@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-09-07 | full | [T-015 미게시·구현 선행](adversarial/2026-09-07-t015.md), a28c2a7 | A 정본·DAG / B 소스·릴리스 | A BLOCK / B BLOCK, 5 finding 수정 후 재검토 |
 | 2026-09-07 | full post-fix | [T-005 최종 판정](adversarial/2026-09-07-t005-post-fix.md), f050997 | A npm·수치 / B 정책·evidence | **A PASS / B PASS, 9 finding FIXED** |
 | 2026-09-07 | full | [T-005 버전 판정](adversarial/2026-09-07-t005.md), 409b95c | A npm·수치 / B 정책·evidence | A BLOCK / B BLOCK, 9 finding 수정 후 재검토 |
 | 2026-09-07 | full post-fix 02 | [T-003 최종 판정](adversarial/2026-09-07-t003-post-fix-02.md), a2c1891 | A 검사기 / B 출처·전달 | **A PASS / B PASS, 6 finding FIXED** |

@@ -18,6 +18,8 @@ v0.2.0은 T-205~T-210의 2차 부품 전부를 담는 첫 minor이며, 0.x 규�
 
 ## 구현 범위
 
+먼저 이 task가 0.2 후보 보존을 소유한다. 현재 main에서 해당 minor의 전체 구현·선행·공개 계약을 대조하고 [release §2.1](../runbooks/release.md#21-common-후보-보존과-후속-구현)의 재빌드·digest·원격 ref 검증을 수행한다. `candidate-ui-0.2.0-<N>`으로 보존한 40자리 commit에서 `codex/release-ui-0.2`를 분기하고 버전 준비 PR을 그 branch에 병합한다. 0.1 후보/branch의 버전만 올리지 않는다. 이후 rc·정식은 검증한 release merge commit을 명시적으로 태그한다. 완료 원장은 [release §2.2](../runbooks/release.md#22-릴리스-소스와-현재-작업-원장의-연결)의 main 문서 PR에서만 갱신한다.
+
 - `packages/ui/package.json` version `0.2.0-rc.1`; peer 확정(`@kor-travel/tokens ~0.1.0`([ADR-013](../adr/013-package-release-execution-contract.md)), `@base-ui/react ^1.6.0`, optional `@tanstack/react-table ^8.21.0`·`@tanstack/react-virtual ^3.14.0`), `exports` 전체 목록 검토(deep import 없음).
 - `CHANGELOG.md` `### @kor-travel/ui 0.2.0`: Added(부품 목록), `Breaking` 절([release](../runbooks/release.md) 형식; v0.1 대비 data-slot·prop·testid 변경 목록 — 없으면 "없음" 명시), 이관 절(map·pinvi shim 예, Checkbox `onCheckedChange(boolean)` 시그니처, 선택 열 셀렉터 `[data-slot=checkbox]`).
 - ui-contract v0.2 절 확정(T-204 절차: grep 대조 + 2인 리뷰), 리뷰 report `docs/reviews/adversarial/YYYY-MM-DD-ui-v0-2-0.md`.
@@ -44,6 +46,8 @@ docs/integration-map.md  (생성물)  docs/journal.md  docs/resume.md
 
 ## 수용 기준
 
+- 0.2 전체 구현의 후보 tag object/commit·두 빌드 digest·CI artifact와 별도 0.2 release branch가 연결돼 있다. source·release merge·main 완료 기록 commit을 구분하고 양 branch의 plan 검증이 통과한다.
+
 - rc 태그·자산·`SHA256SUMS` 존재, `sha256sum -c` 통과, tarball 라이선스 파일 3종 동봉.
 - v0.1 대비 공개 API diff(`exports`·d.ts·data-slot·testid·prop 기본값)가 표로 정리되고 CHANGELOG `Breaking` 절과 1:1 대응한다; 폐기 항목은 alias가 1 minor 동안 남는다.
 - map v0.2 검증 PR: e2e 30·vitest 42 green, `data-table.test.tsx` 이관본 통과, `manualSorting` 기본값 무변경으로 페이지 파일 무변경.
@@ -57,8 +61,10 @@ docs/integration-map.md  (생성물)  docs/journal.md  docs/resume.md
 npm run build -w packages/ui && npm run test -w packages/ui && npx tsc --noEmit -p packages/ui
 node packages/ui/scripts/check-directives.mjs && node packages/ui/scripts/check-kt-classes.mjs && node packages/ui/scripts/check-contract-doc.mjs
 npm pack -w packages/ui --pack-destination dist/release && (cd dist/release && sha256sum kor-travel-ui-0.2.0-rc.1.tgz > SHA256SUMS)
-git tag -a ui-v0.2.0-rc.1 -m "ui 0.2.0-rc.1" && git push origin ui-v0.2.0-rc.1
-gh release create ui-v0.2.0-rc.1 --prerelease dist/release/kor-travel-ui-0.2.0-rc.1.tgz dist/release/SHA256SUMS
+# release §3.1로 확인한 RELEASE_SHA에서 위 빌드·설치를 끝낸 뒤 실행한다.
+test "$(git rev-parse HEAD)" = "$RELEASE_SHA" || exit 1
+git tag -a ui-v0.2.0-rc.1 "$RELEASE_SHA" -m "ui 0.2.0-rc.1" && git push origin ui-v0.2.0-rc.1
+gh release create ui-v0.2.0-rc.1 --verify-tag --prerelease dist/release/kor-travel-ui-0.2.0-rc.1.tgz dist/release/SHA256SUMS
 gh workflow run consumer-smoke.yml -f tag=ui-v0.2.0-rc.1
 python3 -B -X utf8 tools/validate_document_links.py
 ```

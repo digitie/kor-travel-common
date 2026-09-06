@@ -21,7 +21,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 | [T-006](tasks/T-006-npm-scope-pypi-name.md) | BLOCKED | P1 | 공개 registry 이름 확보 철회와 패키지 식별자 확정 | T-015 |
 | [T-009](tasks/T-009-ci-hardening.md) | READY | P1 | common CI 하드닝(permissions·concurrency·timeout·ubuntu-24.04·액션 SHA 핀)·`tools` windows 매트릭스·`secret-scan`·`check-versions(report)` job·branch protection 문서·redaction guard | T-002, T-003 |
 | [T-010](tasks/T-010-reusable-workflows-stage1.md) | BLOCKED | P1 | 재사용 워크플로 1단계(`versions-check`·`contrast-check`·`docs-check`) + `workflows-selftest` fixture + `consumers.pins.json` + consumer-smoke | T-005, T-009, T-101, T-103 |
-| [T-010a](tasks/T-010a-external-consumer-smoke.md) | BLOCKED | P1 | 승인 소비자 2곳의 tokens 후보 dispatch 검증 | T-010 |
+| [T-010a](tasks/T-010a-external-consumer-smoke.md) | BLOCKED | P1 | 승인 소비자 2곳의 tokens 후보 dispatch 검증 | T-010, T-109a |
 | [T-011](tasks/T-011-consumer-manifest-schema.md) | READY | P1 | 소비자 매니페스트 스키마 `consumer-manifest.v1` + `tools/validate_manifest.py` + 7 소비자 초기 매니페스트 초안 | T-005 |
 | [T-012](tasks/T-012-collect-manifests.md) | BLOCKED | P2 | tools/collect_manifests.py → `docs/integration-map.md` 생성 + `docs/architecture/adoption-readiness.md` gate 표 갱신 | T-010, T-011 |
 | [T-014](tasks/T-014-ports-130xx.md) | BLOCKED | P3 | common 포트 `130xx` 로컬 점유 확인·확정 + ktdm `docs/ports.md` sibling(airport 140xx·weather 141xx·common 130xx) 등록 요청 + `-latest` 접미 질의 | 없음 |

@@ -38,7 +38,7 @@ T-109a·T-212a·T-310a는 common 후보 보존이며 정식 릴리스가 아니�
 
 rc 검증에 해당 버전의 정식 채택 task DONE을 선행으로 요구하지 않는다. 정식 채택은 정식 자산 URL·lock으로 갱신한 후 최종 재검증·merge한다. 이전 minor 채택 조건은 유지한다. UI 0.2 외부 검증은 map T-411과 선택한 두 번째 소비자 T-422a 또는 T-432의 0.1 채택 이후다. pinvi는 T-020 → T-420 → T-421 → T-422a → T-422b → T-422 순서를 유지한다.
 
-common 에이전트는 소비자 저장소를 수정하지 않는다. 외부 대기 중 릴리스 task는 BLOCKED로 두고 다음 common 구현을 선택한다. 보존 후보에서 분기한 release branch를 사용해 main의 다음 minor 코드를 과거 버전으로 발행하지 않는다. 선택 소비자·peer 계약은 ADR-013의 유지 조항, 구현/발행 분리는 ADR-014를 따른다.
+common 에이전트는 소비자 저장소를 수정하지 않는다. 외부 대기 중 릴리스 task는 BLOCKED로 두고 다음 common 구현을 선택한다. 보존 후보에서 분기한 release branch를 사용해 main의 다음 minor 코드를 과거 버전으로 발행하지 않는다. 0.2 후보 보존은 T-213·T-311의 준비 범위다. release branch의 task 원장은 과거 스냅샷으로 유지하고, 현재 선행 확인·완료와 후속 READY 갱신은 [release §2.2](../runbooks/release.md#22-릴리스-소스와-현재-작업-원장의-연결)의 main 문서 PR을 따른다. 선택 소비자·peer 계약은 ADR-013의 유지 조항, 구현/발행 분리는 ADR-014를 따른다.
 
 ## 5. 외부 결정과 인계
 

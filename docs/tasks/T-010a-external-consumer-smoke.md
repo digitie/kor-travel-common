@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: 외부 소비자 설치·빌드
-- 선행: T-010
+- 선행: T-010, T-109a
 - 외부 선행: 사용자 범위는 common만 구현이다. 실제 소비자 설치·빌드 실행과 접근 권한·승인 evidence는 해당 저장소 담당자가 제공한다.
 
 ## 목표
@@ -16,7 +16,7 @@ T-010의 실행기로 승인된 map·weather 고정 커밋에 실제 tokens 후�
 
 ## 구현 범위
 
-1. T-010에서 검증한 consumers.pins.json의 map·weather source SHA와 권리/승인 상태, tokens 후보 commit·자산 URL·digest를 요청 문서에 기록한다.
+1. T-010에서 검증한 consumers.pins.json의 map·weather source SHA와 권리/승인 상태, T-109a의 후보 tag·commit·자산 URL·digest를 요청 문서에 기록한다. 만료된 artifact는 release §2.1에 따라 재검증하고 같은 바이트인지 확인한다. 임의 중간 pack으로 대체하지 않는다.
 2. 담당자가 실제 tarball 설치→type-check→webpack/Turbopack 빌드를 실행한 CI run과 사용한 pin·자산 바이트를 확인한다. 빈 입력·설치 생략·skip은 성공이 아니다.
 3. 두 결과와 실패/NOT_RUN·수정 담당을 기록한다. T-109 정식 릴리스는 이 task DONE을 요구한다.
 

@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-015 독립 리뷰 수정)
+
+[PR #4](https://github.com/digitie/kor-travel-common/pull/4) candidate a28c2a7의 CI 34064724584는 성공했지만 독립 리뷰는 A/B 모두 BLOCK이었다. 두 원본을 보존한 뒤 P1 ref 충돌 중복 2건과 P2 세 건을 모두 수용했다([통합 리뷰](reviews/adversarial/2026-09-07-t015.md)). release 태그는 후보에서 분기한 release base의 준비 PR merge commit을 명시하고, 실제 명령·workflow 예외·체크리스트를 정렬했다. T-010a에 후보 생산 선행을 연결하고 0.2 후보 보존 책임을 해당 릴리스 준비 task에 두었다. 과거 release branch의 task 원장은 스냅샷으로 보존하고 현재 main의 원장 commit·evidence로 선행을 확인한다. 실제 발행 뒤 main의 문서 전용 PR에서 완료와 후속 상태를 반영하며 패키지/lock은 가져오지 않는다.
+
+Windows 전체 115 tests 성공·skip 0(14.668초), link·101 task DAG·diff 검증 성공이다. 실제 validator로 과거 branch 보존/현재 main 완료 상태 모델을 대조해 오류 0을 확인했고 release bash 블록은 WSL bash -n을 통과했다. 모델은 실제 task 완료·발행이 아니다. 두 post-fix 리뷰 전이며 패키지·소비자·실제 태그/발행은 NOT_RUN이다. 소비자 저장소에 쓰지 않았다.
+
 ## 2026-09-07 (Codex, T-015 미게시·common 구현 선행 정리)
 
 PR #3은 closure ad00caa의 CI 34064140128 성공 후 659aa6d로 squash merge했고 source tree 동일성을 확인했다. 두 T-005 리뷰 worktree를 clean 상태에서 제거·prune했다. T-015에서는 사용자 npm/PyPI 미게시와 common만 구현 범위를 ADR-014로 반영하고 계정 확보 조건을 철회했다. 실제 소비자 dispatch(T-010a)와 세 패키지 0.1 후보 보존 task를 분리했으며 정식 릴리스·채택·권리 gate를 유지했다. 검증한 이전 후보를 원격 불변 ref·digest로 보존하고 다음 minor를 개발 버전으로 전환한 뒤 구현한다. 외부 릴리스는 후보에서 분기한 release branch의 PR로 준비한다.
