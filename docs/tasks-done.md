@@ -6,6 +6,7 @@
 
 | ID | 상태 | 우선순위 | 작업 | 선행 |
 |---|---|---:|---|---|
+| [T-003](tasks/T-003-notices-provenance-spdx.md) | DONE | P0 | 고지·출처 파일(NOTICE·THIRD_PARTY_NOTICES·LICENSES/·PROVENANCE·CONTRIBUTING)·SPDX 헤더 규약·tools/check_spdx.py (2026-09-07, PR #2) | 없음 |
 | [T-013](tasks/T-013-plan-handoff-closure.md) | DONE | P0 | PR #1·로컬 초안 통합과 순차 실행 계획·인계 마무리 (2026-09-06, PR #1) | 없음 |
 | [T-008](tasks/T-008-architecture-docs.md) | DONE | P0 | docs/architecture/*(README·packages·style-delivery·consumers·adoption-readiness)·`docs/integration-map.md` 초기판 (2026-09-06, PR #1) | 없음 |
 | [T-007](tasks/T-007-runbooks-conventions-templates.md) | DONE | P0 | runbook 본문(agent-workflow·consumer-adoption·release)·`docs/standards/agent-conventions.md`·templates/ (2026-09-06, PR #1) | 없음 |

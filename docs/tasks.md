@@ -2,11 +2,11 @@
 
 이 원장은 열린 task의 요약·선행 관계를 관리한다. 수용 기준·외부 선행·검증·evidence는 상세 파일, 현재 다음 한 작업은 [resume](resume.md), 실행 선택과 단계별 출구는 [통합 계획](plan/integration-plan.md)이 정본이다. 작성 문법은 [task 규칙](tasks-rule.md)을 따른다.
 
-총 96개의 상세 작업이 있다. 완료 6개는 완료 원장에 보존하고 열린 90개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
+총 96개의 상세 작업이 있다. 완료 7개는 완료 원장에 보존하고 열린 89개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
 
 ## 실행 대기열
 
-T-013 문서·계획 인계를 마쳤다. 다음은 T-003 잔여(원문 고지·SPDX 검사), T-005 잔여(소비자 실제 현재값·보고), T-009(CI 하드닝) 순으로 한 작업씩 선택한다. 각 task의 선행·외부 선행 충족이 우선이며, 충족되지 않으면 BLOCKED 이유를 기록하고 독립적인 다음 항목으로 넘어간다.
+T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. 다음은 T-005 잔여(소비자 실제 현재값·보고), T-009(CI 하드닝) 순으로 한 작업씩 선택한다. 각 task의 선행·외부 선행 충족이 우선이며, 충족되지 않으면 BLOCKED 이유를 기록하고 독립적인 다음 항목으로 넘어간다.
 
 그 이후 아래 표에서 모든 선행이 DONE인 항목만 선택한다. 기반 → 토큰 → UI → Python → 소비자 → 운영 분류 안에서 P0~P3 우선, 동순위는 ID 순이다. 외부 전용 T-006·T-014·T-020·T-021·T-430은 외부 evidence를 기다리고 common 구현을 막지 않는 다른 READY 항목을 진행한다. rc 검증·정식 채택 경계는 [통합 계획 §4](plan/integration-plan.md#4-rc-검증과-정식-채택)를 따른다.
 
@@ -16,12 +16,11 @@ T-013 문서·계획 인계를 마쳤다. 다음은 T-003 잔여(원문 고지·
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
-| [T-003](tasks/T-003-notices-provenance-spdx.md) | IN_PROGRESS | P0 | 고지·출처 파일(NOTICE·THIRD_PARTY_NOTICES·LICENSES/·PROVENANCE·CONTRIBUTING)·SPDX 헤더 규약·tools/check_spdx.py | 없음 |
 | [T-005](tasks/T-005-versions-registry.md) | READY | P0 | versions.json v1 + `tools/check_versions.py`(npm lock v3·report·판정 어휘) + `docs/standards/versions.md` + 7 소비자 현재값·예외 등록 | 없음 |
 | [T-005a](tasks/T-005a-check-versions-uv-lock.md) | BLOCKED | P1 | check_versions: `uv.lock` 파서 | T-005 |
 | [T-005b](tasks/T-005b-check-versions-poetry-requirements.md) | BLOCKED | P2 | check_versions: `poetry.lock`·`requirements.txt` 파서 + `NO_LOCK` 보고 | T-005 |
 | [T-006](tasks/T-006-npm-scope-pypi-name.md) | BLOCKED | P1 | npm scope `@kor-travel`·PyPI 이름 가용성 확인·확보(사용자 계정 작업; 실패 시 개명) | 없음 |
-| [T-009](tasks/T-009-ci-hardening.md) | BLOCKED | P1 | common CI 하드닝(permissions·concurrency·timeout·ubuntu-24.04·액션 SHA 핀)·`tools` windows 매트릭스·`secret-scan`·`check-versions(report)` job·branch protection 문서·redaction guard | T-002, T-003 |
+| [T-009](tasks/T-009-ci-hardening.md) | READY | P1 | common CI 하드닝(permissions·concurrency·timeout·ubuntu-24.04·액션 SHA 핀)·`tools` windows 매트릭스·`secret-scan`·`check-versions(report)` job·branch protection 문서·redaction guard | T-002, T-003 |
 | [T-010](tasks/T-010-reusable-workflows-stage1.md) | BLOCKED | P1 | 재사용 워크플로 1단계(`versions-check`·`contrast-check`·`docs-check`) + `workflows-selftest` fixture + `consumers.pins.json` + consumer-smoke | T-005, T-009, T-101, T-103 |
 | [T-011](tasks/T-011-consumer-manifest-schema.md) | BLOCKED | P1 | 소비자 매니페스트 스키마 `consumer-manifest.v1` + `tools/validate_manifest.py` + 7 소비자 초기 매니페스트 초안 | T-005 |
 | [T-012](tasks/T-012-collect-manifests.md) | BLOCKED | P2 | tools/collect_manifests.py → `docs/integration-map.md` 생성 + `docs/architecture/adoption-readiness.md` gate 표 갱신 | T-010, T-011 |
@@ -33,13 +32,13 @@ T-013 문서·계획 인계를 마쳤다. 다음은 T-003 잔여(원문 고지·
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
-| [T-101](tasks/T-101-tokens-package.md) | BLOCKED | P0 | packages/tokens(tokens.css map 값+.dark·theme.css `kt-`·shadcn.css·base.css·base.scoped.css·dark-class/media.css) + 생성물(tokens.json·tokens.ts·tailwind-preset.cjs; 정본 CSS) + 루트 npm workspace·lock + `npm pack` 설치 스모크 | T-003, T-004 |
+| [T-101](tasks/T-101-tokens-package.md) | READY | P0 | packages/tokens(tokens.css map 값+.dark·theme.css `kt-`·shadcn.css·base.css·base.scoped.css·dark-class/media.css) + 생성물(tokens.json·tokens.ts·tailwind-preset.cjs; 정본 CSS) + 루트 npm workspace·lock + `npm pack` 설치 스모크 | T-003, T-004 |
 | [T-102](tasks/T-102-map-vocabulary-shim.md) | BLOCKED | P0 | 레거시 어휘 별칭 shim `aliases/map-vocabulary.css`(map·weather·geo 공통 이름 → `--kt-*`) + weather `--rail`·font 오버라이드 예제 + 별칭 충돌 검사 스크립트 | T-101 |
 | [T-103](tasks/T-103-kt-contrast-ux-lint.md) | BLOCKED | P1 | tools/kt_contrast.py(report·`contrast-baseline.json`) + `tools/ux_lint.py`(금지 7종+window.confirm, 전체 report·diff fail) + 4앱 오버라이드 예제 보고 | T-101 |
 | [T-104](tasks/T-104-design-tokens-standard.md) | BLOCKED | P0 | docs/standards/design-tokens.md 확정(패키지 실물과 대조·규칙 ID TK-n) | T-101 |
 | [T-105](tasks/T-105-ux-guide-standard.md) | READY | P1 | docs/standards/ux-guide.md 확정(UX-Gn.m·MUST/SHOULD·C1~C22·baseline·예외) | 없음 |
 | [T-106](tasks/T-106-responsive-web-standard.md) | BLOCKED | P1 | docs/standards/responsive-web.md 확정 | T-108 |
-| [T-107](tasks/T-107-frontend-stack-templates.md) | BLOCKED | P1 | docs/standards/frontend-stack.md 확정 + `templates/eslint/*.mjs`·tsconfig base·postcss·components.json 조각 | T-003 |
+| [T-107](tasks/T-107-frontend-stack-templates.md) | READY | P1 | docs/standards/frontend-stack.md 확정 + `templates/eslint/*.mjs`·tsconfig base·postcss·components.json 조각 | T-003 |
 | [T-108](tasks/T-108-playwright-baseline.md) | READY | P1 | templates/playwright.baseline.ts(6폭 스크린샷) + 기준선 캡처 절차(consumer-adoption 절) | 없음 |
 | [T-109](tasks/T-109-tokens-v0-1-0-release.md) | BLOCKED | P1 | tokens `v0.1.0-rc.1` → map·weather 검증 → `tokens-v0.1.0` 정식 + SHA256SUMS | T-101, T-102, T-103, T-104, T-010, T-108 |
 
@@ -64,7 +63,7 @@ T-013 문서·계획 인계를 마쳤다. 다음은 T-003 잔여(원문 고지·
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
 | [T-301](tasks/T-301-openapi-standard.md) | READY | P0 | docs/standards/openapi.md 확정 + `openapi-exceptions.yaml` 초기 등록 + 헤더·X-Request-ID 형식 규칙 | 없음 |
-| [T-302](tasks/T-302-python-package-skeleton.md) | BLOCKED | P0 | packages/py/kor-travel-common 골격(hatchling·extras·3.11 문법 검사·uv.lock·starlette 0.4x/1.6 CI 매트릭스) + `docs/standards/backend-stack.md` 확정 | T-003 |
+| [T-302](tasks/T-302-python-package-skeleton.md) | READY | P0 | packages/py/kor-travel-common 골격(hatchling·extras·3.11 문법 검사·uv.lock·starlette 0.4x/1.6 CI 매트릭스) + `docs/standards/backend-stack.md` 확정 | T-003 |
 | [T-303](tasks/T-303-openapi-export-cli.md) | BLOCKED | P0 | C12 openapi export CLI(`--check`·profile 콜백·결정적 직렬화) + typegen 규약 템플릿 | T-302 |
 | [T-304](tasks/T-304-health-and-time.md) | BLOCKED | P1 | C4 health(`/health`·`/readyz`·`/version`·alias 옵션) + C13 time | T-302 |
 | [T-305](tasks/T-305-quality-baseline.md) | BLOCKED | P1 | C20 quality 산출물(ruff extend·mypy·import-linter·pre-commit·CI 템플릿; format 미포함) + common 자기 적용 | T-302 |

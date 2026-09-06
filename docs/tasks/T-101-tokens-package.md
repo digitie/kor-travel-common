@@ -1,6 +1,6 @@
 # T-101 packages/tokens(tokens.css map 값+.dark·theme.css `kt-`·shadcn.css·base.css·base.scoped.css·dark-class/media.css) + 생성물(tokens.json·tokens.ts·tailwind-preset.cjs; 정본 CSS) + 루트 npm workspace·lock + `npm pack` 설치 스모크
 
-- 상태: BLOCKED
+- 상태: READY
 - 우선순위: P0
 - Gate: 패키지 빌드·tarball 설치
 - 선행: T-003, T-004

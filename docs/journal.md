@@ -2,6 +2,10 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-003 완료)
+
+a2c1891에서 A/B 모두 PASS, 최초 6 finding 전부 FIXED다([최종 판정](reviews/adversarial/2026-09-07-t003-post-fix-02.md)). Python 3.11.15에서도 실제 100 tests·SPDX를 확인했고 [CI](https://github.com/digitie/kor-travel-common/actions/runs/34062228366)도 성공했다. T-003을 완료 원장으로 옮기고 그 선행이 닫힌 T-009·T-101·T-107·T-302를 READY로 표시했다. 완료 7개·열린 89개, 다음은 T-005다. 상태 이동은 완료 evidence의 기록이며 수용 기준·규칙·릴리스 gate를 변경하지 않았다.
+
 ## 2026-09-07 (Codex, T-003 확장자 별칭 보완)
 
 951b443 재검토에서 B PASS, A는 기존 경로 별칭 finding의 확장자 변형을 OPEN으로 유지했다. 추가 음성/양성 시험을 먼저 실행해 실패 3개를 확인했고 확장자·주석 판별과 editorconfig·Windows 끝 공백/점 경계를 보완했다. Windows Python 3.14.3·WSL Python 3.14.4 모두 전체 100 tests 성공·skip 0, SPDX 13개·문서 222개/1869 target·task 96개 오류 0이다. 새 review 기록 추가 후 문서 검증은 commit 전에 다시 실행한다.

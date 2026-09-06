@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-09-07 | full post-fix 02 | [T-003 최종 판정](adversarial/2026-09-07-t003-post-fix-02.md), a2c1891 | A 검사기 / B 출처·전달 | **A PASS / B PASS, 6 finding FIXED** |
 | 2026-09-07 | full post-fix | [T-003 재검토](adversarial/2026-09-07-t003-post-fix.md), 951b443 | A 검사기 / B 출처·전달 | A BLOCK / B PASS, 확장자 별칭 P1 잔여 |
 | 2026-09-07 | full | [T-003 고지·SPDX](adversarial/2026-09-07-t003.md), 017fef1 | A 검사기 / B 출처·전달 | A BLOCK / B BLOCK, 6 finding 수정 후 재검토 대기 |
 | 2026-09-06 | full 종료 post-fix | [Phase 0 최종 판정](adversarial/2026-09-06-phase0-closure-post-fix.md), fafb3f6 | A 도구·CI / B 계획·계약 | **A PASS / B PASS, 모든 finding FIXED** |
