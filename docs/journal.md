@@ -2,6 +2,10 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-015 잔여 발행 명령 정리)
+
+d1c7263의 두 독립 리뷰는 기존 7개 finding을 FIXED로 확인했지만 T-109·T-212의 오래된 발행 명령을 각각 A-P1-03·B-P1-06으로 보고했다([통합](reviews/adversarial/2026-09-07-t015-post-fix-02.md)). 두 원본 확정 후 비교했고 coordinator도 실패 3건을 재현했다. 두 task의 중복 발행 절을 정본 release 절차로 연결했으며 checksum/tar 6개 mock이 기대 결과와 같았다. Windows 115 tests·skip 0(12.916초), 문서·101 task·diff 검사 성공이다. 규범 문서에서 태그 생성·Release 생성은 runbook에만 남았다. 실제 발행·소비자 쓰기 없이 새 commit의 두 재확인 뒤 현재 PR #4를 병합하고 대기한다.
+
 ## 2026-09-07 (Codex, T-015 발행 실패 전파·CI 경로 보완)
 
 첫 post-fix ae86185의 CI 34065243380 성공과 별개로 A PASS/B BLOCK이었다. 최초 5건은 모두 FIXED이며 새 B-P1-04·B-P2-05를 수용했다([재검토](reviews/adversarial/2026-09-07-t015-post-fix.md)). coordinator도 T-213 원문의 tag/push 실패 뒤 발행 도달을 bash mock으로 재현했다. 중복 발행 블록을 제거하고 정본의 tag/push/원격 peeled SHA/발행 실패를 즉시 종료하도록 보완했다. rc·정식 합계10개 mock 경계가 기대 결과와 같고 Windows 115 tests 성공·skip 0(17.619초), 문서·101 task·diff 검증 성공이다. 실제 발행은 실행하지 않았다. release merge commit을 위한 push/필수 job/source SHA 검증은 ci-deploy와 T-009/101/302의 구현·수용 기준으로 연결했으며 실제 구현은 NOT_RUN이다.

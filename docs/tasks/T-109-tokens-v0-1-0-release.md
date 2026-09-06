@@ -47,16 +47,14 @@
 
 ## 검증 명령
 
-```bash
-npm version 0.1.0-rc.1 --workspace packages/tokens --no-git-tag-version
-npm pack --workspace packages/tokens --pack-destination dist-release && (cd dist-release && sha256sum *.tgz > SHA256SUMS && sha256sum -c SHA256SUMS)
-tar -tzf dist-release/kor-travel-tokens-0.1.0-rc.1.tgz | grep -E "LICENSE|NOTICE|THIRD_PARTY|aliases/map-vocabulary.css|tokens.json|index.d.ts"
-git tag -a tokens-v0.1.0-rc.1 -m "tokens 0.1.0-rc.1" && git tag -v tokens-v0.1.0-rc.1 || git show tokens-v0.1.0-rc.1 --no-patch
-gh release create tokens-v0.1.0-rc.1 dist-release/*.tgz dist-release/SHA256SUMS --prerelease --title "tokens 0.1.0-rc.1"
-gh workflow run consumer-smoke.yml -f tarball_url=<release asset url>
-```
+릴리스 source 확인·버전 전환·빌드·설치·태그·발행·dispatch는 [release §3.1~3.5](../runbooks/release.md#31-준비)의 단일 절차를 따른다. 패키지는 `tokens`, 버전은 `0.1.0-rc.N`/`0.1.0`으로 설정하고 검증한 준비 PR merge commit을 사용한다. source·태그·push·원격 peeled SHA·발행 검증 중 하나라도 실패하면 후속 명령을 중단한다.
 
-Git Bash에서 동일. 소비자 저장소 명령(`npm install <url>`, `npm run e2e`, `npm test`)은 각 저장소의 `AGENTS.md`를 따른다.
+아래는 §3.2에서 생성한 자산의 체크섬과 내용 확인이다. 파일 목록을 이 task의 tarball 수용 기준과 대조하며, rc 번호와 정식 버전이 바뀌면 파일명도 실제 산출물에 맞춘다.
+
+```bash
+(cd dist/release && sha256sum -c SHA256SUMS) || exit 1
+tar -tzf dist/release/kor-travel-tokens-0.1.0-rc.1.tgz || exit 1
+```
 
 ## evidence
 

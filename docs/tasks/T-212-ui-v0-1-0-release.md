@@ -55,12 +55,13 @@ docs/journal.md  docs/resume.md
 
 ## 검증 명령
 
+릴리스 source 확인·버전 전환·빌드·설치·태그·발행·dispatch는 [release §3.1~3.5](../runbooks/release.md#31-준비)의 단일 절차를 따른다. 패키지는 `ui`, 버전은 `0.1.0-rc.N`/`0.1.0`으로 설정하고 검증한 준비 PR merge commit을 사용한다. source·태그·push·원격 peeled SHA·발행 검증 중 하나라도 실패하면 후속 명령을 중단한다.
+
+아래는 §3.2에서 생성한 자산의 체크섬과 내용 확인이다. 파일 목록을 이 task의 tarball 수용 기준과 대조하며, rc 번호와 정식 버전이 바뀌면 파일명도 실제 산출물에 맞춘다.
+
 ```bash
-git tag -a ui-v0.1.0-rc.1 -m "ui 0.1.0-rc.1" && git push origin ui-v0.1.0-rc.1
-gh release create ui-v0.1.0-rc.1 --prerelease dist/release/kor-travel-ui-0.1.0-rc.1.tgz dist/release/SHA256SUMS
-gh workflow run consumer-smoke.yml -f tag=ui-v0.1.0-rc.1
-cd packages/ui/smoke/next-app && npm install "https://github.com/digitie/kor-travel-common/releases/download/ui-v0.1.0-rc.1/kor-travel-ui-0.1.0-rc.1.tgz" && npx next build --webpack && npx next build
-sha256sum -c SHA256SUMS
+(cd dist/release && sha256sum -c SHA256SUMS) || exit 1
+tar -tzf dist/release/kor-travel-ui-0.1.0-rc.1.tgz || exit 1
 ```
 
 ## evidence
