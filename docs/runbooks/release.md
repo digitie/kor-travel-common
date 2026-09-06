@@ -30,8 +30,22 @@
 - 같은 버전 재발행 금지 — 한 번 발행한 `X.Y.Z`의 tarball·wheel을 다른 내용으로 다시 올리지 않는다(자산 교체도 재발행이다).
 - `@main` 참조 금지 — 소비자의 `@main`·branch·`latest` 참조는 `check_versions.py`가 `FLOATING_REF`로 보고한다.
 - 각 tarball·wheel에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md`를 동봉하고 `license: "GPL-3.0-or-later"` 필드(npm) / PEP 639 `license`·`license-files`(Python)를 둔다([licensing](../standards/licensing.md)).
-- 자산 이름은 `npm pack` 산출 이름을 그대로 쓴다. 패키지명이 `@digitie/kor-travel-<pkg>`로 개명되면(O-5) 산출 이름은 `digitie-kor-travel-<pkg>-X.Y.Z.tgz`가 되며 이 표와 ADR-005를 함께 갱신한다.
-- 공개 npm/PyPI 게시는 Phase 5(T-507) 재평가 전까지 하지 않는다. 전제인 저장소 공개 여부는 O-15다.
+- 자산 이름은 `npm pack` 산출 이름을 그대로 쓴다. 패키지 식별자는 [packages](../architecture/packages.md#1-요약표)에서 확정했다(ADR-014).
+- npm/PyPI에는 게시하지 않는다. 계정·이름 확보 및 게시 재평가는 실행 계획에서 제외했다(ADR-014). 저장소 공개 범위(O-15)는 이 결정과 별개다.
+
+### 2.1 common 후보 보존과 후속 구현
+
+[ADR-014](../adr/014-common-implementation-without-registry-publishing.md)에 따라 common 검증 후보와 외부 릴리스를 구분한다. T-109a·T-212a·T-310a는 다음 순서로 0.1 후보를 보존한다.
+
+1. 해당 구현·계약 task의 검증과 두 리뷰를 완료하고 PR을 병합한다. 패키지 소스·lock·툴체인·40자리 commit, 실행한 시험·pack/wheel 설치 결과를 후보 evidence에 연결한다.
+2. 같은 source와 도구로 다시 빌드한 산출물의 SHA-256을 대조한다. 자산 이름·digest·CI artifact URL과 만료를 기록한다. 미실행·차이는 성공으로 적지 않는다.
+3. 병합된 검증 commit에 불변 annotated tag `candidate-<pkg>-0.1.0-<N>`을 만들어 원격에 push한다. tag object와 peeled commit을 다시 조회해 기록한다. tag는 정식 Release·소비자 승인 표시가 아니다. 후보 수정에는 새 N과 재검증이 필요하다.
+4. UI·Python의 다음 minor 구현은 보존 task가 DONE인 뒤 시작한다. 코드 추가 전에 UI metadata/lock을 `0.2.0-dev.0`, Python을 `0.2.0.dev0`로 변경한다. 초기 미발행 0.1.0의 로컬 pack을 정식 발행으로 세지 않는다. UI 스모크에서는 peer인 tokens도 common tarball 경로를 함께 설치한다.
+5. CI artifact가 만료되면 보존 source에서 빌드·검증한다. 기존 digest와 다르면 기존 바이트를 재현했다고 기록하지 않는다. 새 후보 또는 새 rc와 필요한 검증으로 처리한다.
+
+외부 릴리스는 후보에서 분기한 `codex/release-<pkg>-0.1` 같은 별도 branch를 사용한다. 버전 변경은 그 branch를 base로 하는 준비 branch의 PR로 반영하고 리뷰·CI를 거친다. rc→정식 전환에서도 해당 release branch를 사용하며 main을 과거 버전으로 낮추지 않는다. 초기 branch ref 생성은 검증한 후보 commit을 가리키고 별도 소스 변경을 포함하지 않는다. §3의 버전·lock·릴리스 기록 변경과 tag 생성 대상은 이 release branch다. 다음 minor 코드를 포함한 main에서 과거 버전 태그를 만들지 않는다.
+
+T-010의 common fixture 성공과 T-010a의 실제 소비자 dispatch 성공은 별개다. 릴리스 task는 보존 후보·실제 소비자 검증과 자신의 모든 수용 기준이 닫혀야 DONE이다. 소비자 설치·빌드·PR은 해당 저장소에서 실행하며 common에서는 NOT_RUN/외부 선행으로 추적한다.
 
 ## 3. 절차
 

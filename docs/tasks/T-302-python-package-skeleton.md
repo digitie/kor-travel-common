@@ -30,7 +30,7 @@ Python 공통 패키지의 배포 골격을 만든다: 배포 이름 `kor-travel
 
 ## 범위 밖
 
-모듈 본문(T-303~T-308), `py-v0.1.0` 릴리스와 wheel 자산 발행(T-310), 소비 앱 `uv.lock` 도입(T-440·T-450·T-471), `python-quality.yml` 재사용 워크플로(T-401), PyPI 공개 게시(T-507), Python 앱 floor 3.12 상향(O-7, Phase 4 앱 결정).
+모듈 본문(T-303~T-308), `py-v0.1.0` 릴리스와 wheel 자산 발행(T-310), 소비 앱 `uv.lock` 도입(T-440·T-450·T-471), `python-quality.yml` 재사용 워크플로(T-401), npm/PyPI 게시(사용자 범위 제외), Python 앱 floor 3.12 상향(O-7, Phase 4 앱 결정).
 
 ## 예상 변경 파일
 
@@ -81,4 +81,4 @@ Git Bash에서 동일하게 실행한다(Windows 절은 [dev-environment](../dev
 
 - 패키지 디렉터리·워크플로 신설이므로 `git revert` 1회로 원복된다. 소비자는 아직 없다.
 - 다음 중 하나면 T-303~T-305를 시작하지 않는다: wheel에 고지 파일 누락, import-linter 계약 부재, starlette 매트릭스 한쪽 red, `requires-python`이 3.11 미만 앱을 배제.
-- 패키지 이름이 PyPI에서 불가하면(T-006) `pyproject` `name`만 바꾸고 import 이름 `kortravelcommon`은 유지한다.
+- ADR-014에 따라 배포 이름 `kor-travel-common`·import `kortravelcommon`은 확정이다. 공개 registry 가용성·이름 확보를 이 task의 선행으로 두지 않는다.

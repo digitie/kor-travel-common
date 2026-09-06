@@ -15,7 +15,7 @@
 | CI 템플릿 | 재사용 워크플로(`versions-check`·`contrast-check`·`docs-check` → `openapi-drift`·`typegen-drift` → `node-quality`·`python-quality`), `templates/*` | [ci-deploy](../standards/ci-deploy.md), [templates](../../templates/README.md) |
 | 매니페스트 | `kor-travel-common.lock.json`(schema `kor-travel-common.consumer-manifest.v1`) | [versions](../standards/versions.md), §9 |
 
-원칙(D-24): 한 PR = 한 산출물, 프레임워크 업그레이드 PR과 분리, `git revert` 1회로 원복, lock 동반 커밋, 파일 상한(tokens 10·ui 30·py 10; 초과 시 분할). 토큰·스타일·셸을 바꾸는 PR은 시각 기준선(§5)을 PR evidence로 남긴다(D-21). 패키지명 `@kor-travel/<pkg>`는 잠정이며 npm scope 확인 실패 시 `@digitie/kor-travel-<pkg>`로 개명한다(O-5; tarball 설치 방식이라 첫 소비자 PR 전이면 비용 0).
+원칙(D-24): 한 PR = 한 산출물, 프레임워크 업그레이드 PR과 분리, `git revert` 1회로 원복, lock 동반 커밋, 파일 상한(tokens 10·ui 30·py 10; 초과 시 분할). 토큰·스타일·셸을 바꾸는 PR은 시각 기준선(§5)을 PR evidence로 남긴다(D-21). 확정 패키지 식별자와 파일 배포 채널은 [packages](../architecture/packages.md#1-요약표)를 따른다. 공개 npm/PyPI 계정·이름 확보는 채택 gate가 아니다(ADR-014).
 
 ## 1. 사전 조건 확인
 

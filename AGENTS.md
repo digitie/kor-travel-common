@@ -1,6 +1,6 @@
 # AGENTS.md
 
-이 문서는 `kor-travel-common` 모든 작업에 적용되는 짧은 규칙의 정본이다. 확정 task: T-001(문서 확정) · 마지막 갱신: 2026-09-06. 결정 근거는 [설계 브리프](docs/plan/design-brief.md)의 결정 레지스터(D-xx)이며, 이 문서는 그 결정을 규칙 문장으로만 옮긴다.
+이 문서는 `kor-travel-common` 모든 작업에 적용되는 짧은 규칙의 정본이다. 확정 task: T-001(문서 확정) · 마지막 갱신: 2026-09-07. 결정 근거는 [설계 브리프](docs/plan/design-brief.md)의 결정 레지스터(D-xx)이며, 이 문서는 그 결정을 규칙 문장으로만 옮긴다.
 
 ## 1. 목표와 경계
 
@@ -8,9 +8,9 @@ kor-travel-common은 kor-travel 제품군의 UI·백엔드 공통 코드와 공�
 
 | 배포 단위 | 위치·이름 | 책임 |
 |---|---|---|
-| 디자인 토큰 | `packages/tokens` → npm `@kor-travel/tokens`(잠정, O-5) | `--kt-*` 의미 토큰·`kt-` 유틸리티·프로필(admin/consumer)·다크 값·별칭 shim. 정본은 `tokens.css` |
-| React UI | `packages/ui` → npm `@kor-travel/ui`(잠정, O-5) | React 19 전용 프리미티브·컴포넌트와 마크업 계약(`data-slot`·testid) |
-| Python 공통 | `packages/py/kor-travel-common` → PyPI 이름 `kor-travel-common`, import `kortravelcommon` | OpenAPI export·health·time·quality 등 얇은 인프라 모듈. 인증은 범위 밖 |
+| 디자인 토큰 | `packages/tokens` → npm 형식 `@kor-travel/tokens` | `--kt-*` 의미 토큰·`kt-` 유틸리티·프로필(admin/consumer)·다크 값·별칭 shim. 정본은 `tokens.css` |
+| React UI | `packages/ui` → npm 형식 `@kor-travel/ui` | React 19 전용 프리미티브·컴포넌트와 마크업 계약(`data-slot`·testid) |
+| Python 공통 | `packages/py/kor-travel-common` → Python 배포 이름 `kor-travel-common`, import `kortravelcommon` | OpenAPI export·health·time·quality 등 얇은 인프라 모듈. 인증은 범위 밖 |
 | 규칙 문서 | `docs/standards/*` | 토큰·UX·반응형·프론트/백엔드 스택·UI 계약·OpenAPI·CI·라이선스·버전·에이전트 규약 |
 | 템플릿·레지스트리·도구 | `templates/*`, `versions.json`, `tools/*.py` | 소비자 설정 조각, 버전 floor/recommended/exceptions, 검사 도구 |
 

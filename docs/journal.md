@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-015 미게시·common 구현 선행 정리)
+
+PR #3은 closure ad00caa의 CI 34064140128 성공 후 659aa6d로 squash merge했고 source tree 동일성을 확인했다. 두 T-005 리뷰 worktree를 clean 상태에서 제거·prune했다. T-015에서는 사용자 npm/PyPI 미게시와 common만 구현 범위를 ADR-014로 반영하고 계정 확보 조건을 철회했다. 실제 소비자 dispatch(T-010a)와 세 패키지 0.1 후보 보존 task를 분리했으며 정식 릴리스·채택·권리 gate를 유지했다. 검증한 이전 후보를 원격 불변 ref·digest로 보존하고 다음 minor를 개발 버전으로 전환한 뒤 구현한다. 외부 릴리스는 후보에서 분기한 release branch의 PR로 준비한다.
+
+문서 242개·1991 target, task 101개 검사가 오류 0이다. Windows Python 3.14.3 전체 115 tests 성공·skip 0, 버전 자체 검사 성공, diff 공백 검사 성공이다. 외부 노드를 제외한 DAG 도달성 검사에서 common UI/Python 구현 경로는 열리고 외부 dispatch·정식 릴리스·미래 재평가는 대기를 유지했다. source·workflow·registry 수치는 바꾸지 않았다. 패키지 build·실제 후보 보존·소비자 실행은 NOT_RUN(각 후속 task). 같은 후보의 독립 두 리뷰와 CI는 commit 후 수행하며 완료 전이다.
+
 ## 2026-09-07 (Codex, T-005 최종 리뷰·완료 기록)
 
 f050997에서 A/B 두 원본이 독립 확정된 뒤 교차 비교했다. 최종 PASS/PASS, 최초 9개 ID 모두 FIXED이며 새 finding은 없다([최종 리뷰](reviews/adversarial/2026-09-07-t005-post-fix.md)). A는 Windows/WSL 115 tests와 환경당 공격 CLI 30개, B는 Windows 115 tests·판정/모드 30조합을 실행했다. 7곳 고정 입력 48파일·306행 전체 재현과 새 digest를 확인했으며 report의 102개 위반을 정상으로 세지 않았다. candidate CI 34063775506도 성공했다. T-005를 완료 원장으로 옮기고 T-005a/b·T-011을 READY로 바꾼다. 완료 기록의 CI를 확인한 뒤 PR #3을 병합한다. 다음은 사용자 지시의 npm/PyPI 미게시·common 구현 선행 정리다. 소비자 저장소는 수정하지 않았다.

@@ -218,7 +218,7 @@ lockfile은 의무(`package-lock.json` v3, D-07)이며 `check_versions.py`가 �
 | # | 항목 | 기본값(이 문서) |
 |---|---|---|
 | O-3 | UI 배포 방식 | npm 1차, 레지스트리는 셸·템플릿 채널만 |
-| O-5 | npm scope `@kor-travel` | tarball 선행, 실패 시 `@digitie/kor-travel-*` |
+| O-5 | 패키지 식별자 | [ADR-014](../adr/014-common-implementation-without-registry-publishing.md)로 확정. 공개 registry 이름 확보 제외 |
 | O-6 | TS 기준선·airport 7.0.2 | 5.9.3 + airport 예외 |
 | O-8 | pinvi mobile Tailwind 3 | 미등록(사용자 승인 대기) |
 | O-10 | Node/npm | Node 22 + npm 11.19 권장 |

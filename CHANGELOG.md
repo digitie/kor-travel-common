@@ -26,6 +26,10 @@
 
 ### standards
 
+#### Changed
+
+- npm·PyPI 게시·이름 확보 계획을 제외하고 파일 배포용 식별자를 확정했다. 검증한 common 후보를 보존한 뒤 다음 minor 구현을 진행하며, 실제 소비자 검증과 정식 발행은 별도 gate로 유지한다([ADR-014](docs/adr/014-common-implementation-without-registry-publishing.md)).
+
 #### Fixed
 
 - 버전 검사기가 정책 중첩 오타·역전 범위·예외 중복/만료를 검출하고 npm 사전 배포·별칭·shrinkwrap을 미확인으로 표시한다. optional·상위 hoist·전이 설치본을 대조한다(T-005). 7개 소비자 고정 입력 보고를 정책 값과 분리한다.

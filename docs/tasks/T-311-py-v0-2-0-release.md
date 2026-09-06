@@ -23,7 +23,7 @@ T-306~T-308에서 구현한 settings·db·API key·request-id·metrics 및 3차 
 
 ## 범위 밖
 
-소비자 정식 채택 merge(T-483~T-486), 인증·앱 도메인, 공개 PyPI 게시(T-507).
+소비자 정식 채택 merge(T-483~T-486), 인증·앱 도메인, npm/PyPI 게시(사용자 범위 제외).
 
 ## 예상 변경 파일
 

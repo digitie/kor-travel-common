@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: consumer-smoke
-- 선행: T-203, T-204
+- 선행: T-212a, T-109
 - 외부 선행: T-020(pinvi L6, 사용자 O-1) 또는 T-430(airport WIP 병합, 사용자 O-9) 중 하나 완료; 검증 소비자 PR은 해당 앱의 tokens 채택(map T-410·pinvi T-421·airport T-431, 모두 tokens-v0.1.0 = T-109 이후) 위에서만 가능
 
 ## 목표
@@ -19,6 +19,8 @@
 
 ## 구현 범위
 
+[release §2.1](../runbooks/release.md#21-common-후보-보존과-후속-구현)에 따라 보존 후보에서 분기한 release branch의 PR로 준비한다. 아래 버전·lock 변경은 해당 branch에 적용한다. 후속 minor가 있는 main을 과거 버전으로 내리지 않는다. 소비자 단계는 해당 저장소 담당자에게 요청하는 외부 gate이며 미실행이면 BLOCKED/NOT_RUN을 유지한다.
+
 - `packages/ui/package.json` version `0.1.0-rc.1`, peer `@kor-travel/tokens ~0.1.0`; `CHANGELOG.md` `### @kor-travel/ui 0.1.0` 초안(Added 13종, 계약 링크).
 - 태그 `ui-v0.1.0-rc.1` + GitHub Release(prerelease) 자산 tgz + `SHA256SUMS`; 소비자 설치 URL과 `integrity` 값을 Release 본문에 기록.
 - 소비자 검증 요청: map(T-411)·pinvi(T-422a) 또는 airport(T-432) 브랜치에서 rc URL 설치 → 각 앱 CI green → PR 본문 검사 결과·스크린샷·되돌리기 명령(D-24) 확인.
@@ -28,7 +30,7 @@
 
 ## 범위 밖
 
-- 소비자 PR 작성·머지(T-411·T-422·T-432), Button 이후 부품(T-213), 공개 npm 게시(T-507), tokens 릴리스(T-109), 릴리스 runbook 완주 검증(T-501).
+- 소비자 PR 작성·머지(T-411·T-422·T-432), Button 이후 부품(T-213), npm/PyPI 게시(사용자 범위 제외), tokens 릴리스(T-109), 릴리스 runbook 완주 검증(T-501).
 
 ## 예상 변경 파일
 

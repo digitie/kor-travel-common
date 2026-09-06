@@ -218,7 +218,7 @@ jobs:
 | `workflows-selftest` | PR(`.github/**`) | 재사용 워크플로를 fixture로 호출 | ubuntu-24.04 | T-010 |
 | `packages` | PR, push `main` | `npm install -g npm@11.19.1` → `npm ci` → lint → type-check → test → build → `npm pack` → 임시 디렉터리 tarball 설치 → webpack·Turbopack `next build` 스모크(D-10) | ubuntu-24.04 | T-101·T-201 |
 | `python-package` | PR, push `main` | `uv build` → wheel 설치 → import 스모크 → starlette 0.4x/1.6 매트릭스 | ubuntu-24.04 | T-302 |
-| `consumer-smoke` | `workflow_dispatch` + 주간 | `consumers.pins.json`(role·url·revision, ktdm runtime pin 형식) 패키지별 승인 소비자의 pinned SHA 체크아웃 → tarball 설치 → type-check + `next build` | ubuntu-24.04 | T-010 |
+| `consumer-smoke` | `workflow_dispatch`; 주간은 T-010a 검증 뒤 활성화 | `consumers.pins.json`(role·url·revision, ktdm runtime pin 형식) 패키지별 승인 소비자의 pinned SHA 체크아웃 → tarball 설치 → type-check + `next build` | ubuntu-24.04 | 실행기 T-010, 외부 dispatch T-010a |
 | `secret-scan` | PR | CI-42 패턴 | ubuntu-24.04 | T-009 |
 | `check-versions` | PR, push `main` | `tools/check_versions.py` report 모드(`FLOATING_REF`·`BLOCKED`·`EXEMPT_EXPIRED`는 `::error::`) | ubuntu-24.04 | T-005·T-009 |
 

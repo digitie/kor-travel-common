@@ -3,7 +3,8 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: consumer-smoke
-- 선행: T-101, T-102, T-103, T-104, T-010, T-108
+- 선행: T-109a, T-010a
+- 외부 선행: map·weather 담당자의 실제 소비자 검증 PR·CI·6폭 evidence가 필요하다. common 작업자는 소비자 저장소에 쓰지 않는다.
 
 ## 목표
 
@@ -15,19 +16,21 @@
 - ADR-005·ADR-010 — [docs/adr/README.md](../adr/README.md). 절차 정본은 [release runbook](../runbooks/release.md)·[consumer-adoption runbook](../runbooks/consumer-adoption.md)(T-007).
 - 소비자 PR 순서·gate는 [판정 보고서](../plan/design-panel/judge-migration-feasibility.md) §3.1 map PR 1(6폭 diff 0·e2e 30·vitest 42·revert + lock 복원)·weather PR 1(6폭 diff 0 수동·font 스택 오버라이드).
 - 근거: [map 인벤토리](../survey/inventory/kor-travel-map.md) §3.1·§9(exact 핀·`verify:*` 스크립트·Playwright 1.60), [weather 인벤토리](../survey/inventory/kor-travel-weather.md) §3.1·§8 항목 1·§9(폰트 미로딩·`moduleResolution: node`), [백엔드 조사](../survey/cross/backend.md) §5.2 후보 D(릴리스 자산 + sha256).
-- 패키지명이 O-5로 개명됐다면(T-006) 자산 이름도 `kor-travel-tokens-…`를 유지하되 `package.json` `name`만 바뀐다.
+- 패키지 이름은 ADR-014로 확정했다. T-109a의 보존 후보에서 release branch를 만들며 태그·자산 이름은 실제 npm pack 결과와 맞춘다.
 
 ## 구현 범위
 
+[release §2.1](../runbooks/release.md#21-common-후보-보존과-후속-구현)에 따라 보존 후보에서 분기한 release branch의 PR로 준비한다. 아래 버전·lock 변경은 해당 branch에 적용한다. 후속 minor가 있는 main을 과거 버전으로 내리지 않는다. 소비자 단계는 해당 저장소 담당자에게 요청하는 외부 gate이며 미실행이면 BLOCKED/NOT_RUN을 유지한다.
+
 1. rc 발행: `packages/tokens` `version 0.1.0-rc.1`, `npm pack` 산출 `kor-travel-tokens-0.1.0-rc.1.tgz`, `sha256sum` → `SHA256SUMS`, 태그 `tokens-v0.1.0-rc.1`(annotated), GitHub pre-release에 자산 2개 첨부. tarball 안 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 확인.
-2. map 검증(draft PR, 저장소 kor-travel-map, 브랜치 `agent/<agent>-T-410`, 경로 `packages/kor-travel-map-admin/frontend`): `npm install <release tarball URL>` → lock `integrity` 커밋 → `globals.css`에 `@import "@kor-travel/tokens/theme.css"` + 빈 brand 오버라이드 → 6폭 기준선 diff 0·e2e 30·vitest 42·`verify:*` 통과. 되돌리기 `git revert` 1회 + lock 복원. 파일 수 ≤10.
-3. weather 검증(draft PR, kor-travel-weather, `agent/<agent>-T-461`, `packages/kor-travel-weather-admin/frontend`): `app/tokens.css` → 패키지 `tokens.css` + `aliases/map-vocabulary.css` + navy·`--rail`·font 오버라이드 → 6폭 수동 diff 0(Playwright 없음 → T-108 템플릿). 되돌리기 동일.
+2. map 담당자 검증 요청(draft PR, 저장소 kor-travel-map, 브랜치 `agent/<agent>-T-410`, 경로 `packages/kor-travel-map-admin/frontend`): `npm install <release tarball URL>` → lock `integrity` 커밋 → `globals.css`에 `@import "@kor-travel/tokens/theme.css"` + 빈 brand 오버라이드 → 6폭 기준선 diff 0·e2e 30·vitest 42·`verify:*` 통과. 되돌리기 `git revert` 1회 + lock 복원. 파일 수 ≤10.
+3. weather 담당자 검증 요청(draft PR, kor-travel-weather, `agent/<agent>-T-461`, `packages/kor-travel-weather-admin/frontend`): `app/tokens.css` → 패키지 `tokens.css` + `aliases/map-vocabulary.css` + navy·`--rail`·font 오버라이드 → 6폭 수동 diff 0(Playwright 없음 → T-108 템플릿). 되돌리기 동일.
 4. `consumer-smoke` dispatch 실행(map admin·weather admin pinned SHA에 rc tarball 설치 → `type-check` + `next build` webpack·Turbopack) green.
 5. 정식: `version 0.1.0`, 태그 `tokens-v0.1.0`, 자산 재생성·`SHA256SUMS`, `CHANGELOG.md` `## [0.1.0] ### tokens`(Breaking 없음), `docs/architecture/adoption-readiness.md`·`docs/integration-map.md` 갱신(T-012 도구가 있으면 도구로). 두 draft PR은 정식 URL로 갱신 후 T-410·T-461에서 merge.
 
 ## 범위 밖
 
-- 소비자 PR merge 자체(T-410·T-461), pinvi admin·airport tokens 채택(T-421·T-431), ui 릴리스(T-212), 공개 npm 게시(T-507), 릴리스 runbook 완주 리허설(T-501).
+- 소비자 PR merge 자체(T-410·T-461), pinvi admin·airport tokens 채택(T-421·T-431), ui 릴리스(T-212), npm/PyPI 게시(사용자 범위 제외), 릴리스 runbook 완주 리허설(T-501).
 
 ## 예상 변경 파일
 

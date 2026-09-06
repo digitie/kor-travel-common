@@ -12,7 +12,7 @@
 2. 해당 상세 task가 있으면 그 파일 한 개에서 scope, 선행 조건, `외부 선행`, acceptance, gate를 확인한다. task를 고르는 경우에만 [tasks](../tasks.md)를 연다. 문서·review 전용 요청처럼 task가 없으면 관련 runbook 또는 template을 작업 기준으로 삼는다.
 3. 변경 분야의 architecture 또는 standards 문서 한두 개와 관련 ADR만 읽는다. 조사 문서(`docs/survey/`)는 근거 인용이 필요할 때만 절 단위로 연다(규범이 아니다).
 4. `git status`, 현재 branch, `origin/main`과의 차이를 확인하고 사용자 변경을 구분한다.
-5. common에서 검증할 수 없는 gate(소비자 저장소 빌드·e2e, npm scope·PyPI 가용성, 소비자 CI, 외부 라이선스 결정)와 중요한 가정을 작업 전에 드러낸다. 실행하지 못할 검증은 시작 시점부터 `NOT_RUN(사유)` 후보로 적어 둔다(D-25).
+5. common에서 검증할 수 없는 gate(소비자 저장소 빌드·e2e, 소비자 CI, 외부 라이선스 결정)와 중요한 가정을 작업 전에 드러낸다. 실행하지 못할 검증은 시작 시점부터 `NOT_RUN(사유)` 후보로 적어 둔다(D-25).
 
 반복 실패가 실제로 발생했을 때만 [failure patterns](agent-failure-patterns.md)를 읽는다.
 

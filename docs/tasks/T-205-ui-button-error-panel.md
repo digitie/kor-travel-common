@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: 단위 테스트
-- 선행: T-203, T-212
+- 선행: T-203, T-212a
 
 ## 목표
 
@@ -17,6 +17,8 @@
 - 출처: Button·button-variants는 map 원천(GPL-3.0-or-later). error-recovery는 geo 원천이므로 헤더에 `Origin: kor-travel-geo@1d9d74d … (GPL-3.0-only)`를 병기(D-17, O-20 재선언 전까지).
 
 ## 구현 범위
+
+먼저 [ADR-014](../adr/014-common-implementation-without-registry-publishing.md)의 이전 후보 보존을 확인하고 해당 패키지를 다음 minor 개발 버전으로 바꾼 뒤 코드를 추가한다. 같은 minor의 앞선 task가 이미 전환했으면 그 버전을 유지한다. 이전 정식 발행 대기는 구현 선행이 아니며 릴리스 gate는 별도로 남는다.
 
 - `src/button.tsx` + `src/button-variants.ts`(T-203의 레시피 파일을 여기서 완성): D-09 계약 전항. `loading` 중 `onClick`은 `preventDefault` 후 차단(폼 submit 방지). `render` 합성 지원(`render={<Link/>}`). deprecated size alias는 타입에 `@deprecated` JSDoc.
 - `src/app-error-panel.tsx`: `Alert` + `Button` 조합, what/why/what-to-do 3부, `reset` 있으면 재시도 버튼, `standalone`이면 페이지 레이아웃.

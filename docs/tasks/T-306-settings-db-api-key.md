@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: 단위 테스트(testcontainers)
-- 선행: T-304, T-310
+- 선행: T-304, T-310a
 
 ## 목표
 
@@ -18,6 +18,8 @@
 - Gate가 testcontainers인 이유: map·pinvi 계열 픽스처로 실 PostgreSQL에서 팩토리를 검증한다([be §2.16](../survey/cross/backend.md)); Docker 없는 환경은 `NOT_RUN`.
 
 ## 구현 범위
+
+먼저 [ADR-014](../adr/014-common-implementation-without-registry-publishing.md)의 이전 후보 보존을 확인하고 해당 패키지를 다음 minor 개발 버전으로 바꾼 뒤 코드를 추가한다. 같은 minor의 앞선 task가 이미 전환했으면 그 버전을 유지한다. 이전 정식 발행 대기는 구현 선행이 아니며 릴리스 gate는 별도로 남는다.
 
 1. `kortravelcommon/settings.py`(core): `BaseAppSettings(BaseSettings)` — `model_config = SettingsConfigDict(env_file=(".env",), extra="ignore", hide_input_in_errors=True)`, `redacted_validation_error` 헬퍼, `make_settings_accessor(cls) -> (get_settings, set_settings)`, `require_production_value(name)` 훅.
 2. `kortravelcommon/db.py`(`[db]`): `normalize_dsn(dsn, *, driver="asyncpg"|"psycopg")`, `make_async_engine(dsn, *, pool_size, max_overflow, pool_timeout, pool_recycle, pool_pre_ping=True, statement_timeout_ms=None, search_path=None, extra_server_settings=None, json_serializer=None)`, `make_async_session_factory(engine)`, `make_get_db(session_factory)`, `on_engine_created` 훅(T-307 메트릭 연결점). `make_sync_engine`은 후보.

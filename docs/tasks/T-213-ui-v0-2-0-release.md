@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: consumer-smoke·2인 리뷰
-- 선행: T-208, T-209, T-210
+- 선행: T-208, T-209, T-210, T-212
 - 외부 선행: 검증 소비자 PR은 해당 앱의 ui v0.1 채택(map T-411과 두 번째 소비자 pinvi T-422a 또는 airport T-432)과 `@base-ui/react` ≥ floor 설치 위에서만 가능; pinvi는 L6(O-1), airport는 WIP 병합(O-9)에 묶임
 
 ## 목표
