@@ -20,7 +20,7 @@
 
 1. `poetry.lock`: `[[package]]` `name`·`version`·`source`(git이면 `reference`/`resolved_reference`) 추출. `resolved_reference` 40자 SHA면 보고, 브랜치만 있으면 `FLOATING_REF`.
 2. `requirements.txt`(`-r` 재귀 포함): `pkg==x.y`는 설치본 후보, git URL `@main`은 `FLOATING_REF`, `mcp>=2` 범위가 `blocked[]`와 겹치면 `BLOCKED`; 파일이 lock이 아니므로 결과 표 머리에 `NO_LOCK` 배지를 남긴다.
-3. `--lock` 미지정·부재 시 `NO_LOCK` 행 1개와 안내(“`uv.lock` 도입 task”) 출력.
+3. 유효한 소비자 경로/manifest와 선언 파일은 있으나 대응 lock이 없는 경우 `NO_LOCK`과 안내(“`uv.lock` 도입 task”)를 출력한다. 검사 대상 경로/manifest 자체가 없는 호출은 입력 오류(exit 2)이며 별도 음성 fixture로 보존한다.
 4. fixture: `ktdm.poetry.lock`(축약), `ktc.requirements.txt`(`mcp<2` 포함), 테스트 추가.
 
 ## 범위 밖
@@ -35,17 +35,19 @@
 
 - `poetry.lock` fixture에서 Python 축 판정과 git 참조 판정이 나온다.
 - `requirements.txt` fixture는 결과 표에 `NO_LOCK` 배지가 있고 `mcp` 범위가 `BLOCKED`로 표시된다(`::error::`).
-- `--lock` 부재 시 `NO_LOCK` 1행 + exit code는 모드 규칙(report 0).
+- 다른 입력·정책 오류가 없는 선언 파일과 소비자 경로/manifest를 가진 lock 부재 fixture에서 `NO_LOCK`을 보고하고 exit code는 모드 규칙(report 0)을 따른다. 경로/manifest가 없는 호출은 exit 2이며 이 성공 사례에 포함하지 않는다.
 - npm·uv 테스트 회귀 없음, Linux·Windows 결과 동일.
 
 ## 검증 명령
 
-fixture 디렉터리에는 선언 manifest와 해당 lock/requirements를 함께 만든다. 기존 positional 경로·`--manifest` CLI를 유지한다.
+fixture 디렉터리에는 선언 manifest와 해당 lock/requirements를 함께 만든다. `geo-no-lock`은 유효한 선언 파일만 가진 fixture다. 기존 positional 경로·`--manifest` CLI를 유지한다.
 
 ```bash
 python3 -B -X utf8 -m unittest discover -s tests -p "test_check_versions.py" -v
 python3 -B -X utf8 tools/check_versions.py tests/fixtures/versions/ktdm --repo docker-manager
 python3 -B -X utf8 tools/check_versions.py tests/fixtures/versions/ktc --repo concierge; echo "exit=$?"
+python3 -B -X utf8 tools/check_versions.py tests/fixtures/versions/geo-no-lock --repo geo; echo "exit=$?"
+# 음성 사례: 입력 경로/manifest가 없으므로 exit 2여야 한다.
 python3 -B -X utf8 tools/check_versions.py --repo geo; echo "exit=$?"
 ```
 

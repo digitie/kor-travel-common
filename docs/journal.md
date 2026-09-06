@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-06 (Codex, T-013 두 번째 재검토·종료 기준 대조)
+
+84759b6 CI run 34025270597 성공. 두 번째 post-fix에서 원 14 finding은 모두 FIXED지만 B가 T-005b의 빈 입력 성공 지침을 새 P2(B-P2-09)로 기록했다. 유효 선언과 lock 부재 fixture의 NO_LOCK/report 결과를 입력 자체가 없는 exit 2 음성 사례와 분리했다. 도구 코드는 바꾸지 않았다. 원본과 disposition은 [두 번째 통합 판정](reviews/adversarial/2026-09-06-phase0-post-fix-02.md)에 보존한다.
+
+종료 기준 대조로 resume 5절·다음 작업 3불릿, 소비자 7곳 조사 §8·§9 링크 14개, maintenance의 버전 정본(versions.json) 안내를 정정했다. ADR 13편 H1/색인 상태·다음 번호 014·decisions.md 부재와 CLAUDE 32줄을 직접 검사했다. 새 문서 검사 201개·1734 target 오류 0, 96 task/DAG 오류 0, diff 공백 오류 0. 코드 회귀는 같은 84759b6의 Windows·WSL 67 tests·skip 0을 재사용한다. 종료 상태는 두 reviewer의 새 기준선 확인 뒤 이동한다.
+
 ## 2026-09-06 — T-013 post-fix 잔여와 인계 정합
 
 12fb3a8 CI run 34024615020이 통과했다. A 재검토는 원 6건 중 5건 FIXED, Python 선언 fragment의 A-P1-05 OPEN으로 BLOCK이었다. 추가 CLI 회귀는 수정 전 24 tests 중 3 subtest 실패, 문맥별 ref 해석 후 전체 67 tests 성공·skip 0이다. npm 선언은 fragment, Python 선언은 path의 @rev, uv git lock source는 resolved 전체 SHA로 구분했다. 공식 문서·로컬 pip 재현 근거는 [인계 재확인](plan/handoff-verification.md)에 연결했다.

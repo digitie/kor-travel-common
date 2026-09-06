@@ -6,17 +6,19 @@
 
 [Draft PR #1](https://github.com/digitie/kor-travel-common/pull/1)의 `09104ed`와 로컬 Claude 초안을 인수했다. 누락된 원장·통합 계획을 추가했고 상세 task 96개를 연결했다. 외부 선행과 실물 패키지를 기다리는 task는 BLOCKED로 정정했다. 기존 소비자 조사 기준은 갱신하지 않았다.
 
-Windows Python 3.14.3에서 unittest 65개 성공·skip 0. 앞선 커밋 e9a3a0f는 Linux CI green이며 새 리뷰 정정 커밋의 검증은 진행 중이다. 두 원본 리뷰는 BLOCK이었고 버전 판정·릴리스 선행·승인 gate finding을 수정해 재검토할 예정이다. 최신 결과는 [리뷰 색인](reviews/README.md)에서 확인한다. 이 수치는 문서·도구 검증이며 패키지 또는 소비자 gate 통과가 아니다.
+Windows Python 3.14.3·WSL Python 3.14.4에서 unittest 67개 성공·skip 0. 84759b6의 Linux CI도 성공했다. 최초 14 finding은 원 reviewer가 모두 FIXED로 확인했다. 두 번째 재검토는 A PASS·B CONDITIONAL이며 새 P2 한 건(T-005b의 입력 부재/lock 부재 구분)을 정정해 재확인한다. 최신 결과는 [리뷰 색인](reviews/README.md)에서 확인한다. 이 수치는 문서·도구 검증이며 패키지 또는 소비자 gate 통과가 아니다.
 
 실물 `packages/tokens`·`packages/ui`·Python 패키지가 없다. 패키지 빌드·tarball/wheel 설치·소비자 빌드·e2e·시각 검증은 NOT_RUN(실물·소비자 변경 없음). T-003 SPDX 검사·라이선스 사본과 T-005 실제 소비자 현재값 등록도 남아 있다. 따라서 Phase 0 전체 완료·릴리스 가능 상태가 아니다.
 
 ## 다음 한 작업
 
-[T-013 계획·인계 마무리](tasks/T-013-plan-handoff-closure.md): immutable candidate를 두 전문 리뷰어가 독립 적대적 검토 → 원본 evidence 보존 → finding 수정·후속 task 지정 → post-fix commit 재검토 → 실제 gate가 닫힌 task만 DONE → draft PR 본문·인계 갱신. PR merge는 이번 요청 범위 밖이다.
+- 작업: [T-013 계획·인계 마무리](tasks/T-013-plan-handoff-closure.md)의 잔여 P2를 재확인하고 실제 gate가 닫힌 문서 task만 DONE으로 옮긴다.
+- 출구: 완료 원장·resume·draft PR을 갱신하고 종료 delta를 두 reviewer가 재확인한다. PR merge는 이번 요청 범위 밖이다.
+- 후속: [T-003](tasks/T-003-notices-provenance-spdx.md)의 미완료 수용 기준부터 시작하고 T-005 잔여 → T-009 순서로 한 작업씩 진행한다. 상세 선행·외부 선행이 우선한다.
+
+## 시작 파일과 검증
 
 시작 파일: 위 T-013과 [agent workflow §5](runbooks/agent-workflow.md#5-전문-리뷰어-서브에이전트-2인-적대적-리뷰). 검증 명령은 [개발 환경 §6](dev-environment.md#6-검증-명령-사다리). 리뷰 결과는 [리뷰 색인](reviews/README.md)에 기록한다.
-
-T-013 이후에는 [T-003](tasks/T-003-notices-provenance-spdx.md)의 미완료 수용 기준부터 한 작업씩 진행한다. 그 뒤 T-005 잔여 → T-009 순서이며, 상세 선행·외부 선행이 우선한다.
 
 ## 차단 조건
 

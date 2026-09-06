@@ -48,7 +48,7 @@
 - 되돌리기 어렵거나 여러 소비 저장소에 영향을 주는 결정은 `docs/adr/NNN-<slug>.md`에 하나씩 기록한다.
 - 결정을 뒤집을 때 옛 ADR을 삭제하지 않고 새 ADR에서 `Supersedes`를 명시하며 옛 ADR은 `superseded by ADR-XXX`로 표시한다.
 - `docs/adr/README.md`의 번호·상태·다음 후보 번호를 함께 갱신한다. 별도 `decisions.md` 색인은 두지 않는다(이중 색인 금지).
-- 토큰 값·버전 목표처럼 machine-readable 파일(예: `packages/*/tokens.css`, `standards/versions.md`의 매트릭스)이 정본인 항목은 그 파일을 정본으로 두고 architecture에는 의미와 불변 조건만 남긴다.
+- 토큰 값·버전 목표처럼 machine-readable 파일(`packages/tokens/tokens.css`·`versions.json`)이 정본인 항목은 그 파일을 정본으로 두고 architecture에는 의미와 불변 조건만 남긴다.
 
 ## 4. Task, resume와 journal
 

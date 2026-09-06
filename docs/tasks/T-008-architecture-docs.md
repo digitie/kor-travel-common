@@ -41,7 +41,7 @@
 
 - 다섯 문서가 현재형이며 시간순 연혁·task 순서·acceptance를 담지 않는다(standards·ADR·task로 링크).
 - `packages.md`의 금지 경계가 D-01과 글자 단위로 같고(`lucide-react` peer 없음, `maplibre-vworld-*`·`python-*-api`·인증 미포함), 의존 방향이 단방향으로 그려져 있다.
-- `consumers.md`의 7행 각각에 인벤토리 §8·§9 링크와 외부 선행 열이 있고, airport Admin 정의(D-20)·pinvi 사용자 표면 제외(D-29)가 반영된다.
+- `consumers.md` §1의 7개 저장소 행 각각에 인벤토리 §8·§9 링크가 있고 §3의 같은 저장소 행에 외부 선행이 대응한다. airport Admin 정의(D-20)·pinvi 사용자 표면 제외(D-29)가 반영된다.
 - `adoption-readiness.md`의 gate 열이 `versions.json consumers.<repo>.enforce`·매니페스트 유무와 대응한다.
 - `integration-map.md`에 생성물 대체 예고 문장이 있고 수기 값은 조사 기준 커밋을 명시한다.
 - validator 오류 0, 리뷰어 2인(패키지 경계 · 소비자 이관) verdict `PASS`.

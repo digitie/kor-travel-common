@@ -241,7 +241,7 @@
 | R5.1 | journal H1·H2 형식·newest-first·수정 금지 | 채택 | | 있음(이번 PR) |
 | R5.2 | journal 본문 라벨 불릿 또는 검증 표 | 변형 | + 소비 저장소 상태(커밋·브랜치·dirty) | `docs/runbooks/documentation-maintenance.md` §4 |
 | R5.3 | 도구 fallback·미실행 검증·사용자 변경 보존 | 채택 | | 있음 |
-| R5.4 | resume 5절 + 다음 한 작업 3불릿 | 변형 | 상태·다음 한 작업·차단·인계 링크, 시작 파일·검증은 해당 절에서 연결 | 있음(이번 PR) |
+| R5.4 | resume 5절 + 다음 한 작업 3불릿 | 변형 | 상태·다음 한 작업·시작/검증·차단·인계 링크 5절, 다음 한 작업 3불릿 | 있음(이번 PR) |
 | R5.5 | CHANGELOG Keep a Changelog 계열, 사용자 가시 변경만 | 변형 | 패키지별 H3 + `### Breaking` + 이관 절(D-18·D-31) | 있음(이번 PR) |
 | R5.6 | 루트 README "문서" 절 링크 6 | 변형 | decisions 링크 → ADR 색인 | 있음(이번 PR) |
 | R5.7 | docs/README 5부 구성 | 채택 | | 있음(이번 PR) |
