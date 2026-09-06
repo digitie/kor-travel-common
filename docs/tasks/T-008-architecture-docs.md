@@ -1,6 +1,6 @@
-# T-008 docs/architecture/*(README·packages·style-delivery·consumers·adoption-readiness)·`docs/integration-map.md` 초기판
+# T-008 docs/architecture/*(README·packages·style-delivery·consumers·adoption-readiness)·`docs/integration-map.md` 초기판 (2026-09-06, PR #1)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P0
 - Gate: 문서 검증·2인 리뷰
 - 선행: 없음
@@ -59,7 +59,9 @@ Git Bash에서 동일.
 
 ## evidence
 
-- 검증 출력·리뷰 report(`docs/reviews/adversarial/2026-09-06-architecture.md`)를 이 절·`docs/journal.md`·PR 본문에 남긴다.
+2026-09-06 완료: 패키지 경계·릴리스별 공개 계약·외부 선행을 ADR-013과 함께 재검토했다. 소비자 7곳의 조사 §8·§9 링크 14개와 외부 선행 대응을 확인했다. 채택 지도는 기준 커밋을 명시한 미채택 초기판이며 생성기 T-012·실물 패키지 대조는 미완료로 유지한다. 조사 수치를 최신 소비자 실행으로 세지 않는다.
+
+검증 기준선·CI·2인 gate·원본·실행 수치·NOT_RUN은 [통합 재검토](../reviews/adversarial/2026-09-06-phase0-post-fix-03.md)에 보존한다. 완료 원장 이동과 인계 문서의 후속 delta도 같은 두 리뷰어의 별도 immutable 기준선 검토 대상으로 삼으며 최신 판정은 [리뷰 색인](../reviews/README.md)을 따른다.
 
 ## rollback 또는 release 차단 조건
 

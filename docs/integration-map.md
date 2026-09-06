@@ -1,6 +1,6 @@
 # 통합 지도(integration map)
 
-- 정본 지위: 소비자별 채택 버전·매니페스트·워크플로·강제 수준의 지도. **T-012 이후 `tools/collect_manifests.py`가 `consumers.pins.json`과 각 소비자 `kor-travel-common.lock.json`에서 생성하는 생성물로 전환되며 그 뒤에는 수기 편집을 금지한다(D-19).** 전환 전까지는 이 초기판(수기, 전 셀 "미채택")이 자리표시자다. 확정 task: T-008(초기판, ★이번 PR)·T-011·T-012. 마지막 갱신: 2026-09-06.
+- 정본 지위: 소비자별 채택 버전·매니페스트·워크플로·강제 수준의 지도. **T-012 이후 `tools/collect_manifests.py`가 `consumers.pins.json`과 각 소비자 `kor-travel-common.lock.json`에서 생성하는 생성물로 전환되며 그 뒤에는 수기 편집을 금지한다(D-19).** 전환 전까지는 이 초기판(수기, 전 셀 "미채택")이 자리표시자다. 확정 task: T-008(설계 초기판)·T-011·T-012. 마지막 갱신: 2026-09-06.
 - 근거: [브리프](plan/design-brief.md) D-07·D-16·D-19·D-30, [소비자](architecture/consumers.md), [채택 준비 기준](architecture/adoption-readiness.md).
 
 이 문서는 [문서 지도](README.md)에 속하며 "지금 어느 소비자가 common의 무엇을 어느 버전으로 쓰는가"만 답한다. 왜·어떤 순서로 채택하는가는 [소비자](architecture/consumers.md), gate는 [채택 준비 기준](architecture/adoption-readiness.md), 규칙은 [standards](standards/README.md)가 정본이다.

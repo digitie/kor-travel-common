@@ -1,6 +1,6 @@
 # 배포 단위와 공개 계약
 
-- 정본 지위: 배포 단위별 이름·경로·exports·peer·채널·소비자·공개 계약의 정본(초안). 확정 task: T-008(★이번 PR) → T-101(tokens)·T-201(ui)·T-302(py)에서 실물과 대조해 확정. 마지막 갱신: 2026-09-06.
+- 정본 지위: 배포 단위별 이름·경로·exports·peer·채널·소비자·공개 계약의 정본(초안). 확정 task: T-008(설계 초기판) → T-101(tokens)·T-201(ui)·T-302(py)에서 실물과 대조해 확정. 마지막 갱신: 2026-09-06.
 - 근거: [브리프](../plan/design-brief.md) D-01·D-09·D-10·D-11·D-15·D-31·D-33, `docs/survey/cross/design-tokens.md` §3.6.3, `docs/survey/cross/ui-components.md` §4·§6.2, `docs/survey/cross/backend.md` §5.2·§5.3, `docs/survey/cross/licensing.md` §3.5.
 
 이 문서는 [아키텍처 개요](README.md) §1의 배포 단위를 단위별로 펼친다. 값·파일의 정본은 각 패키지 실물이며, 여기에는 이름·경계·계약(SemVer 대상)만 둔다. "후보" 표기는 T-101·T-201·T-302에서 확정한다.

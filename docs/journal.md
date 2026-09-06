@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-06 (Codex, T-013 문서 task 종료·순차 인계)
+
+5670642에서 두 reviewer가 모두 PASS이며 최초 14건과 후속 B-P2-09까지 FIXED를 확인했다([세 번째 통합 판정](reviews/adversarial/2026-09-06-phase0-post-fix-03.md)). T-001·T-002·T-004·T-007·T-008·T-013의 실제 evidence를 연결하고 상세 H1/상태와 완료 원장 제목을 동기화했다. 총 96개 중 완료 6개·열린 90개이며 다음은 T-003 READY, 이후 T-005·T-009다. 개별 규칙 확정과 SPDX/라이선스 원문·소비자 보고·실물 구현은 완료하지 않았다.
+
+정본 서두의 리뷰 전/IN_PROGRESS를 문서 초기판 완료 범위와 맞추고 패키지 실물 대조·소비자 첫 적용의 초안 상태는 유지했다. 기존 원본·조사 스냅샷·소비자 checkout을 보존했다. 이번 종료 delta도 별도 immutable 기준선으로 같은 두 reviewer에게 제출하며 최종 CI·리모트 SHA·판정은 [리뷰 색인](reviews/README.md)과 draft PR #1에 연결한다. 이번 작업은 PR merge·릴리스를 포함하지 않는다.
+
 ## 2026-09-06 (Codex, T-013 두 번째 재검토·종료 기준 대조)
 
 84759b6 CI run 34025270597 성공. 두 번째 post-fix에서 원 14 finding은 모두 FIXED지만 B가 T-005b의 빈 입력 성공 지침을 새 P2(B-P2-09)로 기록했다. 유효 선언과 lock 부재 fixture의 NO_LOCK/report 결과를 입력 자체가 없는 exit 2 음성 사례와 분리했다. 도구 코드는 바꾸지 않았다. 원본과 disposition은 [두 번째 통합 판정](reviews/adversarial/2026-09-06-phase0-post-fix-02.md)에 보존한다.

@@ -1,6 +1,6 @@
-# T-004 ADR-001~012 + `docs/adr/README.md` 단일 색인
+# T-004 ADR-001~012 + `docs/adr/README.md` 단일 색인 (2026-09-06, PR #1)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P0
 - Gate: 2인 리뷰
 - 선행: 없음
@@ -68,7 +68,9 @@ Git Bash에서 동일.
 
 ## evidence
 
-- 검증 출력과 리뷰 report 경로(`docs/reviews/adversarial/2026-09-06-adr-set.md`, evidence `…-reviewer-{a,b}.md`)를 이 절·`docs/journal.md`·PR 본문에 남긴다.
+2026-09-06 완료: ADR 13편 H1·날짜·상태를 확인하고 색인 13행과 상태 문자열이 일치함을 검사했다. README 포함 14파일, 다음 번호 ADR-014, decisions.md 없음. ADR-013이 005·007·010을 부분 대체하며 ADR-012는 사용자 승인 전 proposed를 유지한다.
+
+검증 기준선·CI·2인 gate·원본·실행 수치·NOT_RUN은 [통합 재검토](../reviews/adversarial/2026-09-06-phase0-post-fix-03.md)에 보존한다. 완료 원장 이동과 인계 문서의 후속 delta도 같은 두 리뷰어의 별도 immutable 기준선 검토 대상으로 삼으며 최신 판정은 [리뷰 색인](../reviews/README.md)을 따른다.
 
 ## rollback 또는 release 차단 조건
 

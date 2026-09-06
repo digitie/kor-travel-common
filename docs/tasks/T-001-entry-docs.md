@@ -1,6 +1,6 @@
-# T-001 진입 문서·문서 지도·canview 대조표(AGENTS·CLAUDE·SKILL·README·docs/README·dev-environment·canview-checklist·PR 템플릿)
+# T-001 진입 문서·문서 지도·canview 대조표(AGENTS·CLAUDE·SKILL·README·docs/README·dev-environment·canview-checklist·PR 템플릿) (2026-09-06, PR #1)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P0
 - Gate: 문서 검증·2인 리뷰
 - 선행: 없음
@@ -66,8 +66,9 @@ Git Bash에서 동일(`python` 대체 표기는 [개발 환경](../dev-environme
 
 ## evidence
 
-- 실행 결과(명령·exit code·검사 문서 수)는 이 절에 갱신하고 `docs/journal.md` 항목과 PR 본문에 남긴다. 실행하지 못한 검증은 `NOT_RUN(사유)`로 적는다(D-25).
-- 리뷰 원본은 `docs/reviews/adversarial/evidence/2026-09-06-entry-docs-reviewer-{a,b}.md`, 통합 report는 `docs/reviews/adversarial/2026-09-06-entry-docs.md`([리뷰 아카이브](../reviews/README.md) 규칙 1·5).
+2026-09-06 완료: CLAUDE 포인터 32줄, 문서 지도 8개 실제 디렉터리, canview A 49개·R 77개 ID 대응을 직접 확인했다. 진입 문서·개발 환경·PR 템플릿을 대조했고 링크 검사를 통과했다.
+
+검증 기준선·CI·2인 gate·원본·실행 수치·NOT_RUN은 [통합 재검토](../reviews/adversarial/2026-09-06-phase0-post-fix-03.md)에 보존한다. 완료 원장 이동과 인계 문서의 후속 delta도 같은 두 리뷰어의 별도 immutable 기준선 검토 대상으로 삼으며 최신 판정은 [리뷰 색인](../reviews/README.md)을 따른다.
 
 ## rollback 또는 release 차단 조건
 

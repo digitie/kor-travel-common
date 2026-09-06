@@ -10,8 +10,8 @@ kor-travel 제품군(kor-travel-airport·concierge·docker-manager·geo·map·we
 | React UI | `packages/ui` | npm `@kor-travel/ui`(잠정, 열림 O-5) — 태그 `ui-vX.Y.Z` | 미작성(T-201) |
 | Python 공통 | `packages/py/kor-travel-common` | 배포 이름 `kor-travel-common`, import `kortravelcommon` — git 태그 `py-vX.Y.Z` + wheel 자산 | 미작성(T-302) |
 | 규칙 문서 | `docs/standards/` | 저장소 문서(소비자는 링크·템플릿으로 채택) | 초안(T-005·T-104~T-107·T-204·T-301·T-302) |
-| 템플릿 | `templates/` | 소비자 설정 조각·PR 규격·체크리스트 | 초안(T-007) |
-| 버전 레지스트리·도구 | `versions.json`, `tools/*.py` | `check_versions`·`kt_contrast`·`ux_lint`·`check_spdx`·문서 validator 2종 | validator 2종·`versions.json`·`check_versions` 초안 있음(T-002·T-005), `kt_contrast`·`ux_lint`·`check_spdx`는 T-103·T-003 |
+| 템플릿 | `templates/` | 소비자 설정 조각·PR 규격·체크리스트 | 규약·PR 틀 작성(T-007); 설정·캡처는 T-107·T-108에서 검증 |
+| 버전 레지스트리·도구 | `versions.json`, `tools/*.py` | `check_versions`·`kt_contrast`·`ux_lint`·`check_spdx`·문서 validator 2종 | validator 2종 검증 완료(T-002), `versions.json`·`check_versions` 부분 구현(T-005), `kt_contrast`·`ux_lint`·`check_spdx`는 T-103·T-003 |
 
 배포 채널·SemVer 0.x·태그 불변 규칙은 [release runbook](docs/runbooks/release.md), 경계와 의존 방향(앱 → ui → tokens, 앱 → py)은 [architecture](docs/architecture/README.md)가 정본이다. `config` npm 패키지와 `api-client-core`는 만들지 않는다.
 

@@ -1,6 +1,6 @@
 # kor-travel-common 아키텍처
 
-- 정본 지위: 현재 설계의 상위 정본(초안). 확정 task: T-008(초기판, ★이번 PR) → T-101·T-201·T-302(실물 패키지와 대조해 확정). 마지막 갱신: 2026-09-06.
+- 정본 지위: 현재 설계의 상위 정본(초안). 확정 task: T-008(설계 초기판) → T-101·T-201·T-302(실물 패키지와 대조해 확정). 마지막 갱신: 2026-09-06.
 - 근거: [브리프](../plan/design-brief.md) D-01·D-02·D-09~D-12·D-15·D-31, `docs/survey/commonality-matrix.md` §1·§2, `docs/survey/cross/ui-components.md` §4·§6.2, `docs/survey/cross/backend.md` §3~§5, `docs/survey/cross/design-tokens.md` §3.6.
 
 이 문서는 kor-travel-common의 배포 단위, 의존 방향과 책임 경계를 설명하는 상위 아키텍처 정본이다. 여기서 전체 형태를 확인한 뒤 변경 대상에 해당하는 상세 문서만 읽는다. 소비자별 채택 gate는 [채택 준비 기준](adoption-readiness.md), 결정의 역사는 [ADR 색인](../adr/README.md), 현재 작업은 [tasks](../tasks.md)를 따른다. 이 문서와 하위 architecture 문서는 정본 초안이며, 실물 패키지(T-101 tokens·T-201 ui·T-302 py)와 대조해 확정하는 task가 남아 있다.

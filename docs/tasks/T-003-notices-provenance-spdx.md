@@ -1,6 +1,6 @@
 # T-003 고지·출처 파일(NOTICE·THIRD_PARTY_NOTICES·LICENSES/·PROVENANCE·CONTRIBUTING)·SPDX 헤더 규약·tools/check_spdx.py
 
-- 상태: IN_PROGRESS
+- 상태: READY
 - 우선순위: P0
 - Gate: 문서 검증·도구 테스트
 - 선행: 없음
@@ -63,6 +63,8 @@ rg -n "pinvi|maplibre-vworld|python-.*-api" PROVENANCE.md
 Git Bash에서 동일.
 
 ## evidence
+
+2026-09-06 T-013 인계: 고지·출처 초안은 인수했다. LICENSES 원문 사본과 tools/check_spdx.py·음성 fixture는 미완료이며 NOT_RUN(잔여)이다. 다음 에이전트가 이 task 하나부터 착수한다.
 
 - 명령·exit code·검사 파일 수를 이 절과 `docs/journal.md`에 남긴다. `check_spdx.py`·`LICENSES/`가 미완이면 `NOT_RUN(잔여)`로 두고 `DONE` 전에 완료한다.
 

@@ -1,6 +1,6 @@
-# T-002 문서 검증 도구 정정(절대 링크 금지·산문 오탐·Windows 동작·LF)·validator 회귀 테스트·docs.yml 정비
+# T-002 문서 검증 도구 정정(절대 링크 금지·산문 오탐·Windows 동작·LF)·validator 회귀 테스트·docs.yml 정비 (2026-09-06, PR #1)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P0
 - Gate: 도구 테스트·CI
 - 선행: 없음
@@ -59,10 +59,9 @@ Git Bash에서 동일. Windows 실행 표기는 [개발 환경](../dev-environme
 
 ## evidence
 
-- T-013 재검증(2026-09-06): CI run `34023326750`에서 inline code `def fn[T](...)` 오탐으로 Linux 실패를 재현했다. inline code를 제외하고 2개 회귀 시험을 추가했다. Windows Python 3.14.3과 WSL에서 문서 오류 0·DAG 오류 0·전체 unittest 59개 성공·skip 0. `git diff --check`와 추적 파일 `i/lf` 확인 완료. 최신 CI·2인 리뷰는 후속 evidence로 닫는다.
+2026-09-06 완료: Windows Python 3.14.3·WSL Python 3.14.4 각각 전체 67 tests 성공·skip 0, 문서 링크·96 task DAG·공백 검사 성공. 추적 텍스트 i/lf이며 빈 .gitkeep만 i/none이다. validate_plan.py는 착수 09104ed 대비 변경이 없다. Linux CI도 아래 기준선에서 성공했다. Python 지원 버전별 CI 매트릭스·액션 SHA 핀은 T-009 범위다.
 
-- 테스트 수·exit code·Python 버전(`python3 --version`, Windows `py -3 --version`)을 이 절과 `docs/journal.md`에 남긴다. CI 실행은 PR의 `docs` job 링크로 남긴다.
-- 리뷰가 필요한 변경(validator 규칙 변경)은 `docs/reviews/adversarial/2026-09-06-doc-validators.md`에 기록한다.
+검증 기준선·CI·2인 gate·원본·실행 수치·NOT_RUN은 [통합 재검토](../reviews/adversarial/2026-09-06-phase0-post-fix-03.md)에 보존한다. 완료 원장 이동과 인계 문서의 후속 delta도 같은 두 리뷰어의 별도 immutable 기준선 검토 대상으로 삼으며 최신 판정은 [리뷰 색인](../reviews/README.md)을 따른다.
 
 ## rollback 또는 release 차단 조건
 

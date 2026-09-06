@@ -1,6 +1,6 @@
-# T-013 PR #1·로컬 초안 통합과 순차 실행 계획·인계 마무리
+# T-013 PR #1·로컬 초안 통합과 순차 실행 계획·인계 마무리 (2026-09-06, PR #1)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P0
 - Gate: 문서 검증·도구 테스트·CI·2인 리뷰
 - 선행: 없음
@@ -53,7 +53,9 @@ Git Bash에서 동일. Windows 치환은 [개발 환경](../dev-environment.md) 
 
 ## evidence
 
-착수 기준 PR #1 HEAD: `09104ed0fa7f8564936fbbc3b9c17057f86d3e7c`. 로컬 재검증: 문서 181개·링크 오류 33개, 상세 task 92개·원장 누락 등 오류 94개, unittest 57개 성공·skip 0. 최종 결과와 리뷰는 [journal](../journal.md) 및 [리뷰 색인](../reviews/README.md)에 연결한다.
+2026-09-06 완료: PR #1의 09104ed와 로컬 초안을 인수해 96개 상세 task 원장·순차 실행 계획을 완성했다. 최초 14건과 후속 1건의 finding을 수정했고 두 원 reviewer가 모두 FIXED로 재확인했다. 완료 문서 task만 archive로 이동하고 다음 한 작업은 T-003, 이후 T-005·T-009로 지정한다. 기존 draft PR #1을 갱신하며 소비자 변경·패키지 구현·릴리스·merge는 후속 범위다.
+
+검증 기준선·CI·2인 gate·원본·실행 수치·NOT_RUN은 [통합 재검토](../reviews/adversarial/2026-09-06-phase0-post-fix-03.md)에 보존한다. 완료 원장 이동과 인계 문서의 후속 delta도 같은 두 리뷰어의 별도 immutable 기준선 검토 대상으로 삼으며 최신 판정은 [리뷰 색인](../reviews/README.md)을 따른다.
 
 ## rollback 또는 release 차단 조건
 

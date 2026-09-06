@@ -1,7 +1,7 @@
 # 에이전트·문서 공통 규약 (agent-conventions)
 
 - 정본 지위: 이 문서는 kor-travel-common이 7개 소비 저장소에 **배포하는** 에이전트·문서 규약의 정본이다. 공통 절의 원문은 [`templates/AGENTS.common.md`](../../templates/AGENTS.common.md), 포인터 원문은 [`templates/CLAUDE.pointer.md`](../../templates/CLAUDE.pointer.md)이며 이 문서는 규칙·적용 범위·대응표만 둔다. common 저장소 **자체**의 규칙은 루트 [`AGENTS.md`](../../AGENTS.md)가 정본이고 이 문서를 인용한다.
-- 확정 task: T-007(★이번 PR), T-001(common 자체 진입 문서), T-403(소비자 반영). 이 문서는 정본 초안이며 소비자 첫 채택 PR(T-410·T-461)에서 실물과 대조해 확정한다.
+- 확정 task: T-007(규약 초기판), T-001(common 자체 진입 문서), T-403(소비자 반영). 이 문서는 정본 초안이며 소비자 첫 채택 PR(T-410·T-461)에서 실물과 대조해 확정한다.
 - 마지막 갱신: 2026-09-06. 결정 근거: [설계 브리프](../plan/design-brief.md) D-02·D-03·D-04·D-05·D-24·D-25·D-27·D-32, ADR-002·003([ADR 색인](../adr/README.md)).
 - 상위 문서: [standards 색인](README.md). 관련: [agent workflow](../runbooks/agent-workflow.md)(common 자체 절차), [documentation maintenance](../runbooks/documentation-maintenance.md), [tasks-rule](../tasks-rule.md), [review archive](../reviews/README.md), [canview 대조표](../architecture/canview-checklist.md).
 

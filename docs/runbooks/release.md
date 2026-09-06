@@ -1,6 +1,6 @@
 # 릴리스 Runbook (release)
 
-이 문서는 common 패키지(tokens·ui·py)와 규칙 문서 버전을 발행하는 절차 정본이다(브리프 D-11·D-18·D-31, ADR-005). 확정 task는 T-007(★이번 PR)이며, 절차 1회 완주 검증은 T-501, 첫 실행은 T-109(`tokens-v0.1.0`)다. 패키지 실물이 생기기 전까지 §3의 빌드 명령은 후보다. 마지막 갱신 2026-09-06.
+이 문서는 common 패키지(tokens·ui·py)와 규칙 문서 버전을 발행하는 절차 정본이다(브리프 D-11·D-18·D-31, ADR-005). 확정 task는 T-007(문서 초기판)이며, 절차 1회 완주 검증은 T-501, 첫 실행은 T-109(`tokens-v0.1.0`)다. 패키지 실물이 생기기 전까지 §3의 빌드 명령은 후보다. 마지막 갱신 2026-09-06.
 
 버전 정책의 규범은 [versions](../standards/versions.md), 배포 채널 결정은 ADR-005([ADR 색인](../adr/README.md)), 소비자 쪽 절차는 [consumer adoption](consumer-adoption.md), 일반 작업 절차는 [agent workflow](agent-workflow.md)를 따른다. 명령은 bash 기준이며 Git Bash에서 동일하다.
 

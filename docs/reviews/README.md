@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-09-06 | full post-fix 03 | [Phase 0 세 번째 재검토](adversarial/2026-09-06-phase0-post-fix-03.md), 5670642 | A 도구·CI / B 계획·계약 | A PASS / B PASS, 15 finding FIXED |
 | 2026-09-06 | full post-fix 02 | [Phase 0 두 번째 재검토](adversarial/2026-09-06-phase0-post-fix-02.md), 84759b6 | A 도구·CI / B 계획·계약 | A PASS / B CONDITIONAL(B-P2-09) |
 | 2026-09-06 | full post-fix | [Phase 0 재검토](adversarial/2026-09-06-phase0-post-fix.md), 12fb3a8 | A 도구·CI / B 계획·계약 | A BLOCK(A-P1-05) / B PASS |
 | 2026-09-06 | full | [Phase 0](adversarial/2026-09-06-phase0.md), d3712a8 → post-fix 대기 | A 도구·CI / B 계획·계약 | 최초 BLOCK·수정 재확인 대기 |

@@ -1,6 +1,6 @@
 # kor-travel-common 개발 환경
 
-이 문서는 [문서 지도](README.md)의 개발 환경 정본이며 D-03([설계 브리프](plan/design-brief.md) §1 A)을 규칙으로 옮긴다: 정본 OS, 경로 표기, 임시 worktree 프로필, 도구 설치, Windows Tier 2, 검증 명령 사다리. branch·worktree 명령, CodeGraph 수명주기, 2인 리뷰, PR 절차는 [agent workflow](runbooks/agent-workflow.md)에만 둔다. 확정 task: T-001(초안) · 마지막 갱신: 2026-09-06. 소비 저장소의 개발 환경은 이 문서가 규정하지 않는다(각 저장소의 `docs/dev-environment.md`와 ADR이 프로필을 선언한다).
+이 문서는 [문서 지도](README.md)의 개발 환경 정본이며 D-03([설계 브리프](plan/design-brief.md) §1 A)을 규칙으로 옮긴다: 정본 OS, 경로 표기, 임시 worktree 프로필, 도구 설치, Windows Tier 2, 검증 명령 사다리. branch·worktree 명령, CodeGraph 수명주기, 2인 리뷰, PR 절차는 [agent workflow](runbooks/agent-workflow.md)에만 둔다. 확정 task: T-001(문서 확정) · 마지막 갱신: 2026-09-06. 소비 저장소의 개발 환경은 이 문서가 규정하지 않는다(각 저장소의 `docs/dev-environment.md`와 ADR이 프로필을 선언한다).
 
 ## 1. 실행 원칙
 

@@ -1,6 +1,6 @@
 # kor-travel-common 에이전트 개발 워크플로
 
-이 문서는 branch, 검증, 독립 적대적 리뷰, PR, merge 정리의 실행 절차 정본이다(브리프 D-03·D-04·D-25, ADR-002·ADR-003). 확정 task는 T-007(★이번 PR, `IN_PROGRESS`)이며 패키지 실물(T-101·T-201·T-302)이 생기면 §4의 패키지 명령을 대조해 확정한다. 마지막 갱신 2026-09-06.
+이 문서는 branch, 검증, 독립 적대적 리뷰, PR, merge 정리의 실행 절차 정본이다(브리프 D-03·D-04·D-25, ADR-002·ADR-003). 확정 task는 T-007(문서 확정)이며 패키지 실물(T-101·T-201·T-302)이 생기면 §4의 패키지 명령을 대조해 확정한다. 마지막 갱신 2026-09-06.
 
 배포 단위·계약 설계는 [architecture](../architecture/README.md), 공통 규칙은 [standards](../standards/README.md), 문서 역할과 갱신 규칙은 [documentation maintenance](documentation-maintenance.md)가 정본이다. 소비 저장소 쪽 절차는 [consumer adoption](consumer-adoption.md), 버전 발행은 [release](release.md)를 따른다. 명령은 bash 기준이며 Git Bash에서 동일하게 실행된다(Windows 표기와 경로·도구 프로필은 [개발 환경](../dev-environment.md)에만 둔다).
 

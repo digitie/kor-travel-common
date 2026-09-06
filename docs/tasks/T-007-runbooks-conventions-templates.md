@@ -1,6 +1,6 @@
-# T-007 runbook 본문(agent-workflow·consumer-adoption·release)·`docs/standards/agent-conventions.md`·templates/
+# T-007 runbook 본문(agent-workflow·consumer-adoption·release)·`docs/standards/agent-conventions.md`·templates/ (2026-09-06, PR #1)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P0
 - Gate: 문서 검증·2인 리뷰
 - 선행: 없음
@@ -63,7 +63,9 @@ Git Bash에서 동일.
 
 ## evidence
 
-- 검증 출력·리뷰 report(`docs/reviews/adversarial/2026-09-06-runbooks.md`, evidence `…-reviewer-{a,b}.md`)를 이 절·`docs/journal.md`·PR 본문에 남긴다.
+2026-09-06 완료: runbook 5개 링크와 리뷰 앵커, immutable·detached·clean·disposition·post-fix 규칙을 대조했다. 릴리스 태그 불변·재발행 금지·integrity, 소비자 파일 상한·업그레이드 PR 분리·6폭·rollback 필드가 존재한다. Windows 실행기 표기는 개발 환경 문서에 위임했다. 패키지 명령의 실제 완주와 소비자 템플릿 적용은 T-101·T-201·T-302·T-403·T-501에서 검증한다.
+
+검증 기준선·CI·2인 gate·원본·실행 수치·NOT_RUN은 [통합 재검토](../reviews/adversarial/2026-09-06-phase0-post-fix-03.md)에 보존한다. 완료 원장 이동과 인계 문서의 후속 delta도 같은 두 리뷰어의 별도 immutable 기준선 검토 대상으로 삼으며 최신 판정은 [리뷰 색인](../reviews/README.md)을 따른다.
 
 ## rollback 또는 release 차단 조건
 

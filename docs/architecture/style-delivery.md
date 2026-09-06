@@ -1,6 +1,6 @@
 # 스타일 배포 계약(Tailwind v4 CSS-first)
 
-- 정본 지위: `@kor-travel/tokens`·`@kor-travel/ui`의 CSS 파일 구성과 소비자 연결 방식의 정본(초안). 값 정본은 `packages/tokens/tokens.css`. 확정 task: T-008(★이번 PR) → T-101·T-102·T-103·T-104. 마지막 갱신: 2026-09-06.
+- 정본 지위: `@kor-travel/tokens`·`@kor-travel/ui`의 CSS 파일 구성과 소비자 연결 방식의 정본(초안). 값 정본은 `packages/tokens/tokens.css`. 확정 task: T-008(설계 초기판) → T-101·T-102·T-103·T-104. 마지막 갱신: 2026-09-06.
 - 근거: [브리프](../plan/design-brief.md) D-10·D-12·D-13, `docs/survey/cross/design-tokens.md` §3.2.3·§3.4.1·§3.4.2·§3.6.1~§3.6.6, `docs/survey/cross/ui-components.md` §6.3, `docs/survey/inventory/pinvi.md` §3.1(`[data-pv-surface]`), `docs/survey/inventory/kor-travel-weather.md` §3.1·§9.1.
 
 이 문서는 [아키텍처 개요](README.md) §3의 tokens·ui 책임 중 "CSS가 소비자에게 어떻게 도달하는가"만 다룬다. 토큰 이름·역할·오버라이드 규칙의 정본은 [design-tokens](../standards/design-tokens.md), UX 금지 패턴은 [ux-guide](../standards/ux-guide.md), 이관 절차는 [consumer adoption runbook](../runbooks/consumer-adoption.md)이다.
