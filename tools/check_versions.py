@@ -70,6 +70,36 @@ def normalize_name(name: str) -> str:
     return re.sub(r"[-_.]+", "-", name.strip().lower())
 
 
+def package_identity(ecosystem: str, name: str) -> str:
+    """npm의 서로 다른 점·밑줄·하이픈 이름을 Python 정규화로 합치지 않는다."""
+    return normalize_name(name) if ecosystem == "pypi" else name.strip()
+
+
+def installed_version(ecosystem: str, text: str | None) -> tuple[int, ...] | None:
+    """설치본의 지원 문법을 검사한 뒤 build metadata를 제외한 수치를 읽는다."""
+    if not isinstance(text, str):
+        return None
+    if ecosystem == "npm":
+        return parse_version(text.split("+", 1)[0]) if NPM_VERSION_RE.fullmatch(text) else None
+    if "-slim" in text:
+        return None
+    return parse_version(text)
+
+
+def npm_entry(packages: dict, directory: str, name: str) -> tuple[str, dict]:
+    """lock 안에서 각 상위 node_modules를 찾으며 파일시스템 링크는 따라가지 않는다."""
+    while True:
+        if directory.rsplit("/", 1)[-1] == "node_modules":
+            directory = directory.rsplit("/", 1)[0] if "/" in directory else ""
+            continue
+        path = f"{directory}/node_modules/{name}" if directory else f"node_modules/{name}"
+        if path in packages:
+            return path, packages[path]
+        if not directory:
+            return "", {}
+        directory = directory.rsplit("/", 1)[0] if "/" in directory else ""
+
+
 def below(installed: tuple[int, ...], floor: tuple[int, ...]) -> bool:
     width = max(len(installed), len(floor))
     return installed + (0,) * (width - len(installed)) < floor + (0,) * (width - len(floor))
@@ -90,10 +120,7 @@ class Bound:
 
 
 def lower_bound(spec: str | None) -> Bound | None:
-    """npm(`^`, `~`, `>=`, `||`)·PEP 440(`>=`, `==`, `~=`, `,`)·Poetry(`^`) 범위의 하한.
-
-    하한을 정할 수 없으면(`*`, `<x`만, 빈 값) `Bound(None, False)`, 정확 핀이면 `exact=True`.
-    """
+    """단일 숫자·접두 연산자 또는 >=/< 교집합의 하한. 미지원 문법은 미확인이다."""
     if spec is None:
         return None
     text = re.sub(r"(>=|<=|==|~=|!=|>|<|\^|~|=)\s+", r"\1", spec.strip())
@@ -104,6 +131,7 @@ def lower_bound(spec: str | None) -> Bound | None:
     for alternative in text.split("||"):
         parts = [part.strip() for part in re.split(r",|\s+", alternative) if part.strip()]
         alt_low: tuple[int, ...] | None = None
+        alt_upper: tuple[int, ...] | None = None
         alt_exact = False
         for part in parts:
             operator = ""
@@ -112,16 +140,24 @@ def lower_bound(spec: str | None) -> Bound | None:
                     operator = candidate
                     part = part[len(candidate):].strip()
                     break
-            version = parse_version(re.sub(r"(?:\.[xX*])+$", "", part))
+            if operator in {">", "<=", "!="} or (len(parts) > 1 and operator not in {">=", "<"}):
+                return Bound(None, False)
+            if not re.fullmatch(r"v?\d+(?:\.\d+){0,3}(?:\.[xX*])?", part):
+                return Bound(None, False)
+            version = parse_version(re.sub(r"(?:\.[xX*])$", "", part))
             if version is None:
                 return Bound(None, False)
-            if operator in {"<", "<=", "!="}:
+            if operator == "<":
+                if alt_upper is None or below(version, alt_upper):
+                    alt_upper = version
                 continue
             if operator in {"", "=", "=="}:
                 alt_exact = "x" not in part and "*" not in part and len(version) >= 2
             if alt_low is None or below(alt_low, version):
                 alt_low = version
         if alt_low is None:
+            return Bound(None, False)
+        if alt_upper is not None and at_or_above(alt_low, alt_upper):
             return Bound(None, False)
         lows.append(alt_low)
         exact = exact or (alt_exact and len(parts) == 1)
@@ -283,7 +319,7 @@ class Registry:
             if not isinstance(names, list) or not names or any(not isinstance(n, str) or not n for n in names):
                 raise ValueError(f"{path}: axes.{key}.packages 목록 오류")
             for name in axis.get("packages", [key]):
-                identity = (axis["ecosystem"], normalize_name(name))
+                identity = (axis["ecosystem"], package_identity(axis["ecosystem"], name))
                 if identity in registry.by_package:
                     raise ValueError(f"{path}: 패키지 축 중복 {name}")
                 registry.by_package[identity] = key
@@ -312,7 +348,7 @@ class Registry:
         for entry in data.get("exceptions", []):
             names = {"repo", "key", "installed", "reason", "until", "review"}
             fields(entry, names, "exceptions 항목", names)
-            if any(not isinstance(entry[n], str) or not entry[n] for n in names):
+            if any(not isinstance(entry[n], str) or not entry[n].strip() for n in names):
                 raise ValueError(f"{path}: exceptions 값은 빈 문자열이 아니어야 함")
             if entry["repo"] not in consumers or entry["key"] not in axes or parse_version(entry["installed"]) is None:
                 raise ValueError(f"{path}: exceptions 참조 또는 버전 오류")
@@ -335,12 +371,14 @@ class Registry:
             if "since" in entry:
                 iso_date(entry["since"], "blocked.since")
             for clause in entry["range"].split(","):
-                if not re.fullmatch(r"\s*(?:>=|<=|==|!=|>|<)?\d+(?:\.\d+)*\s*", clause):
+                number = re.sub(r"^\s*(?:>=|<=|==|!=|>|<)?", "", clause).strip()
+                if (not re.fullmatch(r"\s*(?:>=|<=|==|!=|>|<)?\d+(?:\.\d+)*\s*", clause)
+                        or parse_version(number) is None):
                     raise ValueError(f"{path}: blocked 범위 오류")
         return registry
 
     def axis_for(self, ecosystem: str, name: str) -> str | None:
-        return self.by_package.get((ecosystem, normalize_name(name)))
+        return self.by_package.get((ecosystem, package_identity(ecosystem, name)))
 
     def consumer(self, repo: str) -> str | None:
         consumers = self.data.get("consumers", {})
@@ -376,10 +414,15 @@ class Registry:
         if version is None:
             return None
         for entry in self.data.get("blocked", []):
-            if entry["ecosystem"] == ecosystem and normalize_name(entry["name"]) == normalize_name(name):
+            if entry["ecosystem"] == ecosystem and package_identity(ecosystem, entry["name"]) == package_identity(ecosystem, name):
                 if range_contains(version, entry["range"]):
                     return entry
         return None
+
+    def blocked_name(self, ecosystem: str, name: str) -> bool:
+        return any(entry["ecosystem"] == ecosystem
+                   and package_identity(ecosystem, entry["name"]) == package_identity(ecosystem, name)
+                   for entry in self.data.get("blocked", []))
 
     def provider_names(self) -> set[str]:
         packages = self.data.get("providers", {}).get("packages", {})
@@ -546,6 +589,7 @@ class Checker:
         self.npm_locks: dict[Path, tuple[str, dict]] = {}
         self.npm_direct: set[tuple[Path, str]] = set()
         self.npm_floating: set[tuple[Path, str]] = set()
+        self.npm_manifests: set[tuple[Path, str]] = set()
 
     # --- 공통
     def add(self, scope: str, key: str, ecosystem: str, declared: str, installed: str,
@@ -582,16 +626,20 @@ class Checker:
 
     def record_axis(self, scope: str, key: str, ecosystem: str, declared: str,
                     installed_text: str, exact: bool = True) -> None:
-        installed = parse_version(installed_text)
-        if ecosystem == "npm" and (not isinstance(installed_text, str)
-                                    or not NPM_VERSION_RE.fullmatch(installed_text)):
-            installed = None
+        installed = installed_version(ecosystem, installed_text)
         verdict, detail = self.judge(key, installed, exact)
         verdict, detail = self.apply_exception(key, installed, verdict, detail)
         self.add(scope, key, ecosystem, declared, installed_text, verdict, detail)
 
     def record_blocked(self, scope: str, ecosystem: str, name: str, version_text: str) -> None:
-        entry = self.registry.blocked(ecosystem, name, parse_version(version_text))
+        if not self.registry.blocked_name(ecosystem, name):
+            return
+        version = installed_version(ecosystem, version_text)
+        if version is None:
+            self.add(scope, name, ecosystem, "(차단 대상)", version_text, "NO_LOCK",
+                     "차단 대상 설치 버전 미해석 — 범위 대조를 성공으로 표시할 수 없음")
+            return
+        entry = self.registry.blocked(ecosystem, name, version)
         if entry is not None:
             self.add(scope, name, ecosystem, entry["range"], version_text, "BLOCKED",
                      f"since {entry.get('since', '?')} · {entry['reason']}")
@@ -612,6 +660,18 @@ class Checker:
                      "브랜치·미고정 참조 금지(D-11): SHA 또는 버전 태그로 고정")
 
     # --- npm
+    def record_npm_declarations(self, label: str, declared: dict, packages: dict,
+                                directory: str, lock_path: Path | None, *, transitive: bool = False) -> None:
+        for name, spec in declared.items():
+            path, entry = npm_entry(packages, directory, name)
+            if is_vcs_spec(str(spec)):
+                self.record_ref(label, "npm", name, str(spec), entry.get("resolved", ""))
+                if path and not ref_is_pinned(str(spec)):
+                    self.npm_floating.add((lock_path, path))
+            elif not transitive and str(spec).strip() in {"*", "latest", ""} and not entry.get("link"):
+                self.add(label, name, "npm", str(spec), "", "FLOATING_REF",
+                         "`*`/`latest` 선언 금지: 범위 또는 정확 버전으로 선언")
+
     def check_npm(self, scope: Scope) -> None:
         label = scope.label
         manifest = read_json(scope.manifest) if scope.manifest and scope.manifest.is_file() else {}
@@ -634,17 +694,7 @@ class Checker:
             raise ValueError("npm lock packages는 경로별 객체여야 함")
         if packages and scope.lock is not None:
             self.npm_locks.setdefault(scope.lock, (label, packages))
-
-        def installed_entry(name):
-            # Node의 상위 node_modules 탐색 순서를 lock 상대 경로에서 따른다.
-            directory = scope.workspace
-            while True:
-                path = f"{directory}/node_modules/{name}" if directory else f"node_modules/{name}"
-                if path in packages:
-                    return path, packages[path]
-                if not directory:
-                    return "", {}
-                directory = directory.rsplit("/", 1)[0] if "/" in directory else ""
+            self.npm_manifests.add((scope.lock, scope.workspace))
 
         root_entry = packages.get("", {})
         own_engines = bool(engines)
@@ -667,15 +717,7 @@ class Checker:
                 self.record_range("npm", label, "runtime", npm_spec)
 
         # 선언된 git/floating 참조(워크스페이스 링크 `*`는 제외)
-        for name, spec in declared.items():
-            path, entry = installed_entry(name)
-            if is_vcs_spec(str(spec)):
-                self.record_ref(label, "npm", name, str(spec), entry.get("resolved", ""))
-                if path and not ref_is_pinned(str(spec)):
-                    self.npm_floating.add((scope.lock, path))
-            elif str(spec).strip() in {"*", "latest", ""} and not entry.get("link"):
-                self.add(label, name, "npm", str(spec), "", "FLOATING_REF",
-                         "`*`/`latest` 선언 금지: 범위 또는 정확 버전으로 선언")
+        self.record_npm_declarations(label, declared, packages, scope.workspace, scope.lock)
 
         if not packages:
             added = 0
@@ -695,7 +737,7 @@ class Checker:
             key = self.registry.axis_for("npm", name)
             if key is None or not self.registry.axes[key].get("checked", True):
                 continue
-            path, entry = installed_entry(name)
+            path, entry = npm_entry(packages, scope.workspace, name)
             if path:
                 self.npm_direct.add((scope.lock, path))
             if str(spec).startswith("npm:") or entry.get("name", name) != name or entry.get("link"):
@@ -710,15 +752,38 @@ class Checker:
     def check_npm_locks(self) -> None:
         """직접·전이·워크스페이스 중첩 설치본을 lock별 1회 검사한다."""
         for lock_path, (label, packages) in self.npm_locks.items():
+            # 전이 선언의 branch가 resolved SHA에 가려지지 않도록 선언을 먼저 본다.
             for path, entry in packages.items():
-                if not re.search(r"(?:^|/)node_modules/", path) or entry.get("link"):
+                if (lock_path, path) in self.npm_manifests:
+                    continue
+                declared = {**entry.get("dependencies", {}), **entry.get("devDependencies", {}),
+                            **entry.get("optionalDependencies", {})}
+                self.record_npm_declarations(f"{label} [lock:{path}]", declared, packages, path, lock_path,
+                                             transitive=True)
+            for path, entry in packages.items():
+                if not re.search(r"(?:^|/)node_modules/", path):
                     continue
                 name = entry.get("name") or path.rsplit("node_modules/", 1)[1]
                 location = f"{label} [lock:{path}]"
+                if entry.get("link"):
+                    target = packages.get(entry.get("resolved", ""), {})
+                    names = {name, target.get("name", name)}
+                    for linked_name in sorted(names):
+                        key = self.registry.axis_for("npm", linked_name)
+                        if (lock_path, path) not in self.npm_direct and (key or self.registry.blocked_name("npm", linked_name)):
+                            self.add(location, key or linked_name, "npm", "(로컬 링크)", "", "NO_LOCK",
+                                     "로컬 링크 설치본 미지원 — 정책 축·차단 대상을 검사에서 제외하지 않음")
+                    continue
                 version = entry.get("version", "")
                 self.record_blocked(location, "npm", name, version)
                 resolved = entry.get("resolved", "")
-                if (resolved.startswith(("git+", "git:")) and not ref_is_pinned(resolved)
+                parsed = urlsplit(resolved)
+                # 기본 npm registry의 버전 tarball과 외부 URL 참조를 구분한다.
+                registry_tarball = (
+                    parsed.scheme == "https" and parsed.hostname == "registry.npmjs.org" and "/-/" in parsed.path
+                    and parsed.path.endswith(f"-{version}.tgz")
+                )
+                if (is_vcs_spec(resolved) and not registry_tarball and not ref_is_pinned(resolved)
                         and (lock_path, path) not in self.npm_floating):
                     self.add(location, name, "git", "(전이)", "", "FLOATING_REF",
                              f"lock resolved가 고정되지 않음: {resolved[:80]}")

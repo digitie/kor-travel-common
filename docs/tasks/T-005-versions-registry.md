@@ -56,6 +56,8 @@ Git Bash에서 동일.
 
 ## evidence
 
+2026-09-07 독립 리뷰: [A/B 최초 판정](../reviews/adversarial/2026-09-07-t005.md)은 BLOCK, 9개 ID를 모두 수용했다. 수정 회귀 8개에서 20 실패를 먼저 재현한 뒤 Windows·WSL Python 3.11에서 전체 115 tests 성공·skip 0을 확인했다. 같은 7개 입력 48파일·306행도 재실행해 원본과 동일했다([수정 digest](../evidence/t005/post-fix.json)). 수정 commit의 두 reviewer 재확인 전 DONE/merge하지 않는다.
+
 2026-09-07 구현 후보: 새 회귀 시험 7개를 먼저 실행해 31 tests 중 24 subtest 실패를 재현했다. 중첩 정책 오타·숫자 역전·예외 중첩/만료·prerelease·optional/hoist·전이 설치·shrinkwrap 경계를 수정했다. 전체 Windows Python 3.14.3·WSL Python 3.14.4에서 각각 107 tests 성공·skip 0, SPDX 13개 오류 0이다. 문서 228개/1893 target·task 96개 오류 0. `.github/workflows/docs.yml`에 자체 검사를 연결했으며 CI·2인 리뷰는 commit 후 실제 결과를 기록한다. 제품·소비자 build/e2e는 NOT_RUN(소비자 저장소 실행)이다.
 
 2026-09-07 정본 대조: 초안의 중첩 exceptions·현재값 registry 복제 지시는 versions 정책 §7 및 AGENTS §4·§6과 충돌해 정정했다. 수치 floor와 기존 승인 예외는 유지한다. 자세한 고정 입력 결과는 [실측 보고](../evidence/t005/README.md)로 연결한다.

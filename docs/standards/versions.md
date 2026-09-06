@@ -43,7 +43,7 @@
 
 - npm: `package-lock.json` **lockfileVersion 3** 커밋. CI·Docker는 `npm ci`. lockfileVersion 1·2는 `NO_LOCK`으로 본다. `npm-shrinkwrap.json`이 함께 있으면 npm이 이를 우선하므로, 미지원 shrinkwrap 대신 package-lock을 신뢰하지 않고 `NO_LOCK`으로 보고한다.
 - Python: `uv.lock` 커밋 + CI·Docker 모두 `uv sync --locked`(weather 선례, `vm` §2.1). airport(CI만)·pinvi(미소비)는 T-482·T-484에서 소비 일관화. Poetry(ktdm)·`requirements.txt`(concierge)는 uv 전환 task(T-471·T-450)가 선행이며 그때까지 `NO_LOCK`으로 보고된다.
-- 워크스페이스: npm 워크스페이스는 루트 lock 하나가 전 멤버를 해석한다(map·pinvi). 도구는 멤버 `package.json`을 별도 범위로 보고하되 설치본은 `<멤버>/node_modules/<pkg>`부터 각 상위 디렉터리의 `node_modules/<pkg>`를 거쳐 루트까지 찾는다. 직접 선언 대조 뒤 lock 전체의 나머지 축과 차단·git 참조를 1회 검사한다. 전이 행의 scope에는 lock 내부 경로를 붙이며, 명시한 멤버 범위라도 공유 lock 전체를 검사한다. uv의 세부 워크스페이스 해석은 T-005a가 확정한다.
+- 워크스페이스: npm 워크스페이스는 루트 lock 하나가 전 멤버를 해석한다(map·pinvi). 도구는 멤버 `package.json`을 별도 범위로 보고하되 설치본은 `<멤버>/node_modules/<pkg>`부터 각 상위 디렉터리의 `node_modules/<pkg>`를 거쳐 루트까지 찾는다. 직접 선언 대조 뒤 lock 전체의 나머지 축·차단 대상·전이 git/URL 선언과 resolved를 검사한다. 로컬 링크의 축·차단 대상은 NO_LOCK으로 남긴다. npm 이름의 점·밑줄·하이픈을 서로 합치지 않으며 Python 이름만 정규화한다. 전이 행의 scope에는 lock 내부 경로를 붙이며, 명시한 멤버 범위라도 공유 lock 전체를 검사한다. uv의 세부 워크스페이스 해석은 T-005a가 확정한다.
 - lock 재생성 사고 방지: `--package-lock-only`로 만든 lock은 `integrity`가 빠질 수 있다(pinvi T-352, `vm` §3.6). 채택 PR은 lock 동반 커밋이 필수다(D-24).
 
 ### 3.3 판정 어휘(D-07)
@@ -56,7 +56,7 @@
 | `ABOVE_MAX` | 설치본이 max 이상 | — | `::warning::` | `::error::` + exit 1 |
 | `NO_LOCK` | lockfile 없음·버전 불일치·lock에 항목 없음·파서 미지원(Poetry·requirements) | — | `::warning::` | `::error::` + exit 1 |
 | `NO_ENGINES` | `engines.node`(또는 `requires-python`) 미선언, 하한 없는 범위(`*`) | — | `::warning::` | `::error::` + exit 1 |
-| `FLOATING_REF` | git/URL 의존성이 SHA·버전 태그·릴리스 자산으로 고정되지 않음(`@main`, 참조 없음, `semver:` 범위), npm 선언 `*`/`latest`(워크스페이스 링크 제외) | **`::error::`** | `::error::` | `::error::` + exit 1 |
+| `FLOATING_REF` | git/URL 의존성이 SHA·버전 태그·릴리스 자산으로 고정되지 않음(`@main`, 참조 없음, `semver:` 범위), 직접 npm 선언 `*`/`latest`(워크스페이스 링크 제외) | **`::error::`** | `::error::` | `::error::` + exit 1 |
 | `BLOCKED` | 설치본이 `blocked[]` 범위에 포함 | **`::error::`** | `::error::` | `::error::` + exit 1 |
 | `EXEMPT` | 예외 등록·`until` 이내(비고에 원 판정 표기) | — | — | — |
 | `EXEMPT_EXPIRED` | 예외 `until` 경과 | **`::error::`** | `::error::` | `::error::` + exit 1 |
@@ -168,7 +168,7 @@ python3 -B -X utf8 tools/check_versions.py /path/to/app --repo wx --today 2027-0
 - 출력: 표준 출력에 Markdown 표(범위·축·생태계·선언·설치·판정·비고) + GitHub annotation(`::error::`/`::warning::`) + 요약 1줄. `--json`은 `kor-travel-common.version-report.v1`. `GITHUB_STEP_SUMMARY`가 있으면 표를 덧붙인다.
 - exit: 0(report·warn), 1(fail 모드 실패 후보 존재 또는 `--self-check` 예외 만료), 2(레지스트리·매니페스트·경로 오류). 자체 검사는 소비자 report 모드와 별개로 만료를 실패 처리한다.
 - 읽는 것: `package.json`·`package-lock.json`(v3)·`pyproject.toml`(PEP 621·Poetry 선언)·`uv.lock`·`requirements.txt`(선언만). 쓰는 것: `--json`·`--markdown` 출력 파일뿐. 네트워크 없음. Python 3.11+ 표준 라이브러리(`tomllib`)만 쓰며 Windows에서 동작한다(D-03 Tier 2; 회귀 시험 `tests/test_check_versions.py`).
-- 한계(사실): `poetry.lock` 파서 없음(T-005b) → `NO_LOCK`; Docker 이미지·GitHub Actions·CI Node 버전은 읽지 않음(T-009); git 고정 판정은 §3.8 휴리스틱; npm 사전 배포 버전·별칭·로컬 링크는 안정 원 패키지와 비교하지 않고 `NO_LOCK`으로 보고한다. npm 설치본은 `major.minor.patch`와 선택적 build metadata만 지원한다. 런타임/정책 숫자 접두와 이미지 `-slim`은 별도 허용한다. 전체 SemVer/PEP 440 범위 해석기가 아니며 lock과 선언의 만족 여부는 소비자의 `npm ci`·`uv sync --locked` gate가 검증한다.
+- 한계(사실): `poetry.lock` 파서 없음(T-005b) → `NO_LOCK`; Docker 이미지·GitHub Actions·CI Node 버전은 읽지 않음(T-009); git 고정 판정은 §3.8 휴리스틱; npm 사전 배포 버전·별칭·로컬 링크는 안정 원 패키지와 비교하지 않고 `NO_LOCK`으로 보고한다. npm 설치본은 `major.minor.patch`와 선택적 build metadata만 지원한다. 런타임/정책 숫자 접두와 이미지 `-slim`은 별도 허용한다. 런타임 하한은 단일 숫자/`=`/`==`/`^`/`~`/`~=`/`>=` 접두, `>=`·`<` 교집합, 이들의 `||` 대안을 지원한다. 빈 교집합과 `>`·`<=`·`!=` 및 그 밖의 혼합 문법은 NO_ENGINES다. 전체 SemVer/PEP 440 범위 해석기가 아니며 lock과 선언의 만족 여부는 소비자의 `npm ci`·`uv sync --locked` gate가 검증한다.
 - CI 연동: common `check-versions(report)` job(T-009)과 재사용 워크플로 `versions-check.yml`(T-010). 소비자는 기존 워크플로에 job을 추가하는 방식으로 호출하며 required check 이름은 입력으로 개방한다([ci-deploy](ci-deploy.md)).
 
 ## 9. 열린 결정(사용자 확인 필요; 기본값으로 진행)
@@ -191,9 +191,14 @@ python3 -B -X utf8 tools/check_versions.py /path/to/app --repo wx --today 2027-0
 
 ### 입력 오류와 자체 검사
 
-`check_versions.py --self-check`는 소비자 버전 조회 없이 레지스트리 형식·판정 정책을 검증한다. 모든 정책 객체의 미지 필드, 잘못된 enforce/버전/날짜/예외/차단 값, 뒤집힌 `floor <= recommended < max`, 겹치는 예외 접두와 빈 검사 범위는 입력 오류(exit 2)다. 현재 지원하지 않는 actions의 `checked: true`와 providers의 report 외 정책도 거부한다. 자체 검사에서 `until` 다음 날부터 `EXEMPT_EXPIRED` 주석과 exit 1을 반환한다. 설치 버전 파싱 실패는 NO_LOCK, 하한 없는 OR 또는 지원하지 않는 런타임 범위는 NO_ENGINES이며 OK로 바꾸지 않는다. URL은 npm 선언의 `#ref`, Python 선언의 `@rev`, uv lock git source의 전체 SHA fragment를 구분해 실제 ref 위치를 해석하고 임의 query·자산 fragment의 SHA를 고정 근거로 삼지 않는다. 지원 파서의 확대와 실제 소비자 대조는 T-005·T-005a·T-005b에서 검증한다.
+`check_versions.py --self-check`는 소비자 버전 조회 없이 레지스트리 형식·판정 정책을 검증한다. 모든 정책 객체의 미지 필드, 잘못된 enforce/버전/날짜/예외/차단 값, 뒤집힌 `floor <= recommended < max`, 겹치는 예외 접두와 빈 검사 범위는 입력 오류(exit 2)다. 현재 지원하지 않는 actions의 `checked: true`와 providers의 report 외 정책도 거부한다. 자체 검사에서 `until` 다음 날부터 `EXEMPT_EXPIRED` 주석과 exit 1을 반환한다. 설치 버전 파싱 실패는 axes 밖의 차단 전용 패키지에도 NO_LOCK, 하한 없는 OR 또는 지원하지 않는 런타임 범위는 NO_ENGINES이며 OK로 바꾸지 않는다. URL은 npm 선언의 `#ref`, Python 선언의 `@rev`, uv lock git source의 전체 SHA fragment를 구분해 실제 ref 위치를 해석하고 임의 query·자산 fragment의 SHA를 고정 근거로 삼지 않는다. 지원 파서의 확대와 실제 소비자 대조는 T-005·T-005a·T-005b에서 검증한다.
 
 
 ### npm 입력 형식 근거
 
 2026-09-07 조회: [npm package-lock 문서](https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json/)(표시 버전 11.19.1)의 packages·link·shrinkwrap 우선순위와 [node-semver README](https://github.com/npm/node-semver/blob/6e05b7637396ac66522cff8731f07cfe0ef49a29/README.md)의 사전 배포 구분을 참고했다. 이 도구는 안정 버전 수치 비교만 구현하며 node-semver 전체 문법 지원을 주장하지 않는다.
+
+
+### 전이 npm 참조의 범위
+
+전이 패키지의 git/URL 선언은 resolved가 SHA여도 원 선언이 branch이면 FLOATING_REF다. 전이 numeric/wildcard 선언은 lock 설치본으로 대조하고 직접 manifest의 `*`/`latest` 금지와 구분한다. 기본 npm registry의 `/-/<이름>-<설치버전>.tgz` 경로는 registry 설치본으로 분류한다. 그 외 외부 resolved는 §3.8의 고정 참조 규칙을 적용하므로 미지원 사설 registry/mirror는 FLOATING_REF일 수 있다. 실제 파일 다운로드·integrity 검증은 이 읽기 전용 검사기의 성공 주장에 포함하지 않는다.

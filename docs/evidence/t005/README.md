@@ -51,3 +51,8 @@ python3 -B -X utf8 tools/check_versions.py <입력-루트> --repo <repo> --today
 - uv의 marker·workspace 전체 해석은 T-005a, Poetry·requirements 잠금 해석은 T-005b의 잔여다. 현재 Python 값은 지원하는 초안 경로로 읽었으며 NO_LOCK을 설치 성공으로 바꾸지 않는다.
 - 입력 manifest/lock 대조는 npm ci·uv sync·제품 build·e2e·소비자 CI 실행의 증거가 아니다. 이 gate는 NOT_RUN(소비자 저장소 실행)이며 해당 이관 task에서 수행한다.
 - report 2회 위반 0 조건을 충족하지 않아 7개 소비자 모두 clean_runs 0·report 유지다.
+
+
+## 리뷰 수정 후 대조
+
+위 원본은 409b95c의 코드에 고정된 기록이다. [수정 코드 digest](post-fix.json)는 리뷰 수정 후 검사기와 동일 입력/전체 보고의 재대조 결과를 기록한다. 원본 입력·보고를 최신 코드의 실행으로 소급 변경하지 않는다.
