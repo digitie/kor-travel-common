@@ -1,6 +1,6 @@
 # ADR-013: 패키지 릴리스 순서·호환 범위·검증 소비자 계약
 
-- 상태: accepted
+- 상태: partially superseded by ADR-014
 - 날짜: 2026-09-06
 - 근거 문서: 브리프 D-09·D-11·D-15·D-16·D-18·D-31, UI 조사 §3.1~§3.4; T-013 독립 적대적 리뷰의 릴리스 교착·누락, AGENTS의 단방향 의존·승인·NOT_RUN 경계
 - Supersedes: ADR-005의 "같은 minor" 해석, ADR-007의 helper 의존 시점, ADR-010의 고정 smoke 대상 해석을 부분 대체
@@ -31,3 +31,5 @@
 ## 후속·적용 위치
 
 [통합 계획](../plan/integration-plan.md), [패키지 계약](../architecture/packages.md), [릴리스 runbook](../runbooks/release.md), T-010·T-109·T-201·T-205·T-206·T-212·T-213·T-306·T-307·T-310·T-311·T-420·T-422a·T-422b와 Python 소비자 task에 반영한다. 공개 import facade의 소유·wheel 검증은 T-302의 수용 기준에서 확정한다.
+
+후속: [ADR-014](014-common-implementation-without-registry-publishing.md)이 npm/PyPI 미게시·이름 확정과 common 후보 보존 후 구현 순서를 결정한다. 대체 범위 밖의 계약은 유지한다.

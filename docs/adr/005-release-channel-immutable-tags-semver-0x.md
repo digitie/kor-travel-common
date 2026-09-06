@@ -1,6 +1,6 @@
 # ADR-005: 배포 채널(GitHub Release tarball·git 태그·wheel)·태그 불변·SemVer 0.x
 
-- 상태: partially superseded by ADR-013
+- 상태: partially superseded by ADR-013, ADR-014
 - 날짜: 2026-09-06
 - 근거 문서: `docs/plan/design-brief.md` D-11·D-31·D-33·O-5·O-15·O-18, `docs/survey/cross/backend.md` §5.1·§5.2, `docs/survey/cross/version-matrix.md` §7.1·§7.4, `docs/survey/cross/licensing.md` §3.3·§3.5, 선행 보고서(geo `docs/kor-travel-common-library-review.md`) §8
 
@@ -40,3 +40,5 @@
 - 릴리스 task: T-109(tokens v0.1.0), T-212·T-213(ui), T-310(py), T-501(완주 검증), T-507(공개 게시 재평가)
 
 후속: [ADR-013](013-package-release-execution-contract.md)이 릴리스 실행·peer 호환·검증 소비자에 관한 위 일부 조항을 구체화한다. 나머지 결정은 유지한다.
+
+후속: [ADR-014](014-common-implementation-without-registry-publishing.md)이 npm/PyPI 미게시·이름 확정과 common 후보 보존 후 구현 순서를 결정한다. 대체 범위 밖의 계약은 유지한다.

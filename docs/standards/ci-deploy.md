@@ -213,14 +213,20 @@ jobs:
 
 | job | 트리거 | 내용 | 러너 | task |
 |---|---|---|---|---|
-| `docs` | PR, push `main` | `validate_document_links.py` → `validate_plan.py` → `unittest discover -s tests -p "test_*.py"` → `git diff --check` → redaction 전체 트리(CI-40) | ubuntu-24.04 | T-002·T-009 |
-| `tools` | PR(`tools/**`·`tests/**`·`versions.json`) | 도구 자기 테스트(`check_versions`·`kt_contrast`·`ux_lint`·validator) | ubuntu-24.04 + windows-latest 매트릭스(D-03) | T-009 |
+| `docs` | PR, push `main`·`codex/release-*` | `validate_document_links.py` → `validate_plan.py` → `unittest discover -s tests -p "test_*.py"` → `git diff --check` → redaction 전체 트리(CI-40) | ubuntu-24.04 | T-002·T-009 |
+| `tools` | PR, push `main`·`codex/release-*` | 도구 자기 테스트(`check_versions`·`kt_contrast`·`ux_lint`·validator) | ubuntu-24.04 + windows-latest 매트릭스(D-03) | T-009 |
 | `workflows-selftest` | PR(`.github/**`) | 재사용 워크플로를 fixture로 호출 | ubuntu-24.04 | T-010 |
-| `packages` | PR, push `main` | `npm install -g npm@11.19.1` → `npm ci` → lint → type-check → test → build → `npm pack` → 임시 디렉터리 tarball 설치 → webpack·Turbopack `next build` 스모크(D-10) | ubuntu-24.04 | T-101·T-201 |
-| `python-package` | PR, push `main` | `uv build` → wheel 설치 → import 스모크 → starlette 0.4x/1.6 매트릭스 | ubuntu-24.04 | T-302 |
-| `consumer-smoke` | `workflow_dispatch` + 주간 | `consumers.pins.json`(role·url·revision, ktdm runtime pin 형식) 패키지별 승인 소비자의 pinned SHA 체크아웃 → tarball 설치 → type-check + `next build` | ubuntu-24.04 | T-010 |
-| `secret-scan` | PR | CI-42 패턴 | ubuntu-24.04 | T-009 |
-| `check-versions` | PR, push `main` | `tools/check_versions.py` report 모드(`FLOATING_REF`·`BLOCKED`·`EXEMPT_EXPIRED`는 `::error::`) | ubuntu-24.04 | T-005·T-009 |
+| `packages` | PR, push `main`·`codex/release-*` | `npm install -g npm@11.19.1` → `npm ci` → lint → type-check → test → build → `npm pack` → 임시 디렉터리 tarball 설치 → webpack·Turbopack `next build` 스모크(D-10) | ubuntu-24.04 | T-101·T-201 |
+| `python-package` | PR, push `main`·`codex/release-*` | `uv build` → wheel 설치 → import 스모크 → starlette 0.4x/1.6 매트릭스 | ubuntu-24.04 | T-302 |
+| `consumer-smoke` | `workflow_dispatch`; 주간은 T-010a 검증 뒤 활성화 | `consumers.pins.json`(role·url·revision, ktdm runtime pin 형식) 패키지별 승인 소비자의 pinned SHA 체크아웃 → tarball 설치 → type-check + `next build` | ubuntu-24.04 | 실행기 T-010, 외부 dispatch T-010a |
+| `secret-scan` | PR, push `main`·`codex/release-*` | CI-42 패턴 | ubuntu-24.04 | T-009 |
+| `check-versions` | PR, push `main`·`codex/release-*` | `tools/check_versions.py` report 모드(`FLOATING_REF`·`BLOCKED`·`EXEMPT_EXPIRED`는 `::error::`) | ubuntu-24.04 | T-005·T-009 |
+
+**릴리스 후보에도 필요한 실행 경로(ADR-014)**: `docs`·`tools`·`secret-scan`·`check-versions` 및 존재하는 `packages`·`python-package`는 PR 외에 `main`과 `codex/release-*` push에서도 실행한다. release push에서는 path filter나 PR 전용 조건으로 필수 job을 생략하지 않고 `github.sha`의 실제 merge commit을 checkout한다. run의 head SHA와 build/artifact source SHA가 릴리스 evidence의 `RELEASE_SHA`와 같아야 한다. PR head 성공은 다른 merge SHA의 실행으로 세지 않는다. 아래 구현 task가 이를 적용하고, 후보 보존 전에 실행 경로를 확인해야 과거 후보에서 분기한 release branch에서도 사용할 수 있다. 현재 미구현은 NOT_RUN이며 발행을 차단한다.
+
+- T-009: docs·tools(두 OS)·secret-scan·check-versions의 push 실행과 SHA evidence.
+- T-101: 같은 push에서 tokens/UI `packages` 검증과 artifact source 기록(T-201에서 UI 추가).
+- T-302: 같은 push에서 Python 지원/extras 매트릭스·wheel 검증과 artifact source 기록.
 
 branch protection(문서, T-009): PR 필수, required check `docs`·`tools`·`packages`(패키지 생성 후), linear history, force-push 차단. required check 이름은 재사용 워크플로 이름 변경과 함께 관리한다.
 

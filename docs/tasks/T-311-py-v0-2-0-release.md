@@ -16,6 +16,8 @@ T-306~T-308에서 구현한 settings·db·API key·request-id·metrics 및 3차 
 
 ## 구현 범위
 
+먼저 이 task가 0.2 후보 보존을 소유한다. 현재 main에서 해당 minor의 전체 구현·선행·공개 계약을 대조하고 [release §2.1](../runbooks/release.md#21-common-후보-보존과-후속-구현)의 재빌드·digest·원격 ref 검증을 수행한다. `candidate-py-0.2.0-<N>`으로 보존한 40자리 commit에서 `codex/release-py-0.2`를 분기하고 버전 준비 PR을 그 branch에 병합한다. 0.1 후보/branch의 버전만 올리지 않는다. 이후 rc·정식은 검증한 release merge commit을 명시적으로 태그한다. 완료 원장은 [release §2.2](../runbooks/release.md#22-릴리스-소스와-현재-작업-원장의-연결)의 main 문서 PR에서만 갱신한다.
+
 1. 0.1 대비 export·extras·import 경로·미들웨어 기본값을 대조하고 CHANGELOG `### Breaking`과 이관 절에 변경/변경 없음 및 근거를 기록한다.
 2. `0.2.0-rc.1` wheel을 빌드해 core-only·api·db·http·dagster·testing 설치 조합과 Python 지원 매트릭스를 검증한다. request-id 공개 경로·기본 `trust_incoming=True`와 앱 옵션 `False`를 설치본에서 확인한다.
 3. map-api·weather-api 담당자에게 별도 draft 검증 PR을 요청한다. 현재 서비스 계약을 보존하는 opt-in 설정으로 import·health·OpenAPI drift·request-id·metrics를 검증한다. 소비자 변경은 해당 저장소 task가 소유한다.
@@ -23,13 +25,15 @@ T-306~T-308에서 구현한 settings·db·API key·request-id·metrics 및 3차 
 
 ## 범위 밖
 
-소비자 정식 채택 merge(T-483~T-486), 인증·앱 도메인, 공개 PyPI 게시(T-507).
+소비자 정식 채택 merge(T-483~T-486), 인증·앱 도메인, npm/PyPI 게시(사용자 범위 제외).
 
 ## 예상 변경 파일
 
 Python 패키지 버전·lock, `CHANGELOG.md`, 릴리스 evidence·통합 지도 입력·`docs/journal.md`. 외부 소비자 검증 PR은 해당 저장소가 소유한다.
 
 ## 수용 기준
+
+- 0.2 전체 구현의 후보 tag object/commit·두 빌드 digest·CI artifact와 별도 0.2 release branch가 연결돼 있다. source·release merge·main 완료 기록 commit을 구분하고 양 branch의 plan 검증이 통과한다.
 
 - rc와 정식 wheel의 실제 모듈 목록이 위 범위·공개 계약과 일치한다.
 - 고지 파일·`py.typed`·SHA256SUMS와 wheel 설치 후 공개 import 검사가 통과한다.

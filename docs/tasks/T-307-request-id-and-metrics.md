@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: 단위 테스트
-- 선행: T-304, T-310
+- 선행: T-304, T-310a
 
 ## 목표
 
@@ -18,6 +18,8 @@
 - 요청 ID 형식 검증 규칙만 공통, 발급 주체(BFF vs 백엔드)는 앱 결정([be §7-5](../survey/cross/backend.md), [oa §6 Q9](../survey/cross/openapi.md)).
 
 ## 구현 범위
+
+먼저 [ADR-014](../adr/014-common-implementation-without-registry-publishing.md)의 이전 후보 보존을 확인하고 해당 패키지를 다음 minor 개발 버전으로 바꾼 뒤 코드를 추가한다. 같은 minor의 앞선 task가 이미 전환했으면 그 버전을 유지한다. 이전 정식 발행 대기는 구현 선행이 아니며 릴리스 gate는 별도로 남는다.
 
 1. `kortravelcommon/api/request_id.py`: `RequestIdMiddleware(app, *, header="X-Request-ID", trust_incoming=True, validator=is_valid_request_id, generator=new_request_id, expose_duration_header=False)`(순수 ASGI, starlette `BaseHTTPMiddleware` 미사용), `current_request_id()`, `RequestIdLogFilter`, `bind_structlog_contextvars()`(structlog import 가능할 때만). 검증기: UUID v4/v7 또는 ULID, ≤128자 ASCII, 제어문자 금지.
 2. `kortravelcommon/api/metrics.py`: `HttpMetrics(prefix, *, registry=None, buckets=DEFAULT_BUCKETS, unmatched="__unmatched__", label_normalizer=None, multiprocess_env="PROMETHEUS_MULTIPROC_DIR")`, `HttpMetricsMiddleware`(route template 해석, 미매칭 센티널), `metrics_endpoint(metrics, *, dependencies=())`, `build_registry(multiprocess: bool)`(`MultiProcessCollector` 분기), prometheus_client 부재 시 `_NoopMetric`(geo)로 폴백. DB pool gauge·엔진 쿼리 훅은 T-306 `on_engine_created`에 연결하는 헬퍼(후보).

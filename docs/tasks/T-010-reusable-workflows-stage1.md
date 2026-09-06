@@ -7,7 +7,7 @@
 
 ## 목표
 
-소비자 저장소가 `uses: digitie/kor-travel-common/.github/workflows/<name>.yml@<tag|sha>`로 호출할 1단계 재사용 워크플로 3종을 만들고, fixture 기반 selftest와 패키지별 승인된 대표 소비자 2곳 pinned SHA 스모크로 common 쪽에서 먼저 검증한다.
+소비자 저장소가 `uses: digitie/kor-travel-common/.github/workflows/<name>.yml@<tag|sha>`로 호출할 1단계 재사용 워크플로 3종을 만들고, fixture 기반 selftest와 스모크 실행기 검증을 common에서 완료한다. 승인된 실제 소비자 2곳의 dispatch 성공은 T-010a가 별도로 소유한다(ADR-014).
 
 ## 고정 결정
 
@@ -22,7 +22,7 @@
 2. `.github/workflows/docs-check.yml`: inputs `link-check`, `redaction-patterns-file`, `redaction-scope`, `task-ledger`; common 도구를 호출 저장소에서 실행.
 3. `.github/workflows/contrast-check.yml`: inputs `override-css`, `baseline`, `dark`; T-103의 실제 검사기를 호출하며 정상·대비 미달 fixture를 모두 실행한다.
 4. `tests/fixtures/node-app`·`tests/fixtures/python-app`(최소 `package.json`+lock v3, `pyproject.toml`+`uv.lock`) + `.github/workflows/workflows-selftest.yml`(PR이 `.github/**`·`tools/**`를 바꿀 때 세 워크플로를 `workflow_call`로 호출).
-5. `consumers.pins.json`(`"schema": "kor-travel-common.consumer-pins.v1"`, `{role, url, revision(sha), path, package, approval}`; tokens는 map·weather, UI는 map·pinvi admin(L6 완료) 또는 airport) + `.github/workflows/consumer-smoke.yml`(`workflow_dispatch` + 주간 cron; pinned SHA 체크아웃 → `npm ci` → 후보 tarball 필수 설치 → `type-check` + `next build` webpack·Turbopack; required check 아님).
+5. `consumers.pins.json`(`"schema": "kor-travel-common.consumer-pins.v1"`, `{role, url, revision(sha), path, package, approval}`; tokens는 map·weather, UI는 map·pinvi admin(L6 완료) 또는 airport) + `.github/workflows/consumer-smoke.yml`(`workflow_dispatch`; 주간 실행 활성화는 T-010a 실제 검증 뒤 별도 PR. pinned SHA 체크아웃 → `npm ci` → 후보 tarball 필수 설치 → `type-check` + `next build` webpack·Turbopack; required check 아님).
 6. `docs/standards/ci-deploy.md`의 호출 예시·fallback(비공개 시 체크아웃 방식)은 standards-be 문서에 위임하고 여기서는 selftest 결과만 남긴다.
 
 ## 범위 밖
@@ -38,7 +38,7 @@
 - 세 재사용 워크플로가 `on: workflow_call`이고 `name`·`common-ref` 입력을 받으며 T-009 하드닝 기본값(permissions·timeout·ubuntu-24.04·SHA 핀)을 갖는다.
 - `workflows-selftest`가 fixture 2종에서 green이고, `versions-check`는 fixture의 `BELOW_FLOOR`를 report(exit 0)로 표시한다.
 - `consumers.pins.json`의 `revision`이 40자 SHA이고 `tests/test_consumer_pins.py`가 스키마·SHA 형식을 고정한다.
-- `consumer-smoke`가 승인된 소비자 2곳에서 실제 tarball 설치 후 dispatch 1회 green. T-109 전에는 T-101 후보를 `npm pack`하여 commit·sha256을 고정한 자산을 입력한다. 태그 발행을 선행으로 요구하지 않는다. 자산·도구가 없으면 NOT_RUN과 실패로 종료하고 DONE을 막는다. L6 미완료 pinvi는 설치 대상에서 제외한다.
+- `consumer-smoke` 실행기의 입력 pin·자산 digest·승인 조건·설치 실패/누락 처리를 common fixture에서 검증한다. 로컬 tarball을 실제 설치하는 정상 fixture와 의도적 digest/승인/설치 실패 fixture가 있어야 한다. 실제 소비자 2곳 dispatch·주간 활성화는 T-010a에 남기고 이 task의 성공으로 세지 않는다. 실행기는 자산·도구 부재나 미승인 입력을 실패로 종료하며 L6 미완료 pinvi를 제외한다.
 - 어떤 예시·문서에도 `@main` 참조가 없다.
 
 ## 검증 명령
@@ -54,7 +54,7 @@ Git Bash에서 동일. selftest·consumer-smoke 결과는 Actions 실행 링크�
 
 ## evidence
 
-- selftest·consumer-smoke 실행 링크, fixture 판정 표, 실제 설치 자산의 digest·선택한 소비자 승인 evidence·미실행 실패 표기를 이 절과 `docs/journal.md`에 남긴다.
+- selftest·consumer-smoke 실행 링크, fixture 판정 표, fixture 설치 자산의 digest·승인 검증과 실패 재현·실제 소비자 NOT_RUN 및 T-010a 연결을 이 절과 `docs/journal.md`에 남긴다.
 
 ## rollback 또는 release 차단 조건
 

@@ -175,7 +175,7 @@ python3 -B -X utf8 tools/check_versions.py /path/to/app --repo wx --today 2027-0
 
 | # | 결정 | 기본값(이 문서·레지스트리 반영) |
 |---|---|---|
-| O-5 | npm scope `@kor-travel` | 잠정; 실패 시 `@digitie/kor-travel-*`(레지스트리 값과 무관) |
+| O-5 | 패키지 식별자 | [ADR-014](../adr/014-common-implementation-without-registry-publishing.md)로 확정. 공개 registry 이름 확보 제외 |
 | O-6 | TS 기준선·airport 7.0.2 | 5.9.3 + airport 예외(`until` 2026-12-31, T-433) |
 | O-7 | Python 앱 floor 3.12 시점 | common 3.11 호환 유지; 앱 상향은 Phase 4 |
 | O-8 | pinvi mobile Tailwind 3 예외 | **미등록**(사용자 승인 대기). report에 `BELOW_FLOOR`로 표시 |

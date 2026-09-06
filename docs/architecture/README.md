@@ -44,7 +44,7 @@ kor-travel-common은 kor-travel 제품군의 UI·백엔드 공통 코드와 공�
 | 템플릿 | `templates/*` | 복사형 파일(AGENTS 공통 절·에이전트 설정·PR 본문·ESLint 조각·dependabot·playwright 기준선) | 복사 후 앱 소유 | 전 소비자 |
 | 레지스트리·도구 | `versions.json` + `tools/*.py` + `.github/workflows/*`(재사용 워크플로) | JSON + Python stdlib 스크립트 + `workflow_call` | 소비자 CI가 태그/SHA로 호출 | 전 소비자 |
 
-패키지명 `@kor-travel/<pkg>`는 잠정이며 T-006에서 npm scope 확보에 실패하면 `@digitie/kor-travel-<pkg>`로 개명한다(O-5, 첫 소비자 PR 전이면 비용 0).
+패키지 식별자는 [packages](packages.md#1-요약표)에서 확정한다. npm/PyPI 게시·계정 확보를 하지 않는 결정과 common 후보 보존 후 구현 순서는 [ADR-014](../adr/014-common-implementation-without-registry-publishing.md)를 따른다.
 
 만들지 않는 것: `config` npm 패키지(`templates/eslint/*.mjs` 조각과 [frontend-stack](../standards/frontend-stack.md)으로 대체), `api-client-core`(Phase 5 T-508 재평가), 아이콘 패키지(ui는 인라인 SVG, `lucide-react` peer 없음 — `vm` §1.3의 0.363~1.41 혼재), shadcn 전면 레지스트리(셸·로그인·playwright 기준선 템플릿 채널만, T-211).
 

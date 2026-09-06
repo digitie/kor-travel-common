@@ -19,6 +19,8 @@ Python 공통 패키지의 배포 골격을 만든다: 배포 이름 `kor-travel
 
 ## 구현 범위
 
+python-package job은 [ci-deploy §9](../standards/ci-deploy.md#9-common-자체-ci)에 따라 PR과 main·codex/release-* push에서 실행한다. release push의 github.sha를 checkout하고 필수 job을 path/PR 조건으로 생략하지 않는다. run·산출물 source SHA를 기록한다. 후보 보존 전에 이 실행 경로를 포함해야 한다.
+
 1. `packages/py/kor-travel-common/pyproject.toml`: `[build-system] hatchling`, `name = "kor-travel-common"`, `version`은 `src/kortravelcommon/_version.py` 동적, `requires-python = ">=3.11"`, `license = "GPL-3.0-or-later"`, `license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md"]`(PEP 639; 루트 파일을 빌드 시 복사), core 의존 `pydantic>=2.9,<3`·`pydantic-settings>=2.5,<3`, extras 5종, dev 그룹(ruff·mypy·import-linter·pytest).
 2. `src/kortravelcommon/{__init__.py,_version.py,py.typed}` + 빈 서브패키지 `api/`·`openapi/`(T-303·T-304가 채움). 모든 `.py`에 SPDX 헤더.
 3. `uv.lock` 생성·커밋, `uv sync --locked --all-extras` 성공.
@@ -30,7 +32,7 @@ Python 공통 패키지의 배포 골격을 만든다: 배포 이름 `kor-travel
 
 ## 범위 밖
 
-모듈 본문(T-303~T-308), `py-v0.1.0` 릴리스와 wheel 자산 발행(T-310), 소비 앱 `uv.lock` 도입(T-440·T-450·T-471), `python-quality.yml` 재사용 워크플로(T-401), PyPI 공개 게시(T-507), Python 앱 floor 3.12 상향(O-7, Phase 4 앱 결정).
+모듈 본문(T-303~T-308), `py-v0.1.0` 릴리스와 wheel 자산 발행(T-310), 소비 앱 `uv.lock` 도입(T-440·T-450·T-471), `python-quality.yml` 재사용 워크플로(T-401), npm/PyPI 게시(사용자 범위 제외), Python 앱 floor 3.12 상향(O-7, Phase 4 앱 결정).
 
 ## 예상 변경 파일
 
@@ -49,6 +51,8 @@ docs/architecture/packages.md                # py 절 정합(architecture 소유
 ```
 
 ## 수용 기준
+
+- main·codex/release-* push 사건의 모든 필수 job 선택을 검증하고, common의 임시 release 검증 branch에 코드 변경 없는 검증 commit을 push한 실제 CI run으로 head/source SHA 일치를 확인한다. 태그·GitHub Release 생성은 필요 없다. 이 검증 branch는 PR 또는 보존 ref로 commit 도달성을 확보하고 작업 뒤 정리한다. 검사기를 통과한 PR head 결과를 다른 merge SHA 결과로 대신 기록하지 않는다.
 
 - [ ] `uv build`가 sdist·wheel을 만들고, 깨끗한 venv에 wheel만 설치해 `python -c "import kortravelcommon; print(kortravelcommon.__version__)"`이 3.11·3.12·3.13에서 성공한다.
 - [ ] wheel `unzip -l` 출력에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md`가 있고 `METADATA`의 `License-Expression`이 `GPL-3.0-or-later`다.
@@ -81,4 +85,4 @@ Git Bash에서 동일하게 실행한다(Windows 절은 [dev-environment](../dev
 
 - 패키지 디렉터리·워크플로 신설이므로 `git revert` 1회로 원복된다. 소비자는 아직 없다.
 - 다음 중 하나면 T-303~T-305를 시작하지 않는다: wheel에 고지 파일 누락, import-linter 계약 부재, starlette 매트릭스 한쪽 red, `requires-python`이 3.11 미만 앱을 배제.
-- 패키지 이름이 PyPI에서 불가하면(T-006) `pyproject` `name`만 바꾸고 import 이름 `kortravelcommon`은 유지한다.
+- ADR-014에 따라 배포 이름 `kor-travel-common`·import `kortravelcommon`은 확정이다. 공개 registry 가용성·이름 확보를 이 task의 선행으로 두지 않는다.

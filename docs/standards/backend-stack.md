@@ -192,7 +192,7 @@ geo·map은 import-linter로 라이브러리 계층의 `fastapi/starlette` impor
 | BE-29 | 배포 채널은 git 태그 + wheel 자산 병행이다. 소비자 선언: `kor-travel-common[api] @ git+https://github.com/digitie/kor-travel-common.git@py-vX.Y.Z#subdirectory=packages/py/kor-travel-common` 이고 `uv.lock`이 커밋 sha를 고정한다. GitHub Release 자산 `kor_travel_common-X.Y.Z-py3-none-any.whl` + `SHA256SUMS`를 URL 핀 대안으로 제공한다(Docker 빌드 스테이지에 `git`이 없을 때) | `be` §5.2 후보 A+D; D-11 |
 | BE-30 | 태그 `py-vX.Y.Z`는 불변이고 같은 버전을 재발행하지 않는다. `@main`·브랜치 참조는 금지. 소비자 범위는 `~0.N`(0.x 동안 minor = 파괴 허용, `-rc.N` → 소비자 PR 검증 → 정식; D-31). CHANGELOG는 단일 파일에 패키지별 H3 | D-11·D-31; 절차는 [release](../runbooks/release.md) |
 | BE-31 | 배포물에는 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md`를 동봉하고 `license = "GPL-3.0-or-later"`(PEP 639 `license-files`)를 선언한다 | [licensing](licensing.md) §6 |
-| BE-32 | common 자체 CI `python-package` job: `uv build` → wheel 설치 → import 스모크 → starlette 매트릭스. 공개 PyPI 게시는 Phase 5 재평가(T-507) | [ci-deploy](ci-deploy.md) §9 |
+| BE-32 | common 자체 CI `python-package` job: `uv build` → wheel 설치 → import 스모크 → starlette 매트릭스. npm/PyPI에는 게시하지 않음([ADR-014](../adr/014-common-implementation-without-registry-publishing.md)) | [ci-deploy](ci-deploy.md) §9 |
 
 ## 10. 공통화 금지 목록
 

@@ -9,14 +9,16 @@
 
 | 배포 단위 | 이름 | 경로 | 채널·태그 | peer | 1차 소비자 |
 |---|---|---|---|---|---|
-| tokens | `@kor-travel/tokens`(잠정, O-5) | `packages/tokens` | GitHub Release `tokens-vX.Y.Z`, 자산 `kor-travel-tokens-X.Y.Z.tgz` + `SHA256SUMS` | 없음(`theme.css`는 소비자 Tailwind ≥4.3.0 빌드 컨텍스트 필요) | map·weather → pinvi admin(L6)·airport(WIP 병합 후) |
-| ui | `@kor-travel/ui`(잠정, O-5) | `packages/ui` | `ui-vX.Y.Z`, 자산 `kor-travel-ui-X.Y.Z.tgz` + `SHA256SUMS` | `react`·`react-dom` `^19.0.0`, `@kor-travel/tokens`의 호환 minor 하나, `@base-ui/react` ≥1.6(권장 1.8), `@tanstack/react-table` ^8.21·`@tanstack/react-virtual` ^3.14(DataTable subpath만) | map·pinvi admin(L6) 또는 airport 소형 부품 |
-| py | PyPI 이름 `kor-travel-common`, import `kortravelcommon` | `packages/py/kor-travel-common` | git 태그 `py-vX.Y.Z` + wheel 자산; 소비자는 `git+https://github.com/digitie/kor-travel-common.git@py-vX.Y.Z#subdirectory=packages/py/kor-travel-common`(lock sha) | `requires-python >=3.11`; core는 pydantic만, 나머지는 extras | map-api·weather-api·airport → geo → pinvi·concierge·ktdm(L8 후) |
+| tokens | `@kor-travel/tokens` | `packages/tokens` | GitHub Release `tokens-vX.Y.Z`, 자산 `kor-travel-tokens-X.Y.Z.tgz` + `SHA256SUMS` | 없음(`theme.css`는 소비자 Tailwind ≥4.3.0 빌드 컨텍스트 필요) | map·weather → pinvi admin(L6)·airport(WIP 병합 후) |
+| ui | `@kor-travel/ui` | `packages/ui` | `ui-vX.Y.Z`, 자산 `kor-travel-ui-X.Y.Z.tgz` + `SHA256SUMS` | `react`·`react-dom` `^19.0.0`, `@kor-travel/tokens`의 호환 minor 하나, `@base-ui/react` ≥1.6(권장 1.8), `@tanstack/react-table` ^8.21·`@tanstack/react-virtual` ^3.14(DataTable subpath만) | map·pinvi admin(L6) 또는 airport 소형 부품 |
+| py | Python 배포 이름 `kor-travel-common`, import `kortravelcommon` | `packages/py/kor-travel-common` | git 태그 `py-vX.Y.Z` + wheel 자산; 소비자는 `git+https://github.com/digitie/kor-travel-common.git@py-vX.Y.Z#subdirectory=packages/py/kor-travel-common`(lock sha) | `requires-python >=3.11`; core는 pydantic만, 나머지는 extras | map-api·weather-api·airport → geo → pinvi·concierge·ktdm(L8 후) |
 | 규칙 문서 | `docs/standards/*` | `docs/standards` | common 태그와 동반(문서 자체는 버전 없음, 규칙 ID 불변) | — | 전 소비자 |
 | 템플릿 | `templates/*` | `templates` | 복사 시점의 common 커밋을 앱이 기록 | — | 전 소비자 |
 | 레지스트리·도구 | `versions.json`, `tools/*.py`, `.github/workflows/*.yml`(재사용) | 루트·`tools`·`.github/workflows` | 소비자 CI가 태그/SHA로 호출(`@main` 금지) | Python 3.11+ stdlib(Windows Tier 2) | 전 소비자 |
 
-공개 npm/PyPI 게시와 Renovate는 Phase 5(T-507)에서 재평가한다. 전제는 common 저장소 공개(O-15).
+npm/PyPI에는 게시하지 않는다. 위 이름은 파일 배포·import 식별자이며 공개 registry 소유권 확보를 뜻하지 않는다([ADR-014](../adr/014-common-implementation-without-registry-publishing.md)). 로컬 설치도 common이 만든 tarball/wheel 경로를 명시한다. Renovate 재평가는 T-507에 남는다.
+
+common 후보 보존은 T-109a(tokens)·T-212a(UI)·T-310a(Python), 외부 rc·정식 발행은 T-109·T-212·T-310이 맡는다. 다음 minor 구현은 보존 후보 완료 뒤 가능하며 이전 정식 발행을 기다리지 않는다. 후보 tag·digest·개발 버전 전환·release branch 절차는 [release](../runbooks/release.md#21-common-후보-보존과-후속-구현)를 따른다.
 
 ## 2. `@kor-travel/tokens`
 

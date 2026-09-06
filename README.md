@@ -6,8 +6,8 @@ kor-travel 제품군(kor-travel-airport·concierge·docker-manager·geo·map·we
 
 | 단위 | 위치 | 배포 이름·채널 | 상태(2026-09-06) |
 |---|---|---|---|
-| 디자인 토큰 | `packages/tokens` | npm `@kor-travel/tokens`(잠정, 열림 O-5) — GitHub Release tarball, 태그 `tokens-vX.Y.Z` | 미작성(T-101) |
-| React UI | `packages/ui` | npm `@kor-travel/ui`(잠정, 열림 O-5) — 태그 `ui-vX.Y.Z` | 미작성(T-201) |
+| 디자인 토큰 | `packages/tokens` | npm 형식 `@kor-travel/tokens` — GitHub Release tarball, 태그 `tokens-vX.Y.Z` | 미작성(T-101) |
+| React UI | `packages/ui` | npm 형식 `@kor-travel/ui` — 태그 `ui-vX.Y.Z` | 미작성(T-201) |
 | Python 공통 | `packages/py/kor-travel-common` | 배포 이름 `kor-travel-common`, import `kortravelcommon` — git 태그 `py-vX.Y.Z` + wheel 자산 | 미작성(T-302) |
 | 규칙 문서 | `docs/standards/` | 저장소 문서(소비자는 링크·템플릿으로 채택) | 초안(T-005·T-104~T-107·T-204·T-301·T-302) |
 | 템플릿 | `templates/` | 소비자 설정 조각·PR 규격·체크리스트 | 규약·PR 틀 작성(T-007); 설정·캡처는 T-107·T-108에서 검증 |

@@ -3,7 +3,8 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: 소비자 스모크
-- 선행: T-303, T-304, T-305, T-309
+- 선행: T-310a
+- 외부 선행: 실제 Python 소비자 계약 대조 evidence를 해당 저장소 담당자가 제공한다. common 작업자는 소비자 저장소에 쓰지 않는다.
 
 ## 목표
 
@@ -12,15 +13,17 @@ Python 공통 패키지의 첫 릴리스를 낸다: `py-v0.1.0-rc.1` 태그 → 
 ## 고정 결정
 
 - [design-brief](../plan/design-brief.md) D-11(Python = `git+https://github.com/digitie/kor-travel-common.git@py-vX.Y.Z#subdirectory=packages/py/kor-travel-common` + lock sha, wheel 자산 병행, 태그 불변·재발행 금지·`@main` 금지, 고지 파일 동봉), D-16(Python 1차 = map-api·weather-api·airport), D-18(`-rc.N` → 소비자 PR 검증 → 정식, CHANGELOG 단일 파일 + 패키지별 H3), D-24(이관 PR 규격: 한 PR = 한 산출물, py 파일 상한 10, `git revert` 1회), D-25(NOT_RUN), D-31(SemVer 0.x; py 독립 버전; 소비자 범위 `~0.N`), D-17(wheel에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md`). ADR-005·ADR-010·ADR-011 — [ADR 색인](../adr/README.md). 절차 정본: [release runbook](../runbooks/release.md), 소비자 측 절차: [consumer adoption runbook](../runbooks/consumer-adoption.md), PR 본문: [templates/consumer-pr.md](../../templates/consumer-pr.md).
-- 공개 여부 전제 **열림(O-15, 사용자 확인 필요)**, 기본값 = 공개. PyPI 이름 가용성은 T-006(비차단: 실패 시 배포 이름만 개명).
+- 공개 여부 전제 **열림(O-15, 사용자 확인 필요)**, 기본값 = 공개. 배포 이름은 ADR-014로 확정했으며 PyPI 가용성 확인을 하지 않는다.
 - 앱별 PR 순서·되돌리기: [judge-migration-feasibility §3.1](../plan/design-panel/judge-migration-feasibility.md) map PR 4(export CLI 교체·health 팩토리·ruff extend, 3 profile 무변경 단언 + pinvi/ktdm pin 갱신 요청 링크), weather PR 8(export `--check` 전환·`code` 사전·L15 airkorea 정본), airport PR 4(`code`/`request_id` additive·스펙 422 정합·`--check` CI·`uv sync --locked`). 앱 근거: [inv/map §8](../survey/inventory/kor-travel-map.md) 16·20·22, [§9](../survey/inventory/kor-travel-map.md)(Python lockfile 없음·OpenAPI 3종·CLI argparse), [inv/weather §8](../survey/inventory/kor-travel-weather.md) 11·12·13·17, [§9](../survey/inventory/kor-travel-weather.md)(Python 3.11/3.12/3.13 불일치), [inv/airport §8](../survey/inventory/kor-travel-airport.md) 10·12·15·16, [§9](../survey/inventory/kor-travel-airport.md)(uv.lock CI vs pip Docker).
 - PEP 440 버전 문자열은 `0.1.0rc1`, git 태그는 `py-v0.1.0-rc.1`(D-18 표기) — 대응표를 `release.md`에 둔다(runbooks 소유자와 합의).
 
 ## 구현 범위
 
+[release §2.1](../runbooks/release.md#21-common-후보-보존과-후속-구현)에 따라 보존 후보에서 분기한 release branch의 PR로 준비한다. 아래 버전·lock 변경은 해당 branch에 적용한다. 후속 minor가 있는 main을 과거 버전으로 내리지 않는다. 소비자 단계는 해당 저장소 담당자에게 요청하는 외부 gate이며 미실행이면 BLOCKED/NOT_RUN을 유지한다.
+
 1. 사전 조건 확인: T-302 `python-package` job green, T-303·T-304·T-305 DONE, `check_spdx` 0 오류, CHANGELOG `## [Unreleased]` → `## [0.1.0]` 아래 `### kor-travel-common (py)` H3.
 2. `_version.py` `0.1.0rc1` → 태그 `py-v0.1.0-rc.1` → `uv build` → Release(prerelease) 자산 `kor_travel_common-0.1.0rc1-py3-none-any.whl`·sdist·`SHA256SUMS`.
-3. rc 검증(대상 저장소·브랜치·되돌리기): 각 소비 저장소를 `consumers.pins.json`의 SHA로 체크아웃하고 검증 브랜치 `agent/<agent>-T-310-rc`(명명 정본은 consumer-adoption.md)에서 다음을 실행한다. 병합하지 않으며 결과는 evidence로만 남기고 브랜치를 삭제한다(되돌리기 = 브랜치 폐기, 원 저장소 무변경).
+3. rc 검증 요청(담당자는 각 소비자 저장소): `consumers.pins.json`의 SHA에서 아래 계약을 대조한 evidence를 요청한다. common 작업자는 해당 저장소의 checkout·검증 branch를 만들거나 설치·수정하지 않는다. 담당자가 별도 검증 branch를 사용했다면 해당 저장소의 되돌리기와 정리 evidence를 받는다.
    - map(`F:/dev/kor-travel-common-survey/ktm-main` 또는 pin): `uv pip install "kor-travel-common[api] @ git+https://github.com/digitie/kor-travel-common.git@py-v0.1.0-rc.1#subdirectory=packages/py/kor-travel-common"` → `python -m kortravelcommon.openapi export --app kortravelmap.api.app:create_app --profile admin|user|service --transform <map route-policy 콜백> --check`로 3 profile 바이트 무변경; `health_router(wrap=map envelope)`를 테스트 앱에 마운트해 `/health`·`/version` 본문이 현행과 같음; `ruff check --config templates/python/ruff.base.toml` report(위반 수만 기록, fail 아님).
    - weather-api: 같은 CLI로 `packages/kor-travel-weather-api/openapi.json` 대조(`development` 프로필 강제 사실 확인, M9 미확인 항목 기록); `kortravelcommon.time.kst_now` vs `models.py` 고정 오프셋 차이 기록.
    - airport: `docs/openapi.json` 대조(인메모리 SQLite 설정 export 재현); `/health`의 DB 질의를 `/readyz`로 옮길 때의 응답 차이 기록(additive 판정 근거).
@@ -30,7 +33,7 @@ Python 공통 패키지의 첫 릴리스를 낸다: `py-v0.1.0-rc.1` 태그 → 
 
 ## 범위 밖
 
-각 앱의 채택 PR 머지(T-480·T-481·T-482), 2차 모듈(T-306~T-308)이 들어가는 `py-v0.2.0`, pinvi·ktdm pin 갱신 PR(T-480 동반), PyPI 공개 게시·Renovate(T-507), 릴리스 runbook 재현성 리허설(T-501은 tokens·ui), weather airkorea 정본 결정 L15(T-481).
+각 앱의 채택 PR 머지(T-480·T-481·T-482), 2차 모듈(T-306~T-308)이 들어가는 `py-v0.2.0`, pinvi·ktdm pin 갱신 PR(T-480 동반), npm/PyPI 게시(사용자 범위 제외)·Renovate 재평가(T-507), 릴리스 runbook 재현성 리허설(T-501은 tokens·ui), weather airkorea 정본 결정 L15(T-481).
 
 ## 예상 변경 파일
 

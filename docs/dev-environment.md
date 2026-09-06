@@ -72,7 +72,7 @@ Windows에서 통과한 결과는 §6의 1·2층(문서·도구)에만 유효하
 | 3 패키지 빌드·타입 | tokens·ui 빌드, `noUncheckedIndexedAccess` 타입 검사, 단위 테스트(vitest+RTL+jsdom), 생성물 diff | `npm ci` → `npm run build --workspaces` → `npm test --workspaces` | `packages`(T-101·T-201) |
 | 3' Python | `uv build`·pytest·starlette 0.4x/1.6 매트릭스 | `uv sync --locked --all-extras` → `uv run pytest` → `uv build` | `python-package`(T-302) |
 | 4 산출물 설치 | `npm pack` tarball을 임시 디렉터리에 설치해 import·CSS·d.ts 존재 확인; wheel 설치 | `npm pack -w packages/tokens` 후 임시 프로젝트에서 `npm install <tgz>` | `packages`, `python-package` |
-| 5 소비자 빌드 | 패키지별 승인 소비자 pinned SHA에서 webpack·Turbopack `next build` | `consumer-smoke` dispatch(주간 schedule 병행) | `consumer-smoke`(T-010) |
+| 5 소비자 빌드 | 패키지별 승인 소비자 pinned SHA에서 webpack·Turbopack `next build` | `consumer-smoke` dispatch(주간은 외부 검증 뒤 활성화) | 실행기 T-010·외부 검증 T-010a |
 | 6 소비자 실측 | 소비자 저장소의 e2e·6폭 시각 diff·배포 스모크 | 소비자 PR에서 실행 | 소비자 CI |
 | 횡단 | 버전 정렬 report, 대비, UX 금지 패턴, SPDX, secret | `tools/check_versions.py`, `tools/kt_contrast.py`, `tools/ux_lint.py`, `tools/check_spdx.py` | `check-versions`(report), `secret-scan`(T-009·T-103·T-003) |
 

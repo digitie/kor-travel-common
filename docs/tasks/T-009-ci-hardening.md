@@ -18,6 +18,8 @@ common 자체 CI를 D-18 구성으로 재편해, 소비자에게 배포할 재�
 
 ## 구현 범위
 
+docs·tools(두 OS)·secret-scan·check-versions job은 [ci-deploy §9](../standards/ci-deploy.md#9-common-자체-ci)에 따라 PR과 main·codex/release-* push에서 실행한다. release push의 github.sha를 checkout하고 필수 job을 path/PR 조건으로 생략하지 않는다. run·산출물 source SHA를 기록한다. 후보 보존 전에 이 실행 경로를 포함해야 한다.
+
 1. `.github/workflows/docs.yml` 재편: job `docs`(link·plan·unittest·`git diff --check`·redaction 전체 트리), `tools`(matrix `ubuntu-24.04` + Windows 러너; `python -B -X utf8`로 validator·unittest·`check_versions --self-check`·`check_spdx`), `secret-scan`(`tools/scan_secrets.py`: `dc` §1.16 패턴 + `.secret-scan-patterns` 프로젝트 패턴, staged/diff·전체 트리), `check-versions`(report; `$GITHUB_STEP_SUMMARY`).
 2. 하드닝: 최상위 `permissions: contents: read`, `concurrency: ${{ github.workflow }}-${{ github.ref }}` cancel-in-progress, job별 `timeout-minutes`, `runs-on: ubuntu-24.04`, PR head SHA checkout(`ref: ${{ github.event.pull_request.head.sha || github.sha }}`), 모든 `uses:`를 40자 SHA + `# vX.Y.Z` 주석.
 3. `tools/check_prod_redaction.py` + `.prod-redaction-patterns`: 사설 IP 대역·내부 호스트명 형식·운영 도메인 형식을 정규식으로만 정의(실제 운영 값을 패턴 파일에 적지 않음), common 전체 트리 검사(`docs/survey/**` 포함), 예외는 파일 단위 allowlist.
@@ -33,6 +35,8 @@ common 자체 CI를 D-18 구성으로 재편해, 소비자에게 배포할 재�
 예정 경로는 존재·실행 증거가 아니다. `.github/workflows/docs.yml`, `tools/scan_secrets.py`, `tools/check_prod_redaction.py`, `.secret-scan-patterns`, `.prod-redaction-patterns`, `tests/test_scan_secrets.py`, `tests/test_prod_redaction.py`, `docs/runbooks/branch-protection.md`, `tools/README.md`(행 추가).
 
 ## 수용 기준
+
+- main·codex/release-* push 사건의 모든 필수 job 선택을 검증하고, common의 임시 release 검증 branch에 코드 변경 없는 검증 commit을 push한 실제 CI run으로 head/source SHA 일치를 확인한다. 태그·GitHub Release 생성은 필요 없다. 이 검증 branch는 PR 또는 보존 ref로 commit 도달성을 확보하고 작업 뒤 정리한다. 검사기를 통과한 PR head 결과를 다른 merge SHA 결과로 대신 기록하지 않는다.
 
 - 워크플로의 모든 `uses:`가 `owner/repo@<40hex> # vX.Y.Z` 형식이고 태그 참조가 0건이다.
 - 최상위 `permissions: contents: read`, `concurrency` cancel-in-progress, 모든 job에 `timeout-minutes`, 러너 `ubuntu-24.04`(Windows job 제외).
