@@ -58,16 +58,13 @@ docs/integration-map.md  (생성물)  docs/journal.md  docs/resume.md
 ## 검증 명령
 
 ```bash
-npm run build -w packages/ui && npm run test -w packages/ui && npx tsc --noEmit -p packages/ui
-node packages/ui/scripts/check-directives.mjs && node packages/ui/scripts/check-kt-classes.mjs && node packages/ui/scripts/check-contract-doc.mjs
-npm pack -w packages/ui --pack-destination dist/release && (cd dist/release && sha256sum kor-travel-ui-0.2.0-rc.1.tgz > SHA256SUMS)
-# release §3.1로 확인한 RELEASE_SHA에서 위 빌드·설치를 끝낸 뒤 실행한다.
-test "$(git rev-parse HEAD)" = "$RELEASE_SHA" || exit 1
-git tag -a ui-v0.2.0-rc.1 "$RELEASE_SHA" -m "ui 0.2.0-rc.1" && git push origin ui-v0.2.0-rc.1
-gh release create ui-v0.2.0-rc.1 --verify-tag --prerelease dist/release/kor-travel-ui-0.2.0-rc.1.tgz dist/release/SHA256SUMS
-gh workflow run consumer-smoke.yml -f tag=ui-v0.2.0-rc.1
-python3 -B -X utf8 tools/validate_document_links.py
+npm run build -w packages/ui && npm run test -w packages/ui && npx tsc --noEmit -p packages/ui || exit 1
+node packages/ui/scripts/check-directives.mjs && node packages/ui/scripts/check-kt-classes.mjs && node packages/ui/scripts/check-contract-doc.mjs || exit 1
+npm pack -w packages/ui --pack-destination dist/release && (cd dist/release && sha256sum kor-travel-ui-0.2.0-rc.1.tgz > SHA256SUMS) || exit 1
+python3 -B -X utf8 tools/validate_document_links.py || exit 1
 ```
+
+위는 common 빌드 검증이다. 태그·발행·dispatch는 [release §3.1~3.5](../runbooks/release.md#31-준비)의 단일 절차를 사용하고 패키지를 ui, 버전을 0.2.0-rc.N/0.2.0으로 설정한다. 준비 PR의 source와 원격 태그 peeled commit·자산 digest를 대조하며, tag·push·발행 중 하나라도 실패하면 후속 명령을 실행하지 않는다. 기존 다른 source의 같은 태그는 새 rc 번호와 재검증으로 처리한다.
 
 ## evidence
 

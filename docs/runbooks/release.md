@@ -63,7 +63,7 @@ T-010의 common fixture 성공과 T-010a의 실제 소비자 dispatch 성공은 
 
 ### 3.1 준비
 
-1. §2.2의 현재 main 원장으로 선행을 확인하고, 해당 minor의 보존 후보에서 release branch를 만든다. 버전 준비 PR의 base는 이 release branch다. PR 병합 뒤 실제 빌드할 merge commit을 고정하고 해당 commit의 필수 CI(`docs`·`tools`·해당 패키지·`secret-scan`)가 green인지 확인한다. 비면제 변경은 2인 리뷰 report와 disposition이 닫혀 있어야 한다([agent workflow §5](agent-workflow.md#5-전문-리뷰어-서브에이전트-2인-적대적-리뷰)).
+1. §2.2의 현재 main 원장으로 선행을 확인하고, 해당 minor의 보존 후보에서 release branch를 만든다. 버전 준비 PR의 base는 이 release branch다. PR 병합 뒤 실제 빌드할 merge commit을 고정하고 해당 commit의 필수 CI(`docs`·`tools`·해당 패키지·`secret-scan`)가 green인지 확인한다. release merge SHA의 CI 실행 경로는 [ci-deploy §9](../standards/ci-deploy.md#9-common-자체-ci)의 T-009·T-101·T-302가 구현한다. 그 전에는 NOT_RUN이며 PR head의 결과를 대신 사용하지 않는다. 비면제 변경은 2인 리뷰 report와 disposition이 닫혀 있어야 한다([agent workflow §5](agent-workflow.md#5-전문-리뷰어-서브에이전트-2인-적대적-리뷰)).
 2. `CHANGELOG.md` `## [Unreleased]`의 해당 패키지 절을 확인하고 minor면 `#### Breaking`과 이관 절이 있는지 본다.
 3. release branch에서 준비 branch `codex/prepare-<pkg>-vX.Y.Z`를 만들어 버전을 올린다: `packages/<pkg>/package.json` `version`(정확 핀, D-07) 또는 `packages/py/kor-travel-common/pyproject.toml` `version`; 루트 `package-lock.json`·`uv.lock` 갱신을 같은 커밋에 넣는다.
 4. rc는 npm `X.Y.Z-rc.N`, Python `X.Y.ZrcN` metadata를 사용한다. rc→정식도 새 준비 PR을 같은 release branch에 병합한 후 source·CI·자산을 다시 확인한다.
@@ -139,15 +139,19 @@ python3 -m venv "$TMP/venv" && "$TMP/venv/bin/pip" install dist/release/kor_trav
 
 ### 3.3 rc 발행
 
+태그·push·원격 source 대조·발행은 순서대로 실행하며 하나라도 실패하면 뒤 단계를 실행하지 않는다. 아래 tokens 예시를 ui/py의 패키지·버전·자산 이름으로 치환한다. 중복 발행 명령을 각 task에 별도로 유지하지 않는다.
+
 ```bash
 test "$(git rev-parse HEAD)" = "$RELEASE_SHA" || exit 1
 test "$(node -p "require('./packages/tokens/package.json').version")" = "0.1.0-rc.1" || exit 1
 git tag -a tokens-v0.1.0-rc.1 "$RELEASE_SHA" -m "tokens v0.1.0-rc.1" || exit 1
 git push origin tokens-v0.1.0-rc.1 || exit 1
+REMOTE_RELEASE_SHA=$(git ls-remote --tags origin 'refs/tags/tokens-v0.1.0-rc.1^{}' | awk '{print $1}')
+test "$REMOTE_RELEASE_SHA" = "$RELEASE_SHA" || exit 1
 gh release create tokens-v0.1.0-rc.1 --verify-tag --prerelease \
   --title "tokens v0.1.0-rc.1" --notes-file dist/release/notes.md \
-  dist/release/kor-travel-tokens-0.1.0-rc.1.tgz dist/release/SHA256SUMS
-gh release view tokens-v0.1.0-rc.1 --json assets --jq '.assets[].name'
+  dist/release/kor-travel-tokens-0.1.0-rc.1.tgz dist/release/SHA256SUMS || exit 1
+gh release view tokens-v0.1.0-rc.1 --json assets --jq '.assets[].name' || exit 1
 ```
 
 `notes.md`에는 CHANGELOG 해당 절 사본, 자산 digest, 검증한 소비자·commit, 알려진 제한(`NOT_RUN` 포함)을 적는다. 릴리스 노트는 CHANGELOG의 정본이 아니다.
@@ -180,9 +184,11 @@ test "$(git rev-parse HEAD)" = "$RELEASE_SHA" || exit 1
 test "$(node -p "require('./packages/tokens/package.json').version")" = "0.1.0" || exit 1
 git tag -a tokens-v0.1.0 "$RELEASE_SHA" -m "tokens v0.1.0" || exit 1
 git push origin tokens-v0.1.0 || exit 1
+REMOTE_RELEASE_SHA=$(git ls-remote --tags origin 'refs/tags/tokens-v0.1.0^{}' | awk '{print $1}')
+test "$REMOTE_RELEASE_SHA" = "$RELEASE_SHA" || exit 1
 gh release create tokens-v0.1.0 --verify-tag --title "tokens v0.1.0" --notes-file dist/release/notes.md \
-  dist/release/kor-travel-tokens-0.1.0.tgz dist/release/SHA256SUMS
-gh release view tokens-v0.1.0 --json tagName,isPrerelease,assets
+  dist/release/kor-travel-tokens-0.1.0.tgz dist/release/SHA256SUMS || exit 1
+gh release view tokens-v0.1.0 --json tagName,isPrerelease,assets || exit 1
 ```
 
 정식 자산은 rc에서 검증한 코드와 같고 버전 metadata·lock·릴리스 기록만 전환한 source에서 다시 빌드한다. 코드가 다르면 새 rc와 소비자 재검증이 필요하다. 발행 뒤 원격 annotated tag object·peeled commit이 기록한 RELEASE_SHA와 일치하는지 확인하고, 내려받은 자산의 digest를 빌드 evidence와 대조한다.

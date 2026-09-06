@@ -18,6 +18,8 @@
 
 ## 구현 범위
 
+packages job은 [ci-deploy §9](../standards/ci-deploy.md#9-common-자체-ci)에 따라 PR과 main·codex/release-* push에서 실행한다. release push의 github.sha를 checkout하고 필수 job을 path/PR 조건으로 생략하지 않는다. run·산출물 source SHA를 기록한다. 후보 보존 전에 이 실행 경로를 포함해야 한다.
+
 1. 루트: `package.json`(`workspaces: ["packages/*"]`, `packageManager`, `engines`), `.nvmrc`, `package-lock.json`(v3), `.github/workflows` `packages` job(`npm install -g npm@11.19.1` → `npm ci` → build → check → `npm pack` → 임시 디렉터리 설치 검사).
 2. `packages/tokens/package.json`: `name` `@kor-travel/tokens`(ADR-014 확정), `version 0.1.0`, `license: "GPL-3.0-or-later"`, `files`(CSS·`dist`·`LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md`), `exports`(`./tokens.css`·`./theme.css`·`./shadcn.css`·`./base.css`·`./base.scoped.css`·`./dark-class.css`·`./dark-media.css`·`./aliases/*`·`./tokens.json`·`.`→`dist/index.js`+`d.ts`·`./tailwind-preset`), `sideEffects: ["*.css"]`.
 3. `src/tokens.css`(정본): `:root{--kt-*}` map 값 + `.dark` 완비 + `color-scheme: light`; 역할 전부(surface 4·text 4+strong·icon·border·control-line·brand 4·focus·status 4+tint 4·overlay·radius 2·control-h 2·rail·duration 2·ease 2·shadow 2·z 5·font 2). 값은 OKLCH(map 원본 유지).
@@ -34,6 +36,8 @@
 예정 경로는 존재·실행 증거가 아니다. `package.json`, `package-lock.json`, `.nvmrc`, `packages/tokens/{package.json,README.md,LICENSE,NOTICE,THIRD_PARTY_NOTICES.md}`, `packages/tokens/src/*.css`, `packages/tokens/scripts/build.mjs`, `packages/tokens/test/*.test.mjs`, `packages/tokens/dist/*`(생성물 커밋 여부는 T-104와 함께 결정, 기본 커밋), `.github/workflows/docs.yml`(`packages` job), `PROVENANCE.md`(행 추가).
 
 ## 수용 기준
+
+- main·codex/release-* push 사건의 모든 필수 job 선택을 검증하고, common의 임시 release 검증 branch에 코드 변경 없는 검증 commit을 push한 실제 CI run으로 head/source SHA 일치를 확인한다. 태그·GitHub Release 생성은 필요 없다. 이 검증 branch는 PR 또는 보존 ref로 commit 도달성을 확보하고 작업 뒤 정리한다. 검사기를 통과한 PR head 결과를 다른 merge SHA 결과로 대신 기록하지 않는다.
 
 - `tokens.css`에 D-12 역할 전부가 `:root`·`.dark` 양쪽에 정의되고 `--ktc-`·`--ui-`·`--color-admin-`·`--pv-` 접두가 0건이다.
 - 값 비교 테스트가 map 원본과 diff 0(값 무변경)을 단언한다.

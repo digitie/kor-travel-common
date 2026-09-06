@@ -12,9 +12,9 @@ T-005는 Windows Python 3.14.3·WSL Python 3.11.15에서 각각 전체 115 tests
 
 ## 다음 한 작업
 
-- 작업: [T-015](tasks/T-015-common-delivery-plan.md), IN_PROGRESS. npm/PyPI 게시 제외와 common 구현 선행 정리. ADR-014와 네 하위 task를 작성했고 관련 정본·선행을 조정했다. 첫 독립 리뷰는 두 BLOCK이며 5개 finding을 수정했다. [PR #4](https://github.com/digitie/kor-travel-common/pull/4)의 최초 CI는 성공했고 수정 후 두 재검토를 진행한다.
+- 작업: [T-015](tasks/T-015-common-delivery-plan.md), IN_PROGRESS. npm/PyPI 게시 제외와 common 구현 선행 정리. ADR-014와 네 하위 task를 작성했고 관련 정본·선행을 조정했다. 첫 독립 리뷰는 두 BLOCK이며 5개 finding을 수정했다. [PR #4](https://github.com/digitie/kor-travel-common/pull/4)의 최초 CI는 성공했고 첫 재검토는 A PASS/B BLOCK이며 추가 2건을 수정해 두 번째 재검토를 진행한다.
 - 출구: 이름 확보·공개 registry 게시 계획을 제외하고, 검증한 common 후보 보존과 외부 릴리스·채택 gate를 구분한다. 미실행 외부 gate를 DONE으로 바꾸지 않는다.
-- 후속: T-009 CI 하드닝 → common 구현 순서다. T-005a/b·T-011은 선행 완료로 READY다.
+- 사용자 최신 지시: 현재 PR #4를 검증·재검토 후 병합하고 대기한다. T-009 및 다른 다음 task는 재개 요청 전 착수하지 않는다.
 
 ## 시작 파일과 검증
 
