@@ -1,40 +1,25 @@
 kor-travel-common
 Copyright (C) 2026 Youn-sok Choi (digitie)
-
 SPDX-License-Identifier: GPL-3.0-or-later
 
-This program is free software: you can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or (at your
-option) any later version. The full text of the license is in the file
-LICENSE at the root of this repository and inside every distributed
-package (npm tarball, Python wheel/sdist).
+이 프로그램의 자체 작성 부분은 GNU 일반 공중 사용 허가서 버전 3 또는
+(수령자의 선택에 따라) 그 이후 버전에 따라 재배포·수정할 수 있다. 전문은
+루트 LICENSE에 있다. GPLv3 7조의 추가 허가는 부여하지 않는다.
 
-No additional permissions under GNU GPL version 3 section 7 are granted
-for this program. Consuming applications that distribute a combined work
-must comply with the GPL (see CONTRIBUTING.md and
-docs/standards/licensing.md).
+원천 고지는 재선언으로 지우지 않는다. templates/agent-config/의 geo 설정
+6개는 GPL-3.0-only이며 파일별 범위와 수정 고지는 해당 디렉터리 README.md와
+PROVENANCE.md를 따른다. 이는 추가 허가가 아니라 기존 원천 조건의 보존이다.
+서드파티 고지·원문 사본은 THIRD_PARTY_NOTICES.md와 LICENSES/에 있다.
 
-Version: per-package versions are recorded in CHANGELOG.md and Git tags
-(tokens-vX.Y.Z, ui-vX.Y.Z, py-vX.Y.Z). This NOTICE applies to every
-version unless a later NOTICE supersedes it.
+버전: 패키지별 CHANGELOG.md와 Git 태그(tokens-vX.Y.Z, ui-vX.Y.Z, py-vX.Y.Z)를
+따른다. 현재 패키지는 미발행 상태다. 배포 시 LICENSE·NOTICE·
+THIRD_PARTY_NOTICES.md와 그 문서가 참조하는 해당 LICENSES/ 사본을 동봉한다.
 
-Source and contact:
+소스·연락처:
   https://github.com/digitie/kor-travel-common
-  Issues: https://github.com/digitie/kor-travel-common/issues
-  Copyright holder: Youn-sok Choi (GitHub: digitie)
+  https://github.com/digitie/kor-travel-common/issues
+  저작권자: Youn-sok Choi (GitHub: digitie)
 
-Third-party components and their licenses are listed in
-THIRD_PARTY_NOTICES.md. File-level origin of code moved from other
-repositories is recorded in PROVENANCE.md and in each file's SPDX header.
-
-Contributions produced with AI assistance are distributed under the same
-license by the copyright holder who directed and accepted them
-(CONTRIBUTING.md section 1).
-
----
-
-이 파일은 배포되는 모든 패키지에 동봉되는 저작권·라이선스 고지다. 저작권자는
-Youn-sok Choi (digitie), 라이선스는 GPL-3.0-or-later이며 GPLv3 7조의 추가 허가는
-두지 않는다. 서드파티 고지는 THIRD_PARTY_NOTICES.md, 파일 출처는 PROVENANCE.md를
-본다.
+AI 보조 기여물은 이를 지시·수용한 권리자가 배포한다. 타인의 원천 조건은
+유지하며 기여 조건은 CONTRIBUTING.md, 라이선스 규칙은
+docs/standards/licensing.md를 따른다.

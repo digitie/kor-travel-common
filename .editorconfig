@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 root = true
 
 [*]
@@ -17,3 +19,7 @@ trim_trailing_whitespace = false
 
 [*.ps1]
 end_of_line = crlf
+
+[LICENSES/**.txt]
+trim_trailing_whitespace = false
+insert_final_newline = false

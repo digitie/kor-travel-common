@@ -1,10 +1,10 @@
 # CONTRIBUTING
 
-이 문서는 kor-travel-common에 기여할 때의 권리·헤더·커밋·리뷰 규칙 요약이다(브리프 D-04·D-17·D-32, ADR-004). 확정 task는 T-003(★이번 PR). 절차의 정본은 [agent workflow](docs/runbooks/agent-workflow.md), 라이선스 규범의 정본은 [licensing](docs/standards/licensing.md)이며 이 문서는 요약과 링크만 둔다. 마지막 갱신 2026-09-06.
+이 문서는 kor-travel-common에 기여할 때의 권리·헤더·커밋·리뷰 규칙 요약이다(브리프 D-04·D-17·D-32, ADR-004). 고지·검사 구현 task는 T-003이다. 절차의 정본은 [agent workflow](docs/runbooks/agent-workflow.md), 라이선스 규범의 정본은 [licensing](docs/standards/licensing.md)이며 이 문서는 요약과 링크만 둔다. 마지막 갱신 2026-09-07.
 
 ## 1. 라이선스와 권리
 
-- 이 저장소의 라이선스는 `GPL-3.0-or-later`다([LICENSE](LICENSE), [NOTICE](NOTICE)). 기여물은 같은 라이선스로 배포되는 데 동의한 것으로 본다. GPLv3 7조의 추가 허가는 두지 않는다(O-2 기각).
+- 이 저장소 자체 작성 부분의 라이선스는 `GPL-3.0-or-later`다. 기존 원천의 별도 조건은 NOTICE와 파일별 고지에 보존한다([LICENSE](LICENSE), [NOTICE](NOTICE)). 기여물은 같은 라이선스로 배포되는 데 동의한 것으로 본다. GPLv3 7조의 추가 허가는 두지 않는다(O-2 기각).
 - **AI 보조 생성물**: 에이전트·코딩 도구(Claude, Codex 등)의 도움으로 만든 코드·문서와 봇 계정 이름으로 커밋된 변경은, 그 생성을 지시하고 검토·수용한 저작권자(Youn-sok Choi, digitie)가 자신의 저작물로서 GPL-3.0-or-later로 배포한다. 도구 계정은 권리자가 아니며, 도구 약관·관할법상 권리 귀속이 불명확한 부분의 책임도 지시자가 진다(`docs/survey/cross/licensing.md` §2.6·§4 B8).
 - 제3자 코드·문서·에셋을 반입할 때는 반드시 먼저 [PROVENANCE](PROVENANCE.md)에 행을 추가하고 [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)를 갱신한다. 금지 원천(pinvi L6 전, 벤더 tgz·`maplibre-vworld-*`, Hallmark 스킬 본문, `python-*-api` 코드)은 PROVENANCE §규칙 4를 따른다.
 - 외부 원문(Tailwind·shadcn·Next·FastAPI 문서 등)을 인용할 때는 공식 URL과 version/commit/revision을 함께 적는다.
@@ -29,7 +29,7 @@
 
 - `SPDX-License-Identifier`·`SPDX-FileCopyrightText`는 필수, `Origin:`은 다른 저장소에서 옮긴 파일에 필수, `Derived-From:`은 서드파티 파생에 필수, `Modified:`는 원천을 바꿨을 때 필수다. geo 유래 파일은 `Origin:` 괄호에 `GPL-3.0-only`를 병기한다(O-20).
 - CSS는 `/* … */`로 같은 행을 쓴다. Hallmark 스탬프는 common 파일에 두지 않는다(SPDX만, D-13·D-17).
-- `tools/check_spdx.py`(T-003 잔여)가 CI `docs` job에서 헤더 부재를 fail로 판정한다. 그 전까지는 [agent workflow §7](docs/runbooks/agent-workflow.md#7-stage-보안-감사와-pr)의 stage 검사에서 눈으로 확인한다.
+- [check_spdx.py](tools/check_spdx.py)가 로컬에서 헤더·출처 누락을 exit 1로 판정한다. 전체 검사 범위·예외는 [licensing §5.2](docs/standards/licensing.md#52-검사-범위와-출처-대조), CI 필수 연결은 T-009를 따른다.
 - 생성물(`tokens.json`·`tokens.ts`·`tailwind-preset.cjs`)은 생성기가 헤더를 넣는다. 손으로 고치지 않는다.
 
 ## 3. 커밋 규칙

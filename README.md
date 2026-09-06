@@ -57,4 +57,4 @@ git diff --check
 
 ## 라이선스
 
-이 저장소는 `GPL-3.0-or-later`다([LICENSE](LICENSE); 저작권자·버전·연락처는 [NOTICE](NOTICE)). 이식·벤더링한 서드파티 코드의 라이선스는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), 파일군별 원천 저장소·커밋·라이선스는 [PROVENANCE.md](PROVENANCE.md), 기여 조건(AI 보조 생성물은 권리자가 GPL로 배포)은 [CONTRIBUTING.md](CONTRIBUTING.md)에 있다. 배포 tarball·wheel에는 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md`를 동봉하고 패키지 메타데이터에 `license: "GPL-3.0-or-later"`를 선언한다. 라이선스·고지·SPDX 헤더·추출 규칙의 정본은 [licensing](docs/standards/licensing.md)이다.
+이 저장소 자체 작성 부분은 `GPL-3.0-or-later`이며 geo 설정 사본의 `GPL-3.0-only` 조건은 파일별 고지에 보존한다([LICENSE](LICENSE); 저작권자·버전·연락처는 [NOTICE](NOTICE)). 이식·벤더링한 서드파티 코드의 라이선스는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), 파일군별 원천 저장소·커밋·라이선스는 [PROVENANCE.md](PROVENANCE.md), 기여 조건(AI 보조 생성물은 권리자가 GPL로 배포)은 [CONTRIBUTING.md](CONTRIBUTING.md)에 있다. 배포 tarball·wheel에는 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md`를 동봉하고 패키지 메타데이터에 `license: "GPL-3.0-or-later"`를 선언한다. 라이선스·고지·SPDX 헤더·추출 규칙의 정본은 [licensing](docs/standards/licensing.md)이다.

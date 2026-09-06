@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-003 고지·SPDX 구현 후보)
+
+PR #1의 b36c99fb6c7f4df2a27364842ee197fc947e461e에서 `codex/t003-license-provenance`를 분기했다. PR #1은 merge하지 않고 이 branch의 base로 유지한다. 사용자 요청에 따라 T-003 → T-005 → T-009 순서로 진행한다.
+
+원문 확보 결과·94개 회귀 시험·SPDX 13개·문서/DAG·수정한 초기 시험 실패는 [T-003 evidence](tasks/T-003-notices-provenance-spdx.md#evidence)에 있다. 초안의 geo 설정 출처 누락을 실제 Git object 대조로 찾아 PV-007~012와 GPL-3.0-only 고지로 보완했다. 새 소비자 제품 코드를 복사하거나 소비 저장소를 수정하지 않았다. CodeGraph의 기존 미초기화 상태 대신 코드 읽기·rg·고장 주입 시험으로 검증했다. 두 독립 reviewer는 같은 commit의 별도 detached worktree에서 검사한다.
+
 ## 2026-09-06 (Codex, T-013 종료 대조의 숨은 선행 정정)
 
 8fb1334에서 완료 6개·인계·draft PR/리모트 SHA·CI run 34025999506은 일치했다. coordinator가 T-009의 미구현 SPDX 도구 의존을 추가 질문했고 두 reviewer가 같은 원인을 A-P1-06/B-P2-10으로 독립 확인했다. 심각도는 원본 그대로 보존하며 통합 차단은 높은 P1을 따른다. T-009 상세/원장에 T-003 선행을 넣고 BLOCKED로 되돌렸다. T-005 전체 DONE은 기술적 필수와 구분하고 기본 실행 대기열의 T-003 → T-005 → T-009는 유지한다.

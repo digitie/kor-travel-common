@@ -16,7 +16,7 @@ T-013 문서·계획 인계를 마쳤다. 다음은 T-003 잔여(원문 고지·
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
-| [T-003](tasks/T-003-notices-provenance-spdx.md) | READY | P0 | 고지·출처 파일(NOTICE·THIRD_PARTY_NOTICES·LICENSES/·PROVENANCE·CONTRIBUTING)·SPDX 헤더 규약·tools/check_spdx.py | 없음 |
+| [T-003](tasks/T-003-notices-provenance-spdx.md) | IN_PROGRESS | P0 | 고지·출처 파일(NOTICE·THIRD_PARTY_NOTICES·LICENSES/·PROVENANCE·CONTRIBUTING)·SPDX 헤더 규약·tools/check_spdx.py | 없음 |
 | [T-005](tasks/T-005-versions-registry.md) | READY | P0 | versions.json v1 + `tools/check_versions.py`(npm lock v3·report·판정 어휘) + `docs/standards/versions.md` + 7 소비자 현재값·예외 등록 | 없음 |
 | [T-005a](tasks/T-005a-check-versions-uv-lock.md) | BLOCKED | P1 | check_versions: `uv.lock` 파서 | T-005 |
 | [T-005b](tasks/T-005b-check-versions-poetry-requirements.md) | BLOCKED | P2 | check_versions: `poetry.lock`·`requirements.txt` 파서 + `NO_LOCK` 보고 | T-005 |

@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+# Origin: kor-travel-geo@1d9d74d3a852bbaaa09144b75bb69b99a58a6002 .codex/config.toml (GPL-3.0-only)
+# Modified: 2026-09-07 — common 설명·SPDX 헤더 추가, 설정 본문 불변
 # kor-travel-common templates/agent-config/codex.config.toml (판 2026-09)
 # 소비 저장소 경로: .codex/config.toml
 # 경로 비의존 형식(geo 이식형). 절대 경로·worktree별 cwd는 로컬 override로만 둔다.

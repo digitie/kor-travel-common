@@ -13,3 +13,6 @@
 *.jpg binary
 *.woff2 binary
 *.pdf binary
+# 라이선스 원문 사본의 공백을 변경하지 않는다.
+LICENSES/*.txt -whitespace
+LICENSES/upstream/*.txt -whitespace

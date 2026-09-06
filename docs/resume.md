@@ -12,7 +12,7 @@ Windows Python 3.14.3·WSL Python 3.14.4에서 unittest 67개 성공·skip 0. �
 
 ## 다음 한 작업
 
-- 작업: [T-003 고지·출처·SPDX](tasks/T-003-notices-provenance-spdx.md)의 READY 상태를 인수해 미완료 수용 기준부터 착수한다.
+- 작업: [T-003 고지·출처·SPDX](tasks/T-003-notices-provenance-spdx.md)의 IN_PROGRESS 상태로 고지 원문·출처 대조·검사기를 구현 중이다.
 - 출구: 고정 upstream 원문 사본·고지 연결·SPDX 도구와 음성 fixture를 검증하고 2인 리뷰를 마친다. 실제 수행 전에는 DONE으로 옮기지 않는다.
 - 후속: T-005 잔여(소비자 실제 현재값·예외·보고) → T-009(CI 하드닝) 순서로 한 작업씩 진행한다. 상세 선행·외부 선행이 우선한다.
 

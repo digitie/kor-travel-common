@@ -1,6 +1,6 @@
 # PROVENANCE
 
-이 문서는 다른 저장소에서 common으로 옮겨 온 파일군의 원천·커밋·경로·라이선스·수정 여부를 파일군 단위로 기록한다(브리프 D-17, ADR-004; 형식은 `docs/survey/cross/licensing.md` §2.3). 확정 task는 T-003(★이번 PR). 파일 단위 표기는 각 파일의 SPDX 헤더 `Origin:`/`Derived-From:`/`Modified:` 행이 정본이고, 이 표는 그 색인이다. 마지막 갱신 2026-09-06.
+이 문서는 다른 저장소에서 common으로 옮겨 온 파일군의 원천·커밋·경로·라이선스·수정 여부를 파일군 단위로 기록한다(브리프 D-17, ADR-004; 형식은 `docs/survey/cross/licensing.md` §2.3). 고지·검사 구현 task는 T-003이다. 파일 단위 표기는 각 파일의 SPDX 헤더 `Origin:`/`Derived-From:`/`Modified:` 행이 정본이고, 이 표는 그 색인이다. 마지막 갱신 2026-09-07.
 
 ## 규칙
 
@@ -21,5 +21,17 @@
 | PV-004 | `docs/reviews/adversarial/TEMPLATE.md` | canview | `1f93b8a` | `docs/reviews/adversarial/TEMPLATE.md` | 동상 | 없음(diff 0) | 동상 §1.2 |
 | PV-005 | `docs/tasks-rule.md`, `docs/tasks-done.md`, `docs/tasks/README.md`, `docs/runbooks/README.md`, `docs/runbooks/documentation-maintenance.md`, `docs/runbooks/agent-failure-patterns.md`, `docs/reviews/README.md`, `.gitignore`, `.gitattributes` | canview | `1f93b8a` | 동일 경로 9개 | 동상 | 도메인 치환(ID 대역·5열 문법·standards 행·Node/Python ignore·전역 LF); 변경 줄 수는 checklist §1.2 표 | 동상 §1.2 |
 | PV-006 | `docs/runbooks/agent-workflow.md`, `docs/resume.md`(5절 구조), `docs/journal.md`(항목 형식·검증 표), `CHANGELOG.md`(형식), `AGENTS.md`·`SKILL.md`·`docs/README.md`(절 구조) | canview | `1f93b8a` | `docs/runbooks/agent-workflow.md`, `docs/resume.md`, `docs/journal.md`, `CHANGELOG.md`, `AGENTS.md`, `SKILL.md`, `docs/README.md` | 동상 | 절 제목·규칙 어휘만 채택하고 본문은 kor-travel-common으로 전면 치환(2026-09-06) | 동상 §2·§3, `docs/survey/cross/docs-conventions.md` §3 |
+| PV-007 | `templates/agent-config/codex.config.toml` | kor-travel-geo | `1d9d74d3a852bbaaa09144b75bb69b99a58a6002` | `.codex/config.toml` | GPL-3.0-only | common 설명·SPDX 헤더 추가, 설정 본문 동일 (2026-09-07 확인) | [설정 고지](templates/agent-config/README.md) |
+| PV-008 | `templates/agent-config/antigravity.json` | kor-travel-geo | `1d9d74d3a852bbaaa09144b75bb69b99a58a6002` | `antigravity.json` | GPL-3.0-only | 없음(정규화 JSON 동일) (2026-09-07 확인) | [설정 고지](templates/agent-config/README.md) |
+| PV-009 | `templates/agent-config/claude.json` | kor-travel-geo | `1d9d74d3a852bbaaa09144b75bb69b99a58a6002` | `claude.json` | GPL-3.0-only | 없음(정규화 JSON 동일) (2026-09-07 확인) | [설정 고지](templates/agent-config/README.md) |
+| PV-010 | `templates/agent-config/mcp.json` | kor-travel-geo | `1d9d74d3a852bbaaa09144b75bb69b99a58a6002` | `.mcp.json` | GPL-3.0-only | 없음(정규화 JSON 동일) (2026-09-07 확인) | [설정 고지](templates/agent-config/README.md) |
+| PV-011 | `templates/agent-config/opencode.json` | kor-travel-geo | `1d9d74d3a852bbaaa09144b75bb69b99a58a6002` | `opencode.json` | GPL-3.0-only | instructions 추가·키 정렬 (2026-09-07 확인) | [설정 고지](templates/agent-config/README.md) |
+| PV-012 | `templates/agent-config/gemini.mcp.json` | kor-travel-geo | `1d9d74d3a852bbaaa09144b75bb69b99a58a6002` | `antigravity.json` | GPL-3.0-only | filesystem 항목 제거 (2026-09-07 확인) | [설정 고지](templates/agent-config/README.md) |
 
-현재 소비 저장소(map·weather·airport·geo·concierge·docker-manager·pinvi)에서 옮겨 온 코드는 **없다**. 첫 이식은 T-101(`packages/tokens`, map `globals.css` 값)과 T-203(`packages/ui`, map admin `components/ui/*` 레시피)이며, 그때 PV-007 이후 행과 SPDX 헤더를 함께 추가한다. `tools/check_spdx.py`(T-003 잔여)는 common 파일에 헤더가 없으면 즉시 fail한다.
+### 2026-09-07 출처 대조 정정
+
+PV-001의 초기 기록 뒤 `validate_plan.py`에는 완료 상세 제목과 archive 제목 일치 검사도 추가되었다. PV-002에는 여러 길이의 inline code backtick 처리, PV-003에는 대응 회귀 시험이 추가되었다. 원천 커밋은 그대로이며 현재 수정 고지는 파일 헤더로 확인한다.
+
+PV-007~012는 T-013에 이미 들어 있던 geo 설정 사본을 원본과 대조해 누락된 출처를 보완한 것이다. 새 소비자 코드를 반입하지 않았다. 주석 불가 JSON의 파일별 고지는 [설정 고지](templates/agent-config/README.md)가 맡는다. 소비 저장소의 제품 코드(tokens·UI·Python)는 아직 없다. 이후 이식은 다음 PV 번호부터 행과 헤더를 함께 추가한다.
+
+검사 대상 소스는 행마다 명시적 common 경로·원천 경로 하나씩 기록한다. `tools/check_spdx.py`는 이 색인과 헤더를 대조한다. 소스 재이식 시 이전 행 원문은 별도 이식 기록 문서에 보존·링크하고 현재 표에 같은 common 경로가 두 번 나오지 않게 한다. 수정 여부를 원격 원본과 자동 비교하거나 미등록 복사를 탐지하는 도구는 아니므로, 원본 diff와 금지 원천 검토는 이식 PR의 2인 리뷰에서 수행한다.

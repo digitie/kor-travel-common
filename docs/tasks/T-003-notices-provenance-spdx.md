@@ -1,6 +1,6 @@
 # T-003 고지·출처 파일(NOTICE·THIRD_PARTY_NOTICES·LICENSES/·PROVENANCE·CONTRIBUTING)·SPDX 헤더 규약·tools/check_spdx.py
 
-- 상태: READY
+- 상태: IN_PROGRESS
 - 우선순위: P0
 - Gate: 문서 검증·도구 테스트
 - 선행: 없음
@@ -37,7 +37,14 @@ GPL-3.0-or-later 저장소가 코드를 받기 전에 권리·출처 고지 골�
 
 ## 예상 변경 파일
 
-예정 경로는 존재·실행 증거가 아니다. `NOTICE`, `THIRD_PARTY_NOTICES.md`, `PROVENANCE.md`, `CONTRIBUTING.md`, `LICENSES/*.txt`(6), `tools/check_spdx.py`, `tests/test_check_spdx.py`, `tools/README.md`.
+예정 경로는 존재·실행 증거가 아니다. `NOTICE`, `THIRD_PARTY_NOTICES.md`, `PROVENANCE.md`, `CONTRIBUTING.md`, `LICENSES/*.txt`(SPDX 전문 6종)·`LICENSES/upstream/*`·확보 digest, `tools/check_spdx.py`, `tests/test_check_spdx.py`, `tools/README.md`.
+
+## 구현 대조 결정(2026-09-07)
+
+- 기존 LIC-15·LIC-18 정본에 맞춰 검사기는 tests·workflow·설정까지 검사한다. 초기 최소 범위보다 넓지만 기존 의무를 줄이지 않는 적용이다.
+- LICENSES 고지를 읽는 문서 검사 범위도 확장한다. 고지 사본을 새로 읽는 음성 회귀 시험을 둔다.
+- 초안의 "소비자에서 옮긴 코드 없음"은 geo 설정 6개와 충돌했다. 원본 Git object와 대조해 PV-007~012·GPL-3.0-only·JSON sidecar를 보완한다. 소비자 제품 코드는 반입하지 않는다.
+- 고정 버전 후보의 원문 확보는 common 의존 설치나 기존 shadcn 생성 시점의 증거가 아니다. B5·B6를 자동 해제하지 않는다.
 
 ## 수용 기준
 
@@ -64,9 +71,14 @@ Git Bash에서 동일.
 
 ## evidence
 
-2026-09-06 T-013 인계: 고지·출처 초안은 인수했다. LICENSES 원문 사본과 tools/check_spdx.py·음성 fixture는 미완료이며 NOT_RUN(잔여)이다. 다음 에이전트가 이 task 하나부터 착수한다.
+2026-09-07 구현 후보: [확보 목록·digest](../../LICENSES/sources.json)의 원문 사본 21개 SHA-256 일치. npm 후보 13개 tarball integrity 일치, cva 0.7.1 고정 원천 LICENSE와 배포물 LICENSE 바이트 일치·원천/배포물 NOTICE 없음. geo 설정은 고정 커밋의 TOML 본문·정규화 JSON과 대조했으며 [파일별 고지](../../templates/agent-config/README.md)에 보존했다.
 
-- 명령·exit code·검사 파일 수를 이 절과 `docs/journal.md`에 남긴다. `check_spdx.py`·`LICENSES/`가 미완이면 `NOT_RUN(잔여)`로 두고 `DONE` 전에 완료한다.
+- Windows Python 3.14.3·WSL Python 3.14.4: 전체 unittest 94개 성공, skip 0. SPDX 전용 26개에는 누락 헤더 CLI exit 1·정상 CLI exit 0·문자열 위장·출처/수정 고지·geo -only·빈 범위·읽기 실패가 포함된다.
+- Windows·WSL: SPDX 13개 파일 오류 0, 문서 링크 215개 문서/1833개 로컬 target 오류 0, task 96개 오류 0. `git diff --check` 오류 0.
+- 원문 후행 공백 때문에 최초 staged 공백 검사가 실패했다. LICENSES txt 사본만 공백 자동 정리/경고에서 제외해 원본 digest를 보존하고 staged 검사를 다시 통과했다.
+- 링크 검사 범위 추가 테스트를 처음 배치할 때 기존 assert 위치가 섞여 1건 실패했다. 위치를 고친 뒤 위 전체 시험을 양쪽에서 다시 실행했다.
+- 2인 독립 적대적 리뷰: 아직 NOT_RUN(구현 후보 commit 후 실행). 완료 전 DONE으로 옮기지 않는다.
+- CI의 필수 SPDX 단계·Windows matrix는 T-009. 패키지 빌드·설치·소비자 smoke는 NOT_RUN(제품 실물 없음; T-101·T-201·T-302의 후속 gate). 이 task의 문서·도구 완료와 릴리스 가능을 구분한다.
 
 ## rollback 또는 release 차단 조건
 
