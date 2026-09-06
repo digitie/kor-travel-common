@@ -2,6 +2,10 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-005 버전 검사 구현 후보)
+
+T-003 완료 commit 219e44d에서 `codex/t005-version-registry`를 분기했다. 회귀 7개에서 24 실패를 먼저 재현했고 strict 중첩 정책·역전 범위·만료·prerelease·optional/hoist·전이·shrinkwrap 처리를 보완했다. 코드 변경 후 Windows·WSL 전체 107 tests 성공·skip 0. [고정 입력 evidence](evidence/t005/README.md)는 7개 소비자 306개 판정과 입력 digest를 보존한다. 입력 원문은 common의 무시된 임시 위치에만 두고 소비자 저장소에는 쓰지 않았다. report exit 0을 정책 준수로 세지 않았고 `enforce`·`clean_runs`와 12개 예외 값/기한은 유지했다. 정본 간 충돌은 task를 versions 정책 §7에 맞춰 해소했다. CodeGraph는 기존 미초기화 상태이므로 rg·직접 코드·고장 주입으로 확인했다.
+
 ## 2026-09-07 (Codex, T-003 완료)
 
 a2c1891에서 A/B 모두 PASS, 최초 6 finding 전부 FIXED다([최종 판정](reviews/adversarial/2026-09-07-t003-post-fix-02.md)). Python 3.11.15에서도 실제 100 tests·SPDX를 확인했고 [CI](https://github.com/digitie/kor-travel-common/actions/runs/34062228366)도 성공했다. T-003을 완료 원장으로 옮기고 그 선행이 닫힌 T-009·T-101·T-107·T-302를 READY로 표시했다. 완료 7개·열린 89개, 다음은 T-005다. 상태 이동은 완료 evidence의 기록이며 수용 기준·규칙·릴리스 gate를 변경하지 않았다.

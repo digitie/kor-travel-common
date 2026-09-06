@@ -12,13 +12,13 @@ T-003은 a2c1891에서 두 독립 reviewer PASS, 최초 6 finding 모두 FIXED�
 
 ## 다음 한 작업
 
-- 작업: [T-005 버전 레지스트리·현재값](tasks/T-005-versions-registry.md), READY. 7곳 고정 커밋의 manifest/lock 메타데이터를 읽기 전용으로 대조한다.
+- 작업: [T-005 버전 레지스트리·현재값](tasks/T-005-versions-registry.md), IN_PROGRESS. 7곳 고정 커밋의 manifest/lock 메타데이터를 읽기 전용으로 대조한다.
 - 출구: strict 정책·npm lock 판정·실제 report·예외 근거·자체 검사 CI를 검증하고 2인 리뷰를 마친다. report exit 0을 정책 준수로 세지 않는다.
 - 후속: T-009 CI 하드닝 → 원장의 선행이 충족된 common 작업 순서다. 외부 소비자·권리·릴리스 gate는 담당 task에 남긴다.
 
 ## 시작 파일과 검증
 
-T-005 상세 task와 [versions](standards/versions.md), `versions.json`, `tools/check_versions.py`, 해당 회귀 시험을 읽는다. 예비 고장 주입에서 미지 providers 필드·뒤집힌 floor/max가 자체 검사를 통과하고 npm prerelease가 OK로 표시되는 문제를 재현했다. 구현 시 회귀 시험으로 고정한다. 명령 사다리는 [개발 환경](dev-environment.md#6-검증-명령-사다리), 리뷰는 [agent workflow](runbooks/agent-workflow.md)를 따른다.
+T-005 상세 task와 [versions](standards/versions.md), `versions.json`, `tools/check_versions.py`, 해당 회귀 시험을 읽는다. 예비 고장 주입에서 미지 providers 필드·뒤집힌 floor/max가 자체 검사를 통과하고 npm prerelease가 OK로 표시되는 문제를 재현했다. 회귀 시험 7개를 추가해 경계를 고정했으며 독립 리뷰 전이다. 명령 사다리는 [개발 환경](dev-environment.md#6-검증-명령-사다리), 리뷰는 [agent workflow](runbooks/agent-workflow.md)를 따른다.
 
 ## 차단 조건
 

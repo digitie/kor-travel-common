@@ -49,7 +49,8 @@ MAX_DEPTH = 4
 SHA_RE = re.compile(r"\b[0-9a-f]{40}\b")
 TAG_RE = re.compile(r"^(?:[A-Za-z0-9._-]+-)?v?\d+(?:\.\d+){1,3}(?:[-+.][0-9A-Za-z.-]+)?$")
 FLOATING_NAMES = frozenset({"main", "master", "develop", "dev", "head", "latest", "trunk"})
-VERSION_RE = re.compile(r"v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?(?:[-+][0-9A-Za-z][0-9A-Za-z.-]*)?")
+VERSION_RE = re.compile(r"v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?(?:-slim|\+[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?")
+NPM_VERSION_RE = re.compile(r"(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?")
 REQ_RE = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)\s*(\[[^\]]*\])?\s*(.*)$")
 
 
@@ -205,11 +206,57 @@ class Registry:
             if unknown or missing:
                 raise ValueError(f"{path}: {label} 미지 필드 {sorted(unknown)}, 누락 {sorted(missing)}")
 
+        def strings(value, names, label):
+            for name in names:
+                if name in value and (not isinstance(value[name], str) or not value[name].strip()):
+                    raise ValueError(f"{path}: {label}.{name}은 빈 문자열이 아니어야 함")
+
+        def iso_date(value, label):
+            if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+                raise ValueError(f"{path}: {label}은 YYYY-MM-DD 날짜여야 함")
+            date.fromisoformat(value)
+
         fields(data, {"schema", "baseline", "updated", "next_review", "policy", "source",
                       "semantics", "axes", "actions", "exceptions", "blocked", "consumers", "providers"},
                "registry", {"schema", "axes"})
         if data.get("schema") != REGISTRY_SCHEMA:
             raise ValueError(f"{path}: schema가 {REGISTRY_SCHEMA}가 아님: {data.get('schema')!r}")
+        strings(data, ("policy", "source"), "registry")
+        for name in ("baseline", "next_review"):
+            if name in data:
+                value = data[name]
+                if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}", value):
+                    raise ValueError(f"{path}: {name}은 YYYY-MM이어야 함")
+                iso_date(value + "-01", name)
+        if "updated" in data:
+            iso_date(data["updated"], "updated")
+        semantics = data.get("semantics", {})
+        fields(semantics, {"floor", "recommended", "max", "checked", "packages"}, "semantics")
+        strings(semantics, semantics, "semantics")
+        actions = data.get("actions", {})
+        fields(actions, {"consumer_policy", "common", "checked", "source"}, "actions")
+        strings(actions, ("consumer_policy", "source"), "actions")
+        if "checked" in actions and actions["checked"] is not False:
+            raise ValueError(f"{path}: actions는 아직 미검사이므로 checked: false만 허용")
+        common_actions = actions.get("common", {})
+        if not isinstance(common_actions, dict) or any(
+                not re.fullmatch(r"[\w.-]+/[\w.-]+", name)
+                or not isinstance(ref, str) or not re.fullmatch(r"v\d+", ref)
+                for name, ref in common_actions.items()):
+            raise ValueError(f"{path}: actions.common은 owner/action: vN 정책이어야 함")
+        providers = data.get("providers", {})
+        fields(providers, {"policy", "packages", "note", "source"}, "providers")
+        strings(providers, ("note", "source"), "providers")
+        if providers.get("policy", "report") != "report":
+            raise ValueError(f"{path}: providers.policy는 report만 허용")
+        provider_packages = providers.get("packages", {})
+        if not isinstance(provider_packages, dict):
+            raise ValueError(f"{path}: providers.packages는 객체여야 함")
+        for name, provider in provider_packages.items():
+            fields(provider, {"repo"}, f"providers.packages.{name}", {"repo"})
+            strings(provider, ("repo",), f"providers.packages.{name}")
+            if not name.strip() or not provider["repo"].startswith("https://"):
+                raise ValueError(f"{path}: provider 이름 또는 저장소 URL 오류")
         axes = data.get("axes")
         if not isinstance(axes, dict) or not axes:
             raise ValueError(f"{path}: axes가 비어 있음")
@@ -219,10 +266,17 @@ class Registry:
                           "checked", "note", "source"}, f"axes.{key}", {"ecosystem"})
             if axis["ecosystem"] not in {"runtime", "npm", "pypi", "image", "tool", "db"}:
                 raise ValueError(f"{path}: axes.{key}.ecosystem 오류")
+            strings(axis, ("image", "check", "note", "source"), f"axes.{key}")
             for field_name in ("floor", "recommended", "max"):
                 value = axis.get(field_name)
-                if value is not None and parse_version(value) is None:
+                if value is not None and (parse_version(value) is None
+                        or ("-" in value and axis["ecosystem"] != "image")):
                     raise ValueError(f"{path}: axes.{key}.{field_name} 버전 오류")
+            floor, recommended, maximum = (parse_version(axis.get(n)) for n in ("floor", "recommended", "max"))
+            if ((floor is not None and recommended is not None and below(recommended, floor))
+                    or (maximum is not None and any(v is not None and at_or_above(v, maximum)
+                                                    for v in (floor, recommended)))):
+                raise ValueError(f"{path}: axes.{key}은 floor <= recommended < max 순서여야 함")
             if "checked" in axis and not isinstance(axis["checked"], bool):
                 raise ValueError(f"{path}: axes.{key}.checked는 bool이어야 함")
             names = axis.get("packages", [key])
@@ -239,6 +293,7 @@ class Registry:
         aliases = {name.lower() for name in consumers}
         for name, entry in consumers.items():
             fields(entry, {"enforce", "clean_runs", "aliases", "note"}, f"consumers.{name}", {"enforce"})
+            strings(entry, ("note",), f"consumers.{name}")
             if entry["enforce"] not in MODES:
                 raise ValueError(f"{path}: consumers.{name}.enforce 오류")
             if not isinstance(entry.get("aliases", []), list):
@@ -253,6 +308,7 @@ class Registry:
         for name in ("exceptions", "blocked"):
             if not isinstance(data.get(name, []), list):
                 raise ValueError(f"{path}: {name}는 목록이어야 함")
+        exception_prefixes: dict[tuple[str, str], list[tuple[int, ...]]] = {}
         for entry in data.get("exceptions", []):
             names = {"repo", "key", "installed", "reason", "until", "review"}
             fields(entry, names, "exceptions 항목", names)
@@ -260,7 +316,14 @@ class Registry:
                 raise ValueError(f"{path}: exceptions 값은 빈 문자열이 아니어야 함")
             if entry["repo"] not in consumers or entry["key"] not in axes or parse_version(entry["installed"]) is None:
                 raise ValueError(f"{path}: exceptions 참조 또는 버전 오류")
-            date.fromisoformat(entry["until"])
+            iso_date(entry["until"], "exceptions.until")
+            prefix = parse_version(entry["installed"])
+            if not re.fullmatch(r"\d+(?:\.\d+){0,3}", entry["installed"]):
+                raise ValueError(f"{path}: exceptions.installed는 숫자 접두여야 함")
+            previous = exception_prefixes.setdefault((entry["repo"], entry["key"]), [])
+            if any(matches_prefix(prefix, old) or matches_prefix(old, prefix) for old in previous):
+                raise ValueError(f"{path}: 같은 저장소·축의 예외 접두가 겹침")
+            previous.append(prefix)
         for entry in data.get("blocked", []):
             fields(entry, {"ecosystem", "name", "range", "reason", "since", "source"}, "blocked 항목",
                    {"ecosystem", "name", "range", "reason"})
@@ -268,6 +331,9 @@ class Registry:
                 raise ValueError(f"{path}: blocked ecosystem 오류")
             if any(not isinstance(entry[n], str) or not entry[n] for n in ("name", "range", "reason")):
                 raise ValueError(f"{path}: blocked 문자열 오류")
+            strings(entry, ("source",), "blocked")
+            if "since" in entry:
+                iso_date(entry["since"], "blocked.since")
             for clause in entry["range"].split(","):
                 if not re.fullmatch(r"\s*(?:>=|<=|==|!=|>|<)?\d+(?:\.\d+)*\s*", clause):
                     raise ValueError(f"{path}: blocked 범위 오류")
@@ -477,6 +543,9 @@ class Checker:
         self.repo = repo
         self.today = today
         self.findings: list[Finding] = []
+        self.npm_locks: dict[Path, tuple[str, dict]] = {}
+        self.npm_direct: set[tuple[Path, str]] = set()
+        self.npm_floating: set[tuple[Path, str]] = set()
 
     # --- 공통
     def add(self, scope: str, key: str, ecosystem: str, declared: str, installed: str,
@@ -514,6 +583,9 @@ class Checker:
     def record_axis(self, scope: str, key: str, ecosystem: str, declared: str,
                     installed_text: str, exact: bool = True) -> None:
         installed = parse_version(installed_text)
+        if ecosystem == "npm" and (not isinstance(installed_text, str)
+                                    or not NPM_VERSION_RE.fullmatch(installed_text)):
+            installed = None
         verdict, detail = self.judge(key, installed, exact)
         verdict, detail = self.apply_exception(key, installed, verdict, detail)
         self.add(scope, key, ecosystem, declared, installed_text, verdict, detail)
@@ -543,16 +615,37 @@ class Checker:
     def check_npm(self, scope: Scope) -> None:
         label = scope.label
         manifest = read_json(scope.manifest) if scope.manifest and scope.manifest.is_file() else {}
-        declared = {**manifest.get("dependencies", {}), **manifest.get("devDependencies", {})}
+        declared = {**manifest.get("dependencies", {}), **manifest.get("devDependencies", {}),
+                    **manifest.get("optionalDependencies", {})}
         engines = manifest.get("engines") or {}
         lock: dict = {}
         if scope.lock is not None and scope.lock.is_file():
-            lock = read_json(scope.lock)
-            if lock.get("lockfileVersion") != 3:
+            if (scope.lock.parent / "npm-shrinkwrap.json").is_file():
+                self.add(label, "npm-shrinkwrap.json", "npm", "", "", "NO_LOCK",
+                         "npm-shrinkwrap.json이 우선하지만 파서 미지원 — package-lock을 대신 신뢰하지 않음")
+            else:
+                lock = read_json(scope.lock)
+            if lock and lock.get("lockfileVersion") != 3:
                 self.add(label, "package-lock.json", "npm", "", str(lock.get("lockfileVersion")),
-                         "NO_LOCK", "lockfileVersion 3만 지원(npm 7+에서 `npm install`로 재생성)")
+                         "NO_LOCK", "lockfileVersion 3만 지원")
                 lock = {}
         packages = lock.get("packages", {}) if lock else {}
+        if not isinstance(packages, dict) or any(not isinstance(entry, dict) for entry in packages.values()):
+            raise ValueError("npm lock packages는 경로별 객체여야 함")
+        if packages and scope.lock is not None:
+            self.npm_locks.setdefault(scope.lock, (label, packages))
+
+        def installed_entry(name):
+            # Node의 상위 node_modules 탐색 순서를 lock 상대 경로에서 따른다.
+            directory = scope.workspace
+            while True:
+                path = f"{directory}/node_modules/{name}" if directory else f"node_modules/{name}"
+                if path in packages:
+                    return path, packages[path]
+                if not directory:
+                    return "", {}
+                directory = directory.rsplit("/", 1)[0] if "/" in directory else ""
+
         root_entry = packages.get("", {})
         own_engines = bool(engines)
         if not engines and root_entry.get("engines"):
@@ -575,9 +668,11 @@ class Checker:
 
         # 선언된 git/floating 참조(워크스페이스 링크 `*`는 제외)
         for name, spec in declared.items():
-            entry = packages.get(f"node_modules/{name}") or {}
+            path, entry = installed_entry(name)
             if is_vcs_spec(str(spec)):
                 self.record_ref(label, "npm", name, str(spec), entry.get("resolved", ""))
+                if path and not ref_is_pinned(str(spec)):
+                    self.npm_floating.add((scope.lock, path))
             elif str(spec).strip() in {"*", "latest", ""} and not entry.get("link"):
                 self.add(label, name, "npm", str(spec), "", "FLOATING_REF",
                          "`*`/`latest` 선언 금지: 범위 또는 정확 버전으로 선언")
@@ -595,34 +690,42 @@ class Checker:
                          "package-lock.json(v3) 없음")
             return
 
-        # 설치본: 워크스페이스 중첩 → hoisted 순
-        seen_keys: set[str] = set()
+        # 직접 설치본을 먼저 기록하고 전이 설치본은 모든 멤버 처리 뒤 대조한다.
         for name, spec in declared.items():
             key = self.registry.axis_for("npm", name)
             if key is None or not self.registry.axes[key].get("checked", True):
                 continue
-            entry = None
-            if scope.workspace:
-                entry = packages.get(f"{scope.workspace}/node_modules/{name}")
-            if entry is None:
-                entry = packages.get(f"node_modules/{name}")
-            if entry is None or not entry.get("version"):
+            path, entry = installed_entry(name)
+            if path:
+                self.npm_direct.add((scope.lock, path))
+            if str(spec).startswith("npm:") or entry.get("name", name) != name or entry.get("link"):
+                self.add(label, key, "npm", str(spec), "", "NO_LOCK",
+                         "별칭·로컬 링크는 원 패키지 설치 버전으로 대조하지 않음")
+            elif not entry.get("version"):
                 self.add(label, key, "npm", str(spec), "", "NO_LOCK",
                          f"lock에 `{name}` 항목 없음(`npm install`로 lock 갱신 필요)")
-                continue
-            self.record_axis(label, key, "npm", str(spec), entry["version"])
-            seen_keys.add(key)
-        # 차단 목록·전이 git 참조는 lock 전체를 본다(워크스페이스 루트에서 1회).
-        if not scope.workspace:
+            else:
+                self.record_axis(label, key, "npm", str(spec), entry["version"])
+
+    def check_npm_locks(self) -> None:
+        """직접·전이·워크스페이스 중첩 설치본을 lock별 1회 검사한다."""
+        for lock_path, (label, packages) in self.npm_locks.items():
             for path, entry in packages.items():
-                if not path.startswith("node_modules/") or not entry.get("version"):
+                if not re.search(r"(?:^|/)node_modules/", path) or entry.get("link"):
                     continue
-                name = path.rsplit("node_modules/", 1)[1]
-                self.record_blocked(label, "npm", name, entry["version"])
+                name = entry.get("name") or path.rsplit("node_modules/", 1)[1]
+                location = f"{label} [lock:{path}]"
+                version = entry.get("version", "")
+                self.record_blocked(location, "npm", name, version)
                 resolved = entry.get("resolved", "")
-                if resolved.startswith(("git+", "git:")) and not ref_is_pinned(resolved) and name not in declared:
-                    self.add(label, name, "git", "(전이)", "", "FLOATING_REF",
+                if (resolved.startswith(("git+", "git:")) and not ref_is_pinned(resolved)
+                        and (lock_path, path) not in self.npm_floating):
+                    self.add(location, name, "git", "(전이)", "", "FLOATING_REF",
                              f"lock resolved가 고정되지 않음: {resolved[:80]}")
+                key = self.registry.axis_for("npm", name)
+                if ((lock_path, path) not in self.npm_direct and key is not None
+                        and self.registry.axes[key].get("checked", True)):
+                    self.record_axis(location, key, "npm", "(전이)", version)
 
     def record_range(self, key: str, scope: str, ecosystem: str, spec: str) -> None:
         bound = lower_bound(spec)
@@ -767,6 +870,7 @@ class Checker:
                              scope.note or "pyproject.toml 없음(매니페스트 lockfiles 경로 확인)")
                     continue
                 self.check_python(scope)
+        self.check_npm_locks()
         order = {"runtime": 0, "npm": 1, "pypi": 2, "git": 3}
         self.findings.sort(key=lambda f: (f.repo, f.scope, order.get(f.ecosystem, 9), f.key, f.installed))
         # 한 축에 여러 패키지(react/react-dom 등)가 대응하면 같은 판정 행을 하나로 접는다.
@@ -887,6 +991,14 @@ def main(argv: list[str] | None = None) -> int:
         print(f"::error title=check_versions::레지스트리 오류: {exc}")
         return 2
     if args.self_check:
+        today = args.today or date.today()
+        expired = [entry for entry in registry.data.get("exceptions", [])
+                   if today > date.fromisoformat(entry["until"])]
+        for entry in expired:
+            print(f"::error title=check_versions::EXEMPT_EXPIRED: {entry['repo']} {entry['key']} "
+                  f"until {entry['until']} · {entry['review']}")
+        if expired:
+            return 1
         print("check_versions: 레지스트리 자체 검사 통과(소비자 버전 검사는 실행하지 않음)")
         return 0
     if not args.paths and args.manifest is None:

@@ -128,10 +128,93 @@ class CheckVersionsTests(unittest.TestCase):
 
     def cli(self, *args: str) -> subprocess.CompletedProcess:
         return subprocess.run([sys.executable, "-B", "-X", "utf8", str(SCRIPT), "--registry",
-                               str(self.registry_path), *args],
+                               str(self.registry_path), "--today", "2026-09-06", *args],
                               capture_output=True, text=True, encoding="utf-8")
 
     # --- 버전 파싱·범위 도우미
+    def test_registry_nested_fields_and_order_are_strict(self):
+        mutations = [
+            ("providers", {"polciy": "report"}),
+            ("providers", {"policy": "fail"}),
+            ("providers", {"packages": {"x": {"repo": "https://example.com/x", "pin": "main"}}}),
+            ("actions", {"cheked": False}),
+            ("actions", {"checked": True}),
+            ("actions", {"common": {"actions/checkout": "main"}}),
+            ("semantics", {"florr": "잘못된 필드"}),
+            ("updated", "2026-02-30"),
+            ("baseline", "2026-13"),
+        ]
+        for key, value in mutations:
+            with self.subTest(key=key, value=value):
+                data = json.loads(json.dumps(REGISTRY))
+                data[key] = value
+                self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+                self.assertEqual(self.cli("--self-check").returncode, 2)
+        for values in ({"floor": "8", "max": "6.1"}, {"recommended": "6.1"},
+                       {"recommended": "5.8"}, {"floor": "5.9-rc.1"}, {"check": False}):
+            with self.subTest(values=values):
+                data = json.loads(json.dumps(REGISTRY))
+                data["axes"]["typescript"].update(values)
+                self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+                self.assertEqual(self.cli("--self-check").returncode, 2)
+
+    def test_overlapping_exception_prefixes_are_rejected(self):
+        data = json.loads(json.dumps(REGISTRY))
+        data["exceptions"].append({**data["exceptions"][0], "installed": "7", "until": "2027-01-31"})
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+        self.assertEqual(self.cli("--self-check").returncode, 2)
+
+    def test_self_check_expiry_is_not_report_success(self):
+        self.assertEqual(self.cli("--self-check", "--today", "2026-12-31").returncode, 0)
+        result = self.cli("--self-check", "--today", "2027-01-01", "--mode", "report")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("EXEMPT_EXPIRED", result.stdout)
+
+    def test_npm_prerelease_and_alias_are_not_stable(self):
+        for version in ("19.2.8-rc.1", "19.2.8-slim", "19.2", "v19.2.8"):
+            with self.subTest(version=version):
+                npm_fixture(self.repo, deps={"react": "^19.2.8"}, engines={"node": ">=22.12"},
+                            installed={"react": version})
+                self.assertEqual(self.verdicts(self.run_checker(), "react"), ["NO_LOCK"])
+        npm_fixture(self.repo, deps={"react": "npm:other@19.2.8"}, engines={"node": ">=22.12"},
+                    installed={"react": "19.2.8"})
+        self.assertEqual(self.verdicts(self.run_checker(), "react"), ["NO_LOCK"])
+        npm_fixture(self.repo, deps={"react": "19.2.8+build.1"}, engines={"node": ">=22.12"},
+                    installed={"react": "19.2.8+build.1"})
+        self.assertEqual(self.verdicts(self.run_checker(), "react"), ["OK"])
+
+    def test_npm_transitive_nested_versions_and_blocked(self):
+        data = json.loads(json.dumps(REGISTRY))
+        data["blocked"].append({"ecosystem": "npm", "name": "bad", "range": ">=2", "reason": "시험"})
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+        npm_fixture(self.repo, deps={"react": "19.2.8"}, engines={"node": ">=22.12"},
+                    installed={"react": "19.2.8"}, extra_packages={
+                        "node_modules/other/node_modules/react": {"version": "18.3.1"},
+                        "apps/web/node_modules/bad": {"version": "2.0.0"},
+                        "apps/web/node_modules/custom": {"version": "1.0.0", "resolved": "git+https://github.com/example/custom#main"},
+                    })
+        findings = self.run_checker()
+        self.assertEqual(sorted(self.verdicts(findings, "react")), ["BELOW_FLOOR", "OK"])
+        self.assertEqual(self.verdicts(findings, "bad"), ["BLOCKED"])
+        self.assertEqual(self.verdicts(findings, "custom"), ["FLOATING_REF"])
+
+    def test_npm_optional_and_workspace_ancestor_hoisting(self):
+        npm_fixture(self.repo, deps={}, engines={"node": ">=22.12"}, installed={"react": "19.2.8"},
+                    extra_packages={"apps/node_modules/react": {"version": "18.3.1"}})
+        member = self.repo / "apps/web"
+        member.mkdir(parents=True)
+        (member / "package.json").write_text(json.dumps({"optionalDependencies": {"react": "18.3.1"}}), encoding="utf-8")
+        findings = self.run_checker()
+        member_rows = [f for f in findings if f.scope == "apps/web" and f.key == "react"]
+        self.assertEqual([f.verdict for f in member_rows], ["BELOW_FLOOR"])
+        self.assertEqual(len([f for f in findings if f.installed == "18.3.1"]), 1)
+
+    def test_shrinkwrap_precedence_does_not_use_stale_package_lock(self):
+        npm_fixture(self.repo, deps={"react": "19.2.8"}, engines={"node": ">=22.12"},
+                    installed={"react": "19.2.8"})
+        (self.repo / "npm-shrinkwrap.json").write_text("{}", encoding="utf-8")
+        self.assertEqual(self.verdicts(self.run_checker(), "react"), ["NO_LOCK"])
+
     def test_invalid_installed_versions_are_not_success(self):
         for version in ("banana", "19.2.8garbage", ""):
             with self.subTest(version=version):

@@ -23,6 +23,8 @@ jobs:
         run: python -B -X utf8 tools/validate_plan.py
       - name: 전체 도구 회귀 테스트
         run: python -B -X utf8 -m unittest discover -s tests -p 'test_*.py' -v
+      - name: 버전 정책·예외 만료 자체 검사
+        run: python -B -X utf8 tools/check_versions.py --self-check
       - name: Whitespace check
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}

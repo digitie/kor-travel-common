@@ -16,7 +16,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. �
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
-| [T-005](tasks/T-005-versions-registry.md) | READY | P0 | versions.json v1 + `tools/check_versions.py`(npm lock v3·report·판정 어휘) + `docs/standards/versions.md` + 7 소비자 현재값·예외 등록 | 없음 |
+| [T-005](tasks/T-005-versions-registry.md) | IN_PROGRESS | P0 | versions.json v1 + `tools/check_versions.py`(npm lock v3·report·판정 어휘) + `docs/standards/versions.md` + 7 소비자 현재값·예외 등록 | 없음 |
 | [T-005a](tasks/T-005a-check-versions-uv-lock.md) | BLOCKED | P1 | check_versions: `uv.lock` 파서 | T-005 |
 | [T-005b](tasks/T-005b-check-versions-poetry-requirements.md) | BLOCKED | P2 | check_versions: `poetry.lock`·`requirements.txt` 파서 + `NO_LOCK` 보고 | T-005 |
 | [T-006](tasks/T-006-npm-scope-pypi-name.md) | BLOCKED | P1 | npm scope `@kor-travel`·PyPI 이름 가용성 확인·확보(사용자 계정 작업; 실패 시 개명) | 없음 |
