@@ -1,9 +1,9 @@
 # T-107 docs/standards/frontend-stack.md 확정 + `templates/eslint/*.mjs`·tsconfig base·postcss·components.json 조각
 
-- 상태: IN_PROGRESS
+- 상태: BLOCKED
 - 우선순위: P1
 - Gate: 2인 리뷰
-- 선행: 없음
+- 선행: T-003
 
 ## 목표
 
@@ -53,6 +53,8 @@ rg -n "16\.3\.4|19\.2\.8|5\.9\.3" docs/standards/frontend-stack.md || echo "no v
 Git Bash에서 동일.
 
 ## evidence
+
+2026-09-06 T-013 인계: 규칙·설정 조각은 초안으로 존재한다. T-003 SPDX 도구, 조각 문법 fixture와 정책 값 중복 검증이 미완료다. 해당 실행과 전문 리뷰를 완료한 뒤 확정한다.
 
 - 검증 출력·리뷰 report(`docs/reviews/adversarial/YYYY-MM-DD-frontend-stack.md`)를 이 절과 `docs/journal.md`에 남긴다.
 

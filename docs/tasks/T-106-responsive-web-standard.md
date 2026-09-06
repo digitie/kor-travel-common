@@ -1,9 +1,9 @@
 # T-106 docs/standards/responsive-web.md 확정
 
-- 상태: IN_PROGRESS
+- 상태: BLOCKED
 - 우선순위: P1
 - Gate: 2인 리뷰
-- 선행: 없음
+- 선행: T-108
 
 ## 목표
 
@@ -54,6 +54,8 @@ rg -o "RW-[0-9]+" docs/standards/responsive-web.md | sort -u | wc -l
 Git Bash에서 동일.
 
 ## evidence
+
+2026-09-06 T-013 인계: 반응형 문서는 초안으로 존재한다. T-108의 실제 캡처 템플릿과 폭 상수·기존 UX 문서 중복·규칙 강도를 대조하기 전에는 확정하지 않는다.
 
 - 규칙 수·리뷰 report(`docs/reviews/adversarial/YYYY-MM-DD-responsive-web.md`)를 이 절과 `docs/journal.md`에 남긴다.
 

@@ -182,6 +182,32 @@ class CheckVersionsTests(unittest.TestCase):
                 self.assertIn("FLOATING_REF", self.verdicts(self.run_checker(), "custom-lib"))
                 self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail").returncode, 1)
 
+    def test_python_declaration_fragment_is_not_a_revision(self):
+        for url in ("git+https://github.com/example/pkg.git@main#v1.2.3",
+                    "git+https://github.com/example/pkg.git#v1.2.3"):
+            with self.subTest(url=url):
+                python_fixture(self.repo, requires=">=3.12", deps=["custom-lib @ " + url], locked={})
+                self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail").returncode, 1)
+                self.assertIn("FLOATING_REF", self.verdicts(self.run_checker(), "custom-lib"))
+
+    def test_python_declaration_and_uv_resolved_ref_are_distinct(self):
+        sha = "a" * 40
+        for ref in (sha, "py-v0.1.0"):
+            with self.subTest(ref=ref):
+                url = "git+https://github.com/example/pkg.git@" + ref + "#subdirectory=src"
+                python_fixture(self.repo, requires=">=3.12", deps=["custom-lib @ " + url], locked={})
+                self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), ["OK"])
+        for fragment, expected in ((sha, "OK"), ("v1.2.3", "FLOATING_REF")):
+            with self.subTest(fragment=fragment):
+                python_fixture(self.repo, requires=">=3.12", deps=[], locked={},
+                               git_locked={"custom-lib": ("1.0.0", "https://github.com/example/pkg?rev=main#" + fragment)})
+                self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), [expected])
+        npm_fixture(self.repo, deps={"custom-lib": "git+https://github.com/example/pkg.git#v1.2.3"},
+                    engines={"node": ">=22.12"}, installed={"custom-lib": "1.2.3"})
+        npm_findings = CV.Checker(CV.Registry.load(self.registry_path), "app-a", CV.date(2026, 9, 6))
+        npm_findings.check_npm(next(scope for scope in CV.discover(self.repo) if scope.kind == "npm"))
+        self.assertEqual(self.verdicts(npm_findings.findings, "custom-lib"), ["OK"])
+
     def test_version_helpers(self):
         self.assertEqual(CV.parse_version("22.12"), (22, 12))
         self.assertEqual(CV.parse_version("3.12-slim"), (3, 12))
@@ -212,7 +238,7 @@ class CheckVersionsTests(unittest.TestCase):
             "git+ssh://git@github.com/o/r.git#semver:^1.0",
         ]
         for text in pinned:
-            self.assertTrue(CV.ref_is_pinned(text), text)
+            self.assertTrue(CV.ref_is_pinned(text, kind="pypi" if "@" in text else "npm"), text)
         for text in floating:
             self.assertFalse(CV.ref_is_pinned(text), text)
 

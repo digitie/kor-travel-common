@@ -3,41 +3,41 @@
 - 정본 지위: 사용자 지시 (5) "canview 구조·AGENTS.md 채택"의 검증 수단. `docs/survey/cross/canview-structure-checklist.md` §1(파일 F01~F47)·§2(AGENTS A1.1~A8.5)·§3(규약 R1.1~R6.10)·§4(validator 문법)의 항목 ID별로 common의 판단·사유·대응 파일·상태를 적는다. 확정 task: T-001·T-008(★이번 PR). 마지막 갱신: 2026-09-06.
 - 근거: [브리프](../plan/design-brief.md) D-02·D-03·D-04·D-05·D-27, `docs/survey/cross/canview-structure-checklist.md`(canview `1f93b8a`), `docs/survey/cross/docs-conventions.md` §2·§3·§4.
 
-판단 어휘: **채택**(canview 규칙·파일을 그대로), **변형**(역할은 유지하되 내용·경로를 common 용도로 교체), **제외**(하드웨어·차량·firmware·임베디드 전용), **추가**(canview에 없는 common 항목). 상태 어휘: **있음**(작업 트리에 존재), **있음(이번 PR)**(이 PR의 architecture 작성자가 만듦), **작성 예정(이번 PR)**(파일 지도의 다른 작성자가 같은 PR에서 만듦), **작성 예정(T-xxx)**(후속 task), **—**(제외라 대응 파일 없음). 상태는 2026-09-06 작업 트리와 [브리프 §3 파일 지도](../plan/design-brief.md)를 대조한 값이며, 링크 검사(`tools/validate_document_links.py`)와 [문서 지도](../README.md)가 실제 트리의 정본이다.
+판단 어휘: **채택**(canview 규칙·파일을 그대로), **변형**(역할은 유지하되 내용·경로를 common 용도로 교체), **제외**(하드웨어·차량·firmware·임베디드 전용), **추가**(canview에 없는 common 항목). 상태 어휘: **있음**(작업 트리에 존재), **있음(이번 PR)**(이 PR의 architecture 작성자가 만듦), **작성 예정(T-xxx)**(후속 task), **—**(제외라 대응 파일 없음). 상태는 2026-09-06 작업 트리와 [브리프 §3 파일 지도](../plan/design-brief.md)를 대조한 값이며, 링크 검사(`tools/validate_document_links.py`)와 [문서 지도](../README.md)가 실제 트리의 정본이다.
 
 ## 1. 파일 목록(cv §1.1 F01~F47)
 
 | ID | canview 경로 | 판단 | 사유·결정 | common 대응 파일 | 상태 |
 |---|---|---|---|---|---|
-| F01 | `AGENTS.md` | 변형 | 8절 골격 유지, §1·§6·§7의 차량 항목을 라이브러리 경계로 치환(D-02) | `AGENTS.md` | 작성 예정(이번 PR) |
-| F02 | `SKILL.md` | 변형 | 라우터 + 작업별 시작점 표 + 용어를 common 도메인으로 | `SKILL.md` | 작성 예정(이번 PR) |
-| F03 | `README.md` | 변형 | "문서"·"저장소 상태" 절만 재사용, 패키지 목록 추가 | `README.md` | 작성 예정(이번 PR) |
-| F04 | `CHANGELOG.md` | 채택 | 단일 파일에 패키지별 H3, `### Breaking`(D-18·D-31) | `CHANGELOG.md` | 작성 예정(이번 PR) |
+| F01 | `AGENTS.md` | 변형 | 8절 골격 유지, §1·§6·§7의 차량 항목을 라이브러리 경계로 치환(D-02) | `AGENTS.md` | 있음(이번 PR) |
+| F02 | `SKILL.md` | 변형 | 라우터 + 작업별 시작점 표 + 용어를 common 도메인으로 | `SKILL.md` | 있음(이번 PR) |
+| F03 | `README.md` | 변형 | "문서"·"저장소 상태" 절만 재사용, 패키지 목록 추가 | `README.md` | 있음(이번 PR) |
+| F04 | `CHANGELOG.md` | 채택 | 단일 파일에 패키지별 H3, `### Breaking`(D-18·D-31) | `CHANGELOG.md` | 있음(이번 PR) |
 | F05 | `LICENSE` | 채택 | GPL-3.0-or-later 전문(D-17) | `LICENSE` | 있음 |
 | F06 | `.gitignore` | 변형 | firmware·KiCad 제거, Node·Python·편집기 추가(cv §1.2) | `.gitignore` | 있음 |
 | F07 | `.gitattributes` | 변형 | 전역 `* text=auto eol=lf` + 확장자별 LF, `*.ps1` CRLF(D-03) | `.gitattributes` | 있음 |
 | F08 | `tokens.css`(루트) | 변형 | 토큰은 패키지 산출물; 루트에 두지 않음(D-12) | `packages/tokens/tokens.css` | 작성 예정(T-101) |
-| F09 | `docs/README.md` | 채택 | 읽기 단계 표 → 정본 관계 트리 → 분야별 표 → 탐색 규칙(R5.7) | `docs/README.md` | 작성 예정(이번 PR) |
-| F10 | `docs/resume.md` | 채택 | 5절(R5.4) | `docs/resume.md` | 작성 예정(이번 PR) |
-| F11 | `docs/journal.md` | 채택 | newest-first(R5.1) | `docs/journal.md` | 작성 예정(이번 PR) |
-| F12 | `docs/tasks.md` | 채택 | 5열 표·"N개의 상세 작업"·검사 명령 3개(D-05) | `docs/tasks.md` | 작성 예정(이번 PR) |
+| F09 | `docs/README.md` | 채택 | 읽기 단계 표 → 정본 관계 트리 → 분야별 표 → 탐색 규칙(R5.7) | `docs/README.md` | 있음(이번 PR) |
+| F10 | `docs/resume.md` | 변형 | 상태·다음 한 작업·차단·인계 링크(R5.4) | `docs/resume.md` | 있음(이번 PR) |
+| F11 | `docs/journal.md` | 채택 | newest-first(R5.1) | `docs/journal.md` | 있음(이번 PR) |
+| F12 | `docs/tasks.md` | 채택 | 5열 표·"N개의 상세 작업"·검증 정본 링크(D-05) | `docs/tasks.md` | 있음(이번 PR) |
 | F13 | `docs/tasks-done.md` | 채택 | 5열 고정, 완료 날짜는 제목 괄호(D-05) | `docs/tasks-done.md` | 있음 |
 | F14 | `docs/tasks-rule.md` | 변형 | ID 대역을 common 6대역 + §2.1 앱 대역으로(D-05) | `docs/tasks-rule.md` | 있음 |
 | F15 | `docs/tasks/README.md` | 채택 | validator 통과 조건 추가 | `docs/tasks/README.md` | 있음 |
-| F16 | `docs/tasks/T-*.md` | 변형 | 형식만 채택, 내용은 브리프 §6의 92개 | `docs/tasks/T-*.md` | 작성 예정(이번 PR, task 작성자 5) |
+| F16 | `docs/tasks/T-*.md` | 변형 | 형식만 채택, 실행 목록은 task 원장 정본 | `docs/tasks/T-*.md` | 있음(원장과 상세 검증) |
 | F17 | `docs/adr/README.md` | 채택 | 규칙 5 + 표 `ADR|제목|상태` + 상단 "다음 후보 번호"(D-02, R2.7 보존) | [ADR 색인](../adr/README.md) | 있음(이번 PR) |
-| F18 | `docs/adr/001…007-*.md` | 변형 | 형식만; 내용은 브리프 §4의 ADR-001~012 | `docs/adr/001…012-*.md` | 있음(이번 PR) |
+| F18 | `docs/adr/001…007-*.md` | 변형 | 형식만; 결정 목록은 ADR 색인 정본 | `docs/adr/NNN-*.md` | 있음(이번 PR) |
 | F19 | `docs/decisions.md` | 제외 | 이중 색인 금지. `adr/README.md`가 단일 색인이며 "다음 후보 번호"를 상단에 둠(D-02·D-27, cv Q1) | — | — |
 | F20 | `docs/architecture/README.md` | 변형 | 사용법 표 → 범위 → 데이터·의존 흐름 → 책임과 경계 → 릴리스·버전 경계 → 저장소 구조 → 문서 정본 | [아키텍처 개요](README.md) | 있음(이번 PR) |
-| F21 | `docs/architecture/{system,features,automation,ota,diagnostic-bridge,controller-can-pipeline}.md`, `protocols/*` | 제외/변형 | 차량·protocol 설계는 제외. 역할만 `packages.md`·`style-delivery.md`·`docs/standards/openapi.md`가 이어받음 | [packages](packages.md), [style-delivery](style-delivery.md), `docs/standards/openapi.md` | 있음(이번 PR) / 작성 예정(이번 PR) |
+| F21 | `docs/architecture/{system,features,automation,ota,diagnostic-bridge,controller-can-pipeline}.md`, `protocols/*` | 제외/변형 | 차량·protocol 설계는 제외. 역할만 `packages.md`·`style-delivery.md`·`docs/standards/openapi.md`가 이어받음 | [packages](packages.md), [style-delivery](style-delivery.md), `docs/standards/openapi.md` | 있음(이번 PR) / 있음(이번 PR) |
 | F22 | `docs/architecture/implementation-readiness.md` | 변형 | "구현자가 다시 결정하지 않을 사항"·정본과 생성물 역할을 채택 gate 추적표로 | [채택 준비 기준](adoption-readiness.md) | 있음(이번 PR) |
 | F23 | `docs/architecture/requirements-coverage.md` | 변형 | 요구→정본→task→검증→남은 gate 형식을 소비자→gate 형식으로 | [채택 준비 기준](adoption-readiness.md) §4 | 있음(이번 PR) |
-| F24 | `docs/development/windows.md`, `toolchains.md` | 변형 | Linux/WSL 정본 + Windows Tier 2 절 + 임시 worktree 프로필 1파일(D-03) | `docs/dev-environment.md` | 작성 예정(이번 PR) |
+| F24 | `docs/development/windows.md`, `toolchains.md` | 변형 | Linux/WSL 정본 + Windows Tier 2 절 + 임시 worktree 프로필 1파일(D-03) | `docs/dev-environment.md` | 있음(이번 PR) |
 | F25 | `docs/hardware/**`, `docs/vehicle/**`, `docs/images/*.png` | 제외 | 하드웨어·차량. `docs/images/`는 UI 스크린샷이 생기면 선택(현재 없음) | — | — |
-| F26 | `docs/ui/design.md` | 변형 | 원칙·정보 구조·토큰 정본 지정 골격을 규칙 문서로 분해(D-13). 루트 `DESIGN.md`는 두지 않음(파일 지도에 없음) | `docs/standards/design-tokens.md`·`ux-guide.md`·`responsive-web.md` | 작성 예정(이번 PR) |
+| F26 | `docs/ui/design.md` | 변형 | 원칙·정보 구조·토큰 정본 지정 골격을 규칙 문서로 분해(D-13). 루트 `DESIGN.md`는 두지 않음(파일 지도에 없음) | `docs/standards/design-tokens.md`·`ux-guide.md`·`responsive-web.md` | 있음(이번 PR) |
 | F27 | `docs/ui/lvgl-demo-review.md` | 제외 | 임베디드 UI | — | — |
 | F28 | `docs/runbooks/README.md` | 변형 | consumer-adoption·release 행 추가 | `docs/runbooks/README.md` | 있음 |
-| F29 | `docs/runbooks/agent-workflow.md` | 변형 | 8절 유지, OS·worktree 명령을 bash 1벌 + dev-environment 위임(D-03), 검증 사다리를 문서→패키지→tarball→소비자로(R4.6) | `docs/runbooks/agent-workflow.md` | 작성 예정(이번 PR) |
+| F29 | `docs/runbooks/agent-workflow.md` | 변형 | 8절 유지, OS·worktree 명령을 bash 1벌 + dev-environment 위임(D-03), 검증 사다리를 문서→패키지→tarball→소비자로(R4.6) | `docs/runbooks/agent-workflow.md` | 있음(이번 PR) |
 | F30 | `docs/runbooks/documentation-maintenance.md` | 변형 | standards·survey·plan 행 추가, `decisions.md` 언급 제거 | `docs/runbooks/documentation-maintenance.md` | 있음 |
 | F31 | `docs/runbooks/agent-failure-patterns.md` | 변형 | 임베디드 12행 제거, 링크·WSL/Windows·worktree 3행 재사용 + 패키징·스타일·소비자 통합 행 | `docs/runbooks/agent-failure-patterns.md` | 있음 |
 | F32 | `docs/reviews/README.md` | 채택 | 기록 규칙 9 + 빈 표 + 새 리뷰 시작(D-04) | `docs/reviews/README.md` | 있음 |
@@ -48,22 +48,22 @@
 | F37 | `tools/validate_document_links.py` | 변형 | 절대 접두 허용 제거(절대 경로는 오류), `packages/**`·`templates/**`·`tests/**` 포함, 산문 오탐 제외(D-02·D-27, cv Q2) | `tools/validate_document_links.py` | 있음 |
 | F38 | `tools/validate_plan.py` | 채택 | 무변경(docstring 1줄)(D-05) | `tools/validate_plan.py` | 있음 |
 | F39 | `tests/test_plan_validation.py` | 채택 | 35 tests 무변경 | `tests/test_plan_validation.py` | 있음 |
-| F40 | `tools/toolchain-versions.json` | 변형 | `versions.json`(schema `kor-travel-common.version-registry.v1`, floor/recommended/exceptions/blocked/enforce)으로 재설계(D-06·D-07, cv Q8) | `versions.json` | 작성 예정(이번 PR) |
-| F41 | `tools/environment/setup-windows.ps1`, `tools/hardware/**`, `protocol/**`, `ui/**` | 제외/변형 | SDK·KiCad 제외. "manifest 대조 스크립트" 역할만 `check_versions.py`로 | `tools/check_versions.py` | 작성 예정(이번 PR) |
+| F40 | `tools/toolchain-versions.json` | 변형 | `versions.json`(schema `kor-travel-common.version-registry.v1`, floor/recommended/exceptions/blocked/enforce)으로 재설계(D-06·D-07, cv Q8) | `versions.json` | 있음(이번 PR) |
+| F41 | `tools/environment/setup-windows.ps1`, `tools/hardware/**`, `protocol/**`, `ui/**` | 제외/변형 | SDK·KiCad 제외. "manifest 대조 스크립트" 역할만 `check_versions.py`로 | `tools/check_versions.py` | 있음(이번 PR) |
 | F42 | `tests/automation/**`, `lvgl/**`, `ui/**` | 제외 | host C·LVGL·브라우저 시험 | — | — |
 | F43 | `dbc/`, `firmware/`, `hardware/`, `protocol/`, `ui/` | 제외/변형 | 제품 소스는 `packages/*`(tokens·ui·py)와 `templates/*`로 | `packages/`, `templates/` | 작성 예정(T-101·T-201·T-302 / 이번 PR) |
 | F44 | `.tools/`(gitignore) | 변형 | 로컬 부산물 디렉터리 후보. 현재 `.gitignore`에 없음 — 리뷰 probe 관례가 생길 때 추가(open) | `.gitignore` | 있음(항목 미등록) |
-| F45 | (없음) `CLAUDE.md` | 추가 | 40줄 이하 포인터, 읽기 순서에 추가하지 않음(D-02, dc C3) | `CLAUDE.md` | 작성 예정(이번 PR) |
+| F45 | (없음) `CLAUDE.md` | 추가 | 40줄 이하 포인터, 읽기 순서에 추가하지 않음(D-02, dc C3) | `CLAUDE.md` | 있음(이번 PR) |
 | F46 | (없음) `.editorconfig` | 추가 | utf-8·lf·indent 2(`*.py` 4)·`*.ps1` crlf | `.editorconfig` | 있음 |
 | F47 | (없음) `.github/workflows/*` | 추가 | `docs.yml` + T-009 하드닝·`tools` windows 매트릭스 + T-010 재사용 워크플로(D-18) | `.github/workflows/docs.yml` 외 | 있음(docs.yml) / 작성 예정(T-009·T-010) |
-| F48 | (없음) `docs/standards/`, `docs/survey/`, `docs/plan/` | 추가 | 규칙 정본·조사·계획 분리(D-02) | 각 디렉터리 | 있음(survey·plan) / 작성 예정(이번 PR, standards) |
-| F49 | (없음) `NOTICE`·`THIRD_PARTY_NOTICES.md`·`PROVENANCE.md`·`CONTRIBUTING.md`·`LICENSES/` | 추가 | 고지·출처 규약(D-17) | 각 파일 | 작성 예정(이번 PR; `LICENSES/` 원문은 T-003 잔여) |
+| F48 | (없음) `docs/standards/`, `docs/survey/`, `docs/plan/` | 추가 | 규칙 정본·조사·계획 분리(D-02) | 각 디렉터리 | 있음 |
+| F49 | (없음) `NOTICE`·`THIRD_PARTY_NOTICES.md`·`PROVENANCE.md`·`CONTRIBUTING.md`·`LICENSES/` | 추가 | 고지·출처 규약(D-17) | 각 파일 | 고지 파일 있음; `LICENSES/` 원문은 T-003 잔여 |
 | F50 | (없음) `docs/integration-map.md`, `docs/architecture/{packages,style-delivery,consumers,adoption-readiness,canview-checklist}.md` | 추가 | 소비자 채택 지도·배포 단위·스타일 계약·대조표(D-02) | [통합 지도](../integration-map.md) 외 | 있음(이번 PR) |
-| F51 | (없음) `templates/`, `consumers.pins.json`, `.github/pull_request_template.md` | 추가 | 소비자 복사형 파일·smoke pin·PR 본문(D-18·D-24) | 각 파일 | 작성 예정(이번 PR / T-010) |
+| F51 | (없음) `templates/`, `consumers.pins.json`, `.github/pull_request_template.md` | 추가 | 소비자 복사형 파일·smoke pin·PR 본문(D-18·D-24) | 각 파일 | templates·PR 템플릿 있음; pins는 T-010 잔여 |
 
 ## 2. AGENTS.md 절별(cv §2 A1.1~A8.5)
 
-대응 파일은 별도 표기가 없으면 `AGENTS.md`(entry 작성자, 작성 예정(이번 PR))이다. 공통 절 A~I는 `docs/survey/cross/docs-conventions.md` §3.1의 배치를 따르며 소비자 배포판은 `templates/AGENTS.common.md`다.
+대응 파일은 별도 표기가 없으면 `AGENTS.md`(entry 작성자, 있음(이번 PR))이다. 공통 절 A~I는 `docs/survey/cross/docs-conventions.md` §3.1의 배치를 따르며 소비자 배포판은 `templates/AGENTS.common.md`다.
 
 ### 2.1 §1 목표와 안전 경계
 
@@ -173,10 +173,10 @@
 | R1.11 | 상세 9항목 | 채택 | + 이관 task 필수 기재(대상 저장소·브랜치·되돌리기) | 있음 |
 | R1.12 | 미래 경로·명령은 증거 아님 | 채택 | `docs/tasks-rule.md` §6에 명문화(D-25) | 있음 |
 | R1.13 | 실행 기록 tool version·exit code·digest, NOT_RUN, 0 test 금지 | 채택 | §6 명문화 | 있음 |
-| R1.14 | PR Task/Gate/Risk/Tests/Evidence/Rollback | 채택 | `.github/pull_request_template.md`, agent-workflow §7 | 작성 예정(이번 PR) |
+| R1.14 | PR Task/Gate/Risk/Tests/Evidence/Rollback | 채택 | `.github/pull_request_template.md`, agent-workflow §7 | 있음(이번 PR) |
 | R1.15 | 완료 시 이동 + journal·resume | 채택 | 완료 날짜는 제목 괄호(5열 고정) | 있음 |
 | R1.16 | 요약·상세 같은 PR | 채택 | `docs/tasks/README.md` | 있음 |
-| R1.17 | tasks.md §2 검사 명령 3개 + "제품 gate 아님" | 채택 | `docs/tasks.md` | 작성 예정(이번 PR) |
+| R1.17 | tasks.md §2 검사 명령 3개 + "제품 gate 아님" | 변형 | 원장은 선행·상태, 명령은 dev-environment·각 task 정본으로 연결 | 있음(이번 PR) |
 | R1.18 | 우선순위 열 `---:` | 채택 | `docs/tasks-done.md` | 있음 |
 
 ### 3.2 ADR·결정 색인(R2)
@@ -222,15 +222,15 @@
 | ID | 규약 | 판단 | common 상태·사유 | 대응 파일 |
 |---|---|---|---|---|
 | R4.1 | runbooks에는 절차만; README 표 | 채택 | 행 추가(consumer-adoption·release) | 있음 |
-| R4.2 | agent-workflow 8절 | 채택 | | 작성 예정(이번 PR) |
-| R4.3 | 브랜치 `agent/<agent>-<task>`, main 직접 push 금지 | 채택 | | 작성 예정(이번 PR) |
-| R4.4 | worktree 경로·이중 checkout 금지·prune | 채택 | 경로 `<repo>-wt/<agent>-<task>`(D-03) | 작성 예정(이번 PR) |
-| R4.5 | CodeGraph 설치 시만; 없으면 `rg`·compiler·test 대체 | 채택 | | 작성 예정(이번 PR) |
-| R4.6 | 검증 사다리 7층 | 변형 | 문서 → 패키지 빌드·타입 → 단위 → tarball 설치 → 소비자 빌드·e2e → 소비자 배포 스모크; host simulation으로 실물 gate 대체 금지 → "common 스모크로 소비자 e2e 대체 금지" | 작성 예정(이번 PR) |
+| R4.2 | agent-workflow 8절 | 채택 | | 있음(이번 PR) |
+| R4.3 | 브랜치 `agent/<agent>-<task>`, main 직접 push 금지 | 채택 | | 있음(이번 PR) |
+| R4.4 | worktree 경로·이중 checkout 금지·prune | 채택 | 경로 `<repo>-wt/<agent>-<task>`(D-03) | 있음(이번 PR) |
+| R4.5 | CodeGraph 설치 시만; 없으면 `rg`·compiler·test 대체 | 채택 | | 있음(이번 PR) |
+| R4.6 | 검증 사다리 7층 | 변형 | 문서 → 패키지 빌드·타입 → 단위 → tarball 설치 → 소비자 빌드·e2e → 소비자 배포 스모크; host simulation으로 실물 gate 대체 금지 → "common 스모크로 소비자 e2e 대체 금지" | 있음(이번 PR) |
 | R4.7 | 기록 갱신 6조건 | 변형 | decisions.md 제외, standards·CHANGELOG 추가 | `docs/runbooks/documentation-maintenance.md` §2 |
-| R4.8 | stage 경로별 명시, `git add .`·`-A` 금지, staged diff 읽기 | 채택 | | 작성 예정(이번 PR) |
-| R4.9 | PR 본문 6항목 | 채택 | + 소비자 PR 규격(D-24, `templates/consumer-pr.md`) | 작성 예정(이번 PR) |
-| R4.10 | CI·reviewer gate·P0/P1 확인 전 merge 금지 | 채택 | | 작성 예정(이번 PR) |
+| R4.8 | stage 경로별 명시, `git add .`·`-A` 금지, staged diff 읽기 | 채택 | | 있음(이번 PR) |
+| R4.9 | PR 본문 6항목 | 채택 | + 소비자 PR 규격(D-24, `templates/consumer-pr.md`) | 있음(이번 PR) |
+| R4.10 | CI·reviewer gate·P0/P1 확인 전 merge 금지 | 채택 | | 있음(이번 PR) |
 | R4.11 | failure patterns 단일 표, 반복 시 task | 채택 | | 있음 |
 | R4.12 | 문서 이동 7단계 | 채택 | `documentation-maintenance.md` §6 | 있음 |
 
@@ -238,14 +238,14 @@
 
 | ID | 규약 | 판단 | common 상태·사유 | 대응 파일 |
 |---|---|---|---|---|
-| R5.1 | journal H1·H2 형식·newest-first·수정 금지 | 채택 | | 작성 예정(이번 PR) |
+| R5.1 | journal H1·H2 형식·newest-first·수정 금지 | 채택 | | 있음(이번 PR) |
 | R5.2 | journal 본문 라벨 불릿 또는 검증 표 | 변형 | + 소비 저장소 상태(커밋·브랜치·dirty) | `docs/runbooks/documentation-maintenance.md` §4 |
 | R5.3 | 도구 fallback·미실행 검증·사용자 변경 보존 | 채택 | | 있음 |
-| R5.4 | resume 5절 + 다음 한 작업 3불릿 | 채택 | | 작성 예정(이번 PR) |
-| R5.5 | CHANGELOG Keep a Changelog 계열, 사용자 가시 변경만 | 변형 | 패키지별 H3 + `### Breaking` + 이관 절(D-18·D-31) | 작성 예정(이번 PR) |
-| R5.6 | 루트 README "문서" 절 링크 6 | 변형 | decisions 링크 → ADR 색인 | 작성 예정(이번 PR) |
-| R5.7 | docs/README 5부 구성 | 채택 | | 작성 예정(이번 PR) |
-| R5.8 | 정본 관계 5문장 | 채택 | + standards 1문장 | 작성 예정(이번 PR) |
+| R5.4 | resume 5절 + 다음 한 작업 3불릿 | 변형 | 상태·다음 한 작업·차단·인계 링크, 시작 파일·검증은 해당 절에서 연결 | 있음(이번 PR) |
+| R5.5 | CHANGELOG Keep a Changelog 계열, 사용자 가시 변경만 | 변형 | 패키지별 H3 + `### Breaking` + 이관 절(D-18·D-31) | 있음(이번 PR) |
+| R5.6 | 루트 README "문서" 절 링크 6 | 변형 | decisions 링크 → ADR 색인 | 있음(이번 PR) |
+| R5.7 | docs/README 5부 구성 | 채택 | | 있음(이번 PR) |
+| R5.8 | 정본 관계 5문장 | 채택 | + standards 1문장 | 있음(이번 PR) |
 | R5.9 | 하위 README 서두 1단락 | 채택 | architecture·runbooks·reviews·tasks·adr 모두 | 있음 / 있음(이번 PR) |
 
 ### 3.6 언어·링크·Git·파일(R6)

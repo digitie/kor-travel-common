@@ -247,4 +247,4 @@ python3 -B -X utf8 tools/check_versions.py /path/to/app --repo wx --today 2027-0
 
 ### 입력 오류와 자체 검사
 
-`check_versions.py --self-check`는 소비자 버전 조회 없이 레지스트리 형식·판정 정책을 검증한다. 미지 필드, 잘못된 enforce/버전/예외/차단 값과 빈 검사 범위는 입력 오류(exit 2)다. 설치 버전 파싱 실패는 NO_LOCK, 하한 없는 OR 또는 지원하지 않는 런타임 범위는 NO_ENGINES이며 OK로 바꾸지 않는다. URL은 실제 ref 위치를 해석하고 임의 query·자산 fragment의 SHA를 고정 근거로 삼지 않는다. 지원 파서의 확대와 실제 소비자 대조는 T-005·T-005a·T-005b에서 검증한다.
+`check_versions.py --self-check`는 소비자 버전 조회 없이 레지스트리 형식·판정 정책을 검증한다. 미지 필드, 잘못된 enforce/버전/예외/차단 값과 빈 검사 범위는 입력 오류(exit 2)다. 설치 버전 파싱 실패는 NO_LOCK, 하한 없는 OR 또는 지원하지 않는 런타임 범위는 NO_ENGINES이며 OK로 바꾸지 않는다. URL은 npm 선언의 `#ref`, Python 선언의 `@rev`, uv lock git source의 전체 SHA fragment를 구분해 실제 ref 위치를 해석하고 임의 query·자산 fragment의 SHA를 고정 근거로 삼지 않는다. 지원 파서의 확대와 실제 소비자 대조는 T-005·T-005a·T-005b에서 검증한다.

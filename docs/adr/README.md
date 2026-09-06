@@ -23,11 +23,11 @@ kor-travel-common의 구조적 결정은 파일당 하나의 ADR로 둔다. 파�
 | [ADR-003](003-linux-wsl-canonical-env-windows-tier2-worktree.md) | 개발 환경 정본(Linux/WSL)·Windows Tier 2·임시 worktree | accepted |
 | [ADR-004](004-gpl-3-0-or-later-and-provenance-gate.md) | 라이선스 GPL-3.0-or-later와 출처 고지·추출 gate | accepted |
 | [ADR-005](005-release-channel-immutable-tags-semver-0x.md) | 배포 채널(GitHub Release tarball·git 태그·wheel)·태그 불변·SemVer 0.x | partially superseded by ADR-013 |
-| [ADR-006](006-design-token-contract.md) | 디자인 토큰 계약(`--kt-*`·`kt-` 네임스페이스·계층·프로필·다크·대비·정본 CSS) | accepted — O-4 기본값 |
+| [ADR-006](006-design-token-contract.md) | 디자인 토큰 계약(`--kt-*`·`kt-` 네임스페이스·계층·프로필·다크·대비·정본 CSS) | accepted — O-4(네임스페이스)·O-11(다크)·O-13(마커 정본)은 기본값으로 진행 |
 | [ADR-007](007-react-ui-package-delivery.md) | React UI 패키지 배포 방식(npm 1차·React 19 전용·overlay base-ui/비-overlay native·마크업 계약·레지스트리 2차) | partially superseded by ADR-013 |
-| [ADR-008](008-version-alignment-policy.md) | 라이브러리·플랫폼 버전 일치 정책(floor/recommended/exceptions·lockfile 의무·판정 어휘·승격 권한) | accepted |
-| [ADR-009](009-openapi-rest-conventions.md) | OpenAPI/REST 규약 3계층과 예외 레지스트리·health 경로 | accepted |
+| [ADR-008](008-version-alignment-policy.md) | 라이브러리·플랫폼 버전 일치 정책(floor/recommended/exceptions·lockfile 의무·판정 어휘·승격 권한) | accepted — O-6·O-7·O-10·O-17·O-18은 기본값으로 진행 |
+| [ADR-009](009-openapi-rest-conventions.md) | OpenAPI/REST 규약 3계층과 예외 레지스트리·health 경로 | accepted — O-14(429 코드명·geo v2 시점·pinvi Zod)는 기본값으로 진행 |
 | [ADR-010](010-consumer-adoption-model.md) | 소비자 채택 모델(매니페스트·첫 소비자 순서·라이선스 gate·채택 PR 규격·시각 기준선·NOT_RUN) | partially superseded by ADR-013 |
-| [ADR-011](011-python-common-package.md) | Python 공통 패키지 구조(extras·3.11 호환·모듈 우선순위·인증 범위 밖·메트릭 접두) | accepted |
-| [ADR-012](012-tailwind-v4-migration-policy.md) | Tailwind v4 전환 정책(대상·순서·4단 PR·pinvi mobile 예외 보류) | proposed — O-8 대기 |
+| [ADR-011](011-python-common-package.md) | Python 공통 패키지 구조(extras·3.11 호환·모듈 우선순위·인증 범위 밖·메트릭 접두) | accepted — O-7(앱 floor 3.12 시점)·O-12(메트릭 접두 map·pinvi)는 기본값으로 진행 |
+| [ADR-012](012-tailwind-v4-migration-policy.md) | Tailwind v4 전환 정책(대상·순서·4단 PR·pinvi mobile 예외 보류) | proposed — O-8(pinvi mobile Tailwind 3 예외) 사용자 승인 대기; 나머지 항목은 기본값으로 진행 |
 | [ADR-013](013-package-release-execution-contract.md) | 패키지 릴리스 순서·호환 범위·검증 소비자 계약 | accepted |

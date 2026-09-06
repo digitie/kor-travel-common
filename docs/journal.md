@@ -2,6 +2,18 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-06 — T-013 post-fix 잔여와 인계 정합
+
+12fb3a8 CI run 34024615020이 통과했다. A 재검토는 원 6건 중 5건 FIXED, Python 선언 fragment의 A-P1-05 OPEN으로 BLOCK이었다. 추가 CLI 회귀는 수정 전 24 tests 중 3 subtest 실패, 문맥별 ref 해석 후 전체 67 tests 성공·skip 0이다. npm 선언은 fragment, Python 선언은 path의 @rev, uv git lock source는 resolved 전체 SHA로 구분했다. 공식 문서·로컬 pip 재현 근거는 [인계 재확인](plan/handoff-verification.md)에 연결했다.
+
+인계 대조에서 canview A 49개·R 77개가 원본 ID와 빠짐없이 대응하고 CLAUDE 포인터는 32줄임을 확인했다. ADR 13편 H1·상태/색인을 일치시켰다. 생성된 파일의 예정 상태를 정정하고 test_plan_validation의 추가 시험·출처 헤더를 PROVENANCE에 반영했다. 미완료 규칙 task를 READY/BLOCKED와 잔여 evidence로 되돌렸으며 개별 규칙 확정·도구 실행을 수행 완료로 세지 않았다. 다음 재검토는 이 정정까지 포함한 immutable commit으로 진행한다.
+
+## 2026-09-06 — T-013 독립 리뷰 finding 정정
+
+원본 후보 d3712a8을 리뷰어 A(도구·CI)와 B(계획·계약)가 격리 checkout에서 독립 검토했고 모두 BLOCK이었다. A의 5개 P1 음성 사례를 재현한 최초 회귀 실행은 22 tests 중 11 subtest 실패였으며 구현 수정 후 전체 65 tests가 Windows에서 통과했다(skip 0). B의 L6 결정/적용 역전, pinvi UI 0.1/0.2 순환, 다음 minor 코드 혼입, Python 0.2 릴리스 누락, 승인 전 스모크, useRender peer 누락을 ADR-013·선행 DAG·T-311/T-422a/T-422b로 정정했다. 공개 Python facade와 tokens 호환 minor도 명시했다. 원본 보고서는 수정하지 않고 evidence에 보존한다.
+
+추가 직접 대조: T-432가 0.1에 없는 Button을 import하던 범위를 소형 공개 부품으로 제한했고, 아직 없는 T-211 검사기는 수동 shim/patch evidence로 분리했다. T-003의 고정 항목 수·존재 미확인 cva NOTICE 요구를 실제 고정 upstream 파일 대조로 바꿨다. 라이선스 원문 확보·소비자 7곳 버전 보고·패키지 구현은 후속 task이며 수행 완료로 집계하지 않았다.
+
 ## 2026-09-06 (Codex, T-013 인수·계획 원장·CI 재현)
 
 PR #1 `09104ed`와 미커밋 초안을 실제 파일로 대조했다. 착수 검증은 링크 33건 오류·원장 누락 등 plan 94건 오류·unittest 57건 성공이었다. `d3712a8`에 로컬 초안과 T-013·93개 원장·통합 계획을 통합해 같은 draft PR에 push했다. 소비자 저장소를 수정하지 않았다.
@@ -48,9 +60,3 @@ Git Bash에서 동일. 다음은 reviewer 원본 보존·finding 수정·post-fi
 **소비 저장소 상태(조사 기준, `docs/survey/README.md` §2.1)**: airport `2bb1111`(clean, WIP `codex/shadcn-ui-foundation` `99b3f98`), concierge `7945305`, docker-manager `862562d`, geo `1d9d74d`, map `c494e227`, weather `6003da9`, pinvi `9af25e5`(shallow clone). 어느 저장소도 수정하지 않았다.
 
 **다음**: [resume](resume.md) "다음 한 작업" — 2인 적대적 리뷰 → task `DONE` → PR #1 본문 갱신·머지.
-
-## 2026-09-06 — T-013 독립 리뷰 finding 정정
-
-원본 후보 d3712a8을 리뷰어 A(도구·CI)와 B(계획·계약)가 격리 checkout에서 독립 검토했고 모두 BLOCK이었다. A의 5개 P1 음성 사례를 재현한 최초 회귀 실행은 22 tests 중 11 subtest 실패였으며 구현 수정 후 전체 65 tests가 Windows에서 통과했다(skip 0). B의 L6 결정/적용 역전, pinvi UI 0.1/0.2 순환, 다음 minor 코드 혼입, Python 0.2 릴리스 누락, 승인 전 스모크, useRender peer 누락을 ADR-013·선행 DAG·T-311/T-422a/T-422b로 정정했다. 공개 Python facade와 tokens 호환 minor도 명시했다. 원본 보고서는 수정하지 않고 evidence에 보존한다.
-
-추가 직접 대조: T-432가 0.1에 없는 Button을 import하던 범위를 소형 공개 부품으로 제한했고, 아직 없는 T-211 검사기는 수동 shim/patch evidence로 분리했다. T-003의 고정 항목 수·존재 미확인 cva NOTICE 요구를 실제 고정 upstream 파일 대조로 바꿨다. 라이선스 원문 확보·소비자 7곳 버전 보고·패키지 구현은 후속 task이며 수행 완료로 집계하지 않았다.

@@ -1,6 +1,6 @@
 # T-105 docs/standards/ux-guide.md 확정(UX-Gn.m·MUST/SHOULD·C1~C22·baseline·예외)
 
-- 상태: IN_PROGRESS
+- 상태: READY
 - 우선순위: P1
 - Gate: 2인 리뷰
 - 선행: 없음
@@ -55,6 +55,8 @@ rg -n "Hallmark" docs/standards/ux-guide.md || echo "no hallmark"
 Git Bash에서 동일.
 
 ## evidence
+
+2026-09-06 T-013 인계: 규칙 문서는 초안으로 존재한다. 규칙 ID·채택 근거·예외와 접근성/이관 관점의 이 task 전용 수용 기준 대조는 아직 미완료다. 통합 계획 리뷰를 개별 UX 규칙 확정으로 대신하지 않는다.
 
 - 규칙 수·MUST 수·리뷰 report(`docs/reviews/adversarial/YYYY-MM-DD-ux-guide.md`)를 이 절과 `docs/journal.md`에 남긴다.
 

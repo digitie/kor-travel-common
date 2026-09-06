@@ -114,6 +114,10 @@ common CI `packages` job: build → `npm pack` → tarball 설치 → webpack·T
 
 common CI `python-package` job: `uv build` → wheel 설치 → starlette 매트릭스 테스트. 릴리스는 wheel 자산과 git 태그를 병행하며 소비자는 lock sha로 고정한다(Docker 빌드 스테이지에 `git` 필요 — `be` §5.2 A 전제).
 
+### 4.4 Python 공개 import와 릴리스 경계
+
+공개 경로 `kortravelcommon.health`·`request_id`·`metrics`는 내부 `api.*`의 얇은 facade다. T-302가 facade·extras import-linter 경계를 만들고 T-304·T-307이 실제 재수출을 완성한다. 최상위 import는 프레임워크를 eager import하지 않으며 core-only와 `[api]` wheel 설치를 별도 검증한다. 1차 모듈은 T-310의 0.1, T-306~T-308은 [T-311](../tasks/T-311-py-v0-2-0-release.md)의 0.2로 발행한다.
+
 ## 5. 규칙 문서(`docs/standards/*`)
 
 | 문서 | 규칙 ID | 검사 도구 | 예외 형식 |
@@ -145,7 +149,3 @@ common CI `python-package` job: `uv build` → wheel 설치 → starlette 매트
 | 재사용 워크플로 | Phase 1 `versions-check`·`contrast-check`·`docs-check` → Phase 3 `openapi-drift`·`typegen-drift` → Phase 4 `node-quality`·`python-quality` | `uses: digitie/kor-travel-common/.github/workflows/<name>.yml@<tag|sha>` | common; job `name:` 입력 개방 |
 
 도구는 Python 3.11+ stdlib에서 Windows에서도 동작해야 하며 CI `tools` job이 ubuntu+windows 매트릭스로 보증한다(D-03).
-
-### Python 공개 import와 릴리스 경계
-
-공개 경로 `kortravelcommon.health`·`request_id`·`metrics`는 내부 `api.*`의 얇은 facade다. T-302가 facade·extras import-linter 경계를 만들고 T-304·T-307이 실제 재수출을 완성한다. 최상위 import는 프레임워크를 eager import하지 않으며 core-only와 `[api]` wheel 설치를 별도 검증한다. 1차 모듈은 T-310의 0.1, T-306~T-308은 [T-311](../tasks/T-311-py-v0-2-0-release.md)의 0.2로 발행한다.

@@ -38,3 +38,7 @@ git -C <airport-checkout> show HEAD:frontend/package.json
 ```
 
 Git Bash에서 동일. 로컬 경로는 [조사 checkout 표](../survey/README.md)에만 둔다. 작업 중인 소비자 파일이나 운영 정보를 evidence로 복사하지 않는다.
+
+## 5. VCS revision 문법 재확인
+
+2026-09-06 [pip VCS 공식 문서](https://pip.pypa.io/en/stable/topics/vcs-support/)(표시 버전 26.2.1)의 Git·URL fragments 절을 대조했다. Python 선언은 `@rev`, fragment는 subdirectory 등 메타데이터다. 리뷰어 A는 로컬 pip 26.0.1의 `Git.get_url_rev_and_auth`로 `@main#v1.2.3`의 실제 rev가 main이며 `#v1.2.3`만 있으면 rev가 없음을 네트워크·설치 없이 재현했다. 이 근거로 npm·Python 선언·uv resolved source의 파싱 문맥을 분리하고 두 부정 선언과 정상 SHA/tag/subdirectory·npm fragment·uv 전체 SHA를 회귀 시험으로 고정했다. 소비자 설치 시험으로 확대 해석하지 않는다.

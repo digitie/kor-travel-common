@@ -332,11 +332,11 @@ def read_toml(path: Path) -> dict:
         return tomllib.load(handle)
 
 
-def ref_is_pinned(text: str) -> bool:
+def ref_is_pinned(text: str, *, kind: str = "npm") -> bool:
     """git/URL 참조가 불변 대상(SHA·버전 태그·릴리스 자산)으로 고정돼 있는지.
 
     고정으로 보는 것: 40자리 SHA, `/tarball|/archive|/commit/<7~40 hex>`, GitHub Release
-    자산(`/releases/download/<tag>/…`, D-11), `@<태그>`·`#<태그>`의 버전형 태그(`v1.2.3`,
+    자산(`/releases/download/<tag>/…`, D-11), Python `@<태그>`·npm `#<태그>`의 버전형 태그(`v1.2.3`,
     `py-v0.1.0`). 브랜치 이름(`main`·`master`·`develop`)·참조 없음·`semver:` 범위는 floating.
     """
     def valid_ref(ref: str) -> bool:
@@ -346,6 +346,9 @@ def ref_is_pinned(text: str) -> bool:
     path = unquote(parsed.path)
     fragment = unquote(parsed.fragment)
     hosted = parsed.hostname in {"github.com", "gitlab.com"}
+    if kind == "uv":
+        # uv.lock의 git source fragment는 해석된 전체 commit SHA다.
+        return bool(re.fullmatch(r"[0-9a-f]{40}", fragment))
     if hosted:
         release = re.fullmatch(r"/[^/]+/[^/]+/releases/download/([^/]+)/[^/]+", path)
         if release:
@@ -357,12 +360,11 @@ def ref_is_pinned(text: str) -> bool:
                 or re.fullmatch(r"[^/:]+/[^/]+", path) and not parsed.scheme)
     if not git_spec:
         return False
-    # URL의 임의 query/fragment를 자산의 불변 ref로 인정하지 않는다.
-    if fragment and not fragment.startswith("subdirectory="):
-        return valid_ref(fragment)
-    if "@" in path:
-        return valid_ref(path.rsplit("@", 1)[1])
-    return False
+    if kind == "pypi":
+        # Python 선언에서 fragment는 subdirectory 등 메타데이터이며 revision이 아니다.
+        return "@" in path and valid_ref(path.rsplit("@", 1)[1])
+    # npm git 선언의 revision은 fragment다. URL query나 Python식 @rev를 혼용하지 않는다.
+    return bool(fragment and valid_ref(fragment))
 
 
 def is_vcs_spec(spec: str) -> bool:
@@ -525,7 +527,8 @@ class Checker:
 
     def record_ref(self, scope: str, ecosystem: str, name: str, spec: str, resolved: str = "") -> None:
         # 선언이 브랜치를 가리키면 lock이 SHA를 기록해도 다음 설치에서 움직인다(D-11).
-        pinned = ref_is_pinned(resolved) if spec == "(전이)" else ref_is_pinned(spec)
+        pinned = (ref_is_pinned(resolved, kind="uv" if ecosystem == "pypi" else "npm")
+                  if spec == "(전이)" else ref_is_pinned(spec, kind=ecosystem))
         provider = (normalize_name(name) in self.registry.provider_names()
                     or re.fullmatch(r"python-[a-z0-9-]+-api", normalize_name(name)) is not None)
         sha = SHA_RE.search(resolved or spec)

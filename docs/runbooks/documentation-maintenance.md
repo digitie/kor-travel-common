@@ -80,7 +80,7 @@
 3. Markdown link뿐 아니라 backtick·plain text로 적힌 옛 경로를 전체 저장소에서 검색한다.
 4. 이동한 문서 서두에 상위 인덱스와 자신의 책임을 짧게 밝힌다.
 5. 상대 링크는 새 파일 위치를 기준으로 다시 계산한다.
-6. `python3 -B -X utf8 tools/validate_document_links.py`와 `git diff --check`를 실행한다(Git Bash·PowerShell에서는 `python`/`py -3`; [개발 환경](../dev-environment.md)).
+6. `python3 -B -X utf8 tools/validate_document_links.py`와 `git diff --check`를 실행한다(환경별 실행기 치환은 [개발 환경](../dev-environment.md)).
 7. 정본 관계가 바뀌었다면 ADR로 남긴다.
 
 검색 예시는 다음과 같다.

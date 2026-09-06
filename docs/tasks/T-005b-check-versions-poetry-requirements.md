@@ -40,10 +40,12 @@
 
 ## 검증 명령
 
+fixture 디렉터리에는 선언 manifest와 해당 lock/requirements를 함께 만든다. 기존 positional 경로·`--manifest` CLI를 유지한다.
+
 ```bash
 python3 -B -X utf8 -m unittest discover -s tests -p "test_check_versions.py" -v
-python3 -B -X utf8 tools/check_versions.py --repo docker-manager --lock tests/fixtures/versions/ktdm.poetry.lock
-python3 -B -X utf8 tools/check_versions.py --repo concierge --lock tests/fixtures/versions/ktc.requirements.txt; echo "exit=$?"
+python3 -B -X utf8 tools/check_versions.py tests/fixtures/versions/ktdm --repo docker-manager
+python3 -B -X utf8 tools/check_versions.py tests/fixtures/versions/ktc --repo concierge; echo "exit=$?"
 python3 -B -X utf8 tools/check_versions.py --repo geo; echo "exit=$?"
 ```
 

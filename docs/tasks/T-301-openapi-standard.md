@@ -1,6 +1,6 @@
 # T-301 docs/standards/openapi.md 확정 + `openapi-exceptions.yaml` 초기 등록 + 헤더·X-Request-ID 형식 규칙
 
-- 상태: IN_PROGRESS
+- 상태: READY
 - 우선순위: P0
 - Gate: 2인 리뷰
 - 선행: 없음
@@ -63,6 +63,8 @@ grep -c '^| \(M[1-9]\|S[0-9]\+\|N[1-8]\) |' docs/standards/openapi.md   # 30이�
 ```
 
 ## evidence
+
+2026-09-06 T-013 인계: OpenAPI 규칙·예외 초안은 존재한다. 이 task가 tools/openapi_exceptions.py와 tests/test_openapi_exceptions.py의 규칙 ID·필수 필드·생성 문서 drift 검증을 함께 소유한다. 아직 없는 도구를 실행한 것으로 세지 않으며 표의 실제 규칙 ID 집합을 대조한 뒤 수용 기준을 확정한다.
 
 이 파일 하단 "실행 기록"에 명령·exit code·날짜와 규칙 수(30)·예외 수(12)를 남긴다. 리뷰 report 경로(`docs/reviews/adversarial/YYYY-MM-DD-openapi-standard.md`)와 reviewer evidence 2파일을 링크한다. 도구를 만들지 않고 md를 수기 유지하기로 결정하면 그 결정을 여기와 `docs/journal.md`에 적는다.
 

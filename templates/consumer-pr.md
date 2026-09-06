@@ -12,7 +12,7 @@
 | gate | 명령 | 결과(tool version·test 수·exit code) |
 |---|---|---|
 | lockfile 무결성 | `npm ci` / `uv sync --locked` | |
-| 버전 대조 | `python3 -B -X utf8 tools/check_versions.py . --repo <repo>` (common 체크아웃에서) | 판정 요약: OK n · … · exit 0 |
+| 버전 대조 | `python3 -B -X utf8 tools/check_versions.py <소비자-checkout> --repo <repo>` (common 체크아웃에서) | 실제 판정 요약·mode·exit code |
 | 단위 | `npm test -- --run` / `pytest -q` | |
 | 빌드·타입 | `next build` / `tsc --noEmit` / `mypy` | |
 | e2e | `npx playwright test` | |

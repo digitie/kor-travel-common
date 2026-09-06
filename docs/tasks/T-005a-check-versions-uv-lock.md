@@ -18,7 +18,7 @@
 
 ## 구현 범위
 
-1. `tools/check_versions.py`에 `--lock <uv.lock>` 자동 판별(파일명·`version = 1` 헤더) 또는 `--lock-kind uv` 옵션 추가. `[[package]]`의 `name`·`version`·`source`(`registry`/`git`/`editable`/`directory`)를 읽고 프로젝트 자신(`source.editable`/`virtual`)의 `requires-python`을 대조한다.
+1. `tools/check_versions.py`에 기존 소비자 디렉터리/manifest 입력으로 `uv.lock` 자동 탐색·판별(파일명·`version = 1` 헤더)을 검증. `[[package]]`의 `name`·`version`·`source`(`registry`/`git`/`editable`/`directory`)를 읽고 프로젝트 자신(`source.editable`/`virtual`)의 `requires-python`을 대조한다.
 2. git 소스: `source.git` URL의 rev가 40자 SHA면 `providers` 절에 보고, 브랜치·태그 참조면 `FLOATING_REF`.
 3. `tests/fixtures/versions/weather.uv.lock`(축약 fixture)·`git-main.uv.lock`으로 `OK/BELOW_FLOOR/NOT_RECOMMENDED/FLOATING_REF/NO_LOCK` 검증.
 4. `docs/standards/versions.md`의 "지원 lockfile" 표에 `uv.lock` 행과 `--locked` 요구를 반영(값 복제 없이).
@@ -41,10 +41,12 @@
 
 ## 검증 명령
 
+fixture 디렉터리에는 선언 manifest와 해당 lock/requirements를 함께 만든다. 기존 positional 경로·`--manifest` CLI를 유지한다.
+
 ```bash
 python3 -B -X utf8 -m unittest discover -s tests -p "test_check_versions.py" -v
-python3 -B -X utf8 tools/check_versions.py --repo weather --lock tests/fixtures/versions/weather.uv.lock
-python3 -B -X utf8 tools/check_versions.py --repo pinvi --lock tests/fixtures/versions/git-main.uv.lock; echo "exit=$?"
+python3 -B -X utf8 tools/check_versions.py tests/fixtures/versions/weather --repo weather
+python3 -B -X utf8 tools/check_versions.py tests/fixtures/versions/git-main --repo pinvi; echo "exit=$?"
 ```
 
 Git Bash에서 동일.
