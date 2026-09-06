@@ -2,6 +2,28 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-003 완료)
+
+a2c1891에서 A/B 모두 PASS, 최초 6 finding 전부 FIXED다([최종 판정](reviews/adversarial/2026-09-07-t003-post-fix-02.md)). Python 3.11.15에서도 실제 100 tests·SPDX를 확인했고 [CI](https://github.com/digitie/kor-travel-common/actions/runs/34062228366)도 성공했다. T-003을 완료 원장으로 옮기고 그 선행이 닫힌 T-009·T-101·T-107·T-302를 READY로 표시했다. 완료 7개·열린 89개, 다음은 T-005다. 상태 이동은 완료 evidence의 기록이며 수용 기준·규칙·릴리스 gate를 변경하지 않았다.
+
+## 2026-09-07 (Codex, T-003 확장자 별칭 보완)
+
+951b443 재검토에서 B PASS, A는 기존 경로 별칭 finding의 확장자 변형을 OPEN으로 유지했다. 추가 음성/양성 시험을 먼저 실행해 실패 3개를 확인했고 확장자·주석 판별과 editorconfig·Windows 끝 공백/점 경계를 보완했다. Windows Python 3.14.3·WSL Python 3.14.4 모두 전체 100 tests 성공·skip 0, SPDX 13개·문서 222개/1869 target·task 96개 오류 0이다. 새 review 기록 추가 후 문서 검증은 commit 전에 다시 실행한다.
+
+사용자가 모든 라이브러리를 GPLv3로 변경할 예정이라고 알렸다. 이 미래 방향과 고정 원천의 현재 선언을 구분하며, common은 현재 GPL-3.0-or-later를 유지한다. -only/or-later 표기는 별도 확인 질문을 전달했다. 다른 저장소는 수정하지 않았고 원문 사본·소비자 gate도 자동 변경하지 않았다.
+
+## 2026-09-07 (Codex, T-003 독립 리뷰 수정)
+
+017fef1의 두 원본을 확정한 뒤 6 finding을 모두 수용했다([통합 리뷰](reviews/adversarial/2026-09-07-t003.md)). 경로 별칭·qualified geo·PV 행 공백 우회를 회귀 시험으로 고정했다. canview 원본 재대조로 제목 검사는 기존 기능임을 확인해 수정 고지를 바로잡았다. 템플릿의 고지·PV 사본·라이선스 동반 목적지를 명시했다.
+
+Windows·WSL 전체 98 tests 성공·skip 0, SPDX 13개 오류 0. 격리 전달 fixture는 설정 6개와 고지·PV·원문 사본을 확인했다. 제품·소비자 gate와 T-009 CI 확장은 미실행이며 리뷰 수정 candidate를 다시 commit·push한 뒤 동일 두 reviewer가 재확인한다. T-003을 닫기 전 다음 task 구현은 시작하지 않는다.
+
+## 2026-09-07 (Codex, T-003 고지·SPDX 구현 후보)
+
+PR #1의 b36c99fb6c7f4df2a27364842ee197fc947e461e에서 `codex/t003-license-provenance`를 분기했다. PR #1은 merge하지 않고 이 branch의 base로 유지한다. 사용자 요청에 따라 T-003 → T-005 → T-009 순서로 진행한다.
+
+원문 확보 결과·94개 회귀 시험·SPDX 13개·문서/DAG·수정한 초기 시험 실패는 [T-003 evidence](tasks/T-003-notices-provenance-spdx.md#evidence)에 있다. 초안의 geo 설정 출처 누락을 실제 Git object 대조로 찾아 PV-007~012와 GPL-3.0-only 고지로 보완했다. 새 소비자 제품 코드를 복사하거나 소비 저장소를 수정하지 않았다. CodeGraph의 기존 미초기화 상태 대신 코드 읽기·rg·고장 주입 시험으로 검증했다. 두 독립 reviewer는 같은 commit의 별도 detached worktree에서 검사한다.
+
 ## 2026-09-06 (Codex, T-013 종료 대조의 숨은 선행 정정)
 
 8fb1334에서 완료 6개·인계·draft PR/리모트 SHA·CI run 34025999506은 일치했다. coordinator가 T-009의 미구현 SPDX 도구 의존을 추가 질문했고 두 reviewer가 같은 원인을 A-P1-06/B-P2-10으로 독립 확인했다. 심각도는 원본 그대로 보존하며 통합 차단은 높은 P1을 따른다. T-009 상세/원장에 T-003 선행을 넣고 BLOCKED로 되돌렸다. T-005 전체 DONE은 기술적 필수와 구분하고 기본 실행 대기열의 T-003 → T-005 → T-009는 유지한다.

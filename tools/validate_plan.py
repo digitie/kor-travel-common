@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+# Origin: canview@1f93b8adb34a48537db69b950c8a99ce89859760 tools/validate_plan.py
+# Modified: 2026-09-07 — docstring의 gate 문구 치환·출처 헤더 추가, 검사 로직 동일
 """상세 task와 요약의 metadata·선행 DAG를 파일 변경 없이 검사한다.
 
 예정 코드/시험 artifact의 존재나 gate 통과를 판정하지 않는다.

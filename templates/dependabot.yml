@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 # kor-travel-common templates/dependabot.yml (판 2026-09)
 # 소비 저장소 경로: .github/dependabot.yml
 # Renovate는 설치 미확인(O-18)이라 dependabot을 기본으로 둔다(D-07·T-507).

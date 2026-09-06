@@ -1,6 +1,6 @@
 # T-302 packages/py/kor-travel-common 골격(hatchling·extras·3.11 문법 검사·uv.lock·starlette 0.4x/1.6 CI 매트릭스) + `docs/standards/backend-stack.md` 확정
 
-- 상태: BLOCKED
+- 상태: READY
 - 우선순위: P0
 - Gate: python-package
 - 선행: T-003

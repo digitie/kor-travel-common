@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
-# Origin: kor-travel-common 자체 작성
 """tools/check_versions.py 회귀 시험: 판정 어휘·모드·예외 만료·lockfile 파서·읽기 전용 동작."""
 
 from __future__ import annotations

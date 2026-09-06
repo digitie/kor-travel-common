@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
-# Origin: kor-travel-common 자체 작성
 """tools/validate_document_links.py 회귀 시험: 상대 링크만 허용, 절대 링크 오류, 산문 오탐 제외."""
 from __future__ import annotations
 
@@ -41,6 +40,14 @@ class DocumentLinkValidation(unittest.TestCase):
         errors, _, _ = MODULE.validate(self.root)
         self.assertEqual(len(errors), 1)
         self.assertIn("missing.md", errors[0])
+
+    def test_license_notice_links_are_checked(self) -> None:
+        directory = self.root / "LICENSES"
+        directory.mkdir()
+        (directory / "README.md").write_text("[사본](missing.txt)\n", encoding="utf-8")
+        errors, _, _ = MODULE.validate(self.root)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("missing.txt", errors[0])
 
     def test_absolute_link_is_error(self) -> None:
         self.write("a.md", "[w](F:/dev/kor-travel-common/docs/target.md) [l](/mnt/f/dev/x/docs/target.md)\n")

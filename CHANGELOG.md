@@ -26,6 +26,12 @@
 
 ### standards
 
+#### Fixed
+
+- SPDX 출처 대조의 경로 별칭·표 공백·qualified geo 우회를 수정하고, 설정 템플릿에 출처 기록과 라이선스를 함께 전달하는 배치 절차를 추가했다.
+
+- T-003: geo 설정 템플릿 6개의 누락된 출처·GPL-3.0-only 고지를 보완했다. 도입 후보의 고정 버전 라이선스 원문과 저작권 사본을 보존하고, SPDX·출처 대조 도구를 추가했다. 설정을 복사할 때 [파일별 고지](templates/agent-config/README.md)도 함께 유지한다.
+
 #### Added
 
 - 규칙 문서 초안(`docs/standards/`: design-tokens·ux-guide·responsive-web·frontend-stack·ui-contract·openapi·backend-stack·ci-deploy·licensing·versions·agent-conventions)과 예외 레지스트리 `openapi-exceptions.yaml`.

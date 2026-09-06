@@ -1,0 +1,199 @@
+{
+  "verified": "2026-09-07",
+  "files": [
+    {
+      "component": "shadcn",
+      "version": "4.21.0",
+      "license": "MIT",
+      "source": "https://registry.npmjs.org/shadcn/-/shadcn-4.21.0.tgz",
+      "integrity": "sha512-UU2mFNusW8C5rvadKdH69vERYZqUlOOlXBcf0MYhYLdTGP6DPti7X4qovCu+RTfCqsAgq/T+YfE0Vnttxh9aiw==",
+      "member": "package/LICENSE.md",
+      "file": "LICENSES/upstream/shadcn-4.21.0.txt",
+      "sha256": "1564074e13439397221ffd522e2e504d56561994a23d371aa5e3ad43e4f5423f"
+    },
+    {
+      "component": "@base-ui/react",
+      "version": "1.8.0",
+      "license": "MIT",
+      "source": "https://registry.npmjs.org/@base-ui/react/-/react-1.8.0.tgz",
+      "integrity": "sha512-P0/1sxo6SBVZOklKMIedvTWqw2s2IQzi9x5bIVsXu980cuSOD4NeuRSs+/L7LZQfDkZP/uRZyGPyfFl/B1oH+Q==",
+      "member": "package/LICENSE",
+      "file": "LICENSES/upstream/base-ui-react-1.8.0.txt",
+      "sha256": "07fc1b39d69d14bc7d40482a628f47226258eb01265db68ae684944b916beb2a"
+    },
+    {
+      "component": "radix-ui",
+      "version": "1.6.0",
+      "license": "MIT",
+      "source": "https://registry.npmjs.org/radix-ui/-/radix-ui-1.6.0.tgz",
+      "integrity": "sha512-EUEC70O03EgxWMP5aoqfBZ6iLC5bczFagGy7zhSYRt8o5DP7IWNiP3ywetse3L9b8843ExB0OGWZvgbYVJuNeg==",
+      "member": "package/LICENSE",
+      "file": "LICENSES/upstream/radix-ui-1.6.0.txt",
+      "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+    },
+    {
+      "component": "class-variance-authority",
+      "version": "0.7.1",
+      "license": "Apache-2.0",
+      "source": "https://registry.npmjs.org/class-variance-authority/-/class-variance-authority-0.7.1.tgz",
+      "integrity": "sha512-Ka+9Trutv7G8M6WT6SeiRWz792K5qEqIGEGzXKhAE6xOWAY6pPH8U+9IY3oCMv6kqTmLsv7Xh/2w2RigkePMsg==",
+      "member": "package/LICENSE",
+      "file": "LICENSES/upstream/class-variance-authority-0.7.1.txt",
+      "sha256": "0ccbf956cffc8dcf515809433cb5242ee67c94513d46e48c261d68d0880de406"
+    },
+    {
+      "component": "lucide-react",
+      "version": "1.41.0",
+      "license": "ISC",
+      "source": "https://registry.npmjs.org/lucide-react/-/lucide-react-1.41.0.tgz",
+      "integrity": "sha512-6lksP35l6KszDKUeRTi4LV7i6DEe0Yzl2ALJm9j4c5xEYN91GdW1xGsawGMOg2mgjF5GHBVX8pKX9kP+cWsP3Q==",
+      "member": "package/LICENSE",
+      "file": "LICENSES/upstream/lucide-react-1.41.0.txt",
+      "sha256": "b495047bd93a9b06913511076f504daba17d5bbeb3e0650f3bb53a4220329c57"
+    },
+    {
+      "component": "tailwind-merge",
+      "version": "3.6.0",
+      "license": "MIT",
+      "source": "https://registry.npmjs.org/tailwind-merge/-/tailwind-merge-3.6.0.tgz",
+      "integrity": "sha512-uxL7qAVQriqRQPAyK3pj66VqskWqoZ37PW94jwOTwNfq/z9oyu1V+eqrZqtR2+fCiXdYOZe/Modt8GtvqNzu+w==",
+      "member": "package/LICENSE.md",
+      "file": "LICENSES/upstream/tailwind-merge-3.6.0.txt",
+      "sha256": "d4c70c7ce38cea8778f0aed3fc0bef0a9dbd27f13bd8b6773cbd6d37941971e5"
+    },
+    {
+      "component": "clsx",
+      "version": "2.1.1",
+      "license": "MIT",
+      "source": "https://registry.npmjs.org/clsx/-/clsx-2.1.1.tgz",
+      "integrity": "sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==",
+      "member": "package/license",
+      "file": "LICENSES/upstream/clsx-2.1.1.txt",
+      "sha256": "9a9edad7baae52622bddf3c15b2ef8a33d2c89f2d25408ad13e8a7481c6b0c97"
+    },
+    {
+      "component": "tw-animate-css",
+      "version": "1.4.0",
+      "license": "MIT",
+      "source": "https://registry.npmjs.org/tw-animate-css/-/tw-animate-css-1.4.0.tgz",
+      "integrity": "sha512-7bziOlRqH0hJx80h/3mbicLW7o8qLsH5+RaLR2t+OHM3D0JlWGODQKQ4cxbK7WlvmUxpcj6Kgu6EKqjrGFe3QQ==",
+      "member": "package/LICENSE",
+      "file": "LICENSES/upstream/tw-animate-css-1.4.0.txt",
+      "sha256": "039184dfa0a822397b3f45a435b5b1e538721587fbade96b9fa80f86cb354109"
+    },
+    {
+      "component": "maplibre-gl",
+      "version": "5.24.0",
+      "license": "BSD-3-Clause",
+      "source": "https://registry.npmjs.org/maplibre-gl/-/maplibre-gl-5.24.0.tgz",
+      "integrity": "sha512-ALyFxgtd5R+65UqZ/++lOqwWcC0SNho9c27fYSyLmG7AfnAul2o46F05aDJGPbFU57wos9dgcIySHs0Xe6ia3A==",
+      "member": "package/LICENSE.txt",
+      "file": "LICENSES/upstream/maplibre-gl-5.24.0.txt",
+      "sha256": "ee5fc05a0677eaf69601d2c7db0d9ecd6cc27c3abc1d0733bc9ed34707cf8ef2"
+    },
+    {
+      "component": "pretendard",
+      "version": "1.3.9",
+      "license": "OFL-1.1",
+      "source": "https://registry.npmjs.org/pretendard/-/pretendard-1.3.9.tgz",
+      "integrity": "sha512-PaQAADyLY5v4kYFwkpSJHbSSYIkiriY/1xXw75TKoZ9UQQqeU+tvP05yTdZAWibiIYoo8ZKtRv8PM7w0IaywSw==",
+      "member": "package/dist/LICENSE.txt",
+      "file": "LICENSES/upstream/pretendard-1.3.9.txt",
+      "sha256": "b04538c9abec39a3db75108cf0af0fd9c77032fe8aa2cf38345b4d250e98e38e"
+    },
+    {
+      "component": "@tanstack/react-table",
+      "version": "8.21.3",
+      "license": "MIT",
+      "source": "https://registry.npmjs.org/@tanstack/react-table/-/react-table-8.21.3.tgz",
+      "integrity": "sha512-5nNMTSETP4ykGegmVkhjcS8tTLW6Vl4axfEGQN3v0zdHYbK4UfoqfPChclTrJ4EoK9QynqAu9oUf8VEmrpZ5Ww==",
+      "member": "package/LICENSE",
+      "file": "LICENSES/upstream/tanstack-react-table-8.21.3.txt",
+      "sha256": "9db3f8ddd7031ab264b99bec49c221155d0c8649b53dd4aa007f2041d36cdf5f"
+    },
+    {
+      "component": "@tanstack/react-virtual",
+      "version": "3.14.0",
+      "license": "MIT",
+      "source": "https://registry.npmjs.org/@tanstack/react-virtual/-/react-virtual-3.14.0.tgz",
+      "integrity": "sha512-826QNsxG1P5uZqbaRhkpKPQcPuu4xEpiWZtPWDIaIXiPnGgXeNYZ4e+rC6c7omZuyvLMbA89ZvGko7DsGa74fg==",
+      "member": "package/LICENSE",
+      "file": "LICENSES/upstream/tanstack-react-virtual-3.14.0.txt",
+      "sha256": "a405ee70c632bb938acb7ac5f210e814409b3760ea9d2329d8ed8ffcfd11a0e7"
+    },
+    {
+      "component": "zod",
+      "version": "4.5.0",
+      "license": "MIT",
+      "source": "https://registry.npmjs.org/zod/-/zod-4.5.0.tgz",
+      "integrity": "sha512-FSVkRSv3SBc0aefry5kxuD46ExRwtWWyUPjyXHZt00YRF81+MX8rdQm8aJwlL4NLMqcJABseHr66OJuc+0LkDw==",
+      "member": "package/LICENSE",
+      "file": "LICENSES/upstream/zod-4.5.0.txt",
+      "sha256": "3f1189b28e3866e0d979968d466b78f813f76827cfdca1fbb124cc0a5c8841f8"
+    },
+    {
+      "component": "spdx/license-list-data",
+      "version": "v3.26.0",
+      "commit": "8a04f0303d95c4f932210b118588c662665bd383",
+      "source": "https://raw.githubusercontent.com/spdx/license-list-data/8a04f0303d95c4f932210b118588c662665bd383/text/GPL-3.0-or-later.txt",
+      "file": "LICENSES/GPL-3.0-or-later.txt",
+      "sha256": "fb981668c18a279e285fc4d83fba1e836cc84dd4daa73c9697d3cfd2d8aca6e0"
+    },
+    {
+      "component": "spdx/license-list-data",
+      "version": "v3.26.0",
+      "commit": "8a04f0303d95c4f932210b118588c662665bd383",
+      "source": "https://raw.githubusercontent.com/spdx/license-list-data/8a04f0303d95c4f932210b118588c662665bd383/text/MIT.txt",
+      "file": "LICENSES/MIT.txt",
+      "sha256": "6d7c9e9d7d12c8d3753bdb24417b84819ba4d6c2f025c37948113d86dc81eef9"
+    },
+    {
+      "component": "spdx/license-list-data",
+      "version": "v3.26.0",
+      "commit": "8a04f0303d95c4f932210b118588c662665bd383",
+      "source": "https://raw.githubusercontent.com/spdx/license-list-data/8a04f0303d95c4f932210b118588c662665bd383/text/Apache-2.0.txt",
+      "file": "LICENSES/Apache-2.0.txt",
+      "sha256": "074e6e32c86a4c0ef8b3ed25b721ca23aca83df277cd88106ef7177c354615ff"
+    },
+    {
+      "component": "spdx/license-list-data",
+      "version": "v3.26.0",
+      "commit": "8a04f0303d95c4f932210b118588c662665bd383",
+      "source": "https://raw.githubusercontent.com/spdx/license-list-data/8a04f0303d95c4f932210b118588c662665bd383/text/ISC.txt",
+      "file": "LICENSES/ISC.txt",
+      "sha256": "f2ec607f67bb0dd3053b49835b02110d5cd0f8eb6da3aac4dc0b142a6b299be9"
+    },
+    {
+      "component": "spdx/license-list-data",
+      "version": "v3.26.0",
+      "commit": "8a04f0303d95c4f932210b118588c662665bd383",
+      "source": "https://raw.githubusercontent.com/spdx/license-list-data/8a04f0303d95c4f932210b118588c662665bd383/text/BSD-3-Clause.txt",
+      "file": "LICENSES/BSD-3-Clause.txt",
+      "sha256": "5a93d5831e1297ab10fe643e1a631e83be392896da14ee2951285a79012df69d"
+    },
+    {
+      "component": "spdx/license-list-data",
+      "version": "v3.26.0",
+      "commit": "8a04f0303d95c4f932210b118588c662665bd383",
+      "source": "https://raw.githubusercontent.com/spdx/license-list-data/8a04f0303d95c4f932210b118588c662665bd383/text/OFL-1.1.txt",
+      "file": "LICENSES/OFL-1.1.txt",
+      "sha256": "8eea8287e5876b539670cadb82e99f9a7afddec6f6730811be1daf25d2e9bcfd"
+    },
+    {
+      "component": "digitie/canview",
+      "version": "1f93b8adb34a48537db69b950c8a99ce89859760",
+      "commit": "1f93b8adb34a48537db69b950c8a99ce89859760",
+      "source": "https://github.com/digitie/canview/blob/1f93b8adb34a48537db69b950c8a99ce89859760/LICENSE",
+      "file": "LICENSES/upstream/canview-LICENSE.txt",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    },
+    {
+      "component": "digitie/kor-travel-geo",
+      "version": "1d9d74d3a852bbaaa09144b75bb69b99a58a6002",
+      "commit": "1d9d74d3a852bbaaa09144b75bb69b99a58a6002",
+      "source": "https://github.com/digitie/kor-travel-geo/blob/1d9d74d3a852bbaaa09144b75bb69b99a58a6002/LICENSE",
+      "file": "LICENSES/upstream/kor-travel-geo-LICENSE.txt",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    }
+  ]
+}

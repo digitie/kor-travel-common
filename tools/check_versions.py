@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
-# Origin: kor-travel-common 자체 작성
 """소비 저장소의 선언·설치 버전을 루트 `versions.json`과 대조해 판정한다(읽기 전용).
 
 규칙 정본은 docs/standards/versions.md, 값 정본은 versions.json이다. 이 도구는

@@ -18,6 +18,9 @@
 | [`agent-config/opencode.json`](agent-config/opencode.json) | `opencode.json` | SHOULD | 〃 | `instructions: ["AGENTS.md", "SKILL.md"]` 포함 |
 | [`agent-config/codex.config.toml`](agent-config/codex.config.toml) | `.codex/config.toml` | SHOULD | 〃 | |
 | [`agent-config/gemini.mcp.json`](agent-config/gemini.mcp.json) | `.gemini/mcp.json` | 선택 | 〃 | ktdm·map·pinvi 관례 |
+| [`agent-config/README.md`](agent-config/README.md) | `docs/notices/kor-travel-common-agent-config.md` | 설정 채택 시 필수 | [licensing](../docs/standards/licensing.md) §5 | 아래 동반 출처 기록·라이선스 사본과 함께 배치 |
+| [PROVENANCE PV-007~012](../PROVENANCE.md) 중 채택 파일의 행 | `docs/provenance/kor-travel-common-agent-config.md` | 설정 채택 시 필수 | 〃 | 표 머리·원문 행·common 고정 SHA·배치 경로 매핑 보존 |
+| [geo 라이선스 원문](../LICENSES/upstream/kor-travel-geo-LICENSE.txt) | `LICENSES/kor-travel-geo-LICENSE.txt` | 설정 채택 시 필수 | 〃 | 원본 바이트 유지 |
 | [`consumer-pr.md`](consumer-pr.md) | PR 본문 | MUST(채택·이관 PR) | agent-conventions §10, [design-brief D-24](../docs/plan/design-brief.md) | 6항목 + 되돌리기 명령 + 6폭 시각 diff 표 |
 | [`consumer-adoption-checklist.md`](consumer-adoption-checklist.md) | 상세 task 또는 채택 PR 첨부 | MUST(첫 채택) | [consumer adoption runbook](../docs/runbooks/consumer-adoption.md), [versions](../docs/standards/versions.md) §3 | MUST/SHOULD 표기 |
 | [`dependabot.yml`](dependabot.yml) | `.github/dependabot.yml` | SHOULD | versions §3.9, O-18 | `directory`만 앱 구조에 맞게 수정. 그룹·ignore는 common 소유 |
@@ -30,6 +33,8 @@
 2. 소비자 경로가 다르면(모노레포 앱 디렉터리) 배치만 바꾸고 내용은 바꾸지 않는다. 바꿔야 한다면 common PR로 제안한다.
 3. 규약 PR(AGENTS·CLAUDE·설정 파일·dependabot)은 코드 채택 PR과 분리한다(D-24: 한 PR = 한 산출물).
 4. 판이 올라가면 `CHANGELOG.md`(common)에 `### Changed` 항목이 생기고, 소비자는 다음 채택 PR에서 갱신한다. 분기 감사(T-506)가 마커 사이 텍스트를 대조한다.
+
+에이전트 설정을 채택할 때는 표의 동반 파일 3종도 배치한다. 출처 기록은 common `PROVENANCE.md` 표 머리와 채택한 파일의 PV-007~012 행을 원문 그대로 복사하고, 확보한 common의 전체 commit SHA와 `common 파일 → 소비자 배치 경로`를 덧붙인다. 수정 요약·날짜·원천 SHA와 경로를 링크만으로 대신하지 않는다. 동반 기록은 고정 common 원문의 배포 사본이며 별도의 정책 정본이 아니다. 소비자 PR에서 고지에 적힌 두 상대 경로의 파일과 해당 PV 행이 실제 존재하는지 확인한다. common 작업에서는 이 전달 절차만 작성하며 소비 저장소를 직접 수정하지 않는다.
 
 ## 3. 템플릿 안의 경로·링크
 

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 # kor-travel-common OpenAPI·REST 규약 예외 레지스트리 (정본)
 #
 # - 규칙 ID·계층·등록 규칙은 docs/standards/openapi.md §3·§6, BE-n 규칙은 docs/standards/backend-stack.md.

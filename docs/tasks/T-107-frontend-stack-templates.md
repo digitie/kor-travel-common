@@ -1,6 +1,6 @@
 # T-107 docs/standards/frontend-stack.md 확정 + `templates/eslint/*.mjs`·tsconfig base·postcss·components.json 조각
 
-- 상태: BLOCKED
+- 상태: READY
 - 우선순위: P1
 - Gate: 2인 리뷰
 - 선행: T-003

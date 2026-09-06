@@ -1,6 +1,6 @@
-# T-003 고지·출처 파일(NOTICE·THIRD_PARTY_NOTICES·LICENSES/·PROVENANCE·CONTRIBUTING)·SPDX 헤더 규약·tools/check_spdx.py
+# T-003 고지·출처 파일(NOTICE·THIRD_PARTY_NOTICES·LICENSES/·PROVENANCE·CONTRIBUTING)·SPDX 헤더 규약·tools/check_spdx.py (2026-09-07, PR #2)
 
-- 상태: READY
+- 상태: DONE
 - 우선순위: P0
 - Gate: 문서 검증·도구 테스트
 - 선행: 없음
@@ -37,7 +37,14 @@ GPL-3.0-or-later 저장소가 코드를 받기 전에 권리·출처 고지 골�
 
 ## 예상 변경 파일
 
-예정 경로는 존재·실행 증거가 아니다. `NOTICE`, `THIRD_PARTY_NOTICES.md`, `PROVENANCE.md`, `CONTRIBUTING.md`, `LICENSES/*.txt`(6), `tools/check_spdx.py`, `tests/test_check_spdx.py`, `tools/README.md`.
+예정 경로는 존재·실행 증거가 아니다. `NOTICE`, `THIRD_PARTY_NOTICES.md`, `PROVENANCE.md`, `CONTRIBUTING.md`, `LICENSES/*.txt`(SPDX 전문 6종)·`LICENSES/upstream/*`·확보 digest, `tools/check_spdx.py`, `tests/test_check_spdx.py`, `tools/README.md`.
+
+## 구현 대조 결정(2026-09-07)
+
+- 기존 LIC-15·LIC-18 정본에 맞춰 검사기는 tests·workflow·설정까지 검사한다. 초기 최소 범위보다 넓지만 기존 의무를 줄이지 않는 적용이다.
+- LICENSES 고지를 읽는 문서 검사 범위도 확장한다. 고지 사본을 새로 읽는 음성 회귀 시험을 둔다.
+- 초안의 "소비자에서 옮긴 코드 없음"은 geo 설정 6개와 충돌했다. 원본 Git object와 대조해 PV-007~012·GPL-3.0-only·JSON sidecar를 보완한다. 소비자 제품 코드는 반입하지 않는다.
+- 고정 버전 후보의 원문 확보는 common 의존 설치나 기존 shadcn 생성 시점의 증거가 아니다. B5·B6를 자동 해제하지 않는다.
 
 ## 수용 기준
 
@@ -45,7 +52,7 @@ GPL-3.0-or-later 저장소가 코드를 받기 전에 권리·출처 고지 골�
 - `THIRD_PARTY_NOTICES.md`의 모든 실제 항목에 고정 버전·원문 URL·`LICENSES/`의 해당 저작권 고지 사본 링크가 있다. cva NOTICE는 해당 버전 upstream의 존재 여부를 확인해 있으면 보존하고 없으면 부재 근거를 남긴다. 문서의 과거 항목 수를 완료 기준으로 쓰지 않는다.
 - `LICENSES/`에 라이선스 6종 본문과 의존성별 저작권 고지 사본이 있고 `THIRD_PARTY_NOTICES.md`·`NOTICE`의 링크가 모두 해석된다.
 - `PROVENANCE.md`에 pinvi 유래 행이 없고(B1), `maplibre-vworld-*`·`python-*-api` 행이 없다(B2).
-- `python3 -B -X utf8 tools/check_spdx.py`가 헤더 없는 fixture에서 exit 1, 규약 준수 fixture에서 exit 0이며 테스트가 이를 고정한다(잔여).
+- `python3 -B -X utf8 tools/check_spdx.py`가 헤더 없는 fixture에서 exit 1, 규약 준수 fixture에서 exit 0이며 테스트가 이를 고정한다.
 - 저장소 어디에도 Hallmark `SKILL.md` 문장 인용이 없다(B3).
 - `tools/validate_document_links.py` 오류 0.
 
@@ -64,9 +71,17 @@ Git Bash에서 동일.
 
 ## evidence
 
-2026-09-06 T-013 인계: 고지·출처 초안은 인수했다. LICENSES 원문 사본과 tools/check_spdx.py·음성 fixture는 미완료이며 NOT_RUN(잔여)이다. 다음 에이전트가 이 task 하나부터 착수한다.
+2026-09-07 구현 후보: [확보 목록·digest](../../LICENSES/sources.json)의 원문 사본 21개 SHA-256 일치. npm 후보 13개 tarball integrity 일치, cva 0.7.1 고정 원천 LICENSE와 배포물 LICENSE 바이트 일치·원천/배포물 NOTICE 없음. geo 설정은 고정 커밋의 TOML 본문·정규화 JSON과 대조했으며 [파일별 고지](../../templates/agent-config/README.md)에 보존했다.
 
-- 명령·exit code·검사 파일 수를 이 절과 `docs/journal.md`에 남긴다. `check_spdx.py`·`LICENSES/`가 미완이면 `NOT_RUN(잔여)`로 두고 `DONE` 전에 완료한다.
+- Windows Python 3.14.3·WSL Python 3.14.4: 전체 unittest 94개 성공, skip 0. SPDX 전용 26개에는 누락 헤더 CLI exit 1·정상 CLI exit 0·문자열 위장·출처/수정 고지·geo -only·빈 범위·읽기 실패가 포함된다.
+- Windows·WSL: SPDX 13개 파일 오류 0, 문서 링크 215개 문서/1833개 로컬 target 오류 0, task 96개 오류 0. `git diff --check` 오류 0.
+- 원문 후행 공백 때문에 최초 staged 공백 검사가 실패했다. LICENSES txt 사본만 공백 자동 정리/경고에서 제외해 원본 digest를 보존하고 staged 검사를 다시 통과했다.
+- 링크 검사 범위 추가 테스트를 처음 배치할 때 기존 assert 위치가 섞여 1건 실패했다. 위치를 고친 뒤 위 전체 시험을 양쪽에서 다시 실행했다.
+- [2인 독립 리뷰](../reviews/adversarial/2026-09-07-t003.md): 017fef1에서 A BLOCK/B BLOCK. 경로 별칭·qualified geo·표 공백·원본 수정 이력·고지 전달을 보완했다. 당시 원본의 6 finding을 OPEN으로 보존하고 IN_PROGRESS를 유지했다.
+- 수정 후보: Windows·WSL 전체 unittest 98개 성공·skip 0, SPDX 13개 오류 0. common 내부 임시 전달 fixture에서 설정 6개·고지·PV 6행·라이선스 사본 바이트를 확인했다. 소비자 파일을 직접 수정하지 않았다.
+- [951b443 재검토](../reviews/adversarial/2026-09-07-t003-post-fix.md): 5 finding FIXED, 확장자 대소문자 별칭 A-T003-P1-01만 OPEN. 추가 시험의 실패 3개를 먼저 재현한 뒤 확장자·주석 문법·editorconfig·Windows 끝 공백/점을 보완했다. 이 수정의 독립 재확인 전까지 IN_PROGRESS를 유지했다.
+- [최종 2인 판정](../reviews/adversarial/2026-09-07-t003-post-fix-02.md): a2c1891에서 A PASS/B PASS, 최초 6 finding 모두 FIXED. Windows 3.14.3·WSL 3.14.4·Python 3.11.15 각각 100 tests 성공·skip 0, SPDX 13개·문서 223개/1874 target·task 96개 오류 0. [CI](https://github.com/digitie/kor-travel-common/actions/runs/34062228366) 성공. T-003의 문서·도구 gate를 닫았다.
+- CI의 필수 SPDX 단계·Windows matrix는 T-009. 패키지 빌드·설치·소비자 smoke는 NOT_RUN(제품 실물 없음; T-101·T-201·T-302의 후속 gate). 이 task의 문서·도구 완료와 릴리스 가능을 구분한다.
 
 ## rollback 또는 release 차단 조건
 

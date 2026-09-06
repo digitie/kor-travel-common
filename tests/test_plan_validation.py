@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
-# Origin: canview 1f93b8adb34a48537db69b950c8a99ce89859760 tests/test_plan_validation.py
+# Origin: canview@1f93b8adb34a48537db69b950c8a99ce89859760 tests/test_plan_validation.py
 # Modified: 2026-09-06 경로 적응·완료 원장 제목 회귀 시험 추가
 """계획 validator의 음성 fixture와 읽기 전용 동작을 검증한다."""
 

@@ -1,6 +1,6 @@
 # kor-travel-common 라이선스·출처 규약
 
-이 문서는 [규칙 문서 색인](README.md)에 속한 저장소 라이선스 정책, 고지 파일 구성, SPDX 헤더, 패키지 메타데이터, 소비 저장소에서 코드를 추출할 때의 gate의 정본이다. 정본 지위: **확정 초안** — [브리프](../plan/design-brief.md) D-17·D-11·D-16을 규칙 ID `LIC-n`으로 옮긴 것이며, 고지 파일 실물(T-003; `tools/check_spdx.py`·`LICENSES/` 원문은 잔여)과 외부 결정(T-020 pinvi L6, T-021 ktc·ktdm L8)에서 대조해 확정하는 task가 남아 있다. 마지막 갱신: 2026-09-06.
+이 문서는 [규칙 문서 색인](README.md)에 속한 저장소 라이선스 정책, 고지 파일 구성, SPDX 헤더, 패키지 메타데이터, 소비 저장소에서 코드를 추출할 때의 gate의 정본이다. 정본 지위: **확정 초안** — [브리프](../plan/design-brief.md) D-17·D-11·D-16을 규칙 ID `LIC-n`으로 옮긴 것이며, 고지 파일 실물(T-003; 구현·원문 확보 후 2인 검토)과 외부 결정(T-020 pinvi L6, T-021 ktc·ktdm L8)에서 대조해 확정하는 task가 남아 있다. 마지막 갱신: 2026-09-07.
 
 법률 자문이 아니다. 판단 근거는 GNU 공식 FAQ·GPLv3 원문과 조사 기준 커밋의 실제 파일이며, 근거 절은 [licensing 횡단 비교](../survey/cross/licensing.md)(`lic`)로 인용한다.
 
@@ -17,10 +17,10 @@
 |---|---|
 | 저작권자·라이선스 버전·연락처 | [NOTICE](../../NOTICE) |
 | 서드파티 고지 목록 | [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md) |
-| 라이선스 원문 사본 | `LICENSES/<SPDX-ID>.txt`(T-003 잔여) |
+| 라이선스 원문 사본 | [원문·출처 안내](../../LICENSES/README.md) |
 | 이식 파일군의 원천·커밋·경로 | [PROVENANCE.md](../../PROVENANCE.md) |
 | AI 보조 생성물·기여 조건 | [CONTRIBUTING.md](../../CONTRIBUTING.md) |
-| 파일 헤더 검사 | `tools/check_spdx.py`(T-003 잔여), [tools README](../../tools/README.md) |
+| 파일 헤더 검사 | [check_spdx.py](../../tools/check_spdx.py), [tools README](../../tools/README.md) |
 | 패키지 동봉·`license` 필드 | 이 문서 §6, 절차는 [release](../runbooks/release.md) |
 | 소비 저장소 정렬 요청 문서 | T-020·T-021 산출물, [consumer adoption](../runbooks/consumer-adoption.md) |
 | 결정 이유 | [ADR-004](../adr/004-gpl-3-0-or-later-and-provenance-gate.md)([ADR 색인](../adr/README.md)) |
@@ -59,11 +59,11 @@
 |---|---|---|---|
 | LIC-8 | `LICENSE` | GPL-3.0 전문(현재 있음). 부록 자리표시자는 채우지 않아도 되며 고지는 `NOTICE`에 | GPLv3 "How to Apply"; `lic` §3.3 |
 | LIC-9 | `NOTICE` | `Copyright (C) 2026 Youn-sok Choi (digitie)`, `SPDX-License-Identifier: GPL-3.0-or-later`, 연락처, 패키지 버전 표기 규칙, §7 추가 허가 없음 명시 | D-17; `lic` §3.3 |
-| LIC-10 | `THIRD_PARTY_NOTICES.md` | 항목: shadcn/ui(MIT), `@base-ui/react`(MIT), radix(MIT; geo 유래·pinvi 전이 21종은 B5 역추적 후), `class-variance-authority`(**Apache-2.0**, NOTICE 원문 유지), lucide(ISC; 인라인 SVG로 가져와도 고지 유지), `tailwind-merge`·`clsx`·`tw-animate-css`(MIT), `maplibre-gl`(BSD-3-Clause, 이름 홍보 금지 조항), pretendard(OFL-1.1 전문; 폰트 파일은 미배포), TanStack(MIT), zod(MIT). 각 항목에 버전·원문 URL·사본 위치. `python-*-api` 13종은 B7 확인 후 | D-17; `lic` §2.4·§3.3 |
-| LIC-11 | `LICENSES/` | SPDX 파일명 원문: `GPL-3.0-or-later.txt`, `MIT.txt`, `Apache-2.0.txt`, `ISC.txt`, `BSD-3-Clause.txt`, `OFL-1.1.txt`(REUSE 관행; T-003 잔여) | `lic` §3.3 |
+| LIC-10 | `THIRD_PARTY_NOTICES.md` | 항목: shadcn/ui(MIT), `@base-ui/react`(MIT), radix(MIT; geo 유래·pinvi 전이 21종은 B5 역추적 후), `class-variance-authority`(**Apache-2.0**, 고정 버전에 NOTICE가 있으면 원문 유지), lucide(ISC와 Feather 파생 MIT; 인라인 SVG로 가져와도 전체 고지 유지), `tailwind-merge`·`clsx`·`tw-animate-css`(MIT), `maplibre-gl`(BSD-3-Clause, 이름 홍보 금지 조항), pretendard(OFL-1.1 전문; 폰트 파일은 미배포), TanStack(MIT), zod(MIT). 각 항목에 버전·원문 URL·사본 위치. `python-*-api` 13종은 B7 확인 후 | D-17; `lic` §2.4·§3.3 |
+| LIC-11 | `LICENSES/` | SPDX 파일명 원문: `GPL-3.0-or-later.txt`, `MIT.txt`, `Apache-2.0.txt`, `ISC.txt`, `BSD-3-Clause.txt`, `OFL-1.1.txt`(원문·버전·digest는 LICENSES 안내) | `lic` §3.3 |
 | LIC-12 | `PROVENANCE.md` | 파일군별 표 `ID \| 파일군 \| 원천 저장소 \| 커밋 \| 경로 \| 라이선스 \| 수정`(`lic` §2.3 형식). 이식 PR마다 행을 추가하며 원천 커밋은 40자 SHA 또는 조사 기준 단축 SHA + 저장소명 | `lic` §2.3·§3.3 L2 |
 | LIC-13 | `CONTRIBUTING.md` | "AI 보조 생성물(Codex·Claude 계정 커밋 포함)은 지시자인 권리자가 GPL-3.0-or-later로 배포한다"(B8), 외부 기여 시 동일 라이선스 조건, SPDX 헤더 의무 | `lic` §2.6·§4 B8·§6-6 |
-| LIC-14 | 패키지 동봉 | npm tarball·Python wheel·sdist 각각에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 동봉(npm은 `files`와 무관하게 `LICENSE*` 포함; Python은 PEP 639 `license-files`). 벤더 tgz에 라이선스가 없던 D7 재발 방지 | D-11; `lic` §2.2 D7·§3.3·§3.5 |
+| LIC-14 | 패키지 동봉 | npm tarball·Python wheel·sdist 각각에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md`와 해당 서드파티 저작권 사본을 동봉하고 고지의 상대 링크를 수령자가 따라갈 수 있는지 확인(npm은 `files`와 무관하게 `LICENSE*` 포함; Python은 PEP 639 `license-files`). 벤더 tgz에 라이선스가 없던 D7 재발 방지 | D-11; `lic` §2.2 D7·§3.3·§3.5 |
 
 ### 4.1 NOTICE·PROVENANCE 예시
 
@@ -92,10 +92,10 @@ Third-party notices: THIRD_PARTY_NOTICES.md. Provenance of ported files: PROVENA
 
 | ID | 규칙 | 근거 |
 |---|---|---|
-| LIC-15 | common의 모든 소스 파일(`*.ts`·`*.tsx`·`*.mjs`·`*.css`·`*.py`·`*.toml`·`*.yml`·`*.yaml`·`*.sh`)은 첫 비어 있지 않은 줄부터 SPDX 헤더로 시작한다. **Hallmark 스탬프는 common 파일에 없다**(D-13·D-17; 스킬 본문 인용 금지 B3). 조사 문서에서 본 "첫 줄 스탬프" 관례는 소비 저장소 것이며 common으로 가져오지 않는다 | `lic` §2.2 D10·§3.4 |
+| LIC-15 | common의 모든 소스 파일(`*.ts`·`*.tsx`·`*.js`·`*.mjs`·`*.cjs`·`*.css`·`*.py`·`*.toml`·`*.yml`·`*.yaml`·`*.sh`·`.editorconfig`)은 첫 비어 있지 않은 줄부터 SPDX 헤더로 시작한다. **Hallmark 스탬프는 common 파일에 없다**(D-13·D-17; 스킬 본문 인용 금지 B3). 조사 문서에서 본 "첫 줄 스탬프" 관례는 소비 저장소 것이며 common으로 가져오지 않는다 | `lic` §2.2 D10·§3.4 |
 | LIC-16 | 헤더 형식(주석 문법은 파일 종류별: TS/CSS `//`·`/* */`, Python/TOML/YAML/shell `#`). `Origin:`은 이식 파일 필수, `Derived-From:`은 서드파티 파생(shadcn 생성물 등) 시 필수, `Modified:`는 원천과 다를 때 필수. 세 행은 GPLv3 §5(a)(수정 고지)·§7(b)(저작자 표시 보존)를 파일 단위로 충족한다 | `lic` §3.4 |
 | LIC-17 | 예외(헤더 없음 허용): `*.md`(문서), `*.json`(주석 불가; `tokens.json` 등 생성물은 생성기가 `$comment`나 sidecar로 출처 기록), lockfile, `LICENSES/*`, `.gitkeep`, 바이너리. `dist/`·`*.d.ts` 생성물은 빌드가 헤더를 삽입하거나 `THIRD_PARTY_NOTICES.md`로 대신한다(T-101·T-201에서 확정) | — |
-| LIC-18 | `tools/check_spdx.py`(T-003 잔여)는 common 트리의 대상 파일에 `SPDX-License-Identifier`가 없으면 즉시 fail한다(baseline 없음, common은 신규 저장소). geo `-only` 유래 파일의 식별자 검사, `Origin:` 행의 저장소·커밋 형식 검사 포함 | D-17 |
+| LIC-18 | [check_spdx.py](../../tools/check_spdx.py)는 common 트리의 대상 파일에 `SPDX-License-Identifier`·`SPDX-FileCopyrightText`가 없거나 값이 비어 있으면 즉시 fail한다(baseline 없음, common은 신규 저장소). geo `-only` 유래 파일의 식별자 검사, `Origin:` 행의 저장소·커밋 형식 검사 포함 | D-17 |
 | LIC-19 | 앱 사본과 common 원본의 drift 비교(`tools/ui_drift.py` T-211 등)는 선두 주석 블록(SPDX·Hallmark 스탬프·이식 주석)을 정규화한 뒤 비교한다 | D-17 |
 
 헤더 예시(TS; Python은 `#`로 치환):
@@ -118,6 +118,17 @@ Third-party notices: THIRD_PARTY_NOTICES.md. Provenance of ported files: PROVENA
 | `*.toml`·`*.yml`·`*.yaml`·`*.sh`·`.editorconfig` | `# SPDX-License-Identifier: …` | YAML front-matter가 있는 파일은 `---` 앞 |
 | `*.md` | 헤더 없음 | 문서 저작권은 `NOTICE`·README 라이선스 절이 대신 |
 | `*.json`·lockfile·바이너리 | 헤더 없음 | LIC-17 |
+
+### 5.2 검사 범위와 출처 대조
+
+검사기는 저장소 전체의 LIC-15 확장자를 검사한다. T-003 초안의 packages·tools·templates 최소 범위에 더해 tests·workflow·설정도 기존 LIC-15 범위에 포함한다. Python·shell·JavaScript CLI의 shebang 바로 다음 줄을 허용한다. 헤더는 선두의 연속된 주석 블록이며 문자열·docstring·실행문 뒤 주석은 인정하지 않는다.
+
+- 허용 식별자는 `GPL-3.0-or-later`, `GPL-3.0-only`, `GPL-3.0-or-later AND GPL-3.0-only`다. LIC-5의 병기는 -only 식별자 또는 AND 결합으로 표현하며 geo 원천에서 -or-later 단독 표기는 실패다.
+- `Origin`은 `저장소@7~40자 소문자 Git SHA 원천상대경로`와 선택적 `(원천 라이선스)`다. 자체 작성 파일은 Origin을 만들지 않는다. 이식 소스는 [PROVENANCE](../../PROVENANCE.md)에 명시한 경로와 저장소·커밋을 대조하며, 수정 행은 날짜·요약을 가진 `Modified`, 서드파티 파생 행은 `Derived-From`도 요구한다. 코드 복사 여부·권리 확인·수정 내용의 진위는 원천 diff와 2인 리뷰가 맡는다.
+- 대상 확장자는 대소문자와 관계없이 검사한다. 색인의 common 경로는 실제 파일의 대소문자와 같은 정규 상대 경로여야 한다. `./`·중복 구분자·대소문자 별칭·중복 등록은 오류이며 표의 선행 공백은 허용한다. geo의 `소유자/저장소` 표기와 색인에 명시된 `GPL-3.0-only` 원천에도 -only 고지를 요구한다.
+- `dist/`·`build/`·`.next/`·`.turbo/`·`coverage/`, 의존성·환경 디렉터리(`node_modules/`·`.venv/`·`venv/`·`__pycache__/`), `.git/`·`LICENSES/`와 `*.gen.*`·`*.d.ts`·lockfile은 제외한다. 생성물의 고지 동봉은 LIC-17과 패키지 gate에서 별도로 확인한다.
+- 검사 범위 0개, 읽기 실패, 대상 심볼릭 링크, 헤더·출처 오류는 exit 1이다. 정상 파일을 실제 검사한 경우에만 exit 0이다. `--root`는 독립 fixture 또는 다른 common checkout 검증에 쓴다.
+- 현재 CLI와 회귀 시험은 실행 가능하며 CI의 필수 SPDX 명령 연결·Windows job은 T-009가 담당한다. 현재 CI 연결이 끝난 것처럼 표시하지 않는다.
 
 ## 6. 패키지 메타데이터
 
@@ -197,7 +208,7 @@ common 측 이식 PR 본문(`.github/pull_request_template.md`)에 다음을 evi
 
 | gate | 검사 | 실패 조건 | 실행 |
 |---|---|---|---|
-| 헤더 | `python3 -B -X utf8 tools/check_spdx.py`(T-003 잔여) | 대상 파일에 `SPDX-License-Identifier` 없음, `-only` 병기 누락, `Origin:` 형식 오류 | common `docs` job(CI-40 이후 `tools` job) |
+| 헤더 | `python3 -B -X utf8 tools/check_spdx.py` | 대상 파일에 `SPDX-License-Identifier` 없음, `-only` 병기 누락, `Origin:` 형식 오류 | 로컬 CLI; CI 필수 연결은 T-009 |
 | 고지 목록 | `THIRD_PARTY_NOTICES.md` 항목 ↔ 루트 `package-lock.json`·`uv.lock`의 `license` 필드 대조(후보 도구) | 락에 있는 직접 의존성이 목록에 없음 | T-101·T-302에서 확정 |
 | 출처 | 이식 PR 체크리스트: `PROVENANCE.md` 행·헤더 `Origin:`·B1~B10 해당 여부 | 행 누락, 차단 원천 | PR 리뷰(D-04 비면제: `packages/*` 공개 API) |
 | 동봉 | `npm pack` tarball·wheel에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 존재 | 누락 | `packages`·`python-package` job |

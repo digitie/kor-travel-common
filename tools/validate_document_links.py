@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 # Origin: canview@1f93b8adb34a48537db69b950c8a99ce89859760 tools/validate_document_links.py
-# Modified: 2026-09-06 — common 경로·절대 링크 금지·산문 및 코드 span 제외
+# Modified: 2026-09-07 — common 경로·절대 링크 금지·산문/코드 span 제외·LICENSES 안내 검사
 """저장소 내부 Markdown 링크 target을 네트워크 없이 검사한다.
 
 규칙(docs/runbooks/documentation-maintenance.md §6·§7):
@@ -22,7 +22,7 @@ SKIP_PARTS = {'node_modules', '.venv', '.git', '.next', 'dist', 'build'}
 
 def collect_documents(root: Path) -> list[Path]:
     files: list[Path] = []
-    for base in ('docs', 'packages', 'tools', 'templates', 'tests'):
+    for base in ('docs', 'packages', 'tools', 'templates', 'tests', 'LICENSES'):
         files.extend((root / base).rglob('*.md'))
     files.extend(root.glob('*.md'))
     return sorted({f for f in files if not (set(f.relative_to(root).parts) & SKIP_PARTS)})

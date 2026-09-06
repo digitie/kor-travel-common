@@ -1,6 +1,6 @@
 # T-009 common CI 하드닝(permissions·concurrency·timeout·ubuntu-24.04·액션 SHA 핀)·`tools` windows 매트릭스·`secret-scan`·`check-versions(report)` job·branch protection 문서·redaction guard
 
-- 상태: BLOCKED
+- 상태: READY
 - 우선순위: P1
 - Gate: CI
 - 선행: T-002, T-003
