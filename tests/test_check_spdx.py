@@ -136,7 +136,8 @@ class SpdxTests(unittest.TestCase):
 
     def test_noncanonical_index_paths_cannot_bypass_notices(self):
         for name in ("./tools/sample.py", "tools//sample.py", "TOOLS/sample.py",
-                     "tools/Sample.py"):
+                     "tools/Sample.py", "tools/sample.PY", "tools/SAMPLE.PY",
+                     "tools/sample.py.", "tools/sample.py "):
             with self.subTest(name=name):
                 self.port()
                 index = self.root / "PROVENANCE.md"
@@ -145,6 +146,22 @@ class SpdxTests(unittest.TestCase):
                 self.write("tools/sample.py", HEADER)
                 result = self.run_cli()
                 self.assertEqual(result.returncode, 1, result.stdout)
+
+    def test_uppercase_source_extensions_keep_comment_syntax(self):
+        self.write("tools/sample.PY", HEADER)
+        self.write("packages/ui/sample.TSX", "".join("// " + line + "\n" for line in BODY.splitlines()))
+        self.write("packages/tokens/sample.CSS", "/*\n" + BODY + "*/\n")
+        result = self.run_cli()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("3개 파일, 오류 0개", result.stdout)
+
+    def test_editorconfig_case_alias_cannot_bypass_notices(self):
+        self.port()
+        index = self.root / "PROVENANCE.md"
+        index.write_text(index.read_text(encoding="utf-8").replace("tools/sample.py", ".EDITORCONFIG"),
+                         encoding="utf-8")
+        self.write(".editorconfig", HEADER)
+        self.assertEqual(self.run_cli().returncode, 1)
 
     def test_duplicate_source_index_fails(self):
         self.port()

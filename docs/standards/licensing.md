@@ -125,7 +125,7 @@ Third-party notices: THIRD_PARTY_NOTICES.md. Provenance of ported files: PROVENA
 
 - 허용 식별자는 `GPL-3.0-or-later`, `GPL-3.0-only`, `GPL-3.0-or-later AND GPL-3.0-only`다. LIC-5의 병기는 -only 식별자 또는 AND 결합으로 표현하며 geo 원천에서 -or-later 단독 표기는 실패다.
 - `Origin`은 `저장소@7~40자 소문자 Git SHA 원천상대경로`와 선택적 `(원천 라이선스)`다. 자체 작성 파일은 Origin을 만들지 않는다. 이식 소스는 [PROVENANCE](../../PROVENANCE.md)에 명시한 경로와 저장소·커밋을 대조하며, 수정 행은 날짜·요약을 가진 `Modified`, 서드파티 파생 행은 `Derived-From`도 요구한다. 코드 복사 여부·권리 확인·수정 내용의 진위는 원천 diff와 2인 리뷰가 맡는다.
-- 색인의 common 경로는 실제 파일의 대소문자와 같은 정규 상대 경로여야 한다. `./`·중복 구분자·대소문자 별칭·중복 등록은 오류이며 표의 선행 공백은 허용한다. geo의 `소유자/저장소` 표기와 색인에 명시된 `GPL-3.0-only` 원천에도 -only 고지를 요구한다.
+- 대상 확장자는 대소문자와 관계없이 검사한다. 색인의 common 경로는 실제 파일의 대소문자와 같은 정규 상대 경로여야 한다. `./`·중복 구분자·대소문자 별칭·중복 등록은 오류이며 표의 선행 공백은 허용한다. geo의 `소유자/저장소` 표기와 색인에 명시된 `GPL-3.0-only` 원천에도 -only 고지를 요구한다.
 - `dist/`·`build/`·`.next/`·`.turbo/`·`coverage/`, 의존성·환경 디렉터리(`node_modules/`·`.venv/`·`venv/`·`__pycache__/`), `.git/`·`LICENSES/`와 `*.gen.*`·`*.d.ts`·lockfile은 제외한다. 생성물의 고지 동봉은 LIC-17과 패키지 gate에서 별도로 확인한다.
 - 검사 범위 0개, 읽기 실패, 대상 심볼릭 링크, 헤더·출처 오류는 exit 1이다. 정상 파일을 실제 검사한 경우에만 exit 0이다. `--root`는 독립 fixture 또는 다른 common checkout 검증에 쓴다.
 - 현재 CLI와 회귀 시험은 실행 가능하며 CI의 필수 SPDX 명령 연결·Windows job은 T-009가 담당한다. 현재 CI 연결이 끝난 것처럼 표시하지 않는다.

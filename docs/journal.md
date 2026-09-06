@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-003 확장자 별칭 보완)
+
+951b443 재검토에서 B PASS, A는 기존 경로 별칭 finding의 확장자 변형을 OPEN으로 유지했다. 추가 음성/양성 시험을 먼저 실행해 실패 3개를 확인했고 확장자·주석 판별과 editorconfig·Windows 끝 공백/점 경계를 보완했다. Windows Python 3.14.3·WSL Python 3.14.4 모두 전체 100 tests 성공·skip 0, SPDX 13개·문서 222개/1869 target·task 96개 오류 0이다. 새 review 기록 추가 후 문서 검증은 commit 전에 다시 실행한다.
+
+사용자가 모든 라이브러리를 GPLv3로 변경할 예정이라고 알렸다. 이 미래 방향과 고정 원천의 현재 선언을 구분하며, common은 현재 GPL-3.0-or-later를 유지한다. -only/or-later 표기는 별도 확인 질문을 전달했다. 다른 저장소는 수정하지 않았고 원문 사본·소비자 gate도 자동 변경하지 않았다.
+
 ## 2026-09-07 (Codex, T-003 독립 리뷰 수정)
 
 017fef1의 두 원본을 확정한 뒤 6 finding을 모두 수용했다([통합 리뷰](reviews/adversarial/2026-09-07-t003.md)). 경로 별칭·qualified geo·PV 행 공백 우회를 회귀 시험으로 고정했다. canview 원본 재대조로 제목 검사는 기존 기능임을 확인해 수정 고지를 바로잡았다. 템플릿의 고지·PV 사본·라이선스 동반 목적지를 명시했다.

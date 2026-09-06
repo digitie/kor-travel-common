@@ -27,7 +27,7 @@ def is_source(path: Path) -> bool:
     """고정 제외 목록 밖의 소스·설정 파일을 선택한다."""
     return (not any(part in EXCLUDED_DIRS for part in path.parts)
             and ".gen." not in path.name and not path.name.endswith(".d.ts")
-            and (path.suffix in SUFFIXES or path.name == ".editorconfig")
+            and (path.suffix.casefold() in SUFFIXES or path.name.casefold() == ".editorconfig")
             and not path.name.endswith(".lock") and path.name != "pnpm-lock.yaml")
 
 
@@ -53,6 +53,7 @@ def source_files(root: Path) -> list[Path]:
 
 def first_comment(text: str, suffix: str) -> list[str]:
     """문자열·docstring·뒤쪽 주석을 헤더로 오인하지 않는다."""
+    suffix = suffix.casefold()
     lines = text.lstrip("\ufeff\r\n \t").splitlines()
     if lines and lines[0].startswith("#!") and suffix in {".py", ".sh", ".js", ".mjs", ".cjs"}:
         lines = lines[1:]
@@ -106,7 +107,7 @@ def provenance(root: Path) -> dict[str, tuple[str, str, str, bool, bool, bool]]:
             path = PurePosixPath(name)
             if path.is_absolute() or ".." in path.parts or "\\" in name or ":" in name:
                 raise ValueError(f"PROVENANCE: 저장소 상대 경로가 아님: {name}")
-            if name != path.as_posix():
+            if name != path.as_posix() or any(part.endswith((" ", ".")) for part in path.parts):
                 raise ValueError(f"PROVENANCE: 정규 상대 경로가 아님: {name}")
             if not is_source(Path(name)):
                 continue
