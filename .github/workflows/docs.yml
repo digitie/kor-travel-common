@@ -1,0 +1,23 @@
+name: docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Validate local Markdown links
+        run: python -B -X utf8 tools/validate_document_links.py
+      - name: Validate task metadata and dependency DAG
+        run: python -B -X utf8 tools/validate_plan.py
+      - name: Plan validator regression tests
+        run: python -B -X utf8 -m unittest discover -s tests -p test_plan_validation.py -v
+      - name: Whitespace check
+        run: git diff --check HEAD~1 HEAD || git diff --check
