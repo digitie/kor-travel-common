@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-09-06 | full 종료 delta | [Phase 0 종료 대조](adversarial/2026-09-06-phase0-closure.md), 8fb1334 | A 도구·CI / B 계획·계약 | A BLOCK / B CONDITIONAL, T-009 숨은 선행 |
 | 2026-09-06 | full post-fix 03 | [Phase 0 세 번째 재검토](adversarial/2026-09-06-phase0-post-fix-03.md), 5670642 | A 도구·CI / B 계획·계약 | A PASS / B PASS, 15 finding FIXED |
 | 2026-09-06 | full post-fix 02 | [Phase 0 두 번째 재검토](adversarial/2026-09-06-phase0-post-fix-02.md), 84759b6 | A 도구·CI / B 계획·계약 | A PASS / B CONDITIONAL(B-P2-09) |
 | 2026-09-06 | full post-fix | [Phase 0 재검토](adversarial/2026-09-06-phase0-post-fix.md), 12fb3a8 | A 도구·CI / B 계획·계약 | A BLOCK(A-P1-05) / B PASS |

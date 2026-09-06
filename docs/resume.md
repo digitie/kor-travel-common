@@ -6,7 +6,7 @@
 
 [Draft PR #1](https://github.com/digitie/kor-travel-common/pull/1)의 `09104ed`와 로컬 Claude 초안을 통합했다. 상세 task 96개 중 문서·계획 6개(T-001·T-002·T-004·T-007·T-008·T-013)를 완료 원장으로 옮겼고 열린 90개는 선행·외부 대기·잔여 수용 기준을 갖는다. 기존 소비자 조사 기준은 갱신하지 않았다.
 
-Windows Python 3.14.3·WSL Python 3.14.4에서 unittest 67개 성공·skip 0. 코드가 같은 5670642의 Linux CI도 성공했다. 원 14건과 후속 1건의 finding은 모두 FIXED이며 두 전문 reviewer가 PASS로 재확인했다. 기준선별 원본·CI와 종료 delta의 최신 판정은 [리뷰 색인](reviews/README.md)이 연결한다. 이 결과는 문서·도구 검증이며 패키지 또는 소비자 gate 통과가 아니다.
+Windows Python 3.14.3·WSL Python 3.14.4에서 unittest 67개 성공·skip 0. 코드가 같은 8fb1334의 Linux CI도 성공했다. 내용 리뷰의 기존 finding은 두 전문 reviewer가 수정 확인했다. 종료 대조에서 추가 발견한 T-009의 숨은 SPDX 선행도 명시했고 BLOCKED로 정정했다. 기준선별 원본·CI와 종료 delta의 최신 판정은 [리뷰 색인](reviews/README.md)이 연결한다. 이 결과는 문서·도구 검증이며 패키지 또는 소비자 gate 통과가 아니다.
 
 실물 `packages/tokens`·`packages/ui`·Python 패키지가 없다. 패키지 빌드·tarball/wheel 설치·소비자 빌드·e2e·시각 검증은 NOT_RUN(실물·소비자 변경 없음). T-003 SPDX 검사·라이선스 사본과 T-005 실제 소비자 현재값 등록도 남아 있다. 따라서 Phase 0 전체 완료·릴리스 가능 상태가 아니다.
 

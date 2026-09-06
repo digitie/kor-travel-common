@@ -1,9 +1,9 @@
 # T-009 common CI 하드닝(permissions·concurrency·timeout·ubuntu-24.04·액션 SHA 핀)·`tools` windows 매트릭스·`secret-scan`·`check-versions(report)` job·branch protection 문서·redaction guard
 
-- 상태: READY
+- 상태: BLOCKED
 - 우선순위: P1
 - Gate: CI
-- 선행: T-002
+- 선행: T-002, T-003
 
 ## 목표
 
@@ -55,6 +55,8 @@ python3 -B -X utf8 -m unittest discover -s tests -p "test_*.py" -v
 Git Bash에서 동일. CI 결과는 GitHub Actions 실행 링크로 기록한다.
 
 ## evidence
+
+2026-09-06 종료 재검토: 필수 Windows tools job이 T-003의 check_spdx.py를 실행하므로 해당 task를 내부 선행으로 명시했다. T-003이 DONE이 되기 전에는 직접 지정받아도 착수하지 않는다. T-005 전체 완료는 현재 checker 자체 검사의 기술적 선행과 구분하며 기본 실행 대기열은 T-003 → T-005 → T-009를 유지한다.
 
 - 각 job의 실행 링크·소요 시간·Windows 러너 Python 버전을 이 절과 `docs/journal.md`에 남긴다. 로컬에서 재현하지 못한 job은 `NOT_RUN(CI 전용)`.
 

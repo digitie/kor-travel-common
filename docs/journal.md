@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-06 (Codex, T-013 종료 대조의 숨은 선행 정정)
+
+8fb1334에서 완료 6개·인계·draft PR/리모트 SHA·CI run 34025999506은 일치했다. coordinator가 T-009의 미구현 SPDX 도구 의존을 추가 질문했고 두 reviewer가 같은 원인을 A-P1-06/B-P2-10으로 독립 확인했다. 심각도는 원본 그대로 보존하며 통합 차단은 높은 P1을 따른다. T-009 상세/원장에 T-003 선행을 넣고 BLOCKED로 되돌렸다. T-005 전체 DONE은 기술적 필수와 구분하고 기본 실행 대기열의 T-003 → T-005 → T-009는 유지한다.
+
+후속 에이전트가 T-009를 직접 지정받아 backlog를 읽지 않아도 필수 도구 선행을 알 수 있게 했다. 코드·CI는 불변이며 새 문서·DAG·공백 검사와 같은 두 reviewer의 수정 기준선 재검토로 닫는다. 과거 종료 원본은 [종료 판정](reviews/adversarial/2026-09-06-phase0-closure.md)에 보존한다.
+
 ## 2026-09-06 (Codex, T-013 문서 task 종료·순차 인계)
 
 5670642에서 두 reviewer가 모두 PASS이며 최초 14건과 후속 B-P2-09까지 FIXED를 확인했다([세 번째 통합 판정](reviews/adversarial/2026-09-06-phase0-post-fix-03.md)). T-001·T-002·T-004·T-007·T-008·T-013의 실제 evidence를 연결하고 상세 H1/상태와 완료 원장 제목을 동기화했다. 총 96개 중 완료 6개·열린 90개이며 다음은 T-003 READY, 이후 T-005·T-009다. 개별 규칙 확정과 SPDX/라이선스 원문·소비자 보고·실물 구현은 완료하지 않았다.
