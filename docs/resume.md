@@ -12,18 +12,18 @@ T-005는 Windows Python 3.14.3·WSL Python 3.11.15에서 각각 전체 115 tests
 
 ## 다음 한 작업
 
-- 현재 다음 구현 task는 선택하지 않았다. [T-015](tasks/T-015-common-delivery-plan.md)·[T-006](tasks/T-006-npm-scope-pypi-name.md)의 문서·검증·독립 리뷰를 마쳤다([최종 리뷰](reviews/adversarial/2026-09-07-t015-post-fix-03.md)).
-- 사용자 최신 지시: 현재 PR #4의 완료 기록과 최종 CI를 확인해 병합한 뒤 대기한다. T-009 및 다른 다음 task는 재개 요청 전 착수하지 않는다.
-- 완료 범위는 계획·규범·기록이다. 실제 패키지·후보 보존·외부 릴리스·채택 gate는 미완료 상태를 유지한다.
+- 작업: [T-009](tasks/T-009-ci-hardening.md), IN_PROGRESS. 선행 T-002·T-003은 DONE이다.
+- 사용자 재개 지시로 common 구현을 순차 진행한다. npm/PyPI 미게시·다른 저장소 수정 금지와 독립 두 리뷰·PR·CI·병합 경계를 유지한다.
+- PR #4는 `82dec2b939885863100802997f9e7548dffd3c9a`로 병합됐고 main CI 34066384346이 성공했다. 아직 구현하지 않은 패키지·후보 보존·외부 gate는 미완료다.
 
 ## 시작 파일과 검증
 
-재개 요청이 오면 [T-009](tasks/T-009-ci-hardening.md)의 선행과 현재 원격 상태부터 확인한다. 현재는 착수하지 않는다. 명령 사다리는 [개발 환경](dev-environment.md#6-검증-명령-사다리), 리뷰는 [agent workflow](runbooks/agent-workflow.md)를 따른다.
+[T-009](tasks/T-009-ci-hardening.md), [CI 규약](standards/ci-deploy.md) §8~9와 현행 docs.yml·검사기부터 대조한다. 명령 사다리는 [개발 환경](dev-environment.md#6-검증-명령-사다리), 리뷰는 [agent workflow](runbooks/agent-workflow.md)를 따른다.
 
 ## 차단 조건
 
 - 다른 저장소에 쓰지 않는다. 소비자 채택·CI·배포는 해당 저장소의 task와 PR에서 실행한다.
-- 사용자 지시: npm·PyPI에 게시하지 않는다. GitHub Release 자산·고정 Git 태그 채널을 유지하며 T-015에서 계정 확보·공개 registry 재평가와 불필요한 선행을 제거했다. 현재 작업 병합 후에는 대기한다.
+- 사용자 지시: npm·PyPI에 게시하지 않는다. GitHub Release 자산·고정 Git 태그 채널을 유지하며 T-015에서 계정 확보·공개 registry 재평가와 불필요한 선행을 제거했다. 현재는 사용자 재개 지시에 따라 순차 진행한다.
 - 사용자는 모든 라이브러리를 GPLv3로 통일할 예정이라고 밝혔다. 현재 common의 GPL-3.0-or-later와 고정 원천 고지를 유지하며 실제 재선언 이전에 과거 원문·권리 gate를 바꾸지 않는다.
 - 외부 결정: pinvi 권리(T-020), concierge·docker-manager 권리(T-021), airport 병합 후 현재 기준선·미해결 CI 재확인(T-430), geo React 승인(T-443), pinvi mobile 명시 예외(O-8). 기본값은 승인 evidence가 아니다.
 - 아직 배포하지 않은 규칙·계약 초안은 T-104·T-204·T-302에서 실물과 대조한다. 소비자 테스트 개수·버전은 고정 조사 관찰이며 최신 실행값으로 재사용하지 않는다.

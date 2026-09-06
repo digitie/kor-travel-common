@@ -6,7 +6,7 @@
 
 ## 실행 대기열
 
-T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-005 버전 검사·고정 보고를 완료했다. T-015와 T-006의 범위 변경 기록을 마쳤다. 사용자의 최신 지시에 따라 PR #4 병합 후 대기하며 다음 task는 재개 요청 전 착수하지 않는다. 재개 시 T-009(CI 하드닝), T-005a/b·T-011, 토큰 도구 실물 순으로 한 작업씩 선택한다. 각 task의 선행·외부 선행 충족이 우선이며, 충족되지 않으면 BLOCKED 이유를 기록하고 독립적인 다음 항목으로 넘어간다.
+T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-005 버전 검사·고정 보고를 완료했다. T-015와 T-006의 범위 변경 기록을 마쳤다. PR #4 병합 뒤 사용자 재개 지시로 T-009(CI 하드닝)를 진행한다. 이후 T-005a/b·T-011, 토큰 도구 실물 순으로 한 작업씩 선택한다. 각 task의 선행·외부 선행 충족이 우선이며, 충족되지 않으면 BLOCKED 이유를 기록하고 독립적인 다음 항목으로 넘어간다.
 
 그 이후 아래 표에서 모든 선행이 DONE인 항목만 선택한다. 현재 범위의 common 작업만 기반 → 토큰 → UI → Python → 공통 운영/도구 분류 안에서 P0~P3 우선, 동순위는 ID 순이다. T-006의 계정 확보는 사용자 지시로 철회했다. T-010a·T-109·T-212·T-213·T-310·T-311 및 소비자 이관/미래 시점 task는 외부 evidence를 기다리고 독립적인 common READY 항목을 진행한다. 후보 보존 T-109a·T-212a·T-310a가 후속 common 구현을 연다(ADR-014). rc 검증·정식 채택 경계는 [통합 계획 §4](plan/integration-plan.md#4-rc-검증과-정식-채택)를 따른다.
 
@@ -18,7 +18,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 |---|---|---|---|---|
 | [T-005a](tasks/T-005a-check-versions-uv-lock.md) | READY | P1 | check_versions: `uv.lock` 파서 | T-005 |
 | [T-005b](tasks/T-005b-check-versions-poetry-requirements.md) | READY | P2 | check_versions: `poetry.lock`·`requirements.txt` 파서 + `NO_LOCK` 보고 | T-005 |
-| [T-009](tasks/T-009-ci-hardening.md) | READY | P1 | common CI 하드닝(permissions·concurrency·timeout·ubuntu-24.04·액션 SHA 핀)·`tools` windows 매트릭스·`secret-scan`·`check-versions(report)` job·branch protection 문서·redaction guard | T-002, T-003 |
+| [T-009](tasks/T-009-ci-hardening.md) | IN_PROGRESS | P1 | common CI 하드닝(permissions·concurrency·timeout·ubuntu-24.04·액션 SHA 핀)·`tools` windows 매트릭스·`secret-scan`·`check-versions(report)` job·branch protection 문서·redaction guard | T-002, T-003 |
 | [T-010](tasks/T-010-reusable-workflows-stage1.md) | BLOCKED | P1 | 재사용 워크플로 1단계(`versions-check`·`contrast-check`·`docs-check`) + `workflows-selftest` fixture + `consumers.pins.json` + consumer-smoke | T-005, T-009, T-101, T-103 |
 | [T-010a](tasks/T-010a-external-consumer-smoke.md) | BLOCKED | P1 | 승인 소비자 2곳의 tokens 후보 dispatch 검증 | T-010, T-109a |
 | [T-011](tasks/T-011-consumer-manifest-schema.md) | READY | P1 | 소비자 매니페스트 스키마 `consumer-manifest.v1` + `tools/validate_manifest.py` + 7 소비자 초기 매니페스트 초안 | T-005 |
