@@ -1,6 +1,6 @@
-# T-005 versions.json v1 + `tools/check_versions.py`(npm lock v3·report·판정 어휘) + `docs/standards/versions.md` + 7 소비자 현재값·예외 등록
+# T-005 versions.json v1 + `tools/check_versions.py`(npm lock v3·report·판정 어휘) + `docs/standards/versions.md` + 7 소비자 현재값·예외 등록 (2026-09-07, PR #3)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P0
 - Gate: 도구 테스트·문서 검증
 - 선행: 없음
@@ -55,6 +55,8 @@ python3 -B -X utf8 tools/validate_document_links.py
 Git Bash에서 동일.
 
 ## evidence
+
+2026-09-07 완료: f050997에서 두 독립 reviewer의 수정 후 재검토를 마쳤다. 최종 판정·원본·잔여 한계는 [post-fix 리뷰](../reviews/adversarial/2026-09-07-t005-post-fix.md)에 있다. 9개 최초 finding을 모두 FIXED로 확인했으며 Windows·WSL 전체 115 tests 성공, 고정 입력 48파일·306판정 재현, [CI](https://github.com/digitie/kor-travel-common/actions/runs/34063775506) 성공이다. 소비자 정책 준수·제품 검증·릴리스 완료를 뜻하지 않는다.
 
 2026-09-07 독립 리뷰: [A/B 최초 판정](../reviews/adversarial/2026-09-07-t005.md)은 BLOCK, 9개 ID를 모두 수용했다. 수정 회귀 8개에서 20 실패를 먼저 재현한 뒤 Windows·WSL Python 3.11에서 전체 115 tests 성공·skip 0을 확인했다. 같은 7개 입력 48파일·306행도 재실행해 원본과 동일했다([수정 digest](../evidence/t005/post-fix.json)). 수정 commit의 두 reviewer 재확인 전 DONE/merge하지 않는다.
 

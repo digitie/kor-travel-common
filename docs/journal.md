@@ -2,6 +2,10 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-005 최종 리뷰·완료 기록)
+
+f050997에서 A/B 두 원본이 독립 확정된 뒤 교차 비교했다. 최종 PASS/PASS, 최초 9개 ID 모두 FIXED이며 새 finding은 없다([최종 리뷰](reviews/adversarial/2026-09-07-t005-post-fix.md)). A는 Windows/WSL 115 tests와 환경당 공격 CLI 30개, B는 Windows 115 tests·판정/모드 30조합을 실행했다. 7곳 고정 입력 48파일·306행 전체 재현과 새 digest를 확인했으며 report의 102개 위반을 정상으로 세지 않았다. candidate CI 34063775506도 성공했다. T-005를 완료 원장으로 옮기고 T-005a/b·T-011을 READY로 바꾼다. 완료 기록의 CI를 확인한 뒤 PR #3을 병합한다. 다음은 사용자 지시의 npm/PyPI 미게시·common 구현 선행 정리다. 소비자 저장소는 수정하지 않았다.
+
 ## 2026-09-07 (Codex, T-005 독립 리뷰 수정)
 
 두 원본 확정 후 9개 ID를 모두 수용했다([통합](reviews/adversarial/2026-09-07-t005.md)). 미해석 차단 버전 두 finding은 같은 원인이나 원 ID/심각도를 유지했다. 전이 링크·URL/branch·npm 이름·런타임 문법·build metadata·차단 범위·예외 공백을 고쳤다. 회귀 8개를 먼저 추가해 20 실패를 확인했고 수정 후 Windows 3.14.3·WSL 3.11.15에서 전체 115 tests 성공·skip 0이다. 같은 7개 고정 입력 48파일과 report 306행이 양 OS에서 원본과 같았다. 새 검사기 digest는 별도 post-fix evidence에 남기고 최초 원본을 덮어쓰지 않았다. 독립 재확인 전 T-005를 완료하거나 merge하지 않는다.
