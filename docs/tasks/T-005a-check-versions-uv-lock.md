@@ -1,6 +1,6 @@
 # T-005a check_versions: `uv.lock` 파서
 
-- 상태: BLOCKED
+- 상태: READY
 - 우선순위: P1
 - Gate: 도구 테스트
 - 선행: T-005

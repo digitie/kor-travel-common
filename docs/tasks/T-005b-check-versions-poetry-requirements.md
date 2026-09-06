@@ -1,6 +1,6 @@
 # T-005b check_versions: `poetry.lock`·`requirements.txt` 파서 + `NO_LOCK` 보고
 
-- 상태: BLOCKED
+- 상태: READY
 - 우선순위: P2
 - Gate: 도구 테스트
 - 선행: T-005

@@ -1,0 +1,248 @@
+{
+  "date": "2026-09-07",
+  "checker_sha256": "70358b716483a197a5af3f11ed1e8ccf17a002e9364b1504838e21e4300de3d9",
+  "registry_sha256": "dc608f881e93b93500e71e64df6ddee25e58ab0cf3f0f8f9715d2999284e361a",
+  "inputs": [
+    {
+      "repo": "kor-travel-airport",
+      "commit": "bb47f107e26faa98d725ab866fba88bb071ae81d",
+      "url": "https://github.com/digitie/kor-travel-airport/tree/bb47f107e26faa98d725ab866fba88bb071ae81d",
+      "files": [
+        {
+          "path": "backend/pyproject.toml",
+          "sha256": "770a59163b17cbb9139fba6e0f7230fd0c3a5c86adf7d3dd27426a02a9e62103"
+        },
+        {
+          "path": "backend/uv.lock",
+          "sha256": "d4488e8ea8dffd71bd71e38cc7460786e6d0cc1e651c56ae7422ed26a857c2f5"
+        },
+        {
+          "path": "frontend/package-lock.json",
+          "sha256": "30f1a7fd4a0568c6ddc4cc32efb60886f74d0ea88a2132d9573ed737d207513e"
+        },
+        {
+          "path": "frontend/package.json",
+          "sha256": "44fcf09d1964b199907e34aca7a65ef7ee991f51441690ad48fc837f7afab1c8"
+        }
+      ]
+    },
+    {
+      "repo": "kor-travel-concierge",
+      "commit": "7945305dd8bcb3eccae54e08b1205d565daa3661",
+      "url": "https://github.com/digitie/kor-travel-concierge/tree/7945305dd8bcb3eccae54e08b1205d565daa3661",
+      "files": [
+        {
+          "path": "backend/requirements.txt",
+          "sha256": "9d4cd647d77fb8d6c4fe50164e5a3761e3c5d18688f66c0533c66ca131a5bdfa"
+        },
+        {
+          "path": "etl/requirements.txt",
+          "sha256": "f8a02d0099bbd922447478550c314461eac50bb6aa88fba0075b865ffb8e58b5"
+        },
+        {
+          "path": "frontend/package-lock.json",
+          "sha256": "170705fc105cf8ce00042b7965314a72ef57f87e7f9243a178d9b31fd42e94c8"
+        },
+        {
+          "path": "frontend/package.json",
+          "sha256": "d4af57e152e38f62fd486ce5b06e76702f34596d6538af8739d071ece974a67b"
+        },
+        {
+          "path": "mcp/requirements.txt",
+          "sha256": "6c9b4dd70d659c313068d237202ab0e2bdeca7133350ab531d77cae33e12a497"
+        },
+        {
+          "path": "scheduler/requirements.txt",
+          "sha256": "56201db203e9661f74f1e337dba155cfd9041949d941a5047739fc3064ee4357"
+        },
+        {
+          "path": "tests/package-lock.json",
+          "sha256": "af447df830ddfed6bfac23e87902fd9e6dc3f1def56229ad07d89a0177bb46f5"
+        },
+        {
+          "path": "tests/package.json",
+          "sha256": "6d6429eaeae24367e3b0f6f6323b2dc43181303e38587c62b149e884fc55215d"
+        }
+      ]
+    },
+    {
+      "repo": "kor-travel-docker-manager",
+      "commit": "862562dcbd6a70c5d00e8d1538264fafe5ed5f5c",
+      "url": "https://github.com/digitie/kor-travel-docker-manager/tree/862562dcbd6a70c5d00e8d1538264fafe5ed5f5c",
+      "files": [
+        {
+          "path": "backend/pyproject.toml",
+          "sha256": "c6cf16af1e411b83d21bb8c96af1b17f0de0c5b6ecd5d73bb30573d5eef92c20"
+        },
+        {
+          "path": "frontend/package-lock.json",
+          "sha256": "75656a98943e2b5291d90376211f3d217dc42b6b173a954b3494b6aefe66feeb"
+        },
+        {
+          "path": "frontend/package.json",
+          "sha256": "39cd315f063b487bca5a9d28b1f2f89f2b5b50a0abb6cf85922d279acc0e6b9d"
+        }
+      ]
+    },
+    {
+      "repo": "kor-travel-geo",
+      "commit": "1d9d74d3a852bbaaa09144b75bb69b99a58a6002",
+      "url": "https://github.com/digitie/kor-travel-geo/tree/1d9d74d3a852bbaaa09144b75bb69b99a58a6002",
+      "files": [
+        {
+          "path": "kor-travel-geo-dagster/pyproject.toml",
+          "sha256": "60a9f79dc033cb823c614e9fda08d360ba784798b85859fdc2c15477c0f47e06"
+        },
+        {
+          "path": "kor-travel-geo-ui/package-lock.json",
+          "sha256": "b5ab66677f91d40673d7e1937c4e2a25f89a1850bbd1ed121b85c361d198f4f8"
+        },
+        {
+          "path": "kor-travel-geo-ui/package.json",
+          "sha256": "a81d030c486e550df0c76893db3846463108910a3d0d828b968baa73ecbc83ef"
+        },
+        {
+          "path": "pyproject.toml",
+          "sha256": "34e3f106206f58658a0ced662c65f507cf98e32b9aec3361b33590df7eb1d6a1"
+        }
+      ]
+    },
+    {
+      "repo": "kor-travel-map",
+      "commit": "c494e227e010565be295de3f9670b2f7c8c20944",
+      "url": "https://github.com/digitie/kor-travel-map/tree/c494e227e010565be295de3f9670b2f7c8c20944",
+      "files": [
+        {
+          "path": "package-lock.json",
+          "sha256": "89805b028a199b30ae971811fe4828a2e7cb8aef54cfabf5eafb18caf23ad407"
+        },
+        {
+          "path": "package.json",
+          "sha256": "fe30f51146679abb89594e44b2c9352d699278935d4ed56a478234c87647f767"
+        },
+        {
+          "path": "packages/kor-travel-map-admin/frontend/package.json",
+          "sha256": "70eba31a8e7919352f8c2c2b7d84b94c8a7aa5271306170536d130a83ff8de83"
+        },
+        {
+          "path": "packages/kor-travel-map-api/pyproject.toml",
+          "sha256": "db7524a9e8a84a28a36c4521c79d5e1513171a0273e99a7302cc735bc2d6d457"
+        },
+        {
+          "path": "packages/kor-travel-map-dagster/pyproject.toml",
+          "sha256": "d8baa8470e74d29720b7531108ed552ce5701a34bac082dc1c3d3963a2f792fb"
+        },
+        {
+          "path": "packages/kor-travel-map-user-client/package.json",
+          "sha256": "032e502e9d9e9500189a3622a86614606583902ecddb5ca12693f4b9abdfc042"
+        },
+        {
+          "path": "packages/map-marker-react/package.json",
+          "sha256": "c13dc3a31ea36a90acc817f122fec68a4f8b0ec8aedb407799269b3708c928a2"
+        },
+        {
+          "path": "pyproject.toml",
+          "sha256": "27b217471ad532b57d09a8af66e609f2e89599d8c4093c2faa4578a98e32325d"
+        }
+      ]
+    },
+    {
+      "repo": "kor-travel-weather",
+      "commit": "6003da995fa4b35799f9dadc406c6ba2878bfbae",
+      "url": "https://github.com/digitie/kor-travel-weather/tree/6003da995fa4b35799f9dadc406c6ba2878bfbae",
+      "files": [
+        {
+          "path": "packages/kor-travel-weather-admin/frontend/package-lock.json",
+          "sha256": "38227ef59f46906630f49fafc99e249373edd3b7dd5efd1c06c28c7948ebd6bb"
+        },
+        {
+          "path": "packages/kor-travel-weather-admin/frontend/package.json",
+          "sha256": "af7334432313818da9d0043db1788e05898ccc5173fae6d107a890678a1bc419"
+        },
+        {
+          "path": "packages/kor-travel-weather-api/pyproject.toml",
+          "sha256": "72bdc702c2cf873b245cb06f1011dde6321b042f3531cddd4b43d2863ed9d2c5"
+        },
+        {
+          "path": "packages/kor-travel-weather-dagster/pyproject.toml",
+          "sha256": "0d7accb84de662bebb7a57b93c1395eb08df2e5dc2392b6596ce3a277019f279"
+        },
+        {
+          "path": "packages/python-airkorea-api/pyproject.toml",
+          "sha256": "a365abae21c267a4acfa0c641161ccb7c756bfb317be8e6dc7916ae3d27c781c"
+        },
+        {
+          "path": "pyproject.toml",
+          "sha256": "dac4a0c776b4ca90632c5890f55e52af33d510f7527ec4f6020ed1e955ce545c"
+        },
+        {
+          "path": "uv.lock",
+          "sha256": "a37cb92e626faf16f63af6f62905483ad87778b409e045d7561216ea3ceee968"
+        }
+      ]
+    },
+    {
+      "repo": "pinvi",
+      "commit": "9af25e58cf77b360188a69e26a36a0588063aa8b",
+      "url": "https://github.com/digitie/pinvi/tree/9af25e58cf77b360188a69e26a36a0588063aa8b",
+      "files": [
+        {
+          "path": "apps/api/pyproject.toml",
+          "sha256": "eb8f373ef2e62280653825844241536021d87c7d88baa7ee9ff55461e19763ff"
+        },
+        {
+          "path": "apps/api/uv.lock",
+          "sha256": "2e0c802654c683a07ba4ecaa729640a853514a521ee88283a28b69c3b2592332"
+        },
+        {
+          "path": "apps/etl/pyproject.toml",
+          "sha256": "87bff1d2ecd9de841eea3b94df9901f0e17d65017f1be56f22b7f56e7987c066"
+        },
+        {
+          "path": "apps/mobile/package.json",
+          "sha256": "208b1bf172cd8b864fe12e54bb3ebe036074b3321158513ab2ae622169ed4441"
+        },
+        {
+          "path": "apps/web/package.json",
+          "sha256": "edd0e9d55df4221bc36c03fe2685d569a0ba7cb01dec28c2a5c78ac9cdef83fe"
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "c3b071511e1083f93fe9561d8c0f4a1ec36396192856e4b862b98b119aa995ef"
+        },
+        {
+          "path": "package.json",
+          "sha256": "637288f72556d983ee1c96213a91c2a2ad5c157266cd3c0caace27a6ce22c6f7"
+        },
+        {
+          "path": "packages/api-client/package.json",
+          "sha256": "6bf11a26757f5029a7d5cd28d27028c6f0128765db7ff1b0e093a3534e07a4b6"
+        },
+        {
+          "path": "packages/design-tokens/package.json",
+          "sha256": "6cd820aebd8686043b3c7c673b8d8cc5b6f72a3263275de98504576388018eb3"
+        },
+        {
+          "path": "packages/domain/package.json",
+          "sha256": "6ee4c262c03493e7423ec0dbbcd67753604dcbf723d6e82a8867b73f8ddb389a"
+        },
+        {
+          "path": "packages/hooks/package.json",
+          "sha256": "a2f35a1d49618e7800aa004912bfea67550b0eef4741d6aba734d24ef535e4b2"
+        },
+        {
+          "path": "packages/i18n/package.json",
+          "sha256": "ce91e077a03590e6122a19c19b5e5ff7c5b4428e5f7d8431c8371befd1ae5069"
+        },
+        {
+          "path": "packages/schemas/package.json",
+          "sha256": "5d4928f80d1c27c9b95d1b2be662fc1b09be14a0e9fa012a3a6e006247df0001"
+        },
+        {
+          "path": "packages/state/package.json",
+          "sha256": "f3320367888567f60c07f32c8307ad00acea974c383e1f16acddd0d6509961b2"
+        }
+      ]
+    }
+  ]
+}

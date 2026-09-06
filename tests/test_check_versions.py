@@ -128,10 +128,186 @@ class CheckVersionsTests(unittest.TestCase):
 
     def cli(self, *args: str) -> subprocess.CompletedProcess:
         return subprocess.run([sys.executable, "-B", "-X", "utf8", str(SCRIPT), "--registry",
-                               str(self.registry_path), *args],
+                               str(self.registry_path), "--today", "2026-09-06", *args],
                               capture_output=True, text=True, encoding="utf-8")
 
     # --- 버전 파싱·범위 도우미
+    def test_blocked_only_unknown_versions_fail_closed(self):
+        data = json.loads(json.dumps(REGISTRY))
+        data["blocked"].append({"ecosystem": "npm", "name": "mcp", "range": ">=2", "reason": "시험"})
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+        for ecosystem in ("npm", "pypi"):
+            for version, expected in (("2.1.1", "BLOCKED"), ("1.9.0", None),
+                                      ("2.1.1-rc.1", "NO_LOCK"), ("broken", "NO_LOCK"), ("", "NO_LOCK")):
+                with self.subTest(ecosystem=ecosystem, version=version):
+                    root = self.root / (ecosystem + version)
+                    root.mkdir()
+                    if ecosystem == "npm":
+                        npm_fixture(root, deps={"mcp": ">=1"}, engines={"node": ">=22.12"}, installed={"mcp": version})
+                    else:
+                        python_fixture(root, requires=">=3.12", deps=["mcp>=1"], locked={"mcp": version})
+                    findings = self.run_checker(root=root, repo="app-fail")
+                    self.assertEqual(self.verdicts(findings, "mcp"), [expected] if expected else [])
+                    self.assertEqual(self.cli(str(root), "--repo", "app-fail").returncode, int(expected is not None))
+
+    def test_blocked_range_parser_matches_self_check(self):
+        for value, code in ((">=2.1.1.0.0", 2), (">=2.1.1.0", 0)):
+            data = json.loads(json.dumps(REGISTRY)); data["blocked"][0]["range"] = value
+            self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+            self.assertEqual(self.cli("--self-check").returncode, code)
+            if code == 0:
+                registry = CV.Registry.load(self.registry_path)
+                self.assertIsNotNone(registry.blocked("pypi", "mcp", (2, 1, 1)))
+
+    def test_exception_requires_nonblank_evidence(self):
+        for name in ("reason", "review"):
+            data = json.loads(json.dumps(REGISTRY)); data["exceptions"][0][name] = " \t "
+            self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+            self.assertEqual(self.cli("--self-check").returncode, 2)
+
+    def test_npm_name_identity_is_not_pypi_identity(self):
+        data = json.loads(json.dumps(REGISTRY))
+        data["blocked"].append({"ecosystem": "npm", "name": "bad-name", "range": ">=1", "reason": "시험"})
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+        npm_fixture(self.repo, deps={}, engines={"node": ">=22.12"},
+                    installed={"react.dom": "1.0.0", "react_dom": "1.0.0", "bad.name": "1.0.0"})
+        findings = self.run_checker()
+        self.assertEqual(self.verdicts(findings, "react"), [])
+        self.assertEqual(self.verdicts(findings, "bad.name"), [])
+        registry = CV.Registry.load(self.registry_path)
+        self.assertEqual(registry.axis_for("pypi", "FastAPI"), "fastapi")
+
+    def test_npm_transitive_links_in_manifest_are_unknown(self):
+        data = json.loads(json.dumps(REGISTRY))
+        data["blocked"].append({"ecosystem": "npm", "name": "bad", "range": ">=2", "reason": "시험"})
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+        npm_fixture(self.repo, deps={}, engines={"node": ">=22.12"}, installed={}, extra_packages={
+            "node_modules/react": {"resolved": "packages/react", "link": True},
+            "packages/react": {"name": "react", "version": "18.3.1"},
+            "node_modules/bad": {"resolved": "packages/bad", "link": True},
+        })
+        manifest = self.repo / "kor-travel-common.lock.json"
+        manifest.write_text(json.dumps({"schema": CV.MANIFEST_SCHEMA, "repo": "app-fail",
+                                       "lockfiles": [{"kind": "npm", "path": "package-lock.json"}]}), encoding="utf-8")
+        findings = self.run_checker(manifest=manifest)
+        self.assertEqual(self.verdicts(findings, "react"), ["NO_LOCK"])
+        self.assertEqual(self.verdicts(findings, "bad"), ["NO_LOCK"])
+        self.assertEqual(self.cli("--manifest", str(manifest)).returncode, 1)
+
+    def test_npm_transitive_declarations_and_urls(self):
+        cases = [
+            ("git+https://github.com/example/custom#main", "git+https://github.com/example/custom#" + "a" * 40, "FLOATING_REF"),
+            ("https://github.com/example/custom/archive/refs/heads/main.tar.gz", "https://github.com/example/custom/archive/refs/heads/main.tar.gz", "FLOATING_REF"),
+            ("1.0.0", "https://github.com/example/custom/archive/refs/heads/main.tar.gz", "FLOATING_REF"),
+            ("1.0.0", "https://registry.npmjs.org/custom/-/custom-1.0.0.tgz", None),
+            ("*", "https://registry.npmjs.org/custom/-/custom-1.0.0.tgz", None),
+            ("git+https://github.com/example/custom#v1.0.0", "git+https://github.com/example/custom#" + "a" * 40, "OK"),
+        ]
+        for spec, resolved, expected in cases:
+            with self.subTest(spec=spec, resolved=resolved):
+                npm_fixture(self.repo, deps={}, engines={"node": ">=22.12"}, installed={}, extra_packages={
+                    "node_modules/wrapper": {"version": "1.0.0", "dependencies": {"custom": spec}},
+                    "node_modules/custom": {"version": "1.0.0", "resolved": resolved},
+                })
+                findings = self.run_checker()
+                self.assertEqual(self.verdicts(findings, "custom"), [expected] if expected else [])
+
+    def test_runtime_unsupported_and_empty_intersection(self):
+        for spec in ("^22.12 <20", ">=22.12 <20", ">22.11", "22.11 >=22.12", ">=22.12-slim"):
+            with self.subTest(spec=spec):
+                npm_fixture(self.repo, deps={}, engines={"node": spec}, installed={})
+                self.assertEqual(self.verdicts(self.run_checker(), "node"), ["NO_ENGINES"])
+        npm_fixture(self.repo, deps={}, engines={"node": ">=22.12 <23"}, installed={})
+        self.assertEqual(self.verdicts(self.run_checker(), "node"), ["OK"])
+
+    def test_npm_build_metadata_keeps_stable_numeric_version(self):
+        for version in ("19.2.8+build--", "19.2.8+001.build-x", "19.2.8+build.1"):
+            npm_fixture(self.repo, deps={"react": version}, engines={"node": ">=22.12"}, installed={"react": version})
+            self.assertEqual(self.verdicts(self.run_checker(), "react"), ["OK"])
+
+    def test_registry_nested_fields_and_order_are_strict(self):
+        mutations = [
+            ("providers", {"polciy": "report"}),
+            ("providers", {"policy": "fail"}),
+            ("providers", {"packages": {"x": {"repo": "https://example.com/x", "pin": "main"}}}),
+            ("actions", {"cheked": False}),
+            ("actions", {"checked": True}),
+            ("actions", {"common": {"actions/checkout": "main"}}),
+            ("semantics", {"florr": "잘못된 필드"}),
+            ("updated", "2026-02-30"),
+            ("baseline", "2026-13"),
+        ]
+        for key, value in mutations:
+            with self.subTest(key=key, value=value):
+                data = json.loads(json.dumps(REGISTRY))
+                data[key] = value
+                self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+                self.assertEqual(self.cli("--self-check").returncode, 2)
+        for values in ({"floor": "8", "max": "6.1"}, {"recommended": "6.1"},
+                       {"recommended": "5.8"}, {"floor": "5.9-rc.1"}, {"check": False}):
+            with self.subTest(values=values):
+                data = json.loads(json.dumps(REGISTRY))
+                data["axes"]["typescript"].update(values)
+                self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+                self.assertEqual(self.cli("--self-check").returncode, 2)
+
+    def test_overlapping_exception_prefixes_are_rejected(self):
+        data = json.loads(json.dumps(REGISTRY))
+        data["exceptions"].append({**data["exceptions"][0], "installed": "7", "until": "2027-01-31"})
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+        self.assertEqual(self.cli("--self-check").returncode, 2)
+
+    def test_self_check_expiry_is_not_report_success(self):
+        self.assertEqual(self.cli("--self-check", "--today", "2026-12-31").returncode, 0)
+        result = self.cli("--self-check", "--today", "2027-01-01", "--mode", "report")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("EXEMPT_EXPIRED", result.stdout)
+
+    def test_npm_prerelease_and_alias_are_not_stable(self):
+        for version in ("19.2.8-rc.1", "19.2.8-slim", "19.2", "v19.2.8"):
+            with self.subTest(version=version):
+                npm_fixture(self.repo, deps={"react": "^19.2.8"}, engines={"node": ">=22.12"},
+                            installed={"react": version})
+                self.assertEqual(self.verdicts(self.run_checker(), "react"), ["NO_LOCK"])
+        npm_fixture(self.repo, deps={"react": "npm:other@19.2.8"}, engines={"node": ">=22.12"},
+                    installed={"react": "19.2.8"})
+        self.assertEqual(self.verdicts(self.run_checker(), "react"), ["NO_LOCK"])
+        npm_fixture(self.repo, deps={"react": "19.2.8+build.1"}, engines={"node": ">=22.12"},
+                    installed={"react": "19.2.8+build.1"})
+        self.assertEqual(self.verdicts(self.run_checker(), "react"), ["OK"])
+
+    def test_npm_transitive_nested_versions_and_blocked(self):
+        data = json.loads(json.dumps(REGISTRY))
+        data["blocked"].append({"ecosystem": "npm", "name": "bad", "range": ">=2", "reason": "시험"})
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+        npm_fixture(self.repo, deps={"react": "19.2.8"}, engines={"node": ">=22.12"},
+                    installed={"react": "19.2.8"}, extra_packages={
+                        "node_modules/other/node_modules/react": {"version": "18.3.1"},
+                        "apps/web/node_modules/bad": {"version": "2.0.0"},
+                        "apps/web/node_modules/custom": {"version": "1.0.0", "resolved": "git+https://github.com/example/custom#main"},
+                    })
+        findings = self.run_checker()
+        self.assertEqual(sorted(self.verdicts(findings, "react")), ["BELOW_FLOOR", "OK"])
+        self.assertEqual(self.verdicts(findings, "bad"), ["BLOCKED"])
+        self.assertEqual(self.verdicts(findings, "custom"), ["FLOATING_REF"])
+
+    def test_npm_optional_and_workspace_ancestor_hoisting(self):
+        npm_fixture(self.repo, deps={}, engines={"node": ">=22.12"}, installed={"react": "19.2.8"},
+                    extra_packages={"apps/node_modules/react": {"version": "18.3.1"}})
+        member = self.repo / "apps/web"
+        member.mkdir(parents=True)
+        (member / "package.json").write_text(json.dumps({"optionalDependencies": {"react": "18.3.1"}}), encoding="utf-8")
+        findings = self.run_checker()
+        member_rows = [f for f in findings if f.scope == "apps/web" and f.key == "react"]
+        self.assertEqual([f.verdict for f in member_rows], ["BELOW_FLOOR"])
+        self.assertEqual(len([f for f in findings if f.installed == "18.3.1"]), 1)
+
+    def test_shrinkwrap_precedence_does_not_use_stale_package_lock(self):
+        npm_fixture(self.repo, deps={"react": "19.2.8"}, engines={"node": ">=22.12"},
+                    installed={"react": "19.2.8"})
+        (self.repo / "npm-shrinkwrap.json").write_text("{}", encoding="utf-8")
+        self.assertEqual(self.verdicts(self.run_checker(), "react"), ["NO_LOCK"])
+
     def test_invalid_installed_versions_are_not_success(self):
         for version in ("banana", "19.2.8garbage", ""):
             with self.subTest(version=version):

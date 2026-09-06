@@ -1,7 +1,7 @@
 {
   "schema": "kor-travel-common.version-registry.v1",
   "baseline": "2026-09",
-  "updated": "2026-09-06",
+  "updated": "2026-09-07",
   "next_review": "2026-12",
   "policy": "docs/standards/versions.md",
   "source": "docs/plan/design-brief.md D-06·D-07·D-30; docs/survey/cross/version-matrix.md §4·§5.1",
@@ -415,7 +415,7 @@
       "repo": "kor-travel-airport",
       "key": "typescript",
       "installed": "7.0",
-      "reason": "lock·CI에서 7.0.2가 실제 동작(vm §6). typescript-eslint peer 확장 또는 2026-12 재판정(O-6).",
+      "reason": "고정 lock에 7.0.2 기록. 소비자 CI 성공은 이 검사로 확인하지 않음(T-433). typescript-eslint peer 확장 또는 2026-12 재판정(O-6).",
       "until": "2026-12-31",
       "review": "T-433; vm §6"
     },

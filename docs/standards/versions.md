@@ -1,8 +1,8 @@
 # 라이브러리·플랫폼 버전 일치 정책 (versions)
 
 - 정본 지위: 이 문서는 버전 정렬 **정책**의 정본이고, 기준선 **값**의 정본은 루트 [`versions.json`](../../versions.json)(schema `kor-travel-common.version-registry.v1`)이다. 두 문서가 어긋나면 `versions.json`이 값을, 이 문서가 규칙을 이긴다. 검사기는 [`tools/check_versions.py`](../../tools/check_versions.py).
-- 확정 task: T-005(★이번 PR; 7 소비자 현재값·예외의 최종 등록은 잔여), T-005a(`uv.lock` 확장), T-005b(`poetry.lock`·`requirements.txt`), T-403(소비자 CI 삽입), T-502(gate 승격), T-507(재평가). 이 문서는 정본 초안이며 실물 소비자 매니페스트(T-011)와 대조해 확정하는 task가 남아 있다.
-- 마지막 갱신: 2026-09-06. 결정 근거: [설계 브리프](../plan/design-brief.md) D-06·D-07·D-30·D-31, ADR-008([ADR 색인](../adr/README.md)).
+- 확정 task: T-005(정책·npm v3 구현, 독립 리뷰 진행), T-005a(`uv.lock` 확장), T-005b(`poetry.lock`·`requirements.txt`), T-403(소비자 CI 삽입), T-502(gate 승격), T-507(재평가). 이 문서는 정본 초안이며 실물 소비자 매니페스트(T-011)와 대조해 확정하는 task가 남아 있다.
+- 마지막 갱신: 2026-09-07. 결정 근거: [설계 브리프](../plan/design-brief.md) D-06·D-07·D-30·D-31, ADR-008([ADR 색인](../adr/README.md)).
 - 상위 문서: [standards 색인](README.md). 관련: [frontend-stack](frontend-stack.md), [backend-stack](backend-stack.md), [ci-deploy](ci-deploy.md), [consumer adoption runbook](../runbooks/consumer-adoption.md), [release runbook](../runbooks/release.md).
 
 ## 1. 목적과 범위
@@ -19,7 +19,7 @@
 | floor | 하한. 설치본(또는 선언 하한)이 이보다 낮으면 `BELOW_FLOOR`. 접두 비교(`22.12`는 `22.12.x` 전체) |
 | recommended | 권장 접두. 설치본이 이 접두와 일치하면 `OK`, 아니면 `NOT_RECOMMENDED`(정보용, 어느 모드에서도 실패 아님). 범위 선언(`>=22`)의 하한에는 적용하지 않는다 |
 | max | 배타 상한. 근거가 있는 축에만(`typescript` 6.1 · `maplibre-gl` 6 · `@tanstack/react-table` 9). 설치본이 이 값 이상이면 `ABOVE_MAX` |
-| 선언 | `package.json` `dependencies`/`devDependencies`/`engines`/`packageManager`, `pyproject.toml` `[project]`/`[tool.poetry]`, `requirements.txt`의 범위 문자열 |
+| 선언 | `package.json` `dependencies`/`devDependencies`/`optionalDependencies`/`engines`/`packageManager`, `pyproject.toml` `[project]`/`[tool.poetry]`, `requirements.txt`의 범위 문자열 |
 | 설치본 | `package-lock.json`(lockfileVersion 3) `packages[…].version`, `uv.lock` `[[package]].version`. lockfile이 없으면 설치본은 **미확인**이다 |
 | 예외(exception) | `exceptions[]{repo,key,installed,reason,until,review}`. 해당 저장소·축·설치본 접두에 한해 원 판정을 `EXEMPT`로 덮는다. `until` 경과 시 `EXEMPT_EXPIRED` |
 | 차단(blocked) | `blocked[]{ecosystem,name,range,reason,since}`. 설치본이 범위에 들면 `BLOCKED` |
@@ -41,9 +41,9 @@
 
 ### 3.2 lockfile 의무
 
-- npm: `package-lock.json` **lockfileVersion 3** 커밋. CI·Docker는 `npm ci`. lockfileVersion 1·2는 `NO_LOCK`으로 본다(npm 7+에서 `npm install`로 재생성).
+- npm: `package-lock.json` **lockfileVersion 3** 커밋. CI·Docker는 `npm ci`. lockfileVersion 1·2는 `NO_LOCK`으로 본다. `npm-shrinkwrap.json`이 함께 있으면 npm이 이를 우선하므로, 미지원 shrinkwrap 대신 package-lock을 신뢰하지 않고 `NO_LOCK`으로 보고한다.
 - Python: `uv.lock` 커밋 + CI·Docker 모두 `uv sync --locked`(weather 선례, `vm` §2.1). airport(CI만)·pinvi(미소비)는 T-482·T-484에서 소비 일관화. Poetry(ktdm)·`requirements.txt`(concierge)는 uv 전환 task(T-471·T-450)가 선행이며 그때까지 `NO_LOCK`으로 보고된다.
-- 워크스페이스: npm 워크스페이스는 루트 lock 하나가 전 멤버를 해석한다(map·pinvi). 도구는 멤버 `package.json`을 별도 범위로 보고하되 설치본은 `<멤버>/node_modules/<pkg>` → 루트 `node_modules/<pkg>` 순으로 찾는다. uv 워크스페이스도 같은 방식.
+- 워크스페이스: npm 워크스페이스는 루트 lock 하나가 전 멤버를 해석한다(map·pinvi). 도구는 멤버 `package.json`을 별도 범위로 보고하되 설치본은 `<멤버>/node_modules/<pkg>`부터 각 상위 디렉터리의 `node_modules/<pkg>`를 거쳐 루트까지 찾는다. 직접 선언 대조 뒤 lock 전체의 나머지 축·차단 대상·전이 git/URL 선언과 resolved를 검사한다. 로컬 링크의 축·차단 대상은 NO_LOCK으로 남긴다. npm 이름의 점·밑줄·하이픈을 서로 합치지 않으며 Python 이름만 정규화한다. 전이 행의 scope에는 lock 내부 경로를 붙이며, 명시한 멤버 범위라도 공유 lock 전체를 검사한다. uv의 세부 워크스페이스 해석은 T-005a가 확정한다.
 - lock 재생성 사고 방지: `--package-lock-only`로 만든 lock은 `integrity`가 빠질 수 있다(pinvi T-352, `vm` §3.6). 채택 PR은 lock 동반 커밋이 필수다(D-24).
 
 ### 3.3 판정 어휘(D-07)
@@ -56,7 +56,7 @@
 | `ABOVE_MAX` | 설치본이 max 이상 | — | `::warning::` | `::error::` + exit 1 |
 | `NO_LOCK` | lockfile 없음·버전 불일치·lock에 항목 없음·파서 미지원(Poetry·requirements) | — | `::warning::` | `::error::` + exit 1 |
 | `NO_ENGINES` | `engines.node`(또는 `requires-python`) 미선언, 하한 없는 범위(`*`) | — | `::warning::` | `::error::` + exit 1 |
-| `FLOATING_REF` | git/URL 의존성이 SHA·버전 태그·릴리스 자산으로 고정되지 않음(`@main`, 참조 없음, `semver:` 범위), npm 선언 `*`/`latest`(워크스페이스 링크 제외) | **`::error::`** | `::error::` | `::error::` + exit 1 |
+| `FLOATING_REF` | git/URL 의존성이 SHA·버전 태그·릴리스 자산으로 고정되지 않음(`@main`, 참조 없음, `semver:` 범위), 직접 npm 선언 `*`/`latest`(워크스페이스 링크 제외) | **`::error::`** | `::error::` | `::error::` + exit 1 |
 | `BLOCKED` | 설치본이 `blocked[]` 범위에 포함 | **`::error::`** | `::error::` | `::error::` + exit 1 |
 | `EXEMPT` | 예외 등록·`until` 이내(비고에 원 판정 표기) | — | — | — |
 | `EXEMPT_EXPIRED` | 예외 `until` 경과 | **`::error::`** | `::error::` | `::error::` + exit 1 |
@@ -99,55 +99,17 @@
 
 - 값 변경(`axes`·`blocked`·`exceptions`·`consumers.enforce`)은 common PR + 2인 리뷰 비면제(D-04) + `CHANGELOG.md` 기록.
 - 분기마다(T-506) 최신 안정 버전을 재조회해 `recommended`를 올리고 `floor`는 EOL·보안 floor·peer 제약이 있을 때만 올린다. Node 24/26·Vitest 5·react-table 9·lucide 1.x·mypy 2·TS 7 재평가는 T-507.
-- 기준선을 올리면 `baseline`을 `YYYY-MM`으로 바꾸고 이 문서 §4 표를 함께 갱신한다. 과거 기준선은 CHANGELOG에 남기고 레지스트리에 이력을 쌓지 않는다.
+- 기준선을 올리면 `baseline`을 `YYYY-MM`으로 바꾸고 변경 이유와 영향받는 축을 CHANGELOG에 기록한다. 과거 기준선은 CHANGELOG에 남기고 레지스트리에 이력을 쌓지 않는다.
 
-## 4. 2026-09 기준선 매트릭스(D-06 표)
+## 4. 기준선 값과 축
 
-| 축 | floor | recommended | 예외·비고 |
-|---|---|---|---|
-| Node | 22.12 | 22.23.x(이미지 `node:22-bookworm-slim` digest) | 24/26 승격은 Phase 5(T-507); Node 20 CI(ktdm·geo·wx)는 T-403 |
-| npm | 10.9(Node 22 동봉 10.9.8) | 11.19.x(CI `npm install -g npm@11.19.x` 명시 설치) | map 12.0.1 exact 예외 |
-| Next.js | 16.2 | 16.3.4 | map `16.2.12` exact 허용(pin), wx 15·ktdm 14는 Phase 4 |
-| React | 19.0 | 19.2.8 | geo·ktdm 18.3.1은 Phase 4 전 예외(tokens만 채택) |
-| TypeScript | 5.9 | 5.9.3 | airport 7.0.2 예외(`until`: typescript-eslint peer 확장 또는 2026-12 재판정) |
-| Tailwind / @tailwindcss/postcss | 4.3.0 | 4.3.3 | pinvi mobile Tailwind 3(NativeWind 4) 예외 — **O-8 사용자 승인 필요** |
-| @base-ui/react | 1.6 | 1.8.0 | ktc 1.5는 채택 PR에서 상향 |
-| shadcn CLI | — | 4.21.x, devDependencies | map은 CLI 미설치 유지(테스트가 부재 단언) |
-| ESLint / typescript-eslint | 9.0 | 10.x / 8.x | ktdm 8은 Phase 4 |
-| Vitest / @playwright/test | 4.1 / 1.60 | 4.1.x / 1.63.x | map Playwright 1.60 exact 예외; wx Vitest 3은 Phase 4 |
-| react-query / react-table / react-virtual / zod / zustand / RHF / resolvers | 5 / 8.21 / 3.14 / 4 / 5 / 7.55 / 5 | 최신 5.x / 8.21.x(9는 breaking 미조사) / 3.14.x / 4.5.x / 5.0.x / 7.8x / 5.x | ktc·pinvi resolvers 3은 채택 PR에서 상향 |
-| maplibre-gl | 5.24 | 5.24.x | ktc 6.0 예외(공유 라이브러리 peer 정합까지) |
-| Python(common 패키지) | 3.11 호환 | — | 앱 `requires-python` 3.12 상향은 Phase 4 앱 결정(O-7) |
-| Python 이미지 | 3.11-slim | 3.12-slim(3.13 허용) | |
-| uv | 0.11 | 0.12.x | lockfile 의무: `uv.lock` + CI·Docker `--locked`; Poetry(ktdm)·requirements.txt(ktc)는 uv 전환 task |
-| FastAPI / Starlette / uvicorn | 0.115 / 미핀 / 0.30 | 0.141.x / 1.6.x / 0.52.x | map `starlette<1.0` 상한은 T-480 재검증 전까지 예외 |
-| pydantic / pydantic-settings | 2.9 / 2.5 | 2.13.x / 2.15.x | |
-| SQLAlchemy / alembic | 2.0.35 / 1.13 | 2.0.52 / 1.19.x | map `alembic<1.20` 존중 |
-| asyncpg / psycopg | 0.29 / 3.2 | 0.31 / 3.3 | 앱 선택 |
-| httpx / tenacity / structlog / prometheus-client / typer / dagster | 0.27 / 9 / 24 / 0.20 / 0.12 / 1.9 | 0.28 / 9.1 / 26 / 0.26 / 0.27 / 1.13 | |
-| pytest / pytest-asyncio / ruff / mypy / import-linter / testcontainers | 8 / 0.23 / 0.9 / 1.13 / 2.0 / 4.8 | 9.1 / 1.4 / 0.16.x / 2.3.x / 2.15 / 4.15 | |
-| PostgreSQL / PostGIS | 별도 트랙(현 16 + 3.5 digest 핀) | — | 라이브러리 정렬 범위 밖 |
-| GitHub Actions | 소비자: 현행 major 유지 + SHA 핀 권고 | common 내부: checkout v7·setup-node v7·setup-python v7·setup-uv v10, SHA 핀 | |
-| provider `python-*-api` SHA | `providers` 절에 보고만 | — | 정렬 주체는 각 저장소(O-16) |
+수치의 유일한 정본은 [`versions.json`](../../versions.json)의 `axes`·`actions`·`providers`·`exceptions`다. 표를 수동 복제하지 않는다. `packages[]`가 있는 축은 여러 npm/Python 이름을 같은 정책으로 묶는다. `checked: false`인 이미지·DB·도구 축은 실제 실행 버전 검사 결과가 아니다.
 
-값의 출처: `vm` §4(2026-09-06 registry 조회), §5.1 후보 A(현재 다수와 최소 이동) 채택. 최신(후보 B: Node 24·Python 3.12 floor·TS 7)은 채택하지 않았다 — Node 20 CI 3곳·Python 3.11 하한 3곳·typescript-eslint peer 때문(`vm` §5.1, [backend](../survey/cross/backend.md) §2.1·§5.3). 판정 3인 모두 "단일 정확값 표"를 기각했으므로 floor/recommended 두 값으로 둔다(브리프 D-06 채택 사유).
+기준선 결정은 ADR-008과 브리프 D-06에 있으며, 변경 시 §3.9 절차를 따른다. `actions.common`은 사용할 major 정책이고 실제 workflow SHA 대조는 T-009다.
 
-레지스트리 키와의 대응: 표의 "Node"→`node`, "npm"→`npm`, "Next.js"→`next`, "React"→`react`(react-dom 포함), "Tailwind / @tailwindcss/postcss"→`tailwindcss`(두 패키지), "ESLint / typescript-eslint"→`eslint`·`typescript-eslint`(후자는 floor 8.0), "react-query … resolvers"→`@tanstack/react-query`·`@tanstack/react-table`(max 9)·`@tanstack/react-virtual`·`zod`·`zustand`·`react-hook-form`(recommended `7.87`)·`@hookform/resolvers`, "Python(common 패키지)"→`python`(앱 `requires-python` 하한 대조), "Python 이미지"→`python-image`(`checked: false`), "uv"→`uv`(`checked: false`), "PostgreSQL / PostGIS"→`postgresql`(`checked: false`), "GitHub Actions"→`actions` 절(`checked: false`, T-009), "provider SHA"→`providers` 절.
+## 5. 소비자 실측
 
-## 5. 앱별 격차(2026-09-06 기준 커밋)
-
-[commonality-matrix](../survey/commonality-matrix.md) §3.2 요약. 난이도는 조사의 추정이다. `check_versions` 열은 이 PR에서 기준 커밋 체크아웃에 report 모드로 실행한 결과 요약(도구 실행 evidence; 값은 `vm` §1~§2와 일치)이다.
-
-| 앱 | major 격차 | 선행 작업(공통 소비 전) | `check_versions` report(실패 후보) | 난이도 |
-|---|---|---|---|---|
-| airport | TypeScript 7.0.2(예외 등록, O-6); Tailwind 미도입(WIP `99b3f98`) | WIP 병합(T-430), `engines` 선언·ESLint 도입 판정(T-433), Docker `uv sync --locked`(T-482) | `NO_ENGINES` 1(frontend); TS 7은 `EXEMPT` | 낮~중 |
-| concierge | `@hookform/resolvers` 3, `maplibre-gl` 6.0(예외), `@base-ui/react` 1.5 | **CI 신설**(T-451), **Python lock 도입**(T-450; `mcp<2` 사고), `@config` 제거 | `NO_LOCK` 14(requirements 4벌), `NO_ENGINES` 5, `BELOW_FLOOR` 3(node `>=22`·base-ui·resolvers) | 중~높 |
-| docker-manager | Next 14, React 18, ESLint 8(모두 예외, T-470), shadcn 미도입 | Poetry→uv(T-471), 하한 상향, CI Node 22 | `NO_LOCK` 9(Poetry), `NO_ENGINES` 1 | **높음** |
-| geo | React 18(예외, O-25), Radix→Base UI, lucide 0.x | CI Node 22·`uv.lock`(T-440), `@config` 제거(T-441), pre-commit 정렬 | `NO_LOCK` 25(Python), `NO_ENGINES` 1 | **높음**(UI) / 중(Python) |
-| map | TS 6.0.3(map-marker-react) vs 5.9.3 | **Python lock 도입**, `starlette<1.0`·`alembic<1.20` 재검토(T-480), npm 12.0.1 합의 | `NO_LOCK` 26(Python 3 패키지); exact 핀 4건은 `EXEMPT` | 낮~중 |
-| weather | Tailwind 미도입, Next 15, Vitest 3(예외, T-460) | CI Node 22, `engines` 선언, 벤더링 `python-airkorea-api` `requires-python >=3.10` 정리(T-481) | `NO_ENGINES` 1, `BELOW_FLOOR` 1(벤더링 패키지 python 3.10) | 중~높 |
-| pinvi web/admin | `@hookform/resolvers` 3, jsdom 25, lucide 0.x | `uv.lock` CI·Docker 소비, etl `@main` 제거(T-484), **라이선스 결정 선행**(O-1) | `BELOW_FLOOR` 3(engines `>=20`, resolvers, mobile tailwind 3), `NO_LOCK` 9(etl), `FLOATING_REF` 1(`python-kasi-api@main`) | 중 |
-| pinvi mobile | Tailwind 3.4.19(NativeWind 4) — O-8 대기 | NativeWind 5 GA | `BELOW_FLOOR`(tailwindcss) — 승인 전 미등록 | **높음**(외부) |
+[T-005 고정 입력 보고](../evidence/t005/README.md)는 7개 소비자의 commit·입력 digest·실행 환경·판정 목록을 보존한다. 값은 해당 commit의 관찰이며 현재 배포 상태나 소비자 빌드 성공을 뜻하지 않는다. report exit 0은 정책 준수 증거가 아니며, 이번 위반 결과로 `clean_runs`나 `enforce`를 올리지 않는다.
 
 ## 6. 전환 트랙(매트릭스 §3.3)
 
@@ -174,32 +136,14 @@
 
 ## 7. 레지스트리 스키마(`kor-travel-common.version-registry.v1`)
 
-```json
-{
-  "schema": "kor-travel-common.version-registry.v1",
-  "baseline": "2026-09",
-  "updated": "2026-09-06",
-  "next_review": "2026-12",
-  "axes": {
-    "node": {"ecosystem": "runtime", "floor": "22.12", "recommended": "22.23", "image": "node:22-bookworm-slim", "check": "engines.node"},
-    "react": {"ecosystem": "npm", "packages": ["react", "react-dom"], "floor": "19.0", "recommended": "19.2.8"},
-    "typescript": {"ecosystem": "npm", "floor": "5.9", "recommended": "5.9.3", "max": "6.1"},
-    "python-image": {"ecosystem": "image", "floor": "3.11-slim", "recommended": "3.12-slim", "checked": false}
-  },
-  "actions": {"consumer_policy": "현행 major 유지 + SHA 핀", "common": {"actions/checkout": "v7"}, "checked": false},
-  "exceptions": [{"repo": "kor-travel-airport", "key": "typescript", "installed": "7.0", "reason": "…", "until": "2026-12-31", "review": "T-433; vm §6"}],
-  "blocked": [{"ecosystem": "pypi", "name": "mcp", "range": ">=2", "reason": "…", "since": "2026-09-04"}],
-  "consumers": {"kor-travel-map": {"enforce": "report", "clean_runs": 0, "aliases": ["ktm", "map"]}},
-  "providers": {"policy": "report", "packages": {"python-kasi-api": {"repo": "https://github.com/digitie/python-kasi-api"}}}
-}
-```
+전체 형식과 현재 값은 [`versions.json`](../../versions.json)을 참조한다. 아래는 필드 의미와 검사 계약이다.
 
 | 절 | 필드 | 규칙 |
 |---|---|---|
-| 머리 | `schema`(고정 문자열)·`baseline`(`YYYY-MM`)·`updated`·`next_review`·`policy`·`source` | 로더는 `schema` 불일치 시 exit 2 |
+| 머리 | `schema`(고정 문자열)·`baseline`(`YYYY-MM`)·`updated`·`next_review`·`policy`·`source` | schema 고정·문자열·YYYY-MM·ISO 날짜 검사, 미지 필드 exit 2 |
 | `axes.<key>` | `ecosystem` ∈ `runtime`/`npm`/`pypi`/`image`/`tool`/`db`(필수), `packages[]`(생략 시 key), `floor`/`recommended`/`max`(문자열 또는 null), `image`, `check`, `checked`(기본 true), `note`, `source` | `runtime` 축은 `engines.node`·`engines.npm`(또는 `packageManager`)·`requires-python`의 **하한**을 대조하고, exact 값이면 recommended까지 대조 |
 | `actions` | `consumer_policy`·`common{}`·`checked: false` | 도구 미검사(T-009에서 워크플로 파서 추가 후보) |
-| `exceptions[]` | `repo`(consumers 키)·`key`(axes 키)·`installed`(접두)·`reason`·`until`(ISO)·`review` — 6개 모두 필수 | 접두 일치 시에만 적용; 다른 설치본이 되면 자동 무효 |
+| `exceptions[]` | `repo`(consumers 키)·`key`(axes 키)·`installed`(접두)·`reason`·`until`(ISO)·`review` — 6개 모두 필수 | 숫자 접두 일치 시에만 적용; 같은 저장소·축의 중첩 접두는 거부; 다른 설치본이면 무효 |
 | `blocked[]` | `ecosystem`·`name`·`range`·`reason`(필수)·`since`·`source` | `range`는 `>=`·`<`·`==`·`,` 조합 |
 | `consumers.<repo>` | `enforce`(`report`/`warn`/`fail`)·`clean_runs`·`aliases[]`·`note` | 7개 고정. 신규 소비자는 common PR |
 | `providers` | `policy: "report"`·`packages{name:{repo}}`·`note` | 보고 전용. `python-*-api` 패턴은 목록에 없어도 보고 |
@@ -220,11 +164,11 @@ python3 -B -X utf8 tools/check_versions.py --manifest /path/to/app/kor-travel-co
 python3 -B -X utf8 tools/check_versions.py /path/to/app --repo wx --today 2027-01-15
 ```
 
-- 인자: 위치 인자 = 저장소 루트(여러 개 가능), `--manifest`, `--registry`(기본 common 루트 `versions.json`), `--repo`(consumers 키 또는 별칭; 기본 매니페스트 `repo` → 디렉터리 이름), `--mode`(로컬 override), `--today`, `--json`, `--markdown`, `--no-step-summary`, `--quiet`.
+- 인자: 위치 인자 = 저장소 루트(여러 개 가능), `--manifest`, `--registry`(기본 common 루트 `versions.json`), `--repo`(consumers 키 또는 별칭; 기본 매니페스트 `repo` → 디렉터리 이름), `--mode`(로컬 override), `--today`, `--json`, `--markdown`, `--no-step-summary`, `--quiet`, `--self-check`(형식·순서·예외 만료).
 - 출력: 표준 출력에 Markdown 표(범위·축·생태계·선언·설치·판정·비고) + GitHub annotation(`::error::`/`::warning::`) + 요약 1줄. `--json`은 `kor-travel-common.version-report.v1`. `GITHUB_STEP_SUMMARY`가 있으면 표를 덧붙인다.
-- exit: 0(report·warn), 1(fail 모드 실패 후보 존재), 2(레지스트리·매니페스트·경로 오류).
+- exit: 0(report·warn), 1(fail 모드 실패 후보 존재 또는 `--self-check` 예외 만료), 2(레지스트리·매니페스트·경로 오류). 자체 검사는 소비자 report 모드와 별개로 만료를 실패 처리한다.
 - 읽는 것: `package.json`·`package-lock.json`(v3)·`pyproject.toml`(PEP 621·Poetry 선언)·`uv.lock`·`requirements.txt`(선언만). 쓰는 것: `--json`·`--markdown` 출력 파일뿐. 네트워크 없음. Python 3.11+ 표준 라이브러리(`tomllib`)만 쓰며 Windows에서 동작한다(D-03 Tier 2; 회귀 시험 `tests/test_check_versions.py`).
-- 한계(사실): `poetry.lock` 파서 없음(T-005b) → `NO_LOCK`; Docker 이미지·GitHub Actions·CI Node 버전은 읽지 않음(T-009); git 고정 판정은 §3.8 휴리스틱; 여러 lock 항목(중첩 설치)이 있으면 워크스페이스 멤버 경로를 우선한다.
+- 한계(사실): `poetry.lock` 파서 없음(T-005b) → `NO_LOCK`; Docker 이미지·GitHub Actions·CI Node 버전은 읽지 않음(T-009); git 고정 판정은 §3.8 휴리스틱; npm 사전 배포 버전·별칭·로컬 링크는 안정 원 패키지와 비교하지 않고 `NO_LOCK`으로 보고한다. npm 설치본은 `major.minor.patch`와 선택적 build metadata만 지원한다. 런타임/정책 숫자 접두와 이미지 `-slim`은 별도 허용한다. 런타임 하한은 단일 숫자/`=`/`==`/`^`/`~`/`~=`/`>=` 접두, `>=`·`<` 교집합, 이들의 `||` 대안을 지원한다. 빈 교집합과 `>`·`<=`·`!=` 및 그 밖의 혼합 문법은 NO_ENGINES다. 전체 SemVer/PEP 440 범위 해석기가 아니며 lock과 선언의 만족 여부는 소비자의 `npm ci`·`uv sync --locked` gate가 검증한다.
 - CI 연동: common `check-versions(report)` job(T-009)과 재사용 워크플로 `versions-check.yml`(T-010). 소비자는 기존 워크플로에 job을 추가하는 방식으로 호출하며 required check 이름은 입력으로 개방한다([ci-deploy](ci-deploy.md)).
 
 ## 9. 열린 결정(사용자 확인 필요; 기본값으로 진행)
@@ -247,4 +191,14 @@ python3 -B -X utf8 tools/check_versions.py /path/to/app --repo wx --today 2027-0
 
 ### 입력 오류와 자체 검사
 
-`check_versions.py --self-check`는 소비자 버전 조회 없이 레지스트리 형식·판정 정책을 검증한다. 미지 필드, 잘못된 enforce/버전/예외/차단 값과 빈 검사 범위는 입력 오류(exit 2)다. 설치 버전 파싱 실패는 NO_LOCK, 하한 없는 OR 또는 지원하지 않는 런타임 범위는 NO_ENGINES이며 OK로 바꾸지 않는다. URL은 npm 선언의 `#ref`, Python 선언의 `@rev`, uv lock git source의 전체 SHA fragment를 구분해 실제 ref 위치를 해석하고 임의 query·자산 fragment의 SHA를 고정 근거로 삼지 않는다. 지원 파서의 확대와 실제 소비자 대조는 T-005·T-005a·T-005b에서 검증한다.
+`check_versions.py --self-check`는 소비자 버전 조회 없이 레지스트리 형식·판정 정책을 검증한다. 모든 정책 객체의 미지 필드, 잘못된 enforce/버전/날짜/예외/차단 값, 뒤집힌 `floor <= recommended < max`, 겹치는 예외 접두와 빈 검사 범위는 입력 오류(exit 2)다. 현재 지원하지 않는 actions의 `checked: true`와 providers의 report 외 정책도 거부한다. 자체 검사에서 `until` 다음 날부터 `EXEMPT_EXPIRED` 주석과 exit 1을 반환한다. 설치 버전 파싱 실패는 axes 밖의 차단 전용 패키지에도 NO_LOCK, 하한 없는 OR 또는 지원하지 않는 런타임 범위는 NO_ENGINES이며 OK로 바꾸지 않는다. URL은 npm 선언의 `#ref`, Python 선언의 `@rev`, uv lock git source의 전체 SHA fragment를 구분해 실제 ref 위치를 해석하고 임의 query·자산 fragment의 SHA를 고정 근거로 삼지 않는다. 지원 파서의 확대와 실제 소비자 대조는 T-005·T-005a·T-005b에서 검증한다.
+
+
+### npm 입력 형식 근거
+
+2026-09-07 조회: [npm package-lock 문서](https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json/)(표시 버전 11.19.1)의 packages·link·shrinkwrap 우선순위와 [node-semver README](https://github.com/npm/node-semver/blob/6e05b7637396ac66522cff8731f07cfe0ef49a29/README.md)의 사전 배포 구분을 참고했다. 이 도구는 안정 버전 수치 비교만 구현하며 node-semver 전체 문법 지원을 주장하지 않는다.
+
+
+### 전이 npm 참조의 범위
+
+전이 패키지의 git/URL 선언은 resolved가 SHA여도 원 선언이 branch이면 FLOATING_REF다. 전이 numeric/wildcard 선언은 lock 설치본으로 대조하고 직접 manifest의 `*`/`latest` 금지와 구분한다. 기본 npm registry의 `/-/<이름>-<설치버전>.tgz` 경로는 registry 설치본으로 분류한다. 그 외 외부 resolved는 §3.8의 고정 참조 규칙을 적용하므로 미지원 사설 registry/mirror는 FLOATING_REF일 수 있다. 실제 파일 다운로드·integrity 검증은 이 읽기 전용 검사기의 성공 주장에 포함하지 않는다.

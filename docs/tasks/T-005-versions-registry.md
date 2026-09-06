@@ -1,6 +1,6 @@
-# T-005 versions.json v1 + `tools/check_versions.py`(npm lock v3·report·판정 어휘) + `docs/standards/versions.md` + 7 소비자 현재값·예외 등록
+# T-005 versions.json v1 + `tools/check_versions.py`(npm lock v3·report·판정 어휘) + `docs/standards/versions.md` + 7 소비자 현재값·예외 등록 (2026-09-07, PR #3)
 
-- 상태: READY
+- 상태: DONE
 - 우선순위: P0
 - Gate: 도구 테스트·문서 검증
 - 선행: 없음
@@ -19,11 +19,11 @@
 
 ## 구현 범위
 
-1. `versions.json`: `"schema": "kor-travel-common.version-registry.v1"`, `baseline: "2026-09"`, 축별 `{floor, recommended, max?}`(D-06 표 전 행: node·npm·next·react·typescript·tailwindcss·@tailwindcss/postcss·@base-ui/react·shadcn·eslint·typescript-eslint·vitest·@playwright/test·react-query·react-table·react-virtual·zod·zustand·react-hook-form·resolvers·maplibre-gl·python·python-image·uv·fastapi·starlette·uvicorn·pydantic·pydantic-settings·sqlalchemy·alembic·asyncpg·psycopg·httpx·tenacity·structlog·prometheus-client·typer·dagster·pytest·pytest-asyncio·ruff·mypy·import-linter·testcontainers·actions), `images`(digest), `blocked[]`(`mcp>=2`, concierge 2026-09-04), `providers`(보고만), `consumers.<repo>{enforce: "report", exceptions[]{key, installed, reason, until, review}}`. 미지 필드 거부.
+1. `versions.json`: `"schema": "kor-travel-common.version-registry.v1"`, `baseline: "2026-09"`, 축별 `{floor, recommended, max?}`(D-06 표 전 행: node·npm·next·react·typescript·tailwindcss·@tailwindcss/postcss·@base-ui/react·shadcn·eslint·typescript-eslint·vitest·@playwright/test·react-query·react-table·react-virtual·zod·zustand·react-hook-form·resolvers·maplibre-gl·python·python-image·uv·fastapi·starlette·uvicorn·pydantic·pydantic-settings·sqlalchemy·alembic·asyncpg·psycopg·httpx·tenacity·structlog·prometheus-client·typer·dagster·pytest·pytest-asyncio·ruff·mypy·import-linter·testcontainers·actions), `axes.*.image`(이미지 참조, digest 검사 범위 밖), `blocked[]`(`mcp>=2`, concierge 2026-09-04), `providers`(보고만), `consumers.<repo>{enforce: "report", clean_runs, aliases}`와 최상위 `exceptions[]{repo, key, installed, reason, until, review}`. 미지 필드 거부.
 2. `tools/check_versions.py`: 입력 `<소비자-checkout> --repo <name>` 또는 `--manifest <kor-travel-common.lock.json>`(manifest와 v3 `packages` 트리에서 선언·설치본 추출); 판정 `OK/BELOW_FLOOR/ABOVE_MAX/NOT_RECOMMENDED/NO_LOCK/NO_ENGINES/FLOATING_REF/BLOCKED/EXEMPT/EXEMPT_EXPIRED`; 모드는 `consumers.<repo>.enforce`가 결정(`report` exit 0, `warn`, `fail` exit 1); `FLOATING_REF`·`BLOCKED`·`EXEMPT_EXPIRED`는 report에서도 `::error::` 주석; 출력 Markdown 표 + `--json` + `$GITHUB_STEP_SUMMARY`; `--self-check`(스키마·`until` 형식·만료 검사); stdlib만, Windows 동작. 매니페스트 입력의 정식 스키마 정합은 T-011에서 검증한다. 기존 positional 경로 입력을 유지하고 미구현 `--lock`·`--engines`를 실행 예시로 요구하지 않는다.
 3. `tests/test_check_versions.py`: fixture lock v3(직접·전이·git URL·workspace)로 10 판정 전부 + 모드별 exit code + strict 스키마 거부.
 4. `docs/standards/versions.md`: 정책(계층별 하이브리드·lockfile 의무·판정 어휘·모드·승격 조건 "report 2회 연속 위반 0 → common PR"·예외 형식·`blocked` 운영) + D-06 표는 `versions.json`을 정본으로 두고 의미만 서술.
-5. 잔여: 7 소비자 현재값(`vm` §1~§3, 인벤토리 §10)과 예외(map npm 12.0.1·next 16.2.12·Playwright 1.60, airport TS 7.0.2, ktc maplibre 6.0·base-ui 1.5, geo·ktdm React 18, map `starlette<1.0`·`alembic<1.20`)를 `consumers` 절에 등록하고 `check_versions --self-check`로 검증.
+5. 7개 소비자 고정 commit의 manifest/lock을 읽기 전용으로 대조하고 `docs/evidence/t005/`에 입력 digest·보고·예외 근거를 기록한다. 설치값을 registry에 복제하지 않는다. base-ui 하향과 pinvi mobile Tailwind 3은 승인 예외가 아니며, map alembic 상한은 현 floor와 충돌하지 않으므로 예외를 신설하지 않는다. 기존 map starlette 예외는 설치 lock 부재로 적용 여부 미검증임을 표시한다.
 
 ## 범위 밖
 
@@ -55,6 +55,14 @@ python3 -B -X utf8 tools/validate_document_links.py
 Git Bash에서 동일.
 
 ## evidence
+
+2026-09-07 완료: f050997에서 두 독립 reviewer의 수정 후 재검토를 마쳤다. 최종 판정·원본·잔여 한계는 [post-fix 리뷰](../reviews/adversarial/2026-09-07-t005-post-fix.md)에 있다. 9개 최초 finding을 모두 FIXED로 확인했으며 Windows·WSL 전체 115 tests 성공, 고정 입력 48파일·306판정 재현, [CI](https://github.com/digitie/kor-travel-common/actions/runs/34063775506) 성공이다. 소비자 정책 준수·제품 검증·릴리스 완료를 뜻하지 않는다.
+
+2026-09-07 독립 리뷰: [A/B 최초 판정](../reviews/adversarial/2026-09-07-t005.md)은 BLOCK, 9개 ID를 모두 수용했다. 수정 회귀 8개에서 20 실패를 먼저 재현한 뒤 Windows·WSL Python 3.11에서 전체 115 tests 성공·skip 0을 확인했다. 같은 7개 입력 48파일·306행도 재실행해 원본과 동일했다([수정 digest](../evidence/t005/post-fix.json)). 수정 commit의 두 reviewer 재확인 전 DONE/merge하지 않는다.
+
+2026-09-07 구현 후보: 새 회귀 시험 7개를 먼저 실행해 31 tests 중 24 subtest 실패를 재현했다. 중첩 정책 오타·숫자 역전·예외 중첩/만료·prerelease·optional/hoist·전이 설치·shrinkwrap 경계를 수정했다. 전체 Windows Python 3.14.3·WSL Python 3.14.4에서 각각 107 tests 성공·skip 0, SPDX 13개 오류 0이다. 문서 228개/1893 target·task 96개 오류 0. `.github/workflows/docs.yml`에 자체 검사를 연결했으며 CI·2인 리뷰는 commit 후 실제 결과를 기록한다. 제품·소비자 build/e2e는 NOT_RUN(소비자 저장소 실행)이다.
+
+2026-09-07 정본 대조: 초안의 중첩 exceptions·현재값 registry 복제 지시는 versions 정책 §7 및 AGENTS §4·§6과 충돌해 정정했다. 수치 floor와 기존 승인 예외는 유지한다. 자세한 고정 입력 결과는 [실측 보고](../evidence/t005/README.md)로 연결한다.
 
 2026-09-06 T-013 인계: 부분 구현은 인수했으나 7개 소비자 실제 report·예외·자체 검사 CI 연결이 미완료다. 다음 T-003 완료 뒤 이 task 하나를 이어서 실행한다.
 

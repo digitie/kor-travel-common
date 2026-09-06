@@ -20,6 +20,8 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-09-07 | full post-fix | [T-005 최종 판정](adversarial/2026-09-07-t005-post-fix.md), f050997 | A npm·수치 / B 정책·evidence | **A PASS / B PASS, 9 finding FIXED** |
+| 2026-09-07 | full | [T-005 버전 판정](adversarial/2026-09-07-t005.md), 409b95c | A npm·수치 / B 정책·evidence | A BLOCK / B BLOCK, 9 finding 수정 후 재검토 |
 | 2026-09-07 | full post-fix 02 | [T-003 최종 판정](adversarial/2026-09-07-t003-post-fix-02.md), a2c1891 | A 검사기 / B 출처·전달 | **A PASS / B PASS, 6 finding FIXED** |
 | 2026-09-07 | full post-fix | [T-003 재검토](adversarial/2026-09-07-t003-post-fix.md), 951b443 | A 검사기 / B 출처·전달 | A BLOCK / B PASS, 확장자 별칭 P1 잔여 |
 | 2026-09-07 | full | [T-003 고지·SPDX](adversarial/2026-09-07-t003.md), 017fef1 | A 검사기 / B 출처·전달 | A BLOCK / B BLOCK, 6 finding 수정 후 재검토 대기 |

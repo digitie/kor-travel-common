@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-07",
+  "initial_review_commit": "409b95c692c073807906e2c1546f022c59a7499c",
+  "checker_sha256": "aa4e1dbec1e42f5ad6bcbfa961d837ccf7bd0239156db1664b14a678e9cd7b93",
+  "registry_sha256": "dc608f881e93b93500e71e64df6ddee25e58ab0cf3f0f8f9715d2999284e361a",
+  "inputs_sha256": "481306dfb06228b8e8dd299744653bf68e0c88cd4ef5f28fdf7b0811937ae8d6",
+  "reports_sha256": "bad711219c47195744c4add91c19fe6987fb4da84c90a78fc386a527120d7fed",
+  "normalization": "LF·UTF-8; report의 roots와 registry.path만 원본 기록 방식으로 치환",
+  "verification": {
+    "Windows Python 3.14.3": {
+      "tests": 115,
+      "skipped": 0,
+      "input_files": 48,
+      "reports": 7,
+      "findings": 306,
+      "reports_equal": true
+    },
+    "WSL Python 3.11.15": {
+      "tests": 115,
+      "skipped": 0,
+      "input_files": 48,
+      "reports": 7,
+      "findings": 306,
+      "reports_equal": true
+    }
+  },
+  "consumer_build": "NOT_RUN(소비자 저장소 실행)"
+}
