@@ -1,0 +1,169 @@
+# kor-travel-common templates/dependabot.yml (판 2026-09)
+# 소비 저장소 경로: .github/dependabot.yml
+# Renovate는 설치 미확인(O-18)이라 dependabot을 기본으로 둔다(D-07·T-507).
+# 수정 규칙: `directory`/`directories`만 앱 구조에 맞게 바꾼다. 그룹·ignore는 common versions.json과 함께 바뀌므로
+# 로컬에서 바꾸지 않고 common PR로 제안한다. 봇 PR도 lockfile 동반·check_versions report 통과 후 머지한다.
+version: 2
+updates:
+  # ---------------------------------------------------------------- npm (프론트엔드; 워크스페이스 루트 기준)
+  - package-ecosystem: "npm"
+    directories:
+      - "/"                     # 루트 lock(모노레포는 여기서 워크스페이스 전체를 해석)
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    labels: ["dependencies", "kor-travel-common:versions"]
+    groups:
+      kt-frontend-core:         # 기준선 축(versions.json axes) — 한 PR로 묶어 check_versions로 대조
+        patterns:
+          - "next"
+          - "react"
+          - "react-dom"
+          - "typescript"
+          - "tailwindcss"
+          - "@tailwindcss/postcss"
+          - "@base-ui/react"
+        update-types: ["minor", "patch"]
+      kt-frontend-tooling:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "@eslint/*"
+          - "typescript-eslint"
+          - "@typescript-eslint/*"
+          - "vitest"
+          - "@vitest/*"
+          - "@playwright/test"
+          - "@testing-library/*"
+          - "jsdom"
+          - "shadcn"
+        update-types: ["minor", "patch"]
+      kt-frontend-libs:
+        patterns:
+          - "@tanstack/*"
+          - "zod"
+          - "zustand"
+          - "react-hook-form"
+          - "@hookform/resolvers"
+          - "maplibre-gl"
+          - "clsx"
+          - "tailwind-merge"
+          - "class-variance-authority"
+        update-types: ["minor", "patch"]
+      kt-frontend-types:
+        patterns:
+          - "@types/*"
+        update-types: ["minor", "patch"]
+    ignore:
+      # 승인되지 않은 major(versions.json max·T-507 재평가 대상)는 봇이 올리지 않는다.
+      - dependency-name: "typescript"
+        versions: [">=6.1"]
+      - dependency-name: "maplibre-gl"
+        versions: [">=6"]
+      - dependency-name: "@tanstack/react-table"
+        versions: [">=9"]
+      - dependency-name: "vitest"
+        versions: [">=5"]
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@base-ui/react"
+        update-types: ["version-update:semver-major"]
+
+  # ---------------------------------------------------------------- Python (uv.lock을 소비하는 앱)
+  - package-ecosystem: "uv"
+    directories:
+      - "/"                     # 예: airport "/backend", pinvi "/apps/api", weather "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    labels: ["dependencies", "kor-travel-common:versions"]
+    groups:
+      kt-python-core:
+        patterns:
+          - "fastapi"
+          - "starlette"
+          - "uvicorn"
+          - "pydantic"
+          - "pydantic-settings"
+          - "sqlalchemy"
+          - "alembic"
+          - "asyncpg"
+          - "psycopg"
+          - "httpx"
+        update-types: ["minor", "patch"]
+      kt-python-tooling:
+        patterns:
+          - "pytest"
+          - "pytest-*"
+          - "ruff"
+          - "mypy"
+          - "import-linter"
+          - "testcontainers"
+        update-types: ["minor", "patch"]
+      kt-python-observability:
+        patterns:
+          - "structlog"
+          - "prometheus-client"
+          - "tenacity"
+          - "typer"
+          - "dagster"
+          - "dagster-*"
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "mcp"        # versions.json blocked: >=2 (concierge 2026-09-04 사고)
+        versions: [">=2"]
+      - dependency-name: "sqlalchemy"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "pydantic"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "dagster"
+        update-types: ["version-update:semver-major"]
+
+  # ---------------------------------------------------------------- GitHub Actions (SHA 핀 유지; major는 사람이 올린다)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(ci)"
+    labels: ["dependencies", "ci"]
+    groups:
+      kt-actions:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # ---------------------------------------------------------------- Docker 베이스 이미지 (digest 갱신만)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      timezone: "Asia/Seoul"
+    open-pull-requests-limit: 2
+    commit-message:
+      prefix: "chore(docker)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

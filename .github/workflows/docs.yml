@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+# Origin: kor-travel-common 자체 작성
+name: docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Validate local Markdown links
+        run: python -B -X utf8 tools/validate_document_links.py
+      - name: Validate task metadata and dependency DAG
+        run: python -B -X utf8 tools/validate_plan.py
+      - name: 전체 도구 회귀 테스트
+        run: python -B -X utf8 -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Whitespace check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: git diff --check "$BASE_SHA" HEAD

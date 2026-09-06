@@ -1,0 +1,40 @@
+kor-travel-common
+Copyright (C) 2026 Youn-sok Choi (digitie)
+
+SPDX-License-Identifier: GPL-3.0-or-later
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version. The full text of the license is in the file
+LICENSE at the root of this repository and inside every distributed
+package (npm tarball, Python wheel/sdist).
+
+No additional permissions under GNU GPL version 3 section 7 are granted
+for this program. Consuming applications that distribute a combined work
+must comply with the GPL (see CONTRIBUTING.md and
+docs/standards/licensing.md).
+
+Version: per-package versions are recorded in CHANGELOG.md and Git tags
+(tokens-vX.Y.Z, ui-vX.Y.Z, py-vX.Y.Z). This NOTICE applies to every
+version unless a later NOTICE supersedes it.
+
+Source and contact:
+  https://github.com/digitie/kor-travel-common
+  Issues: https://github.com/digitie/kor-travel-common/issues
+  Copyright holder: Youn-sok Choi (GitHub: digitie)
+
+Third-party components and their licenses are listed in
+THIRD_PARTY_NOTICES.md. File-level origin of code moved from other
+repositories is recorded in PROVENANCE.md and in each file's SPDX header.
+
+Contributions produced with AI assistance are distributed under the same
+license by the copyright holder who directed and accepted them
+(CONTRIBUTING.md section 1).
+
+---
+
+이 파일은 배포되는 모든 패키지에 동봉되는 저작권·라이선스 고지다. 저작권자는
+Youn-sok Choi (digitie), 라이선스는 GPL-3.0-or-later이며 GPLv3 7조의 추가 허가는
+두지 않는다. 서드파티 고지는 THIRD_PARTY_NOTICES.md, 파일 출처는 PROVENANCE.md를
+본다.

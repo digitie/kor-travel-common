@@ -1,0 +1,14 @@
+# kor-travel-common 완료 task archive
+
+완료·종료 task를 newest-first로 이동해 기록한다. 요약 행의 형식은 [tasks-rule](tasks-rule.md) §4와 같은 5열이며 상세 파일은 `docs/tasks/`에 유지한다.
+
+## 완료 목록
+
+| ID | 상태 | 우선순위 | 작업 | 선행 |
+|---|---|---:|---|---|
+| [T-013](tasks/T-013-plan-handoff-closure.md) | DONE | P0 | PR #1·로컬 초안 통합과 순차 실행 계획·인계 마무리 (2026-09-06, PR #1) | 없음 |
+| [T-008](tasks/T-008-architecture-docs.md) | DONE | P0 | docs/architecture/*(README·packages·style-delivery·consumers·adoption-readiness)·`docs/integration-map.md` 초기판 (2026-09-06, PR #1) | 없음 |
+| [T-007](tasks/T-007-runbooks-conventions-templates.md) | DONE | P0 | runbook 본문(agent-workflow·consumer-adoption·release)·`docs/standards/agent-conventions.md`·templates/ (2026-09-06, PR #1) | 없음 |
+| [T-004](tasks/T-004-adr-index.md) | DONE | P0 | ADR-001~012 + `docs/adr/README.md` 단일 색인 (2026-09-06, PR #1) | 없음 |
+| [T-002](tasks/T-002-doc-validators.md) | DONE | P0 | 문서 검증 도구 정정(절대 링크 금지·산문 오탐·Windows 동작·LF)·validator 회귀 테스트·docs.yml 정비 (2026-09-06, PR #1) | 없음 |
+| [T-001](tasks/T-001-entry-docs.md) | DONE | P0 | 진입 문서·문서 지도·canview 대조표(AGENTS·CLAUDE·SKILL·README·docs/README·dev-environment·canview-checklist·PR 템플릿) (2026-09-06, PR #1) | 없음 |

@@ -1,0 +1,21 @@
+# kor-travel-common templates/agent-config/codex.config.toml (판 2026-09)
+# 소비 저장소 경로: .codex/config.toml
+# 경로 비의존 형식(geo 이식형). 절대 경로·worktree별 cwd는 로컬 override로만 둔다.
+
+[mcp_servers.codegraph]
+enabled = true
+command = "codegraph"
+args = ["serve", "--mcp"]
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-playwright"]
+env = { PLAYWRIGHT_HEADLESS = "true" }
+
+[mcp_servers.sequential-thinking]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+
+[mcp_servers.filesystem]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "."]

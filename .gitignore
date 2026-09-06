@@ -1,0 +1,38 @@
+# Node / frontend build output
+node_modules/
+dist/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+.turbo/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+*.egg-info/
+
+# Local editor/tool state
+.vscode/
+.idea/
+.claude/
+.codegraph/
+.playwright-mcp/
+test-results/
+playwright-report/
+
+# Local credentials and local-only runbooks
+.env
+.env.*
+!.env.example
+*.local.md
+*.local.sh
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,462 @@
+{
+  "schema": "kor-travel-common.version-registry.v1",
+  "baseline": "2026-09",
+  "updated": "2026-09-06",
+  "next_review": "2026-12",
+  "policy": "docs/standards/versions.md",
+  "source": "docs/plan/design-brief.md D-06·D-07·D-30; docs/survey/cross/version-matrix.md §4·§5.1",
+  "semantics": {
+    "floor": "설치본(또는 선언 하한)이 이 값보다 낮으면 BELOW_FLOOR. 접두 비교(예: 22.12는 22.12.x 전체).",
+    "recommended": "설치본이 이 접두와 일치하면 OK, 아니면 NOT_RECOMMENDED(범위 선언에는 적용하지 않음). null은 권장값 없음.",
+    "max": "설치본이 이 값 이상이면 ABOVE_MAX(배타 상한). 근거가 있는 축에만 둔다.",
+    "checked": "false면 tools/check_versions.py가 대조하지 않는 보고 전용 축(이미지·DB·도구 버전).",
+    "packages": "한 축에 대응하는 패키지 이름 목록. 생략하면 축 키와 같다."
+  },
+  "axes": {
+    "node": {
+      "ecosystem": "runtime",
+      "floor": "22.12",
+      "recommended": "22.23",
+      "image": "node:22-bookworm-slim",
+      "check": "engines.node",
+      "note": "24/26 승격은 Phase 5(T-507). Node 20 CI(ktdm·geo·wx)는 T-403. 이미지는 digest 핀 권고.",
+      "source": "vm §1.1·§4.4"
+    },
+    "npm": {
+      "ecosystem": "runtime",
+      "floor": "10.9",
+      "recommended": "11.19",
+      "check": "engines.npm|packageManager",
+      "note": "Node 22 동봉 npm 10.9.8. CI는 `npm install -g npm@11.19.x` 명시 설치.",
+      "source": "vm §3.2·§4.4"
+    },
+    "next": {
+      "ecosystem": "npm",
+      "floor": "16.2",
+      "recommended": "16.3.4",
+      "note": "map 16.2.12 exact 허용(예외). wx 15·ktdm 14는 Phase 4.",
+      "source": "vm §1.2"
+    },
+    "react": {
+      "ecosystem": "npm",
+      "packages": ["react", "react-dom"],
+      "floor": "19.0",
+      "recommended": "19.2.8",
+      "note": "geo·ktdm 18.3.1은 Phase 4 전 예외(tokens만 채택).",
+      "source": "vm §1.2·§5.3"
+    },
+    "typescript": {
+      "ecosystem": "npm",
+      "floor": "5.9",
+      "recommended": "5.9.3",
+      "max": "6.1",
+      "note": "max는 typescript-eslint 8.69 peer `<6.1.0`에서 유도. airport 7.0.2는 예외(O-6).",
+      "source": "vm §1.6·§6"
+    },
+    "tailwindcss": {
+      "ecosystem": "npm",
+      "packages": ["tailwindcss", "@tailwindcss/postcss"],
+      "floor": "4.3.0",
+      "recommended": "4.3.3",
+      "note": "pinvi mobile Tailwind 3(NativeWind 4)은 O-8 사용자 승인 전까지 예외 미등록.",
+      "source": "vm §1.2·§1.7"
+    },
+    "@base-ui/react": {
+      "ecosystem": "npm",
+      "floor": "1.6",
+      "recommended": "1.8.0",
+      "note": "ktc 1.5는 채택 PR에서 상향(예외 아님).",
+      "source": "vm §1.3"
+    },
+    "shadcn": {
+      "ecosystem": "npm",
+      "floor": null,
+      "recommended": "4.21",
+      "note": "devDependencies에만. map은 CLI 미설치 유지.",
+      "source": "vm §1.3"
+    },
+    "eslint": {
+      "ecosystem": "npm",
+      "floor": "9.0",
+      "recommended": "10",
+      "note": "ktdm 8은 Phase 4(T-470).",
+      "source": "vm §1.6"
+    },
+    "typescript-eslint": {
+      "ecosystem": "npm",
+      "floor": "8.0",
+      "recommended": "8",
+      "note": "peer typescript `<6.1.0`.",
+      "source": "vm §1.6"
+    },
+    "vitest": {
+      "ecosystem": "npm",
+      "floor": "4.1",
+      "recommended": "4.1",
+      "note": "Vitest 5 재평가는 T-507. wx 3은 Phase 4(T-460).",
+      "source": "vm §1.6"
+    },
+    "@playwright/test": {
+      "ecosystem": "npm",
+      "floor": "1.60",
+      "recommended": "1.63",
+      "note": "map 1.60 exact 예외(이미지 동반 갱신).",
+      "source": "vm §1.6"
+    },
+    "@tanstack/react-query": {
+      "ecosystem": "npm",
+      "floor": "5",
+      "recommended": "5",
+      "source": "vm §1.4"
+    },
+    "@tanstack/react-table": {
+      "ecosystem": "npm",
+      "floor": "8.21",
+      "recommended": "8.21",
+      "max": "9",
+      "note": "9.x breaking 미조사(T-507).",
+      "source": "vm §1.4·§5.3"
+    },
+    "@tanstack/react-virtual": {
+      "ecosystem": "npm",
+      "floor": "3.14",
+      "recommended": "3.14",
+      "source": "vm §1.4"
+    },
+    "zod": {
+      "ecosystem": "npm",
+      "floor": "4",
+      "recommended": "4.5",
+      "source": "vm §1.4"
+    },
+    "zustand": {
+      "ecosystem": "npm",
+      "floor": "5",
+      "recommended": "5.0",
+      "source": "vm §1.4"
+    },
+    "react-hook-form": {
+      "ecosystem": "npm",
+      "floor": "7.55",
+      "recommended": "7.87",
+      "source": "vm §1.4·§4.2"
+    },
+    "@hookform/resolvers": {
+      "ecosystem": "npm",
+      "floor": "5",
+      "recommended": "5",
+      "note": "ktc·pinvi 3은 채택 PR에서 상향(예외 아님).",
+      "source": "vm §1.4"
+    },
+    "maplibre-gl": {
+      "ecosystem": "npm",
+      "floor": "5.24",
+      "recommended": "5.24",
+      "max": "6",
+      "note": "공유 라이브러리 peer `^5.24.0`. ktc 6.0은 예외.",
+      "source": "vm §1.5"
+    },
+    "python": {
+      "ecosystem": "runtime",
+      "floor": "3.11",
+      "recommended": null,
+      "check": "requires-python",
+      "note": "common 패키지는 3.11 호환. 앱 floor 3.12 상향은 Phase 4 앱 결정(O-7).",
+      "source": "be §2.1·§5.3"
+    },
+    "python-image": {
+      "ecosystem": "image",
+      "floor": "3.11-slim",
+      "recommended": "3.12-slim",
+      "checked": false,
+      "note": "3.13-slim 허용. Dockerfile 파싱은 도구 범위 밖.",
+      "source": "vm §3.3"
+    },
+    "uv": {
+      "ecosystem": "tool",
+      "floor": "0.11",
+      "recommended": "0.12",
+      "checked": false,
+      "note": "lockfile 의무: `uv.lock` + CI·Docker `--locked`. Poetry(ktdm)·requirements.txt(ktc)는 uv 전환 task.",
+      "source": "vm §2.1·§7"
+    },
+    "fastapi": {
+      "ecosystem": "pypi",
+      "floor": "0.115",
+      "recommended": "0.141",
+      "source": "vm §2.2"
+    },
+    "starlette": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": "1.6",
+      "note": "map `starlette<1.0` 상한은 T-480 재검증 전까지 예외.",
+      "source": "vm §2.2"
+    },
+    "uvicorn": {
+      "ecosystem": "pypi",
+      "floor": "0.30",
+      "recommended": "0.52",
+      "source": "vm §2.2"
+    },
+    "pydantic": {
+      "ecosystem": "pypi",
+      "floor": "2.9",
+      "recommended": "2.13",
+      "source": "vm §2.2"
+    },
+    "pydantic-settings": {
+      "ecosystem": "pypi",
+      "floor": "2.5",
+      "recommended": "2.15",
+      "source": "vm §2.2"
+    },
+    "sqlalchemy": {
+      "ecosystem": "pypi",
+      "floor": "2.0.35",
+      "recommended": "2.0.52",
+      "source": "vm §2.3"
+    },
+    "alembic": {
+      "ecosystem": "pypi",
+      "floor": "1.13",
+      "recommended": "1.19",
+      "note": "map `alembic<1.20` 존중.",
+      "source": "vm §2.3"
+    },
+    "asyncpg": {
+      "ecosystem": "pypi",
+      "floor": "0.29",
+      "recommended": "0.31",
+      "note": "앱 선택(asyncpg 또는 psycopg).",
+      "source": "vm §2.3"
+    },
+    "psycopg": {
+      "ecosystem": "pypi",
+      "floor": "3.2",
+      "recommended": "3.3",
+      "source": "vm §2.3"
+    },
+    "httpx": {
+      "ecosystem": "pypi",
+      "floor": "0.27",
+      "recommended": "0.28",
+      "source": "vm §2.4"
+    },
+    "tenacity": {
+      "ecosystem": "pypi",
+      "floor": "9",
+      "recommended": "9.1",
+      "source": "vm §2.4"
+    },
+    "structlog": {
+      "ecosystem": "pypi",
+      "floor": "24",
+      "recommended": "26",
+      "source": "vm §2.4"
+    },
+    "prometheus-client": {
+      "ecosystem": "pypi",
+      "floor": "0.20",
+      "recommended": "0.26",
+      "source": "vm §2.4"
+    },
+    "typer": {
+      "ecosystem": "pypi",
+      "floor": "0.12",
+      "recommended": "0.27",
+      "source": "vm §2.4"
+    },
+    "dagster": {
+      "ecosystem": "pypi",
+      "packages": ["dagster", "dagster-webserver"],
+      "floor": "1.9",
+      "recommended": "1.13",
+      "source": "vm §2.5"
+    },
+    "pytest": {
+      "ecosystem": "pypi",
+      "floor": "8",
+      "recommended": "9.1",
+      "source": "vm §2.6"
+    },
+    "pytest-asyncio": {
+      "ecosystem": "pypi",
+      "floor": "0.23",
+      "recommended": "1.4",
+      "source": "vm §2.6"
+    },
+    "ruff": {
+      "ecosystem": "pypi",
+      "floor": "0.9",
+      "recommended": "0.16",
+      "source": "vm §2.6"
+    },
+    "mypy": {
+      "ecosystem": "pypi",
+      "floor": "1.13",
+      "recommended": "2.3",
+      "source": "vm §2.6"
+    },
+    "import-linter": {
+      "ecosystem": "pypi",
+      "floor": "2.0",
+      "recommended": "2.15",
+      "source": "vm §2.6"
+    },
+    "testcontainers": {
+      "ecosystem": "pypi",
+      "floor": "4.8",
+      "recommended": "4.15",
+      "source": "vm §2.6"
+    },
+    "postgresql": {
+      "ecosystem": "db",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "note": "별도 트랙. 현행 16 + PostGIS 3.5 digest 핀. 라이브러리 정렬 범위 밖.",
+      "source": "vm §3.4"
+    }
+  },
+  "actions": {
+    "consumer_policy": "현행 major 유지 + SHA 핀 권고(`uses: owner/action@<sha> # vN`). `@main`·`@master` 참조 금지.",
+    "common": {
+      "actions/checkout": "v7",
+      "actions/setup-node": "v7",
+      "actions/setup-python": "v7",
+      "astral-sh/setup-uv": "v10"
+    },
+    "checked": false,
+    "source": "vm §3.1·§4.4"
+  },
+  "exceptions": [
+    {
+      "repo": "kor-travel-map",
+      "key": "npm",
+      "installed": "12.0.1",
+      "reason": "`engines.npm`·`packageManager` 12.0.1 exact 핀을 `scripts/verify-npm-tree.mjs`가 검증한다.",
+      "until": "2026-12-31",
+      "review": "T-413; vm §3.6"
+    },
+    {
+      "repo": "kor-travel-map",
+      "key": "next",
+      "installed": "16.2.12",
+      "reason": "exact 핀 + `scripts/verify-next-sharp.mjs` 상수. 상향은 스크립트·sharp·이미지 동반 PR.",
+      "until": "2026-12-31",
+      "review": "T-413; inv/map §9"
+    },
+    {
+      "repo": "kor-travel-map",
+      "key": "@playwright/test",
+      "installed": "1.60",
+      "reason": "1.60.0 exact 핀 + `mcr.microsoft.com/playwright:v1.60.0-noble` 이미지 동반.",
+      "until": "2026-12-31",
+      "review": "T-413; vm §1.6"
+    },
+    {
+      "repo": "kor-travel-map",
+      "key": "starlette",
+      "installed": "0",
+      "reason": "`starlette<1.0` 상한(TestClient·httpx2). T-480 재검증 전까지 예외.",
+      "until": "2026-12-31",
+      "review": "T-480; vm §2.2"
+    },
+    {
+      "repo": "kor-travel-geo",
+      "key": "react",
+      "installed": "18.3",
+      "reason": "ADR-019가 React 18 유지를 명시. Phase 4 전에는 tokens만 채택.",
+      "until": "2026-12-31",
+      "review": "T-443(O-25); vm §5.2"
+    },
+    {
+      "repo": "kor-travel-docker-manager",
+      "key": "react",
+      "installed": "18.3",
+      "reason": "Next 16·React 19 업그레이드 PR(T-470) 전 예외.",
+      "until": "2026-12-31",
+      "review": "T-470; vm §5.2"
+    },
+    {
+      "repo": "kor-travel-docker-manager",
+      "key": "next",
+      "installed": "14.2",
+      "reason": "Next 14→16 2 major 업그레이드는 별도 PR(T-470).",
+      "until": "2026-12-31",
+      "review": "T-470; vm §5.3"
+    },
+    {
+      "repo": "kor-travel-docker-manager",
+      "key": "eslint",
+      "installed": "8",
+      "reason": "eslint-config-next 16 peer `eslint >=9`. Next 16 업그레이드와 동반(T-470).",
+      "until": "2026-12-31",
+      "review": "T-470; vm §1.6"
+    },
+    {
+      "repo": "kor-travel-weather",
+      "key": "next",
+      "installed": "15.5",
+      "reason": "Next 15→16·Vitest 4·Node 22 CI는 별도 PR(T-460). tokens 채택(T-461)과 독립.",
+      "until": "2026-12-31",
+      "review": "T-460; inv/weather §9.1"
+    },
+    {
+      "repo": "kor-travel-weather",
+      "key": "vitest",
+      "installed": "3.2",
+      "reason": "Vitest 3→4는 T-460에 묶는다.",
+      "until": "2026-12-31",
+      "review": "T-460; vm §1.6"
+    },
+    {
+      "repo": "kor-travel-airport",
+      "key": "typescript",
+      "installed": "7.0",
+      "reason": "lock·CI에서 7.0.2가 실제 동작(vm §6). typescript-eslint peer 확장 또는 2026-12 재판정(O-6).",
+      "until": "2026-12-31",
+      "review": "T-433; vm §6"
+    },
+    {
+      "repo": "kor-travel-concierge",
+      "key": "maplibre-gl",
+      "installed": "6.0",
+      "reason": "공유 라이브러리 peer `^5.24.0` 정합 결정(T-505)까지 예외.",
+      "until": "2026-12-31",
+      "review": "T-505(O-16); vm §1.5"
+    }
+  ],
+  "blocked": [
+    {
+      "ecosystem": "pypi",
+      "name": "mcp",
+      "range": ">=2",
+      "reason": "FastMCP→MCPServer API 변경으로 concierge `ktc/mcp_server/server.py` v1 API와 비호환. 2026-09-04 배포에서 전이 의존성으로 2.1.1이 설치돼 깨짐.",
+      "since": "2026-09-04",
+      "source": "inv/ktc §4.1; vm §7.3"
+    }
+  ],
+  "consumers": {
+    "kor-travel-airport": {"enforce": "report", "clean_runs": 0, "aliases": ["kta", "airport", "kta-main"]},
+    "kor-travel-concierge": {"enforce": "report", "clean_runs": 0, "aliases": ["ktc", "concierge", "conc"]},
+    "kor-travel-docker-manager": {"enforce": "report", "clean_runs": 0, "aliases": ["ktdm", "dm", "docker-manager", "ktdm-main"]},
+    "kor-travel-geo": {"enforce": "report", "clean_runs": 0, "aliases": ["geo", "kor-travel-geo-fixes"]},
+    "kor-travel-map": {"enforce": "report", "clean_runs": 0, "aliases": ["ktm", "map", "ktm-main"]},
+    "kor-travel-weather": {"enforce": "report", "clean_runs": 0, "aliases": ["wx", "ktw", "weather"]},
+    "pinvi": {"enforce": "report", "clean_runs": 0, "aliases": ["PinVi"]}
+  },
+  "providers": {
+    "policy": "report",
+    "note": "`digitie/python-*-api` git 핀은 보고만 한다. 정렬 주체는 각 저장소(O-16, T-505). 이름이 `python-*-api` 패턴이면 목록에 없어도 보고한다.",
+    "packages": {
+      "python-kasi-api": {"repo": "https://github.com/digitie/python-kasi-api"},
+      "python-krairport-api": {"repo": "https://github.com/digitie/python-krairport-api"},
+      "python-kma-api": {"repo": "https://github.com/digitie/python-kma-api"},
+      "python-airkorea-api": {"repo": "https://github.com/digitie/python-airkorea-api"},
+      "python-vworld-api": {"repo": "https://github.com/digitie/python-vworld-api"}
+    },
+    "source": "vm §2.7; be §5.1"
+  }
+}
