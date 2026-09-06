@@ -244,3 +244,7 @@ python3 -B -X utf8 tools/check_versions.py /path/to/app --repo wx --today 2027-0
 - 결정: [design-brief](../plan/design-brief.md) D-06·D-07·D-30·D-31·D-33, §2 O-5~O-10·O-16·O-18, §7.
 - 조사: [version-matrix](../survey/cross/version-matrix.md) §1~§7(선언/설치 표, 2026-09-06 최신 조회, 핀 정책 후보 P1~P5, dm 레지스트리 형식), [commonality-matrix](../survey/commonality-matrix.md) §3, [backend](../survey/cross/backend.md) §2.1·§5, [ci-deploy](../survey/cross/ci-deploy.md) §1.3, [inv/map](../survey/inventory/kor-travel-map.md) §9, [inv/ktc](../survey/inventory/kor-travel-concierge.md) §4.1, [inv/ktdm](../survey/inventory/kor-travel-docker-manager.md) §8.
 - 조사 오기 정정값은 [survey README](../survey/README.md) §6.2를 따른다(Node 22 동봉 npm 10.9.8, common Python floor 3.11).
+
+### 입력 오류와 자체 검사
+
+`check_versions.py --self-check`는 소비자 버전 조회 없이 레지스트리 형식·판정 정책을 검증한다. 미지 필드, 잘못된 enforce/버전/예외/차단 값과 빈 검사 범위는 입력 오류(exit 2)다. 설치 버전 파싱 실패는 NO_LOCK, 하한 없는 OR 또는 지원하지 않는 런타임 범위는 NO_ENGINES이며 OK로 바꾸지 않는다. URL은 실제 ref 위치를 해석하고 임의 query·자산 fragment의 SHA를 고정 근거로 삼지 않는다. 지원 파서의 확대와 실제 소비자 대조는 T-005·T-005a·T-005b에서 검증한다.

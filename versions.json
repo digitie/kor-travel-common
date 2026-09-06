@@ -358,7 +358,7 @@
     {
       "repo": "kor-travel-map",
       "key": "starlette",
-      "installed": "0.",
+      "installed": "0",
       "reason": "`starlette<1.0` 상한(TestClient·httpx2). T-480 재검증 전까지 예외.",
       "until": "2026-12-31",
       "review": "T-480; vm §2.2"

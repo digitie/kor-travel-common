@@ -37,7 +37,7 @@
 ## 수용 기준
 
 - `versions.json`이 D-06 표의 모든 축을 갖고, 각 `exceptions[]` 항목에 `until`·`review`가 있으며, pinvi mobile Tailwind 3 예외는 없다(O-8 승인 전).
-- `python3 -B -X utf8 tools/check_versions.py --self-check` exit 0; 미지 필드를 넣은 fixture는 exit 1.
+- `python3 -B -X utf8 tools/check_versions.py --self-check` exit 0; 미지 필드·잘못된 정책 값을 넣은 fixture는 입력 오류 exit 2.
 - report 모드는 `BELOW_FLOOR`가 있어도 exit 0이고 `FLOATING_REF`(예: `git+…@main`)는 `::error::`를 출력한다. `fail` 모드는 exit 1.
 - 테스트가 10 판정·3 모드·strict 스키마를 고정하고 Linux·Windows에서 같은 결과를 낸다(Windows 미실행이면 `NOT_RUN`).
 - `versions.md`가 값을 복제하지 않고 `versions.json`을 정본으로 가리킨다. `docs.yml` 또는 T-009 `check-versions` job이 `--self-check`를 실행한다.
@@ -48,13 +48,15 @@
 ```bash
 python3 -B -X utf8 tools/check_versions.py --self-check
 python3 -B -X utf8 -m unittest discover -s tests -p "test_check_versions.py" -v
-python3 -B -X utf8 tools/check_versions.py --repo map --lock tests/fixtures/versions/map.package-lock.json
+python3 -B -X utf8 tools/check_versions.py ../kor-travel-map --repo map --mode report
 python3 -B -X utf8 tools/validate_document_links.py
 ```
 
 Git Bash에서 동일.
 
 ## evidence
+
+2026-09-06 T-013 리뷰 정정: 미해석 설치 버전은 NO_LOCK, 비어 있는 검사 범위는 입력 오류(exit 2), 하한 없는 OR 범위는 NO_ENGINES, 정책 오타·잘못된 버전/예외/차단 항목은 입력 오류, URL의 query·무관 fragment는 고정 ref 증거로 인정하지 않는다. `--self-check`는 소비자 조회 없이 레지스트리 형식을 검사한다. 7곳 현재값·예외의 실제 대조와 T-009 자체 검사 job 연결은 여전히 잔여이며 자체 검사 통과만으로 이 task를 완료하지 않는다. uv/Poetry 초안도 후속 T-005a·T-005b의 실제 fixture 대조 전 확정하지 않는다.
 
 - 명령·exit code·테스트 수·판정 표를 이 절과 `docs/journal.md`에 남긴다. 소비자 실제 lockfile 대조는 조사 기준 커밋을 명시한다.
 

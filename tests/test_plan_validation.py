@@ -76,6 +76,14 @@ class PlanValidationTests(unittest.TestCase):
         self.write_repo()
         self.assertEqual(PLAN.validate(self.root), ([], 3))
 
+    def test_completed_title_matches_archive_with_date_and_pr(self):
+        self.items[0]["status"] = "DONE"
+        self.items[0]["title"] += " (2026-09-06, PR #1)"
+        self.write_repo()
+        self.assertEqual(PLAN.validate(self.root), ([], 3))
+        self.edit(self.root / "docs/tasks-done.md", " (2026-09-06, PR #1)", "")
+        self.invalid("요약 제목 불일치")
+
     def test_duplicate_detail_id(self):
         other = self.path("T-002").with_name("T-002-other.md")
         other.write_text(self.path("T-002").read_text(encoding="utf-8"), encoding="utf-8")

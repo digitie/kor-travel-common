@@ -133,6 +133,55 @@ class CheckVersionsTests(unittest.TestCase):
                               capture_output=True, text=True, encoding="utf-8")
 
     # --- 버전 파싱·범위 도우미
+    def test_invalid_installed_versions_are_not_success(self):
+        for version in ("banana", "19.2.8garbage", ""):
+            with self.subTest(version=version):
+                npm_fixture(self.repo, deps={"react": "^19.2.8"}, engines={"node": ">=22.12"},
+                            installed={"react": version})
+                self.assertIn("NO_LOCK", self.verdicts(self.run_checker(), "react"))
+                self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail").returncode, 1)
+
+    def test_empty_scope_is_an_input_error(self):
+        self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail").returncode, 2)
+        manifest = self.root / "manifest.json"
+        for fields in ({}, {"lockfiles": []}):
+            manifest.write_text(json.dumps({"schema": CV.MANIFEST_SCHEMA, "repo": "app-fail", **fields}),
+                                encoding="utf-8")
+            self.assertEqual(self.cli("--manifest", str(manifest)).returncode, 2)
+
+    def test_compound_runtime_bounds(self):
+        for spec in ("<22 || >=22.12", ">=22.12 || *", ">=22.12 || invalid"):
+            with self.subTest(spec=spec):
+                npm_fixture(self.repo, deps={}, engines={"node": spec}, installed={})
+                self.assertIn("NO_ENGINES", self.verdicts(self.run_checker(), "node"))
+        self.assertEqual(CV.lower_bound(">=20,>=22.12").lower, (22, 12))
+        self.assertEqual(CV.lower_bound(">= 22.12 < 24 || >=26").lower, (22, 12))
+
+    def test_registry_rejects_policy_typos(self):
+        for field, value in (("enforce", "FAIL"), ("floor", "banana"), ("florr", "22")):
+            with self.subTest(field=field):
+                data = json.loads(json.dumps(REGISTRY))
+                if field == "enforce":
+                    data["consumers"]["app-fail"][field] = value
+                else:
+                    data["axes"]["next"][field] = value
+                self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+                self.assertEqual(self.cli("--self-check").returncode, 2)
+        self.registry_path.write_text(json.dumps(REGISTRY), encoding="utf-8")
+        self.assertEqual(self.cli("--self-check").returncode, 0)
+
+    def test_floating_urls_cannot_bypass_ref_check(self):
+        for url in ("https://github.com/example/pkg/releases/download/latest/pkg.tgz",
+                    "git+https://github.com/example/pkg.git?cache=" + "0" * 40 + "#main",
+                    "https://example.com/packages/latest.tgz",
+                    "https://example.com/packages/latest.tgz#v1.2.3",
+                    "https://github.com/example/pkg/archive/main.zip#" + "0" * 40):
+            with self.subTest(url=url):
+                npm_fixture(self.repo, deps={"custom-lib": url}, engines={"node": ">=22.12"},
+                            installed={"custom-lib": "1.0.0"})
+                self.assertIn("FLOATING_REF", self.verdicts(self.run_checker(), "custom-lib"))
+                self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail").returncode, 1)
+
     def test_version_helpers(self):
         self.assertEqual(CV.parse_version("22.12"), (22, 12))
         self.assertEqual(CV.parse_version("3.12-slim"), (3, 12))

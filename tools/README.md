@@ -17,3 +17,5 @@ python3 -B -X utf8 -m unittest discover -s tests -p "test_*.py" -v
 ```
 
 모든 도구는 Python 3.11+ 표준 라이브러리만 사용하며 Windows Python에서도 동작해야 한다([개발 환경](../docs/dev-environment.md) Tier 2).
+
+`check_versions.py --self-check`는 입력 레지스트리만 검사한다. 소비자 실행에서 검사 범위가 없거나 입력 형식이 잘못되면 exit 2이며, 설치 버전을 해석하지 못하면 NO_LOCK이다. 자체 검사 성공은 소비자 버전 정렬 성공이 아니다.

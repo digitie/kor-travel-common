@@ -75,6 +75,6 @@ docs/tasks.md와 docs/tasks-done.md의 요약 표는 정확히 5열이며 첫 �
 
 ## 6. 완료 처리
 
-모든 수용 기준과 검증을 확인하고 비단순 변경이면 전문 리뷰어 서브에이전트 2인 gate를 통과한 뒤 docs/tasks-done.md에 newest-first로 추가한다. 상세 파일의 상태를 `DONE`으로 바꾸고 docs/tasks.md의 요약 행을 docs/tasks-done.md로 옮긴다. 요약 표는 5열 고정이므로 완료 날짜와 PR 번호는 4열 제목 뒤 괄호에 적는다(예: `문서 골격 (2026-09-06, PR #1)`). 실행하지 못한 검증은 `NOT_RUN(사유)`로 남기고 0 test·skip을 통과로 집계하지 않는다. 명령을 적었다는 사실은 실행·성공의 증거가 아니다. 현재 상태가 바뀌면 docs/journal.md와 docs/resume.md도 갱신한다. 실패한 검증이나 미해결 P0/P1 finding을 남긴 채 `DONE`으로 바꾸지 않는다.
+모든 수용 기준과 검증을 확인하고 비단순 변경이면 전문 리뷰어 서브에이전트 2인 gate를 통과한 뒤 docs/tasks-done.md에 newest-first로 추가한다. 상세 파일의 상태를 `DONE`으로 바꾸고 docs/tasks.md의 요약 행을 docs/tasks-done.md로 옮긴다. 요약 표는 5열 고정이므로 완료 날짜와 PR 번호는 상세 H1 제목과 완료 요약 4열 제목 양쪽에 같은 괄호로 함께 적는다(예: `문서 골격 (2026-09-06, PR #1)`). 실행하지 못한 검증은 `NOT_RUN(사유)`로 남기고 0 test·skip을 통과로 집계하지 않는다. 명령을 적었다는 사실은 실행·성공의 증거가 아니다. 현재 상태가 바뀌면 docs/journal.md와 docs/resume.md도 갱신한다. 실패한 검증이나 미해결 P0/P1 finding을 남긴 채 `DONE`으로 바꾸지 않는다.
 
 리뷰를 수행한 경우 기존 리뷰 문서에 append하지 않고 [review archive](reviews/README.md) 규칙에 따라 새 report를 만든다.

@@ -30,6 +30,7 @@ from pathlib import Path
 import re
 import sys
 import tomllib
+from urllib.parse import unquote, urlsplit
 
 
 REGISTRY_SCHEMA = "kor-travel-common.version-registry.v1"
@@ -49,17 +50,17 @@ MAX_DEPTH = 4
 SHA_RE = re.compile(r"\b[0-9a-f]{40}\b")
 TAG_RE = re.compile(r"^(?:[A-Za-z0-9._-]+-)?v?\d+(?:\.\d+){1,3}(?:[-+.][0-9A-Za-z.-]+)?$")
 FLOATING_NAMES = frozenset({"main", "master", "develop", "dev", "head", "latest", "trunk"})
-VERSION_RE = re.compile(r"^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?")
+VERSION_RE = re.compile(r"v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?(?:[-+][0-9A-Za-z][0-9A-Za-z.-]*)?")
 REQ_RE = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)\s*(\[[^\]]*\])?\s*(.*)$")
 
 
 # --------------------------------------------------------------------------- 버전 비교
 
 def parse_version(text: str | None) -> tuple[int, ...] | None:
-    """앞쪽 숫자 구성요소만 튜플로 돌려준다. `22.12` → (22, 12), `3.12-slim` → (3, 12)."""
-    if not text:
+    """지원 형식 전체를 확인하고 숫자 튜플을 돌려준다. `3.12-slim` → (3, 12)."""
+    if not isinstance(text, str) or not text:
         return None
-    match = VERSION_RE.match(text.strip())
+    match = VERSION_RE.fullmatch(text.strip())
     if match is None:
         return None
     return tuple(int(group) for group in match.groups() if group is not None)
@@ -95,7 +96,7 @@ def lower_bound(spec: str | None) -> Bound | None:
     """
     if spec is None:
         return None
-    text = spec.strip()
+    text = re.sub(r"(>=|<=|==|~=|!=|>|<|\^|~|=)\s+", r"\1", spec.strip())
     if not text or text in {"*", "latest", "x"}:
         return Bound(None, False)
     lows: list[tuple[int, ...]] = []
@@ -111,16 +112,19 @@ def lower_bound(spec: str | None) -> Bound | None:
                     operator = candidate
                     part = part[len(candidate):].strip()
                     break
-            version = parse_version(part)
-            if version is None or operator in {"<", "<=", "!="}:
+            version = parse_version(re.sub(r"(?:\.[xX*])+$", "", part))
+            if version is None:
+                return Bound(None, False)
+            if operator in {"<", "<=", "!="}:
                 continue
             if operator in {"", "=", "=="}:
                 alt_exact = "x" not in part and "*" not in part and len(version) >= 2
-            if alt_low is None or below(version, alt_low):
+            if alt_low is None or below(alt_low, version):
                 alt_low = version
-        if alt_low is not None:
-            lows.append(alt_low)
-            exact = exact or (alt_exact and len(parts) == 1)
+        if alt_low is None:
+            return Bound(None, False)
+        lows.append(alt_low)
+        exact = exact or (alt_exact and len(parts) == 1)
     if not lows:
         return Bound(None, False)
     lowest = lows[0]
@@ -194,6 +198,17 @@ class Registry:
     @classmethod
     def load(cls, path: Path) -> "Registry":
         data = json.loads(path.read_text(encoding="utf-8"))
+        def fields(value, allowed, label, required=()):
+            if not isinstance(value, dict):
+                raise ValueError(f"{path}: {label}은 객체여야 함")
+            unknown = set(value) - set(allowed)
+            missing = set(required) - set(value)
+            if unknown or missing:
+                raise ValueError(f"{path}: {label} 미지 필드 {sorted(unknown)}, 누락 {sorted(missing)}")
+
+        fields(data, {"schema", "baseline", "updated", "next_review", "policy", "source",
+                      "semantics", "axes", "actions", "exceptions", "blocked", "consumers", "providers"},
+               "registry", {"schema", "axes"})
         if data.get("schema") != REGISTRY_SCHEMA:
             raise ValueError(f"{path}: schema가 {REGISTRY_SCHEMA}가 아님: {data.get('schema')!r}")
         axes = data.get("axes")
@@ -201,19 +216,62 @@ class Registry:
             raise ValueError(f"{path}: axes가 비어 있음")
         registry = cls(data, path, axes)
         for key, axis in axes.items():
-            if not isinstance(axis, dict) or "ecosystem" not in axis:
-                raise ValueError(f"{path}: axes.{key}에 ecosystem 필요")
+            fields(axis, {"ecosystem", "packages", "floor", "recommended", "max", "image", "check",
+                          "checked", "note", "source"}, f"axes.{key}", {"ecosystem"})
+            if axis["ecosystem"] not in {"runtime", "npm", "pypi", "image", "tool", "db"}:
+                raise ValueError(f"{path}: axes.{key}.ecosystem 오류")
+            for field_name in ("floor", "recommended", "max"):
+                value = axis.get(field_name)
+                if value is not None and parse_version(value) is None:
+                    raise ValueError(f"{path}: axes.{key}.{field_name} 버전 오류")
+            if "checked" in axis and not isinstance(axis["checked"], bool):
+                raise ValueError(f"{path}: axes.{key}.checked는 bool이어야 함")
+            names = axis.get("packages", [key])
+            if not isinstance(names, list) or not names or any(not isinstance(n, str) or not n for n in names):
+                raise ValueError(f"{path}: axes.{key}.packages 목록 오류")
             for name in axis.get("packages", [key]):
-                registry.by_package[(axis["ecosystem"], normalize_name(name))] = key
+                identity = (axis["ecosystem"], normalize_name(name))
+                if identity in registry.by_package:
+                    raise ValueError(f"{path}: 패키지 축 중복 {name}")
+                registry.by_package[identity] = key
+        consumers = data.get("consumers", {})
+        if not isinstance(consumers, dict):
+            raise ValueError(f"{path}: consumers는 객체여야 함")
+        aliases = {name.lower() for name in consumers}
+        for name, entry in consumers.items():
+            fields(entry, {"enforce", "clean_runs", "aliases", "note"}, f"consumers.{name}", {"enforce"})
+            if entry["enforce"] not in MODES:
+                raise ValueError(f"{path}: consumers.{name}.enforce 오류")
+            if not isinstance(entry.get("aliases", []), list):
+                raise ValueError(f"{path}: consumers.{name}.aliases 목록 오류")
+            for alias in entry.get("aliases", []):
+                if not isinstance(alias, str) or not alias or (alias.lower() in aliases and alias.lower() != name.lower()):
+                    raise ValueError(f"{path}: 소비자 별칭 오류 또는 중복")
+                aliases.add(alias.lower())
+            runs = entry.get("clean_runs", 0)
+            if type(runs) is not int or runs < 0:
+                raise ValueError(f"{path}: consumers.{name}.clean_runs 오류")
+        for name in ("exceptions", "blocked"):
+            if not isinstance(data.get(name, []), list):
+                raise ValueError(f"{path}: {name}는 목록이어야 함")
         for entry in data.get("exceptions", []):
-            missing = {"repo", "key", "installed", "reason", "until", "review"} - set(entry)
-            if missing:
-                raise ValueError(f"{path}: exceptions 항목에 {sorted(missing)} 누락: {entry}")
+            names = {"repo", "key", "installed", "reason", "until", "review"}
+            fields(entry, names, "exceptions 항목", names)
+            if any(not isinstance(entry[n], str) or not entry[n] for n in names):
+                raise ValueError(f"{path}: exceptions 값은 빈 문자열이 아니어야 함")
+            if entry["repo"] not in consumers or entry["key"] not in axes or parse_version(entry["installed"]) is None:
+                raise ValueError(f"{path}: exceptions 참조 또는 버전 오류")
             date.fromisoformat(entry["until"])
         for entry in data.get("blocked", []):
-            missing = {"ecosystem", "name", "range", "reason"} - set(entry)
-            if missing:
-                raise ValueError(f"{path}: blocked 항목에 {sorted(missing)} 누락: {entry}")
+            fields(entry, {"ecosystem", "name", "range", "reason", "since", "source"}, "blocked 항목",
+                   {"ecosystem", "name", "range", "reason"})
+            if entry["ecosystem"] not in {"npm", "pypi"}:
+                raise ValueError(f"{path}: blocked ecosystem 오류")
+            if any(not isinstance(entry[n], str) or not entry[n] for n in ("name", "range", "reason")):
+                raise ValueError(f"{path}: blocked 문자열 오류")
+            for clause in entry["range"].split(","):
+                if not re.fullmatch(r"\s*(?:>=|<=|==|!=|>|<)?\d+(?:\.\d+)*\s*", clause):
+                    raise ValueError(f"{path}: blocked 범위 오류")
         return registry
 
     def axis_for(self, ecosystem: str, name: str) -> str | None:
@@ -235,7 +293,7 @@ class Registry:
         if name is None:
             return "report"
         mode = self.data["consumers"][name].get("enforce", "report")
-        return mode if mode in MODES else "report"
+        return mode
 
     def exception(self, repo: str, key: str, installed: tuple[int, ...] | None):
         if installed is None:
@@ -281,26 +339,35 @@ def ref_is_pinned(text: str) -> bool:
     자산(`/releases/download/<tag>/…`, D-11), `@<태그>`·`#<태그>`의 버전형 태그(`v1.2.3`,
     `py-v0.1.0`). 브랜치 이름(`main`·`master`·`develop`)·참조 없음·`semver:` 범위는 floating.
     """
-    if SHA_RE.search(text) or "/releases/download/" in text:
-        return True
-    if re.search(r"/(?:tarball|archive|commit)/[0-9a-f]{7,40}(?:\.|/|$)", text):
-        return True
-    base, _, fragment = text.partition("#")
-    ref = ""
-    if fragment and "=" not in fragment:
-        ref = fragment.split("&")[0]
-    if not ref and "@" in base:
-        tail = base.rsplit("@", 1)[1]
-        if "/" not in tail and ":" not in tail:
-            ref = tail
-    if not ref or ref.lower() in FLOATING_NAMES:
+    def valid_ref(ref: str) -> bool:
+        return bool(re.fullmatch(r"[0-9a-f]{40}", ref) or TAG_RE.fullmatch(ref))
+
+    parsed = urlsplit(text.removeprefix("git+"))
+    path = unquote(parsed.path)
+    fragment = unquote(parsed.fragment)
+    hosted = parsed.hostname in {"github.com", "gitlab.com"}
+    if hosted:
+        release = re.fullmatch(r"/[^/]+/[^/]+/releases/download/([^/]+)/[^/]+", path)
+        if release:
+            return valid_ref(release[1])
+        if re.fullmatch(r"/[^/]+/[^/]+/(?:tarball|archive|commit)/[0-9a-f]{7,40}(?:\.tar\.gz|\.zip)?", path):
+            return True
+    git_spec = (text.startswith(("git+", "git:", "github:", "gitlab:", "bitbucket:"))
+                or (hosted and re.fullmatch(r"/[^/]+/[^/]+", path))
+                or re.fullmatch(r"[^/:]+/[^/]+", path) and not parsed.scheme)
+    if not git_spec:
         return False
-    return bool(TAG_RE.match(ref))
+    # URL의 임의 query/fragment를 자산의 불변 ref로 인정하지 않는다.
+    if fragment and not fragment.startswith("subdirectory="):
+        return valid_ref(fragment)
+    if "@" in path:
+        return valid_ref(path.rsplit("@", 1)[1])
+    return False
 
 
 def is_vcs_spec(spec: str) -> bool:
     lowered = spec.lower()
-    return (lowered.startswith(("git+", "git:", "github:", "gitlab:", "bitbucket:"))
+    return (lowered.startswith(("git+", "git:", "github:", "gitlab:", "bitbucket:", "https://", "http://"))
             or "github.com/" in lowered or "gitlab.com/" in lowered
             or bool(re.match(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(#.*)?$", spec)))
 
@@ -420,7 +487,7 @@ class Checker:
         """축 값과 설치본(또는 선언 하한)을 대조한다. 예외·차단은 호출자가 먼저 처리한다."""
         axis = self.registry.axes[key]
         if installed is None:
-            return "OK", "판정 불가(버전 파싱 실패)"
+            return "NO_LOCK", "설치 버전 파싱 실패 — 정상 설치본으로 판정할 수 없음"
         floor = parse_version(axis.get("floor"))
         maximum = parse_version(axis.get("max"))
         recommended = parse_version(axis.get("recommended"))
@@ -803,6 +870,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--markdown", type=Path, help="Markdown 보고 출력 경로")
     parser.add_argument("--no-step-summary", action="store_true", help="$GITHUB_STEP_SUMMARY에 쓰지 않음")
     parser.add_argument("--quiet", action="store_true", help="표준 출력에 표를 쓰지 않음(annotation·요약만)")
+    parser.add_argument("--self-check", action="store_true", help="레지스트리 형식·정책만 검사하고 종료")
     args = parser.parse_args(argv)
 
     try:
@@ -813,9 +881,12 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         registry = Registry.load(args.registry.resolve())
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError, TypeError, AttributeError, KeyError) as exc:
         print(f"::error title=check_versions::레지스트리 오류: {exc}")
         return 2
+    if args.self_check:
+        print("check_versions: 레지스트리 자체 검사 통과(소비자 버전 검사는 실행하지 않음)")
+        return 0
     if not args.paths and args.manifest is None:
         parser.error("소비 저장소 경로 또는 --manifest가 필요")
 
@@ -825,7 +896,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.manifest is not None:
         try:
             manifest_repo, scopes = scopes_from_manifest(args.manifest.resolve())
-        except (OSError, ValueError, json.JSONDecodeError) as exc:
+        except (OSError, ValueError, TypeError, AttributeError, KeyError) as exc:
             print(f"::error title=check_versions::매니페스트 오류: {exc}")
             return 2
         roots.append(args.manifest.resolve().parent.as_posix())
@@ -837,6 +908,10 @@ def main(argv: list[str] | None = None) -> int:
         roots.append(root.as_posix())
         scopes.extend(discover(root))
 
+    if not scopes:
+        print("::error title=check_versions::검사 대상 scope가 없음(경로·lockfiles 확인 필요)")
+        return 2
+
     repo = args.repo or manifest_repo or (args.paths[0].resolve().name if args.paths else args.manifest.resolve().parent.name)
     repo = registry.consumer(repo) or repo
     if args.mode:
@@ -846,7 +921,11 @@ def main(argv: list[str] | None = None) -> int:
     today = args.today or date.today()
 
     checker = Checker(registry, repo, today)
-    checker.run(scopes)
+    try:
+        checker.run(scopes)
+    except (OSError, ValueError, TypeError, AttributeError, KeyError) as exc:
+        print(f"::error title=check_versions::소비자 입력 오류: {exc}")
+        return 2
     findings = checker.findings
     markdown = render_markdown(findings, registry, repo, mode, mode_source, today, roots)
     report = build_report(findings, registry, repo, mode, mode_source, today, roots)
