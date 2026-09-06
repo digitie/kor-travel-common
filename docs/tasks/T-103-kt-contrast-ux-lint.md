@@ -1,0 +1,62 @@
+# T-103 tools/kt_contrast.py(report·`contrast-baseline.json`) + `tools/ux_lint.py`(금지 7종+window.confirm, 전체 report·diff fail) + 4앱 오버라이드 예제 보고
+
+- 상태: BLOCKED
+- 우선순위: P1
+- Gate: 도구 테스트
+- 선행: T-101
+
+## 목표
+
+색상 톤 규칙과 UX 규칙의 기계 검사 2종을 만든다. `kt_contrast.py`는 앱 오버라이드의 WCAG 대비를 report하고 신규 미달만 fail할 수 있게 baseline을 지원하며, `ux_lint.py`는 금지 패턴 7종 + `window.confirm`을 전체 report·diff 기반 fail로 검사한다. 4앱(ktdm·concierge·geo·airport)의 알려진 미달 값으로 도구를 검증한다.
+
+## 고정 결정
+
+- [설계 브리프](../plan/design-brief.md) D-12 대비 절(light 쌍 필수·dark는 dark 활성 앱만·report 기본·`contrast-baseline.json` 미달 쌍 + `until`·신규 미달만 fail), D-13(금지 패턴 7종: raw hex/oklch·`text-[Npx]`·`rounded-2xl+`·팔레트 alpha·`outline-none`·`transition-all/colors`·`aria-disabled:opacity-` + `window.confirm`; 전체 report + `--base <sha>` diff fail; baseline 7건), D-30, D-19(매니페스트 `contrast{baseline,dark}`·`ux_gate{baseline}`).
+- ADR-006 — [docs/adr/README.md](../adr/README.md). 규칙 정본은 [design-tokens.md](../standards/design-tokens.md)·[ux-guide.md](../standards/ux-guide.md).
+- [디자인 토큰 조사](../survey/cross/design-tokens.md) §3.4.1(운용 규칙)·§3.4.2(대비 재검증: map 통과, geo 2.29/2.41·concierge 2.06/1.93·ktdm brand 3.59·airport line 1.15 미달)·§3.6.3(`kt-contrast` 역할), [ux 조사](../survey/cross/ux-patterns.md) §2 G0.3(grep 가능한 금지 목록·백틱 인용 제외)·G9.1·G9.4·G9.6·§4 C7(`window.confirm` 잔존 map 2·ktdm 3·kta 1·wx 1), [map 인벤토리](../survey/inventory/kor-travel-map.md) §9(금지 패턴 게이트 미자동화 — common이 제공하면 map이 첫 소비자).
+- stdlib만, Windows 동작(D-03). OKLCH→sRGB 변환은 CSS Color 4 공식 수식을 구현하고 map 문서의 실측 수치와 대조한다.
+
+## 구현 범위
+
+1. `tools/kt_contrast.py`: 입력 `tokens.css` + 오버라이드 CSS(0..n) + `--dark`; 파서(`:root`/`.dark` 블록의 `--kt-*` 값, OKLCH·hex·`var()` 1단 참조); 검사 쌍(text 4 × surface 4 → 4.5:1(tertiary·disabled는 3:1 문서 규칙에 따름), control-line × surface 4 → 3:1, brand-foreground × brand → 4.5:1, status 4 × tint → 3:1, focus × surface-page → 3:1); `--baseline <json>`(미달 쌍 + `until`; 만료는 `EXEMPT_EXPIRED`); `--fail-new`; 출력 Markdown·`--json`·step summary.
+2. `tools/ux_lint.py`: 대상 확장자 `.tsx .ts .css .mdx`; 패턴 7 + `window.confirm`; 백틱·주석 안 인용 제외; `--base <sha>`면 `git diff -U0 <sha>`의 추가 행만 fail 대상, 전체는 report; `--baseline <json>`(파일·패턴·건수); 출력 동일 형식.
+3. 테스트: `tests/test_kt_contrast.py`(변환 정확도: map 문서 수치 ±0.05, 쌍 판정, baseline 만료), `tests/test_ux_lint.py`(패턴별 양성·음성 fixture, diff 모드).
+4. 4앱 예제: `packages/tokens/examples/{docker-manager,concierge,geo,airport}-overrides.css`(조사 문서 값) + 각 `contrast-baseline.example.json`; 실행 결과 표(미달 쌍·수치)를 evidence와 `docs/journal.md`에 보고. 실제 앱 baseline 등록은 각 이관 task.
+5. `templates/contrast-baseline.json`·`templates/ux-baseline.json` 빈 형식 + `tools/README.md` 행.
+
+## 범위 밖
+
+- 재사용 워크플로 `contrast-check.yml` 활성화(T-010에서 stub → 이 task 완료 후 갱신), 규칙 문서 본문(T-104·T-105), 앱별 baseline 확정·등록(T-421·T-431·T-441·T-453·T-472), `fail` 승격(T-502), 마커 팔레트 검사.
+
+## 예상 변경 파일
+
+예정 경로는 존재·실행 증거가 아니다. `tools/kt_contrast.py`, `tools/ux_lint.py`, `tests/test_kt_contrast.py`, `tests/test_ux_lint.py`, `tests/fixtures/ux/*`, `packages/tokens/examples/*-overrides.css`, `packages/tokens/examples/*.contrast-baseline.example.json`, `templates/contrast-baseline.json`, `templates/ux-baseline.json`, `tools/README.md`, `.github/workflows/contrast-check.yml`(활성화).
+
+## 수용 기준
+
+- map 기본값(`tokens.css` 단독)에서 `kt_contrast` 전 쌍 통과(exit 0), 변환값이 map 문서 실측과 ±0.05 이내.
+- 4앱 예제에서 조사 문서의 미달(ktdm brand 3.59, concierge 2.06/1.93, geo 2.29/2.41, airport line 1.15)이 재현되고 baseline 등록 시 `--fail-new`가 exit 0, baseline `until` 만료 fixture는 exit 1.
+- `ux_lint` fixture에서 7 패턴 + `window.confirm` 각각 양성 1·음성(백틱 인용) 1이 기대대로 판정되고, `--base`는 추가 행만 fail한다.
+- 두 도구 모두 `--json`·step summary 출력, Linux·Windows 결과 동일, 외부 의존 0.
+- `contrast-check.yml`이 stub에서 실제 호출로 바뀌고 selftest green.
+
+## 검증 명령
+
+```bash
+python3 -B -X utf8 tools/kt_contrast.py packages/tokens/src/tokens.css; echo "exit=$?"
+python3 -B -X utf8 tools/kt_contrast.py packages/tokens/src/tokens.css packages/tokens/examples/docker-manager-overrides.css --baseline packages/tokens/examples/docker-manager.contrast-baseline.example.json --fail-new; echo "exit=$?"
+python3 -B -X utf8 tools/ux_lint.py tests/fixtures/ux --base HEAD~1; echo "exit=$?"
+python3 -B -X utf8 -m unittest discover -s tests -p "test_kt_contrast.py" -v
+python3 -B -X utf8 -m unittest discover -s tests -p "test_ux_lint.py" -v
+```
+
+Git Bash에서 동일.
+
+## evidence
+
+- 테스트 수·exit code·4앱 결과 표·변환 검증 표를 이 절과 `docs/journal.md`에 남긴다. 실제 앱 저장소에서의 실행은 각 이관 task evidence이며 여기서는 `NOT_RUN(앱 task)`.
+
+## rollback 또는 release 차단 조건
+
+- 도구·예제만 바뀌므로 `git revert` 1회로 원복한다.
+- map 기본값이 통과하지 못하면 토큰 값 또는 검사 쌍 정의 중 하나가 틀린 것이므로 T-109 rc 발행을 차단한다. 검사를 끄는 옵션은 두지 않는다([실패 패턴](../runbooks/agent-failure-patterns.md) `kt-contrast` 행).

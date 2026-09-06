@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+# Origin: kor-travel-common 자체 작성
 """tools/validate_document_links.py 회귀 시험: 상대 링크만 허용, 절대 링크 오류, 산문 오탐 제외."""
 from __future__ import annotations
 

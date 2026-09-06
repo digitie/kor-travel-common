@@ -1,0 +1,61 @@
+# T-021 ktc·ktdm 라이선스 정렬(L8) 결정 반영: 결정 기록·각 저장소 PR 요청 문서
+
+- 상태: BLOCKED
+- 우선순위: P1
+- Gate: 문서
+- 선행: 없음
+- 외부 선행: 사용자 결정 O-2(ktc·ktdm 루트 GPL 정렬 vs common §7 추가 허가). 기본값 "GPL-3.0-or-later 정렬, 각 1 PR"로 준비한다.
+
+## 목표
+
+MIT 저장소 두 곳(concierge·docker-manager)이 GPL common 코드를 링크하기 전에 필요한 라이선스 정렬 결정을 기록하고, 각 저장소에 보낼 PR 요청 문서를 만들어 T-454·T-473(코드 채택)의 외부 선행을 검증 가능한 조건으로 바꾼다. 결정 전에는 두 앱이 규칙 문서·`tokens.json` 참조까지만 한다.
+
+## 고정 결정
+
+- [설계 브리프](../plan/design-brief.md) D-16(concierge·ktdm은 L8 전 규칙 문서·`tokens.json` 참조까지만), D-17(ktc·ktdm 루트 GPL 정렬 권고, §7 추가 허가 기각), O-2.
+- ADR-004 — [docs/adr/README.md](../adr/README.md).
+- [라이선스 조사](../survey/cross/licensing.md) §3.6 ktc·ktdm 행(판단 근거·"같은 소유자니까 된다"는 성립하지 않음), §3.7 L8·L14, §4 B4(ktc `AppShell.tsx`·`globals.css` 복사 여부 diff 후 기록).
+- [판정 보고서](../plan/design-panel/judge-migration-feasibility.md) §3.1 concierge PR 3·ktdm PR 3(L8 = 사용자).
+- [concierge 인벤토리](../survey/inventory/kor-travel-concierge.md) §8·§9, [docker-manager 인벤토리](../survey/inventory/kor-travel-docker-manager.md) §8·§9.
+
+## 구현 범위
+
+1. 결정 기록: `docs/architecture/adoption-readiness.md` gate 표의 ktc·ktdm L8 행에 결정 일자·채택값·근거; ADR-004 "결과" 절에 1줄 보충. ktdm은 "코드 미링크·규칙 문서만 참조 시 MIT 유지 가능(추정)" 대안을 함께 적는다.
+2. 요청 문서 2편 `docs/plan/requests/concierge-license-l8.md`, `docs/plan/requests/docker-manager-license-l8.md`: 대상 저장소, 브랜치 `agent/<agent>-license-l8`, 1 PR 범위(루트 `LICENSE` GPL 전문, `package.json`·`pyproject.toml` `license` 필드, MIT 유래 파일 고지를 `THIRD_PARTY_NOTICES`로, ktc 저작권자 문구 통일 L14), 되돌리기 `git revert` 1회, 인벤토리 §8/§9·판정 §3.1 링크.
+3. B4 처리: ktc `AppShell.tsx`·`globals.css`와 map admin 원본의 diff 결과(복사/개념 참조)를 요청 문서와 `PROVENANCE.md` 후보 행에 기록.
+4. 해제 조건: 각 저장소 `main`의 루트 `LICENSE` 첫 줄과 커밋 SHA를 evidence에 기록 → gate "해제" → T-454·T-473 상태 전환은 원장 작성자.
+
+## 범위 밖
+
+- 두 저장소 직접 수정, §7 추가 허가 문안 작성(기각), 코드 채택 자체(T-453·T-454·T-472·T-473), 라이선스 법률 자문.
+
+## 예상 변경 파일
+
+예정 경로는 존재·실행 증거가 아니다. `docs/plan/requests/concierge-license-l8.md`, `docs/plan/requests/docker-manager-license-l8.md`, `docs/architecture/adoption-readiness.md`, `docs/adr/004-*.md`(1줄 보충), `docs/journal.md`.
+
+## 수용 기준
+
+- 결정 기록에 일자·선택지(정렬/추가 허가)·채택값·근거가 있고 기본값 진행 상태와 확정 상태가 구분된다.
+- 요청 문서 2편이 대상 파일 경로·되돌리기·링크를 포함하고 B4 diff 결과를 담는다.
+- 해제 조건이 저장소별 커밋 SHA + `LICENSE` 첫 줄로 검증 가능하다.
+- 해제 전 `docs/standards/*`·runbook의 concierge·ktdm 절이 "규칙 문서·`tokens.json` 참조까지"로만 적혀 있다.
+- validator 오류 0.
+
+## 검증 명령
+
+```bash
+python3 -B -X utf8 tools/validate_document_links.py
+rg -n "L8" docs/architecture/adoption-readiness.md
+ls docs/plan/requests/
+```
+
+Git Bash에서 동일. B4 diff는 조사 저장소 읽기 전용 체크아웃에서 `diff` 명령으로 수행한다.
+
+## evidence
+
+- 사용자 답·각 저장소 PR 링크·해제 커밋 SHA·B4 diff 요약을 이 절과 `docs/journal.md`에 남긴다. 답이 없으면 `NOT_RUN(사용자 O-2 대기)`.
+
+## rollback 또는 release 차단 조건
+
+- 문서만 바뀌므로 `git revert` 1회로 원복한다.
+- L8 해제 기록 없이 concierge·ktdm 채택 PR(T-454·T-473)이 열리면 common 측에서 승인하지 않는다.

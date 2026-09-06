@@ -74,7 +74,7 @@
 - 근거: version-matrix §7.2·7.3(dm runtime-pin-registry 형식 차용).
 
 ### D-08 Tailwind v4 전환 대상과 방식
-- 결정: 
+- 결정:
   - weather admin: 순수 CSS → v4 CSS-first + `@kor-travel/tokens` + Next 15→16 + Vitest 3→4. 셸은 common 이관 시 교체.
   - airport: WIP 브랜치 `codex/shadcn-ui-foundation`(v4 + shadcn base-nova + base-ui 1.8)을 v4 기반으로 채택하되, 토큰을 `--kt-*` admin 프로필(6/8, 36/30, control-line 3:1)로 정렬. `tokens.css` alpha line은 제거.
   - docker-manager: v4 설치 유지, `ops-*` 146줄 + 유틸리티 혼용 → 토큰·common UI로 정리; Next 14→16, React 18→19, ESLint 8→10 선행.
