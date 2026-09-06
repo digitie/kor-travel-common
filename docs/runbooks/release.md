@@ -8,7 +8,7 @@
 
 | 항목 | 규칙 |
 |---|---|
-| 독립 버전 | tokens·ui·py는 각각 독립 버전. ui는 `@kor-travel/tokens`의 같은 minor를 peer로 요구 |
+| 독립 버전 | tokens·ui·py는 각각 독립 버전. ui는 `@kor-travel/tokens`의 호환 minor 하나를 peer로 요구 |
 | minor(0.N.0) | 파괴 허용. `-rc.N` → 소비자 PR 검증 → 정식. CHANGELOG `#### Breaking` + 이관 절 필수 |
 | patch(0.N.M) | 비파괴(additive)만. 토큰 값 조정·버그 수정·문서 |
 | 파괴 항목 | 토큰 이름/의미, `data-slot`/`data-testid`, prop 기본값, 정렬 모드(`manualSorting`), CSS 파일 경로, 공개 export 제거, py 공개 시그니처 |
@@ -100,7 +100,7 @@ gh release view tokens-v0.1.0-rc.1 --json assets --jq '.assets[].name'
 
 ### 3.4 소비자 검증
 
-1. `gh workflow run consumer-smoke.yml -f tag=tokens-v0.1.0-rc.1`로 pinned SHA 소비자(map admin·pinvi web) 빌드를 돌린다(T-010 후).
+1. `gh workflow run consumer-smoke.yml -f tag=tokens-v0.1.0-rc.1`로 패키지별 승인된 pinned SHA 소비자 빌드를 돌린다(T-010 후).
 2. 1차 소비자에서 실제 채택 PR을 연다([consumer adoption](consumer-adoption.md)): tokens는 map + weather, ui는 map + pinvi admin(L6) 또는 airport 소형 부품, py는 map-api·weather-api·airport(D-16).
 3. 통과 조건: 소비자 빌드 green(webpack·Turbopack), 6폭 시각 diff 0(값 무변경 릴리스) 또는 의도 목록, e2e green, `check_versions` report 위반 0, 소비자 lock에 tarball `resolved` URL과 `integrity`가 기록됨.
 
@@ -162,3 +162,7 @@ gh release view tokens-v0.1.0 --json tagName,isPrerelease,assets
 | 6 | 정식 태그·Release 발행, `gh release view`로 자산 확인 | |
 | 7 | CHANGELOG 절 이동, versions·pins·integration-map·resume·journal·task evidence 갱신 | |
 | 8 | 미실행 검증은 `NOT_RUN(사유)`로 릴리스 노트와 task에 기록 | |
+
+### 패키지별 소비자 스모크 선택
+
+[ADR-013](../adr/013-package-release-execution-contract.md)에 따라 tokens는 map·weather, UI는 map·pinvi admin(L6 완료) 또는 airport의 승인된 범위를 `consumers.pins.json`에 패키지별 기록한다. pinvi의 L6가 완료되기 전에는 pinvi에 common 자산을 설치하지 않는다. 도구·자산·승인 대상이 없으면 NOT_RUN과 gate 미완료이며 설치 생략을 green으로 세지 않는다. Python 0.2 발행 책임은 [T-311](../tasks/T-311-py-v0-2-0-release.md)에 둔다.

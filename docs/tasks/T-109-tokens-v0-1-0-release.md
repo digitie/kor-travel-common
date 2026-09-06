@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: consumer-smoke
-- 선행: T-101, T-102, T-103, T-104
+- 선행: T-101, T-102, T-103, T-104, T-010, T-108
 
 ## 목표
 
@@ -22,7 +22,7 @@
 1. rc 발행: `packages/tokens` `version 0.1.0-rc.1`, `npm pack` 산출 `kor-travel-tokens-0.1.0-rc.1.tgz`, `sha256sum` → `SHA256SUMS`, 태그 `tokens-v0.1.0-rc.1`(annotated), GitHub pre-release에 자산 2개 첨부. tarball 안 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 확인.
 2. map 검증(draft PR, 저장소 kor-travel-map, 브랜치 `agent/<agent>-T-410`, 경로 `packages/kor-travel-map-admin/frontend`): `npm install <release tarball URL>` → lock `integrity` 커밋 → `globals.css`에 `@import "@kor-travel/tokens/theme.css"` + 빈 brand 오버라이드 → 6폭 기준선 diff 0·e2e 30·vitest 42·`verify:*` 통과. 되돌리기 `git revert` 1회 + lock 복원. 파일 수 ≤10.
 3. weather 검증(draft PR, kor-travel-weather, `agent/<agent>-T-461`, `packages/kor-travel-weather-admin/frontend`): `app/tokens.css` → 패키지 `tokens.css` + `aliases/map-vocabulary.css` + navy·`--rail`·font 오버라이드 → 6폭 수동 diff 0(Playwright 없음 → T-108 템플릿). 되돌리기 동일.
-4. `consumer-smoke` dispatch 실행(map admin·pinvi web pinned SHA에 rc tarball 설치 → `type-check` + `next build` webpack·Turbopack) green.
+4. `consumer-smoke` dispatch 실행(map admin·weather admin pinned SHA에 rc tarball 설치 → `type-check` + `next build` webpack·Turbopack) green.
 5. 정식: `version 0.1.0`, 태그 `tokens-v0.1.0`, 자산 재생성·`SHA256SUMS`, `CHANGELOG.md` `## [0.1.0] ### tokens`(Breaking 없음), `docs/architecture/adoption-readiness.md`·`docs/integration-map.md` 갱신(T-012 도구가 있으면 도구로). 두 draft PR은 정식 URL로 갱신 후 T-410·T-461에서 merge.
 
 ## 범위 밖

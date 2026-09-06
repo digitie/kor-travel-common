@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P0
 - Gate: 패키지 빌드·tarball
-- 선행: T-101
+- 선행: T-109
 - 외부 선행: npm scope `@kor-travel` 확인(T-006, O-5)은 비차단 — 실패하면 이름만 `@digitie/kor-travel-ui`로 바꾼다(첫 소비자 PR 전이면 비용 0)
 
 ## 목표
@@ -19,7 +19,7 @@
 
 ## 구현 범위
 
-- `packages/ui/package.json`: `name`(잠정 `@kor-travel/ui`), `type: module`, `license: "GPL-3.0-or-later"`, `files`(`dist`, `LICENSE`, `NOTICE`, `THIRD_PARTY_NOTICES.md`), `sideEffects: false`, `exports`: `.`, `./cn`, `./icons`, `./package.json`(컴포넌트 subpath는 T-203부터 추가). peer: `react ^19.0.0`, `react-dom ^19.0.0`, `@kor-travel/tokens ~0.1.0`(같은 minor, D-31). dependencies: `clsx`, `tailwind-merge`, `class-variance-authority`(Apache-2.0, NOTICE 유지). `lucide-react`·`@base-ui/react`는 골격에 넣지 않는다(후자는 T-206에서 peer 추가).
+- `packages/ui/package.json`: `name`(잠정 `@kor-travel/ui`), `type: module`, `license: "GPL-3.0-or-later"`, `files`(`dist`, `LICENSE`, `NOTICE`, `THIRD_PARTY_NOTICES.md`), `sideEffects: false`, `exports`: `.`, `./cn`, `./icons`, `./package.json`(컴포넌트 subpath는 T-203부터 추가). peer: `react ^19.0.0`, `react-dom ^19.0.0`, `@kor-travel/tokens ~0.1.0`(같은 minor, D-31). dependencies: `clsx`, `tailwind-merge`, `class-variance-authority`(Apache-2.0, NOTICE 유지). `lucide-react`는 넣지 않는다. `@base-ui/react ^1.6.0`은 useRender helper 때문에 지금 peer로 선언하고 개발용으로도 설치한다. 1.6·1.8 실제 helper 호환성은 깨끗한 tarball fixture로 검증하며 실패하면 T-005 정책 변경 전 릴리스를 막는다.
 - `packages/ui/tsconfig.json`: `strict`, `noUncheckedIndexedAccess: true`, `verbatimModuleSyntax`, `moduleResolution: bundler`, `jsx: react-jsx`, `declaration`, `outDir: dist`.
 - `packages/ui/src/cn.ts`: `clsx` + `extendTailwindMerge`에 `kt-` 그룹 등록(`text-kt-*` 폰트 크기, `rounded-kt-*`, `h-kt-*`/`w-kt-*` spacing, `bg-kt-*`/`text-kt-*` 색). D-10 "`@kor-travel/ui/cn` = clsx + extendTailwindMerge(kt 그룹 등록)".
 - `packages/ui/src/icons/`: 1차 컴포넌트가 쓰는 인라인 SVG 최소 집합(예: `TriangleAlertIcon`·`InfoIcon`·`CheckIcon`·`XIcon`·`CopyIcon`·`LoaderIcon`·`ChevronDownIcon`). 파일 헤더 `Derived-From: lucide (ISC)` + `THIRD_PARTY_NOTICES.md` 항목.
@@ -30,7 +30,7 @@
 
 ## 범위 밖
 
-- 컴포넌트 구현(T-203 이후), overlay peer(T-206), DataTable peer(T-208), 레지스트리 채널(T-211).
+- 컴포넌트 구현(T-203 이후), overlay 구현(T-206), DataTable peer(T-208), 레지스트리 채널(T-211).
 - React 18 지원(`forwardRef`)·CommonJS 출력·소스 TS 배포(`transpilePackages`) — D-09와 선행 보고서 E4·E6에 따라 미지원.
 - npm 공개 게시·Renovate(T-507), 아이콘 전체 세트(필요한 컴포넌트 task에서 추가).
 

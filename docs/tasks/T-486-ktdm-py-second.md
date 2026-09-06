@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P3
 - Gate: ci.yml
-- 선행: T-471, T-307
+- 선행: T-471, T-311
 - 외부 선행: ktdm 루트 GPL-3.0-or-later 정렬(L8, O-2; T-021 결과) — 브리프 선행 열에는 없으나 D-16이 L8 전 코드 소비를 금지하므로 common 모듈 import는 L8 후에만
 
 ## 목표
@@ -19,7 +19,7 @@ docker-manager 백엔드가 py 2차 모듈 중 C2 request-id를 `trust_incoming=
 
 ## 구현 범위
 
-- `backend/pyproject.toml`에 `kor-travel-common[api] @ git+…@py-v0.2.x#subdirectory=…`(C2 포함 태그), `uv.lock` 갱신(T-471 전제).
+- `backend/pyproject.toml`에 `kor-travel-common[api] @ git+…@py-v0.2.0#subdirectory=…`(C2 포함 태그), `uv.lock` 갱신(T-471 전제).
 - `request_context.py` → `kortravelcommon.request_id` 미들웨어(`trust_incoming=False`)로 교체하되 contextvar 이름·로그 필터·CORS expose·envelope `request_id` 주입 계약을 어댑터로 유지(호출부 무변경). 형식은 UUID v4(기존과 동일한지 확인, 다르면 로그 소비자 영향 기록).
 - quality baseline 축소: T-471 baseline 중 자동 수정 가능한 ruff 규칙(`I`·`UP` 등)만 파일 단위로 정리 — 재포맷성 diff 금지, 리뷰 가능한 크기(≤10 파일)로.
 - `openapi-exceptions.yaml` ktdm 항목(`/api/v1`·`{detail}`) `review` 갱신; `docs/bindings.md`에 request-id 결박(값·계약·생애) 등록 + `test_normative_docs_cite_real_symbols` 통과.

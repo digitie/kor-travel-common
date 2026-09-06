@@ -51,7 +51,7 @@ git diff --stat package.json package-lock.json
 ```
 
 - 모노레포(map·pinvi)는 workspace 디렉터리에서 `npm install --workspace <경로> <URL>`로 설치하거나 루트에서 workspace를 지정한다. lock은 루트 `package-lock.json` 하나다.
-- ui는 `@kor-travel/tokens`를 같은 minor로 peer 요구한다(D-31). tokens를 먼저 채택하고 같은 PR에서 상향하지 않는다.
+- ui는 `@kor-travel/tokens`를 호환 minor 하나로 peer 요구한다(D-31). tokens를 먼저 채택하고 같은 PR에서 상향하지 않는다.
 - 설치 후 `npm ls @kor-travel/tokens @kor-travel/ui`로 단일 버전인지 확인한다. 중복 설치는 CSS 변수 이중 정의의 원인이 된다.
 - `.npmrc`나 registry 설정 변경은 필요 없다(tarball URL 설치).
 

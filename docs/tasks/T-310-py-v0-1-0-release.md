@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: 소비자 스모크
-- 선행: T-303, T-304, T-305
+- 선행: T-303, T-304, T-305, T-309
 
 ## 목표
 
@@ -26,7 +26,7 @@ Python 공통 패키지의 첫 릴리스를 낸다: `py-v0.1.0-rc.1` 태그 → 
    - airport: `docs/openapi.json` 대조(인메모리 SQLite 설정 export 재현); `/health`의 DB 질의를 `/readyz`로 옮길 때의 응답 차이 기록(additive 판정 근거).
    - Python 3.11·3.12·3.13 설치 가능 확인(map floor 3.11, weather Docker 3.13).
 4. rc 결과 반영 후 `0.1.0` → 태그 `py-v0.1.0` → Release 정식 자산 + `SHA256SUMS`; `versions.json` `packages.py`(또는 해당 절) 값 갱신(versions-conventions 소유 파일의 데이터 갱신), `docs/resume.md`·`docs/journal.md`·CHANGELOG 갱신.
-5. `consumer-smoke` 워크플로에 Python 소비자 스모크(wheel URL 설치 + `export --check`)를 추가할지 판단해 `release.md`에 기록(D-18 consumer-smoke는 현재 map admin·pinvi web npm 2곳).
+5. `consumer-smoke` 워크플로에 Python 소비자 스모크(wheel URL 설치 + `export --check`)를 추가할지 판단해 `release.md`에 기록(ADR-013 consumer-smoke는 패키지별 승인된 npm 소비자 조합).
 
 ## 범위 밖
 

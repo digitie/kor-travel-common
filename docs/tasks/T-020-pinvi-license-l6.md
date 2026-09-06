@@ -22,7 +22,7 @@ pinvi 전 트랙(T-420·T-421·T-422·T-484, ui 1차 T-212의 pinvi 경로)을 �
 
 1. 결정 기록: `docs/architecture/adoption-readiness.md` gate 표의 pinvi L6 행에 결정 일자·내용·근거(사용자 답 인용) 기입, ADR-010 "정본과 수용 조건" 절에 1줄 보충(뒤집히면 새 ADR). 두 선택지(공개 GPL / 사내 비공개)와 각 경우의 common 영향(비공개면 pinvi 트랙 취소·ui 1차 airport 대체)을 명시.
 2. 요청 문서 `docs/plan/requests/pinvi-license-l6.md`: 대상 저장소 pinvi, 브랜치 `agent/<agent>-license-l6`, 1 PR 범위(루트 `LICENSE` GPL 전문, README/AGENTS 공개·사내 문구 정합, `apps/api/pyproject.toml` `license`, `docs/integrations/maplibre-vworld.md:23` 정정, map 이식분 출처 고지), 되돌리기 `git revert` 1회, 인벤토리 §8/§9 링크, 판정 §3.1 PR 순서 링크.
-3. gate 해제 조건: pinvi `main`에 루트 `LICENSE` 첫 줄 `GNU GENERAL PUBLIC LICENSE`·`Version 3`가 있는 커밋 SHA를 evidence에 기록 → `docs/architecture/adoption-readiness.md` L6 "해제" → T-420 `READY` 전환은 원장 작성자가 수행. 해제 전 `PROVENANCE.md`에 pinvi 유래 행 0 유지.
+3. 결정·요청 문서와 두 리뷰어 gate가 완료되면 T-020을 DONE으로, T-420을 READY로 전환한다. 이 시점의 L6는 "결정 완료·실제 반영 대기"다. T-420의 pinvi merge SHA·LICENSE·공개 문구·패키지 필드 정합 evidence를 확인한 뒤에만 소비·추출 gate를 해제한다. 그 전에는 PROVENANCE의 pinvi 유래 행 0을 유지한다([ADR-013](../adr/013-package-release-execution-contract.md)).
 
 ## 범위 밖
 
@@ -37,7 +37,7 @@ pinvi 전 트랙(T-420·T-421·T-422·T-484, ui 1차 T-212의 pinvi 경로)을 �
 - 결정 기록에 일자·선택지·채택값·근거(사용자 답 원문 또는 요약)가 있고 "기본값으로 진행" 상태와 "확정" 상태가 구분된다.
 - 요청 문서가 대상 파일 4개의 경로를 정확히 적고 되돌리기 방법·인벤토리·판정 링크를 포함한다.
 - 해제 조건이 커밋 SHA + `LICENSE` 첫 줄 검사로 검증 가능하게 적혀 있다.
-- 해제 전 `rg -n "pinvi" PROVENANCE.md`가 0건이다.
+- 해제 전 PROVENANCE 표의 원천 저장소가 pinvi인 행이 0건이다. 금지 규칙 설명에 있는 단어를 추출 행으로 세지 않는다.
 - validator 오류 0, 운영 정보 없음.
 
 ## 검증 명령
@@ -52,7 +52,7 @@ Git Bash에서 동일.
 
 ## evidence
 
-- 사용자 답·pinvi PR 링크·해제 커밋 SHA를 이 절과 `docs/journal.md`에 남긴다. 답이 없으면 `NOT_RUN(사용자 O-1 대기)`.
+- 이 task는 사용자 답·결정·요청 문서를 기록한다. pinvi PR·실제 해제 SHA는 T-420 evidence로 연결하며 T-020 완료 조건에 넣지 않는다. 답이 없으면 `NOT_RUN(사용자 O-1 대기)`.
 
 ## rollback 또는 release 차단 조건
 

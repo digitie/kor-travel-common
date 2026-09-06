@@ -16,7 +16,7 @@
 | heading 구조 | 각 컴포넌트가 만드는 heading 레벨과 그 제어 prop |
 | 문구 | sr-only·기본 라벨 한국어 문자열(§5) |
 | CSS | `kt-` 유틸리티만 사용(소비자가 `@source`로 스캔), 배포 CSS 파일 경로 |
-| peer | `react ^19.0.0`, `react-dom ^19.0.0`, `@kor-travel/tokens`(같은 minor), `@base-ui/react ^1.8.0`(overlay 사용 시) |
+| peer | `react ^19.0.0`, `react-dom ^19.0.0`, `@kor-travel/tokens`(호환 minor 하나), `@base-ui/react ^1.6.0`(0.1 useRender부터 필수; 권장 값은 versions.json) |
 
 계약이 아닌 것: 내부 클래스 문자열, DOM 깊이, 애니메이션 시간, 아이콘 모양. 소비자 e2e는 `data-slot`·testid prop·문구·role로만 요소를 잡는다.
 
@@ -230,7 +230,7 @@
 | 파괴(minor, 0.x) | 토큰 이름·의미 변경, `data-slot` 이름 변경·삭제, testid prop 이름 변경, §5 문구 변경, prop 기본값 변경(예: `manualSorting`·`type`·`headingLevel`·`emptyMessage`), 정렬 모드 의미 변경, export 이름 변경·삭제, CSS 파일 경로 변경, peer 범위 축소, deprecated alias 제거, heading 레벨 변경 | `0.N+1.0` + `-rc.N` → 소비자 PR 검증 → 정식. CHANGELOG `### Breaking` + 이관 절 필수 |
 | 비파괴(patch) | 선택 prop 추가, 새 컴포넌트·subpath 추가, 슬롯 **추가**, variant 추가, 내부 클래스·DOM 깊이 변경, 버그 수정(계약 유지) | `0.N.M+1`(additive) |
 | 폐기 | 토큰 이름·prop 폐기는 1 minor 동안 alias·경고 유지 후 다음 minor에서 제거 | 예고 → 제거 |
-| 독립 버전 | tokens·ui·py는 독립 버전. ui는 `@kor-travel/tokens` 같은 minor를 peer | 소비자 범위 `~0.N` |
+| 독립 버전 | tokens·ui·py는 독립 버전. ui는 `@kor-travel/tokens`의 호환 minor 하나를 peer | 구체적 호환 조합은 [packages](../architecture/packages.md) UI 절·ADR-013 |
 | 1.0 | GPL 소비자 3곳 채택 후 | — |
 
 파괴 항목 여부가 애매하면 파괴로 본다. 소비자 e2e·계약 테스트가 먼저 깨지도록 계약 테스트(§11)를 유지한다.
@@ -253,7 +253,7 @@
 |---|---|---|
 | 계약 단위 테스트 | Vitest + RTL + jsdom(`packages/ui`) | 컴포넌트마다 슬롯·기본값·문구·ARIA·heading을 단언. map `data-table.test.tsx`(175줄)·pinvi `AdminTable*.test.tsx`(418줄)를 이관 출발점으로 |
 | 타입 | `tsc` `noUncheckedIndexedAccess` | |
-| 스모크 | consumer-smoke(map admin·pinvi web pinned SHA, webpack + Turbopack) | `kt-` 유틸리티 생성·지시문 보존 |
+| 스모크 | consumer-smoke(패키지별 승인 소비자 pinned SHA, webpack + Turbopack) | `kt-` 유틸리티 생성·지시문 보존 |
 | 드리프트 | `tools/ui_drift.py`(T-211) | npm 소비자의 로컬 패치 사본 탐지. 우회 패치 ≥2 → 배포 방식 재검토(D-28) |
 | 이관 evidence | 소비자 e2e(map 30·pinvi 56·geo 23) + §7 셀렉터 diff | 채택 PR 본문 |
 

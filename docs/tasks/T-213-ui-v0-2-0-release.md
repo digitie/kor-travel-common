@@ -4,7 +4,7 @@
 - 우선순위: P1
 - Gate: consumer-smoke·2인 리뷰
 - 선행: T-208, T-209, T-210
-- 외부 선행: 검증 소비자 PR은 해당 앱의 ui v0.1 채택(map T-411·pinvi T-422·airport T-432)과 `@base-ui/react` ≥ floor 설치 위에서만 가능; pinvi는 L6(O-1), airport는 WIP 병합(O-9)에 묶임
+- 외부 선행: 검증 소비자 PR은 해당 앱의 ui v0.1 채택(map T-411과 두 번째 소비자 pinvi T-422a 또는 airport T-432)과 `@base-ui/react` ≥ floor 설치 위에서만 가능; pinvi는 L6(O-1), airport는 WIP 병합(O-9)에 묶임
 
 ## 목표
 
@@ -18,10 +18,10 @@ v0.2.0은 T-205~T-210의 2차 부품 전부를 담는 첫 minor이며, 0.x 규�
 
 ## 구현 범위
 
-- `packages/ui/package.json` version `0.2.0-rc.1`; peer 확정(`@base-ui/react ^1.6.0`, optional `@tanstack/react-table ^8.21.0`·`@tanstack/react-virtual ^3.14.0`), `exports` 전체 목록 검토(deep import 없음).
+- `packages/ui/package.json` version `0.2.0-rc.1`; peer 확정(`@kor-travel/tokens ~0.1.0`([ADR-013](../adr/013-package-release-execution-contract.md)), `@base-ui/react ^1.6.0`, optional `@tanstack/react-table ^8.21.0`·`@tanstack/react-virtual ^3.14.0`), `exports` 전체 목록 검토(deep import 없음).
 - `CHANGELOG.md` `### @kor-travel/ui 0.2.0`: Added(부품 목록), `Breaking` 절([release](../runbooks/release.md) 형식; v0.1 대비 data-slot·prop·testid 변경 목록 — 없으면 "없음" 명시), 이관 절(map·pinvi shim 예, Checkbox `onCheckedChange(boolean)` 시그니처, 선택 열 셀렉터 `[data-slot=checkbox]`).
 - ui-contract v0.2 절 확정(T-204 절차: grep 대조 + 2인 리뷰), 리뷰 report `docs/reviews/adversarial/YYYY-MM-DD-ui-v0-2-0.md`.
-- rc 태그·Release 자산·`consumer-smoke` dispatch → map T-412·pinvi T-422(또는 airport T-432) 검증 → 정식 태그.
+- rc 태그·Release 자산·`consumer-smoke` dispatch → map T-412·pinvi T-422b(또는 airport의 별도 0.2 검증 PR) 검증 → 정식 태그.
 - 스모크 앱에 v0.2 전 부품 페이지(overlay·table·detail·header) 포함, webpack·Turbopack 빌드.
 
 ## 범위 밖

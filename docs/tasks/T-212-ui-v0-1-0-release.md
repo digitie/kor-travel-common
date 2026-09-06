@@ -12,7 +12,7 @@
 
 ## 고정 결정
 
-- ADR-005·ADR-010 — [ADR 색인](../adr/README.md). [브리프](../plan/design-brief.md) D-11(태그 `ui-v0.1.0-rc.1`/`ui-v0.1.0`, 자산 `kor-travel-ui-0.1.0.tgz` + `SHA256SUMS`, lock `integrity`, 태그 불변·같은 버전 재발행 금지, tarball에 LICENSE·NOTICE·THIRD_PARTY_NOTICES 동봉), D-16(ui 1차 = map + pinvi admin(L6); L6 미결이면 airport 소형 부품으로 대체), D-18(`-rc.N` → 소비자 PR 검증 → 정식, CHANGELOG 단일 파일 패키지별 H3), D-24(한 PR = 한 산출물, ui 파일 상한 30, revert 1회), D-25(NOT_RUN), D-31(0.x; ui는 tokens 같은 minor를 peer; 소비자 범위 `~0.1`).
+- ADR-005·ADR-010 — [ADR 색인](../adr/README.md). [브리프](../plan/design-brief.md) D-11(태그 `ui-v0.1.0-rc.1`/`ui-v0.1.0`, 자산 `kor-travel-ui-0.1.0.tgz` + `SHA256SUMS`, lock `integrity`, 태그 불변·같은 버전 재발행 금지, tarball에 LICENSE·NOTICE·THIRD_PARTY_NOTICES 동봉), D-16(ui 1차 = map + pinvi admin(L6); L6 미결이면 airport 소형 부품으로 대체), D-18(`-rc.N` → 소비자 PR 검증 → 정식, CHANGELOG 단일 파일 패키지별 H3), D-24(한 PR = 한 산출물, ui 파일 상한 30, revert 1회), D-25(NOT_RUN), D-31(0.x; ui는 호환 tokens 한 minor를 peer(ADR-013); 소비자 범위 `~0.1`).
 - 절차 정본: [release](../runbooks/release.md), [consumer-adoption](../runbooks/consumer-adoption.md), [consumer PR 템플릿](../../templates/consumer-pr.md), [adoption-readiness](../architecture/adoption-readiness.md) gate 표.
 - 소비자 PR 순서·되돌리기: [판정 보고서](../plan/design-panel/judge-migration-feasibility.md) §3.1 — map PR 2(shim 9 파일 `export * from "@kor-travel/ui/<x>"` + `@source` 1줄; gate e2e 30·vitest 42·`verify:frontend-eslint` lint 대상 집합 갱신; revert), pinvi PR 2(15 shim + `@/lib/admin/cn` → `@kor-travel/ui/cn` 재수출; gate e2e 56·vitest 27·webpack 빌드), airport PR 3(백업·collector 패널에 Alert·StatStrip·SectionCard·EmptyState; gate build·vitest). 앱별 근거: [map 인벤토리](../survey/inventory/kor-travel-map.md) §8-10·§9(exact 핀·ESLint 검증 스크립트), [pinvi 인벤토리](../survey/inventory/pinvi.md) §8-1·§9(webpack 강제·두 UI 스택 경계), [airport 인벤토리](../survey/inventory/kor-travel-airport.md) §8·§9("Admin"의 실체 = 백업 패널; Button은 v0.2에서).
 - 릴리스 차단 사실: T-201 base-ui 3건 확인, T-204 ui-contract 확정 — [ui-components](../survey/cross/ui-components.md) §5.4 미확인 목록.
@@ -21,8 +21,8 @@
 
 - `packages/ui/package.json` version `0.1.0-rc.1`, peer `@kor-travel/tokens ~0.1.0`; `CHANGELOG.md` `### @kor-travel/ui 0.1.0` 초안(Added 13종, 계약 링크).
 - 태그 `ui-v0.1.0-rc.1` + GitHub Release(prerelease) 자산 tgz + `SHA256SUMS`; 소비자 설치 URL과 `integrity` 값을 Release 본문에 기록.
-- 소비자 검증 요청: map(T-411)·pinvi(T-422의 v0.1 부분) 또는 airport(T-432) 브랜치에서 rc URL 설치 → 각 앱 CI green → PR 본문 검사 결과·스크린샷·되돌리기 명령(D-24) 확인.
-- `consumer-smoke` 워크플로(T-010, `consumers.pins.json` map admin·pinvi web) rc 태그로 dispatch.
+- 소비자 검증 요청: map(T-411)·pinvi(T-422a) 또는 airport(T-432) 브랜치에서 rc URL 설치 → 각 앱 CI green → PR 본문 검사 결과·스크린샷·되돌리기 명령(D-24) 확인.
+- `consumer-smoke` 워크플로(T-010, `consumers.pins.json`의 UI 승인 조합: map + pinvi admin(L6 완료) 또는 airport) rc 태그로 dispatch.
 - 정식: version `0.1.0`, 태그 `ui-v0.1.0`, 자산·SHA256SUMS 재생성(rc 자산은 유지), CHANGELOG 확정, 소비자 PR은 정식 URL로 lock 갱신 후 머지.
 - `docs/integration-map.md`는 `tools/collect_manifests.py`(T-012)로만 갱신(수기 편집 금지, D-19).
 
@@ -48,7 +48,7 @@ docs/journal.md  docs/resume.md
 - map 검증 PR이 rc 설치본으로 e2e 30·vitest 42·`verify:frontend-eslint` green이고 shim 외 페이지 파일 무변경(diff 파일 수 ≤ 30).
 - pinvi admin(L6 완료 시) 또는 airport 검증 PR이 각 gate green; pinvi는 webpack 빌드·`app-shell-mobile` e2e(사용자 표면 무변경) 포함.
 - `consumer-smoke` dispatch green(워크플로 미완이면 `NOT_RUN(T-010 미완료)`로 기록하고 DONE 전 해소).
-- 정식 태그 후 `npm view`가 아닌 Release URL 설치로 스모크 앱 `next build --webpack`·`next build` 통과, lock `integrity`가 SHA256SUMS와 일치.
+- 정식 태그 후 `npm view`가 아닌 Release URL 설치로 스모크 앱 `next build --webpack`·`next build` 통과, lock `integrity`와 SHA256SUMS를 각각 동일 자산 바이트에 대해 검증(해시 알고리즘이 다르면 문자열 비교 금지).
 - CHANGELOG에 `### @kor-travel/ui 0.1.0`·소비자 필수 2줄(`@import`·`@source`)·계약 링크가 있다.
 
 ## 검증 명령

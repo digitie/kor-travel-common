@@ -1,5 +1,7 @@
 # 소비자
 
+> airport의 WIP·Admin 범위는 조사 이후 변경됐다. [인계 시점 재확인](../plan/handoff-verification.md)과 T-430의 현재 SHA·잔여 gate 대조를 먼저 적용한다. 아래 조사 기준 표를 최신 배포 상태로 해석하지 않는다.
+
 - 정본 지위: 소비자 7(+pinvi 표면 3)의 현재 상태·채택 순서·선행 조건의 정본(초안). §5 채택 버전 표는 T-012부터 [통합 지도](../integration-map.md)(생성물)가 정본이 되고 여기서는 링크만 남긴다. 확정 task: T-008(★이번 PR)·T-011·T-012. 마지막 갱신: 2026-09-06.
 - 근거: [브리프](../plan/design-brief.md) §0·D-16·D-19·D-20·D-23·D-28·D-29, `docs/survey/README.md` §2.1(기준 커밋)·§6.2(정정값), `docs/survey/commonality-matrix.md` §1.5·§3.2·§3.3·§4.1, `docs/survey/cross/licensing.md` §3.6, `docs/survey/cross/version-matrix.md` §1.1·§2.1·§3.2, `docs/survey/cross/ci-deploy.md` §1.1·§1.2, `docs/survey/cross/backend.md` §5.1.
 
@@ -22,8 +24,8 @@
 | 배포 단위 | 1차 | 2차 | 3차 | common 선행 |
 |---|---|---|---|---|
 | tokens | map(T-410)·weather(T-461, `tokens.css` 교체 + shim) | pinvi admin(T-421, L6 완료 조건)·airport(T-431, WIP 병합 후) | geo(T-441)·concierge(T-453)·ktdm(T-472) | T-109 `tokens-v0.1.0` |
-| ui | map(T-411·T-412)·pinvi admin(T-422, L6); L6가 T-2xx 착수까지 미결이면 airport 소형 부품(Alert·StatStrip·SectionCard·EmptyState·Button, T-432) | geo(T-444, React 19 후) | concierge(T-454, L8)·ktdm(T-473, L8; StatStrip·AppErrorPanel·SectionCard 부분) | T-212 `ui-v0.1.0`·T-213 `ui-v0.2.0` |
-| py | map-api(T-480)·weather-api(T-481)·airport(T-482) | geo(T-483) | pinvi(T-484)·concierge(T-485, L8)·ktdm(T-486, L8; breaking 묶음) | T-310 `py-v0.1.0` |
+| ui | map(T-411·T-412)·pinvi admin(T-422, L6); L6가 T-2xx 착수까지 미결이면 airport 소형 부품(Alert·StatStrip·SectionCard·EmptyState, T-432; Button은 0.2 별도 검증) | geo(T-444, React 19 후) | concierge(T-454, L8)·ktdm(T-473, L8; StatStrip·AppErrorPanel·SectionCard 부분) | T-212 `ui-v0.1.0`·T-213 `ui-v0.2.0` |
+| py | map-api(T-480)·weather-api(T-481)·airport(T-482) | geo(T-483) | pinvi(T-484)·concierge(T-485, L8)·ktdm(T-486, L8; breaking 묶음) | T-310 `py-v0.1.0`·T-311 `py-v0.2.0` |
 | 규칙 문서·`tokens.json` 의미 이름 | 전 소비자 즉시(코드 링크 없음; ktc·ktdm은 L8 전 이것까지만) | — | — | Phase 0 |
 | CI 재사용 워크플로·매니페스트 | 7 저장소 T-403(Node 22·SHA 핀·`check_versions` report·매니페스트 커밋) | Phase 3 `openapi-drift`·`typegen-drift` | Phase 4 `node-quality`·`python-quality`(concierge CI 신설 T-451 선행) | T-010·T-011·T-309·T-401 |
 

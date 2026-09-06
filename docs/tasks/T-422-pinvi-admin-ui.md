@@ -3,9 +3,11 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: e2e 56·vitest 27
-- 선행: T-421, T-213
+- 선행: T-422a, T-422b
 
 ## 목표
+
+이 task는 두 하위 task의 공통 계약과 완료 요약만 소유한다. 실제 실행은 [T-422a](T-422a-pinvi-admin-ui-v01.md) → [T-422b](T-422b-pinvi-admin-ui-v02.md) 순이다. 부모를 기다려 하위 task를 시작하지 않는다. 아래 PR A/B는 각각 해당 하위 task 범위이며 부모는 둘의 실제 gate가 닫힌 뒤 완료한다. 도구가 아직 없는 경우의 수동 대조와 예외 승인 조건은 각 하위 task가 우선한다.
 
 pinvi `apps/web/components/admin/ui/*` 28파일(KTM 이식본)을 `@kor-travel/ui` v0.1(소형)·v0.2(Button·overlay·Table·DataTable 등) shim으로 바꾸고 `lib/admin/cn.ts`를 `@kor-travel/ui/cn` 재수출로 돌린다. `AdminTable` 어댑터(`manualSorting=false`, `mobileCard`, 소비 페이지 36곳)는 유지해 페이지 무변경을 지킨다. 44px 컨트롤 예외 2쪽을 `ux-guide` 예외로 등록한다.
 

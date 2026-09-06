@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P2
 - Gate: api.yml·etl.yml
-- 선행: T-310, T-420
+- 선행: T-311, T-420
 
 ## 목표
 
@@ -19,7 +19,7 @@ pinvi `apps/api`·`apps/etl`의 Python 축을 common 정책에 맞춘다: (1) �
 ## 구현 범위
 
 - PR 1(lock 소비): `apps/api/Dockerfile` `uv sync --locked --no-dev`, `api.yml` `setup-uv` + `uv sync --locked --extra dev`(pytest-split 샤딩 유지), wheel provenance 검증 스크립트가 uv 환경을 읽도록 확인; `apps/etl/pyproject.toml` `python-kasi-api @ git+…@<sha>` + `apps/etl/uv.lock` 신설 + `etl.yml`·`Dockerfile` `--locked`.
-- PR 2(export + drift): `apps/api`에 `kor-travel-common[api] @ git+…@py-v0.1.0#subdirectory=…` 추가, `scripts/export_openapi.py`(common CLI, 결정적 직렬화) + `apps/api/openapi.json` 커밋, `api.yml`에 `openapi-drift.yml`(common, `check` 모드) 호출 job 추가(required check 이름 보존), `securitySchemes`(JWT·admin 토큰) additive. OpenAPI↔Zod 일치 테스트는 `packages/schemas` vitest 1건으로 시작(O-14 기본값).
+- PR 2(export + drift): `apps/api`에 `kor-travel-common[api] @ git+…@py-v0.2.0#subdirectory=…` 추가, `scripts/export_openapi.py`(common CLI, 결정적 직렬화) + `apps/api/openapi.json` 커밋, `api.yml`에 `openapi-drift.yml`(common, `check` 모드) 호출 job 추가(required check 이름 보존), `securitySchemes`(JWT·admin 토큰) additive. OpenAPI↔Zod 일치 테스트는 `packages/schemas` vitest 1건으로 시작(O-14 기본값).
 - PR 3(request-id): `app/middleware/request_id.py`를 `kortravelcommon.request_id`(`trust_incoming=True`, 형식 검증)로 교체 — 헤더 이름 `X-Request-ID` 대소문자 무관 유지, 응답 헤더·로그 contextvar 동작 계약 테스트로 무변경 확인; `openapi-exceptions.yaml` pinvi 항목 `review` 갱신.
 
 ## 범위 밖

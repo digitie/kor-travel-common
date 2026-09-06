@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P2
 - Gate: CI
-- 선행: T-451, T-310
+- 선행: T-451, T-311
 - 외부 선행: ktc 루트 GPL-3.0-or-later 정렬(L8, O-2; T-021 결과) — 브리프 선행 열에는 없으나 D-16이 L8 전 코드 소비를 금지하므로 common 모듈 import 단계는 L8 후에만
 
 ## 목표
@@ -19,7 +19,7 @@ concierge 백엔드(`ktc`)가 py 1차 모듈 중 export CLI·request-id·quality
 
 ## 구현 범위
 
-- PR 1(export + drift, L8 후): `pyproject.toml`에 `kor-travel-common[api] @ git+…@py-v0.1.0#subdirectory=…`, `uv.lock` 갱신(T-450 전제); `scripts/export_openapi.py`(common CLI) + `backend/openapi.json` 커밋; `ci.yml`에 `openapi-drift.yml` 호출 job; tags·operationId는 부여하지 않음(S 계층, 후속) — 대신 `openapi-exceptions.yaml` concierge 항목(`/api/v1`·`{detail}`·features export) `review` 갱신.
+- PR 1(export + drift, L8 후): `pyproject.toml`에 `kor-travel-common[api] @ git+…@py-v0.2.0#subdirectory=…`, `uv.lock` 갱신(T-450 전제); `scripts/export_openapi.py`(common CLI) + `backend/openapi.json` 커밋; `ci.yml`에 `openapi-drift.yml` 호출 job; tags·operationId는 부여하지 않음(S 계층, 후속) — 대신 `openapi-exceptions.yaml` concierge 항목(`/api/v1`·`{detail}`·features export) `review` 갱신.
 - PR 2(request-id + health additive): `X-Request-ID` 미들웨어(`kortravelcommon.request_id`, `trust_incoming=True`) 추가 — 응답 헤더·로그 contextvar만 추가, 오류 본문 `{detail}` 불변; `/readyz`·`/version` 추가(`/health` 유지). ruff/mypy는 T-450에서 common 베이스를 이미 `extend`했으므로 baseline 축소만.
 - 문서(concierge `docs/features-export-contract.md` 신규 또는 기존 계약 md 갱신): features export 응답 필드·버전·소비자(map provider 경로·핀 방식)·변경 절차("concierge PR + map provider PR 같은 날, 소비자 스냅샷 갱신 후 머지")를 적고 common `openapi-exceptions.yaml` 항목에서 링크. provider-policy.md C-6(원본 vs 파생 필드 경계) 결정과의 동기화 요구를 기록.
 

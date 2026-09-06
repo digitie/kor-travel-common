@@ -47,6 +47,8 @@ PROVENANCE.md  (map 원천 커밋·경로 13행)
 
 ## 수용 기준
 
+- T-201의 Base UI peer 선언을 유지하고, workspace hoist가 없는 임시 tarball 소비자에서 useRender를 사용하는 모든 소형 subpath의 import·타입·렌더를 검사한다. 호스트 앱의 우연한 설치로 누락을 가리지 않는다.
+
 - 13 subpath가 빌드·`npm pack`·스모크 앱 `next build --webpack`/`next build`까지 통과.
 - vitest 실패 0, skip 0(skip·0 test를 pass로 집계하지 않음), 파일당 최소 3 케이스.
 - axe: 13종 기본 렌더 위반 0.

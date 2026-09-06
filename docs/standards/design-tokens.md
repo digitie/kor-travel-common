@@ -243,7 +243,7 @@ Tailwind 없는 앱(weather 1단계)은 `tokens.css` + `aliases/map-vocabulary.c
 
 ## 14. 변경과 버전
 
-토큰 이름·의미 변경은 0.x minor 파괴 항목이고 패치는 additive만 허용한다. 이름 폐기는 1 minor 동안 alias를 유지한다. 절차는 [ui-contract](ui-contract.md) §9(SemVer 0.x)와 [release runbook](../runbooks/release.md)이 정본이다. `@kor-travel/ui`는 `@kor-travel/tokens` 같은 minor를 peer로 요구한다.
+토큰 이름·의미 변경은 0.x minor 파괴 항목이고 패치는 additive만 허용한다. 이름 폐기는 1 minor 동안 alias를 유지한다. 절차는 [ui-contract](ui-contract.md) §9(SemVer 0.x)와 [release runbook](../runbooks/release.md)이 정본이다. `@kor-travel/ui`는 `@kor-travel/tokens`의 호환 minor 하나를 peer로 요구한다.
 
 ## 15. 열린 결정
 

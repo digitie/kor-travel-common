@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: 단위 테스트(testcontainers)
-- 선행: T-304
+- 선행: T-304, T-310
 
 ## 목표
 

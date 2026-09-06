@@ -4,11 +4,15 @@
 - 우선순위: P0
 - Gate: frontend CI
 - 선행: 없음
-- 외부 선행: WIP PR 개설·CI 확인(O-9, 사용자); airport `main`에 `99b3f98` 병합
+- 외부 선행: 현재 airport 기준 SHA·병합된 PR #18/#22·잔여 정렬 및 live-e2e 결과를 해당 저장소 담당자가 확인한다. 과거 WIP 재병합은 하지 않는다.
 
 ## 목표
 
 airport main(`2bb1111`, Tailwind 없음, 순수 CSS 1,844행)에 WIP 브랜치 `codex/shadcn-ui-foundation`(`99b3f98`, Tailwind v4.3.3 + shadcn `base-nova` 브릿지)을 값 무변경으로 병합하고, 직후 정렬 PR로 common 정책과 어긋난 4가지(`cn` npm 패키지, `shadcn`/`postcss`/`@tailwindcss/postcss`의 dependencies 위치, `engines` 미선언, Button 레시피)를 맞춘다. 이 task 완료가 airport tokens/ui 채택(T-431·T-432)의 시작점이다.
+
+## 인계 시점 정정
+
+[2026-09-06 직접 재확인](../plan/handoff-verification.md)에서 PR #18과 T-035 PR #22가 이미 병합된 사실을 확인했다. 아래 기존 구현 범위는 과거 WIP 대비 점검 목록으로만 사용한다. 실행 전 현재 `origin/main`의 코드·lock·CI와 각 항목을 대조해 완료 항목은 evidence로 대체하고 잔여만 해당 저장소 후속 PR로 처리한다. PR #22의 live-e2e 실패가 있으므로 병합 사실만으로 이 task를 DONE 처리하지 않는다. 기존 소비자 dirty 변경은 보존한다.
 
 ## 고정 결정
 

@@ -42,6 +42,8 @@ docs/standards/openapi.md                      # M5·N8 예시 링크(standards-
 
 ## 수용 기준
 
+- T-302의 공개 facade 계약에 따라 내부 api 구현과 최상위 공개 모듈 재수출을 함께 완성한다. wheel 설치본의 문서 예시 import가 통과하고 core-only import에는 프레임워크 의존이 새지 않는다.
+
 - [ ] `kortravelcommon.time`이 fastapi·pydantic 없이 import되고(`python -c "import kortravelcommon.time"`, `[api]` 미설치 venv), `check_aware_datetime(datetime(2026,9,6))`가 `ValueError`, aware 값은 그대로 반환된다.
 - [ ] `kst_now().tzinfo.key == "Asia/Seoul"`, `utc_now().utcoffset() == timedelta(0)`.
 - [ ] `/health`가 readiness 체크를 한 번도 호출하지 않음을 mock 카운트로 단언한다(N8).

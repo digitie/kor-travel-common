@@ -3,26 +3,26 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: selftest
-- 선행: T-005, T-009
+- 선행: T-005, T-009, T-101, T-103
 
 ## 목표
 
-소비자 저장소가 `uses: digitie/kor-travel-common/.github/workflows/<name>.yml@<tag|sha>`로 호출할 1단계 재사용 워크플로 3종을 만들고, fixture 기반 selftest와 대표 소비자 2곳(map admin·pinvi web) pinned SHA 스모크로 common 쪽에서 먼저 검증한다.
+소비자 저장소가 `uses: digitie/kor-travel-common/.github/workflows/<name>.yml@<tag|sha>`로 호출할 1단계 재사용 워크플로 3종을 만들고, fixture 기반 selftest와 패키지별 승인된 대표 소비자 2곳 pinned SHA 스모크로 common 쪽에서 먼저 검증한다.
 
 ## 고정 결정
 
 - [설계 브리프](../plan/design-brief.md) D-18(1단계 `versions-check`·`contrast-check`·`docs-check`, `consumer-smoke` dispatch+주간·`consumers.pins.json`, 소비자는 태그/SHA 참조·job `name:` 입력 개방·앱 워크플로에 job 추가 방식), D-07(`enforce`는 `versions.json` 소유), D-13(대비 검사 report 기본), O-15(공개 전제 + 체크아웃 fallback 문서).
 - [ci 조사](../survey/cross/ci-deploy.md) §2.1(워크플로 후보·입력·하드닝 기본값), §2.3(cross-repo 호출 제약·required check 이름 결합·`@main` 금지), §4(`workflows-selftest` fixture·`consumer-smoke` pinned SHA), [버전 매트릭스](../survey/cross/version-matrix.md) §7.3(`consumers.pins.json` 형식은 ktdm 핀 레지스트리 계열).
 - [실패 패턴](../runbooks/agent-failure-patterns.md) "재사용 워크플로 호출 실패" 행.
-- 암묵 의존(사실): `contrast-check.yml`은 `tools/kt_contrast.py`(T-103), `consumer-smoke`의 tarball 설치는 `packages/tokens`(T-101)를 전제한다. 두 산출물이 없는 동안은 아래 구현 범위 3·5의 stub 단계로 둔다.
+- 암묵 의존(사실): `contrast-check.yml`은 `tools/kt_contrast.py`(T-103), `consumer-smoke`의 tarball 설치는 `packages/tokens`(T-101)를 전제한다. T-101·T-103 완료 후 착수한다. [ADR-013](../adr/013-package-release-execution-contract.md)에 따라 미구현·설치 생략을 green으로 집계하지 않는다.
 
 ## 구현 범위
 
 1. `.github/workflows/versions-check.yml`(`workflow_call`): inputs `name`, `repo`, `lockfiles`(JSON 목록), `common-ref`; common 체크아웃(태그/SHA) → `check_versions.py` report → step summary.
 2. `.github/workflows/docs-check.yml`: inputs `link-check`, `redaction-patterns-file`, `redaction-scope`, `task-ledger`; common 도구를 호출 저장소에서 실행.
-3. `.github/workflows/contrast-check.yml`: inputs `override-css`, `baseline`, `dark`; T-103 전에는 `--help` 수준 stub + selftest에서 `NOT_RUN(T-103 대기)` 표기, T-103 후 실제 검사 활성화.
+3. `.github/workflows/contrast-check.yml`: inputs `override-css`, `baseline`, `dark`; T-103의 실제 검사기를 호출하며 정상·대비 미달 fixture를 모두 실행한다.
 4. `tests/fixtures/node-app`·`tests/fixtures/python-app`(최소 `package.json`+lock v3, `pyproject.toml`+`uv.lock`) + `.github/workflows/workflows-selftest.yml`(PR이 `.github/**`·`tools/**`를 바꿀 때 세 워크플로를 `workflow_call`로 호출).
-5. `consumers.pins.json`(`"schema": "kor-travel-common.consumer-pins.v1"`, `{role, url, revision(sha), path}`; map admin·pinvi web) + `.github/workflows/consumer-smoke.yml`(`workflow_dispatch` + 주간 cron; pinned SHA 체크아웃 → `npm ci` → 조건부 tarball 설치 → `type-check` + `next build` webpack·Turbopack; required check 아님).
+5. `consumers.pins.json`(`"schema": "kor-travel-common.consumer-pins.v1"`, `{role, url, revision(sha), path, package, approval}`; tokens는 map·weather, UI는 map·pinvi admin(L6 완료) 또는 airport) + `.github/workflows/consumer-smoke.yml`(`workflow_dispatch` + 주간 cron; pinned SHA 체크아웃 → `npm ci` → 후보 tarball 필수 설치 → `type-check` + `next build` webpack·Turbopack; required check 아님).
 6. `docs/standards/ci-deploy.md`의 호출 예시·fallback(비공개 시 체크아웃 방식)은 standards-be 문서에 위임하고 여기서는 selftest 결과만 남긴다.
 
 ## 범위 밖
@@ -38,7 +38,7 @@
 - 세 재사용 워크플로가 `on: workflow_call`이고 `name`·`common-ref` 입력을 받으며 T-009 하드닝 기본값(permissions·timeout·ubuntu-24.04·SHA 핀)을 갖는다.
 - `workflows-selftest`가 fixture 2종에서 green이고, `versions-check`는 fixture의 `BELOW_FLOOR`를 report(exit 0)로 표시한다.
 - `consumers.pins.json`의 `revision`이 40자 SHA이고 `tests/test_consumer_pins.py`가 스키마·SHA 형식을 고정한다.
-- `consumer-smoke`가 dispatch로 1회 green(tarball 미존재 시 "설치 단계 건너뜀"을 요약에 표시하고 `NOT_RUN`으로 기록).
+- `consumer-smoke`가 승인된 소비자 2곳에서 실제 tarball 설치 후 dispatch 1회 green. T-109 전에는 T-101 후보를 `npm pack`하여 commit·sha256을 고정한 자산을 입력한다. 태그 발행을 선행으로 요구하지 않는다. 자산·도구가 없으면 NOT_RUN과 실패로 종료하고 DONE을 막는다. L6 미완료 pinvi는 설치 대상에서 제외한다.
 - 어떤 예시·문서에도 `@main` 참조가 없다.
 
 ## 검증 명령
@@ -54,7 +54,7 @@ Git Bash에서 동일. selftest·consumer-smoke 결과는 Actions 실행 링크�
 
 ## evidence
 
-- selftest·consumer-smoke 실행 링크, fixture 판정 표, stub 단계 표기(`NOT_RUN(T-103 대기)`·`NOT_RUN(T-101 대기)`)를 이 절과 `docs/journal.md`에 남긴다.
+- selftest·consumer-smoke 실행 링크, fixture 판정 표, 실제 설치 자산의 digest·선택한 소비자 승인 evidence·미실행 실패 표기를 이 절과 `docs/journal.md`에 남긴다.
 
 ## rollback 또는 release 차단 조건
 

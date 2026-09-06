@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: 단위 테스트
-- 선행: T-304
+- 선행: T-304, T-310
 
 ## 목표
 
@@ -41,6 +41,8 @@ docs/standards/backend-stack.md                 # 메트릭 절 링크(standards
 ```
 
 ## 수용 기준
+
+- T-302의 공개 facade 계약에 따라 내부 api 구현과 최상위 공개 모듈 재수출을 함께 완성한다. wheel 설치본의 문서 예시 import가 통과하고 core-only import에는 프레임워크 의존이 새지 않는다.
 
 - [ ] 유효한 UUID v4/v7·ULID 수신 값은 그대로 echo되고, 129자·비ASCII·제어문자 값은 폐기 후 서버 발급값으로 대체되며, `trust_incoming=False`면 항상 서버 발급이다(각각 테스트 1개 이상).
 - [ ] 모든 응답(에러 포함)에 `X-Request-ID`가 있고 `current_request_id()`가 핸들러·백그라운드 로그 필터에서 같은 값을 돌려준다.

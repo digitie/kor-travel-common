@@ -22,8 +22,8 @@ GPL-3.0-or-later 저장소가 코드를 받기 전에 권리·출처 고지 골�
 | 산출물 | 내용 |
 |---|---|
 | `NOTICE` | `Copyright (C) 2026 Youn-sok Choi (digitie)`, `GPL-3.0-or-later`, 저장소 URL·연락처, §7 추가 허가 없음 명시(D-17, O-2 기본값) |
-| `THIRD_PARTY_NOTICES.md` | shadcn/ui MIT · `@base-ui/react` MIT · radix MIT · class-variance-authority Apache-2.0(NOTICE 원문 유지) · lucide ISC · tailwind-merge/clsx/tw-animate-css MIT · maplibre-gl BSD-3 · pretendard OFL-1.1 · TanStack MIT · zod MIT — 각 항목에 버전·원문 URL·`LICENSES/` 사본 링크 |
-| `LICENSES/` | `GPL-3.0-or-later.txt`, `MIT.txt`, `Apache-2.0.txt`, `ISC.txt`, `BSD-3-Clause.txt`, `OFL-1.1.txt` 원문(잔여) |
+| `THIRD_PARTY_NOTICES.md` | shadcn/ui MIT · `@base-ui/react` MIT · radix MIT · class-variance-authority Apache-2.0(고정 버전에 NOTICE가 실제 있으면 원문 유지) · lucide ISC · tailwind-merge/clsx/tw-animate-css MIT · maplibre-gl BSD-3 · pretendard OFL-1.1 · TanStack MIT · zod MIT — 각 항목에 버전·원문 URL·`LICENSES/` 사본 링크 |
+| `LICENSES/` | `GPL-3.0-or-later.txt`, `MIT.txt`, `Apache-2.0.txt`, `ISC.txt`, `BSD-3-Clause.txt`, `OFL-1.1.txt` 원문 및 각 의존성의 저작권자 고지가 포함된 LICENSE 사본(잔여). 일반 라이선스 본문만으로 개별 고지를 대체하지 않음 |
 | `PROVENANCE.md` | 열: 파일군 · 원천 저장소 · 커밋 · 경로 · 라이선스 · 수정 요약. 초기 행은 조사 기준 커밋(`docs/survey/README.md` §2.1)으로 기록하며 이관 전에는 열 정의 + "아직 옮긴 파일 없음" 상태 허용 |
 | `CONTRIBUTING.md` | AI 보조 생성물은 권리자가 GPL로 배포(B8), 헤더 규약 링크, 2인 리뷰·`git add -A` 금지 링크 |
 | `tools/check_spdx.py` + `tests/test_check_spdx.py` | 검사 대상 `packages/**`(`.ts`·`.tsx`·`.css`·`.py`·`.mjs`), `tools/*.py`, `templates/**` 코드 조각. 첫 주석 블록에 `SPDX-License-Identifier`·`SPDX-FileCopyrightText` 없으면 exit 1; 이식 파일은 `Origin:` 필수, 수정 시 `Modified:` 필수; `Hallmark ·` 스탬프가 있으면 fail(common 파일에는 없음); geo 유래는 `GPL-3.0-only` 병기 허용(O-20); 생성물(`dist/`·`*.gen.*`)은 제외 목록. stdlib만, Windows 동작 |
@@ -42,8 +42,8 @@ GPL-3.0-or-later 저장소가 코드를 받기 전에 권리·출처 고지 골�
 ## 수용 기준
 
 - `NOTICE`에 저작권자·라이선스 식별자·연락처 3항목이 있고 §7 추가 허가 문구가 없다.
-- `THIRD_PARTY_NOTICES.md`의 11개 항목 각각에 버전·URL·`LICENSES/` 사본 링크가 있고, cva 항목은 Apache-2.0 NOTICE 원문을 포함한다.
-- `LICENSES/`에 6개 원문이 있고 `THIRD_PARTY_NOTICES.md`·`NOTICE`의 링크가 모두 해석된다.
+- `THIRD_PARTY_NOTICES.md`의 모든 실제 항목에 고정 버전·원문 URL·`LICENSES/`의 해당 저작권 고지 사본 링크가 있다. cva NOTICE는 해당 버전 upstream의 존재 여부를 확인해 있으면 보존하고 없으면 부재 근거를 남긴다. 문서의 과거 항목 수를 완료 기준으로 쓰지 않는다.
+- `LICENSES/`에 라이선스 6종 본문과 의존성별 저작권 고지 사본이 있고 `THIRD_PARTY_NOTICES.md`·`NOTICE`의 링크가 모두 해석된다.
 - `PROVENANCE.md`에 pinvi 유래 행이 없고(B1), `maplibre-vworld-*`·`python-*-api` 행이 없다(B2).
 - `python3 -B -X utf8 tools/check_spdx.py`가 헤더 없는 fixture에서 exit 1, 규약 준수 fixture에서 exit 0이며 테스트가 이를 고정한다(잔여).
 - 저장소 어디에도 Hallmark `SKILL.md` 문장 인용이 없다(B3).

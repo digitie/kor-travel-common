@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P2
 - Gate: openapi drift·gen:types
-- 선행: T-308, T-440
+- 선행: T-311, T-440
 
 ## 목표
 
@@ -18,7 +18,7 @@ geo 백엔드(`kortravelgeo`)가 py 2차 모듈까지 채택한다: C4 health(`/
 
 ## 구현 범위
 
-- PR 1(1차 모듈 + health): `pyproject.toml`에 `kor-travel-common[api] @ git+…@py-v0.2.x`(2차 모듈 포함 태그), `uv.lock` 갱신(T-440 전제); export CLI 래퍼; health 팩토리 + `alias=["/v1/healthz","/v1/readyz"]`; ruff `extend` + geo 추가 규칙 유지·per-file-ignores 보존; import-linter 계약에 `kortravelcommon` core 허용 확인.
+- PR 1(1차 모듈 + health): `pyproject.toml`에 `kor-travel-common[api] @ git+…@py-v0.2.0`(2차 모듈 포함 태그), `uv.lock` 갱신(T-440 전제); export CLI 래퍼; health 팩토리 + `alias=["/v1/healthz","/v1/readyz"]`; ruff `extend` + geo 추가 규칙 유지·per-file-ignores 보존; import-linter 계약에 `kortravelcommon` core 허용 확인.
 - PR 2(securitySchemes + typegen): admin 라우터의 `X-KTG-Actor`·`X-KTG-Admin-Proxy-Secret`·API key를 `securitySchemes`로 선언(additive), `openapi.json` 재생성, `npm run gen:types` 재생성물 커밋, `check-sync.sh` green.
 - PR 3(problem+json opt-in + request-id): `install_problem_handlers(app, exclude_paths=["/v1/…", "/v2/…"])`로 admin 경로만 RFC7807; request-id 미들웨어(`trust_incoming=True` 기본, 형식 검증 실패 시 서버 발급), v2 응답 `query_id`는 유지하고 `meta`/헤더에 `request_id` 병행; `openapi-exceptions.yaml` geo 항목(v1·v2·400) `review` 갱신.
 

@@ -2,7 +2,7 @@
 
 이 원장은 열린 task의 요약·선행 관계를 관리한다. 수용 기준·외부 선행·검증·evidence는 상세 파일, 현재 다음 한 작업은 [resume](resume.md), 실행 선택과 단계별 출구는 [통합 계획](plan/integration-plan.md)이 정본이다. 작성 문법은 [task 규칙](tasks-rule.md)을 따른다.
 
-총 93개의 상세 작업이 있다. 기존 병렬 초안의 IN_PROGRESS는 완료를 뜻하지 않는다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
+총 96개의 상세 작업이 있다. 기존 병렬 초안의 IN_PROGRESS는 완료를 뜻하지 않는다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
 
 ## 실행 대기열
 
@@ -27,15 +27,15 @@
 | [T-007](tasks/T-007-runbooks-conventions-templates.md) | IN_PROGRESS | P0 | runbook 본문(agent-workflow·consumer-adoption·release)·`docs/standards/agent-conventions.md`·templates/ | 없음 |
 | [T-008](tasks/T-008-architecture-docs.md) | IN_PROGRESS | P0 | docs/architecture/*(README·packages·style-delivery·consumers·adoption-readiness)·`docs/integration-map.md` 초기판 | 없음 |
 | [T-009](tasks/T-009-ci-hardening.md) | BLOCKED | P1 | common CI 하드닝(permissions·concurrency·timeout·ubuntu-24.04·액션 SHA 핀)·`tools` windows 매트릭스·`secret-scan`·`check-versions(report)` job·branch protection 문서·redaction guard | T-002 |
-| [T-010](tasks/T-010-reusable-workflows-stage1.md) | BLOCKED | P1 | 재사용 워크플로 1단계(`versions-check`·`contrast-check`·`docs-check`) + `workflows-selftest` fixture + `consumers.pins.json` + consumer-smoke | T-005, T-009 |
+| [T-010](tasks/T-010-reusable-workflows-stage1.md) | BLOCKED | P1 | 재사용 워크플로 1단계(`versions-check`·`contrast-check`·`docs-check`) + `workflows-selftest` fixture + `consumers.pins.json` + consumer-smoke | T-005, T-009, T-101, T-103 |
 | [T-011](tasks/T-011-consumer-manifest-schema.md) | BLOCKED | P1 | 소비자 매니페스트 스키마 `consumer-manifest.v1` + `tools/validate_manifest.py` + 7 소비자 초기 매니페스트 초안 | T-005 |
-| [T-012](tasks/T-012-collect-manifests.md) | BLOCKED | P2 | tools/collect_manifests.py → `docs/integration-map.md` 생성 + `docs/architecture/adoption-readiness.md` gate 표 갱신 | T-011 |
+| [T-012](tasks/T-012-collect-manifests.md) | BLOCKED | P2 | tools/collect_manifests.py → `docs/integration-map.md` 생성 + `docs/architecture/adoption-readiness.md` gate 표 갱신 | T-010, T-011 |
 | [T-013](tasks/T-013-plan-handoff-closure.md) | IN_PROGRESS | P0 | PR #1·로컬 초안 통합과 순차 실행 계획·인계 마무리 | 없음 |
 | [T-014](tasks/T-014-ports-130xx.md) | BLOCKED | P3 | common 포트 `130xx` 로컬 점유 확인·확정 + ktdm `docs/ports.md` sibling(airport 140xx·weather 141xx·common 130xx) 등록 요청 + `-latest` 접미 질의 | 없음 |
 | [T-020](tasks/T-020-pinvi-license-l6.md) | BLOCKED | P0 | pinvi 라이선스 결정(L6) 반영: 결정 기록·pinvi PR 요청 문서·common 소비 gate 해제 조건 | 없음 |
 | [T-021](tasks/T-021-ktc-ktdm-license-l8.md) | BLOCKED | P1 | ktc·ktdm 라이선스 정렬(L8) 결정 반영: 결정 기록·각 저장소 PR 요청 문서 | 없음 |
 
-## 토큰·스타일·UX
+## 디자인 토큰
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
@@ -47,16 +47,16 @@
 | [T-106](tasks/T-106-responsive-web-standard.md) | IN_PROGRESS | P1 | docs/standards/responsive-web.md 확정 | 없음 |
 | [T-107](tasks/T-107-frontend-stack-templates.md) | IN_PROGRESS | P1 | docs/standards/frontend-stack.md 확정 + `templates/eslint/*.mjs`·tsconfig base·postcss·components.json 조각 | 없음 |
 | [T-108](tasks/T-108-playwright-baseline.md) | READY | P1 | templates/playwright.baseline.ts(6폭 스크린샷) + 기준선 캡처 절차(consumer-adoption 절) | 없음 |
-| [T-109](tasks/T-109-tokens-v0-1-0-release.md) | BLOCKED | P1 | tokens `v0.1.0-rc.1` → map·weather 검증 → `tokens-v0.1.0` 정식 + SHA256SUMS | T-101, T-102, T-103, T-104 |
+| [T-109](tasks/T-109-tokens-v0-1-0-release.md) | BLOCKED | P1 | tokens `v0.1.0-rc.1` → map·weather 검증 → `tokens-v0.1.0` 정식 + SHA256SUMS | T-101, T-102, T-103, T-104, T-010, T-108 |
 
 ## React UI
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
-| [T-201](tasks/T-201-ui-package-skeleton.md) | BLOCKED | P0 | packages/ui 골격(ESM·d.ts·subpath exports·`'use client'`/`'use no memo'` 보존·peer react ^19·인라인 아이콘·`cn` extendTailwindMerge·noUncheckedIndexedAccess) + base-ui 사실 확인 3건 기록 + pack 스모크(webpack/Turbopack) | T-101 |
+| [T-201](tasks/T-201-ui-package-skeleton.md) | BLOCKED | P0 | packages/ui 골격(ESM·d.ts·subpath exports·`'use client'`/`'use no memo'` 보존·peer react ^19·인라인 아이콘·`cn` extendTailwindMerge·noUncheckedIndexedAccess) + base-ui 사실 확인 3건 기록 + pack 스모크(webpack/Turbopack) | T-109 |
 | [T-203](tasks/T-203-ui-small-components.md) | BLOCKED | P0 | ui 1차 소형 13종(Badge·Skeleton·Separator·Card·Alert·Input·Textarea·NativeSelect·Field·EmptyState·SectionCard·FilterBar·StatStrip) + 단위 테스트(vitest+RTL+jsdom) | T-201 |
 | [T-204](tasks/T-204-ui-contract-standard.md) | BLOCKED | P0 | docs/standards/ui-contract.md 확정(data-slot·testid·heading·sr-only·geo 셀렉터 대응·SemVer 0.x) | T-203 |
-| [T-205](tasks/T-205-ui-button-error-panel.md) | BLOCKED | P1 | Button(D-09 계약)·AppErrorPanel·error-recovery | T-203 |
+| [T-205](tasks/T-205-ui-button-error-panel.md) | BLOCKED | P1 | Button(D-09 계약)·AppErrorPanel·error-recovery | T-203, T-212 |
 | [T-206](tasks/T-206-ui-overlay-table-checkbox.md) | BLOCKED | P1 | overlay 세트(Dialog(hasUnsavedInput·viewportProps)·AlertDialog·Popover·Tooltip·Tabs·Breadcrumb·HelpTip) + Table primitive + native Checkbox | T-205 |
 | [T-208](tasks/T-208-ui-data-table-pager.md) | BLOCKED | P1 | DataTable(manualSorting 기본 true·removal·testid·sr-only·4상태) + OffsetPager/CursorPager | T-206 |
 | [T-209](tasks/T-209-ui-copy-json-detail-status.md) | BLOCKED | P2 | CopyButton·JsonViewer·DetailList(`onNotify` 주입)·StatusBadge(사전 주입형) | T-206 |
@@ -65,7 +65,7 @@
 | [T-212](tasks/T-212-ui-v0-1-0-release.md) | BLOCKED | P1 | ui `v0.1.0` rc → map + pinvi admin(L6) 또는 airport 검증 → 정식 | T-203, T-204 |
 | [T-213](tasks/T-213-ui-v0-2-0-release.md) | BLOCKED | P1 | ui `v0.2.0`(Button·overlay·Table·DataTable·Pager·Copy/Json/Detail·Header/Form) rc → 정식 | T-208, T-209, T-210 |
 
-## Python·OpenAPI
+## Python 공통
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
@@ -74,11 +74,12 @@
 | [T-303](tasks/T-303-openapi-export-cli.md) | BLOCKED | P0 | C12 openapi export CLI(`--check`·profile 콜백·결정적 직렬화) + typegen 규약 템플릿 | T-302 |
 | [T-304](tasks/T-304-health-and-time.md) | BLOCKED | P1 | C4 health(`/health`·`/readyz`·`/version`·alias 옵션) + C13 time | T-302 |
 | [T-305](tasks/T-305-quality-baseline.md) | BLOCKED | P1 | C20 quality 산출물(ruff extend·mypy·import-linter·pre-commit·CI 템플릿; format 미포함) + common 자기 적용 | T-302 |
-| [T-306](tasks/T-306-settings-db-api-key.md) | BLOCKED | P1 | C1 settings 베이스 + C9 db 엔진 팩토리 + C7 public_api_key | T-304 |
-| [T-307](tasks/T-307-request-id-and-metrics.md) | BLOCKED | P1 | C2 request_id(`trust_incoming`·형식 검증) + C3 metrics(표준 라벨·센티널·multiproc; 접두 인자) | T-304 |
+| [T-306](tasks/T-306-settings-db-api-key.md) | BLOCKED | P1 | C1 settings 베이스 + C9 db 엔진 팩토리 + C7 public_api_key | T-304, T-310 |
+| [T-307](tasks/T-307-request-id-and-metrics.md) | BLOCKED | P1 | C2 request_id(`trust_incoming`·형식 검증) + C3 metrics(표준 라벨·센티널·multiproc; 접두 인자) | T-304, T-310 |
 | [T-308](tasks/T-308-api-third-tier-modules.md) | BLOCKED | P2 | C5 errors/problem(`exclude_paths`)·C16 security_headers·C17 cors·C8 trusted_proxy·C11 testing·C10 alembic 템플릿·C15 http·C18 dagster | T-306, T-307 |
 | [T-309](tasks/T-309-openapi-typegen-drift-workflows.md) | BLOCKED | P1 | 재사용 워크플로 2단계(`openapi-drift.yml`·`typegen-drift.yml`) + selftest | T-303, T-010 |
-| [T-310](tasks/T-310-py-v0-1-0-release.md) | BLOCKED | P1 | py-v0.1.0(1차) → weather-api·map-api·airport 검증 → 정식(wheel 자산) | T-303, T-304, T-305 |
+| [T-310](tasks/T-310-py-v0-1-0-release.md) | BLOCKED | P1 | py-v0.1.0(1차) → weather-api·map-api·airport 검증 → 정식(wheel 자산) | T-303, T-304, T-305, T-309 |
+| [T-311](tasks/T-311-py-v0-2-0-release.md) | BLOCKED | P1 | Python 0.2 모듈 rc 검증·wheel 발행 | T-308, T-309, T-310 |
 
 ## 소비자 이관
 
@@ -93,10 +94,12 @@
 | [T-413](tasks/T-413-map-framework-bump.md) | BLOCKED | P2 | map: Next 16.3·base-ui 1.8·Playwright 1.63 상향(`verify-next-sharp.mjs`·`test_frontend_dependency_security.py`·이미지 동반, 별도 PR) | T-005 |
 | [T-420](tasks/T-420-pinvi-license-l6.md) | BLOCKED | P0 | pinvi: L6 결정 반영 PR(루트 LICENSE·README/AGENTS 정합·`apps/api` pyproject·maplibre 문서 정정) | T-020 |
 | [T-421](tasks/T-421-pinvi-admin-tokens.md) | BLOCKED | P1 | pinvi: admin `--color-admin-*`→`--kt-*` 오버라이드 + `base.scoped.css` + 매니페스트(사용자 표면 무변경 e2e) | T-420, T-109 |
-| [T-422](tasks/T-422-pinvi-admin-ui.md) | BLOCKED | P1 | pinvi: ui v0.1/v0.2 채택(`AdminTable` 어댑터 유지·`cn` 재수출·44px 예외 등록·webpack 빌드) | T-421, T-213 |
+| [T-422](tasks/T-422-pinvi-admin-ui.md) | BLOCKED | P1 | pinvi: ui v0.1/v0.2 채택(`AdminTable` 어댑터 유지·`cn` 재수출·44px 예외 등록·webpack 빌드) | T-422a, T-422b |
+| [T-422a](tasks/T-422a-pinvi-admin-ui-v01.md) | BLOCKED | P1 | pinvi admin UI 0.1 소형 부품 채택 | T-212, T-421 |
+| [T-422b](tasks/T-422b-pinvi-admin-ui-v02.md) | BLOCKED | P1 | pinvi admin UI 0.2 부품 채택 | T-213, T-422a |
 | [T-430](tasks/T-430-airport-wip-merge.md) | BLOCKED | P0 | airport: WIP `codex/shadcn-ui-foundation` 병합(값 유지·`cn`→clsx+twMerge·devDeps 이동·Button D-09 레시피) | 없음 |
 | [T-431](tasks/T-431-airport-tokens-adoption.md) | BLOCKED | P1 | airport: tokens 채택(alias 재매핑 유지·`dark-media.css`·contrast baseline) + 매니페스트 | T-430, T-109 |
-| [T-432](tasks/T-432-airport-small-ui.md) | BLOCKED | P2 | airport: 소형 ui 채택(백업·collector 패널: Alert·StatStrip·SectionCard·EmptyState·Button) | T-431, T-212 |
+| [T-432](tasks/T-432-airport-small-ui.md) | BLOCKED | P2 | airport: 소형 ui 채택(백업·collector 패널: Alert·StatStrip·SectionCard·EmptyState) | T-431, T-212 |
 | [T-433](tasks/T-433-airport-ts7-exception-hygiene.md) | BLOCKED | P2 | airport: TS 7 예외 등록·ESLint 도입 판정·절대 링크 상대화·prod placeholder 치환·`engines` 선언 | T-005 |
 | [T-440](tasks/T-440-geo-node22-uvlock.md) | BLOCKED | P1 | geo: Node 22 CI + `uv.lock` 도입 + pre-commit rev 정렬 | T-005 |
 | [T-441](tasks/T-441-geo-theme-unify-tokens.md) | BLOCKED | P1 | geo: `@config` 실효값 빌드 검증 → `@theme` 단일화·`tailwind.config.ts` 삭제 → tokens 채택(`--ui-*` 별칭 유지) + contrast baseline + 매니페스트 | T-109 |
@@ -118,12 +121,12 @@
 | [T-480](tasks/T-480-map-api-py-first.md) | BLOCKED | P1 | map-api: py 1차 채택(export CLI·health·time·quality) + `type` URI·429 코드 정렬 + pinvi/ktdm pin 갱신 PR 동반 | T-310 |
 | [T-481](tasks/T-481-weather-api-py-first.md) | BLOCKED | P1 | weather-api: py 1차 채택 + `--check` 전환 + airkorea 스냅샷 정본 결정(L15) + Python 3.11/3.12/3.13 정합 | T-310 |
 | [T-482](tasks/T-482-airport-py-first.md) | BLOCKED | P1 | airport: py 1차 채택 + `code`/`request_id` additive + 스펙 422 정합 + `--check` CI + Docker `uv sync --locked` 정리 | T-310 |
-| [T-483](tasks/T-483-geo-py-second.md) | BLOCKED | P2 | geo: py 2차(health alias 병행·securitySchemes+typegen 재생성·admin problem+json opt-in·request-id) | T-308, T-440 |
-| [T-484](tasks/T-484-pinvi-py-lock-export-drift.md) | BLOCKED | P2 | pinvi: `uv.lock` CI·Docker 소비 + etl `@main` 제거 + export 파이프라인·drift CI + request-id(additive) | T-310, T-420 |
-| [T-485](tasks/T-485-concierge-py-first.md) | BLOCKED | P2 | concierge: py 1차(export·request-id·quality) + features export 계약 문서화(map provider 동시 수정 계획) | T-451, T-310 |
-| [T-486](tasks/T-486-ktdm-py-second.md) | BLOCKED | P3 | ktdm: py 2차(request-id `trust_incoming=False`·quality baseline) | T-471, T-307 |
+| [T-483](tasks/T-483-geo-py-second.md) | BLOCKED | P2 | geo: py 2차(health alias 병행·securitySchemes+typegen 재생성·admin problem+json opt-in·request-id) | T-311, T-440 |
+| [T-484](tasks/T-484-pinvi-py-lock-export-drift.md) | BLOCKED | P2 | pinvi: `uv.lock` CI·Docker 소비 + etl `@main` 제거 + export 파이프라인·drift CI + request-id(additive) | T-311, T-420 |
+| [T-485](tasks/T-485-concierge-py-first.md) | BLOCKED | P2 | concierge: py 1차(export·request-id·quality) + features export 계약 문서화(map provider 동시 수정 계획) | T-451, T-311 |
+| [T-486](tasks/T-486-ktdm-py-second.md) | BLOCKED | P3 | ktdm: py 2차(request-id `trust_incoming=False`·quality baseline) | T-471, T-311 |
 
-## 릴리스·운영
+## 운영·재평가
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|

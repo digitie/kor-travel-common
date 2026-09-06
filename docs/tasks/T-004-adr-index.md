@@ -12,7 +12,7 @@
 ## 고정 결정
 
 - [설계 브리프](../plan/design-brief.md) §4 ADR 목록(번호·제목·상태·핵심 결정)과 D-02(`decisions.md` 미보유, `adr/README.md` 단일 색인, 다음 후보 번호 명시).
-- 형식은 [canview 구조 체크리스트](../survey/cross/canview-structure-checklist.md) §3.2 R2.1~R2.10: 파일당 1개 `NNN-<slug>.md`, H1 `# ADR-NNN: 제목`, 머리 불릿 `상태`·`날짜` 필수, 상태 어휘 `accepted`/`proposed`/`superseded by ADR-XXX`, 본문 컨텍스트 → 결정 → 결과.
+- 형식은 [canview 구조 체크리스트](../survey/cross/canview-structure-checklist.md) §3.2 R2.1~R2.10: 파일당 1개 `NNN-<slug>.md`, H1 `# ADR-NNN: 제목`, 머리 불릿 `상태`·`날짜` 필수, 상태 어휘 `accepted`/`proposed`/`superseded by ADR-XXX`/`partially superseded by ADR-XXX`, 본문 컨텍스트 → 결정 → 결과.
 - [문서 유지보수 runbook](../runbooks/documentation-maintenance.md) §3(뒤집을 때 새 ADR·옛 ADR 유지·번호 갱신)과 [문서 규약 비교](../survey/cross/docs-conventions.md) §2 C8(001부터, 타 저장소 번호 미러 금지).
 - 열린 결정은 본문에 "열림(사용자 확인 필요)" + 기본값으로 적는다(ADR-005 O-5, ADR-006 O-4, ADR-007 O-3, ADR-012 O-8 `proposed`).
 
@@ -33,11 +33,11 @@
 | 011 Python 공통 패키지 구조 | D-15·D-22 | accepted |
 | 012 Tailwind v4 전환 정책 | D-08·D-29 | proposed(O-8 대기) |
 
-`docs/adr/README.md`: 규칙(대상·형식·뒤집기·동기화·번호) + 표 `ADR | 제목 | 상태` + 상단 "다음 후보 번호는 ADR-013".
+`docs/adr/README.md`: 규칙(대상·형식·뒤집기·동기화·번호) + 표 `ADR | 제목 | 상태` + 상단 "다음 후보 번호는 ADR-014".
 
 ## 범위 밖
 
-- 결정 본문의 재설계. ADR은 브리프의 "채택 사유"를 근거로 옮겨 적되 조사 문서 절을 인용한다.
+- 초기 결정 본문의 재설계(리뷰 정정 ADR-013은 T-013 범위). ADR은 브리프의 "채택 사유"를 근거로 옮겨 적되 조사 문서 절을 인용한다.
 - `docs/decisions.md`(두지 않음), architecture 문서(T-008), standards 문서(T-104~T-107·T-301·T-302).
 
 ## 예상 변경 파일
@@ -46,10 +46,10 @@
 
 ## 수용 기준
 
-- `docs/adr/` 파일 수 13(README + 12), 파일명이 `NNN-<slug>.md`, 각 파일에 H1 `# ADR-NNN: …`가 정확히 1개.
+- 초기 ADR 12편과 리뷰 정정 ADR-013을 포함한 `docs/adr/` 파일 수 14(README + 13), 파일명이 `NNN-<slug>.md`, 각 파일에 H1 `# ADR-NNN: …`가 정확히 1개.
 - 각 ADR 머리 불릿에 `상태`·`날짜`(2026-09-06)가 있고 `근거 문서` 불릿이 브리프 D-ID와 조사 문서 절(`dt`·`vm`·`lic` 등 약칭 + §)을 가리킨다.
 - 열림 항목은 "열림(사용자 확인 필요)"과 기본값이 같은 문단에 있으며, pinvi mobile Tailwind 3 예외는 "사용자 승인 대기"로만 적는다(브리프 §7).
-- `docs/adr/README.md` 표의 12행 상태가 각 파일 머리 `상태`와 글자 단위로 같고 "다음 후보 번호는 ADR-013"이 있다.
+- `docs/adr/README.md` 표의 13행 상태가 각 파일 머리 `상태`와 글자 단위로 같고 "다음 후보 번호는 ADR-014"이 있다.
 - `docs/decisions.md`가 없다. 링크는 저장소 상대 경로만.
 - 리뷰어 2인(문서 규약 · 결정 정합) 독립 리뷰 verdict `PASS`.
 
@@ -59,7 +59,7 @@
 python3 -B -X utf8 tools/validate_document_links.py
 ls docs/adr | wc -l
 rg -n "^# ADR-" docs/adr | wc -l
-rg -n "다음 후보 번호는 ADR-013" docs/adr/README.md
+rg -n "다음 후보 번호는 ADR-014" docs/adr/README.md
 rg -n "^- 상태:" docs/adr/0*.md
 test ! -e docs/decisions.md && echo "no decisions.md"
 ```

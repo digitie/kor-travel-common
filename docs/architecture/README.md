@@ -55,7 +55,7 @@ kor-travel-common은 kor-travel 제품군의 UI·백엔드 공통 코드와 공�
     소비 저장소(앱)
       │
       ├─ 프론트엔드(Next.js 16, Tailwind v4)
-      │     ├──► @kor-travel/ui ──► @kor-travel/tokens      (ui는 tokens 같은 minor를 peer)
+      │     ├──► @kor-travel/ui ──► @kor-travel/tokens      (ui는 tokens의 호환 minor 하나를 peer)
       │     └──► @kor-travel/tokens                         (tokens만 채택하는 앱: React 18·Tailwind 없는 앱)
       │
       ├─ 백엔드(FastAPI) ──► kor-travel-common[core|api|db|http|dagster|testing]
@@ -109,7 +109,7 @@ kor-travel-common은 kor-travel 제품군의 UI·백엔드 공통 코드와 공�
 | 0.x minor | 파괴 허용 | `-rc.N` 태그 → 소비자 PR 검증 → 정식; `CHANGELOG.md` `### Breaking` + 이관 절 필수 | 소비자 PR 필요(이관 절 따라) |
 | 1.0 | GPL 소비자 3곳(map·weather·airport 또는 geo) 채택 후 | 릴리스 runbook 1회 완주(T-501) | 1.x major에서만 파괴 |
 
-파괴 항목(D-31): 토큰 이름/의미, data-slot·testid, prop 기본값(예: DataTable `manualSorting`), 정렬 모드, CSS 파일 경로. 토큰 이름 폐기는 1 minor 동안 alias를 유지한다. tokens·ui·py는 독립 버전이며 ui는 tokens 같은 minor를 peer로 요구한다.
+파괴 항목(D-31): 토큰 이름/의미, data-slot·testid, prop 기본값(예: DataTable `manualSorting`), 정렬 모드, CSS 파일 경로. 토큰 이름 폐기는 1 minor 동안 alias를 유지한다. tokens·ui·py는 독립 버전이며 ui는 tokens의 호환 minor 하나를 peer로 요구한다.
 
 릴리스 채널(D-11): 패키지별 태그(`tokens-vX.Y.Z`·`ui-vX.Y.Z`·`py-vX.Y.Z`), 태그 불변, 같은 버전 재발행 금지, `@main` 참조 금지. 강제 수준은 소비자별 `report → warn → fail`이며 승격은 common PR로만 한다(D-30). 릴리스 절차는 [release runbook](../runbooks/release.md), 채택 절차는 [consumer adoption runbook](../runbooks/consumer-adoption.md)이 정본이다.
 

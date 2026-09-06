@@ -4,9 +4,9 @@
 
 ## 현재 상태
 
-[Draft PR #1](https://github.com/digitie/kor-travel-common/pull/1)의 `09104ed`와 로컬 Claude 초안을 인수했다. 누락된 원장·통합 계획을 추가했고 상세 task 93개를 연결했다. 외부 선행과 실물 패키지를 기다리는 task는 BLOCKED로 정정했다. 기존 소비자 조사 기준은 갱신하지 않았다.
+[Draft PR #1](https://github.com/digitie/kor-travel-common/pull/1)의 `09104ed`와 로컬 Claude 초안을 인수했다. 누락된 원장·통합 계획을 추가했고 상세 task 96개를 연결했다. 외부 선행과 실물 패키지를 기다리는 task는 BLOCKED로 정정했다. 기존 소비자 조사 기준은 갱신하지 않았다.
 
-Windows Python 3.14.3에서 문서 184개·local target 1666개 오류 0, 상세 task 93개 DAG 오류 0, unittest 57개 성공·skip 0. CI는 전체 `test_*.py`를 실행하고 공백 검사 실패를 우회하던 fallback을 제거했다. 최신 PR CI와 두 리뷰어 결과는 아직 대기 중이다. 이 수치는 문서·도구 검증이며 패키지 또는 소비자 gate 통과가 아니다.
+Windows Python 3.14.3에서 unittest 65개 성공·skip 0. 앞선 커밋 e9a3a0f는 Linux CI green이며 새 리뷰 정정 커밋의 검증은 진행 중이다. 두 원본 리뷰는 BLOCK이었고 버전 판정·릴리스 선행·승인 gate finding을 수정해 재검토할 예정이다. 최신 결과는 [리뷰 색인](reviews/README.md)에서 확인한다. 이 수치는 문서·도구 검증이며 패키지 또는 소비자 gate 통과가 아니다.
 
 실물 `packages/tokens`·`packages/ui`·Python 패키지가 없다. 패키지 빌드·tarball/wheel 설치·소비자 빌드·e2e·시각 검증은 NOT_RUN(실물·소비자 변경 없음). T-003 SPDX 검사·라이선스 사본과 T-005 실제 소비자 현재값 등록도 남아 있다. 따라서 Phase 0 전체 완료·릴리스 가능 상태가 아니다.
 
@@ -20,9 +20,9 @@ T-013 이후에는 [T-003](tasks/T-003-notices-provenance-spdx.md)의 미완료 
 
 ## 차단 조건
 
-- 외부 결정: npm/PyPI 계정(T-006), pinvi 권리(T-020), concierge·docker-manager 권리(T-021), airport WIP(T-430), geo React 승인(T-443), pinvi mobile 명시 예외(O-8). 기본값은 승인 evidence가 아니다.
+- 외부 결정: npm/PyPI 계정(T-006), pinvi 권리(T-020), concierge·docker-manager 권리(T-021), airport 병합 후 현재 기준선·미해결 CI 재확인(T-430), geo React 승인(T-443), pinvi mobile 명시 예외(O-8). 기본값은 승인 evidence가 아니다.
 - 아직 배포하지 않은 규칙·계약 초안은 T-104·T-204·T-302에서 실물과 대조한다. 소비자 테스트 개수·버전은 고정 조사 관찰이며 최신 실행값으로 재사용하지 않는다.
-- `check_versions.py`는 초기 구현이다. 미확인·파싱 실패를 정상으로 표시하는 경계와 강제 수준을 이번 리뷰에서 재점검하며 T-005 전체 완료 전 CI 강제 승격을 하지 않는다.
+- `check_versions.py`는 초기 구현이다. 미확인·파싱 실패를 정상으로 표시하는 경계와 강제 수준을 회귀 시험으로 정정했으며 T-005 전체 완료 전 CI 강제 승격을 하지 않는다.
 - CodeGraph는 이 checkout에 초기화되지 않아 실패했다. 코드 직접 읽기·`rg`·회귀 테스트로 확인했다.
 
 ## 인계 자료

@@ -108,7 +108,7 @@ Windows Python 3.11+ stdlib에서 동작해야 하며(D-03) 결과는 Markdown �
 | 계층 | 검증 | 실패 시 |
 |---|---|---|
 | 패키지 | `npm pack` → tarball 설치 → `*.css`·`dist`·d.ts 존재, 생성물 diff 0 | `files`·`exports`·`sideEffects` 정정(실패 패턴 표) |
-| 스모크 | `consumer-smoke`(map admin·pinvi web pinned SHA) webpack·Turbopack `next build` | 릴리스 중단 |
+| 스모크 | `consumer-smoke`(패키지별 승인 소비자 pinned SHA) webpack·Turbopack `next build` | 릴리스 중단 |
 | 소비자 PR | 6폭(320/375/414/768/1024/1440) 스크린샷 기준선 → 설정만 → 토큰만 → 컴포넌트 4단 PR, 각 단계 diff evidence(D-08·D-21) | 원인 불명 diff는 해당 단계 revert |
 | 규칙 | `ux_lint`(raw hex/oklch, `text-[Npx]`, `rounded-2xl+`, 팔레트 alpha, `outline-none`, `transition-all/colors`, `aria-disabled:opacity-`, `window.confirm`) 전체 report + `--base <sha>` diff fail | 신규 위반만 fail, 잔존은 앱 baseline |
 

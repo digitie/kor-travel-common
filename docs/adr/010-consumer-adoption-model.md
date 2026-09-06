@@ -1,6 +1,6 @@
 # ADR-010: 소비자 채택 모델(매니페스트·첫 소비자 순서·라이선스 gate·채택 PR 규격·시각 기준선·NOT_RUN)
 
-- 상태: accepted — O-1(L6)·O-2(L8)·O-9(airport WIP)·O-25(geo React 19)는 외부 확인 대기
+- 상태: partially superseded by ADR-013
 - 날짜: 2026-09-06
 - 근거 문서: `docs/plan/design-brief.md` D-16·D-19·D-20·D-21·D-24·D-25·D-28, `docs/survey/cross/licensing.md` §3.6·§4 B1·L6·L8, `docs/survey/inventory/kor-travel-weather.md` §8-1, `docs/survey/inventory/kor-travel-airport.md` §1·§9, 선행 보고서 §1(map↔pinvi 이식 관계)·§11(회수 지표), `docs/survey/cross/canview-structure-checklist.md` R1.12·R1.13
 
@@ -40,3 +40,5 @@
 - 도구: T-011(매니페스트 스키마·`validate_manifest`), T-012(`collect_manifests`), T-108(playwright 기준선), T-402(기준선 초기 캡처)
 - 외부 확인: T-020(L6), T-021(L8), T-430(airport WIP), T-443(geo React 19)
 - 보고: T-503(회수 1회차), T-506(분기 감사)
+
+후속: [ADR-013](013-package-release-execution-contract.md)이 릴리스 실행·peer 호환·검증 소비자에 관한 위 일부 조항을 구체화한다. 나머지 결정은 유지한다.

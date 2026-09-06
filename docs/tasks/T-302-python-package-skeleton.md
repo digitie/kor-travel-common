@@ -22,10 +22,11 @@ Python 공통 패키지의 배포 골격을 만든다: 배포 이름 `kor-travel
 1. `packages/py/kor-travel-common/pyproject.toml`: `[build-system] hatchling`, `name = "kor-travel-common"`, `version`은 `src/kortravelcommon/_version.py` 동적, `requires-python = ">=3.11"`, `license = "GPL-3.0-or-later"`, `license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md"]`(PEP 639; 루트 파일을 빌드 시 복사), core 의존 `pydantic>=2.9,<3`·`pydantic-settings>=2.5,<3`, extras 5종, dev 그룹(ruff·mypy·import-linter·pytest).
 2. `src/kortravelcommon/{__init__.py,_version.py,py.typed}` + 빈 서브패키지 `api/`·`openapi/`(T-303·T-304가 채움). 모든 `.py`에 SPDX 헤더.
 3. `uv.lock` 생성·커밋, `uv sync --locked --all-extras` 성공.
-4. import-linter 계약(`[tool.importlinter]`): `kortravelcommon`(core) → `fastapi|starlette|sqlalchemy|prometheus_client|httpx|dagster` forbidden; `kortravelcommon.api`·`db`·`http`·`dagster`·`testing`만 예외.
-5. 3.11 문법 검사: ruff `target-version = "py311"` + CI Python 3.11·3.12·3.13 매트릭스에서 `import kortravelcommon` 및 pytest.
-6. `.github/workflows/python-package.yml`: `uv build` → 임시 venv에 wheel 설치 → `python -c "import kortravelcommon"` → starlette 매트릭스(`starlette<1.0` / `starlette>=1.6`)로 `[api]` 설치·테스트 → wheel 안 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 존재 검사. 하드닝은 D-18(권한·concurrency·timeout·`ubuntu-24.04`·SHA 핀).
-7. `docs/standards/backend-stack.md` 확정: Python floor/이미지/uv·lock 의무/extras/모듈 우선순위(1차~보류)/메트릭 접두 규칙(D-22)/인증 범위 밖/provider `python-*-api` SHA는 보고만(D-23).
+4. 공개 facade: `kortravelcommon.health`, `kortravelcommon.request_id`, `kortravelcommon.metrics` 등 architecture에 명시된 공개 모듈은 내부 `api.*`를 재수출한다. 이 facade와 내부 api를 프레임워크 의존 허용 대상으로 명시하고, 최상위 `__init__.py`는 api를 eager import하지 않는다. core-only wheel에서 `import kortravelcommon`이 되고 `[api]` 설치 후 공개 facade import가 되는 시험을 수용 기준으로 둔다. 내부 구현 task(T-304·T-307)는 facade를 함께 완성한다.
+5. import-linter 계약(`[tool.importlinter]`): core 모듈 목록을 명시해 `fastapi|starlette|sqlalchemy|prometheus_client|httpx|dagster`로의 직접·간접 의존을 금지한다. 내부 `api`·`db`·`http`·`dagster`·`testing`과 위 공개 facade는 extras 영역으로 별도 분류한다. 전체 루트 패키지를 core로 취급해 facade까지 금지하는 계약은 사용하지 않는다.
+6. 3.11 문법 검사: ruff `target-version = "py311"` + CI Python 3.11·3.12·3.13 매트릭스에서 `import kortravelcommon` 및 pytest.
+7. `.github/workflows/python-package.yml`: `uv build` → 임시 venv에 wheel 설치 → `python -c "import kortravelcommon"` → starlette 매트릭스(`starlette<1.0` / `starlette>=1.6`)로 `[api]` 설치·테스트 → wheel 안 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 존재 검사. 하드닝은 D-18(권한·concurrency·timeout·`ubuntu-24.04`·SHA 핀).
+8. `docs/standards/backend-stack.md` 확정: Python floor/이미지/uv·lock 의무/extras/모듈 우선순위(1차~보류)/메트릭 접두 규칙(D-22)/인증 범위 밖/provider `python-*-api` SHA는 보고만(D-23).
 
 ## 범위 밖
 

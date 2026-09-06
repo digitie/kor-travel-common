@@ -26,7 +26,7 @@
 
 ## 범위 밖
 
-- 재사용 워크플로 `contrast-check.yml` 활성화(T-010에서 stub → 이 task 완료 후 갱신), 규칙 문서 본문(T-104·T-105), 앱별 baseline 확정·등록(T-421·T-431·T-441·T-453·T-472), `fail` 승격(T-502), 마커 팔레트 검사.
+- 재사용 워크플로 `contrast-check.yml` 구현(T-010이 이 task 완료 후 실제 검사기를 연결), 규칙 문서 본문(T-104·T-105), 앱별 baseline 확정·등록(T-421·T-431·T-441·T-453·T-472), `fail` 승격(T-502), 마커 팔레트 검사.
 
 ## 예상 변경 파일
 
@@ -38,7 +38,7 @@
 - 4앱 예제에서 조사 문서의 미달(ktdm brand 3.59, concierge 2.06/1.93, geo 2.29/2.41, airport line 1.15)이 재현되고 baseline 등록 시 `--fail-new`가 exit 0, baseline `until` 만료 fixture는 exit 1.
 - `ux_lint` fixture에서 7 패턴 + `window.confirm` 각각 양성 1·음성(백틱 인용) 1이 기대대로 판정되고, `--base`는 추가 행만 fail한다.
 - 두 도구 모두 `--json`·step summary 출력, Linux·Windows 결과 동일, 외부 의존 0.
-- `contrast-check.yml`이 stub에서 실제 호출로 바뀌고 selftest green.
+- 검사기 정상·대비 미달 fixture가 재사용 워크플로에서 호출 가능한 CLI 계약을 검증한다. 워크플로 자체 selftest는 후행 T-010이 소유하며 이 task의 완료 선행이 아니다.
 
 ## 검증 명령
 

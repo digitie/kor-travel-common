@@ -21,7 +21,7 @@
 - `src/dialog.tsx`(Root/Trigger/Close/Popup/Backdrop/Viewport 재수출 + `hasUnsavedInput`이면 Escape·바깥 클릭 차단, `viewportProps`로 testid 전달), `src/alert-dialog.tsx`(`Close` + `Button`; 취소 초기 포커스), `src/popover.tsx`, `src/tooltip.tsx`, `src/tabs.tsx` + `tabs-variants.ts`(`Tab/Panel`), `src/breadcrumb.tsx`(`useRender`로 `Link` 합성, `aria-current="page"`), `src/help-tip.tsx`(Tooltip + Popover 조합, 40px 히트 확장, `label` 필수).
 - `src/table.tsx`: `Table`(컨테이너 `data-slot="table-container"` + `containerClassName`/`containerStyle`/`containerTestId`), `TableHeader`(`sticky` prop), `TableBody`, `TableRow`(`data-clickable`에만 hover), `TableHead`(`scope="col"` 기본), `TableCell`, `TableCaption`; Card 내부 flush 규칙(`group-data-[slot=card]/card`)과 선택 열 패딩 셀렉터 `[data-slot=checkbox]`.
 - `src/checkbox.tsx`: native `<input type="checkbox">` + `data-slot="checkbox"`, `onCheckedChange(checked: boolean)`, `indeterminate`(ref로 설정 + `data-indeterminate`), 20px 히트.
-- `package.json`: peer `@base-ui/react ^1.6.0` 추가, `exports` 9 subpath.
+- `package.json`: T-201에서 선언한 peer `@base-ui/react ^1.6.0` 유지·호환 재검증, `exports` 9 subpath.
 - 테스트: Dialog 포커스 trap·복원·Escape·`hasUnsavedInput` 차단·`viewportProps` testid; AlertDialog 취소 초기 포커스; Tooltip 지연; Tabs 키보드(←→); Breadcrumb `aria-current`; HelpTip 접근성 이름·popover 열림; Checkbox `FormData` 포함·`indeterminate`·콜백 시그니처; Table `scope`·`containerTestId`·sticky 클래스; CI 매트릭스 두 버전 모두 통과.
 
 ## 범위 밖
@@ -66,5 +66,5 @@ PR 본문·`docs/journal.md`에 두 base-ui 버전별 테스트 수·exit code, 
 
 ## rollback 또는 release 차단 조건
 
-- 컴포넌트 단위 revert. peer 추가는 `package.json` 한 줄이라 함께 되돌린다.
+- 컴포넌트 단위 revert. peer는 0.1의 useRender도 쓰므로 overlay revert 시 제거하지 않는다.
 - 차단: 두 base-ui 버전 중 하나 실패, 포커스 복원 실패, Checkbox가 `FormData`에서 빠짐, `data-[state]` 애니메이션 잔존. 하나라도 있으면 T-213 rc를 만들지 않는다.

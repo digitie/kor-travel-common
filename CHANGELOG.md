@@ -28,9 +28,14 @@
 
 #### Added
 
-- 규칙 문서 초안 9종(`docs/standards/`: design-tokens·ux-guide·responsive-web·frontend-stack·ui-contract·openapi·backend-stack·ci-deploy·licensing·versions·agent-conventions)과 예외 레지스트리 `openapi-exceptions.yaml`.
+- 규칙 문서 초안(`docs/standards/`: design-tokens·ux-guide·responsive-web·frontend-stack·ui-contract·openapi·backend-stack·ci-deploy·licensing·versions·agent-conventions)과 예외 레지스트리 `openapi-exceptions.yaml`.
 - 버전 레지스트리 `versions.json` v1(floor/recommended/exceptions/blocked/enforce)과 `tools/check_versions.py` report 모드, 소비자 매니페스트 규약 `kor-travel-common.consumer-manifest.v1`.
 - 소비자 배포 템플릿 `templates/`(AGENTS 공통 절·CLAUDE 포인터·consumer PR·채택 체크리스트·dependabot·ESLint 조각).
 - 배포 채널·태그·SemVer 0.x 규칙, 소비자 채택·릴리스 runbook, 2인 독립 적대적 리뷰 gate, PR 본문 6항목 템플릿.
-- 저장소 골격: canview 계층 문서(`AGENTS.md`→`docs/README.md`→`docs/resume.md`→task), ADR-001~012, 리뷰 archive, validator 2종(`validate_document_links`·`validate_plan`)과 회귀 테스트 40건, CI `docs` job.
+- 저장소 골격: canview 계층 문서(`AGENTS.md`→`docs/README.md`→`docs/resume.md`→task), ADR-001~013, 리뷰 archive, validator 2종(`validate_document_links`·`validate_plan`)과 회귀 테스트, CI `docs` job.
 - 고지·출처 파일: `NOTICE`, `THIRD_PARTY_NOTICES.md`, `PROVENANCE.md`, `CONTRIBUTING.md`(SPDX 헤더·AI 보조 생성물 조항).
+
+#### Fixed
+
+- 미해석 버전·빈 입력·정책 오타·부정확한 URL ref가 검사 성공으로 처리되던 경우와 Linux에서 inline code를 Markdown 링크로 오인하던 경우를 회귀 시험으로 고정했다.
+- [ADR-013](docs/adr/013-package-release-execution-contract.md)에 릴리스 순서·UI peer·공개 Python facade·승인 소비자 선택을 정리했다. 최초 릴리스 전 계획 정정으로 소비자 설치 변경은 없으며 이후 구현·pack/wheel 계약 시험은 각 상세 task가 소유한다.

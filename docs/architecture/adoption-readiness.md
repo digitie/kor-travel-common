@@ -1,5 +1,7 @@
 # 채택 준비 기준(adoption readiness)
 
+> airport의 WIP·Admin 범위는 조사 이후 변경됐다. [인계 시점 재확인](../plan/handoff-verification.md)과 T-430의 현재 SHA·잔여 gate 대조를 먼저 적용한다. 아래 조사 기준 표를 최신 배포 상태로 해석하지 않는다.
+
 - 정본 지위: 소비자별 채택 gate 정의와 현재 판정의 추적표(초안). §3 매트릭스는 T-012부터 `tools/collect_manifests.py` 출력으로 갱신하며 §2 gate 정의만 수기로 유지한다. 확정 task: T-008(★이번 PR)·T-012. 마지막 갱신: 2026-09-06.
 - 근거: [브리프](../plan/design-brief.md) D-06~D-08·D-16·D-17·D-19·D-21·D-25, O-1·O-2·O-6·O-8·O-9·O-25, `docs/survey/commonality-matrix.md` §3.2·§4.1, `docs/survey/cross/licensing.md` §3.6·§4, `docs/survey/cross/version-matrix.md` §1.1·§2.1·§3.2, `docs/survey/cross/ci-deploy.md` §1.1·§1.2, `docs/survey/cross/design-tokens.md` §3.4.2.
 

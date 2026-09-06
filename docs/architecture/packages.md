@@ -10,7 +10,7 @@
 | 배포 단위 | 이름 | 경로 | 채널·태그 | peer | 1차 소비자 |
 |---|---|---|---|---|---|
 | tokens | `@kor-travel/tokens`(잠정, O-5) | `packages/tokens` | GitHub Release `tokens-vX.Y.Z`, 자산 `kor-travel-tokens-X.Y.Z.tgz` + `SHA256SUMS` | 없음(`theme.css`는 소비자 Tailwind ≥4.3.0 빌드 컨텍스트 필요) | map·weather → pinvi admin(L6)·airport(WIP 병합 후) |
-| ui | `@kor-travel/ui`(잠정, O-5) | `packages/ui` | `ui-vX.Y.Z`, 자산 `kor-travel-ui-X.Y.Z.tgz` + `SHA256SUMS` | `react`·`react-dom` `^19.0.0`, `@kor-travel/tokens` 같은 minor, `@base-ui/react` ≥1.6(권장 1.8), `@tanstack/react-table` ^8.21·`@tanstack/react-virtual` ^3.14(DataTable subpath만) | map·pinvi admin(L6) 또는 airport 소형 부품 |
+| ui | `@kor-travel/ui`(잠정, O-5) | `packages/ui` | `ui-vX.Y.Z`, 자산 `kor-travel-ui-X.Y.Z.tgz` + `SHA256SUMS` | `react`·`react-dom` `^19.0.0`, `@kor-travel/tokens`의 호환 minor 하나, `@base-ui/react` ≥1.6(권장 1.8), `@tanstack/react-table` ^8.21·`@tanstack/react-virtual` ^3.14(DataTable subpath만) | map·pinvi admin(L6) 또는 airport 소형 부품 |
 | py | PyPI 이름 `kor-travel-common`, import `kortravelcommon` | `packages/py/kor-travel-common` | git 태그 `py-vX.Y.Z` + wheel 자산; 소비자는 `git+https://github.com/digitie/kor-travel-common.git@py-vX.Y.Z#subdirectory=packages/py/kor-travel-common`(lock sha) | `requires-python >=3.11`; core는 pydantic만, 나머지는 extras | map-api·weather-api·airport → geo → pinvi·concierge·ktdm(L8 후) |
 | 규칙 문서 | `docs/standards/*` | `docs/standards` | common 태그와 동반(문서 자체는 버전 없음, 규칙 ID 불변) | — | 전 소비자 |
 | 템플릿 | `templates/*` | `templates` | 복사 시점의 common 커밋을 앱이 기록 | — | 전 소비자 |
@@ -61,6 +61,7 @@ tarball에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 동봉, `package.json` 
 - exports: 루트 barrel + 컴포넌트 그룹별 subpath(예: `./button`, `./data-table`, `./cn`, `./overlay`). DataTable·Pager처럼 무거운 peer가 필요한 항목은 별도 subpath로 두어 루트 import가 `@tanstack/*`를 요구하지 않게 한다.
 - `@kor-travel/ui/cn` = `clsx` + `extendTailwindMerge`(`kt-` 그룹 등록). `clsx`·`tailwind-merge`는 dependencies(peer 아님).
 - 엔진: overlay(Dialog·AlertDialog·Popover·Tooltip·Tabs·Breadcrumb·HelpTip)만 `@base-ui/react`; 비-overlay(Button·Checkbox·Input·Textarea·NativeSelect·Separator·Badge)는 native 요소 + `useRender`로 `render` 합성 선택 지원(D-09).
+- UI 0.1·0.2의 tokens peer는 모두 `~0.1.0`이다. 독립 패키지의 minor 번호를 일치시키지 않으며 변경은 [ADR-013](../adr/013-package-release-execution-contract.md)을 따른다. Base UI `useRender` helper는 0.1부터 peer·개발 의존에 필요하고 overlay 구현은 0.2에서 추가한다.
 - 릴리스 단위: `v0.1.0` = 소형 13종(Badge·Skeleton·Separator·Card·Alert·Input·Textarea·NativeSelect·Field·EmptyState·SectionCard·FilterBar·StatStrip, T-203), `v0.2.0` = Button·AppErrorPanel·overlay 세트·Table·Checkbox·DataTable·Pager·CopyButton·JsonViewer·DetailList·StatusBadge·AdminPageHeader·AdminSkipLink·AdminRailGrid·Form*(T-205~T-210).
 - 테스트 하네스: vitest + RTL + jsdom, axe opt-in, showcase 없음(consumer-smoke 대체, D-33).
 - base-ui 미확인 3건(Button `type` 기본, Checkbox hidden input, Toast API)은 T-201에서 소스 확인 전 릴리스 금지.
@@ -75,7 +76,7 @@ tarball에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 동봉, `package.json` 
 | variant·size 이름 | Button variant 7종(default/outline/secondary/ghost/destructive/destructive-solid/link), size 8종(default/sm/xs/lg/icon/icon-sm/icon-xs/icon-lg; xs·lg·icon-xs·icon-lg는 deprecated alias) | 삭제·의미 변경 = 파괴; deprecated alias는 1 minor 유지 |
 | 키보드·포커스 동작 | overlay: Escape 닫기·초기 포커스·복원·trap; Tabs 화살표 이동; DataTable 정렬 헤더 Enter/Space; Checkbox Space; Button `loading` 시 포커스 유지(`aria-disabled`+`aria-busy`, `onClick` 차단, native disabled 안 걺), `disabled`=native + `disabledReason`→`title`, root opacity 금지 | 동작 변경 = 파괴 |
 | CSS 클래스 | `kt-` 접두 유틸리티만 사용; 소비자 필수 2줄(`@import "@kor-travel/tokens/theme.css"` + `@source "../node_modules/@kor-travel/ui"`) | 필수 등록 방식 변경 = 파괴 |
-| peer 범위 | React `^19.0.0`(ref prop, forwardRef 없음), tokens 같은 minor | peer 상향 = minor(이관 절) |
+| peer 범위 | React `^19.0.0`(ref prop, forwardRef 없음), tokens의 호환 minor 하나 | peer 상향 = minor(이관 절) |
 | 앱 소유 | 토스트 엔진(정책 UX-G4.1만), 모달 엔진 선택, 셸 nav·RBAC, 검색 툴바·`rowHeader`(geo `VirtualTable` 잔류) | — |
 
 React 18 앱(geo·ktdm)은 tokens부터 채택하고 React 19 업그레이드(T-443·T-470) 뒤 ui를 채택한다.
@@ -144,3 +145,7 @@ common CI `python-package` job: `uv build` → wheel 설치 → starlette 매트
 | 재사용 워크플로 | Phase 1 `versions-check`·`contrast-check`·`docs-check` → Phase 3 `openapi-drift`·`typegen-drift` → Phase 4 `node-quality`·`python-quality` | `uses: digitie/kor-travel-common/.github/workflows/<name>.yml@<tag|sha>` | common; job `name:` 입력 개방 |
 
 도구는 Python 3.11+ stdlib에서 Windows에서도 동작해야 하며 CI `tools` job이 ubuntu+windows 매트릭스로 보증한다(D-03).
+
+### Python 공개 import와 릴리스 경계
+
+공개 경로 `kortravelcommon.health`·`request_id`·`metrics`는 내부 `api.*`의 얇은 facade다. T-302가 facade·extras import-linter 경계를 만들고 T-304·T-307이 실제 재수출을 완성한다. 최상위 import는 프레임워크를 eager import하지 않으며 core-only와 `[api]` wheel 설치를 별도 검증한다. 1차 모듈은 T-310의 0.1, T-306~T-308은 [T-311](../tasks/T-311-py-v0-2-0-release.md)의 0.2로 발행한다.

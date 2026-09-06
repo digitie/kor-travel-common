@@ -1,6 +1,6 @@
 # ADR-007: React UI 패키지 배포 방식(npm 1차·React 19 전용·overlay base-ui/비-overlay native·마크업 계약·레지스트리 2차)
 
-- 상태: accepted — O-3(배포 방식) 기본값으로 진행; base-ui 미확인 3건은 T-201 확인 전 릴리스 금지
+- 상태: partially superseded by ADR-013
 - 날짜: 2026-09-06
 - 근거 문서: `docs/plan/design-brief.md` D-09·D-10·O-3·O-22, `docs/survey/cross/ui-components.md` §3.1~§3.4·§4·§5·§6·§7, `docs/survey/cross/ux-patterns.md` §4 C7~C10·C18, `docs/survey/commonality-matrix.md` §2.2, 선행 보고서 §3.2·§7.3
 
@@ -42,3 +42,5 @@
 - 규칙: `docs/standards/ui-contract.md`(T-204 확정), `docs/standards/ux-guide.md`
 - 실물: T-201(골격·base-ui 확인), T-203(소형 13종), T-205~T-210(v0.2), T-211(레지스트리 채널·`ui_drift`), T-212·T-213(릴리스)
 - 재평가: T-508(전면 레지스트리·ConfirmDialog·토스트·VirtualTable)
+
+후속: [ADR-013](013-package-release-execution-contract.md)이 릴리스 실행·peer 호환·검증 소비자에 관한 위 일부 조항을 구체화한다. 나머지 결정은 유지한다.
