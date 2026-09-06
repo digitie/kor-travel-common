@@ -60,6 +60,19 @@ class DocumentLinkValidation(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertEqual(count, 0)
 
+    def test_inline_code_is_not_a_link(self) -> None:
+        self.write("a.md", "`def fn[T](...)`와 ``[T](missing.md) `중첩` `` [정상](target.md)\n")
+        errors, _, count = MODULE.validate(self.root)
+        self.assertEqual(errors, [])
+        self.assertEqual(count, 1)
+
+    def test_angle_target_and_encoded_filename(self) -> None:
+        self.write("공통.md", "# 대상\n")
+        self.write("a.md", "[대상](<target.md>) [한글](%EA%B3%B5%ED%86%B5.md#없는-절)\n")
+        errors, _, count = MODULE.validate(self.root)
+        self.assertEqual(errors, [])
+        self.assertEqual(count, 2)
+
 
 if __name__ == "__main__":
     unittest.main()

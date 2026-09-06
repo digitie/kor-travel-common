@@ -1,8 +1,12 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+# Origin: canview@1f93b8adb34a48537db69b950c8a99ce89859760 tools/validate_document_links.py
+# Modified: 2026-09-06 — common 경로·절대 링크 금지·산문 및 코드 span 제외
 """저장소 내부 Markdown 링크 target을 네트워크 없이 검사한다.
 
 규칙(docs/runbooks/documentation-maintenance.md §6·§7):
 - 문서 링크는 저장소 상대 경로만 허용한다. 절대 경로(`F:/...`, `/mnt/...`, `/...`)는 오류다.
-- fenced code block 안의 링크는 검사하지 않는다.
+- fenced code block과 inline code span 안의 링크는 검사하지 않는다.
 - target에 공백이 있으면 링크가 아니라 산문의 대괄호·소괄호 조합으로 보고 건너뛴다.
 - fragment(`#절-제목`)는 검증하지 않는다(파일 존재만 확인).
 """
@@ -30,6 +34,7 @@ def validate(root: Path) -> tuple[list[str], int, int]:
     files = collect_documents(root)
     for path in files:
         body = re.sub(r'```.*?```', '', path.read_text(encoding='utf-8'), flags=re.S)
+        body = re.sub(r'(?<!`)(`+)(?!`).*?(?<!`)\1(?!`)', '', body, flags=re.S)
         for target in re.findall(r'!?\[[^\]\n]*\]\(([^)\n]+)\)', body):
             target = target.strip().strip('<>')
             if not target or any(ch.isspace() for ch in target):

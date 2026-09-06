@@ -14,12 +14,12 @@ canview에서 옮겨 온 검증 도구 2종이 common 규칙(절대 링크 금�
 - [설계 브리프](../plan/design-brief.md) D-02(상대 링크만·Python 도구 유지), D-03(`tools/*.py`는 Windows Python 3.11+ stdlib에서 동작), D-05(`validate_plan.py` 무변경), D-27.
 - [canview 구조 체크리스트](../survey/cross/canview-structure-checklist.md) §4.1(문법 명세)·§4.2(35 tests 계약)·§4.3(link validator 명세)·§5 Q2(절대 접두 제거)·Q6(`.py` CRLF).
 - [문서 규약 비교](../survey/cross/docs-conventions.md) §2 C11(절대 링크는 오류)·C12(실행 명령 `python3`·`uv run` 표기)·C15(`* text=auto eol=lf`).
-- 현재 상태(사실, 2026-09-06 작업 트리): `tools/validate_document_links.py`는 이미 절대 접두를 오류로 보고하고 공백 포함 target을 산문으로 건너뛴다. `tests/test_document_links.py` 5 tests, `tests/test_plan_validation.py` 35 tests. `.github/workflows/docs.yml`은 `test_plan_validation.py`만 discover하고 `permissions`·`concurrency`·`timeout`이 없다(`cv` §1.3, [ci 조사](../survey/cross/ci-deploy.md) §4).
+- 착수 기준(사실, `09104ed`): `tools/validate_document_links.py`는 이미 절대 접두를 오류로 보고하고 공백 포함 target을 산문으로 건너뛴다. `tests/test_document_links.py` 5 tests, `tests/test_plan_validation.py` 35 tests. `.github/workflows/docs.yml`은 `test_plan_validation.py`만 discover하고 `permissions`·`concurrency`·`timeout`이 없다(`cv` §1.3, [ci 조사](../survey/cross/ci-deploy.md) §4).
 
 ## 구현 범위
 
 1. `tools/validate_document_links.py`: 규칙 docstring이 [문서 유지보수 runbook](../runbooks/documentation-maintenance.md) §6·§7과 일치하는지 확인하고, 검사 범위(`docs/**`·`packages/**`·`tools/**`·`templates/**`·`tests/**`·루트)를 [tools/README.md](../../tools/README.md) 표와 맞춘다. 절대 접두 허용은 두지 않는다.
-2. `tests/test_document_links.py`: 절대 링크 오류·산문 오탐 제외·fence 무시·`<>` 감싼 target·percent-encoded target·fragment 미검증 사례를 고정한다.
+2. `tests/test_document_links.py`: 절대 링크 오류·산문 오탐 제외·fence·inline code 무시·`<>` 감싼 target·percent-encoded target·fragment 미검증 사례를 고정한다.
 3. LF: `git ls-files --eol`로 추적 `.py`·`.md`·`.yml`이 `i/lf`인지 확인하고 아니면 `git add --renormalize`([실패 패턴](../runbooks/agent-failure-patterns.md) 6행).
 4. `.github/workflows/docs.yml`: unittest discover 패턴을 `test_*.py`로 바꿔 두 회귀 모듈을 모두 실행하고 `python -B -X utf8` 표기로 통일한다. 하드닝(permissions·SHA 핀·Windows 매트릭스)은 T-009로 넘긴다.
 5. `tools/README.md`·`docs/runbooks/agent-failure-patterns.md`의 관련 행이 도구 동작과 다르면 정정한다(내용 추가는 coordinator 소유이므로 open item으로 보고).
@@ -58,6 +58,8 @@ git diff --check
 Git Bash에서 동일. Windows 실행 표기는 [개발 환경](../dev-environment.md).
 
 ## evidence
+
+- T-013 재검증(2026-09-06): CI run `34023326750`에서 inline code `def fn[T](...)` 오탐으로 Linux 실패를 재현했다. inline code를 제외하고 2개 회귀 시험을 추가했다. Windows Python 3.14.3과 WSL에서 문서 오류 0·DAG 오류 0·전체 unittest 59개 성공·skip 0. `git diff --check`와 추적 파일 `i/lf` 확인 완료. 최신 CI·2인 리뷰는 후속 evidence로 닫는다.
 
 - 테스트 수·exit code·Python 버전(`python3 --version`, Windows `py -3 --version`)을 이 절과 `docs/journal.md`에 남긴다. CI 실행은 PR의 `docs` job 링크로 남긴다.
 - 리뷰가 필요한 변경(validator 규칙 변경)은 `docs/reviews/adversarial/2026-09-06-doc-validators.md`에 기록한다.

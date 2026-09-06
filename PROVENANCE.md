@@ -16,7 +16,7 @@
 | ID | common 파일군 | 원천 저장소 | 커밋 | 원천 경로 | 원천 라이선스 | 수정 | 근거 |
 |---|---|---|---|---|---|---|---|
 | PV-001 | `tools/validate_plan.py` | canview | `1f93b8adb34a48537db69b950c8a99ce89859760` | `tools/validate_plan.py` | GPL-3.0(원문, 버전 미지정) → common `GPL-3.0-or-later`(권리자 동일) | docstring 1줄("G0–G6 통과" → "gate 통과"), 파서·규칙 무변경 (2026-09-06) | `docs/survey/cross/canview-structure-checklist.md` §1.2 |
-| PV-002 | `tools/validate_document_links.py` | canview | `1f93b8a` | `tools/validate_document_links.py` | 동상 | 대상 경로(`docs/`·`packages/`·`tools/`·`templates/`·`tests/`·루트) 변경, 절대 경로 링크를 오류로 판정, 공백 포함 target(산문) 제외 — 사실상 재작성 (2026-09-06) | 동상 §1.2·§4.3 |
+| PV-002 | `tools/validate_document_links.py` | canview | `1f93b8a` | `tools/validate_document_links.py` | 동상 | 대상 경로(`docs/`·`packages/`·`tools/`·`templates/`·`tests/`·루트) 변경, 절대 경로 링크를 오류로 판정, 공백 포함 target(산문)·inline code span 제외 — 사실상 재작성 (2026-09-06) | 동상 §1.2·§4.3 |
 | PV-003 | `tests/test_plan_validation.py` | canview | `1f93b8a` | `tests/test_plan_validation.py` | 동상 | 모듈명 `canview_plan_validation` → `kor_travel_common_plan_validation`, tempdir prefix; 35 tests 무변경 (2026-09-06) | 동상 §1.2·§4.2 |
 | PV-004 | `docs/reviews/adversarial/TEMPLATE.md` | canview | `1f93b8a` | `docs/reviews/adversarial/TEMPLATE.md` | 동상 | 없음(diff 0) | 동상 §1.2 |
 | PV-005 | `docs/tasks-rule.md`, `docs/tasks-done.md`, `docs/tasks/README.md`, `docs/runbooks/README.md`, `docs/runbooks/documentation-maintenance.md`, `docs/runbooks/agent-failure-patterns.md`, `docs/reviews/README.md`, `.gitignore`, `.gitattributes` | canview | `1f93b8a` | 동일 경로 9개 | 동상 | 도메인 치환(ID 대역·5열 문법·standards 행·Node/Python ignore·전역 LF); 변경 줄 수는 checklist §1.2 표 | 동상 §1.2 |

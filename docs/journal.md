@@ -2,6 +2,19 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-06 (Codex, T-013 인수·계획 원장·CI 재현)
+
+PR #1 `09104ed`와 미커밋 초안을 실제 파일로 대조했다. 착수 검증은 링크 33건 오류·원장 누락 등 plan 94건 오류·unittest 57건 성공이었다. `d3712a8`에 로컬 초안과 T-013·93개 원장·통합 계획을 통합해 같은 draft PR에 push했다. 소비자 저장소를 수정하지 않았다.
+
+- Windows에서는 통과했던 link validator가 [CI run 34023326750](https://github.com/digitie/kor-travel-common/actions/runs/34023326750)에서 `docs/survey/cross/backend.md`의 inline code를 링크로 오인했다. code span 제외와 회귀 2건을 추가했다. 조사 본문은 보존했다.
+- `python3 -B -X utf8 tools/validate_document_links.py`, `tools/validate_plan.py`, `-m unittest discover -s tests -p "test_*.py"`: Windows Python 3.14.3과 WSL에서 오류 0·59 tests OK·skip 0. `git diff --check` 통과, 추적 파일 `i/crlf`·`i/mixed` 없음. Windows 명령 치환은 [개발 환경](dev-environment.md) §5를 적용했다.
+- CodeGraph context 호출은 미초기화 오류로 실패했다. `rg`·직접 코드 읽기·회귀 테스트로 대체했다.
+- 재확인(2026-09-06): 공식 [Next 메타데이터](https://registry.npmjs.org/next/16.3.4), [React 메타데이터](https://registry.npmjs.org/react/19.2.8), [TypeScript 메타데이터](https://registry.npmjs.org/typescript/7.0.2)에서 초안의 해당 버전 존재를 확인했다. 이 확인은 전체 버전 레지스트리·소비자 설치 검증이 아니며 T-005 잔여는 유지한다.
+- 직접 읽은 소비자 HEAD·manifest: map `c494e227e010565be295de3f9670b2f7c8c20944` clean, weather `6003da995fa4b35799f9dadc406c6ba2878bfbae` clean, geo `1d9d74d3a852bbaaa09144b75bb69b99a58a6002` clean. airport 로컬은 조사 이후 `2e114b0a0530b32b72cca035ad0366ddb93c6cd2`로 진행했고 dirty 4건이 있어 보존했다. 기존 WIP의 현재 병합·CI evidence는 T-430에서 다시 대조한다. 선언값을 설치본으로 취급하지 않았다.
+- 두 reviewer는 `d3712a8` detached worktree에서 동일 manifest로 검토 중이다. 원본 확정 전 상대 finding을 공유하지 않는다. 패키지·소비자 빌드·e2e는 NOT_RUN(이번 범위에 실물·소비자 변경 없음).
+
+Git Bash에서 동일. 다음은 reviewer 원본 보존·finding 수정·post-fix 재검토·최종 인계다.
+
 ## 2026-09-06 (claude, 저장소 부트스트랩·조사·설계·계획)
 
 기준선 `b92fabeb1c96a11c1fc9507d93271c1ebeee09b0`(Initial commit, 추적 파일 `LICENSE` 1개)에서 브랜치 `feat/bootstrap-survey-and-integration-plan`을 만들어 작업했다. 사용자 dirty 변경은 없었다. 환경은 Windows 11(Git Bash, Tier 2), Python 3.14.3(Windows), 원격 `origin = https://github.com/digitie/kor-travel-common.git`이다. CodeGraph MCP는 연결에 실패해 사용하지 않았고 `rg`·직접 읽기·validator로 대체했다.
