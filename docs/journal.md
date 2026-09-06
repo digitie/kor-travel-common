@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-003 독립 리뷰 수정)
+
+017fef1의 두 원본을 확정한 뒤 6 finding을 모두 수용했다([통합 리뷰](reviews/adversarial/2026-09-07-t003.md)). 경로 별칭·qualified geo·PV 행 공백 우회를 회귀 시험으로 고정했다. canview 원본 재대조로 제목 검사는 기존 기능임을 확인해 수정 고지를 바로잡았다. 템플릿의 고지·PV 사본·라이선스 동반 목적지를 명시했다.
+
+Windows·WSL 전체 98 tests 성공·skip 0, SPDX 13개 오류 0. 격리 전달 fixture는 설정 6개와 고지·PV·원문 사본을 확인했다. 제품·소비자 gate와 T-009 CI 확장은 미실행이며 리뷰 수정 candidate를 다시 commit·push한 뒤 동일 두 reviewer가 재확인한다. T-003을 닫기 전 다음 task 구현은 시작하지 않는다.
+
 ## 2026-09-07 (Codex, T-003 고지·SPDX 구현 후보)
 
 PR #1의 b36c99fb6c7f4df2a27364842ee197fc947e461e에서 `codex/t003-license-provenance`를 분기했다. PR #1은 merge하지 않고 이 branch의 base로 유지한다. 사용자 요청에 따라 T-003 → T-005 → T-009 순서로 진행한다.

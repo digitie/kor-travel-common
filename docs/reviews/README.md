@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-09-07 | full | [T-003 고지·SPDX](adversarial/2026-09-07-t003.md), 017fef1 | A 검사기 / B 출처·전달 | A BLOCK / B BLOCK, 6 finding 수정 후 재검토 대기 |
 | 2026-09-06 | full 종료 post-fix | [Phase 0 최종 판정](adversarial/2026-09-06-phase0-closure-post-fix.md), fafb3f6 | A 도구·CI / B 계획·계약 | **A PASS / B PASS, 모든 finding FIXED** |
 | 2026-09-06 | full 종료 delta | [Phase 0 종료 대조](adversarial/2026-09-06-phase0-closure.md), 8fb1334 | A 도구·CI / B 계획·계약 | A BLOCK / B CONDITIONAL, T-009 숨은 선행 |
 | 2026-09-06 | full post-fix 03 | [Phase 0 세 번째 재검토](adversarial/2026-09-06-phase0-post-fix-03.md), 5670642 | A 도구·CI / B 계획·계약 | A PASS / B PASS, 15 finding FIXED |

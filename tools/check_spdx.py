@@ -84,12 +84,13 @@ def first_comment(text: str, suffix: str) -> list[str]:
     return [] if block else result
 
 
-def provenance(root: Path) -> dict[str, tuple[str, str, str, bool, bool]]:
+def provenance(root: Path) -> dict[str, tuple[str, str, str, bool, bool, bool]]:
     """색인의 명시적 소스 경로를 읽는다. 문서 파일군은 검사 범위 밖이다."""
     text = (root / "PROVENANCE.md").read_text(encoding="utf-8-sig")
+    source_names = {path.relative_to(root).as_posix() for path in source_files(root)}
     entries = {}
     for line in text.splitlines():
-        if not re.match(r"\|\s*PV-", line):
+        if not re.match(r"\s*\|\s*PV-", line):
             continue
         cells = [part.strip() for part in line.strip().strip("|").split("|")]
         if len(cells) != 8:
@@ -105,17 +106,22 @@ def provenance(root: Path) -> dict[str, tuple[str, str, str, bool, bool]]:
             path = PurePosixPath(name)
             if path.is_absolute() or ".." in path.parts or "\\" in name or ":" in name:
                 raise ValueError(f"PROVENANCE: 저장소 상대 경로가 아님: {name}")
+            if name != path.as_posix():
+                raise ValueError(f"PROVENANCE: 정규 상대 경로가 아님: {name}")
             if not is_source(Path(name)):
                 continue
             if name in entries:
                 raise ValueError(f"PROVENANCE: 소스 경로 중복: {name}")
             if not (root / name).is_file():
                 raise ValueError(f"PROVENANCE: 소스 파일 없음: {name}")
+            if name not in source_names:
+                raise ValueError(f"PROVENANCE: 실제 소스 경로의 대소문자와 불일치: {name}")
             origins = re.findall(r"`([^`]+)`", original)
             if len(origins) != 1:
                 raise ValueError(f"PROVENANCE: 소스는 행마다 원천 경로 하나 필요: {name}")
             entries[name] = (repo.strip("`"), sha, origins[0],
-                             not modified.startswith("없음"), "파생" in license_text)
+                             not modified.startswith("없음"), "파생" in license_text,
+                             "GPL-3.0-only" in license_text)
     return entries
 
 
@@ -155,7 +161,8 @@ def check_file(path: Path, root: Path, entries: dict) -> list[str]:
         if entry and (match["repo"] != entry[0] or match["path"] != entry[2]
                       or not (match["sha"].startswith(entry[1]) or entry[1].startswith(match["sha"]))):
             errors.append("Origin과 PROVENANCE의 저장소·커밋·경로 불일치")
-        if match["repo"] == "kor-travel-geo" or match["license"] == "GPL-3.0-only":
+        if (match["repo"].rsplit("/", 1)[-1].casefold() == "kor-travel-geo"
+                or match["license"] == "GPL-3.0-only" or (entry and entry[5])):
             if not any("GPL-3.0-only" in item for item in fields.get("SPDX-License-Identifier", [])):
                 errors.append("geo 또는 GPL-3.0-only 원천의 -only 식별자 누락")
     if entry and entry[3] and not fields.get("Modified"):

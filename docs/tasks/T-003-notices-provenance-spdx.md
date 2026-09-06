@@ -77,7 +77,8 @@ Git Bash에서 동일.
 - Windows·WSL: SPDX 13개 파일 오류 0, 문서 링크 215개 문서/1833개 로컬 target 오류 0, task 96개 오류 0. `git diff --check` 오류 0.
 - 원문 후행 공백 때문에 최초 staged 공백 검사가 실패했다. LICENSES txt 사본만 공백 자동 정리/경고에서 제외해 원본 digest를 보존하고 staged 검사를 다시 통과했다.
 - 링크 검사 범위 추가 테스트를 처음 배치할 때 기존 assert 위치가 섞여 1건 실패했다. 위치를 고친 뒤 위 전체 시험을 양쪽에서 다시 실행했다.
-- 2인 독립 적대적 리뷰: 아직 NOT_RUN(구현 후보 commit 후 실행). 완료 전 DONE으로 옮기지 않는다.
+- [2인 독립 리뷰](../reviews/adversarial/2026-09-07-t003.md): 017fef1에서 A BLOCK/B BLOCK. 경로 별칭·qualified geo·표 공백·원본 수정 이력·고지 전달을 보완했다. 원본의 6 finding은 post-fix 재확인 전 OPEN이며 이 task는 IN_PROGRESS다.
+- 수정 후보: Windows·WSL 전체 unittest 98개 성공·skip 0, SPDX 13개 오류 0. common 내부 임시 전달 fixture에서 설정 6개·고지·PV 6행·라이선스 사본 바이트를 확인했다. 소비자 파일을 직접 수정하지 않았다.
 - CI의 필수 SPDX 단계·Windows matrix는 T-009. 패키지 빌드·설치·소비자 smoke는 NOT_RUN(제품 실물 없음; T-101·T-201·T-302의 후속 gate). 이 task의 문서·도구 완료와 릴리스 가능을 구분한다.
 
 ## rollback 또는 release 차단 조건

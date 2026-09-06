@@ -134,6 +134,46 @@ class SpdxTests(unittest.TestCase):
         self.assertFalse(self.errors(text.replace("GPL-3.0-or-later",
                                                  "GPL-3.0-or-later AND GPL-3.0-only")))
 
+    def test_noncanonical_index_paths_cannot_bypass_notices(self):
+        for name in ("./tools/sample.py", "tools//sample.py", "TOOLS/sample.py",
+                     "tools/Sample.py"):
+            with self.subTest(name=name):
+                self.port()
+                index = self.root / "PROVENANCE.md"
+                index.write_text(index.read_text(encoding="utf-8").replace("tools/sample.py", name),
+                                 encoding="utf-8")
+                self.write("tools/sample.py", HEADER)
+                result = self.run_cli()
+                self.assertEqual(result.returncode, 1, result.stdout)
+
+    def test_duplicate_source_index_fails(self):
+        self.port()
+        self.write("tools/sample.py", HEADER)
+        index = self.root / "PROVENANCE.md"
+        index.write_text(index.read_text(encoding="utf-8") * 2, encoding="utf-8")
+        self.assertEqual(self.run_cli().returncode, 1)
+
+    def test_indented_index_preserves_required_notices(self):
+        for indent in (" ", "   ", "\t"):
+            with self.subTest(indent=indent):
+                text = self.port()
+                index = self.root / "PROVENANCE.md"
+                index.write_text(index.read_text(encoding="utf-8").replace("| PV-", indent + "| PV-"),
+                                 encoding="utf-8")
+                self.assertIn("이식 소스의 Origin은 정확히 하나 필요", self.errors(HEADER))
+                self.assertFalse(self.errors(text + "# Modified: 2026-09-07 — 경로 변경\n"))
+
+    def test_qualified_geo_and_index_license_cannot_bypass_only(self):
+        for repo, license_text in (("digitie/kor-travel-geo", "GPL-3.0-only"),
+                                   ("digitie/KOR-TRAVEL-GEO", "GPL-3.0-or-later"),
+                                   ("other", "GPL-3.0-only")):
+            with self.subTest(repo=repo, license_text=license_text):
+                text = self.port(repo=repo, modified="없음", license_text=license_text)
+                self.assertTrue(self.errors(text))
+                self.assertFalse(self.errors(text.replace("GPL-3.0-or-later", "GPL-3.0-only")))
+                self.assertFalse(self.errors(text.replace("GPL-3.0-or-later",
+                                                         "GPL-3.0-or-later AND GPL-3.0-only")))
+
     def test_derivative_requires_source_notice(self):
         text = self.port(modified="없음", license_text="GPL-3.0-or-later (shadcn/ui MIT 파생)")
         self.assertTrue(self.errors(text))
