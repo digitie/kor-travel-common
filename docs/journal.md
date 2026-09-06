@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-015 최종 리뷰·완료 기록·대기)
+
+95c139f의 두 reviewer 원본을 각각 확정한 뒤 교차 비교했다. 최종 PASS/PASS, 누적 9개 ID 모두 FIXED·새 finding 0이다([최종 리뷰](reviews/adversarial/2026-09-07-t015-post-fix-03.md)). 두 reviewer가 수정된 자산 명령 8개 시나리오와 문서·plan·diff를 새로 확인했고, 변경 없는 코드/정본의 이전 115 tests·발행/source 검증은 동일성 확인 후 재사용했음을 원본에 구분했다. candidate CI 34066138272 성공도 확인했다.
+
+T-015와 T-006의 변경된 범위 기록을 완료 원장으로 옮겼다. T-006의 이전 npm/PyPI 이름 조회·예약은 NOT_RUN(사용자 제외)이며 계정 확보 성공을 주장하지 않는다. 완료 기록에서 link 258문서·2099대상, plan101·diff 오류 0과 Windows 115 tests·skip 0(13.223초)을 새로 확인했다. 최종 CI 성공 뒤 PR #4를 병합하고 대기한다. T-009와 다음 구현 task는 착수하지 않으며 소비자 저장소를 수정하지 않았다.
+
 ## 2026-09-07 (Codex, T-015 잔여 발행 명령 정리)
 
 d1c7263의 두 독립 리뷰는 기존 7개 finding을 FIXED로 확인했지만 T-109·T-212의 오래된 발행 명령을 각각 A-P1-03·B-P1-06으로 보고했다([통합](reviews/adversarial/2026-09-07-t015-post-fix-02.md)). 두 원본 확정 후 비교했고 coordinator도 실패 3건을 재현했다. 두 task의 중복 발행 절을 정본 release 절차로 연결했으며 checksum/tar 6개 mock이 기대 결과와 같았다. Windows 115 tests·skip 0(12.916초), 문서·101 task·diff 검사 성공이다. 규범 문서에서 태그 생성·Release 생성은 runbook에만 남았다. 실제 발행·소비자 쓰기 없이 새 commit의 두 재확인 뒤 현재 PR #4를 병합하고 대기한다.

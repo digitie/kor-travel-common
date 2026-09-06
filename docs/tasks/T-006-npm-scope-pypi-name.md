@@ -1,6 +1,6 @@
-# T-006 공개 registry 이름 확보 철회와 패키지 식별자 확정
+# T-006 공개 registry 이름 확보 철회와 패키지 식별자 확정 (2026-09-07, PR #4)
 
-- 상태: BLOCKED
+- 상태: DONE
 - 우선순위: P1
 - Gate: 사용자 범위 변경 기록·문서 검증
 - 선행: T-015
@@ -42,7 +42,7 @@ python3 -B -X utf8 tools/validate_plan.py
 
 ## evidence
 
-2026-09-07 사용자: “npm pypi 에는 안 올릴꺼야”. 기존 계정 확보 acceptance는 이 지시로 철회했다. npm/PyPI 이름 조회·예약은 NOT_RUN(요청 범위에서 제외)이며 성공으로 판정하지 않는다. T-015의 검증·리뷰 전에는 종료하지 않는다. 과거 범위는 PR #3 병합 기준의 Git 이력에 보존한다.
+2026-09-07 사용자: “npm pypi 에는 안 올릴꺼야”. 기존 계정 확보 acceptance는 이 지시로 철회했다. npm/PyPI 이름 조회·예약은 NOT_RUN(요청 범위에서 제외)이며 성공으로 판정하지 않는다. T-015의 문서 검증과 [최종 두 독립 PASS](../reviews/adversarial/2026-09-07-t015-post-fix-03.md)를 확인해 변경된 범위의 기록을 종료했다. registry 소유권 확보나 기존 조회 acceptance의 성공을 뜻하지 않는다. 과거 범위는 PR #3 병합 기준의 Git 이력에 보존한다.
 
 ## rollback 또는 release 차단 조건
 

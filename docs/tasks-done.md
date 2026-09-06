@@ -6,6 +6,8 @@
 
 | ID | 상태 | 우선순위 | 작업 | 선행 |
 |---|---|---:|---|---|
+| [T-015](tasks/T-015-common-delivery-plan.md) | DONE | P0 | npm·PyPI 미게시와 common 구현·외부 릴리스 선행 분리 (2026-09-07, PR #4) | T-005 |
+| [T-006](tasks/T-006-npm-scope-pypi-name.md) | DONE | P1 | 공개 registry 이름 확보 철회와 패키지 식별자 확정 (2026-09-07, PR #4) | T-015 |
 | [T-005](tasks/T-005-versions-registry.md) | DONE | P0 | versions.json v1 + `tools/check_versions.py`(npm lock v3·report·판정 어휘) + `docs/standards/versions.md` + 7 소비자 현재값·예외 등록 (2026-09-07, PR #3) | 없음 |
 | [T-003](tasks/T-003-notices-provenance-spdx.md) | DONE | P0 | 고지·출처 파일(NOTICE·THIRD_PARTY_NOTICES·LICENSES/·PROVENANCE·CONTRIBUTING)·SPDX 헤더 규약·tools/check_spdx.py (2026-09-07, PR #2) | 없음 |
 | [T-013](tasks/T-013-plan-handoff-closure.md) | DONE | P0 | PR #1·로컬 초안 통합과 순차 실행 계획·인계 마무리 (2026-09-06, PR #1) | 없음 |

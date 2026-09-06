@@ -1,6 +1,6 @@
-# T-015 npm·PyPI 미게시와 common 구현·외부 릴리스 선행 분리
+# T-015 npm·PyPI 미게시와 common 구현·외부 릴리스 선행 분리 (2026-09-07, PR #4)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P0
 - Gate: 문서 검증·2인 독립 리뷰
 - 선행: T-005
@@ -49,7 +49,11 @@ git diff --check
 
 ## evidence
 
-2026-09-07 착수: PR #3은 659aa6dd3cb319761e8f7290155e025b11029c83으로 병합했다. 원안 ADR-013 결정 1과 T-201·T-205·T-306/307의 선행, T-010의 외부 dispatch 수용 기준이 common 단독 완주를 막는 것을 원문에서 확인했다. 원문 대조 후 ADR-014·T-010a·T-109a·T-212a·T-310a를 작성했다. 전체 101 task의 metadata/DAG 검사와 문서 link 검증이 성공했다. 외부 선행 노드를 제외한 도달성 검사에서 UI T-201/205/208/210·Python T-306/307/308의 common 경로가 열리고 T-010a·T-109/212/213/310/311·T-507은 대기를 유지함을 확인했다. 이는 실행 성공 판정이 아니다. 독립 첫 리뷰는 A/B 모두 BLOCK이다. 태그 대상 충돌(P1 중복 2건), 외부 dispatch의 후보 선행 누락(P2), 0.2 보존 책임(P2), 과거 release branch와 현재 main 원장 왕복(P2)을 확인했다. 원 ID·심각도를 보존했고 최초 5개 finding은 원 reviewer가 FIXED로 확인했다. 첫 post-fix는 A PASS/B BLOCK으로, tag 실패 전파와 release SHA CI 경로 두 추가 finding을 수정했다. [두 번째 수정 후 리뷰](../reviews/adversarial/2026-09-07-t015-post-fix-02.md)에서 기존 7개 finding은 FIXED로 확인됐다. 두 0.1 릴리스 task에 남은 발행 경로를 두 reviewer가 각각 A-P1-03·B-P1-06으로 확인해 단일 절차로 연결했고 원 reviewer 재확인 전에는 완료하지 않는다. 사용자는 이 작업 병합 뒤 대기를 요청했다.
+2026-09-07: PR #3 병합 기준 `659aa6dd3cb319761e8f7290155e025b11029c83`에서 ADR-013·관련 task 원문을 다시 대조해 ADR-014와 T-010a·T-109a·T-212a·T-310a를 작성했다. 101 task metadata/DAG·문서 링크를 검사했고 common 구현 도달성과 외부 gate 보존을 모델로 확인했다. 모델은 제품 실행 성공이 아니다.
+
+최종 candidate `95c139fdea523910fb5f1bdd32f5bae728df2915`는 두 독립 reviewer PASS이며 누적 9개 finding ID가 모두 FIXED, 새 finding 0이다([최종 리뷰](../reviews/adversarial/2026-09-07-t015-post-fix-03.md)). Windows 115 tests·skip 0과 문서·plan·diff 검사, 발행 실패/자산 확인 mock을 통과했다. candidate CI 34066138272도 성공했다. 이전 회차의 발견·수정·검증은 리뷰 원본과 journal에 보존했다.
+
+실제 package build/install·후보 보존·Release·소비자 실행은 NOT_RUN(후속 구현 또는 외부 task 범위)이다. T-006은 철회된 계정 확보 실행이 아니라 범위 변경·식별자 확정 기록으로 종료한다. 사용자는 현재 PR #4 병합 뒤 대기를 요청했으므로 다음 task는 시작하지 않는다.
 
 ## rollback 또는 release 차단 조건
 
