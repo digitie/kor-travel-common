@@ -1,6 +1,6 @@
 # T-104 docs/standards/design-tokens.md 확정(패키지 실물과 대조·규칙 ID TK-n)
 
-- 상태: BLOCKED
+- 상태: READY
 - 우선순위: P0
 - Gate: 2인 리뷰
 - 선행: T-101

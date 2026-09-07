@@ -10,6 +10,14 @@ T-101 초기 candidate `f8894e293ca9677f457011197052cd55dbdc9696`에서 A/B가 �
 
 PR #11 정확한 head의 CI `34126309766` 6개 job이 성공했고 Windows/WSL package 7 tests·pack/install·plan/link/SPDX/secret/redaction/version gate를 직접 확인했다. workflow와 표준 문서의 검사 순서 drift도 `6ab650d`에서 정렬했으며, 후속 표준 문서 리뷰 A/B가 PASS·신규 finding 0, CI `34128018010` 6개 job 성공을 확인했다([후속 판정](reviews/adversarial/2026-09-07-t101-ci-docs-post-fix.md), [A](reviews/adversarial/evidence/2026-09-07-t101-ci-docs-post-fix-reviewer-a.md), [B](reviews/adversarial/evidence/2026-09-07-t101-ci-docs-post-fix-reviewer-b.md)). main merge 후 main CI와 `codex/release-*` 실제 push CI는 `NOT_RUN(merge 후 gate)`로 남겼으며, 소비자 build/e2e·T-103·Release·npm/PyPI 게시·소비자 저장소 수정은 사용자 범위 또는 후속 task로 실행하지 않았다.
 
+## 2026-09-07 (Codex, T-101 merge·main/release push CI·완료 원장 반영)
+
+PR #12에서 T-101 candidate `fd5b42ccd0388dbac9eedadc9019d6f923affd5a`를 squash merge해 main `34c15b688b4c8663c1ca8608ab30336ac9ac0e01`에 반영했다. ready PR CI `34129028534`와 merge 후 main push CI `34129164333`은 각각 정확한 source SHA에서 docs·tools 양 OS·secret-scan·check-versions·packages 6개 job이 성공했다.
+
+수용 기준의 release push 경계를 확인하기 위해 main에서 코드 변경 없는 `codex/release-tokens-verify` commit `65397a987f65831ba6cf358609751d576de31d53`을 push했다. [CI `34129337363`](https://github.com/digitie/kor-travel-common/actions/runs/34129337363)의 6개 job과 source SHA 일치를 확인한 뒤 branch를 삭제하고 `ci-t101-verify-20260907` 보존 tag의 peeled commit을 원격에서 확인했다. npm/PyPI·GitHub Release·소비자 저장소 변경은 하지 않았다.
+
+T-101 상세를 DONE으로 바꾸고 완료 원장에 추가했으며 T-102·T-103·T-104를 READY로 열었다. 현재 상세 task는 106개, 완료 17개·열린 89개이며 다음 순차 작업은 T-102다. 초기 draft PR #11은 동일 source의 기록을 보존한 뒤 닫고, 실제 merge는 REST로 생성한 ready PR #12에서 수행했다.
+
 ## 2026-09-07 (Codex, T-011 최종 review PASS·PR #10 merge gate)
 
 T-011 `consumer-manifest.v1` strict schema·validator·10개 앱 표면 초안과 `check_versions --manifest` 저장소 root 경계를 `4680bacdf285f2cc86f1a18cc1de29ff4129f2a8`에서 마쳤다. 반복된 적대 리뷰 no-go의 근본 원인은 매니페스트·lock·workspace·app 입력을 각 호출부에서 `resolve/is_file/exists`로 따로 검사해 OS별 symlink loop와 누락 leaf의 결과가 달라지고, 존재성 조기 반환이 중간 symlink를 경계 검사 전에 소거한 데 있었다. `_resolve_input_path`·`_path_contains_symlink`로 경계를 중앙화하고 app 조기 반환·validator registry·check_versions registry 오류 원문을 닫았으며, Windows/WSL direct·중간·외부·self-symlink와 redaction 회귀를 고정했다.

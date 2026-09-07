@@ -1,6 +1,6 @@
 # T-102 레거시 어휘 별칭 shim `aliases/map-vocabulary.css`(map·weather·geo 공통 이름 → `--kt-*`) + weather `--rail`·font 오버라이드 예제 + 별칭 충돌 검사 스크립트
 
-- 상태: BLOCKED
+- 상태: READY
 - 우선순위: P0
 - Gate: 도구 테스트
 - 선행: T-101
