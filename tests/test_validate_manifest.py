@@ -411,6 +411,30 @@ class ValidateManifestTests(unittest.TestCase):
             self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
             self.assertNotIn("Traceback", result.stdout + result.stderr)
 
+            direct = app / "direct.txt"
+            direct.symlink_to(direct)
+            data["lockfiles"] = [{"kind": "requirements", "path": "apps/etl/direct.txt", "scope": "apps/etl"}]
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            result = subprocess.run([
+                sys.executable, "-B", "-X", "utf8", str(ROOT / "tools" / "check_versions.py"),
+                str(root), "--manifest", str(manifest), "--repo", "pinvi",
+                "--mode", "fail", "--no-step-summary",
+            ], capture_output=True, text=True, encoding="utf-8")
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertNotIn("Traceback", result.stdout + result.stderr)
+
+            pyproject = app / "pyproject.toml"
+            pyproject.symlink_to(pyproject)
+            data["lockfiles"] = []
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            result = subprocess.run([
+                sys.executable, "-B", "-X", "utf8", str(ROOT / "tools" / "check_versions.py"),
+                str(root), "--manifest", str(manifest), "--repo", "pinvi",
+                "--mode", "fail", "--no-step-summary",
+            ], capture_output=True, text=True, encoding="utf-8")
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertNotIn("Traceback", result.stdout + result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

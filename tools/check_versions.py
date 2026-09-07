@@ -1368,6 +1368,14 @@ def _path_within(path: Path, root: Path) -> bool:
     return True
 
 
+def _resolve_input_path(path: Path, message: str) -> Path:
+    """입력 경로의 symlink loop·I/O 오류를 원문 없는 입력 오류로 닫는다."""
+    try:
+        return path.resolve()
+    except (OSError, RuntimeError) as exc:
+        raise ValueError(message) from exc
+
+
 def _workflow_input_error() -> ValueError:
     """workflow 파싱 실패를 입력값·경로를 노출하지 않는 일반 오류로 만든다."""
     return ValueError("workflow 입력 구조 오류")
@@ -1725,7 +1733,7 @@ class _WorkflowYamlParser:
 # --------------------------------------------------------------------------- 탐색
 
 def walk(root: Path):
-    root = root.resolve()
+    root = _resolve_input_path(root, "소비자 입력 오류")
     for current, dirs, files in os.walk(root):
         current_path = Path(current)
         depth = len(current_path.relative_to(root).parts)
@@ -1747,11 +1755,14 @@ def nearest_lock(start: Path, root: Path, name: str) -> Path | None:
 
 def discover_workflows(root: Path) -> list[Scope]:
     """저장소 루트의 `.github/workflows` 정적 입력만 발견한다."""
-    root = root.resolve()
+    root = _resolve_input_path(root, "workflow 입력 구조 오류")
     directory = root / ".github" / "workflows"
     if not directory.is_dir():
         return []
-    resolved_directory = directory.resolve()
+    try:
+        resolved_directory = directory.resolve()
+    except (OSError, RuntimeError) as exc:
+        raise _workflow_input_error() from exc
     if not _path_within(resolved_directory, root):
         raise _workflow_input_error()
     scopes: list[Scope] = []
@@ -1764,7 +1775,7 @@ def discover_workflows(root: Path) -> list[Scope]:
 
 
 def discover(root: Path) -> list[Scope]:
-    root = root.resolve()
+    root = _resolve_input_path(root, "소비자 입력 오류")
     scopes: list[Scope] = []
     for directory, files in walk(root):
         rel = directory.relative_to(root).as_posix() or "."
@@ -1796,9 +1807,11 @@ def discover(root: Path) -> list[Scope]:
 
 def _safe_declared_file(candidate: Path, root: Path) -> Path | None:
     """동반 선언 파일의 최종 경로를 소비자 root 안으로 제한한다."""
-    resolved = candidate.resolve()
+    resolved = _resolve_input_path(candidate, "매니페스트 동반 선언 파일 입력 구조 오류")
     if not _path_within(resolved, root):
         raise ValueError("매니페스트 동반 선언 파일이 소비자 저장소 루트 밖에 있음")
+    if candidate.is_symlink() and not resolved.is_file():
+        raise ValueError("매니페스트 동반 선언 파일 입력 구조 오류")
     return resolved if candidate.is_file() else None
 
 
@@ -1809,9 +1822,11 @@ def _manifest_declaration_scopes(root: Path, app: object) -> list[Scope]:
     candidate = (root / app)
     if not candidate.exists() and not candidate.is_symlink():
         return []
-    app_dir = candidate.resolve()
+    app_dir = _resolve_input_path(candidate, "매니페스트 app 입력 구조 오류")
     if not _path_within(app_dir, root):
         raise ValueError("매니페스트 app 경로가 소비자 저장소 루트 밖에 있음")
+    if candidate.is_symlink() and not app_dir.is_dir():
+        raise ValueError("매니페스트 app 입력 구조 오류")
     if not app_dir.is_dir():
         return []
     label = app_dir.relative_to(root).as_posix() or "."
@@ -1846,8 +1861,11 @@ def scopes_from_manifest(
     이전 최소 fixture는 `root` 없이 계속 읽을 수 있다. 실제 소비자 호출은
     저장소 루트와 매니페스트를 함께 주어 strict v1·루트 기준 경로를 사용한다.
     """
-    manifest_path = manifest_path.resolve()
-    base = (root or manifest_path.parent).resolve()
+    declared_manifest_path = manifest_path
+    manifest_path = _resolve_input_path(manifest_path, "매니페스트 입력 구조 오류")
+    if declared_manifest_path.is_symlink() and not manifest_path.is_file():
+        raise ValueError("매니페스트 입력 구조 오류")
+    base = _resolve_input_path(root or manifest_path.parent, "매니페스트 입력 구조 오류")
     if not _path_within(manifest_path, base):
         raise ValueError("매니페스트가 소비자 저장소 루트 밖에 있음")
     if strict:
@@ -1861,9 +1879,12 @@ def scopes_from_manifest(
     for entry in data.get("lockfiles", []):
         kind = entry.get("kind", "")
         raw_path = entry.get("path", "")
-        path = (base / raw_path).resolve()
+        declared_path = base / raw_path
+        path = _resolve_input_path(declared_path, "매니페스트 lock path 입력 구조 오류")
         if not _path_within(path, base):
             raise ValueError("매니페스트 lock path가 소비자 저장소 루트 밖에 있음")
+        if declared_path.is_symlink() and not path.is_file():
+            raise ValueError("매니페스트 lock path 입력 구조 오류")
         raw_label = entry.get("scope")
         if not isinstance(raw_label, str) or not raw_label:
             raw_label = path.parent.relative_to(base).as_posix() or "."
@@ -1874,7 +1895,9 @@ def scopes_from_manifest(
                 # 기존 최소 fixture는 scope를 보고 label로만 사용하고 lock 옆 manifest를 읽는다.
                 workspace_root = path.parent
             else:
-                workspace_root = (path.parent / workspace).resolve() if workspace else path.parent
+                workspace_root = (_resolve_input_path(path.parent / workspace,
+                                                      "매니페스트 npm workspace 입력 구조 오류")
+                                  if workspace else path.parent)
             if not _path_within(workspace_root, base):
                 raise ValueError("매니페스트 npm workspace가 소비자 저장소 루트 밖에 있음")
             manifest = _safe_declared_file(workspace_root / "package.json", base)
@@ -2147,10 +2170,13 @@ class Checker:
         """workflow의 lexical root를 유지하고 symlink 탈출을 읽기 전에 차단한다."""
         if scope.lock is None:
             raise _workflow_input_error()
-        repository_root = scope.lock.parent.parent.parent.resolve()
+        try:
+            repository_root = scope.lock.parent.parent.parent.resolve()
+        except (OSError, RuntimeError) as exc:
+            raise _workflow_input_error() from exc
         try:
             resolved_workflow = scope.lock.resolve()
-        except OSError as exc:
+        except (OSError, RuntimeError) as exc:
             raise _workflow_input_error() from exc
         if not scope.lock.is_file() or not _path_within(resolved_workflow, repository_root):
             raise _workflow_input_error()
@@ -2165,7 +2191,10 @@ class Checker:
             return "github-action", "-", "FLOATING_REF", "참조가 비어 있음"
         repository_root = self._workflow_repository_root(scope)
         if text.startswith("./"):
-            candidate = (repository_root / text).resolve()
+            try:
+                candidate = (repository_root / text).resolve()
+            except (OSError, RuntimeError) as exc:
+                raise _workflow_input_error() from exc
             try:
                 candidate.relative_to(repository_root)
             except ValueError:
@@ -2804,7 +2833,8 @@ def main(argv: list[str] | None = None) -> int:
         pass
 
     try:
-        registry = Registry.load(args.registry.resolve())
+        registry_path = _resolve_input_path(args.registry, "레지스트리 입력 구조 오류")
+        registry = Registry.load(registry_path)
     except (OSError, ValueError, TypeError, AttributeError, KeyError) as exc:
         print(f"::error title=check_versions::레지스트리 오류: {exc}")
         return 2
@@ -2825,25 +2855,37 @@ def main(argv: list[str] | None = None) -> int:
     scopes: list[Scope] = []
     roots: list[str] = []
     manifest_repo: str | None = None
+    manifest_path: Path | None = None
     if args.manifest is not None:
-        manifest_root = args.paths[0].resolve() if args.paths else None
         try:
+            manifest_path = _resolve_input_path(args.manifest, "매니페스트 입력 구조 오류")
+            manifest_root = (_resolve_input_path(args.paths[0], "매니페스트 입력 구조 오류")
+                             if args.paths else None)
             manifest_repo, scopes = scopes_from_manifest(
-                args.manifest.resolve(),
+                manifest_path,
                 root=manifest_root,
                 strict=manifest_root is not None,
-                registry_path=args.registry.resolve(),
+                registry_path=registry_path,
             )
         except (OSError, ValueError, TypeError, AttributeError, KeyError) as exc:
             print(f"::error title=check_versions::매니페스트 오류: {exc}")
             return 2
-        roots.append((manifest_root or args.manifest.resolve().parent).as_posix())
+        roots.append((manifest_root or manifest_path.parent).as_posix())
+    else:
+        manifest_root = None
+    first_root: Path | None = manifest_root
     for index, path in enumerate(args.paths):
-        root = path.resolve()
+        try:
+            root = _resolve_input_path(path, "소비자 입력 오류")
+        except ValueError as exc:
+            print(f"::error title=check_versions::소비자 입력 오류: {exc}")
+            return 2
         if not root.is_dir():
             print(f"::error title=check_versions::디렉터리 아님: "
                   f"{_workflow_display_value(root.as_posix(), '(입력 경로 비공개)')}")
             return 2
+        if first_root is None:
+            first_root = root
         if args.manifest is not None and index == 0:
             # 매니페스트 모드에서는 lockfiles[]와 저장소 루트 workflow만 읽는다.
             continue
@@ -2858,7 +2900,11 @@ def main(argv: list[str] | None = None) -> int:
         print("::error title=check_versions::검사 대상 scope가 없음(경로·lockfiles 확인 필요)")
         return 2
 
-    repo = args.repo or manifest_repo or (args.paths[0].resolve().name if args.paths else args.manifest.resolve().parent.name)
+    repo = args.repo or manifest_repo or (
+        first_root.name if first_root is not None
+        else manifest_path.parent.name if manifest_path is not None
+        else ""
+    )
     repo = registry.consumer(repo) or repo
     if args.mode:
         mode, mode_source = args.mode, "--mode 로컬 override"
