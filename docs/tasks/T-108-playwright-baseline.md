@@ -51,7 +51,7 @@ rg -n "320, 375, 414, 768, 1024, 1440" templates/playwright.baseline.ts docs/sta
 python3 -B -X utf8 tools/check_spdx.py
 ```
 
-Git Bash에서 동일(포트 13005는 T-014 확정 전 임시).
+Git Bash에서 동일(포트 13005는 실행 시 주입하는 테스트 fixture 예시이며 운영 대역 등록을 전제하지 않는다).
 
 ## evidence
 

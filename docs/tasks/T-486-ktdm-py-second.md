@@ -26,7 +26,7 @@ docker-manager 백엔드가 py 2차 모듈 중 C2 request-id를 `trust_incoming=
 
 ## 범위 밖
 
-envelope 변경(평문 base 케이스 포함), metrics 공통화, 인증 프리미티브(범위 밖 유지), pin registry·pinset 계약(B10), `ruff format`, Node/프론트.
+envelope 변경(평문 base 케이스 포함), metrics 공통화, 앱별 인증 정책·저장소, pin registry·pinset 계약(B10), `ruff format`, Node/프론트. 공용 인증 프리미티브 채택은 T-312 후속으로 기록한다.
 
 ## 대상 저장소·브랜치·PR·되돌리기
 

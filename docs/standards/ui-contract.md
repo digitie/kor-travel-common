@@ -141,7 +141,7 @@
 | `FormFieldInput`, `FormSelect`, `FormTextArea` | `data-slot="form-field"` | `label`, `hint?`, `error?`, `required?`, `help?`, `reserveMessage`(`true`) | 라벨 위 · 컨트롤 · 메시지 슬롯 1개 예약(error가 hint 대체), `aria-describedby`는 표시 중 메시지만, required `*` `aria-hidden` + 접근성 이름 보정 |
 | `validateForm` (`form-validation`) | 헤드리스 | `rules[]` | `{errors, firstErrorField}`; 규칙 순서 = 포커스 순서 |
 
-셸 골격(nav·접힘·로그아웃·RBAC)·로그인 폼·`ConfirmDialog`는 패키지에 없다(`ui` §4.3; 셸·로그인은 레지스트리 채널 T-211, ConfirmDialog API 합의는 T-508).
+앱별 셸 골격(nav·접힘·로그아웃·RBAC 구성)과 `ConfirmDialog` 엔진 선택은 앱 소유다. 공용 `LoginForm`·로그인 오류/상태 슬롯의 마크업 계약은 패키지에서 제공할 수 있으며, endpoint·IdP·redirect·세션 왕복은 앱이 주입한다([ADR-015](../adr/015-common-shared-systems-scope.md), T-210·T-312). 셸·기준선 템플릿 채널은 T-211에서 별도로 다룬다.
 
 ## 5. 문구 사전
 

@@ -25,7 +25,7 @@ concierge 백엔드(`ktc`)가 py 1차 모듈 중 export CLI·request-id·quality
 
 ## 범위 밖
 
-features export 응답 변경·map provider 수정(계획만), `{detail}` → problem+json 전환, `/api/v1` prefix 변경, MCP 서버 규약, 인증(X-API-Key·세션), 라우터 분리 리팩터링.
+features export 응답 변경·map provider 수정(계획만), `{detail}` → problem+json 전환, `/api/v1` prefix 변경, MCP 서버 규약, 앱별 인증(X-API-Key·세션 저장·정책), 라우터 분리 리팩터링. 공용 인증 프리미티브 채택은 T-312 후속이다.
 
 ## 대상 저장소·브랜치·PR·되돌리기
 

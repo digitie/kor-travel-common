@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-016 공용 범위 재점검 시작)
+
+사용자가 common의 목표를 위젯·디자인 토큰·공용 코어 로직·로그인과 같은 공용 시스템을 한 저장소에 모으는 것으로 재확인했다. 기존 ADR-001·ADR-011·AGENTS·architecture·backend/UI 규칙의 “인증 전체 제외” 문구와 충돌하므로 [ADR-015](adr/015-common-shared-systems-scope.md)와 [범위 재점검](plan/common-scope-recheck-2026-09-07.md)을 작성하고 T-016으로 정본·task를 동기화한다. 로그인 UI와 저장소·키 주입형 인증 프리미티브는 common 책임으로 포함하되 인증 서버·사용자/세션 DB·운영 비밀·외부 IdP·앱별 정책은 소비자 소유로 고정했다.
+
+독립 reviewer A/B의 사전 대조에서 T-011의 9/10 초안 수 불일치와 기존 `--manifest` 경로·workflow 경계 위험, common `130xx`를 운영 대역처럼 읽을 수 있는 T-014/CI-20 문구를 확인했다. T-011은 10개 앱 표면 대응표와 경계 회귀를 요구하도록 BLOCKED로 조정하고, T-014/CI-20/T-108은 임시 fixture 포트 원칙으로 바꾼다. 소비자 저장소 수정·소비자 빌드/e2e·npm/PyPI 게시·인증 구현은 `NOT_RUN(이번 범위 밖)`이다.
+
 ## 2026-09-07 (Codex, T-005c 문서 post-fix PASS·merge gate)
 
 문서 gate에서 확인된 세 finding을 `7b35ff07b077cef85d7d0d6e0971cacff210374f`로 수정했다. reviewer-B evidence의 공백 예외를 `-blank-at-eof`로 좁혔고, mixed-line-ending manifest의 `-text -eol -whitespace`로 원본·Git blob·checkout SHA256 `D1AB00A0F4462AEEB1F99E14C6E3FA2C36A5BDD7FA28AE23C6B60278F3C8C451`을 보존했으며, resume의 다음 시작 파일을 T-011로 갱신했다. package/npm/PyPI 항목은 범위 밖 `NOT_RUN(사유)`로 분리했다.

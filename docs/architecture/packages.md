@@ -1,7 +1,7 @@
 # 배포 단위와 공개 계약
 
 - 정본 지위: 배포 단위별 이름·경로·exports·peer·채널·소비자·공개 계약의 정본(초안). 확정 task: T-008(설계 초기판) → T-101(tokens)·T-201(ui)·T-302(py)에서 실물과 대조해 확정. 마지막 갱신: 2026-09-06.
-- 근거: [브리프](../plan/design-brief.md) D-01·D-09·D-10·D-11·D-15·D-31·D-33, `docs/survey/cross/design-tokens.md` §3.6.3, `docs/survey/cross/ui-components.md` §4·§6.2, `docs/survey/cross/backend.md` §5.2·§5.3, `docs/survey/cross/licensing.md` §3.5.
+- 근거: [브리프](../plan/design-brief.md) D-01·D-09·D-10·D-11·D-15·D-31·D-33, [ADR-015](../adr/015-common-shared-systems-scope.md), `docs/survey/cross/design-tokens.md` §3.6.3, `docs/survey/cross/ui-components.md` §4·§6.2, `docs/survey/cross/backend.md` §5.2·§5.3, `docs/survey/cross/licensing.md` §3.5.
 
 이 문서는 [아키텍처 개요](README.md) §1의 배포 단위를 단위별로 펼친다. 값·파일의 정본은 각 패키지 실물이며, 여기에는 이름·경계·계약(SemVer 대상)만 둔다. "후보" 표기는 T-101·T-201·T-302에서 확정한다.
 
@@ -110,7 +110,7 @@ common CI `packages` job: build → `npm pack` → tarball 설치 → webpack·T
 | request_id | `X-Request-ID` UUID v4/v7 또는 ULID, ≤128자 ASCII, 검증 실패 시 서버 발급, `trust_incoming` 옵션(ktdm `False`) | 형식 규칙 변경 = 파괴 |
 | metrics | 표준 HTTP 3지표·라벨·미매칭 센티널·multiproc; 접두는 인자(신규 `kt<x>_`, map·pinvi 기한부 예외 D-22) | 지표 이름·라벨 변경 = 파괴 |
 | quality 베이스 | ruff `extend` 베이스(`line-length=100`, `E,F,I,UP,B,ASYNC`), mypy strict 베이스, import-linter 계약 템플릿, pre-commit 템플릿; format 규칙 미포함 | 규칙 추가는 minor(앱 per-file-ignores baseline) |
-| 인증 | 범위 밖(비밀번호·세션·CSRF·JWT·RBAC) | — |
+| 인증 | 저장소·키·운영 환경을 주입받는 공용 비밀번호·세션/토큰·CSRF·JWT·RBAC 프리미티브와 로그인 UI 계약 | 인증 서버·사용자/세션 DB·외부 IdP·운영 비밀·앱별 역할/라우트 정책 |
 
 ### 4.3 검증·동봉
 

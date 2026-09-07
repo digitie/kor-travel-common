@@ -9,7 +9,7 @@
 - 7개 백엔드(geo·map·weather·airport·pinvi·concierge·ktdm)는 에러 본문 7종, 페이지네이션 4형, health 경로 4형, 요청 ID 정책 4형으로 갈라져 있고, map↔pinvi↔ktdm↔concierge는 서로의 OpenAPI 산출물을 sha256 pin으로 소비한다(사실: `oa` §2.5·§2.6·§2.10·§2.11·§3.5). 규약 불일치가 이미 저장소 간 비용으로 나타나므로 규칙은 코드보다 먼저 배포한다.
 - 원형은 map(`packages/kor-travel-map-api`)이다. map이 이미 지키는 규칙은 map 기준으로 문장을 고정했고, map만 조정하는 항목은 `type` URI·429 코드·`starlette<1.0` 셋뿐이다(`oa` §4).
 - 기존 계약을 깨지 않는다. 신규 표면에는 MUST, 기존 표면에는 SHOULD + 예외 등록으로 적용 강도를 나눈다(§3). 예외에는 반드시 `review` 날짜가 있고, `sunset: null`은 "무기한"이지 "검토 면제"가 아니다.
-- 인증(비밀번호·세션·CSRF·JWT·RBAC)은 이 규약의 범위 밖이다. 공통은 `securitySchemes` 선언 형식과 헤더 이름 형식만 정한다(D-01·D-15).
+- 인증 서버·사용자 데이터·운영 정책은 이 규약의 범위 밖이다. 공통은 로그인 UI/인증 프리미티브의 계약과 `securitySchemes` 선언 형식·헤더 이름 형식을 정하며, 저장소·키·역할 정책은 앱이 주입한다([ADR-015](../adr/015-common-shared-systems-scope.md), T-312).
 
 ## 2. 문서 사용법
 

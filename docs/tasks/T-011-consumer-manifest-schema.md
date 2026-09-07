@@ -1,13 +1,13 @@
 # T-011 소비자 매니페스트 스키마 `consumer-manifest.v1` + `tools/validate_manifest.py` + 7 소비자 초기 매니페스트 초안
 
-- 상태: READY
+- 상태: BLOCKED
 - 우선순위: P1
 - Gate: 도구 테스트
-- 선행: T-005
+- 선행: T-005, T-016
 
 ## 목표
 
-소비 저장소가 커밋할 `kor-travel-common.lock.json`의 스키마와 검증 도구를 만들고, 7 소비자의 초안을 common에 두어 T-403(매니페스트 커밋)과 T-012(통합 지도 생성)가 같은 형식을 쓰게 한다.
+소비 저장소가 커밋할 `kor-travel-common.lock.json`의 스키마와 검증 도구를 만들고, 7 소비자의 앱 표면별 초안을 common에 두어 T-403(매니페스트 커밋)과 T-012(통합 지도 생성)가 같은 형식을 쓰게 한다. 초안은 채택·설치·소비자 실행 성공을 의미하지 않는다.
 
 ## 고정 결정
 
@@ -19,8 +19,23 @@
 
 1. `templates/kor-travel-common.lock.schema.json`(문서용 스키마, draft 2020-12 형식) + `templates/kor-travel-common.lock.example.json`.
 2. `tools/validate_manifest.py`: stdlib만으로 strict 검증(필수 필드·타입·미지 필드 거부·`exceptions[].until` 날짜 형식·`lockfiles[].kind ∈ {npm, uv, poetry, requirements}`·`enforce` 존재 시 오류·`repo` 값이 `versions.json consumers` 키에 있는지). 출력 오류 목록, exit 0/1.
-3. `tools/check_versions.py`에 `--manifest <path>` 입력 연결(`lockfiles[]`를 순회, `scope`별 표).
-4. `templates/manifests/<repo>[.<app>].lock.json` 초안: map(admin), weather(admin), geo(ui), concierge(frontend), docker-manager(frontend), airport(frontend·backend), pinvi(`apps/web`·`apps/api`·`apps/etl`). 값은 조사 기준 커밋 현재값(인벤토리 §10)이며 `tokens.version` 등은 미채택이면 `null`.
+3. 이미 존재하는 `tools/check_versions.py --manifest <path>` 입력 계약을 새 strict schema와 호환되도록 검증한다. `lockfiles[]` 순회·`scope`별 표·매니페스트 기준 workflow 검색을 보존하고, 매니페스트 경로·`app` 경로·저장소 경계를 벗어나는 lock path와 workflow 누락을 회귀 시험으로 고정한다.
+4. 다음 **10개** 초안의 repo/app/파일 대응을 고정한다. `lockfiles.path`는 매니페스트가 놓인 소비자 저장소 기준 경로이며 `app`은 저장소 안의 앱 표면 식별자다.
+
+   | 파일 | repo | app | 관찰 lock |
+   |---|---|---|---|
+   | `map.lock.json` | `kor-travel-map` | `admin` | root `package-lock.json` |
+   | `weather.lock.json` | `kor-travel-weather` | `admin` | frontend `package-lock.json`, root `uv.lock` |
+   | `geo.lock.json` | `kor-travel-geo` | `ui` | `kor-travel-geo-ui/package-lock.json` |
+   | `concierge.lock.json` | `kor-travel-concierge` | `frontend` | frontend `package-lock.json`, requirements files |
+   | `docker-manager.lock.json` | `kor-travel-docker-manager` | `frontend` | frontend `package-lock.json`, backend `poetry.lock`(미추적이면 null) |
+   | `airport.frontend.lock.json` | `kor-travel-airport` | `frontend` | frontend `package-lock.json` |
+   | `airport.backend.lock.json` | `kor-travel-airport` | `backend` | backend `uv.lock` |
+   | `pinvi.apps-web.lock.json` | `pinvi` | `apps/web` | root `package-lock.json` + workspace 경로 |
+   | `pinvi.apps-api.lock.json` | `pinvi` | `apps/api` | `apps/api/uv.lock` |
+   | `pinvi.apps-etl.lock.json` | `pinvi` | `apps/etl` | lock 없음(선언만) |
+
+   값은 조사 기준 커밋 현재값(인벤토리 §10)이며 `tokens.version` 등은 미채택이면 `null`.
 5. `tests/test_validate_manifest.py`(정상·미지 필드·`enforce`·`until` 누락·kind 오류).
 
 ## 범위 밖
@@ -29,14 +44,14 @@
 
 ## 예상 변경 파일
 
-예정 경로는 존재·실행 증거가 아니다. `templates/kor-travel-common.lock.schema.json`, `templates/kor-travel-common.lock.example.json`, `templates/manifests/*.lock.json`(9), `tools/validate_manifest.py`, `tools/check_versions.py`, `tests/test_validate_manifest.py`, `tools/README.md`(행 추가), `templates/README.md`(행 추가).
+예정 경로는 존재·실행 증거가 아니다. `templates/kor-travel-common.lock.schema.json`, `templates/kor-travel-common.lock.example.json`, `templates/manifests/*.lock.json`(10), `tools/validate_manifest.py`, `tools/check_versions.py`, `tests/test_validate_manifest.py`, `tools/README.md`(행 추가), `templates/README.md`(행 추가).
 
 ## 수용 기준
 
 - 스키마 필드 집합이 D-19와 글자 단위로 같고 `enforce`를 넣은 fixture는 exit 1.
-- `validate_manifest.py`가 9개 초안 전부 exit 0, 미지 필드·`until` 누락·잘못된 `kind` fixture는 exit 1(테스트로 고정).
+- `validate_manifest.py`가 10개 초안 전부 exit 0, 미지 필드·`until` 누락·잘못된 `kind` fixture는 exit 1(테스트로 고정).
 - `check_versions.py --manifest templates/manifests/map.lock.json`이 `lockfiles[]`를 읽어 표를 낸다(lock 파일이 fixture로 없으면 `NO_LOCK`).
-- 초안의 `repo`·`app` 값이 `versions.json consumers` 키·인벤토리 앱 경로와 일치한다.
+- 초안의 10개 `repo`·`app` 값이 `versions.json consumers` 키·인벤토리 앱 경로와 일치하고 대응표와 파일 수가 같다.
 - Linux·Windows 결과 동일.
 
 ## 검증 명령

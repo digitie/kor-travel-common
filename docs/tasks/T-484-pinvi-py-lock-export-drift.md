@@ -24,7 +24,7 @@ pinvi `apps/api`·`apps/etl`의 Python 축을 common 정책에 맞춘다: (1) �
 
 ## 범위 밖
 
-envelope `{error:{}}` → problem+json 전환(예외 유지), 메트릭 접두 변경, map 계약 스냅샷 pin 체계(B10, 흡수 부적합), 인증(JWT·argon2·RBAC), 프론트.
+envelope `{error:{}}` → problem+json 전환(예외 유지), 메트릭 접두 변경, map 계약 스냅샷 pin 체계(B10, 흡수 부적합), 앱별 인증(JWT·argon2·RBAC 정책·저장소), 프론트. 공용 검증 프리미티브 채택은 T-312 후속으로 기록한다.
 
 ## 대상 저장소·브랜치·PR·되돌리기
 
