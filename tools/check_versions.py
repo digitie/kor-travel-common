@@ -1354,13 +1354,31 @@ def _workflow_input_error() -> ValueError:
     return ValueError("workflow 입력 구조 오류")
 
 
-def _yaml_quote_starts(text: str, index: int) -> bool:
+def _yaml_quote_starts(text: str, index: int, *, flow: bool = False) -> bool:
     """plain scalar 내부의 apostrophe·quote를 인용 시작으로 오인하지 않는다."""
     if index == 0 or not text[:index].strip() or text[:index].strip() == "-":
         return True
-    delimiter = max(text.rfind(":", 0, index), text.rfind("[", 0, index),
-                    text.rfind(",", 0, index))
-    return delimiter >= 0 and not text[delimiter + 1:index].strip()
+    if flow:
+        delimiter = text.rfind(",", 0, index)
+        if delimiter < 0:
+            delimiter = -1
+        return not text[delimiter + 1:index].strip()
+    mapping_colon = -1
+    for match in re.finditer(r":(?=\s|$)", text):
+        if match.start() >= index:
+            break
+        mapping_colon = match.start()
+    if mapping_colon < 0:
+        return False
+    value_start = mapping_colon + 1
+    while value_start < index and text[value_start].isspace():
+        value_start += 1
+    if value_start < index and text[value_start] == "[":
+        delimiter = text.rfind(",", value_start, index)
+        if delimiter >= value_start:
+            return not text[delimiter + 1:index].strip()
+        return not text[value_start + 1:index].strip()
+    return not text[mapping_colon + 1:index].strip()
 
 
 def _strip_yaml_comment(line: str) -> str:
@@ -1459,7 +1477,7 @@ class _WorkflowYamlParser:
                 elif char == quote:
                     quote = ""
                 continue
-            if char in {"'", '"'} and _yaml_quote_starts(inner, index):
+            if char in {"'", '"'} and _yaml_quote_starts(inner, index, flow=True):
                 quote = char
             elif char in "[]{}":
                 raise _workflow_input_error()

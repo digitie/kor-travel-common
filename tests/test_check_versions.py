@@ -1092,6 +1092,9 @@ class CheckVersionsTests(unittest.TestCase):
             "description: fixture's build\n"
             "summary: a 'b\n"
             'title: a "b\n'
+            "comma: a, 'b\n"
+            "colon-quote: a:'b\n"
+            "bracket-quote: a[ 'b\n"
             "jobs:\n  build:\n    steps:\n"
             '      - run: echo "hello"\n'
             '      - with:\n          node-version: "22.23"\n'
