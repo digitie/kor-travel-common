@@ -66,6 +66,25 @@ class ValidateManifestTests(unittest.TestCase):
         result = self.run_cli(valid_manifest())
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_registry_self_symlink_is_generic_error_without_traceback(self):
+        with tempfile.TemporaryDirectory(prefix="kor-travel-common-registry-loop-") as directory:
+            root = Path(directory)
+            registry = root / "versions.json"
+            try:
+                registry.symlink_to(registry)
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"symlink 생성 불가: {exc}")
+            manifest = root / "manifest.json"
+            manifest.write_text(json.dumps(valid_manifest()), encoding="utf-8")
+            result = subprocess.run([
+                sys.executable, "-B", "-X", "utf8", str(SCRIPT), str(manifest),
+                "--registry", str(registry),
+            ], capture_output=True, text=True, encoding="utf-8")
+            combined = result.stdout + result.stderr
+            self.assertEqual(result.returncode, 1, combined)
+            self.assertNotIn("Traceback", combined)
+            self.assertNotIn(str(registry), combined)
+
     def test_unknown_field_and_enforce_are_rejected(self):
         data = valid_manifest()
         data["enforce"] = "report"

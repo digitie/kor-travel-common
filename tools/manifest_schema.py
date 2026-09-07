@@ -219,7 +219,7 @@ def validate_manifest(data: object, consumer_repos: set[str] | None = None) -> l
 def _consumer_keys(registry_path: Path) -> tuple[set[str] | None, str | None]:
     try:
         registry = json.loads(registry_path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError):
+    except (OSError, RuntimeError, UnicodeError, json.JSONDecodeError):
         return None, "versions.json을 읽을 수 없음"
     consumers = registry.get("consumers") if isinstance(registry, dict) else None
     if not isinstance(consumers, dict):
@@ -231,7 +231,7 @@ def validate_manifest_file(path: Path, registry_path: Path | None = None) -> lis
     """JSON 파일과 versions.json의 소비자 key를 함께 검사한다."""
     try:
         data: Any = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError):
+    except (OSError, RuntimeError, UnicodeError, json.JSONDecodeError):
         return ["$: 매니페스트 JSON을 읽을 수 없음"]
     consumer_repos = None
     if registry_path is not None:

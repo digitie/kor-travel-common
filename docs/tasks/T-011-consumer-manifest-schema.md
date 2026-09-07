@@ -37,7 +37,13 @@
    | `apps/etl/` | `pinvi.apps-etl.lock.json` | `pinvi` | `apps/etl` | lock 없음(선언만) |
 
    값은 조사 기준 커밋 현재값(인벤토리 §10)이며 `tokens.version` 등은 미채택이면 `null`.
-5. `tests/test_validate_manifest.py`(정상·미지 필드·`enforce`·`until`/`review` 날짜·비ASCII/끝 개행 날짜·kind 오류·workspace·workspace/app/intermediate symlink loop·빈 lock 선언·requirements 재귀 root 이탈·self-symlink·제어문자/경계 공백 schema parity·민감한 전이 scope/DEL redaction).
+5. `tests/test_validate_manifest.py`(정상·미지 필드·`enforce`·`until`/`review` 날짜·비ASCII/끝 개행 날짜·kind 오류·workspace·workspace/app/intermediate symlink loop·registry self-symlink·빈 lock 선언·requirements 재귀 root 이탈·self-symlink·제어문자/경계 공백 schema parity·민감한 전이 scope/DEL redaction).
+
+## 반복된 적대적 리뷰 no-go의 원인과 방지
+
+초기 구현은 매니페스트·lock·workspace·app 경계를 각 호출부의 `Path.resolve()`·`is_file()`·`exists()` 조합으로 따로 검사했다. `resolve(strict=False)`의 symlink loop 처리와 누락 leaf의 결과가 Windows와 WSL에서 달랐고, 존재성 조기 반환이 중간 symlink를 검사 전에 지워 버렸다. 그래서 리뷰어가 서로 다른 경로 모양을 제시할 때마다 같은 입력 경계의 변형이 새 P2로 나타났다.
+
+입력 경계는 `_resolve_input_path`와 `_path_contains_symlink`로 한곳에 모으고, lock·동반 선언·app·workspace를 존재성 판단 전에 구성요소 전체로 검사한다. validator registry와 requirements 재귀도 원문 없는 입력 오류로 닫는다. Windows·WSL에서 direct/중간/외부/self-symlink와 누락 경로를 함께 실행하는 회귀 시험을 수용 기준에 고정해, OS별 동작 차이와 조기 반환 재발을 같은 후보에서 발견하도록 했다.
 
 ## 범위 밖
 

@@ -24,7 +24,7 @@ def main(argv: list[str] | None = None) -> int:
         help="정식 repo key를 확인할 versions.json",
     )
     args = parser.parse_args(argv)
-    errors = validate_manifest_file(args.manifest, args.registry.resolve())
+    errors = validate_manifest_file(args.manifest, args.registry)
     if errors:
         print(f"validate_manifest: {MANIFEST_SCHEMA} 오류 {len(errors)}건")
         for error in errors:
