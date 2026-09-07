@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: UI 단위·접근성·pack 스모크·2인 적대적 리뷰
-- 선행: T-210, T-213
+- 선행: T-210, T-213a
 
 ## 목표
 
@@ -47,7 +47,7 @@ npm pack --workspace packages/ui
 
 ## evidence
 
-T-210/T-213 완료 후 public API manifest, test count·OS, pack hash, accessibility 결과와 consumer smoke 결과를 기록한다. 소비자 실제 채택은 T-463·T-422 등에서 별도로 검증한다.
+T-210/T-213a 완료 후 public API manifest, test count·OS, pack hash, accessibility 결과와 common fixture smoke 결과를 기록한다. 소비자 실제 채택·정식 릴리스는 T-213·T-463·T-422 등에서 별도로 검증한다.
 
 ## rollback 또는 release 차단 조건
 

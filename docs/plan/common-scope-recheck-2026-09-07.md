@@ -7,7 +7,7 @@
 | 영역 | 기존 문구/관찰 | 현재 공용 책임 | 소비자에 남는 경계 | 후속 task·근거 |
 |---|---|---|---|---|
 | 디자인 토큰 | `packages/tokens`와 `tokens.css` 정본 | 의미 토큰·프로필·다크 값·생성물 계약 | 브랜드 값·폰트 로딩·앱별 override | T-101·ADR-006 |
-| React 위젯 | `packages/ui` 프리미티브·마크업 계약 | 공용 위젯과 LoginForm 등 로그인 UI 계약 | 도메인 화면·nav 구성·endpoint·IdP 왕복 | T-201·T-210·ADR-015 |
+| React 위젯 | `packages/ui` 프리미티브·마크업 계약 | 공용 위젯과 LoginForm 등 로그인 UI 계약 | 도메인 화면·nav 구성·endpoint·IdP 왕복 | T-201·T-210·T-214·ADR-015 |
 | Python 코어 | health/time/quality 등 얇은 모듈 | 공용 인프라와 주입형 인증 프리미티브 | 사용자 DB·키/비밀·세션 저장·정책·서버 | T-302·T-312·ADR-015 |
 | 로그인 규칙 | UX 문서와 앱별 로그인 템플릿이 분리 | 접근성·오류·redirect 계약과 재사용 위젯 | 앱별 provider·라우트·브랜드·운영 rate limit | T-105·T-211·T-312 |
 | OpenAPI·버전 | common 도구가 규칙·매니페스트를 검사 | 공용 계약·validator·보고 도구 | 소비자 실제 채택·실행 evidence | T-011·T-012·ADR-014 |
@@ -25,5 +25,5 @@
 
 1. T-016에서 이 문서·ADR·architecture·standards·task 의존성을 갱신하고 두 리뷰어의 finding을 반영한다.
 2. T-011을 매니페스트 schema/validator 구현으로 진행한다. 초안 통과는 소비자 채택 성공이 아니며 실제 경로·workflow 경계 회귀를 포함한다.
-3. T-201/T-210에서 로그인 UI 계약을 구현하고 T-312에서 Python 인증 프리미티브를 별도로 구현한다.
+3. T-201/T-210의 UI 골격·폼을 마친 뒤 T-213a common 후보를 보존하고 T-214에서 로그인 UI 계약을 구현한다. T-312에서 Python 인증 프리미티브를 별도로 구현한다.
 4. 각 소비자 이관 task에서 common API를 채택하고 소비자 저장소의 실제 실행 evidence를 남긴다.

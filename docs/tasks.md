@@ -2,13 +2,13 @@
 
 이 원장은 열린 task의 요약·선행 관계를 관리한다. 수용 기준·외부 선행·검증·evidence는 상세 파일, 현재 다음 한 작업은 [resume](resume.md), 실행 선택과 단계별 출구는 [통합 계획](plan/integration-plan.md)이 정본이다. 작성 문법은 [task 규칙](tasks-rule.md)을 따른다.
 
-총 105개의 상세 작업이 있다. 완료 14개는 완료 원장에 보존하고 열린 91개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
+총 106개의 상세 작업이 있다. 완료 14개는 완료 원장에 보존하고 열린 92개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
 
 ## 실행 대기열
 
 T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-005 버전 검사·고정 보고와 T-005a uv.lock 파서를 완료했다. T-005b Poetry·requirements 파서와 `NO_LOCK`·`BLOCKED` 보고를 완료했다. T-015와 T-006의 범위 변경 기록을 마쳤다. T-009(CI 하드닝)의 구현·두 리뷰·실제 CI를 완료했다. T-005c workflow 고정 참조·CI Node 선언 정적 보고와 두 reviewer PASS·PR CI를 완료했다. 사용자 범위 재확인으로 T-016을 먼저 진행하고, 완료 후 T-011을 실행한다. 각 task의 선행·외부 선행 충족이 우선이며, 충족되지 않으면 BLOCKED 이유를 기록하고 독립적인 다음 항목으로 넘어간다.
 
-그 이후 아래 표에서 모든 선행이 DONE인 항목만 선택한다. 현재 범위의 common 작업만 기반 → 토큰 → UI → Python → 공통 운영/도구 분류 안에서 P0~P3 우선, 동순위는 ID 순이다. T-006의 계정 확보는 사용자 지시로 철회했다. T-010a·T-109·T-212·T-213·T-310·T-311 및 소비자 이관/미래 시점 task는 외부 evidence를 기다리고 독립적인 common READY 항목을 진행한다. 후보 보존 T-109a·T-212a·T-310a가 후속 common 구현을 연다(ADR-014). rc 검증·정식 채택 경계는 [통합 계획 §4](plan/integration-plan.md#4-rc-검증과-정식-채택)를 따른다.
+그 이후 아래 표에서 모든 선행이 DONE인 항목만 선택한다. 현재 범위의 common 작업만 기반 → 토큰 → UI → Python → 공통 운영/도구 분류 안에서 P0~P3 우선, 동순위는 ID 순이다. T-006의 계정 확보는 사용자 지시로 철회했다. T-010a·T-109·T-212·T-213·T-310·T-311 및 소비자 이관/미래 시점 task는 외부 evidence를 기다리고 독립적인 common READY 항목을 진행한다. 후보 보존 T-109a·T-212a·T-213a·T-310a가 후속 common 구현을 연다(ADR-014). rc 검증·정식 채택 경계는 [통합 계획 §4](plan/integration-plan.md#4-rc-검증과-정식-채택)를 따른다.
 
 완료 요약은 [완료 원장](tasks-done.md)에 보존한다. 선행 값의 정본은 아래 표와 상세 metadata이며, 브리프의 과거 task 목록은 최초 설계 근거다.
 
@@ -55,8 +55,9 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 | [T-211](tasks/T-211-ui-registry-channel-drift.md) | BLOCKED | P3 | 레지스트리 채널(셸 골격·로그인 페이지·playwright 기준선 템플릿) + `tools/ui_drift.py`(npm 소비자 로컬 패치 탐지) | T-214 |
 | [T-212](tasks/T-212-ui-v0-1-0-release.md) | BLOCKED | P1 | ui `v0.1.0` rc → map + pinvi admin(L6) 또는 airport 검증 → 정식 | T-212a, T-109 |
 | [T-212a](tasks/T-212a-ui-common-candidate.md) | BLOCKED | P1 | UI 0.1 common 검증 후보 보존 | T-203, T-204, T-109a |
-| [T-213](tasks/T-213-ui-v0-2-0-release.md) | BLOCKED | P1 | ui `v0.2.0`(Button·overlay·Table·DataTable·Pager·Copy/Json/Detail·Header/Form) rc → 정식 | T-208, T-209, T-210, T-212 |
-| [T-214](tasks/T-214-ui-login-widget-contract.md) | BLOCKED | P1 | 공용 로그인 위젯·상태 계약 | T-210, T-213 |
+| [T-213a](tasks/T-213a-ui-v0-2-common-candidate.md) | BLOCKED | P1 | UI `v0.2.0` common 검증 후보 보존 | T-208, T-209, T-210, T-212a |
+| [T-213](tasks/T-213-ui-v0-2-0-release.md) | BLOCKED | P1 | ui `v0.2.0`(Button·overlay·Table·DataTable·Pager·Copy/Json/Detail·Header/Form) rc → 정식 | T-212, T-213a |
+| [T-214](tasks/T-214-ui-login-widget-contract.md) | BLOCKED | P1 | 공용 로그인 위젯·상태 계약 | T-210, T-213a |
 
 ## Python 공통
 

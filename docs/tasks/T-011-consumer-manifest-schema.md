@@ -59,7 +59,7 @@
 ```bash
 python3 -B -X utf8 -m unittest discover -s tests -p "test_validate_manifest.py" -v
 for f in templates/manifests/*.lock.json; do python3 -B -X utf8 tools/validate_manifest.py "$f" || echo "FAIL $f"; done
-python3 -B -X utf8 tools/check_versions.py --manifest templates/manifests/map.lock.json
+python3 -B -X utf8 tools/check_versions.py <fixture-repo-root> --manifest <fixture-repo-root>/templates/manifests/map.lock.json
 python3 -B -X utf8 tools/validate_document_links.py
 ```
 

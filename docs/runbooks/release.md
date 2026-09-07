@@ -43,7 +43,7 @@
 4. UI·Python의 다음 minor 구현은 보존 task가 DONE인 뒤 시작한다. 코드 추가 전에 UI metadata/lock을 `0.2.0-dev.0`, Python을 `0.2.0.dev0`로 변경한다. 초기 미발행 0.1.0의 로컬 pack을 정식 발행으로 세지 않는다. UI 스모크에서는 peer인 tokens도 common tarball 경로를 함께 설치한다.
 5. CI artifact가 만료되면 보존 source에서 빌드·검증한다. 기존 digest와 다르면 기존 바이트를 재현했다고 기록하지 않는다. 새 후보 또는 새 rc와 필요한 검증으로 처리한다.
 
-0.1 보존은 T-109a·T-212a·T-310a, 0.2 보존은 T-213·T-311의 준비 범위가 소유한다. 0.2 준비에서는 검증한 해당 minor의 전체 소스 commit으로 위 1~3을 실행해 `candidate-ui-0.2.0-<N>` 또는 `candidate-py-0.2.0-<N>`을 만든다. 0.1 후보나 release branch의 버전만 올려 대체하지 않는다. 이 준비도 미실행이면 성공으로 기록하지 않는다.
+0.1 보존은 T-109a·T-212a·T-310a, UI 0.2 보존은 T-213a, Python 0.2 보존은 T-311의 준비 범위가 소유한다. 0.2 준비에서는 검증한 해당 minor의 전체 소스 commit으로 위 1~3을 실행해 `candidate-ui-0.2.0-<N>` 또는 `candidate-py-0.2.0-<N>`을 만든다. 0.1 후보나 release branch의 버전만 올려 대체하지 않는다. 이 준비도 미실행이면 성공으로 기록하지 않는다.
 
 외부 릴리스는 해당 minor 후보에서 분기한 `codex/release-<pkg>-<X.Y>` 같은 별도 branch를 사용한다. 버전 변경은 그 branch를 base로 하는 준비 branch의 PR로 반영하고 리뷰·CI를 거친다. rc→정식 전환에서도 해당 release branch를 사용하며 main을 과거 버전으로 낮추지 않는다. 초기 branch ref 생성은 검증한 후보 commit을 가리키고 별도 소스 변경을 포함하지 않는다. §3의 버전·lock·자산별 릴리스 기록 변경과 tag 생성 대상은 이 release branch다. 현재 task 상태의 갱신은 §2.2의 main 문서 PR에서만 한다. 다음 minor 코드를 포함한 main에서 과거 버전 태그를 만들지 않는다.
 

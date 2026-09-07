@@ -18,7 +18,7 @@
 
 npm/PyPI에는 게시하지 않는다. 위 이름은 파일 배포·import 식별자이며 공개 registry 소유권 확보를 뜻하지 않는다([ADR-014](../adr/014-common-implementation-without-registry-publishing.md)). 로컬 설치도 common이 만든 tarball/wheel 경로를 명시한다. Renovate 재평가는 T-507에 남는다.
 
-common 후보 보존은 T-109a(tokens)·T-212a(UI)·T-310a(Python), 외부 rc·정식 발행은 T-109·T-212·T-310이 맡는다. 다음 minor 구현은 보존 후보 완료 뒤 가능하며 이전 정식 발행을 기다리지 않는다. 후보 tag·digest·개발 버전 전환·release branch 절차는 [release](../runbooks/release.md#21-common-후보-보존과-후속-구현)를 따른다.
+common 후보 보존은 T-109a(tokens)·T-212a(UI 0.1)·T-213a(UI 0.2)·T-310a(Python), 외부 rc·정식 발행은 T-109·T-212·T-213·T-310이 맡는다. 다음 minor 구현은 보존 후보 완료 뒤 가능하며 이전 정식 발행을 기다리지 않는다. 후보 tag·digest·개발 버전 전환·release branch 절차는 [release](../runbooks/release.md#21-common-후보-보존과-후속-구현)를 따른다.
 
 ## 2. `@kor-travel/tokens`
 
