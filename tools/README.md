@@ -11,7 +11,7 @@
 | `check_spdx.py` | 소스 선두 SPDX·저작권·Origin/Modified/Derived-From을 PROVENANCE와 대조. 전체 범위·제외·exit code는 [licensing §5.2](../docs/standards/licensing.md#52-검사-범위와-출처-대조) | `python3 -B -X utf8 tools/check_spdx.py` (`--root`로 fixture 지정) |
 | `scan_secrets.py` | 자격증명 값 패턴, 파일·행·규칙 ID만 출력. 스냅샷·예외·exit code는 [CI §8.1](../docs/standards/ci-deploy.md#81-검사-범위와-실패-처리) | `python3 -B -X utf8 tools/scan_secrets.py --all` (`--staged`/`--base <commit>`) |
 | `check_prod_redaction.py` | 같은 입력 선택기로 전체 트리의 사설 주소·내부 호스트·운영 서비스 형식 검사 | `python3 -B -X utf8 tools/check_prod_redaction.py --all` |
-| `check_aliases.py` | `packages/tokens/aliases`의 `--kt-*` 참조·Tailwind namespace·shadcn 중복·import 경계를 검사 | `python3 -B -X utf8 tools/check_aliases.py packages/tokens/aliases` |
+| `check_aliases.py` | `packages/tokens/aliases`의 `--kt-*` 참조·Tailwind namespace·shadcn 중복·root/dark 완전성·재귀 import와 package/symlink 경계를 검사 | `python3 -B -X utf8 tools/check_aliases.py packages/tokens/aliases` |
 
 `validate_document_links.py`·`validate_plan.py`는 canview 저장소의 동명 도구를 kor-travel-common 경로에 맞게 적응한 것이다. 검사 규칙은 [tasks-rule](../docs/tasks-rule.md)과 [documentation maintenance](../docs/runbooks/documentation-maintenance.md)가 정본이며, 도구가 통과했다는 사실은 제품 gate 통과를 뜻하지 않는다.
 

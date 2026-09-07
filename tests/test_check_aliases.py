@@ -67,6 +67,14 @@ class AliasCheckerTests(unittest.TestCase):
         for name in names:
             self.assertIn(f"--{name}:", text, name)
 
+    def test_weather_spacing_stays_in_nonpackaged_example(self) -> None:
+        root = Path(__file__).resolve().parents[1] / "packages" / "tokens"
+        alias_text = (root / "aliases" / "map-vocabulary.css").read_text(encoding="utf-8")
+        example_text = (root / "examples" / "weather-overrides.css").read_text(encoding="utf-8")
+        for name in ("3xs", "2xs", "xs", "sm", "md", "lg", "xl", "2xl"):
+            self.assertNotIn(f"--space-{name}:", alias_text)
+            self.assertIn(f"--space-{name}:", example_text)
+
     def test_weather_override_keeps_navy_and_rail_contract(self) -> None:
         path = Path(__file__).resolve().parents[1] / "packages" / "tokens" / "examples" / "weather-overrides.css"
         text = path.read_text(encoding="utf-8")
@@ -78,6 +86,13 @@ class AliasCheckerTests(unittest.TestCase):
             "--kt-rail: 17rem",
         ):
             self.assertIn(value, text)
+        self.assertIn('--kt-font-mono: var(--font-geist-mono, "Geist Mono")', text)
+        self.assertIn("--kt-ease-in: cubic-bezier(0.7, 0, 0.84, 1)", text)
+
+    def test_alias_radius_md_uses_panel_contract(self) -> None:
+        path = Path(__file__).resolve().parents[1] / "packages" / "tokens" / "aliases" / "map-vocabulary.css"
+        text = path.read_text(encoding="utf-8")
+        self.assertEqual(text.count("--radius-md: var(--kt-radius-panel);"), 2)
 
     def test_imported_shadcn_names_are_not_duplicate_alias_definitions(self) -> None:
         self.assertEqual(self.errors(), [])
@@ -89,6 +104,28 @@ class AliasCheckerTests(unittest.TestCase):
     def test_kt_definition_fails(self) -> None:
         self.write("aliases/map.css", ":root { --kt-brand: red; }\n")
         self.assertTrue(any("--kt-* 정의 금지" in error for error in self.errors()))
+
+    def test_kt_definition_without_final_semicolon_fails(self) -> None:
+        self.write("aliases/map.css", ":root { --kt-brand: red }\n.dark { --kt-brand: red }\n")
+        self.assertTrue(any("--kt-* 정의 금지" in error for error in self.errors()))
+
+    def test_uppercase_var_undefined_reference_fails(self) -> None:
+        self.write(
+            "aliases/map.css",
+            ":root { --brand: VAR(--kt-missing); }\n.dark { --brand: VAR(--kt-missing); }\n",
+        )
+        self.assertTrue(any("미정의" in error for error in self.errors()))
+
+    def test_var_text_in_string_is_not_a_reference(self) -> None:
+        self.write(
+            "aliases/map.css",
+            ':root { --brand: "var(--kt-missing)"; }\n.dark { --brand: "var(--kt-missing)"; }\n',
+        )
+        self.assertFalse(any("미정의" in error for error in self.errors()))
+
+    def test_dark_block_is_required(self) -> None:
+        self.write("aliases/map.css", ":root { --brand: var(--kt-brand); }\n")
+        self.assertTrue(any(".dark 블록" in error for error in self.errors()))
 
     def test_theme_namespace_exact_collision_fails(self) -> None:
         self.write("theme.css", "@theme { --color-ink: red; }\n")
@@ -102,6 +139,66 @@ class AliasCheckerTests(unittest.TestCase):
     def test_import_outside_package_fails(self) -> None:
         self.write("aliases/map.css", "@import \"../../outside.css\";\n")
         self.assertTrue(any("패키지 밖" in error for error in self.errors()))
+
+    def test_same_line_url_and_media_import_outside_fails(self) -> None:
+        self.write(
+            "aliases/map.css",
+            '@import "../shadcn.css"; @import url("../../outside.css") screen;\n'
+            ':root { --brand: var(--kt-brand); }\n.dark { --brand: var(--kt-brand); }\n',
+        )
+        self.assertTrue(any("패키지 밖" in error for error in self.errors()))
+
+    def test_url_import_inside_package_passes(self) -> None:
+        self.write(
+            "aliases/map.css",
+            '@import url("../shadcn.css") screen;\n:root { --brand: var(--kt-brand); }\n'
+            '.dark { --brand: var(--kt-brand); }\n',
+        )
+        self.assertEqual(self.errors(), [])
+
+    def test_recursive_imported_kt_definition_fails(self) -> None:
+        self.write("extra.css", ":root { --kt-brand: red; }\n")
+        self.write(
+            "aliases/map.css",
+            '@import "../extra.css";\n:root { --brand: var(--kt-brand); }\n'
+            '.dark { --brand: var(--kt-brand); }\n',
+        )
+        self.assertTrue(any("--kt-* 정의 금지" in error for error in self.errors()))
+
+    def test_recursive_imported_shadcn_duplicate_fails(self) -> None:
+        self.write("extra.css", ":root { --border: red; }\n")
+        self.write(
+            "aliases/map.css",
+            '@import "../extra.css";\n:root { --brand: var(--kt-brand); }\n'
+            '.dark { --brand: var(--kt-brand); }\n',
+        )
+        self.assertTrue(any("shadcn.css 이름 중복" in error for error in self.errors()))
+
+    def test_import_cycle_returns_controlled_error(self) -> None:
+        self.write("a.css", '@import "b.css";\n')
+        self.write("b.css", '@import "a.css";\n')
+        self.write(
+            "aliases/map.css",
+            '@import "../a.css";\n:root { --brand: var(--kt-brand); }\n'
+            '.dark { --brand: var(--kt-brand); }\n',
+        )
+        self.assertTrue(any("순환" in error for error in self.errors()))
+
+    def test_invalid_css_returns_controlled_error(self) -> None:
+        path = self.package / "aliases" / "map.css"
+        path.write_bytes(b":root { --brand: \xff; }\n")
+        errors = self.errors()
+        self.assertTrue(errors)
+        self.assertFalse(any("Traceback" in error for error in errors))
+
+    def test_error_does_not_echo_import_target(self) -> None:
+        marker = "SECRET_MARKER_9f2d"
+        self.write("aliases/map.css", f'@import url("../../{marker}.css");\n')
+        result = subprocess.run(
+            [sys.executable, "-B", "-X", "utf8", str(SCRIPT), str(self.aliases)],
+            text=True, encoding="utf-8", capture_output=True, check=False,
+        )
+        self.assertNotIn(marker, result.stdout + result.stderr)
 
 
 if __name__ == "__main__":

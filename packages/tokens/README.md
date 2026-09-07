@@ -11,6 +11,6 @@ Tailwind v4 앱은 다음 순서로 CSS를 가져온다.
 @import "@kor-travel/tokens/base.css";
 ```
 
-다크 모드는 앱이 `dark-class.css` 또는 `dark-media.css` 중 하나를 선택한다. 레거시 어휘 별칭 shim은 T-102에서 추가하며 이 패키지의 T-101 산출물에는 포함하지 않는다.
+다크 모드는 앱이 `dark-class.css` 또는 `dark-media.css` 중 하나를 선택한다. 레거시 map·weather·geo 어휘가 필요한 이관 앱은 선택적으로 `@kor-travel/tokens/aliases/map-vocabulary.css`를 import한다. 이 파일은 shadcn 이름을 중복 선언하지 않고 패키지의 `shadcn.css`를 내부 import한다. weather 값 재현 예제와 앱 전용 `--space-*` 간격은 `examples/`에 있으며 npm 배포 대상이 아니다.
 
 이 패키지는 GPL-3.0-or-later로 배포되며 폰트 파일이나 폰트 로더를 포함하지 않는다. 저작권·서드파티 고지는 동봉 문서를 따른다.

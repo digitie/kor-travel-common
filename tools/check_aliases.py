@@ -6,15 +6,18 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
+import os
 from pathlib import Path
 import re
 import sys
 
 
-CUSTOM_PROPERTY = re.compile(r"(?<![a-zA-Z0-9_-])(--[a-zA-Z0-9_-]+)\s*:\s*([^;{}]+);")
-KT_REFERENCE = re.compile(r"var\(\s*(--kt-[a-zA-Z0-9_-]+)")
-IMPORT = re.compile(r'(?m)^\s*@import\s+["\']([^"\']+)["\']\s*;')
-THEME_NAMESPACES = ("--color-", "--spacing-", "--radius-", "--text-", "--font-")
+CUSTOM_PROPERTY_NAME = re.compile(r"--[a-zA-Z0-9_-]+")
+KT_REFERENCE = re.compile(r"(?i)\bvar\(\s*(--kt-[a-zA-Z0-9_-]+)")
+
+
+class CSSInputError(ValueError):
+    """CSS 입력을 안전하게 읽거나 해석할 수 없을 때 사용하는 내부 오류."""
 
 
 @dataclass(frozen=True)
@@ -23,146 +26,517 @@ class Definition:
     value: str
     path: Path
     line: int
+    scope: str | None
 
 
-def without_comments(text: str) -> str:
-    """CSS 블록 주석을 제거해 주석 안의 가짜 선언을 검사하지 않는다."""
-    return re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
+@dataclass(frozen=True)
+class ImportRule:
+    target: str
+    path: Path
+    line: int
+
+
+@dataclass(frozen=True)
+class ParsedCSS:
+    definitions: tuple[Definition, ...]
+    imports: tuple[ImportRule, ...]
+
+
+def _read_text(path: Path) -> str:
+    """UTF-8 CSS를 읽고 오류 세부를 외부 출력으로 흘리지 않는다."""
+    try:
+        return path.read_text(encoding="utf-8-sig")
+    except (OSError, UnicodeError) as exc:
+        raise CSSInputError("CSS 파일을 읽을 수 없음") from exc
+
+
+def _mask_comments(text: str) -> str:
+    """문자열 안의 주석 표기는 보존하고 CSS 주석만 공백으로 치환한다."""
+    chars = list(text)
+    result = list(text)
+    quote: str | None = None
+    escaped = False
+    i = 0
+    while i < len(text):
+        char = text[i]
+        if quote is not None:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+            i += 1
+            continue
+        if char in "'\"":
+            quote = char
+            i += 1
+            continue
+        if text.startswith("/*", i):
+            end = text.find("*/", i + 2)
+            if end < 0:
+                raise CSSInputError("닫히지 않은 CSS 주석")
+            for position in range(i, end + 2):
+                if chars[position] not in "\r\n":
+                    result[position] = " "
+            i = end + 2
+            continue
+        i += 1
+    return "".join(result)
+
+
+def _mask_strings(text: str) -> str:
+    """CSS 값의 문자열 리터럴을 공백으로 바꿔 실제 var()만 찾는다."""
+    result = list(text)
+    quote: str | None = None
+    escaped = False
+    for index, char in enumerate(text):
+        if quote is not None:
+            if char not in "\r\n":
+                result[index] = " "
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+            continue
+        if char in "'\"":
+            quote = char
+            result[index] = " "
+    if quote is not None:
+        raise CSSInputError("닫히지 않은 CSS 문자열")
+    return "".join(result)
+
+
+def _line_number(text: str, position: int) -> int:
+    return text.count("\n", 0, position) + 1
+
+
+def _scope(stack: list[str]) -> str | None:
+    """현재 블록 스택에서 별칭의 :root/.dark 모드를 판정한다."""
+    for selector in reversed(stack):
+        if re.search(r"(?:^|[\s,>+~])\.dark(?=$|[\s,>+~.#:[(])", selector):
+            return "dark"
+        if re.search(r"(?:^|[\s,>+~]):root(?=$|[\s,>+~.#:[(])", selector):
+            return "root"
+    return None
+
+
+def _scan_value(text: str, start: int) -> tuple[str, int]:
+    """선언 값의 끝과 값을 반환한다(괄호·문자열 안의 세미콜론은 무시)."""
+    quote: str | None = None
+    escaped = False
+    parentheses = 0
+    i = start
+    while i < len(text):
+        char = text[i]
+        if quote is not None:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+            i += 1
+            continue
+        if char in "'\"":
+            quote = char
+        elif char == "(":
+            parentheses += 1
+        elif char == ")":
+            if parentheses == 0:
+                raise CSSInputError("CSS 괄호가 올바르지 않음")
+            parentheses -= 1
+        elif parentheses == 0 and char in ";}":
+            return text[start:i].strip(), i
+        i += 1
+    if quote is not None or parentheses:
+        raise CSSInputError("CSS 선언 값이 닫히지 않음")
+    raise CSSInputError("CSS 선언이 닫히지 않음")
+
+
+def _quoted_target(text: str, start: int) -> tuple[str, int]:
+    quote = text[start]
+    escaped = False
+    i = start + 1
+    chars: list[str] = []
+    while i < len(text):
+        char = text[i]
+        if escaped:
+            chars.append(char)
+            escaped = False
+        elif char == "\\":
+            escaped = True
+        elif char == quote:
+            return "".join(chars), i + 1
+        else:
+            chars.append(char)
+        i += 1
+    raise CSSInputError("CSS import 문자열이 닫히지 않음")
+
+
+def _import_target(rule: str) -> str:
+    """@import 뒤의 CSS 문자열 또는 url() 대상을 해석한다."""
+    value = rule.strip()
+    if not value:
+        raise CSSInputError("CSS import 대상이 없음")
+    if value[0] in "'\"":
+        target, _ = _quoted_target(value, 0)
+        return target
+    match = re.match(r"(?i)url\s*\(", value)
+    if match:
+        start = match.end()
+        quote: str | None = None
+        escaped = False
+        i = start
+        while i < len(value):
+            char = value[i]
+            if quote is not None:
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == quote:
+                    quote = None
+                i += 1
+                continue
+            if char in "'\"":
+                quote = char
+            elif char == ")":
+                target = value[start:i].strip()
+                if target and target[0] in "'\"":
+                    target, _ = _quoted_target(target, 0)
+                return target.strip()
+            i += 1
+        raise CSSInputError("CSS import url()이 닫히지 않음")
+    raise CSSInputError("지원하지 않는 CSS import 문법")
+
+
+def _parse_imports(text: str, masked: str, path: Path) -> tuple[ImportRule, ...]:
+    """한 줄·url·media 조건을 포함한 모든 @import 규칙을 찾는다."""
+    imports: list[ImportRule] = []
+    i = 0
+    quote: str | None = None
+    escaped = False
+    while i < len(masked):
+        char = masked[i]
+        if quote is not None:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+            i += 1
+            continue
+        if char in "'\"":
+            quote = char
+            i += 1
+            continue
+        if masked[i:i + 7].lower() == "@import" and (
+            i == 0 or not (masked[i - 1].isalnum() or masked[i - 1] in "_-")
+        ):
+            end = i + 7
+            nested_quote: str | None = None
+            nested_escape = False
+            parentheses = 0
+            while end < len(masked):
+                current = masked[end]
+                if nested_quote is not None:
+                    if nested_escape:
+                        nested_escape = False
+                    elif current == "\\":
+                        nested_escape = True
+                    elif current == nested_quote:
+                        nested_quote = None
+                elif current in "'\"":
+                    nested_quote = current
+                elif current == "(":
+                    parentheses += 1
+                elif current == ")" and parentheses:
+                    parentheses -= 1
+                elif current == ";" and parentheses == 0:
+                    break
+                elif current in "{}" and parentheses == 0:
+                    raise CSSInputError("CSS import 규칙이 세미콜론으로 끝나지 않음")
+                end += 1
+            if end >= len(masked) or nested_quote is not None or parentheses:
+                raise CSSInputError("CSS import 규칙이 닫히지 않음")
+            target = _import_target(masked[i + 7:end])
+            imports.append(ImportRule(target, path, _line_number(text, i)))
+            i = end + 1
+            continue
+        i += 1
+    return tuple(imports)
+
+
+def _parse_css(path: Path) -> ParsedCSS:
+    text = _read_text(path)
+    masked = _mask_comments(text)
+    imports = _parse_imports(text, masked, path)
+    definitions: list[Definition] = []
+    stack: list[str] = []
+    header_start = 0
+    can_start_declaration = True
+    quote: str | None = None
+    escaped = False
+    i = 0
+    while i < len(masked):
+        char = masked[i]
+        if quote is not None:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+            i += 1
+            continue
+        if char in "'\"":
+            quote = char
+            can_start_declaration = False
+            i += 1
+            continue
+        if char == "{":
+            stack.append(masked[header_start:i].strip())
+            header_start = i + 1
+            can_start_declaration = True
+            i += 1
+            continue
+        if char == "}":
+            if not stack:
+                raise CSSInputError("CSS 블록이 올바르지 않음")
+            stack.pop()
+            header_start = i + 1
+            can_start_declaration = True
+            i += 1
+            continue
+        if char == ";":
+            can_start_declaration = True
+            i += 1
+            continue
+        if can_start_declaration and masked.startswith("--", i):
+            match = CUSTOM_PROPERTY_NAME.match(masked, i)
+            if match is not None:
+                name_end = match.end()
+                colon = name_end
+                while colon < len(masked) and masked[colon].isspace():
+                    colon += 1
+                if colon < len(masked) and masked[colon] == ":":
+                    value, end = _scan_value(masked, colon + 1)
+                    definitions.append(Definition(
+                        match.group(0), value, path, _line_number(text, i), _scope(stack)
+                    ))
+                    can_start_declaration = False
+                    i = end
+                    continue
+        if not char.isspace():
+            can_start_declaration = False
+        i += 1
+    if quote is not None or stack:
+        raise CSSInputError("CSS 블록 또는 문자열이 닫히지 않음")
+    return ParsedCSS(tuple(definitions), imports)
 
 
 def definitions(path: Path) -> list[Definition]:
-    """한 CSS 파일의 custom property 선언과 행을 읽는다."""
-    text = without_comments(path.read_text(encoding="utf-8-sig"))
-    result = []
-    for match in CUSTOM_PROPERTY.finditer(text):
-        result.append(Definition(
-            match.group(1), match.group(2).strip(), path,
-            text.count("\n", 0, match.start()) + 1,
-        ))
-    return result
+    """한 CSS 파일의 custom property 선언을 읽는다."""
+    return list(_parse_css(path).definitions)
 
 
 def imports(path: Path) -> list[Path]:
-    """상대 CSS import를 읽고 패키지 밖 경로는 호출자에게 오류로 넘긴다."""
-    text = without_comments(path.read_text(encoding="utf-8-sig"))
-    return [path.parent / target for target in IMPORT.findall(text)]
+    """한 CSS 파일의 상대 import 대상을 반환한다."""
+    parsed = _parse_css(path)
+    return [path.parent / item.target for item in parsed.imports]
 
 
-def package_root(alias_dir: Path) -> Path:
-    """aliases 디렉터리에서 tokens 패키지 루트를 계산한다."""
-    return alias_dir.resolve().parent
+def _absolute(path: Path) -> Path:
+    """심볼릭 링크를 따라가지 않는 절대 lexical 경로를 만든다."""
+    return Path(os.path.abspath(os.fspath(path)))
 
 
-def collect_imports(path: Path, root: Path, seen: set[Path] | None = None) -> tuple[list[Path], list[str]]:
-    """별칭 CSS의 상대 import를 안전하게 따라가며 순환·누락을 보고한다."""
-    seen = set() if seen is None else seen
-    canonical = path.resolve()
-    if canonical in seen:
-        return [], [f"CSS import 순환: {path.relative_to(root).as_posix()}"]
-    if not canonical.is_relative_to(root):
-        return [], [f"패키지 밖 CSS import: {path}"]
-    if not canonical.is_file():
-        return [], [f"CSS import 파일 없음: {path.relative_to(root).as_posix()}"]
-    seen.add(canonical)
-    paths = [canonical]
-    errors = []
-    for child in imports(canonical):
-        nested, nested_errors = collect_imports(child, root, seen.copy())
+def _safe_real(path: Path, root: Path, *, directory: bool = False) -> Path:
+    """패키지 root 안의 실제 파일만 허용하고 링크 탈출을 차단한다."""
+    lexical = _absolute(path)
+    try:
+        lexical_inside = lexical.is_relative_to(root)
+    except (OSError, ValueError):
+        lexical_inside = False
+    if not lexical_inside:
+        raise CSSInputError("패키지 밖 파일 경로")
+    try:
+        real = lexical.resolve(strict=True)
+    except (OSError, RuntimeError, ValueError) as exc:
+        raise CSSInputError("파일 경로를 해석할 수 없음") from exc
+    try:
+        inside = real.is_relative_to(root)
+    except (OSError, ValueError):
+        inside = False
+    if not inside:
+        raise CSSInputError("패키지 밖 파일 경로")
+    if directory:
+        if not real.is_dir():
+            raise CSSInputError("별칭 디렉터리가 아님")
+    elif not real.is_file():
+        raise CSSInputError("CSS 파일이 아님")
+    return real
+
+
+def _label(path: Path, root: Path) -> str:
+    """진단용 package 상대 위치만 반환한다(절대 경로·입력 값은 숨긴다)."""
+    try:
+        return path.resolve(strict=False).relative_to(root).as_posix()
+    except (OSError, RuntimeError, ValueError):
+        return "<package-outside>"
+
+
+def _load(path: Path, root: Path, cache: dict[Path, ParsedCSS]) -> ParsedCSS:
+    real = _safe_real(path, root)
+    if real not in cache:
+        cache[real] = _parse_css(real)
+    return cache[real]
+
+
+def _collect(
+    path: Path,
+    root: Path,
+    cache: dict[Path, ParsedCSS],
+    collected: set[Path],
+    active: tuple[Path, ...] = (),
+) -> tuple[list[Path], list[tuple[str, Path, int]]]:
+    """CSS import closure를 수집하고 경계·순환 오류를 반환한다."""
+    try:
+        real = _safe_real(path, root)
+        parsed = _load(real, root, cache)
+    except CSSInputError as exc:
+        return [], [(str(exc), path, 0)]
+    if real in active:
+        return [], [("CSS import 순환", real, 0)]
+    if real in collected:
+        return [], []
+    collected.add(real)
+    paths = [real]
+    errors: list[tuple[str, Path, int]] = []
+    for rule in parsed.imports:
+        target = rule.target.strip()
+        if not target or target.startswith(("/", "\\")) or re.match(r"(?i)^[a-z][a-z0-9+.-]*:", target):
+            errors.append(("CSS import 패키지 경계 오류", real, rule.line))
+            continue
+        child = real.parent / target
+        nested, nested_errors = _collect(child, root, cache, collected, (*active, real))
         paths.extend(nested)
         errors.extend(nested_errors)
     return paths, errors
 
 
+def _refs(value: str) -> list[str]:
+    return KT_REFERENCE.findall(_mask_strings(value))
+
+
+def _append_safe_error(errors: list[str], reason: str, path: Path, root: Path, line: int = 0) -> None:
+    location = _label(path, root)
+    suffix = f" {location}:{line}" if line else f" {location}"
+    errors.append(f"{reason}:{suffix}")
+
+
 def check_aliases(alias_dir: Path) -> list[str]:
     """별칭 디렉터리를 검사하고 사람이 읽을 수 있는 오류 목록을 반환한다."""
     errors: list[str] = []
+    cache: dict[Path, ParsedCSS] = {}
     try:
-        alias_dir = alias_dir.resolve()
-    except OSError as exc:
-        return [f"별칭 경로를 해석할 수 없음: {exc}"]
-    if not alias_dir.is_dir():
-        return [f"별칭 디렉터리 없음: {alias_dir}"]
-    alias_paths = sorted(alias_dir.glob("*.css"))
+        alias_lexical = _absolute(alias_dir)
+        root = _safe_real(alias_lexical.parent, alias_lexical.parent, directory=True)
+        alias_real = _safe_real(alias_lexical, root, directory=True)
+        alias_paths = sorted(
+            (item for item in alias_real.iterdir() if item.name.endswith(".css")),
+            key=lambda item: item.name,
+        )
+    except (OSError, CSSInputError):
+        return ["별칭 경로를 읽을 수 없음"]
     if not alias_paths:
-        return [f"별칭 CSS가 없음: {alias_dir}"]
+        return ["별칭 CSS가 없음"]
 
-    root = package_root(alias_dir)
-    tokens_path = root / "tokens.css"
-    theme_path = root / "theme.css"
-    shadcn_path = root / "shadcn.css"
-    for required in (tokens_path, theme_path, shadcn_path):
-        if not required.is_file():
-            errors.append(f"필수 tokens 파일 없음: {required.relative_to(root).as_posix()}")
+    required_paths = {name: root / name for name in ("tokens.css", "theme.css", "shadcn.css")}
+    required: dict[str, Path] = {}
+    for name, lexical in required_paths.items():
+        try:
+            required[name] = _safe_real(lexical, root)
+            cache[required[name]] = _parse_css(required[name])
+        except (OSError, CSSInputError):
+            errors.append(f"필수 {name} 파일을 읽을 수 없음")
     if errors:
         return errors
 
-    token_names = {item.name for item in definitions(tokens_path)}
-    theme_defs = definitions(theme_path)
+    token_names = {item.name for item in cache[required["tokens.css"]].definitions}
+    theme_defs = list(cache[required["theme.css"]].definitions)
+    shadcn_defs = list(cache[required["shadcn.css"]].definitions)
     theme_names = {item.name for item in theme_defs}
-    shadcn_defs = definitions(shadcn_path)
     shadcn_names = {item.name for item in shadcn_defs}
+    canonical_shadcn = required["shadcn.css"]
+
     alias_defs: list[Definition] = []
     imported_defs: list[Definition] = []
     imported_paths: set[Path] = set()
     for alias_path in alias_paths:
-        paths, import_errors = collect_imports(alias_path, root)
-        errors.extend(import_errors)
+        try:
+            alias_real = _safe_real(alias_path, root)
+            parsed = _load(alias_real, root, cache)
+        except (OSError, CSSInputError):
+            _append_safe_error(errors, "별칭 CSS를 읽을 수 없음", alias_path, root)
+            continue
+        alias_defs.extend(parsed.definitions)
+        paths, import_errors = _collect(alias_real, root, cache, imported_paths)
+        for reason, error_path, line in import_errors:
+            _append_safe_error(errors, reason, error_path, root, line)
         for path in paths:
-            if path == alias_path.resolve():
-                alias_defs.extend(definitions(path))
-            elif path not in imported_paths:
-                imported_paths.add(path)
-                imported_defs.extend(definitions(path))
+            if path != alias_real and path != canonical_shadcn:
+                imported_defs.extend(cache[path].definitions)
 
-    alias_names = {item.name for item in alias_defs}
-    imported_names = {item.name for item in imported_defs}
-    all_defs = alias_defs + imported_defs
-    all_refs = []
-    for path in [*alias_paths, *sorted(imported_paths)]:
-        text = without_comments(path.read_text(encoding="utf-8-sig"))
-        all_refs.extend((path, ref) for ref in KT_REFERENCE.findall(text))
-
-    for path, reference in all_refs:
-        if reference not in token_names:
-            errors.append(
-                f"미정의 --kt-* 대상: {path.relative_to(root).as_posix()} -> {reference}"
-            )
-
-    for item in alias_defs:
-        if item.name.startswith("--kt-"):
-            errors.append(
-                f"별칭 파일에서 --kt-* 정의 금지: {item.path.relative_to(root).as_posix()}:{item.line} {item.name}"
-            )
-        if item.name in theme_names:
-            errors.append(
-                f"Tailwind @theme 이름 충돌: {item.path.relative_to(root).as_posix()}:{item.line} {item.name}"
-            )
-        if item.name in shadcn_names:
-            errors.append(
-                f"shadcn.css 이름 중복 정의: {item.path.relative_to(root).as_posix()}:{item.line} {item.name}"
-            )
-
-    # 접두 네임스페이스는 exact 선언과 비교한다. --text-primary 같은 legacy
-    # 이름은 --text-kt-*가 발행하는 Tailwind 이름과 충돌하지 않는다.
-    for item in alias_defs:
-        if any(item.name.startswith(namespace) for namespace in THEME_NAMESPACES):
-            if item.name in theme_names:
-                errors.append(
-                    f"Tailwind 네임스페이스 exact 충돌: {item.path.relative_to(root).as_posix()}:{item.line} {item.name}"
+    noncanonical_defs = alias_defs + imported_defs
+    all_defs = noncanonical_defs + shadcn_defs
+    for item in all_defs:
+        for reference in _refs(item.value):
+            if reference not in token_names:
+                _append_safe_error(
+                    errors, f"미정의 --kt-* 대상 {reference}", item.path, root, item.line
                 )
 
-    # :root와 .dark에서 같은 legacy 이름을 쓰되 값이 갈라지면 profile 전달이
-    # 깨진다. 같은 값의 반복은 의도적인 상속 경계로 허용한다.
+    for item in noncanonical_defs:
+        if item.name.startswith("--kt-"):
+            _append_safe_error(errors, f"--kt-* 정의 금지 {item.name}", item.path, root, item.line)
+        if item.name in theme_names:
+            _append_safe_error(errors, f"Tailwind @theme 이름 충돌 {item.name}", item.path, root, item.line)
+        if item.name in shadcn_names:
+            _append_safe_error(errors, f"shadcn.css 이름 중복 정의 {item.name}", item.path, root, item.line)
+
+    # 별칭 디렉터리의 모든 직접 선언은 :root와 .dark에 한 번씩 있어야 한다.
+    root_names = {item.name for item in alias_defs if item.scope == "root"}
+    dark_names = {item.name for item in alias_defs if item.scope == "dark"}
+    unscoped = {item.name for item in alias_defs if item.scope is None}
+    if unscoped:
+        errors.append(f"별칭 모드 밖 선언 {', '.join(sorted(unscoped))}")
+    if not root_names:
+        errors.append("별칭 :root 블록이 없음")
+    if not dark_names:
+        errors.append("별칭 .dark 블록이 없음")
+    for name in sorted(root_names - dark_names):
+        errors.append(f"별칭 .dark 선언 누락 {name}")
+    for name in sorted(dark_names - root_names):
+        errors.append(f"별칭 :root 선언 누락 {name}")
+
+    # 같은 모드의 중복 정의와 root/dark 값 drift를 모두 검사한다.
+    by_scope_name: dict[tuple[str | None, str], list[Definition]] = {}
     by_name: dict[str, set[str]] = {}
-    for item in alias_defs:
+    for item in noncanonical_defs:
+        by_scope_name.setdefault((item.scope, item.name), []).append(item)
         by_name.setdefault(item.name, set()).add(item.value)
+    for (scope, name), items in sorted(by_scope_name.items(), key=lambda pair: str(pair[0])):
+        if len(items) > 1:
+            errors.append(f"별칭 중복 선언 {name} ({scope or 'import'})")
     for name, values in sorted(by_name.items()):
         if len(values) > 1:
-            errors.append(f"별칭 값 drift: {name} -> {', '.join(sorted(values))}")
+            errors.append(f"별칭 값 drift {name}")
 
-    # import로 유효 이름을 제공하는 것은 허용하지만, alias가 같은 이름을
-    # 직접 다시 선언하면 중복이므로 위 검사에서 반드시 잡힌다.
-    _ = all_defs
     return errors
 
 
@@ -178,7 +552,10 @@ def main(argv: list[str] | None = None) -> int:
         for error in errors:
             print(f"- {error}")
         return 1
-    files = len(sorted(args.aliases.resolve().glob("*.css")))
+    try:
+        files = len([path for path in _absolute(args.aliases).iterdir() if path.name.endswith(".css")])
+    except OSError:
+        files = 0
     print(f"별칭 검사 통과: CSS {files}개, 오류 0개")
     return 0
 
