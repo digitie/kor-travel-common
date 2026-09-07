@@ -735,6 +735,126 @@ class CheckVersionsTests(unittest.TestCase):
         result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet")
         self.assertEqual(result.returncode, 2)
 
+    def test_requirements_include_forms_and_per_requirement_hashes(self):
+        nested = self.repo / "nested"
+        nested.mkdir()
+        (self.repo / "requirements.txt").write_text(
+            "--requirement=nested/equals.txt\n--requirement nested/space.txt\n"
+            "-r nested/compact.txt\n-rnested/compact.txt\n",
+            encoding="utf-8")
+        (nested / "equals.txt").write_text("fastapi==0.141.1 --hash=sha256:" + "a" * 64 + "\n",
+                                           encoding="utf-8")
+        (nested / "space.txt").write_text("fastapi==0.141.1\t# 탭 주석\n", encoding="utf-8")
+        (nested / "compact.txt").write_text("fastapi==0.141.1 --hash sha256:" + "b" * 64 + "\n",
+                                             encoding="utf-8")
+        findings = self.run_checker()
+        self.assertEqual(self.verdicts(findings, "fastapi"), ["OK"])
+        self.assertEqual(len([f for f in findings if f.key == "fastapi"]), 1)
+
+    def test_requirements_editable_git_and_invalid_options_fail_closed(self):
+        (self.repo / "requirements.txt").write_text(
+            "-e git+https://example.com/repo.git@main#egg=custom-lib\n", encoding="utf-8")
+        findings = self.run_checker()
+        floating = next(f for f in findings if f.key == "custom-lib")
+        self.assertEqual(floating.verdict, "FLOATING_REF")
+        self.assertIn("@main", floating.declared)
+        for invalid in (
+            "--unsupported-option\n",
+            "--hash sha256:" + "a" * 64 + "\n",
+            "-e git+https://example.com/repo.git@main\n",
+            "fastapi==not-a-version\n",
+            "fastapi>=2,<2\n",
+        ):
+            with self.subTest(invalid=invalid):
+                (self.repo / "requirements.txt").write_text(invalid, encoding="utf-8")
+                self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+
+    def test_requirements_range_overlap_uses_pep440_bounds(self):
+        cases = (
+            ("==2.*", ">=2", True),
+            ("==1.*", ">=2", False),
+            ("~=1.0", ">=2", False),
+            ("~=1.0", ">=1.5", True),
+            (">= 2", "<2", False),
+            ("<=2", ">2", False),
+            (">=2,<3", "==2.*", True),
+            (">=2,<2", ">=2", True),  # 빈/잘못된 교집합은 안전하지 않은 입력으로 닫는다.
+        )
+        for left, right, expected in cases:
+            with self.subTest(left=left, right=right):
+                self.assertEqual(CV.ranges_overlap(left, right), expected)
+
+    def test_poetry_source_and_metadata_validation_fail_closed(self):
+        (self.repo / "pyproject.toml").write_text(
+            '[tool.poetry]\nname = "fixture"\nversion = "0.0.0"\n\n'
+            '[tool.poetry.dependencies]\npython = "^3.11"\nfastapi = "^0.110.0"\n',
+            encoding="utf-8")
+        valid = (
+            '[[package]]\nname = "fastapi"\nversion = "0.141.1"\n\n'
+            '[metadata]\nlock-version = "2.1"\npython-versions = ">=3.11,<4.0"\n')
+        lock_path = self.repo / "poetry.lock"
+        for suffix in (
+            '[package.source]\ntype = "git"\nurl = "https://["\n',
+            '[package.source]\ntype = "url"\nurl = "https://example.com:bad/pkg.whl"\n',
+            '[package.source]\ntype = "file"\nurl = 42\n',
+            '[metadata]\nlock-version = "2.1"\n',
+        ):
+            with self.subTest(suffix=suffix):
+                lock_path.write_text(valid.replace('[metadata]', suffix + '\n[metadata]')
+                                     if suffix.startswith('[package.source]') else suffix,
+                                     encoding="utf-8")
+                self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+
+    def test_poetry_input_error_does_not_echo_url_value(self):
+        marker = "SENSITIVE" + "A" * 12
+        (self.repo / "pyproject.toml").write_text(
+            '[tool.poetry]\nname = "fixture"\nversion = "0.0.0"\n\n'
+            '[tool.poetry.dependencies]\npython = "^3.11"\nfastapi = "^0.110.0"\n',
+            encoding="utf-8")
+        (self.repo / "poetry.lock").write_text(
+            '[[package]]\nname = "fastapi"\nversion = "0.141.1"\n\n'
+            '[[package]]\nname = "custom-lib"\nversion = "1.2.3"\n'
+            '[package.source]\ntype = "git"\nurl = "https://[' + marker + ']"\n'
+            'reference = "main"\nresolved_reference = "' + "a" * 40 + '"\n\n'
+            '[metadata]\nlock-version = "2.1"\npython-versions = ">=3.11,<4.0"\n',
+            encoding="utf-8")
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet")
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn(marker, result.stdout)
+
+    def test_poetry_dependency_list_preserves_branch_and_rejects_malformed_list(self):
+        (self.repo / "pyproject.toml").write_text(
+            '[tool.poetry]\nname = "fixture"\nversion = "0.0.0"\n\n'
+            '[tool.poetry.dependencies]\npython = "^3.11"\n'
+            'custom-lib = [\n'
+            '  { git = "https://example.com/repo.git", branch = "main" },\n'
+            '  { git = "https://example.com/repo.git", tag = "v1.2.3" },\n]\n',
+            encoding="utf-8")
+        (self.repo / "poetry.lock").write_text(
+            '[[package]]\nname = "custom-lib"\nversion = "1.2.3"\n\n'
+            '[package.source]\ntype = "git"\nurl = "https://example.com/repo.git"\n'
+            'resolved_reference = "' + "a" * 40 + '"\n\n'
+            '[metadata]\nlock-version = "2.1"\npython-versions = ">=3.11,<4.0"\n',
+            encoding="utf-8")
+        findings = self.run_checker()
+        self.assertEqual(sorted(self.verdicts(findings, "custom-lib")), ["FLOATING_REF", "OK"])
+        branch = next(f for f in findings if f.key == "custom-lib" and f.verdict == "FLOATING_REF")
+        self.assertIn("branch:main", branch.declared)
+        (self.repo / "pyproject.toml").write_text(
+            (self.repo / "pyproject.toml").read_text(encoding="utf-8").replace(
+                '{ git = "https://example.com/repo.git", branch = "main" }', "1"),
+            encoding="utf-8")
+        self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+
+    def test_requirements_glob_discovery_keeps_nested_base_out_of_scope(self):
+        (self.repo / "requirements-dev.txt").write_text("fastapi==0.141.1\n", encoding="utf-8")
+        nested = self.repo / "requirements"
+        nested.mkdir()
+        (nested / "base.txt").write_text("fastapi==0.141.1\n", encoding="utf-8")
+        scopes = CV.discover(self.repo)
+        self.assertEqual([scope.manifest.name for scope in scopes if scope.lock_kind == "requirements"],
+                         ["requirements-dev.txt"])
+
     def test_no_lock_manifest_reports_no_lock_and_missing_path_is_input_error(self):
         fixture = SCRIPT.parents[1] / "tests" / "fixtures" / "versions" / "geo-no-lock"
         result = self.cli(str(fixture), "--repo", "geo", "--mode", "report")

@@ -28,9 +28,10 @@ import json
 import os
 from pathlib import Path
 import re
+import shlex
 import sys
 import tomllib
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, urlsplit, urlunsplit
 
 
 REGISTRY_SCHEMA = "kor-travel-common.version-registry.v1"
@@ -446,46 +447,153 @@ def read_toml(path: Path) -> dict:
         return tomllib.load(handle)
 
 
+POETRY_TOP_FIELDS = frozenset({"package", "metadata"})
+POETRY_PACKAGE_FIELDS = frozenset({
+    "name", "version", "description", "category", "optional", "python-versions", "groups",
+    "files", "dependencies", "extras", "source", "develop", "markers",
+})
+POETRY_SOURCE_FIELDS = frozenset({"type", "url", "reference", "resolved_reference"})
+POETRY_SOURCE_TYPES = frozenset({"git", "url", "legacy", "file", "directory"})
+
+
+def _poetry_error() -> ValueError:
+    """Poetry 입력 원문을 출력하지 않는 일반 오류."""
+    return ValueError("poetry.lock 지원 형식 오류")
+
+
+def _validate_url(value: object, *, require_host: bool) -> str:
+    if not isinstance(value, str) or not value.strip() or "\x00" in value:
+        raise _poetry_error()
+    text = value.strip()
+    # Poetry는 git+ 접두를 기록하기도 하고, 일반 git URL을 기록하기도 한다.
+    parsed_text = text.removeprefix("git+")
+    try:
+        parsed = urlsplit(parsed_text)
+        hostname = parsed.hostname
+        parsed.port
+    except ValueError as exc:
+        raise _poetry_error() from exc
+    if require_host and (not parsed.scheme or not hostname):
+        raise _poetry_error()
+    return text
+
+
 def read_poetry_lock(path: Path) -> dict:
     """Poetry lock의 제한된 package/source 구조를 fail-close로 읽는다."""
     try:
         data = read_toml(path)
     except (tomllib.TOMLDecodeError, UnicodeError) as exc:
-        raise ValueError("poetry.lock 지원 형식 오류") from exc
-    if not isinstance(data, dict) or not isinstance(data.get("package"), list):
-        raise ValueError("poetry.lock 지원 형식 오류")
-    metadata = data.get("metadata", {})
-    if not isinstance(metadata, dict):
-        raise ValueError("poetry.lock 지원 형식 오류")
-    for entry in data["package"]:
-        if not isinstance(entry, dict):
-            raise ValueError("poetry.lock 지원 형식 오류")
+        raise _poetry_error() from exc
+    if not isinstance(data, dict) or set(data) - POETRY_TOP_FIELDS:
+        raise _poetry_error()
+    packages = data.get("package")
+    metadata = data.get("metadata")
+    if not isinstance(packages, list) or not isinstance(metadata, dict):
+        raise _poetry_error()
+    python_versions = metadata.get("python-versions")
+    if (not isinstance(python_versions, str) or not python_versions.strip()
+            or _range_interval(python_versions) is None
+            or not any(item[0] is not None or item[2] is not None for item in _range_interval(python_versions))):
+        raise _poetry_error()
+    for entry in packages:
+        if not isinstance(entry, dict) or set(entry) - POETRY_PACKAGE_FIELDS:
+            raise _poetry_error()
         name, version = entry.get("name"), entry.get("version")
-        if not isinstance(name, str) or not name.strip() or not isinstance(version, str) or not version.strip():
-            raise ValueError("poetry.lock 지원 형식 오류")
+        if (not isinstance(name, str) or not name.strip()
+                or not isinstance(version, str) or not version.strip()):
+            raise _poetry_error()
         source = entry.get("source")
         if source is None:
             continue
-        if not isinstance(source, dict):
-            raise ValueError("poetry.lock 지원 형식 오류")
+        if not isinstance(source, dict) or set(source) - POETRY_SOURCE_FIELDS:
+            raise _poetry_error()
         source_type = source.get("type")
-        if not isinstance(source_type, str) or not source_type.strip():
-            raise ValueError("poetry.lock 지원 형식 오류")
-        if source_type == "git":
-            url = source.get("url")
-            if not isinstance(url, str) or not url.strip():
-                raise ValueError("poetry.lock 지원 형식 오류")
-            for field_name in ("reference", "resolved_reference"):
-                value = source.get(field_name, "")
-                if not isinstance(value, str):
-                    raise ValueError("poetry.lock 지원 형식 오류")
-        elif source_type not in {"legacy", "file", "directory"}:
-            raise ValueError("poetry.lock 지원 형식 오류")
+        if not isinstance(source_type, str) or source_type not in POETRY_SOURCE_TYPES:
+            raise _poetry_error()
+        for field_name in ("url", "reference", "resolved_reference"):
+            if field_name in source and (
+                    not isinstance(source[field_name], str) or not source[field_name].strip()):
+                raise _poetry_error()
+        if source_type in {"git", "url", "legacy"}:
+            if "url" not in source:
+                raise _poetry_error()
+            _validate_url(source["url"], require_host=True)
+        elif "url" in source:
+            _validate_url(source["url"], require_host=False)
+        else:
+            raise _poetry_error()
+        if source_type != "git" and ("reference" in source or "resolved_reference" in source):
+            raise _poetry_error()
+        if source_type == "git" and "resolved_reference" in source:
+            # SHA 이외의 값은 오류가 아니라 부동 참조로 보고한다.
+            if not source["resolved_reference"].strip():
+                raise _poetry_error()
     return data
 
 
+def _strip_inline_comment(line: str) -> str:
+    """공백 또는 탭 뒤의 주석만 제거한다(URL fragment의 `#`는 보존)."""
+    return re.split(r"[ \t]+#", line, maxsplit=1)[0].rstrip()
+
+
+def _editable_requirement(line: str) -> str | None:
+    """지원하는 editable git 행을 일반 PEP 508 URL 행으로 바꾼다."""
+    match = re.match(r"^(?:-e|--editable)(?:=|[ \t]+)(.+)$", line)
+    if match is None:
+        return None
+    value = match[1].strip()
+    if not value:
+        raise ValueError("requirements.txt 입력 구조 오류")
+    try:
+        parsed = urlsplit(value)
+    except ValueError as exc:
+        raise ValueError("requirements.txt 입력 구조 오류") from exc
+    egg = next((item.split("=", 1)[1] for item in parsed.fragment.split("&")
+                if item.startswith("egg=") and "=" in item), None)
+    if not egg or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", egg):
+        raise ValueError("requirements.txt 입력 구조 오류")
+    if not value.lower().startswith(("git+", "git:", "github:", "gitlab:", "bitbucket:")):
+        raise ValueError("requirements.txt 입력 구조 오류")
+    without_egg = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, parsed.query, ""))
+    return f"{egg} @ {without_egg}"
+
+
+def _strip_requirement_hashes(line: str) -> str:
+    """선언 행의 per-requirement `--hash` 토큰을 제거하고 형식을 검증한다."""
+    try:
+        tokens = shlex.split(line, posix=True)
+    except ValueError as exc:
+        raise ValueError("requirements.txt 입력 구조 오류") from exc
+    kept: list[str] = []
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        if token == "--hash":
+            index += 1
+            if index >= len(tokens) or not re.fullmatch(r"[A-Za-z0-9_-]+:[0-9A-Fa-f]+", tokens[index]):
+                raise ValueError("requirements.txt 입력 구조 오류")
+        elif token.startswith("--hash="):
+            if not re.fullmatch(r"--hash=[A-Za-z0-9_-]+:[0-9A-Fa-f]+", token):
+                raise ValueError("requirements.txt 입력 구조 오류")
+        elif token.startswith("--"):
+            kept.append(token)
+        else:
+            kept.append(token)
+        index += 1
+    return " ".join(kept)
+
+
+REQUIREMENTS_IGNORED_OPTIONS = frozenset({
+    "--no-index", "--pre", "--require-hashes", "--use-pep517", "--no-use-pep517",
+    "--prefer-binary", "--only-binary", "--no-binary", "--no-cache-dir",
+})
+REQUIREMENTS_VALUE_OPTIONS = frozenset({
+    "--index-url", "--extra-index-url", "--trusted-host", "--find-links",
+})
+
+
 def read_requirements(path: Path, *, _stack: tuple[Path, ...] = ()) -> list[str]:
-    """`-r`/`--requirement`를 재귀 확장하고 선언 행만 돌려준다."""
+    """`-r`/`--requirement`를 재귀 확장하고 유효한 선언 행만 돌려준다."""
     path = path.resolve()
     if path in _stack or not path.is_file():
         raise ValueError("requirements.txt 입력 구조 오류")
@@ -496,11 +604,8 @@ def read_requirements(path: Path, *, _stack: tuple[Path, ...] = ()) -> list[str]
     lines: list[str] = []
     pending = ""
     for raw in raw_lines:
-        line = raw.strip()
-        if pending:
-            pending += line
-        else:
-            pending = line
+        current = raw.strip()
+        pending = (pending + " " + current) if pending else current
         if pending.endswith("\\"):
             pending = pending[:-1].rstrip()
             continue
@@ -508,34 +613,48 @@ def read_requirements(path: Path, *, _stack: tuple[Path, ...] = ()) -> list[str]
             lines.append(pending)
         pending = ""
     if pending:
-        lines.append(pending)
+        raise ValueError("requirements.txt 입력 구조 오류")
 
     result: list[str] = []
     stack = _stack + (path,)
-    for line in lines:
-        line = line.split(" #", 1)[0].strip()
+    for original in lines:
+        line = _strip_inline_comment(original).strip()
         if not line or line.startswith("#"):
             continue
         include: str | None = None
-        if line.startswith("-r") and not line.startswith("--"):
+        if re.match(r"^-r(?:[ \t]+|$)", line) or (line.startswith("-r") and not line.startswith("--")):
             include = line[2:].strip()
-        elif line.startswith("--requirement"):
+        elif line == "--requirement" or line.startswith("--requirement=") or line.startswith("--requirement ") or line.startswith("--requirement\t"):
             value = line[len("--requirement"):]
-            if value.startswith("="):
-                value = value[1:]
-            if not value or value[0].isspace():
-                include = value.strip()
+            include = value[1:].strip() if value.startswith("=") else value.strip()
         if include is not None:
             if not include:
                 raise ValueError("requirements.txt 입력 구조 오류")
             result.extend(read_requirements(path.parent / include, _stack=stack))
             continue
-        # pip의 인덱스·해시·제약 옵션은 패키지 선언이 아니므로 보고 대상에서 제외한다.
-        if line.startswith("-"):
+        editable = _editable_requirement(line)
+        if editable is not None:
+            result.append(editable)
             continue
-        if parse_requirement(line) is None:
+        if line.startswith(("-e", "--editable")):
             raise ValueError("requirements.txt 입력 구조 오류")
-        result.append(line)
+        normalized = _strip_requirement_hashes(line)
+        if not normalized:
+            raise ValueError("requirements.txt 입력 구조 오류")
+        tokens = normalized.split()
+        option = tokens[0]
+        if option in REQUIREMENTS_IGNORED_OPTIONS:
+            continue
+        option_name, separator, option_value = option.partition("=")
+        if option_name in REQUIREMENTS_VALUE_OPTIONS:
+            if (separator and not option_value) or (not separator and len(tokens) != 2):
+                raise ValueError("requirements.txt 입력 구조 오류")
+            continue
+        if option.startswith("-"):
+            raise ValueError("requirements.txt 입력 구조 오류")
+        if parse_requirement(normalized, strict=True) is None:
+            raise ValueError("requirements.txt 입력 구조 오류")
+        result.append(normalized)
     return result
 
 
@@ -547,39 +666,119 @@ def exact_requirement_version(spec: str) -> str | None:
 
 
 def _range_interval(spec: str):
-    """간단한 PEP 440 범위를 (하한, 포함, 상한, 포함) 목록으로 근사한다."""
+    """PEP 440의 하한·상한을 닫힌/열린 구간으로 보수적으로 해석한다."""
+
+    def next_release(version: tuple[int, ...], operator: str) -> tuple[int, ...]:
+        values = list(version)
+        if operator == "^":
+            if values[0] > 0:
+                return (values[0] + 1,)
+            if len(values) > 1 and values[1] > 0:
+                return (0, values[1] + 1)
+            return (0, 0, (values[2] + 1) if len(values) > 2 else 1)
+        if operator == "~=":
+            if len(values) <= 2:
+                return (values[0] + 1,)
+            return tuple(values[:-2] + [values[-2] + 1])
+        if operator == "~":
+            if len(values) <= 1:
+                return (values[0] + 1,)
+            return tuple(values[:-1] + [values[-1] + 1])
+        return tuple(values)
+
+    def parse_version_token(token: str) -> tuple[tuple[int, ...], tuple[int, ...] | None] | None:
+        if token in {"", "*", "x", "X"}:
+            return None
+        wildcard = re.fullmatch(r"(v?\d+(?:\.\d+)*)\.[xX*]", token)
+        if wildcard:
+            lower = parse_version(wildcard[1])
+            if lower is None:
+                return None
+            values = list(lower)
+            values[-1] += 1
+            return lower, tuple(values)
+        version = parse_version(token)
+        if version is None or "*" in token.lower() or "x" in token.lower():
+            return None
+        return version, None
+
+    def update_lower(old, old_inc, new, new_inc):
+        if old is None or below(old, new):
+            return new, new_inc
+        if same_version(old, new):
+            return old, old_inc and new_inc
+        return old, old_inc
+
+    def update_upper(old, old_inc, new, new_inc):
+        if old is None or below(new, old):
+            return new, new_inc
+        if same_version(old, new):
+            return old, old_inc and new_inc
+        return old, old_inc
+
     intervals = []
     for alternative in spec.split("||"):
+        normalized = re.sub(r"(===|==|!=|~=|>=|<=|>|<|\^|~|=)\s+", r"\1", alternative.strip())
+        if not normalized:
+            return None
+        parts = [part for part in re.split(r"[,\s]+", normalized) if part]
+        if not parts:
+            return None
         lower = upper = None
         lower_inclusive = upper_inclusive = True
         exclusions: list[tuple[int, ...]] = []
-        parts = [part for part in re.split(r"[,\s]+", alternative.strip()) if part]
-        if not parts:
-            return None
+        exact_seen = False
         for part in parts:
-            operator = ""
-            for candidate in (">=", "<=", "==", "!=", ">", "<", "~=", "^", "~", "="):
-                if part.startswith(candidate):
-                    operator, part = candidate, part[len(candidate):]
-                    break
-            version = parse_version(re.sub(r"(?:\.[xX*])$", "", part))
-            if version is None:
+            match = re.match(r"^(===|==|!=|~=|>=|<=|>|<|\^|~|=)?(.*)$", part)
+            if match is None:
                 return None
-            if operator in {"", "=", "=="}:
-                lower = upper = version
-                lower_inclusive = upper_inclusive = True
-            elif operator in {">=", ">", "^", "~", "~=", "!="}:
+            operator = match[1] or ""
+            token = match[2]
+            if token in {"*", "x", "X"}:
+                if operator == "":
+                    continue
+                return None
+            parsed = parse_version_token(token)
+            if parsed is None:
+                return None
+            version, wildcard_upper = parsed
+            if operator in {"==", "="} and wildcard_upper is not None:
+                if exact_seen:
+                    return None
+                exact_seen = True
+                lower, lower_inclusive = update_lower(lower, lower_inclusive, version, True)
+                upper, upper_inclusive = update_upper(upper, upper_inclusive, wildcard_upper, False)
+                continue
+            if wildcard_upper is not None:
                 if operator == "!=":
-                    exclusions.append(version)
-                elif lower is None or below(lower, version):
-                    lower, lower_inclusive = version, operator in {">=", "^", "~", "~="}
+                    # 제외 wildcard는 구간으로 정확히 표현하지 못하므로 전체와 겹칠
+                    # 가능성이 있는 것으로 남겨 둔다(보수적 BLOCKED).
+                    continue
+                return None
+            if operator in {"", "===", "=="}:
+                if exact_seen and (lower is None or not same_version(lower, version)):
+                    return None
+                exact_seen = True
+                lower, lower_inclusive = update_lower(lower, lower_inclusive, version, True)
+                upper, upper_inclusive = update_upper(upper, upper_inclusive, version, True)
+            elif operator == "!=":
+                exclusions.append(version)
+            elif operator in {">=", ">"}:
+                lower, lower_inclusive = update_lower(lower, lower_inclusive, version, operator == ">=")
             elif operator in {"<", "<="}:
-                if upper is None or below(version, upper):
-                    upper, upper_inclusive = version, operator == "<="
+                upper, upper_inclusive = update_upper(upper, upper_inclusive, version, operator == "<=")
+            elif operator in {"^", "~", "~="}:
+                lower, lower_inclusive = update_lower(lower, lower_inclusive, version, True)
+                upper, upper_inclusive = update_upper(upper, upper_inclusive,
+                                                      next_release(version, operator), False)
             else:
                 return None
+        if (lower is not None and upper is not None
+                and (below(upper, lower)
+                     or (same_version(lower, upper) and not (lower_inclusive and upper_inclusive)))):
+            return None
         intervals.append((lower, lower_inclusive, upper, upper_inclusive, exclusions))
-    return intervals
+    return intervals or None
 
 
 def ranges_overlap(left: str, right: str) -> bool:
@@ -744,7 +943,14 @@ def ref_is_pinned(text: str, *, kind: str = "npm") -> bool:
     def valid_ref(ref: str) -> bool:
         return bool(re.fullmatch(r"[0-9a-f]{40}", ref) or TAG_RE.fullmatch(ref))
 
-    parsed = urlsplit(text.removeprefix("git+"))
+    try:
+        parsed = urlsplit(text.removeprefix("git+"))
+        # hostname/port는 URL이 실제로 해석 가능한지 확인한다. 원문 예외는
+        # 입력 값이 로그로 재출력될 수 있으므로 여기서 일반 판정으로 닫는다.
+        parsed.hostname
+        parsed.port
+    except ValueError:
+        return False
     path = unquote(parsed.path)
     fragment = unquote(parsed.fragment)
     hosted = parsed.hostname in {"github.com", "gitlab.com"}
@@ -782,19 +988,34 @@ def is_vcs_spec(spec: str) -> bool:
             or bool(re.match(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(#.*)?$", spec)))
 
 
-def parse_requirement(text: str) -> tuple[str, str, str] | None:
+def parse_requirement(text: str, *, strict: bool = False) -> tuple[str, str, str] | None:
     """PEP 508 문자열 → (이름, 범위, URL). URL 의존성은 범위가 빈 문자열."""
-    text = text.split(";")[0].strip()
+    text, separator, marker = text.partition(";")
+    if strict and separator and not marker.strip():
+        return None
+    text = text.strip()
     if not text or text.startswith(("-", "#")):
         return None
     match = REQ_RE.match(text)
     if match is None:
         return None
-    name, _extras, rest = match.groups()
+    name, extras, rest = match.groups()
+    if strict and extras is not None:
+        values = extras[1:-1].split(",")
+        if any(not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", value.strip()) for value in values):
+            return None
     rest = rest.strip()
     if rest.startswith("@"):
-        return normalize_name(name), "", rest[1:].strip()
-    return normalize_name(name), rest.strip("() "), ""
+        url = rest[1:].strip()
+        if strict and (not url or url.startswith("@")
+                       or not url.lower().startswith(("git+", "git:", "github:", "gitlab:",
+                                                       "bitbucket:", "https://", "http://", "file:"))):
+            return None
+        return normalize_name(name), "", url
+    spec = rest.strip("() ")
+    if strict and spec and _range_interval(spec) is None:
+        return None
+    return normalize_name(name), spec, ""
 
 
 # --------------------------------------------------------------------------- 탐색
@@ -843,9 +1064,10 @@ def discover(root: Path) -> list[Scope]:
                 scopes.append(Scope("python", rel, manifest, directory / "poetry.lock", "poetry"))
             else:
                 scopes.append(Scope("python", rel, manifest, None, "none"))
-        if "requirements.txt" in files:
-            scopes.append(Scope("python", rel, directory / "requirements.txt", None, "requirements",
-                                note="requirements.txt는 선언만 읽는다(T-005b)"))
+        for requirement_name in sorted(name for name in files
+                                       if re.fullmatch(r"requirements[^/]*\.txt", name)):
+            scopes.append(Scope("python", rel, directory / requirement_name, None, "requirements",
+                                note=f"{requirement_name}는 선언만 읽는다(T-005b)"))
     return scopes
 
 
@@ -1235,25 +1457,72 @@ class Checker:
                     urls.setdefault(normalize_name(name), []).append(
                         f"{git_url}@{ref}" if ref else git_url
                     )
-            poetry = data.get("tool", {}).get("poetry", {})
+            tool = data.get("tool", {})
+            if not isinstance(tool, dict):
+                raise _manifest_input_error()
+            poetry = tool.get("poetry", {})
             if poetry:
-                requires_python = requires_python or poetry.get("dependencies", {}).get("python")
-                groups = [poetry.get("dependencies", {})]
-                groups.extend(g.get("dependencies", {}) for g in poetry.get("group", {}).values())
+                if not isinstance(poetry, dict):
+                    raise _manifest_input_error()
+                poetry_dependencies = poetry.get("dependencies", {})
+                poetry_groups = poetry.get("group", {})
+                if not isinstance(poetry_dependencies, dict) or not isinstance(poetry_groups, dict):
+                    raise _manifest_input_error()
+                groups = [poetry_dependencies]
+                for group in poetry_groups.values():
+                    if not isinstance(group, dict) or not isinstance(group.get("dependencies", {}), dict):
+                        raise _manifest_input_error()
+                    groups.append(group["dependencies"])
+
+                def add_poetry_dependency(name: object, value: object) -> None:
+                    if not isinstance(name, str) or not name.strip():
+                        raise _manifest_input_error()
+                    values = value if isinstance(value, list) else [value]
+                    if not values or any(not isinstance(item, (str, dict)) for item in values):
+                        raise _manifest_input_error()
+                    normalized = normalize_name(name)
+                    for item in values:
+                        if isinstance(item, str):
+                            config = {}
+                            spec = item
+                        else:
+                            config = item
+                            spec = config.get("version", "")
+                            if not isinstance(spec, str):
+                                raise _manifest_input_error()
+                        if normalized == "python":
+                            if not isinstance(spec, str) or not spec.strip():
+                                raise _manifest_input_error()
+                            nonlocal_requires[0] = nonlocal_requires[0] or spec
+                            continue
+                        declared.setdefault(normalized, spec)
+                        git_url = config.get("git") if isinstance(config, dict) else None
+                        if isinstance(config, dict) and any(field_name in config
+                                                           for field_name in ("rev", "tag", "branch")) and git_url is None:
+                            raise _manifest_input_error()
+                        if git_url is None:
+                            continue
+                        if not isinstance(git_url, str) or not git_url.strip():
+                            raise _manifest_input_error()
+                        refs = [field_name for field_name in ("rev", "tag", "branch")
+                                if field_name in config and config[field_name] is not None]
+                        if len(refs) > 1 or any(not isinstance(config[field_name], str)
+                                                or not config[field_name].strip() for field_name in refs):
+                            raise _manifest_input_error()
+                        normalized_url = git_url if git_url.startswith("git+") else "git+" + git_url
+                        if config.get("branch") is not None:
+                            ref = f"branch:{config['branch']}"
+                        else:
+                            ref = config.get("rev") or config.get("tag") or ""
+                        urls.setdefault(normalized, []).append(
+                            f"{normalized_url}@{ref}" if ref else normalized_url
+                        )
+
+                nonlocal_requires = [requires_python]
                 for group in groups:
                     for name, value in group.items():
-                        if normalize_name(name) == "python":
-                            continue
-                        spec = value.get("version", "") if isinstance(value, dict) else str(value)
-                        declared.setdefault(normalize_name(name), spec)
-                        if isinstance(value, dict) and value.get("git"):
-                            if value.get("branch") is not None and not value.get("rev") and not value.get("tag"):
-                                ref = f"branch:{value['branch']}"
-                            else:
-                                ref = value.get("rev") or value.get("tag") or ""
-                            urls.setdefault(normalize_name(name), []).append(
-                                f"{value['git']}@{ref}" if ref else value["git"]
-                            )
+                        add_poetry_dependency(name, value)
+                requires_python = nonlocal_requires[0]
         elif manifest is not None and requirements_mode:
             for line in read_requirements(manifest):
                 parsed = parse_requirement(line)
@@ -1309,10 +1578,11 @@ class Checker:
             url = source["url"]
             reference = source.get("reference", "")
             resolved = source.get("resolved_reference", "")
+            normalized_url = url if url.startswith("git+") else "git+" + url
             declared_ref = reference or (resolved if re.fullmatch(r"[0-9a-f]{40}", resolved) else "")
-            declared = f"git+{url}@{declared_ref}" if declared_ref else f"git+{url}"
+            declared = f"{normalized_url}@{declared_ref}" if declared_ref else normalized_url
             # Poetry의 resolved_reference는 uv처럼 fragment에 두어 SHA 판정을 재사용한다.
-            locked = f"git+{url}#{resolved}" if resolved else declared
+            locked = f"{normalized_url}#{resolved}" if resolved else declared
             return declared, locked
 
         for name, url_specs in urls.items():
