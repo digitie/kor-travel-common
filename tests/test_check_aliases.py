@@ -161,6 +161,20 @@ class AliasCheckerTests(unittest.TestCase):
         )
         self.assertTrue(any("지원하지 않는 CSS" in error for error in self.errors()))
 
+    def test_unicode_custom_property_definition_is_rejected(self) -> None:
+        self.write(
+            "aliases/map.css",
+            ":root { --kt-한글: red; }\n.dark { --kt-한글: red; }\n",
+        )
+        self.assertTrue(any("--kt-* 정의 금지" in error for error in self.errors()))
+
+    def test_unicode_kt_reference_is_checked(self) -> None:
+        self.write(
+            "aliases/map.css",
+            ":root { --brand: var(--kt-없는); }\n.dark { --brand: var(--kt-없는); }\n",
+        )
+        self.assertTrue(any("미정의" in error for error in self.errors()))
+
     def test_var_text_in_string_is_not_a_reference(self) -> None:
         self.write(
             "aliases/map.css",
@@ -183,6 +197,22 @@ class AliasCheckerTests(unittest.TestCase):
             ".dark .child { --brand: var(--kt-brand); }\n",
         )
         self.assertTrue(any(".dark 블록" in error for error in self.errors()))
+
+    def test_nested_dark_selector_does_not_count_as_dark_mode(self) -> None:
+        self.write(
+            "aliases/map.css",
+            "@media print { .dark { --brand: var(--kt-brand); } }\n"
+            ":root { --brand: var(--kt-brand); }\n",
+        )
+        self.assertTrue(any(".dark 블록" in error for error in self.errors()))
+
+    def test_combined_selector_duplicate_is_detected_per_mode(self) -> None:
+        self.write(
+            "aliases/map.css",
+            ":root, .dark { --brand: var(--kt-brand); }\n"
+            ":root { --brand: var(--kt-brand); }\n",
+        )
+        self.assertTrue(any("별칭 중복 선언" in error for error in self.errors()))
 
     def test_error_redacts_identifiers_and_relative_paths(self) -> None:
         marker = "ghp_" + "Q" * 36

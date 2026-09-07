@@ -12,8 +12,8 @@ import re
 import sys
 
 
-CUSTOM_PROPERTY_NAME = re.compile(r"--[a-zA-Z0-9_-]+")
-KT_REFERENCE = re.compile(r"(?i)\bvar\(\s*(--kt-[a-zA-Z0-9_-]+)")
+CUSTOM_PROPERTY_NAME = re.compile(r"--[\w\-\u0080-\U0010ffff]+", re.UNICODE)
+KT_REFERENCE = re.compile(r"(?i)\bvar\(\s*(--kt-[\w\-\u0080-\U0010ffff]*)")
 
 
 class CSSInputError(ValueError):
@@ -115,15 +115,9 @@ def _line_number(text: str, position: int) -> int:
 
 def _scope(stack: list[str]) -> str | None:
     """직접 :root/.dark 선택자만 별칭 모드로 인정한다."""
-    selector: str | None = None
-    for candidate in reversed(stack):
-        candidate = candidate.strip()
-        if not candidate or candidate.startswith("@"):
-            continue
-        selector = candidate
-        break
-    if selector is None:
+    if len(stack) != 1:
         return None
+    selector = stack[0].strip()
     parts = tuple(part.strip() for part in selector.split(","))
     if not parts or any(part not in (":root", ".dark") for part in parts):
         return None
@@ -337,21 +331,21 @@ def _parse_css(path: Path) -> ParsedCSS:
             continue
         if can_start_declaration and masked.startswith("--", i):
             match = CUSTOM_PROPERTY_NAME.match(masked, i)
-            if match is None and i + 2 < len(masked) and masked[i + 2] == "\\":
-                raise CSSInputError("지원하지 않는 CSS custom property escape")
-            if match is not None:
-                name_end = match.end()
-                colon = name_end
-                while colon < len(masked) and masked[colon].isspace():
-                    colon += 1
-                if colon < len(masked) and masked[colon] == ":":
-                    value, end = _scan_value(masked, colon + 1)
-                    definitions.append(Definition(
-                        match.group(0), value, path, _line_number(text, i), _scope(stack)
-                    ))
-                    can_start_declaration = False
-                    i = end
-                    continue
+            if match is None:
+                raise CSSInputError("지원하지 않는 CSS custom property 이름")
+            name_end = match.end()
+            colon = name_end
+            while colon < len(masked) and masked[colon].isspace():
+                colon += 1
+            if colon >= len(masked) or masked[colon] != ":":
+                raise CSSInputError("CSS custom property 선언이 올바르지 않음")
+            value, end = _scan_value(masked, colon + 1)
+            definitions.append(Definition(
+                match.group(0), value, path, _line_number(text, i), _scope(stack)
+            ))
+            can_start_declaration = False
+            i = end
+            continue
         if not char.isspace():
             can_start_declaration = False
         i += 1
@@ -576,12 +570,15 @@ def check_aliases(alias_dir: Path) -> list[str]:
         errors.append("별칭 :root 선언 누락")
 
     # 같은 모드의 중복 정의와 root/dark 값 drift를 모두 검사한다.
-    by_scope_name: dict[tuple[str | None, str], list[Definition]] = {}
     by_name: dict[str, set[str]] = {}
     for item in noncanonical_defs:
-        by_scope_name.setdefault((item.scope, item.name), []).append(item)
         by_name.setdefault(item.name, set()).add(item.value)
-    for (scope, name), items in sorted(by_scope_name.items(), key=lambda pair: str(pair[0])):
+    expanded_by_scope: dict[tuple[str | None, str], list[Definition]] = {}
+    for item in noncanonical_defs:
+        scopes = ("root", "dark") if item.scope == "both" else (item.scope,)
+        for scope in scopes:
+            expanded_by_scope.setdefault((scope, item.name), []).append(item)
+    for (scope, name), items in sorted(expanded_by_scope.items(), key=lambda pair: str(pair[0])):
         if len(items) > 1:
             errors.append(f"별칭 중복 선언 ({scope or 'import'})")
     for name, values in sorted(by_name.items()):
