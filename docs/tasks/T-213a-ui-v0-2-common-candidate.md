@@ -43,7 +43,7 @@ docs/journal.md  docs/resume.md
 
 - T-208·T-209·T-210의 공개 exports·props·`data-slot`·testid·sr-only 문구가 ui-contract와 일치하고 계약 시험이 통과한다.
 - unit/axe·TypeScript·pack 설치·webpack/Turbopack smoke가 0 test·skip 없이 성공한다. 실행하지 못한 소비자 검증은 `NOT_RUN(소비자 저장소 미수정)`으로 둔다.
-- 두 빌드 digest가 같고 후보 tag object/peeled commit이 검증한 40자리 source commit과 같다. tag는 이동·덮어쓰지 않는다.
+- 두 빌드 digest가 같고 후보 annotated tag object ID는 로컬·원격 조회값으로 기록해 일치시킨다. tag의 peeled commit만 검증한 40자리 source commit과 같아야 하며 tag object ID 자체는 별도 값이다. tag는 이동·덮어쓰지 않는다.
 - 두 reviewer가 P0/P1 finding 없이 승인하고 문서·plan·diff gate가 통과한다. T-213은 이 evidence와 T-212 외부 evidence를 사용해 별도로 진행한다.
 
 ## 검증 명령
