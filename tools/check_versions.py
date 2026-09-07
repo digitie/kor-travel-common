@@ -890,9 +890,24 @@ class Checker:
             specs = list(project.get("dependencies", []))
             for group in project.get("optional-dependencies", {}).values():
                 specs.extend(group)
-            for group in data.get("dependency-groups", {}).values():
-                if isinstance(group, list):
-                    specs.extend(group)
+            dependency_groups = data.get("dependency-groups", {})
+            expanded_groups: set[str] = set()
+
+            def append_group(group_name: str) -> None:
+                if group_name in expanded_groups:
+                    return
+                expanded_groups.add(group_name)
+                group = dependency_groups.get(group_name, [])
+                if not isinstance(group, list):
+                    return
+                for item in group:
+                    if isinstance(item, str):
+                        specs.append(item)
+                    elif isinstance(item, dict) and isinstance(item.get("include-group"), str):
+                        append_group(item["include-group"])
+
+            for group_name in dependency_groups:
+                append_group(group_name)
             for text in specs:
                 parsed = parse_requirement(str(text))
                 if parsed is None:

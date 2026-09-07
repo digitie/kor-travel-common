@@ -564,7 +564,7 @@ class CheckVersionsTests(unittest.TestCase):
     def test_uv_dependency_group_and_list_source_are_inspected(self):
         (self.repo / "pyproject.toml").write_text(
             '[project]\nname = "fixture"\nversion = "0.0.0"\nrequires-python = ">=3.12"\n'
-            'dependencies = []\n\n[dependency-groups]\ndev = ["fastapi>=0.115"]\n\n'
+            'dependencies = []\n\n[dependency-groups]\nlint = ["fastapi>=0.115"]\ndev = [{ include-group = "lint" }]\n\n'
             '[tool.uv.sources]\ncustom-lib = [\n'
             '  { git = "https://github.com/example/custom-lib", branch = "main" },\n'
             '  { git = "https://github.com/example/custom-lib", tag = "v1.2.3" },\n]\n',
