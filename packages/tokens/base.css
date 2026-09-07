@@ -17,6 +17,14 @@
   }
 }
 
+.border-kt-hairline {
+  border-color: var(--kt-border);
+}
+
+.border-kt-control-line {
+  border-color: var(--kt-control-line);
+}
+
 @utility border-kt-hairline {
   border-color: var(--kt-border);
 }

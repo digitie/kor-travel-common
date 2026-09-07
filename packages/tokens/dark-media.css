@@ -1,10 +1,9 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later
  * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ * Generated: scripts/build.mjs — tokens.css의 .dark 값을 OS media로 전달
  */
 
-@custom-variant dark (&:is(.dark *));
-
-/* class 토글 없이 OS 설정을 쓰는 앱을 위한 동일한 map dark 값이다. */
+/* Tailwind v4의 기본 dark variant가 prefers-color-scheme을 사용하므로 class override를 선언하지 않는다. */
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
@@ -36,5 +35,21 @@
     --kt-overlay: oklch(10% 0.006 157 / 0.6);
     --kt-shadow-elevated: 0 4px 12px oklch(10% 0.006 157 / 0.32);
     --kt-shadow-modal: 0 8px 24px oklch(10% 0.006 157 / 0.4);
+    --kt-radius-control: 0.375rem;
+    --kt-radius-panel: 0.5rem;
+    --kt-control-h: 2.25rem;
+    --kt-control-h-sm: 1.875rem;
+    --kt-rail: 22rem;
+    --kt-duration-fast: 100ms;
+    --kt-duration-base: 150ms;
+    --kt-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --kt-ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+    --kt-z-nav: 30;
+    --kt-z-panel: 40;
+    --kt-z-overlay: 50;
+    --kt-z-modal: 60;
+    --kt-z-toast: 70;
+    --kt-font-sans: "Pretendard Variable", Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif;
+    --kt-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   }
 }

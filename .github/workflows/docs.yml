@@ -180,8 +180,10 @@ jobs:
         run: |
           npm run lint --if-present --workspace packages/tokens
           npm run type-check --if-present --workspace packages/tokens
+          npm run check --workspace packages/tokens
           npm run build --workspace packages/tokens
           npm run check --workspace packages/tokens
+          git diff --exit-code -- packages/tokens/dist packages/tokens/dark-media.css
           npm test --workspace packages/tokens
       - name: tarball 설치 스모크
         run: |

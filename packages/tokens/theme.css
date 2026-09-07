@@ -44,11 +44,6 @@
   --ease-kt-in: var(--kt-ease-in);
   --shadow-kt-elevated: var(--kt-shadow-elevated);
   --shadow-kt-modal: var(--kt-shadow-modal);
-  --z-kt-nav: var(--kt-z-nav);
-  --z-kt-panel: var(--kt-z-panel);
-  --z-kt-overlay: var(--kt-z-overlay);
-  --z-kt-modal: var(--kt-z-modal);
-  --z-kt-toast: var(--kt-z-toast);
 }
 
 /* 타입 스케일은 비inline이어야 소비자가 변수만 가려 프로필을 바꿀 수 있다. */
@@ -77,4 +72,24 @@
 @utility duration-kt-base {
   --tw-duration: var(--kt-duration-base);
   transition-duration: var(--kt-duration-base);
+}
+
+@utility z-kt-nav {
+  z-index: var(--kt-z-nav);
+}
+
+@utility z-kt-panel {
+  z-index: var(--kt-z-panel);
+}
+
+@utility z-kt-overlay {
+  z-index: var(--kt-z-overlay);
+}
+
+@utility z-kt-modal {
+  z-index: var(--kt-z-modal);
+}
+
+@utility z-kt-toast {
+  z-index: var(--kt-z-toast);
 }

@@ -4,10 +4,6 @@
 
 /* admin과 사용자 표면이 함께 있는 앱에서 공용 base 규칙을 표면 안으로 제한한다. */
 @layer base {
-  :where([data-kt-surface], [data-kt-surface] *) {
-    color-scheme: light;
-  }
-
   :where([data-kt-surface], [data-kt-surface] *):focus-visible {
     outline: 2px solid var(--kt-focus);
     outline-offset: 2px;
@@ -18,11 +14,11 @@
   }
 }
 
-@utility border-kt-hairline-scoped {
+:where([data-kt-surface].border-kt-hairline-scoped, [data-kt-surface] .border-kt-hairline-scoped) {
   border-color: var(--kt-border);
 }
 
-@utility border-kt-control-line-scoped {
+:where([data-kt-surface].border-kt-control-line-scoped, [data-kt-surface] .border-kt-control-line-scoped) {
   border-color: var(--kt-control-line);
 }
 

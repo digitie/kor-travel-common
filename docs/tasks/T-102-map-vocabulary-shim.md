@@ -18,7 +18,7 @@ map 어휘를 그대로 쓰는 앱(weather 294회, geo 별칭 층)이 호출부�
 
 ## 구현 범위
 
-1. `packages/tokens/src/aliases/map-vocabulary.css`: map·weather·geo가 공유하는 이름(`--surface-page`… `--text-primary`… `--brand`… `--control-line`·`--border`·`--focus`·status 4+tint·`--radius-control/panel`·`--control-h/-sm`·`--rail`·`--duration-*`·`--ease-*`·`--shadow-*`·`--z-*`·`--font-sans/mono`)을 `var(--kt-*)`로 재선언. 목록은 `dt` §3.2.1·§3.2.3의 map 이름 열 전수 + weather `app/tokens.css`(조사 커밋)에서 재grep해 확정. `.dark` 블록도 동일 이름으로.
+1. `packages/tokens/aliases/map-vocabulary.css`: map·weather·geo가 공유하는 이름(`--surface-page`… `--text-primary`… `--brand`… `--control-line`·`--border`·`--focus`·status 4+tint·`--radius-control/panel`·`--control-h/-sm`·`--rail`·`--duration-*`·`--ease-*`·`--shadow-*`·`--z-*`·`--font-sans/mono`)을 `var(--kt-*)`로 재선언. 목록은 `dt` §3.2.1·§3.2.3의 map 이름 열 전수 + weather `app/tokens.css`(조사 커밋)에서 재grep해 확정. `.dark` 블록도 동일 이름으로.
 2. `packages/tokens/examples/weather-overrides.css`: `--kt-brand` 4종(navy)·`--kt-rail: 17rem`·`--kt-font-sans`(현재 weather 스택)·`.dark` 대응. `examples/README.md`에 "예제이지 배포 대상 아님·6폭 diff 0 검증은 T-461 evidence".
 3. `tools/check_aliases.py` + `tests/test_check_aliases.py`(stdlib): (a) 별칭 파일의 모든 `var(--kt-…)` 대상이 `tokens.css`에 정의됨, (b) 별칭 파일이 `--kt-*` 이름을 정의하지 않음, (c) 별칭 이름이 `theme.css`의 `@theme` 네임스페이스(`--color-*`·`--spacing-*`·`--radius-*`·`--text-*`·`--font-*`)와 겹치지 않음, (d) `shadcn.css`와 중복 정의 없음. 출력 목록 + exit 0/1.
 4. `package.json` `exports`에 `./aliases/map-vocabulary.css` 추가(T-101 골격에 이미 예약), `npm run check`에 `check_aliases` 호출은 Node 빌드 외 Python이므로 CI `tools` job에서 실행.
@@ -29,11 +29,11 @@ map 어휘를 그대로 쓰는 앱(weather 294회, geo 별칭 층)이 호출부�
 
 ## 예상 변경 파일
 
-예정 경로는 존재·실행 증거가 아니다. `packages/tokens/src/aliases/map-vocabulary.css`, `packages/tokens/examples/weather-overrides.css`, `packages/tokens/examples/README.md`, `tools/check_aliases.py`, `tests/test_check_aliases.py`, `tools/README.md`(행 추가), `packages/tokens/package.json`.
+예정 경로는 존재·실행 증거가 아니다. `packages/tokens/aliases/map-vocabulary.css`, `packages/tokens/examples/weather-overrides.css`, `packages/tokens/examples/README.md`, `tools/check_aliases.py`, `tests/test_check_aliases.py`, `tools/README.md`(행 추가), `packages/tokens/package.json`.
 
 ## 수용 기준
 
-- `check_aliases.py`가 `packages/tokens/src`에서 exit 0이고, 미정의 대상·`--kt-*` 정의·네임스페이스 충돌 fixture 각각에서 exit 1(테스트로 고정).
+- `check_aliases.py`가 `packages/tokens/aliases`에서 exit 0이고, 미정의 대상·`--kt-*` 정의·네임스페이스 충돌 fixture 각각에서 exit 1(테스트로 고정).
 - 별칭 이름 집합이 weather `app/tokens.css`(조사 커밋 `6003da9`)의 변수 이름 집합을 포함한다(누락 목록 0; 재grep 결과를 evidence에 첨부).
 - weather 예제가 `tokens.css` + shim + 예제만으로 weather 현재 값(navy·17rem·font)을 재현한다는 대조표(변수별 원값/결과값)가 evidence에 있다.
 - `npm pack` tarball에 `aliases/map-vocabulary.css`가 포함되고 `examples/`는 포함되지 않는다.
@@ -42,7 +42,7 @@ map 어휘를 그대로 쓰는 앱(weather 294회, geo 별칭 층)이 호출부�
 ## 검증 명령
 
 ```bash
-python3 -B -X utf8 tools/check_aliases.py packages/tokens/src; echo "exit=$?"
+python3 -B -X utf8 tools/check_aliases.py packages/tokens/aliases; echo "exit=$?"
 python3 -B -X utf8 -m unittest discover -s tests -p "test_check_aliases.py" -v
 npm pack --workspace packages/tokens --pack-destination /tmp/kt && tar -tzf /tmp/kt/kor-travel-tokens-0.1.0.tgz | grep -E "aliases/|examples/"
 ```

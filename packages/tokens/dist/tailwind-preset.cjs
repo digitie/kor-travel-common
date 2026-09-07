@@ -102,7 +102,7 @@ module.exports = {
         "kt-fast": "var(--kt-duration-fast)",
         "kt-base": "var(--kt-duration-base)"
       },
-      "timingFunction": {
+      "transitionTimingFunction": {
         "kt-out": "var(--kt-ease-out)",
         "kt-in": "var(--kt-ease-in)"
       }

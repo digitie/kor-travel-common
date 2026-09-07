@@ -61,39 +61,119 @@ function properties(block) {
 
 function nestedTokenPath(name) {
   const dash = name.indexOf("-");
-  return dash < 0 ? [name] : [name.slice(0, dash), name.slice(dash + 1)];
+  return dash < 0 ? [name, "$root"] : [name.slice(0, dash), name.slice(dash + 1)];
+}
+
+function tokenReference(name) {
+  return `{${nestedTokenPath(name).join(".")}}`;
+}
+
+function normaliseNumber(value) {
+  return Number(Number(value).toFixed(6));
+}
+
+function dimensionValue(value) {
+  const match = /^(?<number>[+-]?(?:\d+\.?\d*|\.\d+))(?<unit>px|rem)$/.exec(value);
+  if (!match) {
+    if (value === "0") return { value: 0, unit: "px" };
+    throw new Error(`DTCG dimension으로 변환할 수 없는 값: ${value}`);
+  }
+  return { value: normaliseNumber(match.groups.number), unit: match.groups.unit };
+}
+
+function durationValue(value) {
+  const match = /^(?<number>[+-]?(?:\d+\.?\d*|\.\d+))(?<unit>ms|s)$/.exec(value);
+  if (!match) throw new Error(`DTCG duration으로 변환할 수 없는 값: ${value}`);
+  return { value: normaliseNumber(match.groups.number), unit: match.groups.unit };
+}
+
+function cubicBezierValue(value) {
+  const match = /^cubic-bezier\(\s*([^,]+),\s*([^,]+),\s*([^,]+),\s*([^\)]+)\s*\)$/.exec(value);
+  if (!match) throw new Error(`DTCG cubicBezier로 변환할 수 없는 값: ${value}`);
+  return match.slice(1).map(normaliseNumber);
+}
+
+function colorValue(value) {
+  const alias = /^var\(--kt-([a-z0-9-]+)\)$/.exec(value);
+  if (alias) return tokenReference(alias[1]);
+  const match = /^oklch\(\s*([+-]?(?:\d+\.?\d*|\.\d+))%\s+([+-]?(?:\d+\.?\d*|\.\d+))\s+([+-]?(?:\d+\.?\d*|\.\d+))(?:\s*\/\s*([+-]?(?:\d+\.?\d*|\.\d+)))?\s*\)$/.exec(value);
+  if (!match) throw new Error(`DTCG color로 변환할 수 없는 값: ${value}`);
+  const result = {
+    colorSpace: "oklch",
+    components: [normaliseNumber(Number(match[1]) / 100), normaliseNumber(match[2]), normaliseNumber(match[3])],
+  };
+  if (match[4] !== undefined) result.alpha = normaliseNumber(match[4]);
+  return result;
+}
+
+function fontFamilyValue(value) {
+  const result = [];
+  const pattern = /"([^"]*)"|'([^']*)'|([^,]+)/g;
+  for (const match of value.matchAll(pattern)) {
+    const font = (match[1] ?? match[2] ?? match[3]).trim().replace(/^(['"])(.*)\1$/, "$2");
+    if (font) result.push(font);
+  }
+  if (!result.length) throw new Error(`DTCG fontFamily로 변환할 수 없는 값: ${value}`);
+  return result;
+}
+
+function shadowValue(value) {
+  const match = /^(?<x>[+-]?(?:\d+\.?\d*|\.\d+)(?:px|rem)?)\s+(?<y>[+-]?(?:\d+\.?\d*|\.\d+)(?:px|rem)?)\s+(?<blur>[+-]?(?:\d+\.?\d*|\.\d+)(?:px|rem)?)\s+(?<color>oklch\([^)]*\))$/.exec(value);
+  if (!match) throw new Error(`DTCG shadow로 변환할 수 없는 값: ${value}`);
+  const length = (raw) => dimensionValue(raw === "0" ? "0" : raw);
+  return {
+    color: colorValue(match.groups.color),
+    offsetX: length(match.groups.x),
+    offsetY: length(match.groups.y),
+    blur: length(match.groups.blur),
+    spread: { value: 0, unit: "px" },
+  };
+}
+
+function dtcgValue(name, value, aliasValues = null) {
+  const alias = /^var\(--kt-([a-z0-9-]+)\)$/.exec(value);
+  if (alias) {
+    return aliasValues ? dtcgValue(alias[1], aliasValues.get(alias[1]), aliasValues) : tokenReference(alias[1]);
+  }
+  switch (typeFor(name)) {
+    case "color": return colorValue(value);
+    case "dimension": return dimensionValue(value);
+    case "duration": return durationValue(value);
+    case "cubicBezier": return cubicBezierValue(value);
+    case "shadow": return shadowValue(value);
+    case "number": return normaliseNumber(value);
+    case "fontFamily": return fontFamilyValue(value);
+    default: throw new Error(`지원하지 않는 DTCG 토큰 타입: ${name}`);
+  }
 }
 
 function tokenDocument(light, dark) {
   const document = {
-    $schema: "https://design-tokens.github.io/community-group/format/",
+    $schema: "https://www.designtokens.org/schemas/2025.10/format.json",
     $description: "kor-travel-common의 --kt-* 디자인 토큰. 값의 정본은 tokens.css이다.",
-    color: {},
-    dimension: {},
-    duration: {},
-    cubicBezier: {},
-    shadow: {},
-    number: {},
-    fontFamily: {},
-    profiles: {
-      admin: {
-        $description: "공용 admin 밀도 프로필",
-        radius: { control: "0.375rem", panel: "0.5rem" },
-        controlHeight: { default: "2.25rem", small: "1.875rem" },
-        body: "0.9375rem",
-        typeScale: ["0.75rem", "0.84375rem", "0.9375rem", "1.0625rem", "1.25rem", "1.5rem", "1.875rem"],
-      },
-      consumer: {
-        $description: "의미 이름만 common이 제공하며 값과 밀도는 소비자가 소유한다.",
-        ownedBy: "consumer",
-        semanticGroups: ["surface", "text", "brand", "status", "font"],
+    $extensions: {
+      "kor-travel-common": {
+        profiles: {
+          admin: {
+            description: "공용 admin 밀도 프로필",
+            radius: { control: "{radius.control}", panel: "{radius.panel}" },
+            controlHeight: { default: "{control.h}", small: "{control.h-sm}" },
+            body: "sm",
+            typeScale: ["2xs", "xs", "sm", "md", "lg", "xl", "2xl"],
+          },
+          consumer: {
+            description: "의미 이름만 common이 제공하며 값과 밀도는 소비자가 소유한다.",
+            ownedBy: "consumer",
+            semanticGroups: ["surface", "text", "brand", "status", "font"],
+          },
+        },
       },
     },
   };
   for (const [name, value] of light) {
-    const mode = { $type: typeFor(name), $value: value };
+    const mode = { $type: typeFor(name), $value: dtcgValue(name, value) };
     const darkValue = dark.get(name);
-    if (darkValue !== undefined) mode.$extensions = { "kor-travel-common": { dark: darkValue } };
+    if (darkValue !== undefined) mode.$extensions = { "kor-travel-common": { dark: dtcgValue(name, darkValue, dark) } };
     const path = nestedTokenPath(name);
     if (path.length === 1) {
       document[path[0]] = mode;
@@ -141,7 +221,7 @@ function tailwindPreset(light) {
         boxShadow: { "kt-elevated": "var(--kt-shadow-elevated)", "kt-modal": "var(--kt-shadow-modal)" },
         zIndex: Object.fromEntries(["nav", "panel", "overlay", "modal", "toast"].map((key) => [`kt-${key}`, `var(--kt-z-${key})`])),
         transitionDuration: { "kt-fast": "var(--kt-duration-fast)", "kt-base": "var(--kt-duration-base)" },
-        timingFunction: { "kt-out": "var(--kt-ease-out)", "kt-in": "var(--kt-ease-in)" },
+        transitionTimingFunction: { "kt-out": "var(--kt-ease-out)", "kt-in": "var(--kt-ease-in)" },
       },
     },
   };
@@ -159,6 +239,23 @@ function generatedFiles(document, light) {
   };
 }
 
+function darkMediaCss(dark) {
+  const declarations = [...dark].map(([name, value]) => `    --kt-${name}: ${value};`).join("\n");
+  return `/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ * Generated: scripts/build.mjs — tokens.css의 .dark 값을 OS media로 전달
+ */
+
+/* Tailwind v4의 기본 dark variant가 prefers-color-scheme을 사용하므로 class override를 선언하지 않는다. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+${declarations}
+  }
+}
+`;
+}
+
 async function main() {
   const css = await readFile(sourcePath, "utf8");
   const light = properties(matchingBlock(css, ":root"));
@@ -169,10 +266,13 @@ async function main() {
   if (missing.length) throw new Error(`light/dark 토큰 누락: ${missing.join(", ")}`);
   const document = tokenDocument(light, dark);
   const files = generatedFiles(document, light);
+  const outputs = [
+    ...Object.entries(files).map(([name, content]) => ({ path: join(distPath, name), name, content })),
+    { path: join(packageRoot, "dark-media.css"), name: "dark-media.css", content: darkMediaCss(dark) },
+  ];
   if (!checkOnly) await mkdir(distPath, { recursive: true });
   const mismatches = [];
-  for (const [name, content] of Object.entries(files)) {
-    const path = join(distPath, name);
+  for (const { path, name, content } of outputs) {
     if (checkOnly) {
       const actual = existsSync(path) ? await readFile(path, "utf8") : null;
       if (actual !== content) mismatches.push(name);
@@ -182,7 +282,7 @@ async function main() {
   }
   if (mismatches.length) throw new Error(`생성물 drift: ${mismatches.join(", ")}. npm run build를 먼저 실행하십시오.`);
   if (checkOnly) console.log("tokens.css 생성물 검사: clean");
-  else console.log(`tokens.css 생성 완료: ${Object.keys(files).length}개 파일`);
+  else console.log(`tokens.css 생성 완료: ${outputs.length}개 파일`);
 }
 
 await main();
