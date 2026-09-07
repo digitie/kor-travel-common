@@ -1,4 +1,4 @@
-# T-102 레거시 어휘 별칭 shim `aliases/map-vocabulary.css`(map·weather·geo 공통 이름 → `--kt-*`) + weather `--rail`·font 오버라이드 예제 + 별칭 충돌 검사 스크립트 (2026-09-08, PR #14)
+# T-102 레거시 어휘 별칭 shim `aliases/map-vocabulary.css`(map·weather·geo 공통 이름 → `--kt-*`) + weather `--rail`·font 오버라이드 예제 + 별칭 충돌 검사 스크립트 (2026-09-08, PR #15)
 
 - 상태: DONE
 - 우선순위: P0
@@ -51,7 +51,7 @@ Git Bash에서 동일.
 
 ## evidence
 
-- 최종 code candidate는 `ded1631b81d464ed919d36d73ab9c2a1111d38f4`(tree `41dd1c6551994b62d94a04c8a3c1f8bf98414de7`)이며 PR [#14](https://github.com/digitie/kor-travel-common/pull/14)에 반영했다. 반복 no-go의 근본 원인과 finding disposition은 [최종 통합 판정](../reviews/adversarial/2026-09-08-t102-post-fix-01.md)에 기록했다.
+- 최종 code candidate는 `ded1631b81d464ed919d36d73ab9c2a1111d38f4`(tree `41dd1c6551994b62d94a04c8a3c1f8bf98414de7`)이며 ready PR [#15](https://github.com/digitie/kor-travel-common/pull/15)에 반영했다. 초기 draft PR [#14](https://github.com/digitie/kor-travel-common/pull/14)는 동일 source의 기록을 보존한 뒤 닫는다. 반복 no-go의 근본 원인과 finding disposition은 [최종 통합 판정](../reviews/adversarial/2026-09-08-t102-post-fix-01.md)에 기록했다.
 - 두 독립 reviewer의 final2 원본은 [A](../reviews/adversarial/evidence/2026-09-08-t102-final2-reviewer-a.md)(SHA256 `735D4718F53B8349A89638D3BCE1D4DF28593BD5418D14B56DA3EC5B3A03C63B`)와 [B](../reviews/adversarial/evidence/2026-09-08-t102-final2-reviewer-b.md)(SHA256 `B675AC97A9A9B9574B809008513BC187B0D18DA3368EF63CC66E53A1EDE6ECDA`)이며 모두 PASS·신규 P0–P3 finding 0건이다.
 - exact candidate CI [34137474603](https://github.com/digitie/kor-travel-common/actions/runs/34137474603)의 docs·tools(Windows/Ubuntu)·packages·secret-scan·check-versions 6개 job이 모두 성공했다. Windows 전체 238 tests와 focused alias 35 tests, WSL 전체 235 pass와 focused 34 pass(+플랫폼 skip)는 reviewer 원본에 보존했다. `check_aliases`·문서 link/plan·SPDX·secret/redaction·versions self-check·`git diff --check`도 오류 0이다.
 - tokens package check/build/test 7개, 임시 tarball 19개 파일의 alias 포함·examples 제외와 install smoke를 통과했으며 npm/PyPI 게시·소비자 저장소 변경은 하지 않았다. 별칭 수·원천 대조는 최종 통합 판정과 review evidence를 정본으로 한다.
