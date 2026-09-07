@@ -2854,8 +2854,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         registry_path = _resolve_input_path(args.registry, "레지스트리 입력 구조 오류")
         registry = Registry.load(registry_path)
-    except (OSError, ValueError, TypeError, AttributeError, KeyError) as exc:
-        print(f"::error title=check_versions::레지스트리 오류: {exc}")
+    except (OSError, ValueError, TypeError, AttributeError, KeyError):
+        print("::error title=check_versions::레지스트리 입력 구조 오류")
         return 2
     if args.self_check:
         today = args.today or date.today()
