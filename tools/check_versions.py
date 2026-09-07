@@ -1304,6 +1304,39 @@ class _WorkflowLine:
     line: int
 
 
+_WORKFLOW_SENSITIVE_VALUE_RE = re.compile(
+    r"(?ix)(?:"
+    r"\b(?:AKIA|ASIA)[0-9A-Z]{16}\b|"
+    r"\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b|"
+    r"(?:secret|password|passwd|token|api[_-]?key|access[_-]?token|refresh[_-]?token)"
+    r"[-_A-Za-z0-9]{8,}\b|"
+    r"\b[a-z][a-z0-9+.-]*://[^\s/:@<>]+:[^\s/@<>]+@|"
+    r"-----BEGIN (?:[A-Z0-9]+ )?PRIVATE KEY-----|"
+    r"\$\{\{\s*secrets(?:\.|\s|\[)"
+    r")"
+)
+
+
+def _workflow_display_value(value: object, fallback: str = "(workflow 값 비공개)") -> str:
+    """workflow 원문이 보고서·annotation·요약으로 재게시되지 않게 제한한다."""
+    if not isinstance(value, str):
+        return ""
+    text = value.replace("\r", " ").replace("\n", " ")
+    if len(text) > 256 or any(ord(char) < 0x20 and char != "\t" for char in text):
+        return fallback
+    if _WORKFLOW_SENSITIVE_VALUE_RE.search(text):
+        return fallback
+    return text
+
+
+def _path_within(path: Path, root: Path) -> bool:
+    try:
+        path.relative_to(root)
+    except ValueError:
+        return False
+    return True
+
+
 def _workflow_input_error() -> ValueError:
     """workflow 파싱 실패를 입력값·경로를 노출하지 않는 일반 오류로 만든다."""
     return ValueError("workflow 입력 구조 오류")
@@ -1401,7 +1434,7 @@ class _WorkflowYamlParser:
                 continue
             if char in {"'", '"'}:
                 quote = char
-            elif char in "[{}":
+            elif char in "[]{}":
                 raise _workflow_input_error()
             elif char == ":" and index + 1 < len(inner) and inner[index + 1].isspace():
                 raise _workflow_input_error()
@@ -1432,20 +1465,59 @@ class _WorkflowYamlParser:
         if value.startswith("'"):
             if len(value) < 2 or not value.endswith("'"):
                 raise _workflow_input_error()
-            return value[1:-1].replace("''", "'")
+            inner = value[1:-1]
+            result: list[str] = []
+            index = 0
+            while index < len(inner):
+                if inner[index] != "'":
+                    result.append(inner[index])
+                    index += 1
+                    continue
+                if index + 1 >= len(inner) or inner[index + 1] != "'":
+                    raise _workflow_input_error()
+                result.append("'")
+                index += 2
+            return "".join(result)
         if value.startswith('"'):
             if len(value) < 2 or not value.endswith('"'):
                 raise _workflow_input_error()
-            try:
-                parsed = json.loads(value)
-            except (TypeError, ValueError, json.JSONDecodeError) as exc:
-                raise _workflow_input_error() from exc
-            if not isinstance(parsed, str):
-                raise _workflow_input_error()
-            return parsed
-        if re.search(r"(?:^|\s)[&*][A-Za-z0-9_.-]+(?:\s|$)", value):
+            inner = value[1:-1]
+            escapes = {
+                "0": "\0", "a": "\a", "b": "\b", "t": "\t", "n": "\n",
+                "v": "\v", "f": "\f", "r": "\r", "e": "\x1b", " ": " ",
+                '"': '"', "/": "/", "\\": "\\", "N": "\u0085", "_": "\u00a0",
+                "L": "\u2028", "P": "\u2029",
+            }
+            result: list[str] = []
+            index = 0
+            while index < len(inner):
+                char = inner[index]
+                if char != "\\":
+                    if char == '"':
+                        raise _workflow_input_error()
+                    result.append(char)
+                    index += 1
+                    continue
+                index += 1
+                if index >= len(inner):
+                    raise _workflow_input_error()
+                escape = inner[index]
+                if escape in escapes:
+                    result.append(escapes[escape])
+                    index += 1
+                    continue
+                width = {"x": 2, "u": 4, "U": 8}.get(escape)
+                if width is None or index + width >= len(inner):
+                    raise _workflow_input_error()
+                digits = inner[index + 1:index + 1 + width]
+                if not re.fullmatch(rf"[0-9A-Fa-f]{{{width}}}", digits):
+                    raise _workflow_input_error()
+                result.append(chr(int(digits, 16)))
+                index += width + 1
+            return "".join(result)
+        if re.search(r"(?:^|\s)[&*](?:[A-Za-z0-9_.-]+)?(?:\s|$)", value):
             raise _workflow_input_error()
-        if any(char in value for char in {"'", '"'}):
+        if re.search(r":(?:\s|$)", value):
             raise _workflow_input_error()
         lowered = value.lower()
         if lowered in {"null", "~"}:
@@ -1535,7 +1607,8 @@ class _WorkflowYamlParser:
             raw_key, raw_value = pair
             key = self._key(raw_key)
             mapping: dict[str, _WorkflowNode] = {}
-            item, index = self._parse_value(raw_value, current, index, indent)
+            # `- key:`의 논리 parent는 list marker보다 두 칸 안쪽이다.
+            item, index = self._parse_value(raw_value, current, index, indent + 2)
             mapping[key] = item
             if index < len(self.lines) and self.lines[index].indent > indent:
                 continuation_indent = self.lines[index].indent
@@ -1601,6 +1674,9 @@ def discover_workflows(root: Path) -> list[Scope]:
     directory = root / ".github" / "workflows"
     if not directory.is_dir():
         return []
+    resolved_directory = directory.resolve()
+    if not _path_within(resolved_directory, root):
+        raise _workflow_input_error()
     scopes: list[Scope] = []
     for path in sorted(directory.iterdir(), key=lambda item: item.name):
         if not path.is_file() or path.suffix.lower() not in {".yml", ".yaml"}:
@@ -1898,7 +1974,8 @@ class Checker:
     # --- workflow 정적 보고
     @staticmethod
     def _workflow_scope(scope: Scope, line: int) -> str:
-        return f"{scope.label}:{line}"
+        label = _workflow_display_value(scope.label, "(workflow 경로 비공개)")
+        return f"{label or 'workflow'}:{line}"
 
     @staticmethod
     def _workflow_map(node: _WorkflowNode | None) -> dict[str, _WorkflowNode] | None:
@@ -1912,6 +1989,20 @@ class Checker:
             return None
         return node.value
 
+    @staticmethod
+    def _workflow_repository_root(scope: Scope) -> Path:
+        """workflow의 lexical root를 유지하고 symlink 탈출을 읽기 전에 차단한다."""
+        if scope.lock is None:
+            raise _workflow_input_error()
+        repository_root = scope.lock.parent.parent.parent.resolve()
+        try:
+            resolved_workflow = scope.lock.resolve()
+        except OSError as exc:
+            raise _workflow_input_error() from exc
+        if not scope.lock.is_file() or not _path_within(resolved_workflow, repository_root):
+            raise _workflow_input_error()
+        return repository_root
+
     def _workflow_uses(self, scope: Scope, node: _WorkflowNode) -> tuple[str, str, str, str]:
         """uses 문자열을 ecosystem·설치 표기·판정·설명으로 분류한다."""
         if not isinstance(node.value, str):
@@ -1919,8 +2010,7 @@ class Checker:
         text = node.value.strip()
         if not text:
             return "github-action", "-", "FLOATING_REF", "참조가 비어 있음"
-        workflow_path = scope.lock.resolve() if scope.lock is not None else None
-        repository_root = workflow_path.parents[2] if workflow_path is not None else Path.cwd()
+        repository_root = self._workflow_repository_root(scope)
         if text.startswith("./"):
             candidate = (repository_root / text).resolve()
             try:
@@ -1934,21 +2024,27 @@ class Checker:
             image = text[len("docker://"):]
             if not image or re.search(r"\s", image):
                 return "docker", "-", "FLOATING_REF", "Docker image 참조 형식 미지원"
+            if image.count("@") > 1:
+                return "docker", "-", "FLOATING_REF", "Docker image 참조 형식 미지원"
             if "@" in image:
-                name, digest = image.rsplit("@", 1)
-                if name and re.fullmatch(r"sha256:[0-9a-f]{64}", digest):
+                name, digest = image.split("@", 1)
+                if self._workflow_docker_name(name) and re.fullmatch(r"sha256:[0-9a-f]{64}", digest):
                     return "docker", digest, "OK", "Docker digest로 고정됨"
                 return "docker", digest or "-", "FLOATING_REF", "Docker digest가 고정 형식이 아님"
-            if ":" not in image.rsplit("/", 1)[-1]:
+            last = image.rsplit("/", 1)[-1]
+            if ":" not in last:
                 return "docker", "-", "FLOATING_REF", "Docker image tag가 없음"
-            tag = image.rsplit(":", 1)[1]
-            if not tag or tag.lower() in FLOATING_NAMES or not WORKFLOW_TAG_RE.fullmatch(tag):
+            name, tag = image.rsplit(":", 1)
+            if (not self._workflow_docker_name(name) or not tag or tag.lower() in FLOATING_NAMES
+                    or not WORKFLOW_TAG_RE.fullmatch(tag)):
                 return "docker", tag or "-", "FLOATING_REF", "Docker image tag가 버전형이 아님"
             return "docker", tag, "OK", "Docker image 버전형 tag"
         if text.count("@") != 1:
             return "github-action", "-", "FLOATING_REF", "owner/repo@ref 형식이 아니거나 ref가 없음"
         target, ref = text.rsplit("@", 1)
+        target_parts = target.split("/")
         if (not re.fullmatch(r"[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)+", target)
+                or any(part in {"", ".", ".."} for part in target_parts)
                 or not ref.strip() or re.search(r"\s", text)):
             return "github-action", ref or "-", "FLOATING_REF", "action 참조 형식 미지원"
         if re.fullmatch(r"[0-9a-f]{40}", ref):
@@ -1957,27 +2053,53 @@ class Checker:
             return "github-action", ref, "OK", "action 버전형 tag로 고정됨"
         return "github-action", ref, "FLOATING_REF", "branch·미고정 action ref 금지"
 
+    @staticmethod
+    def _workflow_docker_name(name: str) -> bool:
+        """Docker image name의 빈 segment·이동 경로·빈 repository를 거부한다."""
+        if not name or name.startswith("/") or name.endswith("/"):
+            return False
+        parts = name.split("/")
+        if any(not part or part in {".", ".."} for part in parts):
+            return False
+        for part in parts:
+            if ":" in part:
+                host, port = part.rsplit(":", 1)
+                if (not host or not port.isdigit()
+                        or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.-]*", host)):
+                    return False
+            elif not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", part):
+                return False
+        return True
+
     def _check_workflow_uses(self, scope: Scope, node: _WorkflowNode) -> None:
         ecosystem, installed, verdict, detail = self._workflow_uses(scope, node)
         self.add(self._workflow_scope(scope, node.line), "uses", ecosystem,
-                 str(node.value) if isinstance(node.value, str) else "", installed, verdict, detail)
+                 _workflow_display_value(node.value, "(workflow uses 값 비공개)"),
+                 _workflow_display_value(installed, "(workflow ref 비공개)"), verdict,
+                 _workflow_display_value(detail, "(workflow 진단 비공개)"))
 
     def _check_setup_node(self, scope: Scope, uses_node: _WorkflowNode,
                           step: dict[str, _WorkflowNode]) -> None:
         with_node = step.get("with")
-        with_values = self._workflow_map(with_node)
-        if with_values is None:
+        if with_node is None:
             self.add(self._workflow_scope(scope, uses_node.line), "node", "runtime", "", "",
                      "NO_ENGINES", "actions/setup-node의 정적 `with.node-version` 없음")
             return
+        with_values = self._workflow_map(with_node)
+        if with_values is None:
+            raise _workflow_input_error()
         node_node = with_values.get("node-version")
         if node_node is None or not isinstance(node_node.value, str):
             line = node_node.line if node_node is not None else uses_node.line
-            self.add(self._workflow_scope(scope, line), "node", "runtime",
-                     str(node_node.value) if node_node is not None and node_node.value is not None else "",
-                     "", "NO_ENGINES", "node-version이 정적 문자열이 아님")
+            self.add(self._workflow_scope(scope, line), "node", "runtime", "", "", "NO_ENGINES",
+                     "node-version이 정적 문자열이 아님")
             return
         value = node_node.value.strip()
+        display_value = _workflow_display_value(value, "(workflow node 값 비공개)")
+        if display_value != value:
+            self.add(self._workflow_scope(scope, node_node.line), "node", "runtime", display_value, "",
+                     "NO_ENGINES", "node-version 값은 안전한 정적 표시를 만들 수 없음")
+            return
         if not value or "${{" in value or "}}" in value or "$" in value:
             self.add(self._workflow_scope(scope, node_node.line), "node", "runtime", value, "",
                      "NO_ENGINES", "node-version expression·동적 값은 해석하지 않음")
@@ -1986,7 +2108,8 @@ class Checker:
 
     def check_workflow(self, scope: Scope) -> None:
         """workflow의 uses와 setup-node 정적 선언만 검사한다."""
-        if scope.lock is None or not scope.lock.is_file():
+        self._workflow_repository_root(scope)
+        if scope.lock is None:
             raise _workflow_input_error()
         try:
             text = scope.lock.read_text(encoding="utf-8")
@@ -2000,6 +2123,7 @@ class Checker:
         jobs = self._workflow_map(jobs_node)
         if jobs is None or not jobs:
             raise _workflow_input_error()
+        checked_targets = 0
         for job_node in jobs.values():
             job = self._workflow_map(job_node)
             if job is None:
@@ -2008,11 +2132,12 @@ class Checker:
             if job_uses is not None:
                 if "steps" in job:
                     raise _workflow_input_error()
+                checked_targets += 1
                 self._check_workflow_uses(scope, job_uses)
                 continue
             steps_node = job.get("steps")
             if steps_node is None:
-                continue
+                raise _workflow_input_error()
             steps = self._workflow_list(steps_node)
             if steps is None:
                 raise _workflow_input_error()
@@ -2025,10 +2150,13 @@ class Checker:
                     continue
                 if "run" in step:
                     raise _workflow_input_error()
+                checked_targets += 1
                 self._check_workflow_uses(scope, uses_node)
                 if (isinstance(uses_node.value, str)
-                        and uses_node.value.split("@", 1)[0] == "actions/setup-node"):
+                        and uses_node.value.strip().split("@", 1)[0] == "actions/setup-node"):
                     self._check_setup_node(scope, uses_node, step)
+        if checked_targets == 0:
+            raise _workflow_input_error()
 
     def record_range(self, key: str, scope: str, ecosystem: str, spec: str) -> None:
         bound = lower_bound(spec)
@@ -2424,12 +2552,13 @@ def escape_cell(text: str) -> str:
 def render_markdown(findings: list[Finding], registry: Registry, repo: str, mode: str,
                     mode_source: str, today: date, roots: list[str]) -> str:
     counts = summarize(findings)
+    display_roots = [_workflow_display_value(root, "(입력 경로 비공개)") for root in roots]
     lines = [
         f"## check_versions — {repo}",
         "",
         f"- 레지스트리: `{registry.path.name}` (baseline {registry.data.get('baseline')}, "
         f"updated {registry.data.get('updated')})",
-        f"- 대상: {', '.join('`' + r + '`' for r in roots) or '-'}",
+        f"- 대상: {', '.join('`' + r + '`' for r in display_roots) or '-'}",
         f"- 모드: `{mode}` ({mode_source}) · 기준일 {today.isoformat()} · exit {exit_code(mode, findings)}",
         "- 판정 요약: " + " · ".join(f"{verdict} {count}" for verdict, count in counts.items() if count),
         "",
@@ -2466,10 +2595,11 @@ def build_report(findings: list[Finding], registry: Registry, repo: str, mode: s
                  mode_source: str, today: date, roots: list[str]) -> dict:
     return {
         "schema": REPORT_SCHEMA,
-        "registry": {"path": registry.path.as_posix(), "baseline": registry.data.get("baseline"),
+        "registry": {"path": _workflow_display_value(registry.path.as_posix(), "(레지스트리 경로 비공개)"),
+                     "baseline": registry.data.get("baseline"),
                      "updated": registry.data.get("updated")},
         "repo": repo,
-        "roots": roots,
+        "roots": [_workflow_display_value(root, "(입력 경로 비공개)") for root in roots],
         "mode": mode,
         "mode_source": mode_source,
         "today": today.isoformat(),
@@ -2537,7 +2667,11 @@ def main(argv: list[str] | None = None) -> int:
             print(f"::error title=check_versions::디렉터리 아님: {root}")
             return 2
         roots.append(root.as_posix())
-        scopes.extend(discover(root))
+        try:
+            scopes.extend(discover(root))
+        except (OSError, ValueError, TypeError, AttributeError, KeyError) as exc:
+            print(f"::error title=check_versions::소비자 입력 오류: {exc}")
+            return 2
 
     if not scopes:
         print("::error title=check_versions::검사 대상 scope가 없음(경로·lockfiles 확인 필요)")
