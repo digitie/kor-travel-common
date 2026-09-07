@@ -1,7 +1,7 @@
 # 라이브러리·플랫폼 버전 일치 정책 (versions)
 
 - 정본 지위: 이 문서는 버전 정렬 **정책**의 정본이고, 기준선 **값**의 정본은 루트 [`versions.json`](../../versions.json)(schema `kor-travel-common.version-registry.v1`)이다. 두 문서가 어긋나면 `versions.json`이 값을, 이 문서가 규칙을 이긴다. 검사기는 [`tools/check_versions.py`](../../tools/check_versions.py).
-- 확정 task: T-005(정책·npm v3 구현, 독립 리뷰 진행), T-005a(`uv.lock` 확장), T-005b(`poetry.lock`·`requirements.txt`), T-403(소비자 CI 삽입), T-502(gate 승격), T-507(재평가). 이 문서는 정본 초안이며 실물 소비자 매니페스트(T-011)와 대조해 확정하는 task가 남아 있다.
+- 확정 task: T-005(정책·npm v3 구현, 독립 리뷰 진행), T-005a(`uv.lock` 확장), T-005b(`poetry.lock`·`requirements.txt`), T-011(consumer-manifest.v1 strict validator), T-403(소비자 CI 삽입), T-502(gate 승격), T-507(재평가). 이 문서는 버전 정책 정본이고 매니페스트 필드·초안은 [T-011](../tasks/T-011-consumer-manifest-schema.md)과 `templates/`가 소유한다.
 - 마지막 갱신: 2026-09-07. 결정 근거: [설계 브리프](../plan/design-brief.md) D-06·D-07·D-30·D-31, ADR-008([ADR 색인](../adr/README.md)).
 - 상위 문서: [standards 색인](README.md). 관련: [frontend-stack](frontend-stack.md), [backend-stack](backend-stack.md), [ci-deploy](ci-deploy.md), [consumer adoption runbook](../runbooks/consumer-adoption.md), [release runbook](../runbooks/release.md).
 
@@ -24,7 +24,7 @@
 | 예외(exception) | `exceptions[]{repo,key,installed,reason,until,review}`. 해당 저장소·축·설치본 접두에 한해 원 판정을 `EXEMPT`로 덮는다. `until` 경과 시 `EXEMPT_EXPIRED` |
 | 차단(blocked) | `blocked[]{ecosystem,name,range,reason,since}`. 설치본이 범위에 들면 `BLOCKED` |
 | enforce | `consumers.<repo>.enforce` ∈ `report`/`warn`/`fail`. 소비자별 강제 수준(D-30) |
-| 매니페스트 | 소비 저장소의 `kor-travel-common.lock.json`(`consumer-manifest.v1`, T-011). 도구는 `lockfiles[]`·`repo`만 읽는다 |
+| 매니페스트 | 소비 저장소의 `kor-travel-common.lock.json`(`consumer-manifest.v1`, T-011). `validate_manifest.py`가 전체 v1 계약을 strict 검사한 뒤 `check_versions.py`가 `lockfiles[]`·`repo`와 저장소 루트 workflow를 읽는다 |
 
 ## 3. 정책
 
@@ -42,10 +42,11 @@
 ### 3.2 lockfile 의무
 
 - npm: `package-lock.json` **lockfileVersion 3** 커밋. CI·Docker는 `npm ci`. lockfileVersion 1·2는 `NO_LOCK`으로 본다. `npm-shrinkwrap.json`이 함께 있으면 npm이 이를 우선하므로, 미지원 shrinkwrap 대신 package-lock을 신뢰하지 않고 `NO_LOCK`으로 보고한다.
-- Python: `uv.lock` 커밋 + CI·Docker 모두 `uv sync --locked`(weather 선례, `vm` §2.1). airport(CI만)·pinvi(미소비)는 T-482·T-484에서 소비 일관화한다. 과도기 Poetry는 `poetry.lock`의 package/version·Python metadata와 git source를 제한적으로 읽고, `requirements*.txt`는 재귀 선언을 읽되 정확 `==` 핀만 설치본 후보로 삼는다. requirements 결과에는 `NO_LOCK`을 남기며 범위 선언은 설치본 대조가 아니다. Poetry parser의 결과도 uv lock 도입·소비자 gate를 대신하지 않는다(T-005b, T-471·T-450).
+- Python: `uv.lock` 커밋 + CI·Docker 모두 `uv sync --locked`(weather 선례, `vm` §2.1). airport(CI만)·pinvi(미소비)는 T-482·T-484에서 소비 일관화한다. 과도기 Poetry는 `poetry.lock`의 package/version·Python metadata와 git source를 제한적으로 읽고, `requirements*.txt`는 재귀 선언을 읽되 정확 `==` 핀만 설치본 후보로 삼는다. requirements 결과에는 `NO_LOCK`을 남기며 범위 선언은 설치본 대조가 아니다. strict 매니페스트 검사에서는 재귀 include의 최종 경로도 소비자 root 안이어야 하며, root 밖 파일·symlink는 입력 오류(exit 2)로 닫는다. Poetry parser의 결과도 uv lock 도입·소비자 gate를 대신하지 않는다(T-005b, T-471·T-450).
 - `poetry.lock` 검사기는 `[[package]]`의 `name`·`version`·유효한 source 형식을 축과 대조하고 `[package.source] type = "git"`의 `reference`·`resolved_reference`를 검사한다. Poetry가 생성하는 최상위 `extras`, legacy source의 `reference`, Git source의 `subdirectory`는 타입을 확인한 뒤 보존하며 판정을 우회하지 않는다. `metadata.python-versions`가 없거나 문자열·범위가 아니면 입력 오류(exit 2)로 닫는다. 40자리 `resolved_reference`는 lock SHA로 확인하지만 선언 branch는 `FLOATING_REF`로 남긴다. `requirements*.txt`의 `-r`·`--requirement`(공백·등호·축약형)는 상대 파일을 재귀 확장하고 순환·누락·미지원 옵션·형식 오류는 exit 2로 닫는다. 인라인 주석과 per-requirement `--hash`는 선언에서 제거한 뒤 검사하며 editable Git도 같은 고정 참조 규칙을 따른다. requirements marker는 알려진 변수·인용 문자열·비교의 조합(and/or)과 역순 비교를 확인하고, 잘못된 연산자·RHS·괄호는 exit 2로 닫는다. URL 대괄호 호스트는 실제 IPv6 주소만 허용해 malformed URL이 보고서에 부동 참조로 남지 않게 한다. `==2.*`·`~=`·교집합 등 지원하는 PEP 440 범위가 `blocked[]`와 겹치면 설치본이 없어도 `BLOCKED`로 보고한다.
 - `uv.lock` 검사기는 Python 3.11 표준 라이브러리 `tomllib`으로 schema `version = 1`, `revision` 0~4, 최상위 `requires-python`, `[[package]]`의 이름·버전·`source`(registry/git/editable/directory/virtual)를 제한적으로 읽는다. `resolution-markers`·workspace 관련 메타데이터는 알려진 필드만 허용하고, 미지 schema·source·형식은 exit 2로 닫힌다. uv의 lock 내부 형식은 안정적인 공개 API가 아니므로 이 경계는 [공식 lockfile versioning 문서](https://docs.astral.sh/uv/concepts/resolution/#lockfile-versioning)(2026-07-30 문서 revision)와 [upstream source 3c979abda4530fe9bf3d92e9bcf5c5575e3b3126](https://github.com/astral-sh/uv/blob/3c979abda4530fe9bf3d92e9bcf5c5575e3b3126/crates/uv-resolver/src/lock/mod.rs)에 고정한 검사 범위다. universal lock의 marker별 복수 package와 PEP 735 `dependency-groups`, `tool.uv.sources`의 복수 git 항목을 모두 보고하며, 실제 `uv sync --locked` 성공이나 metadata 해석 결과를 대신하지 않는다.
-- 워크스페이스: npm 워크스페이스는 루트 lock 하나가 전 멤버를 해석한다(map·pinvi). 도구는 멤버 `package.json`을 별도 범위로 보고하되 설치본은 `<멤버>/node_modules/<pkg>`부터 각 상위 디렉터리의 `node_modules/<pkg>`를 거쳐 루트까지 찾는다. 직접 선언 대조 뒤 lock 전체의 나머지 축·차단 대상·전이 git/URL 선언과 resolved를 검사한다. 로컬 링크의 축·차단 대상은 NO_LOCK으로 남긴다. npm 이름의 점·밑줄·하이픈을 서로 합치지 않으며 Python 이름만 정규화한다. 전이 행의 scope에는 lock 내부 경로를 붙이며, 명시한 멤버 범위라도 공유 lock 전체를 검사한다. uv의 세부 워크스페이스 해석은 T-005a가 확정한다.
+- 워크스페이스: npm 워크스페이스는 루트 lock 하나가 전 멤버를 해석한다(map·pinvi). 매니페스트 `scope`가 `root`이면 lock 옆 root `package.json`을, 그 밖이면 lockfile 디렉터리 기준 workspace 경로의 멤버 `package.json`을 별도 범위로 보고한다. 설치본은 `<멤버>/node_modules/<pkg>`부터 각 상위 디렉터리의 `node_modules/<pkg>`를 거쳐 루트까지 찾는다. 직접 선언 대조 뒤 lock 전체의 나머지 축·차단 대상·전이 git/URL 선언과 resolved를 검사한다. 로컬 링크의 축·차단 대상은 NO_LOCK으로 남긴다. npm 이름의 점·밑줄·하이픈을 서로 합치지 않으며 Python 이름만 정규화한다. 전이 행의 scope에는 lock 내부 경로를 붙이되 민감한 경로·scope 값은 비식별화한다. 명시한 멤버 범위라도 공유 lock 전체를 검사한다. uv의 세부 워크스페이스 해석은 T-005a가 확정한다.
+- 매니페스트 root 경계: strict 호출은 저장소 root와 manifest를 함께 받아 `lockfiles[].path`, workspace 멤버 선언, Python 동반 선언과 workflow의 최종 resolved 경로가 root 밖이면 exit 2로 닫는다. 빈 `lockfiles`는 `app` 경로에 선언(`package.json`, `pyproject.toml`, `requirements*.txt`)이 있으면 해당 범위를 `NO_LOCK`으로 보고한다. scope·오류 진단은 비밀형 입력과 제어 문자를 재출력하지 않는다.
 - lock 재생성 사고 방지: `--package-lock-only`로 만든 lock은 `integrity`가 빠질 수 있다(pinvi T-352, `vm` §3.6). 채택 PR은 lock 동반 커밋이 필수다(D-24).
 
 ### 3.3 판정 어휘(D-07)
@@ -162,15 +163,16 @@
 # 소비 저장소 체크아웃을 자동 탐색(package.json·pyproject.toml·requirements*.txt·.github/workflows/*.yml|*.yaml, 깊이 4, node_modules 제외)
 python3 -B -X utf8 tools/check_versions.py /path/to/kor-travel-map --repo kor-travel-map
 
-# 매니페스트의 lockfiles[]만 대조(T-011 이후 CI 표준 호출; --mode 없음 = versions.json enforce)
-python3 -B -X utf8 tools/check_versions.py --manifest /path/to/app/kor-travel-common.lock.json \
+# 매니페스트의 lockfiles[]와 저장소 루트 workflow를 대조(T-011 이후 CI 표준 호출)
+python3 -B -X utf8 tools/check_versions.py /path/to/consumer-repo \
+  --manifest /path/to/consumer-repo/<app-dir>/kor-travel-common.lock.json \
   --json report.json --markdown report.md
 
 # 예외 만료를 미리 보기
 python3 -B -X utf8 tools/check_versions.py /path/to/app --repo wx --today 2027-01-15
 ```
 
-- 인자: 위치 인자 = 저장소 루트(여러 개 가능), `--manifest`, `--registry`(기본 common 루트 `versions.json`), `--repo`(consumers 키 또는 별칭; 기본 매니페스트 `repo` → 디렉터리 이름), `--mode`(로컬 override), `--today`, `--json`, `--markdown`, `--no-step-summary`, `--quiet`, `--self-check`(형식·순서·예외 만료).
+- 인자: 위치 인자 = 저장소 루트(여러 개 가능), `--manifest`, `--registry`(기본 common 루트 `versions.json`), `--repo`(consumers 키 또는 별칭; 기본 매니페스트 `repo` → 디렉터리 이름), `--mode`(로컬 override), `--today`, `--json`, `--markdown`, `--no-step-summary`, `--quiet`, `--self-check`(형식·순서·예외 만료). T-011 strict 호출은 저장소 루트와 `--manifest`를 함께 준다.
 - 출력: 표준 출력에 Markdown 표(범위·축·생태계·선언·설치·판정·비고) + GitHub annotation(`::error::`/`::warning::`) + 요약 1줄. `--json`은 `kor-travel-common.version-report.v1`. `GITHUB_STEP_SUMMARY`가 있으면 표를 덧붙인다.
 - exit: 0(report·warn), 1(fail 모드 실패 후보 존재 또는 `--self-check` 예외 만료), 2(레지스트리·매니페스트·경로 오류). 자체 검사는 소비자 report 모드와 별개로 만료를 실패 처리한다.
 - 읽는 것: `package.json`·`package-lock.json`(v3)·`pyproject.toml`(PEP 621·Poetry 선언)·`uv.lock`·`poetry.lock`·`requirements*.txt`(재귀 선언)·`.github/workflows/*.yml|*.yaml`(제한된 정적 YAML). 쓰는 것: `--json`·`--markdown` 출력 파일뿐. 네트워크 없음. Python 3.11+ 표준 라이브러리(`tomllib`)만 쓰며 Windows에서 동작한다(D-03 Tier 2; 회귀 시험 `tests/test_check_versions.py`).

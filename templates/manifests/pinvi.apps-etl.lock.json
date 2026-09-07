@@ -1,0 +1,13 @@
+{
+  "schema": "kor-travel-common.consumer-manifest.v1",
+  "repo": "pinvi",
+  "app": "apps/etl",
+  "tokens": { "version": null, "override": null },
+  "ui": { "version": null },
+  "python": { "version": null },
+  "lockfiles": [],
+  "contrast": { "baseline": null, "dark": false },
+  "ux_gate": { "baseline": null },
+  "openapi": { "exceptions": ["docs/standards/openapi-exceptions.yaml#pinvi"] },
+  "exceptions": []
+}

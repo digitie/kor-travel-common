@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kor-travel-common.consumer-manifest.v1",
+  "title": "kor-travel-common consumer manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?=.*\\S)(?!\\s)(?!.*\\s$)(?!.*[\\u0000-\\u001F\\u007F])(?!/)(?!.*\\\\)(?!.*:)(?!.*\\u0000)(?!.*//)(?!.*(?:^|/)\\.(?:/|$))(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\/$).+"
+    },
+    "nullableRelativePath": {
+      "type": ["string", "null"],
+      "minLength": 1,
+      "pattern": "^(?=.*\\S)(?!\\s)(?!.*\\s$)(?!.*[\\u0000-\\u001F\\u007F])(?!/)(?!.*\\\\)(?!.*:)(?!.*\\u0000)(?!.*//)(?!.*(?:^|/)\\.(?:/|$))(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\/$).+"
+    },
+    "isoDate": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?!(?:0000)-)(?:(?:[0-9]{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12][0-9]|3[01])|(?:0[469]|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8])))|(?:(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:[02468][048]|[13579][26])00)-02-29))(?![\\s\\S])"
+    }
+  },
+  "required": [
+    "schema",
+    "repo",
+    "app",
+    "tokens",
+    "ui",
+    "python",
+    "lockfiles",
+    "contrast",
+    "ux_gate",
+    "openapi",
+    "exceptions"
+  ],
+  "properties": {
+    "schema": { "const": "kor-travel-common.consumer-manifest.v1" },
+    "repo": { "type": "string", "minLength": 1 },
+    "app": { "$ref": "#/$defs/relativePath" },
+    "tokens": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "override"],
+      "properties": {
+        "version": { "type": ["string", "null"], "minLength": 1 },
+        "override": { "$ref": "#/$defs/nullableRelativePath" }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version"],
+      "properties": {
+        "version": { "type": ["string", "null"], "minLength": 1 }
+      }
+    },
+    "python": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version"],
+      "properties": {
+        "version": { "type": ["string", "null"], "minLength": 1 }
+      }
+    },
+    "lockfiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "path", "scope"],
+        "properties": {
+          "kind": { "enum": ["npm", "uv", "poetry", "requirements"] },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "$ref": "#/$defs/relativePath"
+          },
+          "scope": { "$ref": "#/$defs/relativePath" }
+        }
+      }
+    },
+    "contrast": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseline", "dark"],
+      "properties": {
+        "baseline": { "$ref": "#/$defs/nullableRelativePath" },
+        "dark": { "type": "boolean" }
+      }
+    },
+    "ux_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseline"],
+      "properties": {
+        "baseline": { "$ref": "#/$defs/nullableRelativePath" }
+      }
+    },
+    "openapi": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exceptions"],
+      "properties": {
+        "exceptions": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "exceptions": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rule", "surface", "reason", "until", "review"],
+            "properties": {
+              "rule": { "type": "string", "minLength": 1 },
+              "surface": { "type": "string", "minLength": 1 },
+              "reason": { "type": "string", "minLength": 1 },
+              "until": { "$ref": "#/$defs/isoDate" },
+              "review": { "$ref": "#/$defs/isoDate" }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["key", "reason", "until", "review"],
+            "properties": {
+              "key": { "type": "string", "minLength": 1 },
+              "reason": { "type": "string", "minLength": 1 },
+              "until": { "$ref": "#/$defs/isoDate" },
+              "review": { "$ref": "#/$defs/isoDate" }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

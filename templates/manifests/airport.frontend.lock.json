@@ -1,0 +1,15 @@
+{
+  "schema": "kor-travel-common.consumer-manifest.v1",
+  "repo": "kor-travel-airport",
+  "app": "frontend",
+  "tokens": { "version": null, "override": null },
+  "ui": { "version": null },
+  "python": { "version": null },
+  "lockfiles": [
+    { "kind": "npm", "path": "frontend/package-lock.json", "scope": "root" }
+  ],
+  "contrast": { "baseline": null, "dark": false },
+  "ux_gate": { "baseline": null },
+  "openapi": { "exceptions": ["docs/standards/openapi-exceptions.yaml#airport"] },
+  "exceptions": []
+}

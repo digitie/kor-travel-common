@@ -1402,6 +1402,21 @@ class CheckVersionsTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("::error", result.stdout)
 
+    def test_registry_input_errors_do_not_echo_paths_or_values(self):
+        marker = "SENSITIVE_REGISTRY_INPUT_" + "A" * 12
+        missing = self.root / f"{marker}.json"
+        result = subprocess.run([sys.executable, "-B", "-X", "utf8", str(SCRIPT), "--registry", str(missing),
+                                 str(self.repo)], capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn(marker, result.stdout + result.stderr)
+
+        bad = self.root / "bad-registry-value.json"
+        bad.write_text(json.dumps({"schema": marker, "axes": {}}), encoding="utf-8")
+        result = subprocess.run([sys.executable, "-B", "-X", "utf8", str(SCRIPT), "--registry", str(bad),
+                                 str(self.repo)], capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn(marker, result.stdout + result.stderr)
+
     def test_repo_registry_values_load(self):
         """저장소 루트 versions.json이 스키마·필수 필드를 만족하고 예외 until이 ISO 날짜다."""
         registry = CV.Registry.load(SCRIPT.parents[1] / "versions.json")

@@ -1,0 +1,15 @@
+{
+  "schema": "kor-travel-common.consumer-manifest.v1",
+  "repo": "kor-travel-geo",
+  "app": "ui",
+  "tokens": { "version": null, "override": null },
+  "ui": { "version": null },
+  "python": { "version": null },
+  "lockfiles": [
+    { "kind": "npm", "path": "kor-travel-geo-ui/package-lock.json", "scope": "root" }
+  ],
+  "contrast": { "baseline": null, "dark": false },
+  "ux_gate": { "baseline": null },
+  "openapi": { "exceptions": ["docs/standards/openapi-exceptions.yaml#geo"] },
+  "exceptions": []
+}
