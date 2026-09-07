@@ -3,8 +3,8 @@
 이 디렉터리는 kor-travel 소비 저장소가 **복사해 쓰는** 파일을 둔다. 규칙의 정본은 [`docs/standards/`](../docs/standards/README.md)이고 여기 파일은 그 규칙을 바로 적용할 수 있는 원문이다. 템플릿을 고치는 것은 규칙 변경이므로 common PR + 2인 리뷰 비면제 대상이다(D-04).
 
 - 정본 지위: 템플릿 파일 목록·배치 경로·판 표기의 정본. 각 파일의 규칙 정본은 표의 "규약" 열.
-- 확정 task: T-007(★이번 PR), T-107(`eslint/*.mjs` 실물), T-108(`playwright.baseline.ts`), T-011(매니페스트 스키마).
-- 마지막 갱신: 2026-09-06.
+- 확정 task: T-007(문서), T-107(`eslint/*.mjs` 실물), T-108(`playwright.baseline.ts`), T-011(매니페스트 스키마·초안).
+- 마지막 갱신: 2026-09-07.
 
 ## 1. 목록과 배치
 
@@ -24,6 +24,9 @@
 | [`consumer-pr.md`](consumer-pr.md) | PR 본문 | MUST(채택·이관 PR) | agent-conventions §10, [design-brief D-24](../docs/plan/design-brief.md) | 6항목 + 되돌리기 명령 + 6폭 시각 diff 표 |
 | [`consumer-adoption-checklist.md`](consumer-adoption-checklist.md) | 상세 task 또는 채택 PR 첨부 | MUST(첫 채택) | [consumer adoption runbook](../docs/runbooks/consumer-adoption.md), [versions](../docs/standards/versions.md) §3 | MUST/SHOULD 표기 |
 | [`dependabot.yml`](dependabot.yml) | `.github/dependabot.yml` | SHOULD | versions §3.9, O-18 | `directory`만 앱 구조에 맞게 수정. 그룹·ignore는 common 소유 |
+| [`kor-travel-common.lock.schema.json`](kor-travel-common.lock.schema.json) | 소비 저장소 `kor-travel-common.lock.json` | MUST | [D-19](../docs/plan/design-brief.md)·T-011 | draft 2020-12 strict schema. `enforce` 금지 |
+| [`kor-travel-common.lock.example.json`](kor-travel-common.lock.example.json) | 소비 저장소 매니페스트 작성 참고 | 참고 | T-011 | 실제 소비자 채택·설치 성공을 의미하지 않는 예시 |
+| [`manifests/*.lock.json`](manifests) | 소비 저장소별 초기 초안 | 참고 | T-011 | 10개 앱 표면 대응. 소비자 저장소에 자동 복사하지 않음 |
 | [`eslint/README.md`](eslint/README.md) | (설명) | 후보 | [frontend-stack](../docs/standards/frontend-stack.md) | `*.mjs` 조각은 T-107 |
 | `playwright.baseline.ts` | `tests/visual/baseline.spec.ts`(예) | MUST(토큰·셸 변경 앱 중 Playwright 없는 wx·ktdm) | D-21, T-108 | **미작성**(T-108) |
 
@@ -44,4 +47,4 @@
 
 - 재사용 워크플로(`.github/workflows/*.yml`, T-010·T-309·T-401)는 템플릿이 아니라 common 워크플로를 태그/SHA로 호출한다([ci-deploy](../docs/standards/ci-deploy.md)).
 - Python 품질 베이스(ruff `extend`·mypy·import-linter·pre-commit)는 `packages/py/kor-travel-common` C20 산출물(T-305).
-- 소비자 매니페스트 `kor-travel-common.lock.json` 초안은 T-011이 `tools/validate_manifest.py`와 함께 만든다.
+- 소비자 매니페스트 `kor-travel-common.lock.json` 초안과 schema는 T-011이 `tools/validate_manifest.py`와 함께 관리한다.

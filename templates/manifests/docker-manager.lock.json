@@ -1,0 +1,16 @@
+{
+  "schema": "kor-travel-common.consumer-manifest.v1",
+  "repo": "kor-travel-docker-manager",
+  "app": "frontend",
+  "tokens": { "version": null, "override": null },
+  "ui": { "version": null },
+  "python": { "version": null },
+  "lockfiles": [
+    { "kind": "npm", "path": "frontend/package-lock.json", "scope": "root" },
+    { "kind": "poetry", "path": "backend/poetry.lock", "scope": "backend" }
+  ],
+  "contrast": { "baseline": null, "dark": false },
+  "ux_gate": { "baseline": null },
+  "openapi": { "exceptions": ["docs/standards/openapi-exceptions.yaml#ktdm"] },
+  "exceptions": []
+}

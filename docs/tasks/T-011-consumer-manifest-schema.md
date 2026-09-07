@@ -1,6 +1,6 @@
 # T-011 소비자 매니페스트 스키마 `consumer-manifest.v1` + `tools/validate_manifest.py` + 7 소비자 초기 매니페스트 초안
 
-- 상태: READY
+- 상태: IN_PROGRESS
 - 우선순위: P1
 - Gate: 도구 테스트
 - 선행: T-005, T-016
@@ -14,12 +14,13 @@
 - [설계 브리프](../plan/design-brief.md) D-19(필드: `repo`·`app`·`tokens{version,override}`·`ui{version}`·`python{version}`·`lockfiles[]{kind,path,scope}`·`contrast{baseline,dark}`·`ux_gate{baseline}`·`openapi{exceptions}`·`exceptions[]`; `enforce` 없음), D-07(`lockfiles[]`를 `check_versions`가 읽음), D-13(baseline 파일), D-14(`openapi-exceptions.yaml` 참조).
 - ADR-010 — [docs/adr/README.md](../adr/README.md).
 - [버전 매트릭스](../survey/cross/version-matrix.md) §7.3(strict 파서·미지 필드 거부), [백엔드 조사](../survey/cross/backend.md) §2.1(앱별 lock 종류), [pinvi 인벤토리](../survey/inventory/pinvi.md) §2(모노레포 앱 디렉터리).
+- `openapi.exceptions`는 `docs/standards/openapi-exceptions.yaml#<app>` 같은 정본 참조 문자열 배열이다. 최상위 `exceptions[]`는 UX 규칙 예외(`rule`·`surface`·`reason`·`until`·`review`) 또는 버전·포트 예외(`key`·`reason`·`until`·`review`)의 두 형태만 허용하며 `until`·`review`는 유효한 ISO 날짜다.
 
 ## 구현 범위
 
 1. `templates/kor-travel-common.lock.schema.json`(문서용 스키마, draft 2020-12 형식) + `templates/kor-travel-common.lock.example.json`.
-2. `tools/validate_manifest.py`: stdlib만으로 strict 검증(필수 필드·타입·미지 필드 거부·`exceptions[].until` 날짜 형식·`lockfiles[].kind ∈ {npm, uv, poetry, requirements}`·`enforce` 존재 시 오류·`repo` 값이 `versions.json consumers` 키에 있는지). 출력 오류 목록, exit 0/1.
-3. 이미 존재하는 `tools/check_versions.py --manifest <path>` 입력 계약을 새 strict schema와 호환되도록 검증한다. `lockfiles[]` 순회·`scope`별 표·매니페스트 기준 workflow 검색을 보존하고, 매니페스트 경로·`app` 경로·저장소 경계를 벗어나는 lock path와 workflow 누락을 회귀 시험으로 고정한다.
+2. `tools/manifest_schema.py`와 `tools/validate_manifest.py`: stdlib만으로 strict 검증(필수 필드·타입·미지 필드 거부·`exceptions[].until` 날짜 형식·`lockfiles[].kind ∈ {npm, uv, poetry, requirements}`·`enforce` 존재 시 오류·`repo` 값이 `versions.json consumers` 키에 있는지). 출력 오류 목록, exit 0/1.
+3. 이미 존재하는 `tools/check_versions.py <consumer-repo-root> --manifest <manifest>` 입력 계약을 새 strict schema와 호환되도록 검증한다. `lockfiles[]` 순회·`scope`별 표·저장소 루트 workflow 검색을 보존하고, 매니페스트 경로·`app` 경로·저장소 경계를 벗어나는 lock path와 workflow 누락을 회귀 시험으로 고정한다. root 없이 호출하는 기존 최소 fixture는 하위 호환으로 읽는다.
 4. 다음 **10개** 초안의 repo/app/파일 대응을 고정한다. 실제 소비자 매니페스트는 표의 앱 디렉터리에 놓고, `lockfiles.path`는 **소비자 저장소 루트 기준**으로 해석한다. `app`은 표면 식별자이며 `scope`는 보고 label 겸 npm workspace 선택자다(`root`는 lockfile 루트 package, 그 밖에는 lockfile 기준 workspace 경로). 도구 호출은 `check_versions.py <consumer-repo-root> --manifest <app-dir>/kor-travel-common.lock.json` 형태로 저장소 루트와 manifest를 함께 전달한다.
 
    | manifest 위치(소비자 저장소 기준) | 파일 | repo | app | 관찰 lock |
@@ -44,13 +45,13 @@
 
 ## 예상 변경 파일
 
-예정 경로는 존재·실행 증거가 아니다. `templates/kor-travel-common.lock.schema.json`, `templates/kor-travel-common.lock.example.json`, `templates/manifests/*.lock.json`(10), `tools/validate_manifest.py`, `tools/check_versions.py`, `tests/test_validate_manifest.py`, `tools/README.md`(행 추가), `templates/README.md`(행 추가).
+예정 경로는 존재·실행 증거가 아니다. `templates/kor-travel-common.lock.schema.json`, `templates/kor-travel-common.lock.example.json`, `templates/manifests/*.lock.json`(10), `tools/manifest_schema.py`, `tools/validate_manifest.py`, `tools/check_versions.py`, `tests/test_validate_manifest.py`, `tools/README.md`(행 추가), `templates/README.md`(행 추가).
 
 ## 수용 기준
 
 - 스키마 필드 집합이 D-19와 글자 단위로 같고 `enforce`를 넣은 fixture는 exit 1.
 - `validate_manifest.py`가 10개 초안 전부 exit 0, 미지 필드·`until` 누락·잘못된 `kind` fixture는 exit 1(테스트로 고정).
-- `check_versions.py <fixture-repo-root> --manifest templates/manifests/map.lock.json`이 저장소 루트의 shared lock과 root workflow를 읽어 표를 낸다. lock/workflow가 fixture로 없으면 각각 `NO_LOCK`/빈 workflow로 명시한다.
+- `check_versions.py <fixture-repo-root> --manifest <fixture-repo-root>/templates/manifests/map.lock.json`이 저장소 루트의 shared lock과 root workflow를 읽어 표를 낸다. lock/workflow가 fixture로 없으면 각각 `NO_LOCK`/빈 workflow로 명시한다.
 - 초안의 10개 `repo`·`app` 값이 `versions.json consumers` 키·인벤토리 앱 경로와 일치하고 대응표와 파일 수가 같다.
 - Linux·Windows 결과 동일.
 

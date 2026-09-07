@@ -14,13 +14,13 @@ T-009는 [PR #5](https://github.com/digitie/kor-travel-common/pull/5)의 `6e1881
 
 ## 다음 한 작업
 
-- 작업: [T-011](tasks/T-011-consumer-manifest-schema.md), READY. T-016에서 확정한 10개 앱 표면·소비자 저장소 root·manifest 경계를 기준으로 schema/validator 구현을 시작한다.
+- 작업: [T-011](tasks/T-011-consumer-manifest-schema.md), IN_PROGRESS. T-016에서 확정한 10개 앱 표면·소비자 저장소 root·manifest 경계를 기준으로 schema/validator를 구현하고 있다.
 - 사용자 재개 지시로 common 구현을 순차 진행한다. npm/PyPI 미게시·다른 저장소 수정 금지와 독립 두 리뷰·PR·CI·병합 경계를 유지한다.
 - PR #4는 `82dec2b939885863100802997f9e7548dffd3c9a`로 병합됐고 main CI 34066384346이 성공했다. 아직 구현하지 않은 패키지·후보 보존·외부 gate는 미완료다.
 
 ## 시작 파일과 검증
 
-[T-011](tasks/T-011-consumer-manifest-schema.md)의 소비자 매니페스트 스키마·validator 계약과 T-016 최종 review evidence부터 대조한다. 명령 사다리는 [개발 환경](dev-environment.md#6-검증-명령-사다리), 리뷰는 [agent workflow](runbooks/agent-workflow.md)를 따른다.
+[T-011](tasks/T-011-consumer-manifest-schema.md)의 소비자 매니페스트 스키마·validator 계약과 T-016 최종 review evidence를 대조했다. 현재 구현 diff와 strict fixture 테스트를 이어서 검증한다. 명령 사다리는 [개발 환경](dev-environment.md#6-검증-명령-사다리), 리뷰는 [agent workflow](runbooks/agent-workflow.md)를 따른다.
 
 ## 차단 조건
 

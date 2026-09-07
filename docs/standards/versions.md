@@ -1,7 +1,7 @@
 # 라이브러리·플랫폼 버전 일치 정책 (versions)
 
 - 정본 지위: 이 문서는 버전 정렬 **정책**의 정본이고, 기준선 **값**의 정본은 루트 [`versions.json`](../../versions.json)(schema `kor-travel-common.version-registry.v1`)이다. 두 문서가 어긋나면 `versions.json`이 값을, 이 문서가 규칙을 이긴다. 검사기는 [`tools/check_versions.py`](../../tools/check_versions.py).
-- 확정 task: T-005(정책·npm v3 구현, 독립 리뷰 진행), T-005a(`uv.lock` 확장), T-005b(`poetry.lock`·`requirements.txt`), T-403(소비자 CI 삽입), T-502(gate 승격), T-507(재평가). 이 문서는 정본 초안이며 실물 소비자 매니페스트(T-011)와 대조해 확정하는 task가 남아 있다.
+- 확정 task: T-005(정책·npm v3 구현, 독립 리뷰 진행), T-005a(`uv.lock` 확장), T-005b(`poetry.lock`·`requirements.txt`), T-011(consumer-manifest.v1 strict validator), T-403(소비자 CI 삽입), T-502(gate 승격), T-507(재평가). 이 문서는 버전 정책 정본이고 매니페스트 필드·초안은 [T-011](../tasks/T-011-consumer-manifest-schema.md)과 `templates/`가 소유한다.
 - 마지막 갱신: 2026-09-07. 결정 근거: [설계 브리프](../plan/design-brief.md) D-06·D-07·D-30·D-31, ADR-008([ADR 색인](../adr/README.md)).
 - 상위 문서: [standards 색인](README.md). 관련: [frontend-stack](frontend-stack.md), [backend-stack](backend-stack.md), [ci-deploy](ci-deploy.md), [consumer adoption runbook](../runbooks/consumer-adoption.md), [release runbook](../runbooks/release.md).
 
@@ -24,7 +24,7 @@
 | 예외(exception) | `exceptions[]{repo,key,installed,reason,until,review}`. 해당 저장소·축·설치본 접두에 한해 원 판정을 `EXEMPT`로 덮는다. `until` 경과 시 `EXEMPT_EXPIRED` |
 | 차단(blocked) | `blocked[]{ecosystem,name,range,reason,since}`. 설치본이 범위에 들면 `BLOCKED` |
 | enforce | `consumers.<repo>.enforce` ∈ `report`/`warn`/`fail`. 소비자별 강제 수준(D-30) |
-| 매니페스트 | 소비 저장소의 `kor-travel-common.lock.json`(`consumer-manifest.v1`, T-011). 도구는 `lockfiles[]`·`repo`만 읽는다 |
+| 매니페스트 | 소비 저장소의 `kor-travel-common.lock.json`(`consumer-manifest.v1`, T-011). `validate_manifest.py`가 전체 v1 계약을 strict 검사한 뒤 `check_versions.py`가 `lockfiles[]`·`repo`와 저장소 루트 workflow를 읽는다 |
 
 ## 3. 정책
 
@@ -162,15 +162,16 @@
 # 소비 저장소 체크아웃을 자동 탐색(package.json·pyproject.toml·requirements*.txt·.github/workflows/*.yml|*.yaml, 깊이 4, node_modules 제외)
 python3 -B -X utf8 tools/check_versions.py /path/to/kor-travel-map --repo kor-travel-map
 
-# 매니페스트의 lockfiles[]만 대조(T-011 이후 CI 표준 호출; --mode 없음 = versions.json enforce)
-python3 -B -X utf8 tools/check_versions.py --manifest /path/to/app/kor-travel-common.lock.json \
+# 매니페스트의 lockfiles[]와 저장소 루트 workflow를 대조(T-011 이후 CI 표준 호출)
+python3 -B -X utf8 tools/check_versions.py /path/to/consumer-repo \
+  --manifest /path/to/consumer-repo/<app-dir>/kor-travel-common.lock.json \
   --json report.json --markdown report.md
 
 # 예외 만료를 미리 보기
 python3 -B -X utf8 tools/check_versions.py /path/to/app --repo wx --today 2027-01-15
 ```
 
-- 인자: 위치 인자 = 저장소 루트(여러 개 가능), `--manifest`, `--registry`(기본 common 루트 `versions.json`), `--repo`(consumers 키 또는 별칭; 기본 매니페스트 `repo` → 디렉터리 이름), `--mode`(로컬 override), `--today`, `--json`, `--markdown`, `--no-step-summary`, `--quiet`, `--self-check`(형식·순서·예외 만료).
+- 인자: 위치 인자 = 저장소 루트(여러 개 가능), `--manifest`, `--registry`(기본 common 루트 `versions.json`), `--repo`(consumers 키 또는 별칭; 기본 매니페스트 `repo` → 디렉터리 이름), `--mode`(로컬 override), `--today`, `--json`, `--markdown`, `--no-step-summary`, `--quiet`, `--self-check`(형식·순서·예외 만료). T-011 strict 호출은 저장소 루트와 `--manifest`를 함께 준다.
 - 출력: 표준 출력에 Markdown 표(범위·축·생태계·선언·설치·판정·비고) + GitHub annotation(`::error::`/`::warning::`) + 요약 1줄. `--json`은 `kor-travel-common.version-report.v1`. `GITHUB_STEP_SUMMARY`가 있으면 표를 덧붙인다.
 - exit: 0(report·warn), 1(fail 모드 실패 후보 존재 또는 `--self-check` 예외 만료), 2(레지스트리·매니페스트·경로 오류). 자체 검사는 소비자 report 모드와 별개로 만료를 실패 처리한다.
 - 읽는 것: `package.json`·`package-lock.json`(v3)·`pyproject.toml`(PEP 621·Poetry 선언)·`uv.lock`·`poetry.lock`·`requirements*.txt`(재귀 선언)·`.github/workflows/*.yml|*.yaml`(제한된 정적 YAML). 쓰는 것: `--json`·`--markdown` 출력 파일뿐. 네트워크 없음. Python 3.11+ 표준 라이브러리(`tomllib`)만 쓰며 Windows에서 동작한다(D-03 Tier 2; 회귀 시험 `tests/test_check_versions.py`).

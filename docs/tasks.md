@@ -18,7 +18,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 |---|---|---|---|---|
 | [T-010](tasks/T-010-reusable-workflows-stage1.md) | BLOCKED | P1 | 재사용 워크플로 1단계(`versions-check`·`contrast-check`·`docs-check`) + `workflows-selftest` fixture + `consumers.pins.json` + consumer-smoke | T-005, T-009, T-101, T-103 |
 | [T-010a](tasks/T-010a-external-consumer-smoke.md) | BLOCKED | P1 | 승인 소비자 2곳의 tokens 후보 dispatch 검증 | T-010, T-109a |
-| [T-011](tasks/T-011-consumer-manifest-schema.md) | READY | P1 | 소비자 매니페스트 스키마 `consumer-manifest.v1` + `tools/validate_manifest.py` + 7 소비자 초기 매니페스트 초안 | T-005, T-016 |
+| [T-011](tasks/T-011-consumer-manifest-schema.md) | IN_PROGRESS | P1 | 소비자 매니페스트 스키마 `consumer-manifest.v1` + `tools/validate_manifest.py` + 7 소비자 초기 매니페스트 초안 | T-005, T-016 |
 | [T-012](tasks/T-012-collect-manifests.md) | BLOCKED | P2 | tools/collect_manifests.py → `docs/integration-map.md` 생성 + `docs/architecture/adoption-readiness.md` gate 표 갱신 | T-010, T-011 |
 | [T-014](tasks/T-014-ports-130xx.md) | BLOCKED | P3 | common 테스트 fixture 포트 점검 + ktdm sibling 포트 문서 정합성 요청 | 없음 |
 | [T-020](tasks/T-020-pinvi-license-l6.md) | BLOCKED | P0 | pinvi 라이선스 결정(L6) 반영: 결정 기록·pinvi PR 요청 문서·common 소비 gate 해제 조건 | 없음 |

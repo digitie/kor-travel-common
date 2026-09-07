@@ -22,7 +22,7 @@
 | 항목 | 확인 방법 | 통과 조건 | 근거 |
 |---|---|---|---|
 | 라이선스 gate | 저장소 루트 `LICENSE`·`package.json`/`pyproject.toml` `license` 필드 | GPL-3.0-or-later 정렬. pinvi는 T-020(O-1), concierge·docker-manager는 T-021(O-2) 전에는 규칙 문서·`tokens.json` 의미 이름 참조까지만 허용하고 코드 채택 금지 | D-16·D-17, [licensing](../standards/licensing.md), `docs/survey/cross/licensing.md` §3.6·§4 B1 |
-| 버전 기준선 | `python3 -B -X utf8 tools/check_versions.py --manifest <소비자 매니페스트>`(report 모드) | `BELOW_FLOOR`·`BLOCKED`·`FLOATING_REF` 0(등록된 `exceptions[]` 제외). ui는 React `^19.0.0` 필수(React 18 앱은 tokens부터), `theme.css`는 Tailwind 4.3+ 필수 | D-06·D-07·D-09, [versions](../standards/versions.md) |
+| 버전 기준선 | `python3 -B -X utf8 tools/check_versions.py <소비자 저장소 루트> --manifest <소비자 저장소 루트>/<앱 경로>/kor-travel-common.lock.json`(report 모드) | `BELOW_FLOOR`·`BLOCKED`·`FLOATING_REF` 0(등록된 `exceptions[]` 제외). ui는 React `^19.0.0` 필수(React 18 앱은 tokens부터), `theme.css`는 Tailwind 4.3+ 필수 | D-06·D-07·D-09·T-011, [versions](../standards/versions.md) |
 | lockfile | `package-lock.json`(`lockfileVersion: 3`)·`uv.lock` 존재, lock 항목 `integrity` 보유 | 존재 + `npm ci`/`uv sync --locked` 재현 | D-07, `docs/survey/cross/version-matrix.md` §3.6(pinvi `check-lockfile-integrity.mjs` 선례) |
 | 릴리스 자산 | `gh release view <tag> --repo digitie/kor-travel-common` | 태그가 존재하고 tarball/wheel + `SHA256SUMS`가 첨부됨. `-rc.N`은 검증 PR에만, 정식 태그만 merge | D-11, [release](release.md) §2 |
 | Tailwind 상태 | `@import "tailwindcss"` 유무, `@config` 잔존, `source(none)` | v4 미도입 앱(weather, airport main)은 `tokens.css`만 채택(Phase 1), `@config` 잔존 앱(geo·concierge·pinvi web)은 §4.3 정리 항목 포함 | D-08, `docs/survey/cross/version-matrix.md` §1.2 |
@@ -218,7 +218,7 @@ Tailwind가 없는 앱은 `next build` 후 `.next/static/css/*.css`를 같은 �
 
 위 예시는 필드 이름만 보여 주며 스키마 정본과 검증 명령(`python3 -B -X utf8 tools/validate_manifest.py <path>`)은 T-011 산출물이다. 절차는 다음과 같다.
 
-1. 채택 PR에서 매니페스트를 갱신하고 `validate_manifest.py`(T-011 후)와 `check_versions.py` report를 통과시킨다.
+1. 채택 PR에서 매니페스트를 갱신하고 `validate_manifest.py`와 소비자 저장소 루트를 함께 준 `check_versions.py` report를 통과시킨다.
 2. 소비자 PR merge 뒤 common PR로 `consumers.pins.json`의 해당 저장소 SHA를 갱신한다(`consumer-smoke` 대상이면 필수).
 3. `docs/integration-map.md`는 `python3 -B -X utf8 tools/collect_manifests.py`(T-012)가 생성한다. 수기 편집은 금지이며 생성 결과를 common PR에 포함한다.
 4. 새 예외(`exceptions[]`)는 `until`과 `review`가 필수이고, 만료되면 `EXEMPT_EXPIRED`로 report에 표시된다(D-07).

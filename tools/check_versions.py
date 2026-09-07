@@ -35,10 +35,14 @@ import sys
 import tomllib
 from urllib.parse import unquote, urlsplit, urlunsplit
 
+try:
+    from manifest_schema import MANIFEST_SCHEMA, validate_manifest_file
+except ImportError:  # repository-root imports in the unit tests
+    from tools.manifest_schema import MANIFEST_SCHEMA, validate_manifest_file
+
 
 REGISTRY_SCHEMA = "kor-travel-common.version-registry.v1"
 REPORT_SCHEMA = "kor-travel-common.version-report.v1"
-MANIFEST_SCHEMA = "kor-travel-common.consumer-manifest.v1"
 
 VERDICTS = ("OK", "BELOW_FLOOR", "ABOVE_MAX", "NOT_RECOMMENDED", "NO_LOCK", "NO_ENGINES",
             "FLOATING_REF", "BLOCKED", "EXEMPT", "EXEMPT_EXPIRED")
@@ -1775,20 +1779,42 @@ def discover(root: Path) -> list[Scope]:
     return scopes
 
 
-def scopes_from_manifest(manifest_path: Path) -> tuple[str | None, list[Scope]]:
+def scopes_from_manifest(
+    manifest_path: Path,
+    *,
+    root: Path | None = None,
+    strict: bool = False,
+    registry_path: Path | None = None,
+) -> tuple[str | None, list[Scope]]:
+    """매니페스트의 lockfiles를 scope로 바꾼다.
+
+    이전 최소 fixture는 `root` 없이 계속 읽을 수 있다. 실제 소비자 호출은
+    저장소 루트와 매니페스트를 함께 주어 strict v1·루트 기준 경로를 사용한다.
+    """
+    manifest_path = manifest_path.resolve()
+    base = (root or manifest_path.parent).resolve()
+    if not _path_within(manifest_path, base):
+        raise ValueError("매니페스트가 소비자 저장소 루트 밖에 있음")
+    if strict:
+        errors = validate_manifest_file(manifest_path, registry_path)
+        if errors:
+            raise ValueError("매니페스트 strict 검증 실패: " + "; ".join(errors[:8]))
     data = read_json(manifest_path)
     if data.get("schema") not in (None, MANIFEST_SCHEMA):
         raise ValueError(f"{manifest_path}: schema가 {MANIFEST_SCHEMA}가 아님")
-    base = manifest_path.parent.resolve()
     scopes: list[Scope] = []
     for entry in data.get("lockfiles", []):
         kind = entry.get("kind", "")
-        path = (base / entry.get("path", "")).resolve()
+        raw_path = entry.get("path", "")
+        path = (base / raw_path).resolve()
+        if not _path_within(path, base):
+            raise ValueError("매니페스트 lock path가 소비자 저장소 루트 밖에 있음")
         label = entry.get("scope") or path.parent.relative_to(base).as_posix() or "."
+        workspace = "" if label in {".", "root"} else label
         if kind == "npm":
             manifest = path.parent / "package.json"
             scopes.append(Scope("npm", label, manifest if manifest.is_file() else None,
-                                path if path.is_file() else None, "package-lock"))
+                                path if path.is_file() else None, "package-lock", workspace=workspace))
         elif kind in {"uv", "poetry"}:
             manifest = path.parent / "pyproject.toml"
             scopes.append(Scope("python", label, manifest if manifest.is_file() else None,
@@ -2691,7 +2717,7 @@ def build_report(findings: list[Finding], registry: Registry, repo: str, mode: s
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("paths", nargs="*", type=Path, help="소비 저장소 루트(또는 앱 디렉터리). 생략 시 --manifest 필요")
-    parser.add_argument("--manifest", type=Path, help="kor-travel-common.lock.json(consumer-manifest.v1). lockfiles[]만 읽는다")
+    parser.add_argument("--manifest", type=Path, help="kor-travel-common.lock.json(consumer-manifest.v1). 위치 인자 root와 함께 주면 strict v1·root workflow를 사용")
     parser.add_argument("--registry", type=Path, default=Path(__file__).resolve().parents[1] / "versions.json")
     parser.add_argument("--repo", help="consumers 키(별칭 허용). 기본: 매니페스트 repo → 디렉터리 이름")
     parser.add_argument("--mode", choices=MODES, help="로컬 override. 생략하면 versions.json consumers.<repo>.enforce")
@@ -2732,18 +2758,27 @@ def main(argv: list[str] | None = None) -> int:
     roots: list[str] = []
     manifest_repo: str | None = None
     if args.manifest is not None:
+        manifest_root = args.paths[0].resolve() if args.paths else None
         try:
-            manifest_repo, scopes = scopes_from_manifest(args.manifest.resolve())
+            manifest_repo, scopes = scopes_from_manifest(
+                args.manifest.resolve(),
+                root=manifest_root,
+                strict=manifest_root is not None,
+                registry_path=args.registry.resolve(),
+            )
         except (OSError, ValueError, TypeError, AttributeError, KeyError) as exc:
             print(f"::error title=check_versions::매니페스트 오류: {exc}")
             return 2
-        roots.append(args.manifest.resolve().parent.as_posix())
-    for path in args.paths:
+        roots.append((manifest_root or args.manifest.resolve().parent).as_posix())
+    for index, path in enumerate(args.paths):
         root = path.resolve()
         if not root.is_dir():
             print(f"::error title=check_versions::디렉터리 아님: "
                   f"{_workflow_display_value(root.as_posix(), '(입력 경로 비공개)')}")
             return 2
+        if args.manifest is not None and index == 0:
+            # 매니페스트 모드에서는 lockfiles[]와 저장소 루트 workflow만 읽는다.
+            continue
         roots.append(root.as_posix())
         try:
             scopes.extend(discover(root))

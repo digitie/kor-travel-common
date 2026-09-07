@@ -1,0 +1,16 @@
+{
+  "schema": "kor-travel-common.consumer-manifest.v1",
+  "repo": "kor-travel-weather",
+  "app": "admin",
+  "tokens": { "version": null, "override": null },
+  "ui": { "version": null },
+  "python": { "version": null },
+  "lockfiles": [
+    { "kind": "npm", "path": "packages/kor-travel-weather-admin/frontend/package-lock.json", "scope": "root" },
+    { "kind": "uv", "path": "uv.lock", "scope": "root" }
+  ],
+  "contrast": { "baseline": null, "dark": false },
+  "ux_gate": { "baseline": null },
+  "openapi": { "exceptions": ["docs/standards/openapi-exceptions.yaml#weather"] },
+  "exceptions": []
+}
