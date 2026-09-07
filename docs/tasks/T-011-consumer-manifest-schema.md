@@ -1,6 +1,6 @@
 # T-011 소비자 매니페스트 스키마 `consumer-manifest.v1` + `tools/validate_manifest.py` + 7 소비자 초기 매니페스트 초안
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P1
 - Gate: 도구 테스트
 - 선행: T-005, T-016
@@ -76,7 +76,10 @@ Git Bash에서 동일.
 
 ## evidence
 
-- 테스트 수·exit code·초안 10개 검증 결과를 이 절과 `docs/journal.md`에 남긴다.
+- 최종 candidate `4680bacdf285f2cc86f1a18cc1de29ff4129f2a8`을 PR #10에 push했고 exact CI `34120043104`의 docs·tools(ubuntu-24.04)·tools(windows-2025)·secret-scan·check-versions 5개 job이 성공했다.
+- Windows Python 3.14.3·WSL Python 3.11.15에서 전체 203 tests, focused 23 tests를 실행했다. WSL은 선택 jsonschema 엔진 2개를 skip으로 별도 기록했으며 성공으로 세지 않았다. `validate_plan`(106/오류0), 문서 링크(353/2304/오류0), SPDX(32/오류0), secret/redaction(443/발견0), `check_versions --self-check`도 통과했다.
+- 독립 적대 리뷰 post-fix-07에서 A/B 모두 PASS, 신규 P0–P3 0건, 누적 T011-R17~R20 모두 FIXED다([통합 리뷰](../reviews/adversarial/2026-09-07-t011-post-fix-07.md), [A 원본](../reviews/adversarial/evidence/2026-09-07-t011-post-fix-07-reviewer-a.md), [B 원본](../reviews/adversarial/evidence/2026-09-07-t011-post-fix-07-reviewer-b.md)).
+- 소비자 저장소 build/e2e·npm ci·uv sync·패키지 build/pack/install·release·npm/PyPI 게시·소비자 채택은 `NOT_RUN(이번 범위 밖)`이다.
 
 ## rollback 또는 release 차단 조건
 

@@ -6,6 +6,7 @@
 
 | ID | 상태 | 우선순위 | 작업 | 선행 |
 |---|---|---:|---|---|
+| [T-011](tasks/T-011-consumer-manifest-schema.md) | DONE | P1 | 소비자 매니페스트 스키마 `consumer-manifest.v1` + `tools/validate_manifest.py` + 7 소비자 초기 매니페스트 초안 | T-005, T-016 |
 | [T-016](tasks/T-016-common-shared-systems-scope.md) | DONE | P0 | 공용 시스템 범위 재정의와 전체 계획 동기화 (2026-09-07, PR #9) | 없음 |
 | [T-005c](tasks/T-005c-workflow-static-report.md) | DONE | P2 | workflow 고정 참조·CI Node 선언의 정적 보고 (2026-09-07, PR #8) | T-005, T-009 |
 | [T-005b](tasks/T-005b-check-versions-poetry-requirements.md) | DONE | P2 | check_versions: `poetry.lock`·`requirements.txt` 파서 + `NO_LOCK` 보고 | T-005 |

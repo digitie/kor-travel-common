@@ -2,6 +2,14 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-011 최종 review PASS·PR #10 merge gate)
+
+T-011 `consumer-manifest.v1` strict schema·validator·10개 앱 표면 초안과 `check_versions --manifest` 저장소 root 경계를 `4680bacdf285f2cc86f1a18cc1de29ff4129f2a8`에서 마쳤다. 반복된 적대 리뷰 no-go의 근본 원인은 매니페스트·lock·workspace·app 입력을 각 호출부에서 `resolve/is_file/exists`로 따로 검사해 OS별 symlink loop와 누락 leaf의 결과가 달라지고, 존재성 조기 반환이 중간 symlink를 경계 검사 전에 소거한 데 있었다. `_resolve_input_path`·`_path_contains_symlink`로 경계를 중앙화하고 app 조기 반환·validator registry·check_versions registry 오류 원문을 닫았으며, Windows/WSL direct·중간·외부·self-symlink와 redaction 회귀를 고정했다.
+
+post-fix-04~07에서 reviewer A/B가 서로 독립적으로 BLOCK finding을 재현하고 수정했으며, 최종 post-fix-07은 A/B 모두 PASS·신규 P0–P3 0·T011-R17~R20 FIXED다([통합 리뷰](reviews/adversarial/2026-09-07-t011-post-fix-07.md), [A](reviews/adversarial/evidence/2026-09-07-t011-post-fix-07-reviewer-a.md), [B](reviews/adversarial/evidence/2026-09-07-t011-post-fix-07-reviewer-b.md)). PR #10 exact CI `34120043104`의 5개 job이 성공했고 Windows/WSL 전체 203 tests·focused 23 tests, plan 106/오류0, link 353문서·2304대상, SPDX 32/오류0, secret/redaction 443/발견0, versions self-check를 확인했다. T-011을 완료 원장으로 옮기고 현재 완료 16개·열린 90개, 다음 READY는 T-101이다.
+
+소비자 저장소 수정·build/e2e·npm ci·uv sync·공용 패키지 build/pack/install·Release·npm/PyPI 게시·실제 소비자 채택은 `NOT_RUN(사용자 범위와 외부 환경 밖)`이다. GPL-3.0-or-later와 common 전용 범위를 유지했다.
+
 ## 2026-09-07 (Codex, T-016 완료·PR #9 병합 대기)
 
 T-016 공용 시스템 범위 재점검을 `a9fc2f5187bcf2517cb1da54ece9b12ab04b82ff`에서 마쳤다. ADR-015로 common을 독립 운영 시스템이 아닌 위젯·디자인 토큰·공용 코어·로그인 UI/주입형 인증 프리미티브를 제공하는 저장소로 확정하고, 서버·사용자/세션 DB·운영 비밀·IdP·앱 정책은 소비자 소유로 남겼다. T-213a common UI 0.2 후보 보존과 T-214 로그인 위젯을 외부 UI 정식 릴리스 T-213에서 분리했으며 T-011은 READY가 됐다.

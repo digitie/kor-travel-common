@@ -20,6 +20,10 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-09-07 | full post-fix 07 | [T-011 최종 판정](adversarial/2026-09-07-t011-post-fix-07.md), `4680bac` | A 입력·경계 / B redaction·교차 OS | **A PASS / B PASS, 누적 finding 모두 FIXED** |
+| 2026-09-07 | full post-fix 06 | [T-011 재검토](adversarial/2026-09-07-t011-post-fix-06.md), `56d6ae1` | A 경계·입력 / B redaction·교차 OS | A BLOCK / B BLOCK, registry 원문 노출 수정 후 재검토 |
+| 2026-09-07 | full post-fix 05 | [T-011 재검토](adversarial/2026-09-07-t011-post-fix-05.md), `94c445e` | A 경계·입력 / B redaction·교차 OS | A BLOCK / B BLOCK, app·validator 경계 수정 후 재검토 |
+| 2026-09-07 | full post-fix 04 | [T-011 재검토](adversarial/2026-09-07-t011-post-fix-04.md), `22f9333` | A 경계·입력 / B redaction·교차 OS | A BLOCK / B BLOCK, 중간 symlink 경계 수정 후 재검토 |
 | 2026-09-07 | full post-fix | [T-016 공용 범위 재점검 최종 판정](adversarial/2026-09-07-t016-common-scope-post-fix.md), `a9fc2f5` | A 정본·task DAG / B 외부 gate·tag/source | **A PASS / B PASS, 누적 finding 모두 FIXED** |
 | 2026-09-07 | full post-fix 01 | [T-005c post-fix 판정](adversarial/2026-09-07-t005c-post-fix.md), `03f2cae` | A parser·YAML·Node / B CI·redaction·path | A BLOCK / B BLOCK, 누적 8개 고유 finding 재수정 후 재검토 |
 | 2026-09-07 | full post-fix 03 | [T-005c 최종 판정](adversarial/2026-09-07-t005c-post-fix-03.md), `5807e53` | A parser·YAML·구조 / B redaction·정책·Docker | **A PASS / B PASS, 누적 finding 모두 FIXED** |
