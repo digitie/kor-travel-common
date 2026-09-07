@@ -24,12 +24,9 @@
   --destructive: var(--kt-destructive);
   --destructive-foreground: var(--kt-brand-foreground);
   --radius: var(--kt-radius-control);
-  --chart-1: var(--kt-brand);
-  --chart-2: var(--kt-info);
-  --chart-3: var(--kt-success);
-  --chart-4: var(--kt-warning);
-  --chart-5: var(--kt-destructive);
 }
+
+/* --chart-1..5는 소비자 앱이 선언하는 슬롯이다. common은 색을 정본화하지 않는다. */
 
 .dark {
   --background: var(--kt-surface-page);
@@ -52,11 +49,6 @@
   --destructive: var(--kt-destructive);
   --destructive-foreground: var(--kt-brand-foreground);
   --radius: var(--kt-radius-control);
-  --chart-1: var(--kt-brand);
-  --chart-2: var(--kt-info);
-  --chart-3: var(--kt-success);
-  --chart-4: var(--kt-warning);
-  --chart-5: var(--kt-destructive);
 }
 
 /*
@@ -85,9 +77,4 @@
   --destructive: var(--kt-destructive);
   --destructive-foreground: var(--kt-brand-foreground);
   --radius: var(--kt-radius-control);
-  --chart-1: var(--kt-brand);
-  --chart-2: var(--kt-info);
-  --chart-3: var(--kt-success);
-  --chart-4: var(--kt-warning);
-  --chart-5: var(--kt-destructive);
 }

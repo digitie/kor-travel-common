@@ -23,12 +23,12 @@ concierge에서 agent/<agent>-license-l8 branch로 LICENSE·metadata·고지만 
 
 ## 해제 조건
 
-concierge 담당 PR에서 다음을 확인한 40자리 commit SHA와 CI/evidence 링크를 common의 T-454 선행 evidence에 기록한다.
+concierge 담당 **license-only PR**에서 다음을 확인한 40자리 commit SHA와 CI/evidence 링크를 T-021의 concierge external evidence 행에 기록한다. 이 기록은 후속 코드 채택 task가 참조하는 L8 선행이며, common 코드 채택·B4 결과는 T-454에서 별도로 검증한다.
 
 - 루트 LICENSE가 GPL-3.0-or-later와 호환되는 GPLv3 전문임
-- GPL common을 소비하는 앱의 루트 고지와 서드파티 고지가 일치함
-- B4 diff 결과와 파일별 고지가 기록됨
-- 소비자 build/quality 검증 결과가 기록됨
+- GPL common을 소비할 앱의 루트 고지와 서드파티 고지가 일치함
+- license-only PR의 metadata·고지 검사 결과가 기록됨
+- 소비자 build/quality 결과와 B4 diff는 후속 코드 채택 PR(T-454)의 별도 evidence로 남김
 
 외부 PR과 SHA가 없으면 G-LIC의 concierge 적용 gate는 OPEN으로 유지한다. common은 concierge 코드를 복사하거나 수정하지 않는다. 되돌리기는 해당 저장소에서 git revert 1회로 수행한다.
 

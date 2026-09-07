@@ -11,7 +11,7 @@
 |---|---|---|---|---|
 | `tokens.css` | `:root { --kt-*: <map 기본값> }` + `.dark { --kt-* }`. 순수 CSS, 값 정본 | 무관 | 전 앱(Tailwind 없는 weather·airport main 포함) | `dt` §3.6.3 |
 | `theme.css` | `@import "./tokens.css"`; `@theme inline { --color-kt-*, --spacing-kt-*, --radius-kt-*, --font-kt-*, --shadow-kt-*, --ease-kt-* }`; `@theme { --text-kt-* }`; `@utility duration-kt-fast/base` | v4 필수 | Tailwind v4 앱 + ui 소비 앱(필수) | `dt` §3.6.3·§3.6.5, D-10 |
-| `shadcn.css` | `:root/.dark`와 `[data-kt-surface]`에서 `--background: var(--kt-surface-page); … --input: var(--kt-control-line); --accent: var(--kt-brand-tint); --radius: var(--kt-radius-control); --border: var(--kt-border)` 파생 alias를 발행 | 무관 | shadcn 사용 앱(map·geo·concierge·pinvi admin·airport WIP) | `dt` §3.2.3 |
+| `shadcn.css` | `:root/.dark`와 `[data-kt-surface]`에서 `--background: var(--kt-surface-page); … --input: var(--kt-control-line); --accent: var(--kt-brand-tint); --radius: var(--kt-radius-control); --border: var(--kt-border)` 파생 alias를 발행한다. `--chart-1..5` 슬롯은 common이 선언하지 않고 앱이 소유한다 | 무관 | shadcn 사용 앱(map·geo·concierge·pinvi admin·airport WIP) | `dt` §3.2.3 |
 | `base.css` | `@layer base :focus-visible { outline: 2px solid var(--kt-focus); outline-offset: 2px }` 단일 발행, hairline 2종(장식 `--kt-border`·3:1 `--kt-control-line`), reduced-motion 전역(스피너 예외), `button:not(:disabled){cursor:pointer}`, `color-scheme: light` 기본 | 무관 | 선택(전 admin 권장) | `dt` §3.4.1, `ux` G9 |
 | `base.scoped.css` | `base.css`를 `[data-kt-surface]` 하위로 한정. 사용자 표면과 admin이 한 앱에 공존하는 pinvi용 | 무관 | 선택(pinvi admin) | D-10, `inv/pinvi` §3.1 |
 | `dark-class.css` | `@custom-variant dark (&:is(.dark *))` | v4 | 다크 class 활성 앱(map·geo·concierge 계열) | `dt` §3.6.6 |
@@ -95,7 +95,7 @@ common 토큰을 도입한 앱은 `@config tailwind.config.ts`를 두지 않고 
 
 | 항목 | 규칙 |
 |---|---|
-| 검사 쌍 | 본문 4.5:1(`--kt-text-primary/secondary/tertiary` × surface 4, `--kt-brand-foreground`/`--kt-brand`, status 텍스트/tint), 컨트롤 경계·focus 3:1(`--kt-control-line`/surface, `--kt-focus`/surface). `dt` §3.4.2의 재검증 쌍을 그대로 쓴다 |
+| 검사 쌍 | TK-8과 같은 쌍·기준을 쓴다: primary/secondary/strong·brand-foreground 4.5:1, tertiary·icon·control-line·focus·brand↔tint·status↔tint 3:1, disabled 제외. `dt` §3.4.2의 재검증 쌍을 그대로 쓴다 |
 | 대상 | 앱 `brand.css`(오버라이드 결과값)와 `tokens.css` 기본값. light 쌍 필수, dark 쌍은 dark 활성 앱만 |
 | 모드 | report 기본. 앱 `contrast-baseline.json`(미달 쌍 + `until`)에 없는 **신규 미달**만 fail. 검사를 끄지 않는다(임시 예외는 owner·기한이 있는 `DEFERRED`로만) |
 | 실행 | `python3 -B -X utf8 tools/kt_contrast.py <brand.css> [--baseline contrast-baseline.json] [--dark]`(인자는 T-103 확정). 소비자 CI는 `contrast-check.yml` 재사용 워크플로로 호출 |

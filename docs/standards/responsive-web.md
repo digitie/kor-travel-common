@@ -72,7 +72,7 @@
 
 ## 5. 타이포 하한
 
-**RW-5 (MUST)** 폰트 하한은 표면별로 다음과 같다. 스케일 이름·값은 [design-tokens](design-tokens.md) TK-3, 금지 패턴은 [ux-guide](ux-guide.md) §4 P2.
+**RW-5 (MUST)** 폰트 하한은 표면별로 다음과 같다. 스케일 이름·값은 [design-tokens](design-tokens.md) TK-5, 금지 패턴은 [ux-guide](ux-guide.md) §4 P2.
 
 | 표면 | 본문 | 최소 | 비고 |
 |---|---|---|---|

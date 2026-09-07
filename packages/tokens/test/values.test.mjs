@@ -156,6 +156,7 @@ test("shadcn·base·dark 파일은 공개 계약을 유지한다", () => {
   assert.match(shadcn, /--radius:\s*var\(--kt-radius-control\)/);
   assert.match(shadcn, /:where\(\[data-kt-surface\]\)/);
   assert.match(shadcn, /:where\(\[data-kt-surface\]\)[\s\S]*--radius:\s*var\(--kt-radius-control\)/);
+  assert.doesNotMatch(shadcn, /--chart-[1-5]\s*:/);
   assert.match(read("base.css"), /:focus-visible[\s\S]*outline: 2px solid var\(--kt-focus\)/);
   assert.match(read("base.css"), /button:not\(:disabled\)[\s\S]*cursor: pointer/);
   assert.match(read("base.css"), /\.border-kt-hairline\s*\{/);

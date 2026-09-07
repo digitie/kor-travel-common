@@ -128,7 +128,7 @@ C9 부속 결정: ktdm `ok/warn/danger`는 이름 alias(ok=success, warn=warning
 | UX-G9.3 | reduced-motion 전역 규칙 + "사라지면 상태를 알 수 없는 애니메이션(스피너)은 유지, 자리표시(skeleton)는 끈다" | MUST | `ux` G9.3, §1.12(7앱 전역 규칙 보유) |
 | UX-G9.4 | 전환 유틸은 열거형만. `transition-all`·`transition-colors`·맨 `transition` 금지(v4 전환 목록에 `outline-color`가 포함돼 링이 페이드된다) | MUST | `ux` G9.4, §4 P1 |
 | UX-G9.5 | 한글 라벨에 `uppercase`·`tracking-*` 금지 | MUST | `ux` G9.5(4앱) |
-| UX-G9.6 | admin 타입 스케일 7단(12/13.5/15/17/20/24/30), 본문 15px, 최소 12px, `text-[Npx]` 금지 | MUST | `ux` G9.6, C13, [design-tokens](design-tokens.md) TK-3 |
+| UX-G9.6 | admin 타입 스케일 7단(12/13.5/15/17/20/24/30), 본문 15px, 최소 12px, `text-[Npx]` 금지 | MUST | `ux` G9.6, C13, [design-tokens](design-tokens.md) TK-5 |
 | UX-G9.7 | radius 2종(6px 컨트롤/8px 패널), 컨트롤 높이 2종(36/30px). micro-control(≥24px)은 정렬 버튼·닫기·HelpTip·Copy 등 닫힌 목록만 | MUST | `ux` G9.7(6앱), `dt` §3.1.2 |
 | UX-G9.8 | hairline 2종: 장식 `border-kt-border` vs 컨트롤 경계 `border-kt-control-line`(3:1). 장식선을 입력 경계에 쓰지 않는다 | MUST | `ux` G9.8, TK-4·TK-8 |
 | UX-G9.9 | `html, body { overflow-x: clip }`(`hidden` 금지). 표·지도·작업면만 자체 overflow | MUST | `ux` G9.9(4앱), [responsive-web](responsive-web.md) §7 |

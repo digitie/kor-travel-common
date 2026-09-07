@@ -24,7 +24,7 @@ MIT 저장소 두 곳(concierge·docker-manager)이 GPL common 코드를 링크�
 2. 요청 문서 2편 `docs/plan/requests/concierge-license-l8.md`, `docs/plan/requests/docker-manager-license-l8.md`: 대상 저장소, 브랜치 `agent/<agent>-license-l8`, **LICENSE·metadata·고지만 다루는 독립 PR** 범위(루트 `LICENSE` GPL 전문, `package.json`·`pyproject.toml` `license` 필드, MIT 유래 파일 고지를 `THIRD_PARTY_NOTICES`로, ktc 저작권자 문구 통일 L14), common 코드 링크를 넣지 않는다는 경계, 되돌리기 `git revert` 1회, 인벤토리 §8/§9·판정 §3.1 링크.
 3. 외부 license-only PR이 머지되면 요청 문서와 이 task의 ktc·ktdm 행에 PR URL·40자리 `main` merge SHA·LICENSE 첫 줄·CI/license 검사 결과를 기록한다. 이 common task의 결정 완료와 외부 evidence는 별도 상태다.
 4. B4 처리: ktc `AppShell.tsx`·`globals.css`와 map admin 원본의 diff 결과(복사/개념 참조)는 후속 T-454 코드 채택 PR과 그 evidence에 기록한다. license-only PR이나 이 common task 완료가 B4 결과를 대신하지 않는다.
-5. 외부 license evidence가 기록되면 G-LIC gate를 해제할 수 있으며, T-453·T-454·T-472·T-473·T-485·T-486의 코드 채택 상태 전환은 각 원장 작성자가 수행한다.
+5. 외부 **license-only** evidence가 소비자별 external evidence 행에 기록되면 G-LIC의 L8 선행을 해제할 수 있으며, T-453·T-454·T-472·T-473·T-485·T-486의 코드 채택 상태 전환은 각 원장 작성자가 수행한다. B4 diff·common 코드 링크·common provenance·소비자 build/quality는 license-only PR의 수용 기준이 아니며 후속 코드 채택 task가 별도로 기록한다.
 
 ## 범위 밖
 
@@ -38,7 +38,7 @@ MIT 저장소 두 곳(concierge·docker-manager)이 GPL common 코드를 링크�
 
 - 결정 기록에 일자·선택지(정렬/추가 허가)·채택값·근거가 있고 기본값 진행 상태와 확정 상태가 구분된다.
 - 요청 문서 2편이 대상 파일 경로·되돌리기·인벤토리 §8/§9·판정 §3.1 링크·license-only 경계를 포함하고, 외부 evidence 기록 형식을 정의한다.
-- 외부 evidence가 저장소별 PR URL·40자리 커밋 SHA + `LICENSE` 첫 줄·검사 결과로 검증 가능하다. B4 diff는 후속 코드 채택 evidence로 별도 기록한다.
+- 외부 license-only evidence가 저장소별 PR URL·40자리 커밋 SHA + `LICENSE` 첫 줄·license/metadata·고지 검사 결과로 검증 가능하다. B4 diff·common 코드 링크·common provenance·소비자 build/quality는 후속 코드 채택 evidence로 별도 기록한다.
 - 해제 전 `docs/standards/*`·runbook의 concierge·ktdm 절이 "규칙 문서·`tokens.json` 참조까지"로만 적혀 있다.
 - validator 오류 0.
 
@@ -66,7 +66,7 @@ Git Bash에서 동일. B4 diff는 조사 저장소 읽기 전용 체크아웃에
 사용자는 “t020 021 관련해서 모두 gplv3로 바꿀꺼야 참고해서 이번에 한번에 닫아”라고 지시했다. 이에 O-2를 **concierge·docker-manager 루트 GPL-3.0-or-later 정렬, GPLv3 §7 추가 허가 없음**으로 확정하고 common 안에서 결정 기록과 두 요청 문서를 완료했다.
 
 - 요청 문서: [concierge-license-l8.md](../plan/requests/concierge-license-l8.md), [docker-manager-license-l8.md](../plan/requests/docker-manager-license-l8.md)
-- common은 두 소비자 저장소를 수정하지 않았고 실제 LICENSE·metadata·고지 반영은 concierge·docker-manager 외부 PR에서 수행하고 T-454·T-473 evidence로 남긴다.
+- common은 두 소비자 저장소를 수정하지 않았고 실제 LICENSE·metadata·고지 반영은 concierge·docker-manager 외부 license-only PR에서 수행하고 이 task의 external evidence 행에 남긴다. B4 diff·common 코드 채택은 각각 T-454·T-472/T-473 evidence로 남긴다.
 - G-LIC의 ktc·ktdm 적용 gate는 각 외부 PR의 40자리 SHA·LICENSE 첫 줄·자체 검증 evidence를 받을 때까지 OPEN이다.
 - T-021의 DONE은 라이선스 결정·요청 문서 gate를 닫았다는 뜻이며 소비자 코드 링크 gate를 닫았다는 뜻이 아니다.
 

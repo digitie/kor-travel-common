@@ -23,12 +23,12 @@ docker-manager에서 agent/<agent>-license-l8 branch로 LICENSE·metadata·고�
 
 ## 해제 조건
 
-docker-manager 담당 PR에서 다음을 확인한 40자리 commit SHA와 CI/evidence 링크를 common의 T-473 선행 evidence에 기록한다.
+docker-manager 담당 **license-only PR**에서 다음을 확인한 40자리 commit SHA와 CI/evidence 링크를 T-021의 docker-manager external evidence 행에 기록한다. 이 기록은 후속 코드 채택 task가 참조하는 L8 선행이며, common 코드 채택·provenance는 T-472·T-473·T-486에서 별도로 검증한다.
 
 - 루트 LICENSE가 GPL-3.0-or-later와 호환되는 GPLv3 전문임
 - metadata·고지 파일·서드파티 고지가 일치함
-- common 코드 링크와 함께 필요한 provenance가 기록됨
-- 소비자 build/quality 검증 결과가 기록됨
+- license-only PR의 metadata·고지 검사 결과와 외부 원천 provenance가 기록됨
+- common 코드 링크·common provenance·소비자 build/quality 결과는 후속 코드 채택 PR의 별도 evidence로 남김
 
 외부 PR과 SHA가 없으면 G-LIC의 docker-manager 적용 gate는 OPEN으로 유지한다. common은 docker-manager 코드를 복사하거나 수정하지 않는다. 되돌리기는 해당 저장소에서 git revert 1회로 수행한다.
 
