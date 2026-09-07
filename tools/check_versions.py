@@ -440,6 +440,128 @@ def read_toml(path: Path) -> dict:
         return tomllib.load(handle)
 
 
+UV_TOP_FIELDS = frozenset({
+    "version", "revision", "requires-python", "resolution-markers", "supported-markers",
+    "required-markers", "conflicts", "options", "manifest", "package", "distribution",
+})
+UV_PACKAGE_FIELDS = frozenset({
+    "name", "version", "source", "dependencies", "optional-dependencies", "dependency-groups",
+    "dev-dependencies", "resolution-markers", "metadata", "sdist", "wheels",
+})
+UV_SOURCE_FIELDS = frozenset({"registry", "git", "editable", "directory", "virtual"})
+UV_SUPPORTED_REVISION = 4
+DEPENDENCY_GROUP_NAME_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$")
+
+
+def _uv_error(path: Path, detail: str) -> ValueError:
+    return ValueError("uv.lock 지원 형식 오류")
+
+
+def _manifest_input_error() -> ValueError:
+    """입력의 이름·경로·값을 로그에 재출력하지 않는 manifest 오류."""
+    return ValueError("Python manifest 지원 형식 오류")
+
+
+def uv_source_kind(source: object, path: Path, package_name: str) -> str:
+    """uv package source의 제한된 네 종류를 확인하고 종류를 돌려준다."""
+    if not isinstance(source, dict):
+        raise _uv_error(path, f"package {package_name!r}의 source는 객체여야 함")
+    unknown = set(source) - UV_SOURCE_FIELDS
+    if unknown:
+        raise _uv_error(path, f"package {package_name!r} source 미지 필드 {sorted(unknown)}")
+    kinds = [key for key in UV_SOURCE_FIELDS if key in source]
+    if len(kinds) != 1 or not isinstance(source[kinds[0]], str) or not source[kinds[0]].strip():
+        raise _uv_error(path, f"package {package_name!r} source 종류·값이 잘못됨")
+    if kinds[0] in {"registry", "git"}:
+        try:
+            parsed = urlsplit(source[kinds[0]])
+            hostname = parsed.hostname
+            parsed.port
+        except ValueError as exc:
+            raise _uv_error(path, "source URL 형식 오류") from exc
+        if not parsed.scheme or not hostname:
+            raise _uv_error(path, "source URL 형식 오류")
+    elif "\x00" in source[kinds[0]]:
+        raise _uv_error(path, "source 경로 형식 오류")
+    return kinds[0]
+
+
+def read_uv_lock(path: Path) -> dict:
+    """uv v1 revision 0~4의 검사 대상 필드만 허용하는 오프라인 파서."""
+    try:
+        data = read_toml(path)
+    except (tomllib.TOMLDecodeError, UnicodeError) as exc:
+        raise _uv_error(path, "TOML 형식 오류") from exc
+    if not isinstance(data, dict):
+        raise _uv_error(path, "최상위가 객체가 아님")
+    unknown = set(data) - UV_TOP_FIELDS
+    if unknown:
+        raise _uv_error(path, f"최상위 미지 필드 {sorted(unknown)}")
+    if type(data.get("version")) is not int or data["version"] != 1:
+        raise _uv_error(path, "version은 지원하는 정수 1이어야 함")
+    revision = data.get("revision", 0)
+    if type(revision) is not int or not 0 <= revision <= UV_SUPPORTED_REVISION:
+        raise _uv_error(path, f"revision은 0~{UV_SUPPORTED_REVISION} 정수만 지원")
+    requires_python = data.get("requires-python")
+    if not isinstance(requires_python, str) or not requires_python.strip():
+        raise _uv_error(path, "requires-python이 비어 있거나 문자열이 아님")
+    if lower_bound(requires_python) is None or lower_bound(requires_python).lower is None:
+        raise _uv_error(path, "requires-python의 하한을 해석할 수 없음")
+    for field_name in ("resolution-markers", "supported-markers", "required-markers"):
+        if field_name in data and (not isinstance(data[field_name], list)
+                                   or any(not isinstance(item, str) for item in data[field_name])):
+            raise _uv_error(path, "marker 형식 오류")
+    for field_name in ("conflicts", "options", "manifest"):
+        if field_name in data and not isinstance(data[field_name], (dict, list)):
+            raise _uv_error(path, "lock 메타데이터 형식 오류")
+    packages = data.get("package", data.get("distribution", []))
+    if "package" in data and "distribution" in data:
+        raise _uv_error(path, "package와 distribution을 동시에 사용할 수 없음")
+    if not isinstance(packages, list):
+        raise _uv_error(path, "package는 배열이어야 함")
+    for index, entry in enumerate(packages):
+        if not isinstance(entry, dict):
+            raise _uv_error(path, f"package[{index}]는 객체여야 함")
+        unknown_package = set(entry) - UV_PACKAGE_FIELDS
+        if unknown_package:
+            raise _uv_error(path, f"package[{index}] 미지 필드 {sorted(unknown_package)}")
+        name = entry.get("name")
+        version = entry.get("version")
+        if not isinstance(name, str) or not name.strip():
+            raise _uv_error(path, f"package[{index}].name이 비어 있음")
+        if not isinstance(version, str):
+            raise _uv_error(path, f"package[{name!r}].version은 문자열이어야 함")
+        uv_source_kind(entry.get("source"), path, name)
+        if "dependencies" in entry and (
+                not isinstance(entry["dependencies"], list)
+                or any(not isinstance(item, dict)
+                       or not isinstance(item.get("name"), str)
+                       or not item["name"].strip() for item in entry["dependencies"])):
+            raise _uv_error(path, "package dependencies 형식 오류")
+        for field_name in ("optional-dependencies", "dependency-groups", "dev-dependencies"):
+            if field_name not in entry:
+                continue
+            value = entry[field_name]
+            if (not isinstance(value, dict)
+                    or any(not isinstance(items, list)
+                           or any(not isinstance(item, dict)
+                                  or not isinstance(item.get("name"), str)
+                                  or not item["name"].strip() for item in items)
+                           for items in value.values())):
+                raise _uv_error(path, "package group 형식 오류")
+        for field_name in ("metadata", "sdist"):
+            if field_name in entry and not isinstance(entry[field_name], dict):
+                raise _uv_error(path, "package metadata 형식 오류")
+        if "wheels" in entry and (not isinstance(entry["wheels"], list)
+                                   or any(not isinstance(item, dict) for item in entry["wheels"])):
+            raise _uv_error(path, "package wheel 형식 오류")
+        if "resolution-markers" in entry and (
+                not isinstance(entry["resolution-markers"], list)
+                or any(not isinstance(item, str) for item in entry["resolution-markers"])):
+            raise _uv_error(path, "package marker 형식 오류")
+    return data
+
+
 def ref_is_pinned(text: str, *, kind: str = "npm") -> bool:
     """git/URL 참조가 불변 대상(SHA·버전 태그·릴리스 자산)으로 고정돼 있는지.
 
@@ -470,6 +592,12 @@ def ref_is_pinned(text: str, *, kind: str = "npm") -> bool:
         return False
     if kind == "pypi":
         # Python 선언에서 fragment는 subdirectory 등 메타데이터이며 revision이 아니다.
+        # manifest에서 branch 종류를 보존하기 위해 넣은 내부 표식은 이름 모양과 무관하게 부동이다.
+        if "@branch:" in path:
+            return False
+        # tag/rev/branch 이름에 `@`가 들어가면 마지막 조각만 버전 태그로 볼 수 없다.
+        if path.count("@") != 1:
+            return False
         return "@" in path and valid_ref(path.rsplit("@", 1)[1])
     # npm git 선언의 revision은 fragment다. URL query나 Python식 @rev를 혼용하지 않는다.
     return bool(fragment and valid_ref(fragment))
@@ -590,6 +718,7 @@ class Checker:
         self.npm_direct: set[tuple[Path, str]] = set()
         self.npm_floating: set[tuple[Path, str]] = set()
         self.npm_manifests: set[tuple[Path, str]] = set()
+        self.uv_locks_scanned: set[Path] = set()
 
     # --- 공통
     def add(self, scope: str, key: str, ecosystem: str, declared: str, installed: str,
@@ -646,8 +775,13 @@ class Checker:
 
     def record_ref(self, scope: str, ecosystem: str, name: str, spec: str, resolved: str = "") -> None:
         # 선언이 브랜치를 가리키면 lock이 SHA를 기록해도 다음 설치에서 움직인다(D-11).
-        pinned = (ref_is_pinned(resolved, kind="uv" if ecosystem == "pypi" else "npm")
-                  if spec == "(전이)" else ref_is_pinned(spec, kind=ecosystem))
+        declared_pinned = (ref_is_pinned(spec, kind=ecosystem) if spec != "(전이)" else True)
+        if spec == "(전이)":
+            resolved_pinned = bool(resolved) and ref_is_pinned(resolved, kind="uv")
+        else:
+            resolved_pinned = (ref_is_pinned(resolved, kind="uv")
+                              if ecosystem == "pypi" and resolved else True)
+        pinned = declared_pinned and resolved_pinned
         provider = (normalize_name(name) in self.registry.provider_names()
                     or re.fullmatch(r"python-[a-z0-9-]+-api", normalize_name(name)) is not None)
         sha = SHA_RE.search(resolved or spec)
@@ -656,8 +790,12 @@ class Checker:
             self.add(scope, name, "git", spec, installed, "OK",
                      "providers 보고만(O-16)" if provider else "git 참조 고정됨")
         else:
+            if declared_pinned and not resolved_pinned:
+                detail = "선언은 고정됐지만 uv.lock source.git이 전체 SHA로 고정되지 않음"
+            else:
+                detail = "브랜치·미고정 참조 금지(D-11): SHA 또는 버전 태그로 고정"
             self.add(scope, name, "git", spec, installed, "FLOATING_REF",
-                     "브랜치·미고정 참조 금지(D-11): SHA 또는 버전 태그로 고정")
+                     detail)
 
     # --- npm
     def record_npm_declarations(self, label: str, declared: dict, packages: dict,
@@ -808,16 +946,61 @@ class Checker:
     def check_python(self, scope: Scope) -> None:
         label = scope.label
         declared: dict[str, str] = {}
-        urls: dict[str, str] = {}
+        urls: dict[str, list[str]] = {}
         requires_python: str | None = None
         manifest = scope.manifest
         if manifest is not None and manifest.name == "pyproject.toml":
-            data = read_toml(manifest)
+            try:
+                data = read_toml(manifest)
+            except (tomllib.TOMLDecodeError, UnicodeError) as exc:
+                raise _manifest_input_error() from exc
             project = data.get("project", {})
             requires_python = project.get("requires-python")
             specs = list(project.get("dependencies", []))
             for group in project.get("optional-dependencies", {}).values():
                 specs.extend(group)
+            dependency_groups = data.get("dependency-groups", {})
+            if not isinstance(dependency_groups, dict):
+                raise _manifest_input_error()
+            normalized_groups: dict[str, list] = {}
+            for original_name, group in dependency_groups.items():
+                if (not isinstance(original_name, str)
+                        or not DEPENDENCY_GROUP_NAME_RE.fullmatch(original_name)
+                        or not isinstance(group, list)):
+                    raise _manifest_input_error()
+                normalized_name = normalize_name(original_name)
+                if normalized_name in normalized_groups:
+                    raise _manifest_input_error()
+                normalized_groups[normalized_name] = group
+            expanded_groups: set[str] = set()
+            active_groups: set[str] = set()
+
+            def append_group(group_name: str) -> None:
+                if not isinstance(group_name, str) or not DEPENDENCY_GROUP_NAME_RE.fullmatch(group_name):
+                    raise _manifest_input_error()
+                normalized_name = normalize_name(group_name)
+                if normalized_name in active_groups or normalized_name not in normalized_groups:
+                    raise _manifest_input_error()
+                if normalized_name in expanded_groups:
+                    return
+                active_groups.add(normalized_name)
+                try:
+                    for item in normalized_groups[normalized_name]:
+                        if isinstance(item, str):
+                            if parse_requirement(item) is None:
+                                raise _manifest_input_error()
+                            specs.append(item)
+                        elif (isinstance(item, dict) and set(item) == {"include-group"}
+                              and isinstance(item.get("include-group"), str)):
+                            append_group(item["include-group"])
+                        else:
+                            raise _manifest_input_error()
+                finally:
+                    active_groups.remove(normalized_name)
+                expanded_groups.add(normalized_name)
+
+            for group_name in normalized_groups:
+                append_group(group_name)
             for text in specs:
                 parsed = parse_requirement(str(text))
                 if parsed is None:
@@ -825,11 +1008,34 @@ class Checker:
                 name, spec, url = parsed
                 declared.setdefault(name, spec)
                 if url:
-                    urls[name] = url
-            for name, source in data.get("tool", {}).get("uv", {}).get("sources", {}).items():
-                if isinstance(source, dict) and "git" in source:
-                    ref = source.get("rev") or source.get("tag") or source.get("branch") or ""
-                    urls[normalize_name(name)] = f"{source['git']}@{ref}" if ref else source["git"]
+                    urls.setdefault(name, []).append(url)
+            uv_sources = data.get("tool", {}).get("uv", {}).get("sources", {})
+            if not isinstance(uv_sources, dict):
+                raise _manifest_input_error()
+            for name, source_value in uv_sources.items():
+                source_entries = source_value if isinstance(source_value, list) else [source_value]
+                if not source_entries or any(not isinstance(source, dict) for source in source_entries):
+                    raise _manifest_input_error()
+                for source in source_entries:
+                    if "git" not in source:
+                        continue
+                    git_url = source.get("git")
+                    if not isinstance(git_url, str) or not git_url.strip():
+                        raise _manifest_input_error()
+                    refs = [field_name for field_name in ("rev", "tag", "branch")
+                            if source.get(field_name) is not None]
+                    if len(refs) > 1 or any(not isinstance(source[field_name], str)
+                                            or not source[field_name].strip() for field_name in refs):
+                        raise _manifest_input_error()
+                    if not git_url.startswith("git+"):
+                        git_url = "git+" + git_url
+                    if source.get("branch") is not None and not source.get("rev") and not source.get("tag"):
+                        ref = f"branch:{source['branch']}"
+                    else:
+                        ref = source.get("rev") or source.get("tag") or ""
+                    urls.setdefault(normalize_name(name), []).append(
+                        f"{git_url}@{ref}" if ref else git_url
+                    )
             poetry = data.get("tool", {}).get("poetry", {})
             if poetry:
                 requires_python = requires_python or poetry.get("dependencies", {}).get("python")
@@ -842,8 +1048,13 @@ class Checker:
                         spec = value.get("version", "") if isinstance(value, dict) else str(value)
                         declared.setdefault(normalize_name(name), spec)
                         if isinstance(value, dict) and value.get("git"):
-                            ref = value.get("rev") or value.get("tag") or value.get("branch") or ""
-                            urls[normalize_name(name)] = f"{value['git']}@{ref}" if ref else value["git"]
+                            if value.get("branch") is not None and not value.get("rev") and not value.get("tag"):
+                                ref = f"branch:{value['branch']}"
+                            else:
+                                ref = value.get("rev") or value.get("tag") or ""
+                            urls.setdefault(normalize_name(name), []).append(
+                                f"{value['git']}@{ref}" if ref else value["git"]
+                            )
         elif manifest is not None and manifest.name == "requirements.txt":
             for line in manifest.read_text(encoding="utf-8-sig").splitlines():
                 line = line.split(" #")[0].strip()
@@ -853,7 +1064,7 @@ class Checker:
                 name, spec, url = parsed
                 declared.setdefault(name, spec)
                 if url:
-                    urls[name] = url
+                    urls.setdefault(name, []).append(url)
 
         if requires_python is None:
             self.add(label, "python", "runtime", "", "", "NO_ENGINES",
@@ -861,23 +1072,42 @@ class Checker:
         else:
             self.record_range("python", label, "runtime", str(requires_python))
 
+        lock_data: dict = {}
         lock_packages: dict[str, list[dict]] = {}
         if scope.lock is not None and scope.lock.is_file() and scope.lock_kind == "uv":
-            data = read_toml(scope.lock)
-            for entry in data.get("package", []):
+            lock_data = read_uv_lock(scope.lock)
+            for entry in lock_data.get("package", lock_data.get("distribution", [])):
                 lock_packages.setdefault(normalize_name(entry.get("name", "")), []).append(entry)
 
+            lock_requires = str(lock_data["requires-python"])
+            manifest_bound = lower_bound(str(requires_python)) if requires_python is not None else None
+            lock_bound = lower_bound(lock_requires)
+            if (requires_python is None
+                    or manifest_bound is None or lock_bound is None
+                    or manifest_bound.lower != lock_bound.lower
+                    or manifest_bound.exact != lock_bound.exact):
+                self.record_range("python", f"{label} [uv.lock]", "runtime", lock_requires)
+
         # git/URL 참조
-        for name, url in urls.items():
-            resolved = ""
-            for entry in lock_packages.get(name, []):
-                source = entry.get("source", {})
-                if "git" in source:
-                    resolved = source["git"]
-            self.record_ref(label, "pypi", name, url, resolved)
-        if scope.lock is not None and manifest is not None and scope.lock.parent == manifest.parent:
+        for name, url_specs in urls.items():
+            resolved_refs = [entry["source"]["git"] for entry in lock_packages.get(name, [])
+                             if "git" in entry.get("source", {})]
+            for url in url_specs:
+                if resolved_refs:
+                    for resolved in resolved_refs:
+                        self.record_ref(label, "pypi", name, url, resolved)
+                else:
+                    self.record_ref(label, "pypi", name, url)
+        first_uv_lock_scan = False
+        if scope.lock is not None and scope.lock_kind == "uv" and lock_packages:
+            # uv workspace는 멤버마다 같은 lock을 가리킬 수 있다. 첫 범위가 멤버여도
+            # 공유 lock 전체의 전이 축·차단·git 참조를 한 번 검사한다.
+            lock_path = scope.lock.resolve()
+            first_uv_lock_scan = lock_path not in self.uv_locks_scanned
+            if first_uv_lock_scan:
+                self.uv_locks_scanned.add(lock_path)
             for name, entries in lock_packages.items():
-                if name in urls:
+                if not first_uv_lock_scan or name in urls:
                     continue
                 for entry in entries:
                     source = entry.get("source", {})
@@ -895,8 +1125,6 @@ class Checker:
             if not added:
                 self.add(label, "lockfile", "pypi", "", "", "NO_LOCK", scope.note or "uv.lock 없음")
             return
-        owns_lock = scope.lock is not None and manifest is not None and scope.lock.parent == manifest.parent
-
         for name, spec in declared.items():
             key = self.registry.axis_for("pypi", name)
             if key is None or not self.registry.axes[key].get("checked", True):
@@ -908,18 +1136,17 @@ class Checker:
                 continue
             for entry in entries:
                 self.record_axis(label, key, "pypi", spec, str(entry.get("version", "")))
-        # 전이 의존성까지 포함한 축·차단 검사는 lock을 소유한 범위에서 1회만(선언에 없는 축은 전이로 표시)
-        if not owns_lock:
-            return
-        for name, entries in lock_packages.items():
-            for entry in entries:
-                version = str(entry.get("version", ""))
-                if "registry" not in entry.get("source", {}):
-                    continue
-                self.record_blocked(label, "pypi", name, version)
-                key = self.registry.axis_for("pypi", name)
-                if key is not None and name not in declared and self.registry.axes[key].get("checked", True):
-                    self.record_axis(label, key, "pypi", "(전이)", version)
+        # 전이 의존성까지 포함한 축·차단 검사는 공유 lock당 1회만 수행한다.
+        if first_uv_lock_scan:
+            for name, entries in lock_packages.items():
+                for entry in entries:
+                    version = str(entry.get("version", ""))
+                    if "registry" not in entry.get("source", {}):
+                        continue
+                    self.record_blocked(label, "pypi", name, version)
+                    key = self.registry.axis_for("pypi", name)
+                    if key is not None and name not in declared and self.registry.axes[key].get("checked", True):
+                        self.record_axis(label, key, "pypi", "(전이)", version)
 
     def run(self, scopes: list[Scope]) -> None:
         for scope in scopes:

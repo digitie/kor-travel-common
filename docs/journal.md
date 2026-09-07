@@ -2,6 +2,14 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-005a 완료·PR #6 병합 준비)
+
+T-005a의 최종 code candidate `3c5801f14855a067080f257ec83d2279de32c74a`를 PR #6에 올렸다. `uv.lock`의 version/revision/source와 Python 하한, 공유 lock의 전이 축·차단·git source, PEP 735 group, `tool.uv.sources` 복수 항목을 검사하고 malformed input은 exit 2로 닫는다. branch/tag/rev 이름에 `@`가 들어간 경우 마지막 조각을 버전 태그로 오인하지 않도록 보수적으로 FLOATING_REF 처리했다. npm·PyPI 게시나 소비자 저장소 쓰기는 하지 않았다.
+
+최초 A/B 적대적 리뷰는 BLOCK이었고, 고정 선언 우회·구조 fail-open·PEP 735 검증 누락·입력 원문 노출을 각각 수정했다. 후속 후보 `9027500`, `735efed`에서 잔여 반례를 추가로 수정했으며 최종 post-fix `3c5801f`에서 A/B가 독립적으로 PASS, 누적 8개 finding FIXED·새 finding 0을 확인했다([통합 리뷰](reviews/adversarial/2026-09-07-t005a-post3.md)).
+
+Windows Python 3.14.3·WSL Python 3.11.15에서 각각 전체 140 tests·skip 0과 focused 45 tests가 성공했다. PR CI run `34080403871`의 5개 check도 모두 성공했다. 문서 link 272/2151, plan 102, SPDX 20, secret/redaction guard와 self-check가 오류 0이다. 공항 소비자 파일은 양 OS에서 읽기 전용으로 `findings=24 failing=2 exit=0`을 재현했으며 이는 제품 gate가 아니다. 실제 `uv sync --locked`·설치·빌드·e2e 및 소비자 CI는 NOT_RUN이다. PR #6 병합 후 다음 작업은 T-005b다.
+
 ## 2026-09-07 (Codex, T-009 두 리뷰 종료·완료 기록)
 
 f15072f의 post-fix 원본을 각각 확정한 뒤 교차 비교했다. A/B PASS·원 finding 8개 FIXED·새 finding 0이다([최종 리뷰](reviews/adversarial/2026-09-07-t009-post-fix.md)). Windows/WSL 각각 135 tests·skip 0, 두 reviewer의 경로/정규식·8.3 별칭·step summary 원 반례가 성공했다. 초기 CI 실패·수정과 각 검증 수치/한계는 [T-009](tasks/T-009-ci-hardening.md#evidence)에 연결했다.

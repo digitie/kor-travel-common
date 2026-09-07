@@ -6,6 +6,7 @@
 
 | ID | 상태 | 우선순위 | 작업 | 선행 |
 |---|---|---:|---|---|
+| [T-005a](tasks/T-005a-check-versions-uv-lock.md) | DONE | P1 | check_versions: `uv.lock` 파서 | T-005 |
 | [T-009](tasks/T-009-ci-hardening.md) | DONE | P1 | common CI 하드닝(permissions·concurrency·timeout·ubuntu-24.04·액션 SHA 핀)·`tools` windows 매트릭스·`secret-scan`·`check-versions(report)` job·branch protection 문서·redaction guard (2026-09-07, PR #5) | T-002, T-003 |
 | [T-015](tasks/T-015-common-delivery-plan.md) | DONE | P0 | npm·PyPI 미게시와 common 구현·외부 릴리스 선행 분리 (2026-09-07, PR #4) | T-005 |
 | [T-006](tasks/T-006-npm-scope-pypi-name.md) | DONE | P1 | 공개 registry 이름 확보 철회와 패키지 식별자 확정 (2026-09-07, PR #4) | T-015 |

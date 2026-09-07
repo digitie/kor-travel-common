@@ -74,7 +74,7 @@ def npm_fixture(root: Path, *, deps: dict, engines: dict | None, installed: dict
 
 
 def python_fixture(root: Path, *, requires: str | None, deps: list[str], locked: dict | None,
-                   git_locked: dict | None = None) -> None:
+                   git_locked: dict | None = None, lock_requires: str | None = None) -> None:
     lines = ["[project]", 'name = "fixture"', 'version = "0.0.0"']
     if requires is not None:
         lines.append(f'requires-python = "{requires}"')
@@ -85,8 +85,10 @@ def python_fixture(root: Path, *, requires: str | None, deps: list[str], locked:
     if locked is None:
         return
     blocks = ['version = 1', 'revision = 3']
-    if requires is not None:
-        blocks.append(f'requires-python = "{requires}"')
+    if lock_requires is None:
+        lock_requires = requires
+    if lock_requires is not None:
+        blocks.append(f'requires-python = "{lock_requires}"')
     blocks.append('\n[[package]]\nname = "fixture"\nversion = "0.0.0"\nsource = { editable = "." }')
     for name, version in locked.items():
         blocks.append(f'\n[[package]]\nname = "{name}"\nversion = "{version}"\n'
@@ -387,6 +389,25 @@ class CheckVersionsTests(unittest.TestCase):
                 python_fixture(self.repo, requires=">=3.12", deps=[], locked={},
                                git_locked={"custom-lib": ("1.0.0", "https://github.com/example/pkg?rev=main#" + fragment)})
                 self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), [expected])
+        python_fixture(self.repo, requires=">=3.12",
+                       deps=["custom-lib @ git+https://github.com/example/pkg.git@" + sha],
+                       locked={}, git_locked={"custom-lib": ("1.0.0", "https://github.com/example/pkg?rev=main#main")})
+        self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), ["FLOATING_REF"])
+        lock_text = (self.repo / "uv.lock").read_text(encoding="utf-8")
+        (self.repo / "uv.lock").write_text(
+            lock_text + '\n[[package]]\nname = "custom-lib"\nversion = "1.1.0"\n'
+            'source = { git = "https://github.com/example/pkg?rev=short#abc" }\n', encoding="utf-8")
+        self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), ["FLOATING_REF"])
+        branch_url = "git+https://github.com/example/pkg.git@branch:topic@v1.2.3"
+        python_fixture(self.repo, requires=">=3.12", deps=["custom-lib @ " + branch_url], locked={},
+                       git_locked={"custom-lib": ("1.0.0", "https://github.com/example/pkg?branch=topic%40v1.2.3#" + sha)})
+        self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), ["FLOATING_REF"])
+        for field in ("tag", "rev"):
+            python_fixture(self.repo, requires=">=3.12", deps=["custom-lib"], locked={},
+                           git_locked={"custom-lib": ("1.0.0", "https://github.com/example/pkg?rev=main#" + sha)})
+            with (self.repo / "pyproject.toml").open("a", encoding="utf-8") as stream:
+                stream.write(f'\n[tool.uv.sources]\ncustom-lib = {{ git = "https://github.com/example/pkg.git", {field} = "topic@v1.2.3" }}\n')
+            self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), ["FLOATING_REF"])
         npm_fixture(self.repo, deps={"custom-lib": "git+https://github.com/example/pkg.git#v1.2.3"},
                     engines={"node": ">=22.12"}, installed={"custom-lib": "1.2.3"})
         npm_findings = CV.Checker(CV.Registry.load(self.registry_path), "app-a", CV.date(2026, 9, 6))
@@ -513,6 +534,120 @@ class CheckVersionsTests(unittest.TestCase):
         self.assertEqual((starlette.declared, starlette.verdict), ("(전이)", "OK"))
         provider = next(f for f in findings if f.key == "python-kasi-api")
         self.assertEqual((provider.ecosystem, provider.verdict, provider.installed), ("git", "OK", "51c39c1b0dd5"))
+
+    def test_uv_lock_requires_python_is_checked_against_floor(self):
+        python_fixture(self.repo, requires=">=3.12", lock_requires=">=3.10",
+                       deps=["fastapi>=0.115"], locked={"fastapi": "0.141.1"})
+        python_findings = self.run_checker()
+        self.assertEqual(self.verdicts(python_findings, "python"), ["OK", "BELOW_FLOOR"])
+        lock_python = next(f for f in python_findings
+                           if f.key == "python" and "uv.lock" in f.scope)
+        self.assertEqual(lock_python.installed, "3.10")
+        self.assertIn("floor 3.11", lock_python.detail)
+
+    def test_uv_lock_schema_and_source_fail_closed(self):
+        python_fixture(self.repo, requires=">=3.12", deps=["fastapi>=0.115"],
+                       locked={"fastapi": "0.141.1"})
+        lock_path = self.repo / "uv.lock"
+        original = lock_path.read_text(encoding="utf-8")
+        for replacement in (
+            ("version = 1", "version = 2"),
+            ("revision = 3", "revision = 5"),
+            ("revision = 3", "revision = 3\nresolution-markers = 42"),
+            ('source = { registry = "https://pypi.org/simple" }',
+             'source = { registry = "https://pypi.org/simple", git = "https://example.invalid/repo" }'),
+            ('source = { registry = "https://pypi.org/simple" }',
+             'source = { registry = "https://[" }'),
+            ('source = { registry = "https://pypi.org/simple" }',
+             'source = { registry = "https://pypi.org/simple" }\ndependencies = { broken = true }'),
+            ('source = { registry = "https://pypi.org/simple" }',
+             'source = { registry = "https://@" }'),
+            ('source = { registry = "https://pypi.org/simple" }',
+             'source = { registry = "https://example.invalid:bad/simple" }'),
+            ('source = { registry = "https://pypi.org/simple" }',
+             'source = { registry = "https://pypi.org/simple" }\noptional-dependencies = { test = [42] }'),
+        ):
+            with self.subTest(replacement=replacement):
+                lock_path.write_text(original.replace(*replacement), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    self.run_checker()
+        lock_path.write_text(original, encoding="utf-8")
+
+    def test_uv_input_error_does_not_echo_input_names(self):
+        python_fixture(self.repo, requires=">=3.12", deps=["fastapi>=0.115"],
+                       locked={"fastapi": "0.141.1"})
+        lock_path = self.repo / "uv.lock"
+        lock_path.write_text(lock_path.read_text(encoding="utf-8")
+                             .replace("version = 1", "version = 1\nSENTINEL_INPUT_FIELD = true"),
+                             encoding="utf-8")
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet")
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn("SENTINEL_INPUT_FIELD", result.stdout)
+        self.assertNotIn(str(self.repo), result.stdout)
+
+    def test_uv_shared_lock_checks_transitive_package_from_member_scope(self):
+        workspace = self.root / "workspace"
+        member = workspace / "packages" / "api"
+        member.mkdir(parents=True)
+        (member / "pyproject.toml").write_text(
+            '[project]\nname = "member"\nversion = "0.0.0"\nrequires-python = ">=3.12"\n'
+            'dependencies = ["fastapi>=0.115"]\n', encoding="utf-8")
+        (workspace / "uv.lock").write_text(
+            'version = 1\nrevision = 3\nrequires-python = ">=3.12"\n\n'
+            '[[package]]\nname = "member"\nversion = "0.0.0"\nsource = { virtual = "." }\n\n'
+            '[[package]]\nname = "fastapi"\nversion = "0.141.1"\n'
+            'source = { registry = "https://pypi.org/simple" }\n\n'
+            '[[package]]\nname = "mcp"\nversion = "2.1.1"\n'
+            'source = { registry = "https://pypi.org/simple" }\n', encoding="utf-8")
+        findings = self.run_checker(root=workspace)
+        self.assertEqual(self.verdicts(findings, "fastapi"), ["OK"])
+        self.assertEqual(self.verdicts(findings, "mcp"), ["BLOCKED"])
+
+    def test_uv_dependency_group_and_list_source_are_inspected(self):
+        (self.repo / "pyproject.toml").write_text(
+            '[project]\nname = "fixture"\nversion = "0.0.0"\nrequires-python = ">=3.12"\n'
+            'dependencies = []\n\n[dependency-groups]\nlint = ["fastapi>=0.115"]\ndev = [{ include-group = "lint" }]\n\n'
+            '[tool.uv.sources]\ncustom-lib = [\n'
+            '  { git = "https://github.com/example/custom-lib", branch = "v1.2.3" },\n'
+            '  { git = "https://github.com/example/custom-lib", tag = "v1.2.3" },\n]\n',
+            encoding="utf-8")
+        findings = self.run_checker()
+        self.assertEqual(self.verdicts(findings, "fastapi"), ["NO_LOCK"])
+        self.assertEqual(self.verdicts(findings, "custom-lib"), ["FLOATING_REF", "OK"])
+
+        malformed_group = (self.repo / "pyproject.toml").read_text(encoding="utf-8").replace(
+            'lint = ["fastapi>=0.115"]', 'lint = "fastapi>=0.115"')
+        (self.repo / "pyproject.toml").write_text(malformed_group, encoding="utf-8")
+        self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+        malformed_source = malformed_group.replace('lint = "fastapi>=0.115"',
+                                                     'lint = ["fastapi>=0.115"]')
+        malformed_source = malformed_source.replace(
+            'custom-lib = [\n  { git = "https://github.com/example/custom-lib", branch = "v1.2.3" },\n  { git = "https://github.com/example/custom-lib", tag = "v1.2.3" },\n]',
+            'custom-lib = "invalid"')
+        (self.repo / "pyproject.toml").write_text(malformed_source, encoding="utf-8")
+        self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+
+        normalized_group = malformed_group.replace(
+            '[dependency-groups]\nlint = "fastapi>=0.115"\ndev = [{ include-group = "lint" }]',
+            '[dependency-groups]\nTest_Group = ["fastapi>=0.115"]\ndev = [{ include-group = "test-group" }]')
+        (self.repo / "pyproject.toml").write_text(normalized_group, encoding="utf-8")
+        self.assertNotEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+
+        cyclic_group = normalized_group.replace(
+            'Test_Group = ["fastapi>=0.115"]', 'Test_Group = [{ include-group = "dev" }]')
+        (self.repo / "pyproject.toml").write_text(cyclic_group, encoding="utf-8")
+        self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+
+        extra_include_key = normalized_group.replace(
+            '{ include-group = "test-group" }',
+            '{ include-group = "test-group", unexpected = true }')
+        (self.repo / "pyproject.toml").write_text(extra_include_key, encoding="utf-8")
+        self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+
+        missing_group = malformed_group.replace('lint = "fastapi>=0.115"',
+                                                  'lint = [{ include-group = "missing" }]')
+        (self.repo / "pyproject.toml").write_text(missing_group, encoding="utf-8")
+        self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
 
     def test_python_floating_ref_without_lock(self):
         python_fixture(self.repo, requires=None,
