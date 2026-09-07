@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-005c 문서 post-fix PASS·merge gate)
+
+문서 gate에서 확인된 세 finding을 `7b35ff07b077cef85d7d0d6e0971cacff210374f`로 수정했다. reviewer-B evidence의 공백 예외를 `-blank-at-eof`로 좁혔고, mixed-line-ending manifest의 `-text -eol -whitespace`로 원본·Git blob·checkout SHA256 `D1AB00A0F4462AEEB1F99E14C6E3FA2C36A5BDD7FA28AE23C6B60278F3C8C451`을 보존했으며, resume의 다음 시작 파일을 T-011로 갱신했다. package/npm/PyPI 항목은 범위 밖 `NOT_RUN(사유)`로 분리했다.
+
+두 docs reviewer가 Windows/WSL에서 독립 post-fix 검증을 완료해 PASS했고 새 finding은 없었다. [문서 post-fix 통합 보고서](reviews/adversarial/2026-09-07-t005c-docs-post-fix.md), [A 원본](reviews/adversarial/evidence/2026-09-07-t005c-docs-postfix-reviewer-a.md), [B 원본](reviews/adversarial/evidence/2026-09-07-t005c-docs-postfix-reviewer-b.md)에 기록했다. exact PR CI `34099960667`의 5개 job도 성공했다. 소비자 저장소와 npm/PyPI는 건드리거나 게시하지 않았고, PR #8 merge 후 main CI만 남은 gate다.
+
 ## 2026-09-07 (Codex, T-005c 최종 review 완료·PR #8 merge gate)
 
 T-005c workflow 고정 참조·CI Node 선언 정적 보고를 `codex/t005c-workflow-static-report`에서 마쳤다. 최종 code candidate `5807e535c16310c41c21f9efce87b2113aa17ee5`는 plain/flow YAML quote·delimiter 경계, workflow 출력 redaction, 저장소 식별자 분리, Docker 이름 문법, local action root containment와 빈 구조 fail-close를 포함한다. PR #8 CI `34097813843`의 docs·tools(Windows/Ubuntu)·check-versions·secret-scan 5개 job이 모두 성공했다.
