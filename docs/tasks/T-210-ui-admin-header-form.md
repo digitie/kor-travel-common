@@ -26,7 +26,7 @@
 
 ## 범위 밖
 
-- `AdminShell` nav·로그아웃·접힘·RBAC·`NAV_GROUPS`(앱), 공용 `LoginForm`/`LoginScreen` 계약과 앱 endpoint/IdP 어댑터(T-211·T-312), pinvi `AdminPage` 어댑터 교체(T-422), weather 셸 교체(T-463), RHF/zod 어댑터, dirty 이탈 경고(O-22 미포함).
+- `AdminShell` nav·로그아웃·접힘·RBAC·`NAV_GROUPS`(앱), 로그인 위젯 계약·앱 endpoint/IdP 어댑터(T-214·T-312), pinvi `AdminPage` 어댑터 교체(T-422), weather 셸 교체(T-463), RHF/zod 어댑터, dirty 이탈 경고(O-22 미포함).
 
 ## 예상 변경 파일
 

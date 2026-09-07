@@ -238,6 +238,7 @@
 | T-211 | 레지스트리 채널(셸 골격·로그인 페이지·playwright 기준선 템플릿) + `tools/ui_drift.py`(npm 소비자 로컬 패치 탐지) | T-210 | P3 | selftest | common | |
 | T-212 | ui `v0.1.0` rc → map + pinvi admin(L6) 또는 airport 검증 → 정식 | T-203, T-204 | P1 | consumer-smoke | common | 외부 선행: T-020 또는 T-430 |
 | T-213 | ui `v0.2.0`(Button·overlay·Table·DataTable·Pager·Copy/Json/Detail·Header/Form) rc → 정식 | T-208, T-209, T-210 | P1 | consumer-smoke·2인 리뷰 | common | |
+| T-214 | 공용 로그인 위젯·상태 계약(`LoginForm`·오류/대기 접근성·redirect 안전성) | T-210, T-213 | P1 | 단위 테스트·pack·2인 리뷰 | common | ADR-015·T-016 |
 
 ### Phase 3 — T-3xx Python 공통 패키지·OpenAPI (그룹: 백엔드)
 
@@ -253,6 +254,7 @@
 | T-308 | C5 errors/problem(`exclude_paths`)·C16 security_headers·C17 cors·C8 trusted_proxy·C11 testing·C10 alembic 템플릿·C15 http·C18 dagster | T-306, T-307 | P2 | 단위 테스트 | common | |
 | T-309 | 재사용 워크플로 2단계(`openapi-drift.yml`·`typegen-drift.yml`) + selftest | T-303, T-010 | P1 | selftest | common | |
 | T-310 | `py-v0.1.0`(1차) → weather-api·map-api·airport 검증 → 정식(wheel 자산) | T-303, T-304, T-305 | P1 | 소비자 스모크 | common | |
+| T-312 | Python 공용 인증 코어 프리미티브(저장소·비밀 주입형) | T-016, T-302 | P1 | 단위·계약 시험·2인 리뷰 | common | ADR-015 |
 
 ### Phase 4 — T-4xx 소비 앱 이관 (그룹: 소비자 — 앱별)
 

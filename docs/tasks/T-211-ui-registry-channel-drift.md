@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P3
 - Gate: selftest
-- 선행: T-210
+- 선행: T-214
 
 ## 목표
 
@@ -14,7 +14,7 @@ npm 패키지로 배포할 수 없는 "앱이 소유해야 하는 템플릿"(셸
 - ADR-007 — [ADR 색인](../adr/README.md). [브리프](../plan/design-brief.md) D-10: 레지스트리 채널은 앱이 소유해야 하는 템플릿에만, 전면 레지스트리는 Phase 5에서 "npm 소비자 우회 패치 2회 이상"일 때만 재검토. D-11: `@main` 참조 금지, 태그 불변. D-17: 앱 사본 drift 비교는 선두 주석 블록 정규화, shadcn 생성물 MIT 고지(B6). D-21: playwright 기준선 정본은 `templates/playwright.baseline.ts`(T-108). D-28: 로컬 복사본 수·우회 패치 수를 분기 보고. D-03: `tools/*.py`는 Windows Python 3.11+ stdlib에서 동작.
 - 규칙 정본: [ux-guide](../standards/ux-guide.md) UX-G1(셸)·G7.1(로그인 단일 가운데 열·타이포 워드마크·오류 live region)·G7.2(오류 코드 → 한국어 맵)·G7.3(`next` 로컬 경로만), [consumer-adoption](../runbooks/consumer-adoption.md)(기준선 캡처 절차), [release](../runbooks/release.md).
 - 사실 근거: [ui-components](../survey/cross/ui-components.md) §6.1(`components.json`: map·concierge·airport WIP `base-nova`, geo `radix-nova`, pinvi 없음; `registry.json` 어느 저장소에도 없음), §6.2(방식 A 장단점), §3.4 LoginForm 행(5 구현 리다이렉트 계약 3종), §4.3(AdminShell nav·LoginForm 보류 사유); [ux-patterns](../survey/cross/ux-patterns.md) C4(strip 기본 + drawer 옵션)·C15(로그인 아이콘 타일은 후속 정렬).
-- 이 task에서 확정하는 선택(호스팅은 열림, 기본값): 레지스트리 JSON은 `shadcn build`로 생성해 GitHub Release 자산(`ui-vX.Y.Z` 태그, 파일명 `registry-<item>.json`)으로 올리고 소비자 `components.json` `registries`에 태그 고정 URL을 적는다. 로그인 템플릿은 공용 `LoginForm` 계약과 `fetch("/api/auth/login")` 호출·`nextPath` prop 골격을 연결하고, endpoint·IdP·세션·CSRF·rate limit은 앱 소유(T-210·T-312·ADR-015).
+- 이 task에서 확정하는 선택(호스팅은 열림, 기본값): 레지스트리 JSON은 `shadcn build`로 생성해 GitHub Release 자산(`ui-vX.Y.Z` 태그, 파일명 `registry-<item>.json`)으로 올리고 소비자 `components.json` `registries`에 태그 고정 URL을 적는다. 로그인 템플릿은 T-214의 공용 `LoginForm` 계약과 `fetch("/api/auth/login")` 호출·`nextPath` prop 골격을 연결하고, endpoint·IdP·세션·CSRF·rate limit은 앱 소유(T-214·T-312·ADR-015).
 
 ## 구현 범위
 
@@ -24,7 +24,7 @@ npm 패키지로 배포할 수 없는 "앱이 소유해야 하는 템플릿"(셸
 
 ## 범위 밖
 
-- 전면 레지스트리 전환(T-508), 레지스트리로 primitive 배포, 소비자 `components.json` 신설(앱 이관 task), 인증 서버·사용자 저장소·운영 비밀·앱별 인증 정책, `AdminShell` nav 정본, playwright 기준선 파일 자체(T-108). 공용 로그인 위젯 계약은 T-210에서 다룬다.
+- 전면 레지스트리 전환(T-508), 레지스트리로 primitive 배포, 소비자 `components.json` 신설(앱 이관 task), 인증 서버·사용자 저장소·운영 비밀·앱별 인증 정책, `AdminShell` nav 정본, playwright 기준선 파일 자체(T-108). 공용 로그인 위젯 구현은 T-214에서 다룬다.
 
 ## 예상 변경 파일
 

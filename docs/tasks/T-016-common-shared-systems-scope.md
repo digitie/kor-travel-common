@@ -21,7 +21,7 @@ kor-travel-common이 독립 운영 시스템이 아니라 위젯·디자인 토�
 1. ADR-015, 범위 재점검 문서와 AGENTS/architecture/packages 문구를 동기화한다.
 2. UI·backend·OpenAPI·UX standards에서 인증 제외 문구를 공용 프리미티브/앱 소유 경계로 바꾼다.
 3. T-011을 T-016 이후로 순서를 조정하고, 매니페스트의 앱/경로/workflow 경계를 명시한다.
-4. T-312 Python 인증 프리미티브 task를 만들고 T-210/T-211 및 소비자 이관 task의 obsolete한 인증 제외 문구를 정리한다.
+4. T-214 공용 로그인 위젯 task와 T-312 Python 인증 프리미티브 task를 만들고 T-210/T-211 및 소비자 이관 task의 obsolete한 인증 제외 문구를 정리한다.
 5. T-014와 CI-20/T-108에서 common `130xx`를 운영 대역처럼 해석하지 않도록 fixture 임시 포트와 ktdm 정본 경계를 명시한다.
 6. docs/resume·tasks·journal·ADR 색인을 갱신한다.
 
@@ -33,7 +33,7 @@ kor-travel-common이 독립 운영 시스템이 아니라 위젯·디자인 토�
 
 ## 예상 변경 파일
 
-`AGENTS.md`, `docs/adr/015-common-shared-systems-scope.md`, `docs/plan/common-scope-recheck-2026-09-07.md`, `docs/architecture/README.md`, `docs/architecture/packages.md`, `docs/architecture/consumers.md`, `docs/architecture/canview-checklist.md`, `docs/standards/backend-stack.md`, `docs/standards/openapi.md`, `docs/standards/ui-contract.md`, `docs/standards/ux-guide.md`, `docs/tasks.md`, `docs/tasks/T-011-consumer-manifest-schema.md`, `docs/tasks/T-014-ports-130xx.md`, `docs/tasks/T-108-playwright-baseline.md`, `docs/tasks/T-210-ui-core.md`, `docs/tasks/T-211-ui-registry-channel-drift.md`, `docs/tasks/T-302-python-common-package.md`, `docs/tasks/T-306-public-api-key.md`, `docs/tasks/T-308-security-middleware.md`, `docs/tasks/T-311-python-release.md`, `docs/tasks/T-312-auth-core-primitives.md`, `docs/tasks/T-463-weather-shell-panels-forms-login.md`, `docs/tasks/T-484-pinvi-api-adoption.md`, `docs/tasks/T-485-concierge-api-adoption.md`, `docs/tasks/T-486-docker-manager-api-adoption.md`, `docs/plan/design-brief.md`, `docs/resume.md`, `docs/journal.md`, `docs/adr/README.md`.
+`AGENTS.md`, `docs/adr/001-purpose-boundary-and-deliverables.md`, `docs/adr/010-consumer-adoption-model.md`, `docs/adr/011-python-common-package.md`, `docs/adr/015-common-shared-systems-scope.md`, `docs/plan/common-scope-recheck-2026-09-07.md`, `docs/architecture/README.md`, `docs/architecture/packages.md`, `docs/architecture/consumers.md`, `docs/architecture/canview-checklist.md`, `docs/standards/backend-stack.md`, `docs/standards/openapi.md`, `docs/standards/ui-contract.md`, `docs/standards/ux-guide.md`, `docs/runbooks/consumer-adoption.md`, `docs/tasks.md`, `docs/tasks/T-011-consumer-manifest-schema.md`, `docs/tasks/T-014-ports-130xx.md`, `docs/tasks/T-108-playwright-baseline.md`, `docs/tasks/T-210-ui-admin-header-form.md`, `docs/tasks/T-211-ui-registry-channel-drift.md`, `docs/tasks/T-214-ui-login-widget-contract.md`, `docs/tasks/T-302-python-package-skeleton.md`, `docs/tasks/T-306-settings-db-api-key.md`, `docs/tasks/T-308-api-third-tier-modules.md`, `docs/tasks/T-311-py-v0-2-0-release.md`, `docs/tasks/T-312-auth-core-primitives.md`, `docs/tasks/T-403-consumer-ci-alignment.md`, `docs/tasks/T-463-weather-shell-panels-forms-login.md`, `docs/tasks/T-484-pinvi-py-lock-export-drift.md`, `docs/tasks/T-485-concierge-py-first.md`, `docs/tasks/T-486-ktdm-py-second.md`, `docs/plan/design-brief.md`, `docs/resume.md`, `docs/journal.md`, `docs/adr/README.md`.
 
 ## 수용 기준
 

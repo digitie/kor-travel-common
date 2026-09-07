@@ -27,7 +27,7 @@
 ## 결과와 후속
 
 - [T-016](../tasks/T-016-common-shared-systems-scope.md)은 이 결정에 맞춰 현재 문서·task·책임표를 동기화한다.
-- [T-210](../tasks/T-210-ui-admin-header-form.md)·[T-211](../tasks/T-211-ui-registry-channel-drift.md)은 공용 로그인 UI 계약과 앱 소유 인증 왕복을 구분한다.
+- [T-214](../tasks/T-214-ui-login-widget-contract.md)·[T-211](../tasks/T-211-ui-registry-channel-drift.md)은 공용 로그인 UI 계약과 앱 소유 인증 왕복을 구분한다. T-210은 헤더·폼 필드만 담당한다.
 - [T-312](../tasks/T-312-auth-core-primitives.md)은 Python 인증 프리미티브의 API·위협 모델·계약 시험을 구현한다.
 - T-463·T-484·T-485·T-486 등 소비자 이관 task는 common 프리미티브를 선택적으로 채택하되 사용자 저장소·IdP·정책은 앱에 둔다.
 - 기존 ADR-001·ADR-011의 역사적 결정 문구는 보존하고 인증 제외 부분만 이 ADR로 부분 대체한다.

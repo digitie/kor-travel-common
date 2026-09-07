@@ -28,7 +28,7 @@
 
 ## 범위 밖
 
-비밀번호 해시·세션·CSRF·JWT·RBAC(D-01 범위 밖), `ops.public_api_keys` DDL·저장소 구현(앱 소유), 헤더 AppId 통일(D-22), request_id·metrics(T-307), trusted_proxy·testing 픽스처 배포(T-308), 앱 채택 PR(T-480~T-486), 좌표 경계 상수(공통화 금지).
+비밀번호 해시·세션·CSRF·JWT·RBAC(공용 구현은 T-312 범위), `ops.public_api_keys` DDL·저장소 구현(앱 소유), 헤더 AppId 통일(D-22), request_id·metrics(T-307), trusted_proxy·testing 픽스처 배포(T-308), 앱 채택 PR(T-480~T-486), 좌표 경계 상수(공통화 금지).
 
 ## 예상 변경 파일
 

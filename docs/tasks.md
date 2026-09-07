@@ -2,7 +2,7 @@
 
 이 원장은 열린 task의 요약·선행 관계를 관리한다. 수용 기준·외부 선행·검증·evidence는 상세 파일, 현재 다음 한 작업은 [resume](resume.md), 실행 선택과 단계별 출구는 [통합 계획](plan/integration-plan.md)이 정본이다. 작성 문법은 [task 규칙](tasks-rule.md)을 따른다.
 
-총 104개의 상세 작업이 있다. 완료 14개는 완료 원장에 보존하고 열린 90개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
+총 105개의 상세 작업이 있다. 완료 14개는 완료 원장에 보존하고 열린 91개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
 
 ## 실행 대기열
 
@@ -52,10 +52,11 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 | [T-208](tasks/T-208-ui-data-table-pager.md) | BLOCKED | P1 | DataTable(manualSorting 기본 true·removal·testid·sr-only·4상태) + OffsetPager/CursorPager | T-206 |
 | [T-209](tasks/T-209-ui-copy-json-detail-status.md) | BLOCKED | P2 | CopyButton·JsonViewer·DetailList(`onNotify` 주입)·StatusBadge(사전 주입형) | T-206 |
 | [T-210](tasks/T-210-ui-admin-header-form.md) | BLOCKED | P2 | AdminPageHeader·AdminSkipLink·AdminRailGrid + FormFieldInput/FormSelect/FormTextArea + form-validation(헤드리스) | T-206 |
-| [T-211](tasks/T-211-ui-registry-channel-drift.md) | BLOCKED | P3 | 레지스트리 채널(셸 골격·로그인 페이지·playwright 기준선 템플릿) + `tools/ui_drift.py`(npm 소비자 로컬 패치 탐지) | T-210 |
+| [T-211](tasks/T-211-ui-registry-channel-drift.md) | BLOCKED | P3 | 레지스트리 채널(셸 골격·로그인 페이지·playwright 기준선 템플릿) + `tools/ui_drift.py`(npm 소비자 로컬 패치 탐지) | T-214 |
 | [T-212](tasks/T-212-ui-v0-1-0-release.md) | BLOCKED | P1 | ui `v0.1.0` rc → map + pinvi admin(L6) 또는 airport 검증 → 정식 | T-212a, T-109 |
 | [T-212a](tasks/T-212a-ui-common-candidate.md) | BLOCKED | P1 | UI 0.1 common 검증 후보 보존 | T-203, T-204, T-109a |
 | [T-213](tasks/T-213-ui-v0-2-0-release.md) | BLOCKED | P1 | ui `v0.2.0`(Button·overlay·Table·DataTable·Pager·Copy/Json/Detail·Header/Form) rc → 정식 | T-208, T-209, T-210, T-212 |
+| [T-214](tasks/T-214-ui-login-widget-contract.md) | BLOCKED | P1 | 공용 로그인 위젯·상태 계약 | T-210, T-213 |
 
 ## Python 공통
 

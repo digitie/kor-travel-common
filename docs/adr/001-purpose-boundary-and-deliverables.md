@@ -1,7 +1,8 @@
 # ADR-001: kor-travel-common의 목적·경계·배포 단위
 
-- 상태: accepted
+- 상태: partially superseded by ADR-015
 - 날짜: 2026-09-06
+- 인증 프리미티브·로그인 위젯 제외 결정은 [ADR-015](015-common-shared-systems-scope.md)로 대체하며 나머지 목적·배포 경계는 유지한다.
 - 근거 문서: `docs/plan/design-brief.md` D-01·§0, `docs/survey/commonality-matrix.md` §1·§2·§4.1, `docs/survey/cross/ui-components.md` §4.1~§4.3·§6.2, `docs/survey/cross/backend.md` §3·§4, `docs/survey/cross/version-matrix.md` §1.3, `docs/survey/inventory/kor-travel-map.md` §3.1
 
 ## 컨텍스트

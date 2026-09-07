@@ -20,20 +20,20 @@
 1. `templates/kor-travel-common.lock.schema.json`(문서용 스키마, draft 2020-12 형식) + `templates/kor-travel-common.lock.example.json`.
 2. `tools/validate_manifest.py`: stdlib만으로 strict 검증(필수 필드·타입·미지 필드 거부·`exceptions[].until` 날짜 형식·`lockfiles[].kind ∈ {npm, uv, poetry, requirements}`·`enforce` 존재 시 오류·`repo` 값이 `versions.json consumers` 키에 있는지). 출력 오류 목록, exit 0/1.
 3. 이미 존재하는 `tools/check_versions.py --manifest <path>` 입력 계약을 새 strict schema와 호환되도록 검증한다. `lockfiles[]` 순회·`scope`별 표·매니페스트 기준 workflow 검색을 보존하고, 매니페스트 경로·`app` 경로·저장소 경계를 벗어나는 lock path와 workflow 누락을 회귀 시험으로 고정한다.
-4. 다음 **10개** 초안의 repo/app/파일 대응을 고정한다. `lockfiles.path`는 매니페스트가 놓인 소비자 저장소 기준 경로이며 `app`은 저장소 안의 앱 표면 식별자다.
+4. 다음 **10개** 초안의 repo/app/파일 대응을 고정한다. 실제 소비자 매니페스트는 표의 앱 디렉터리에 놓고, `lockfiles.path`는 **소비자 저장소 루트 기준**으로 해석한다. `app`은 표면 식별자이며 `scope`는 보고 label 겸 npm workspace 선택자다(`root`는 lockfile 루트 package, 그 밖에는 lockfile 기준 workspace 경로). 도구 호출은 `check_versions.py <consumer-repo-root> --manifest <app-dir>/kor-travel-common.lock.json` 형태로 저장소 루트와 manifest를 함께 전달한다.
 
-   | 파일 | repo | app | 관찰 lock |
-   |---|---|---|---|
-   | `map.lock.json` | `kor-travel-map` | `admin` | root `package-lock.json` |
-   | `weather.lock.json` | `kor-travel-weather` | `admin` | frontend `package-lock.json`, root `uv.lock` |
-   | `geo.lock.json` | `kor-travel-geo` | `ui` | `kor-travel-geo-ui/package-lock.json` |
-   | `concierge.lock.json` | `kor-travel-concierge` | `frontend` | frontend `package-lock.json`, requirements files |
-   | `docker-manager.lock.json` | `kor-travel-docker-manager` | `frontend` | frontend `package-lock.json`, backend `poetry.lock`(미추적이면 null) |
-   | `airport.frontend.lock.json` | `kor-travel-airport` | `frontend` | frontend `package-lock.json` |
-   | `airport.backend.lock.json` | `kor-travel-airport` | `backend` | backend `uv.lock` |
-   | `pinvi.apps-web.lock.json` | `pinvi` | `apps/web` | root `package-lock.json` + workspace 경로 |
-   | `pinvi.apps-api.lock.json` | `pinvi` | `apps/api` | `apps/api/uv.lock` |
-   | `pinvi.apps-etl.lock.json` | `pinvi` | `apps/etl` | lock 없음(선언만) |
+   | manifest 위치(소비자 저장소 기준) | 파일 | repo | app | 관찰 lock |
+   |---|---|---|---|---|
+   | `packages/kor-travel-map-admin/frontend/` | `map.lock.json` | `kor-travel-map` | `admin` | root `package-lock.json`(workspace selector) |
+   | `packages/kor-travel-weather-admin/frontend/` | `weather.lock.json` | `kor-travel-weather` | `admin` | `packages/kor-travel-weather-admin/frontend/package-lock.json`, root `uv.lock` |
+   | `kor-travel-geo-ui/` | `geo.lock.json` | `kor-travel-geo` | `ui` | `kor-travel-geo-ui/package-lock.json` |
+   | `frontend/` | `concierge.lock.json` | `kor-travel-concierge` | `frontend` | `frontend/package-lock.json`, requirements files |
+   | `frontend/` | `docker-manager.lock.json` | `kor-travel-docker-manager` | `frontend` | `frontend/package-lock.json`, backend `poetry.lock`(미추적이면 null) |
+   | `frontend/` | `airport.frontend.lock.json` | `kor-travel-airport` | `frontend` | `frontend/package-lock.json` |
+   | `backend/` | `airport.backend.lock.json` | `kor-travel-airport` | `backend` | `backend/uv.lock` |
+   | `apps/web/` | `pinvi.apps-web.lock.json` | `pinvi` | `apps/web` | root `package-lock.json`(workspace selector) |
+   | `apps/api/` | `pinvi.apps-api.lock.json` | `pinvi` | `apps/api` | `apps/api/uv.lock` |
+   | `apps/etl/` | `pinvi.apps-etl.lock.json` | `pinvi` | `apps/etl` | lock 없음(선언만) |
 
    값은 조사 기준 커밋 현재값(인벤토리 §10)이며 `tokens.version` 등은 미채택이면 `null`.
 5. `tests/test_validate_manifest.py`(정상·미지 필드·`enforce`·`until` 누락·kind 오류).
@@ -50,7 +50,7 @@
 
 - 스키마 필드 집합이 D-19와 글자 단위로 같고 `enforce`를 넣은 fixture는 exit 1.
 - `validate_manifest.py`가 10개 초안 전부 exit 0, 미지 필드·`until` 누락·잘못된 `kind` fixture는 exit 1(테스트로 고정).
-- `check_versions.py --manifest templates/manifests/map.lock.json`이 `lockfiles[]`를 읽어 표를 낸다(lock 파일이 fixture로 없으면 `NO_LOCK`).
+- `check_versions.py <fixture-repo-root> --manifest templates/manifests/map.lock.json`이 저장소 루트의 shared lock과 root workflow를 읽어 표를 낸다. lock/workflow가 fixture로 없으면 각각 `NO_LOCK`/빈 workflow로 명시한다.
 - 초안의 10개 `repo`·`app` 값이 `versions.json consumers` 키·인벤토리 앱 경로와 일치하고 대응표와 파일 수가 같다.
 - Linux·Windows 결과 동일.
 
@@ -67,7 +67,7 @@ Git Bash에서 동일.
 
 ## evidence
 
-- 테스트 수·exit code·초안 9개 검증 결과를 이 절과 `docs/journal.md`에 남긴다.
+- 테스트 수·exit code·초안 10개 검증 결과를 이 절과 `docs/journal.md`에 남긴다.
 
 ## rollback 또는 release 차단 조건
 

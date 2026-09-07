@@ -64,7 +64,7 @@ tarball에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 동봉, `package.json` 
 - `@kor-travel/ui/cn` = `clsx` + `extendTailwindMerge`(`kt-` 그룹 등록). `clsx`·`tailwind-merge`는 dependencies(peer 아님).
 - 엔진: overlay(Dialog·AlertDialog·Popover·Tooltip·Tabs·Breadcrumb·HelpTip)만 `@base-ui/react`; 비-overlay(Button·Checkbox·Input·Textarea·NativeSelect·Separator·Badge)는 native 요소 + `useRender`로 `render` 합성 선택 지원(D-09).
 - UI 0.1·0.2의 tokens peer는 모두 `~0.1.0`이다. 독립 패키지의 minor 번호를 일치시키지 않으며 변경은 [ADR-013](../adr/013-package-release-execution-contract.md)을 따른다. Base UI `useRender` helper는 0.1부터 peer·개발 의존에 필요하고 overlay 구현은 0.2에서 추가한다.
-- 릴리스 단위: `v0.1.0` = 소형 13종(Badge·Skeleton·Separator·Card·Alert·Input·Textarea·NativeSelect·Field·EmptyState·SectionCard·FilterBar·StatStrip, T-203), `v0.2.0` = Button·AppErrorPanel·overlay 세트·Table·Checkbox·DataTable·Pager·CopyButton·JsonViewer·DetailList·StatusBadge·AdminPageHeader·AdminSkipLink·AdminRailGrid·Form*(T-205~T-210).
+- 릴리스 단위: `v0.1.0` = 소형 13종(Badge·Skeleton·Separator·Card·Alert·Input·Textarea·NativeSelect·Field·EmptyState·SectionCard·FilterBar·StatStrip, T-203), `v0.2.0` = Button·AppErrorPanel·overlay 세트·Table·Checkbox·DataTable·Pager·CopyButton·JsonViewer·DetailList·StatusBadge·AdminPageHeader·AdminSkipLink·AdminRailGrid·Form*(T-205~T-210), 로그인 위젯 계약은 T-214 별도 minor 단위로 확정한다.
 - 테스트 하네스: vitest + RTL + jsdom, axe opt-in, showcase 없음(consumer-smoke 대체, D-33).
 - base-ui 미확인 3건(Button `type` 기본, Checkbox hidden input, Toast API)은 T-201에서 소스 확인 전 릴리스 금지.
 

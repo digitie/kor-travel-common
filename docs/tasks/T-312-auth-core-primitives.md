@@ -21,15 +21,15 @@
 - 위협 모델과 API 계약(입력·출력·오류·만료·알고리즘 제한)을 먼저 고정한다.
 - 표준 라이브러리 우선 비밀번호 해시/검증, 세션·CSRF 토큰 생성/검증, JWT 서명 알고리즘·키 resolver 인터페이스, RBAC policy protocol을 구현한다.
 - 테스트에서 결정론적 clock·키 resolver·store double을 주입하고 replay·만료·alg 혼동·권한 거부를 검증한다.
-- FastAPI route, DB model, 사용자 가입/복구, IdP 연동과 운영 비밀 로딩은 구현하지 않는다.
+- FastAPI route, DB model, 사용자 가입/복구, IdP 연동과 운영 비밀 로딩은 구현하지 않는다. 로그인 위젯은 T-214가 담당한다.
 
 ## 범위 밖
 
-인증 서버·사용자/세션 DB·운영 비밀·외부 IdP·앱별 역할 매핑·rate limit 배포·로그인 화면(UI는 T-201/T-210)·소비자 저장소 변경.
+인증 서버·사용자/세션 DB·운영 비밀·외부 IdP·앱별 역할 매핑·rate limit 배포·로그인 화면(UI는 T-214)·소비자 저장소 변경.
 
 ## 예상 변경 파일
 
-`packages/py/kor-travel-common/src/kortravelcommon/auth/`, 관련 `tests/`, Python package metadata·문서·CHANGELOG. 실제 경로는 T-302 패키지 골격 확인 후 확정한다.
+`packages/py/kor-travel-common/src/kortravelcommon/auth/`, `packages/py/kor-travel-common/tests/`, Python package metadata·문서·CHANGELOG. 실제 경로는 T-302 패키지 골격 확인 후 확정한다.
 
 ## 수용 기준
 
@@ -41,7 +41,7 @@
 ## 검증 명령
 
 ```bash
-python3 -B -X utf8 -m unittest discover -s tests -p '*auth*test.py' -v
+uv run --project packages/py/kor-travel-common pytest packages/py/kor-travel-common/tests -k auth -q
 python3 -B -X utf8 tools/check_spdx.py
 python3 -B -X utf8 tools/validate_document_links.py
 ```

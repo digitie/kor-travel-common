@@ -202,14 +202,14 @@ geo·map은 import-linter로 라이브러리 계층의 `fastapi/starlette` impor
 |---|---|
 | geo: 주소 DTO·geocoder·GDAL loaders·GeoIP Korea-only 게이트·admission control·source registry·backup artifact·VWorld 호환 오류 형식 | GDAL 시스템 결합, ADR-037 정책, 외부 계약 |
 | map: route policy matrix·`SurfaceScopedCORSMiddleware`·ServiceToken scope/digest·cache-target 프로토콜·alembic 300 baseline·ADR-090 런타임 권한 경계·provider fetcher/retry 예산 | 도메인 결합, 400행 `env.py` |
-| pinvi: JWT/refresh/OAuth/RBAC(404 은닉)/rate-limit·geofence·cache-target sync·M05 계약 JSON·백업 셸 스크립트·서비스 영역 좌표 경계 | 감사·마이그레이션 이력 보유 |
+| pinvi: 앱별 JWT/refresh/OAuth/RBAC(404 은닉) 정책·rate-limit·geofence·cache-target sync·M05 계약 JSON·백업 셸 스크립트·서비스 영역 좌표 경계 | 감사·마이그레이션 이력 보유. 공용 JWT 검증/RBAC 인터페이스 채택 여부는 T-312 이후 앱 task에서 결정 |
 | ktdm: docker/compose 오케스트레이션·runtime pin registry·`docker exec pg_dump`·SQLite 메트릭 DB·HMAC 서명 세션 쿠키·월간 로그 롤링 | 운영 도구 자체 |
 | concierge: LLM 클라이언트·YouTube ETL·APScheduler 워커·MCP 서버·int ID keyset cursor | 도메인 |
 | weather: sync provider 어댑터·Dagster 전용 multiprocess 메트릭 청소·자격증명 암호화 | 도메인 |
 | airport: 주차 도메인·sqlite/PG 이중 방언·lifespan 스케줄러 | 도메인 |
 | 서비스 간 클라이언트(pinvi `clients/kor_travel_*.py`, geo·map Dagster 클라이언트) | 선행 보고서 §7.2 facade 금지, map ADR-006 |
 | 한국 좌표 경계 상수 | 세 앱의 값이 다르고 각각 근거 문서가 있다(geo 123–132/32–39 개구간, map 124–132/33–39.5, pinvi 124–132/33–43 + 39.5) |
-| 비밀번호 해시·세션 저장소·CSRF | BE-22 |
+| 앱별 비밀번호·세션 저장소·CSRF secret·세션 폐기 정책 | BE-22. 공용 해시·토큰·CSRF 검증 프리미티브는 T-312에서 주입형으로 제공 |
 | 기존 공유 라이브러리 재래핑(`python-*-api` 13종, `maplibre-vworld-*`, `python-kraddr-base`) | D-01·D-23; 라이선스 B2 |
 | 백업 오케스트레이터 | 5개 구현이 각자 도메인 결합; 산출물 규약(파일명·sha256·manifest)만 문서(C21 보류) |
 
