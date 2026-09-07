@@ -1,6 +1,6 @@
 # kor-travel-common 라이선스·출처 규약
 
-이 문서는 [규칙 문서 색인](README.md)에 속한 저장소 라이선스 정책, 고지 파일 구성, SPDX 헤더, 패키지 메타데이터, 소비 저장소에서 코드를 추출할 때의 gate의 정본이다. 정본 지위: **확정 초안** — [브리프](../plan/design-brief.md) D-17·D-11·D-16을 규칙 ID `LIC-n`으로 옮긴 것이며, 고지 파일 실물(T-003; 구현·원문 확보 후 2인 검토)과 외부 결정(T-020 pinvi L6, T-021 ktc·ktdm L8)에서 대조해 확정하는 task가 남아 있다. 마지막 갱신: 2026-09-07.
+이 문서는 규칙 문서 색인의 저장소 라이선스 정책, 고지 파일 구성, SPDX 헤더, 패키지 메타데이터, 소비 저장소 코드 추출 gate의 정본이다. O-1·O-2의 common 결정은 T-020·T-021에서 2026-09-08 확정했고 실제 소비자 LICENSE 반영은 pinvi T-420과 concierge·docker-manager 외부 PR evidence(T-454·T-473)가 소유한다. 마지막 갱신: 2026-09-08.
 
 법률 자문이 아니다. 판단 근거는 GNU 공식 FAQ·GPLv3 원문과 조사 기준 커밋의 실제 파일이며, 근거 절은 [licensing 횡단 비교](../survey/cross/licensing.md)(`lic`)로 인용한다.
 
@@ -8,7 +8,7 @@
 
 - common은 `GPL-3.0-or-later`다. 7개 소비 저장소 중 5개(airport·geo·map·weather + pinvi 이식 코드의 원천)가 이미 GPL 계열이고 사람 기여자가 한 명(`digitie`/`Youn-sok Choi`, 동일 이메일)이라 재라이선스 결정에 제3자 동의가 필요 없다(사실·추정: `lic` §2.1·§2.6).
 - 수령자가 받는 고지가 서로 모순되면 권리가 불명확해진다(`lic` §3.6). 따라서 "같은 소유자니까 명시 없이 된다"는 성립하지 않으며, 모든 예외·재선언은 `NOTICE`와 파일 헤더에 적는다.
-- GPLv3 §7 추가 허가(MIT 앱이 링크할 수 있게 하는 예외)는 두지 않는다(O-2 기본값). 이유: 모든 파일에 예외 문구를 유지·검증하는 비용이 크고 "GPL common" 전제와 어긋난다(`lic` §3.6).
+- GPLv3 §7 추가 허가(MIT 앱이 링크할 수 있게 하는 예외)는 두지 않는다(O-2 결정). 이유: 모든 파일에 예외 문구를 유지·검증하는 비용이 크고 "GPL common" 전제와 어긋난다(`lic` §3.6).
 - 코드를 옮기기 전에 권리를 확인한다. 차단 항목 B1~B8(§8)이 열려 있는 원천에서는 추출하지 않는다.
 
 ## 2. 문서 사용법
@@ -31,9 +31,9 @@
 | ID | 규칙 | 근거 |
 |---|---|---|
 | LIC-1 | common 루트 [LICENSE](../../LICENSE)는 GPL-3.0 전문이며, 버전 고지 `GPL-3.0-or-later`는 `NOTICE`·`README`·패키지 메타데이터·파일 헤더에 명시한다. 버전 미지정은 GPLv3 §14로 수령자가 임의 버전을 고를 수 있게 하므로 금지 | `lic` §2.2 D3·§3.1 |
-| LIC-2 | §7 추가 허가·이중 라이선스는 두지 않는다. 필요해지면 새 ADR과 `NOTICE` 개정으로만 | O-2 기본값; `lic` §3.6 |
-| LIC-3 | 소비 앱 정렬 권고: ktc·ktdm은 루트 `LICENSE`를 `GPL-3.0-or-later`로 정렬(L8, 각 1 PR; ktc는 이미 GPL `python-vworld-api`에 의존). 결정 전에는 common **코드**를 링크하지 않고 규칙 문서·`tokens.json` 참조까지만(D-16). 규칙을 따르는 것 자체는 파생이 아니다(추정) | `lic` §3.6·§4 B9; T-021 |
-| LIC-4 | pinvi는 L6(공개 + `GPL-3.0-or-later`, 루트 `LICENSE` 추가, `apps/api/pyproject.toml` MIT 수정, `docs/integrations/maplibre-vworld.md:23` "MIT" 정정, README/AGENTS 상충 해소)을 1 PR로 처리한다(O-1 기본값). 완료 전 pinvi 파일 추출 금지(B1) | `lic` §2.2 D4·D5·§3.6; T-020·T-420 |
+| LIC-2 | §7 추가 허가·이중 라이선스는 두지 않는다. 필요해지면 새 ADR과 `NOTICE` 개정으로만 | O-2 결정; `lic` §3.6 |
+| LIC-3 | 소비 앱 정렬: ktc·ktdm은 루트 `LICENSE`를 `GPL-3.0-or-later`로 정렬(L8, 각 1 외부 PR; ktc는 이미 GPL `python-vworld-api`에 의존). common의 O-2 결정은 완료됐고 외부 LICENSE evidence 전에는 common **코드**를 링크하지 않고 규칙 문서·`tokens.json` 참조까지만(D-16). 규칙을 따르는 것 자체는 파생이 아니다(추정) | `lic` §3.6·§4 B9; T-021 |
+| LIC-4 | pinvi는 common에서 L6(공개 + `GPL-3.0-or-later`) 결정을 완료했고, 외부 T-420에서 루트 `LICENSE` 추가·`apps/api/pyproject.toml` MIT 수정·`docs/integrations/maplibre-vworld.md:23` "MIT" 정정·README/AGENTS 상충 해소를 1 PR로 처리한다. T-420 완료 전 pinvi 파일 추출 금지(B1) | `lic` §2.2 D4·D5·§3.6; T-020·T-420 |
 | LIC-5 | geo `GPL-3.0-only` 유래 파일은 common에서 `SPDX-License-Identifier: GPL-3.0-only`를 병기한다. 권리자가 `-or-later`로 재선언하면(O-20 권고) 병기를 제거한다 | `lic` §2.2 D2·§3.2 |
 | LIC-6 | map 루트 `LICENSE` 25행 요약본은 전문으로 복원하고 저작권·버전 고지는 `NOTICE`로 옮긴다(L9). 전 앱 `package.json`·`pyproject.toml`에 `license` 필드를 넣는다(L11) | `lic` §2.2 D1·§2.1; map T-410·airport T-433 |
 | LIC-7 | 배포(convey) 판단: 공개 저장소·외부 배포 이미지·앱 바이너리는 배포이고 사내 사용은 아니다(FAQ `#InternalDistribution`·`#UnreleasedMods`). pinvi Docker·EAS 배포 여부는 미확인이며 L6 결정의 입력이다 | `lic` §2.5·§3.1 |
@@ -43,16 +43,22 @@
 | 저장소 | 루트 `LICENSE` | 메타데이터 `license` | 판정 | 정렬 조치 |
 |---|---|---|---|---|
 | airport | GPL-3.0 원문(버전 미지정) | 없음 | GPL-3.0 | `-or-later` 명시·`license` 필드(L11) |
-| concierge | MIT | 없음(pyproject 없음) | MIT + GPL 의존(`python-vworld-api`) | L8(O-2) |
-| ktdm | MIT | 없음 | MIT, GPL 의존 없음 | L8(O-2); 규칙 문서 참조만이면 MIT 유지 가능 |
+| concierge | MIT(조사 기준) | 없음 | GPL-3.0-or-later 정렬 결정 완료, 외부 반영 OPEN(T-454 evidence) | T-454 외부 PR과 SHA 확인 |
+| ktdm | MIT(조사 기준) | 없음 | GPL-3.0-or-later 정렬 결정 완료, 외부 반영 OPEN(T-473 evidence) | T-473 외부 PR과 SHA 확인 |
 | geo | GPL-3.0 원문 | `GPL-3.0-only` | `-only` | L10(O-20) |
 | map | 25행 요약본 | `GPL-3.0-or-later`(하위 2패키지 MIT) | `-or-later` | L9 전문 복원 |
 | weather | GPL-3.0 원문 | 루트 `GPL-3.0-or-later`, 하위 없음 | `-or-later` | 하위 `license` 필드(L11) |
-| pinvi | **없음** | `apps/api` MIT | 미결(README "비공개" vs AGENTS "공개") | L6(O-1) |
+| pinvi | 없음(조사 기준) | apps/api MIT | 공개 GPL-3.0-or-later 결정 완료, 외부 반영 OPEN(T-420) | T-420 외부 PR과 SHA 확인 |
 | common | GPL-3.0 원문 | 아직 없음 | 초기 | L1·L5 |
 
 근거: `lic` §2.1; 정정값은 [survey README](../survey/README.md) §6.2 항목 8~11.
 
+
+### 3.2 사용자 결정 반영(2026-09-08)
+
+사용자는 “t020 021 관련해서 모두 gplv3로 바꿀꺼야 참고해서 이번에 한번에 닫아”라고 지시했다. 따라서 O-1은 공개 pinvi + GPL-3.0-or-later, O-2는 concierge·docker-manager 루트 GPL-3.0-or-later 정렬과 GPLv3 §7 추가 허가 없음으로 확정한다. [pinvi 요청](../plan/requests/pinvi-license-l6.md), [concierge 요청](../plan/requests/concierge-license-l8.md), [docker-manager 요청](../plan/requests/docker-manager-license-l8.md)가 common의 결정 산출물이다.
+
+이 결정은 common task T-020·T-021을 DONE으로 닫지만 소비자 저장소를 바꾸지 않는다. 실제 LICENSE·metadata·고지 반영과 40자리 SHA 확인 전에는 pinvi·concierge·docker-manager의 G-LIC 적용 gate를 OPEN으로 유지하고 common에 소비자 코드를 추출하지 않는다.
 ## 4. 고지 파일 구성
 
 | ID | 파일 | 내용 | 근거 |
@@ -165,7 +171,7 @@ common 측 이식 PR 본문(`.github/pull_request_template.md`)에 다음을 evi
 2. 각 파일 헤더의 `SPDX-License-Identifier`·`Origin:`·`Derived-From:`·`Modified:`(`tools/check_spdx.py` 출력).
 3. 새 서드파티 의존성의 라이선스와 `THIRD_PARTY_NOTICES.md` 행(cva Apache-2.0은 NOTICE 원문 포함 여부).
 4. geo 유래 파일의 `-only` 병기(LIC-5) 또는 재선언 근거(O-20).
-5. 원천이 MIT(ktc·ktdm)면 고지 유지 위치, pinvi면 L6 완료 링크(T-020 evidence).
+5. 원천이 MIT(ktc·ktdm)면 고지 유지 위치, pinvi면 T-420 외부 LICENSE evidence 링크.
 6. 벤더 tgz·공유 라이브러리·Hallmark 본문이 diff에 없음을 확인한 grep 명령과 결과.
 
 ## 8. 조치 목록과 차단 항목 요약
@@ -179,9 +185,9 @@ common 측 이식 PR 본문(`.github/pull_request_template.md`)에 다음을 evi
 | L3 | `THIRD_PARTY_NOTICES.md` + `LICENSES/` | common | 높음 | T-003 |
 | L4 | 헤더 규약 확정 + `check_spdx` | common | 높음 | T-003 |
 | L5 | npm/Python 메타데이터 규약 첫 적용 | common | 높음 | T-101·T-302 |
-| L6 | pinvi 라이선스 결정·정합 PR | pinvi | 높음(B1 해제) | T-020·T-420(O-1) |
+| L6 | pinvi 외부 LICENSE·정합 PR | pinvi | 높음(B1 해제) | T-020 결정·T-420(O-1) |
 | L7 | `maplibre-vworld-react` `license`·`LICENSE`·tgz 재생성 | 공유 lib | 높음 | T-505 요청 |
-| L8 | ktc·ktdm 루트 정렬 결정 | ktc·ktdm | 중간 | T-021(O-2) |
+| L8 | ktc·ktdm 외부 루트 LICENSE 정렬 PR | ktc·ktdm | 중간 | T-021 결정·T-454·T-473(O-2) |
 | L9 | map `LICENSE` 전문 복원 | map | 중간 | T-410 |
 | L10 | geo `-only` → `-or-later` 재선언 여부 | geo·common | 중간 | O-20 |
 | L11 | 전 앱 `license` 필드 | 각 앱 | 중간 | T-433 외 앱별 |
@@ -201,7 +207,7 @@ common 측 이식 PR 본문(`.github/pull_request_template.md`)에 다음을 evi
 | B6 | shadcn 생성 컴포넌트의 버전·registry 항목 | shadcn `LICENSE.md` 원문 확보 |
 | B7 | `python-*-api` 중 라이선스 미확인 저장소 | 각 `LICENSE` 확인 후 `THIRD_PARTY_NOTICES` |
 | B8 | 봇 계정 커밋분 | `CONTRIBUTING.md` 문구(LIC-13) |
-| B9 | ktc·ktdm이 common 코드를 링크 | L8(O-2) |
+| B9 | ktc·ktdm이 common 코드를 링크 | 외부 L8 LICENSE evidence(O-2) |
 | B10 | map·pinvi·ktdm·concierge 간 sha256 pin 계약 | 흡수 부적합 — [openapi](openapi.md) M10 규약만 |
 
 ## 9. 검증 gate
@@ -218,8 +224,8 @@ common 측 이식 PR 본문(`.github/pull_request_template.md`)에 다음을 evi
 
 | # | 항목 | 기본값 | 상태 |
 |---|---|---|---|
-| O-1 | pinvi 라이선스·공개 여부(L6) | 공개 + `GPL-3.0-or-later`, 1 PR | 열림(사용자 확인 필요) |
-| O-2 | ktc·ktdm 정렬 vs common §7 추가 허가(L8) | GPL 정렬(각 1 PR), 추가 허가 없음 | 열림(사용자 확인 필요) |
+| O-1 | pinvi 라이선스·공개 여부(L6) | 공개 + GPL-3.0-or-later, 1 PR | 닫힘(사용자 지시 2026-09-08); 실제 반영 T-420 대기 |
+| O-2 | ktc·ktdm 정렬 vs common §7 추가 허가(L8) | GPL-3.0-or-later 정렬(각 1 PR), 추가 허가 없음 | 닫힘(사용자 지시 2026-09-08); 실제 반영 T-454·T-473 evidence 대기 |
 | O-20 | geo `GPL-3.0-only` 재선언 | `-or-later` 권고, 전까지 `-only` 병기 | 열림(사용자 확인 필요) |
 | — | `maplibre-vworld-react`를 MIT(또는 이중)로 재선언할지 | GPL-3.0 유지 + pinvi 문서 정정 | 후보(`lic` §6-4; T-505) |
 | — | Hallmark 스킬 원저작자·라이선스 | 미확인, 인용 금지 유지 | 후보(`lic` §6-5) |

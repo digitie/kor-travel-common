@@ -4,7 +4,7 @@
 - 우선순위: P1
 - Gate: consumer-smoke
 - 선행: T-212a, T-109
-- 외부 선행: T-020(pinvi L6, 사용자 O-1) 또는 T-430(airport WIP 병합, 사용자 O-9) 중 하나 완료; 검증 소비자 PR은 해당 앱의 tokens 채택(map T-410·pinvi T-421·airport T-431, 모두 tokens-v0.1.0 = T-109 이후) 위에서만 가능
+- 외부 선행: T-420(pinvi L6 외부 LICENSE PR) 또는 T-430(airport WIP 병합, 사용자 O-9) 중 하나 완료; 검증 소비자 PR은 해당 앱의 tokens 채택(map T-410·pinvi T-421·airport T-431, 모두 tokens-v0.1.0 = T-109 이후) 위에서만 가능
 
 ## 목표
 

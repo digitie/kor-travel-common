@@ -4,7 +4,7 @@
 - 우선순위: P3
 - Gate: vitest
 - 선행: T-021, T-472, T-213
-- 외부 선행: 사용자 O-2(ktdm 루트 GPL 정렬 결정, L8)
+- 외부 선행: T-021 common 결정 완료(2026-09-08); docker-manager 루트 LICENSE·metadata·고지의 외부 PR evidence
 
 ## 목표
 
@@ -74,4 +74,4 @@ PR 본문(전후 캡처·테스트 수·L8 링크), `consumers.pins.json`·`docs
 
 ## rollback·release 차단 조건
 
-- O-2 미결/T-021 미완이면 PR을 열지 않는다(B9). vitest red·호출부 변경 필요(어댑터로 흡수 불가)면 머지 금지, 머지 후 회귀 시 revert + 재배포.
+- T-021 결정 또는 L8 외부 LICENSE evidence가 없으면 PR을 열지 않는다(B9). vitest red·호출부 변경 필요(어댑터로 흡수 불가)면 머지 금지, 머지 후 회귀 시 revert + 재배포.

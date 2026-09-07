@@ -2,7 +2,7 @@
 
 > airport의 WIP·Admin 범위는 조사 이후 변경됐다. [인계 시점 재확인](../plan/handoff-verification.md)과 T-430의 현재 SHA·잔여 gate 대조를 먼저 적용한다. 아래 조사 기준 표를 최신 배포 상태로 해석하지 않는다.
 
-- 정본 지위: 소비자 7(+pinvi 표면 3)의 현재 상태·채택 순서·선행 조건의 정본(초안). §5 채택 버전 표는 T-012부터 [통합 지도](../integration-map.md)(생성물)가 정본이 되고 여기서는 링크만 남긴다. 확정 task: T-008(설계 초기판)·T-011·T-012. 마지막 갱신: 2026-09-06.
+- 정본 지위: 소비자 7(+pinvi 표면 3)의 현재 상태·채택 순서·선행 조건의 정본(초안). §5 채택 버전 표는 T-012부터 [통합 지도](../integration-map.md)(생성물)가 정본이 되고 여기서는 링크만 남긴다. 확정 task: T-008(설계 초기판)·T-011·T-012. 라이선스 선행 상태 갱신: 2026-09-08.
 - 근거: [브리프](../plan/design-brief.md) §0·D-16·D-19·D-20·D-23·D-28·D-29, `docs/survey/README.md` §2.1(기준 커밋)·§6.2(정정값), `docs/survey/commonality-matrix.md` §1.5·§3.2·§3.3·§4.1, `docs/survey/cross/licensing.md` §3.6, `docs/survey/cross/version-matrix.md` §1.1·§2.1·§3.2, `docs/survey/cross/ci-deploy.md` §1.1·§1.2, `docs/survey/cross/backend.md` §5.1.
 
 이 문서는 [아키텍처 개요](README.md) §1의 소비자를 저장소 단위로 펼친다. gate 판정은 [채택 준비 기준](adoption-readiness.md), 이관 절차는 [consumer adoption runbook](../runbooks/consumer-adoption.md), 앱별 task는 [tasks](../tasks.md) T-4xx가 정본이다. 아래 사실은 조사 기준 커밋에 고정된 관찰이며 저장소가 바뀌어도 본문을 고치지 않고 분기 감사(T-506)에서 기준 커밋을 갱신한 절로만 확장한다.
@@ -26,7 +26,7 @@
 | tokens | map(T-410)·weather(T-461, `tokens.css` 교체 + shim) | pinvi admin(T-421, L6 완료 조건)·airport(T-431, WIP 병합 후) | geo(T-441)·concierge(T-453)·ktdm(T-472) | T-109 `tokens-v0.1.0` |
 | ui | map(T-411·T-412)·pinvi admin(T-422, L6); L6가 T-2xx 착수까지 미결이면 airport 소형 부품(Alert·StatStrip·SectionCard·EmptyState, T-432; Button은 0.2 별도 검증) | geo(T-444, React 19 후) | concierge(T-454, L8)·ktdm(T-473, L8; StatStrip·AppErrorPanel·SectionCard 부분) | T-212 `ui-v0.1.0`·T-213 `ui-v0.2.0` |
 | py | map-api(T-480)·weather-api(T-481)·airport(T-482) | geo(T-483) | pinvi(T-484)·concierge(T-485, L8)·ktdm(T-486, L8; breaking 묶음) | T-310 `py-v0.1.0`·T-311 `py-v0.2.0` |
-| 규칙 문서·`tokens.json` 의미 이름 | 전 소비자 즉시(코드 링크 없음; ktc·ktdm은 L8 전 이것까지만) | — | — | Phase 0 |
+| 규칙 문서·`tokens.json` 의미 이름 | 전 소비자 즉시(코드 링크 없음; ktc·ktdm은 외부 L8 evidence 전 이것까지만) | — | — | Phase 0 |
 | CI 재사용 워크플로·매니페스트 | 7 저장소 T-403(Node 22·SHA 핀·`check_versions` report·매니페스트 커밋) | Phase 3 `openapi-drift`·`typegen-drift` | Phase 4 `node-quality`·`python-quality`(concierge CI 신설 T-451 선행) | T-010·T-011·T-309·T-401 |
 
 ## 3. 소비자별 선행 조건
@@ -34,12 +34,12 @@
 | 소비자 | 외부 선행(사용자·타 저장소) | 앱 자체 선행(Phase 4) | common 선행 | 현재 판정 |
 |---|---|---|---|---|
 | kta | WIP `codex/shadcn-ui-foundation` 병합(O-9, T-430; 값 16/10·alpha line 유지, `cn`→clsx+tailwind-merge, shadcn/postcss devDependencies); L11 `license` 필드 | TS 7.0.2 예외 등록(O-6)·ESLint 도입 판정·`engines`·절대 링크 상대화(T-433); Docker `uv sync --locked`(T-482); AdminPageHeader·셸 소비는 T-035 라우트 분리 후(O-9) | T-109·T-212·T-310 | tokens 대기(WIP 병합 후) |
-| ktc | L8 GPL 정렬(O-2, T-021) | `pyproject.toml`·`uv.lock`(`mcp<2` blocked)·ruff/mypy baseline(T-450); CI 신설 + production `frontend/Dockerfile`(T-451); hex fallback·`@config` 제거·`--ktc-*`→`--kt-*` 오버라이드(T-453) | T-401·T-305·T-109·T-213 | 규칙 참조만(L8 전) |
-| ktdm | L8(O-2); 포트 `-latest`·sibling 등록 질의(T-014, O-24) | Next 16·React 19·ESLint 9·Node 22 별도 PR(T-470, 재포맷 금지); Poetry→`uv.lock`(T-471) | T-305·T-109·T-213·T-307 | 규칙 참조만(L8 전) |
+| ktc | L8 GPL 정렬(O-2, T-021) | `pyproject.toml`·`uv.lock`(`mcp<2` blocked)·ruff/mypy baseline(T-450); CI 신설 + production `frontend/Dockerfile`(T-451); hex fallback·`@config` 제거·`--ktc-*`→`--kt-*` 오버라이드(T-453) | T-401·T-305·T-109·T-213 | 규칙 참조만(외부 L8 evidence 전) |
+| ktdm | L8(O-2); 포트 `-latest`·sibling 등록 질의(T-014, O-24) | Next 16·React 19·ESLint 9·Node 22 별도 PR(T-470, 재포맷 금지); Poetry→`uv.lock`(T-471) | T-305·T-109·T-213·T-307 | 규칙 참조만(외부 L8 evidence 전) |
 | geo | React 19 승인(O-25, ADR-019 갱신, T-443); `-only` 재선언 여부(O-20) | Node 22 CI·`uv.lock`·pre-commit rev 정렬(T-440); `@config` 실효값 빌드 검증 → `@theme` 단일화(T-441) | T-109·T-213·T-308 | tokens 가능(T-109 후, React 19와 독립) |
 | map | 없음(L9 LICENSE 전문 복원·`license` 필드는 T-410 채택 PR 동반) | Next 16.3·base-ui 1.8·Playwright 1.63 상향 별도 PR(T-413); OpenAPI 산출물 변경 시 pinvi·ktdm sha256 pin 갱신 PR 동반(T-480) | T-109·T-212·T-213·T-310 | 1차 대상 |
 | wx | 없음 | Next 16·Vitest 4·Node 22·`moduleResolution: bundler`·CI vitest/mypy 추가(T-460); Python 3.11/3.12/3.13 정합·airkorea 스냅샷 정본(L15, T-481) | T-109·T-102(shim)·T-213·T-310 | 1차 대상(`tokens.css` 교체는 Next 버전과 독립) |
-| pinvi | L6 라이선스·공개 결정(O-1, T-020·T-420); admin 44px 예외 2쪽(O-21); mobile Tailwind 3(O-8) | `uv.lock` CI·Docker 소비·etl `@main` 제거·export 파이프라인(T-484) | T-109·T-213·T-310 | 규칙 참조만(L6 전); L6 후 tokens·ui 1차 |
+| pinvi | L6 라이선스 결정 완료·외부 반영(O-1, T-020·T-420); admin 44px 예외 2쪽(O-21); mobile Tailwind 3(O-8) | `uv.lock` CI·Docker 소비·etl `@main` 제거·export 파이프라인(T-484) | T-109·T-213·T-310 | 규칙 참조만(T-420 LICENSE evidence 전); evidence 후 tokens·ui 1차 |
 
 ## 4. pinvi 세 표면(D-29)
 

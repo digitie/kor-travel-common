@@ -2,7 +2,7 @@
 
 이 원장은 열린 task의 요약·선행 관계를 관리한다. 수용 기준·외부 선행·검증·evidence는 상세 파일, 현재 다음 한 작업은 [resume](resume.md), 실행 선택과 단계별 출구는 [통합 계획](plan/integration-plan.md)이 정본이다. 작성 문법은 [task 규칙](tasks-rule.md)을 따른다.
 
-총 106개의 상세 작업이 있다. 완료 18개는 완료 원장에 보존하고 열린 88개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
+총 106개의 상세 작업이 있다. 완료 20개는 완료 원장에 보존하고 열린 86개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
 
 ## 실행 대기열
 
@@ -20,15 +20,15 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 | [T-010a](tasks/T-010a-external-consumer-smoke.md) | BLOCKED | P1 | 승인 소비자 2곳의 tokens 후보 dispatch 검증 | T-010, T-109a |
 | [T-012](tasks/T-012-collect-manifests.md) | BLOCKED | P2 | tools/collect_manifests.py → `docs/integration-map.md` 생성 + `docs/architecture/adoption-readiness.md` gate 표 갱신 | T-010, T-011 |
 | [T-014](tasks/T-014-ports-130xx.md) | BLOCKED | P3 | common 테스트 fixture 포트 점검 + ktdm sibling 포트 문서 정합성 요청 | 없음 |
-| [T-020](tasks/T-020-pinvi-license-l6.md) | BLOCKED | P0 | pinvi 라이선스 결정(L6) 반영: 결정 기록·pinvi PR 요청 문서·common 소비 gate 해제 조건 | 없음 |
-| [T-021](tasks/T-021-ktc-ktdm-license-l8.md) | BLOCKED | P1 | ktc·ktdm 라이선스 정렬(L8) 결정 반영: 결정 기록·각 저장소 PR 요청 문서 | 없음 |
+
+
 
 ## 디자인 토큰
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
 | [T-103](tasks/T-103-kt-contrast-ux-lint.md) | READY | P1 | tools/kt_contrast.py(report·`contrast-baseline.json`) + `tools/ux_lint.py`(금지 7종+window.confirm, 전체 report·diff fail) + 4앱 오버라이드 예제 보고 | T-101 |
-| [T-104](tasks/T-104-design-tokens-standard.md) | READY | P0 | docs/standards/design-tokens.md 확정(패키지 실물과 대조·규칙 ID TK-n) | T-101 |
+| [T-104](tasks/T-104-design-tokens-standard.md) | IN_PROGRESS | P0 | docs/standards/design-tokens.md 확정(패키지 실물과 대조·규칙 ID TK-n) | T-101 |
 | [T-105](tasks/T-105-ux-guide-standard.md) | READY | P1 | docs/standards/ux-guide.md 확정(UX-Gn.m·MUST/SHOULD·C1~C22·baseline·예외) | 없음 |
 | [T-106](tasks/T-106-responsive-web-standard.md) | BLOCKED | P1 | docs/standards/responsive-web.md 확정 | T-108 |
 | [T-107](tasks/T-107-frontend-stack-templates.md) | READY | P1 | docs/standards/frontend-stack.md 확정 + `templates/eslint/*.mjs`·tsconfig base·postcss·components.json 조각 | T-003 |

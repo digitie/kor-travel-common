@@ -230,10 +230,10 @@ Tailwind가 없는 앱은 `next build` 후 `.next/static/css/*.css`를 같은 �
 |---|---|---|---|---|
 | map admin | tokens → ui → py | 없음(첫 소비자) | `docs/survey/inventory/kor-travel-map.md` §8·§9, `docs/survey/cross/ui-components.md` §3.3(`manualSorting`) | T-410~T-413, T-480 |
 | weather admin | tokens(`tokens.css` 교체 + shim) → Tailwind v4 → ui | Next 16·Vitest 4·Node 22(T-460) | `docs/survey/inventory/kor-travel-weather.md` §8·§9.1 | T-460~T-464, T-481 |
-| pinvi admin | tokens(`[data-pv-surface='admin']` 스코프) → ui | L6(T-020) | `docs/survey/inventory/pinvi.md` §3.2·§8, `docs/survey/cross/licensing.md` §3.6 | T-420~T-422, T-484 |
+| pinvi admin | tokens(`[data-pv-surface='admin']` 스코프) → ui | L6 외부 LICENSE evidence(T-420) | `docs/survey/inventory/pinvi.md` §3.2·§8, `docs/survey/cross/licensing.md` §3.6 | T-420~T-422, T-484 |
 | airport | tokens → 소형 ui | WIP 병합(T-430, O-9) | `docs/survey/inventory/kor-travel-airport.md` §3.2·§9 | T-430~T-433, T-482 |
 | geo | tokens(`--ui-*` 별칭 유지) → React 19(O-25) → ui | `@config` 실효값 검증(T-441) | `docs/survey/inventory/kor-travel-geo.md` §8·§9, `docs/survey/cross/ui-components.md` §5.2 | T-440~T-444, T-483 |
-| concierge | 규칙 참조 → CI 신설 → tokens → ui | L8(T-021), CI(T-451) | `docs/survey/inventory/kor-travel-concierge.md` §8·§11.12 | T-450~T-454, T-485 |
-| docker-manager | 규칙 참조 → 업그레이드 PR → tokens → 부분 ui | L8(T-021), Next 16·React 19(T-470) | `docs/survey/inventory/kor-travel-docker-manager.md` §8·§9 | T-470~T-473, T-486 |
+| concierge | 규칙 참조 → CI 신설 → tokens → ui | L8 external LICENSE evidence(T-454/T-473), CI(T-451) | `docs/survey/inventory/kor-travel-concierge.md` §8·§11.12 | T-450~T-454, T-485 |
+| docker-manager | 규칙 참조 → 업그레이드 PR → tokens → 부분 ui | L8 external LICENSE evidence(T-454/T-473), Next 16·React 19(T-470) | `docs/survey/inventory/kor-travel-docker-manager.md` §8·§9 | T-470~T-473, T-486 |
 
 task 상세는 [tasks](../tasks.md)와 `docs/tasks/T-4xx-*.md`, 순서·Phase는 [integration plan](../plan/integration-plan.md), 앱별 이관 PR 수·규모 판정 근거는 [migration-feasibility 판정](../plan/design-panel/judge-migration-feasibility.md) §3.1, 소비자별 계약 요약은 [consumers](../architecture/consumers.md)를 본다. pinvi 사용자 표면·모바일은 코드 소비 대상이 아니며 consumer 프로필 규칙과 `tokens.json` 의미 이름만 참조한다(D-29; 모바일 Tailwind 3 예외는 O-8 사용자 승인 대기).

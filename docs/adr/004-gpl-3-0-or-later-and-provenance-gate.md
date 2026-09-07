@@ -14,7 +14,7 @@
 2. 파일 헤더는 `SPDX-License-Identifier: GPL-3.0-or-later` + `SPDX-FileCopyrightText`에 `Origin:`/`Derived-From:`/`Modified:` 행을 더한다. `tools/check_spdx.py`가 common 파일에서 헤더 부재를 즉시 fail로 잡는다. Hallmark 스탬프는 common 파일에 두지 않는다(SPDX만).
 3. 추출 규칙: GPL 원천(map·weather·airport)은 그대로; geo `-only` 유래는 `-only`를 병기(권리자 재선언 시 `-or-later`, O-20); MIT 원천(ktc·ktdm)은 고지 보존; pinvi는 L6 전 추출 금지(B1); 벤더 tgz·`maplibre-vworld-*`·`python-*-api`는 영구 금지(B2, 의존만); Hallmark SKILL 본문 인용 금지(B3, 스탬프 형식만); ktc AppShell은 map 코드 복사 여부를 diff로 확정 후(B4); shadcn 생성물은 MIT 고지(B6); 봇 커밋분은 CONTRIBUTING 문구(B8).
 4. 패키지 메타데이터: npm `license: "GPL-3.0-or-later"`, tarball에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 동봉; Python `license = "GPL-3.0-or-later"` + PEP 639 `license-files`.
-5. 소비 앱 정렬 권고: ktc·ktdm 루트 `GPL-3.0-or-later` 정렬(common §7 추가 허가는 기각, O-2); pinvi는 공개 + GPL-3.0-or-later를 기본값으로 L6 결정을 Phase 0 외부 확인(T-020)으로 승격(O-1); map `LICENSE` 전문 복원(L9); 전 앱 `license` 필드(L11); pg-aiguide 스킬은 common이 배포하지 않는다(L12).
+5. 소비 앱 정렬 권고: ktc·ktdm 루트 `GPL-3.0-or-later` 정렬(common §7 추가 허가는 기각, O-2); pinvi는 공개 + GPL-3.0-or-later로 common 결정을 완료하고 실제 반영을 T-420 외부 확인으로 둔다(O-1); map `LICENSE` 전문 복원(L9); 전 앱 `license` 필드(L11); pg-aiguide 스킬은 common이 배포하지 않는다(L12).
 6. 앱 사본 drift 비교는 선두 주석 블록(SPDX·Origin·Hallmark)을 정규화한 뒤 수행한다.
 
 ## 대안 검토
@@ -26,7 +26,7 @@
 ## 결과
 
 - 고지 파일·헤더·메타데이터가 갖춰져 tarball·wheel 수령자가 권리를 판단할 수 있다.
-- pinvi·ktc·ktdm 코드 채택은 사용자 결정(O-1·O-2)에 종속되며 그 전에는 규칙 문서·`tokens.json` 참조까지만 허용한다(ADR-010).
+- pinvi·ktc·ktdm 코드 채택은 common 결정과 각 소비자 LICENSE evidence에 종속되며, evidence 전에는 규칙 문서·`tokens.json` 참조까지만 허용한다(ADR-010).
 - geo 유래 파일에 `-only` 병기가 남는 동안 해당 파일의 결합물은 사실상 v3-only다.
 - `check_spdx.py`가 CI에 들어가면 헤더 없는 파일은 머지되지 않는다.
 
@@ -34,5 +34,9 @@
 
 - 고지 파일: `NOTICE`, `THIRD_PARTY_NOTICES.md`, `PROVENANCE.md`, `CONTRIBUTING.md`, `LICENSES/`(T-003; `check_spdx.py`·`LICENSES/` 원문은 잔여)
 - 규칙: `docs/standards/licensing.md`
-- 외부 확인: T-020(L6), T-021(L8), T-410(map L9·`license` 필드)
+- 외부 확인: T-420(pinvi L6), T-454·T-473(ktc·ktdm L8 evidence), T-410(map L9·`license` 필드)
 - 패키지 실물: T-101·T-201·T-302(메타데이터 적용)
+
+## 후속 결정(2026-09-08)
+
+사용자는 T-020·T-021에 대해 모든 라이브러리를 GPLv3로 통일하라고 지시했다. 이에 O-1은 공개 pinvi + GPL-3.0-or-later, O-2는 concierge·docker-manager 루트 GPL-3.0-or-later 정렬과 GPLv3 §7 추가 허가 없음으로 닫았다. common은 [pinvi 요청](../plan/requests/pinvi-license-l6.md), [concierge 요청](../plan/requests/concierge-license-l8.md), [docker-manager 요청](../plan/requests/docker-manager-license-l8.md)을 작성했지만 소비자 저장소는 수정하지 않았다. 실제 반영은 pinvi T-420과 concierge·docker-manager의 외부 PR evidence(T-454·T-473에서 링크)에서 LICENSE 첫 줄, 40자리 SHA, 자체 검증 evidence를 확인한 뒤 G-LIC gate를 닫는다.
