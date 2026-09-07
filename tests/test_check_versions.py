@@ -658,16 +658,101 @@ class CheckVersionsTests(unittest.TestCase):
         self.assertEqual(self.verdicts(findings, "fastapi"), ["NO_LOCK"])
         self.assertEqual(self.verdicts(findings, "python-kasi-api"), ["FLOATING_REF"])
 
-    def test_poetry_manifest_reports_no_lock(self):
+    def test_invalid_poetry_lock_is_input_error(self):
         (self.repo / "pyproject.toml").write_text(
             '[tool.poetry]\nname = "fixture"\nversion = "0.0.0"\n\n'
             '[tool.poetry.dependencies]\npython = "^3.11"\nfastapi = "^0.110.0"\n', encoding="utf-8")
         (self.repo / "poetry.lock").write_text("# placeholder\n", encoding="utf-8")
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet")
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn(str(self.repo), result.stdout)
+
+    def test_poetry_lock_packages_and_git_sources(self):
+        (self.repo / "pyproject.toml").write_text(
+            '[tool.poetry]\nname = "fixture"\nversion = "0.0.0"\n\n'
+            '[tool.poetry.dependencies]\npython = "^3.11"\nfastapi = "^0.110.0"\n'
+            'custom-lib = { git = "https://github.com/example/custom-lib.git", tag = "v1.2.3" }\n',
+            encoding="utf-8")
+        (self.repo / "poetry.lock").write_text(
+            '[[package]]\nname = "fastapi"\nversion = "0.141.1"\n\n'
+            '[[package]]\nname = "custom-lib"\nversion = "1.2.3"\n\n'
+            '[package.source]\ntype = "git"\nurl = "https://github.com/example/custom-lib.git"\n'
+            'reference = "v1.2.3"\nresolved_reference = "' + "a" * 40 + '"\n\n'
+            '[metadata]\nlock-version = "2.1"\npython-versions = ">=3.11,<4.0"\n', encoding="utf-8")
         findings = self.run_checker()
         self.assertEqual(self.verdicts(findings, "python"), ["OK"])
-        fastapi = next(f for f in findings if f.key == "fastapi")
-        self.assertEqual(fastapi.verdict, "NO_LOCK")
-        self.assertIn("T-005b", fastapi.detail)
+        self.assertEqual(self.verdicts(findings, "fastapi"), ["OK"])
+        self.assertEqual(self.verdicts(findings, "custom-lib"), ["OK"])
+
+        lock = (self.repo / "poetry.lock").read_text(encoding="utf-8").replace(
+            'reference = "v1.2.3"', 'reference = "main"')
+        (self.repo / "poetry.lock").write_text(lock, encoding="utf-8")
+        manifest = (self.repo / "pyproject.toml").read_text(encoding="utf-8").replace(
+            'tag = "v1.2.3"', 'branch = "main"')
+        (self.repo / "pyproject.toml").write_text(manifest, encoding="utf-8")
+        self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), ["FLOATING_REF"])
+
+    def test_requirements_recursive_exact_range_blocked_and_no_lock(self):
+        nested = self.repo / "nested"
+        nested.mkdir()
+        (self.repo / "requirements.txt").write_text(
+            "-r nested/base.txt\nmcp>=2\n", encoding="utf-8")
+        (nested / "base.txt").write_text(
+            "fastapi==0.141.1\ncustom-lib @ git+https://github.com/example/custom-lib.git@main\n",
+            encoding="utf-8")
+        findings = self.run_checker()
+        self.assertEqual(self.verdicts(findings, "fastapi"), ["OK"])
+        self.assertEqual(self.verdicts(findings, "mcp"), ["BLOCKED"])
+        self.assertEqual(self.verdicts(findings, "custom-lib"), ["FLOATING_REF"])
+        self.assertEqual(self.verdicts(findings, "lockfile"), ["NO_LOCK"])
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("::error title=check_versions::BLOCKED", result.stdout)
+
+    def test_requirements_safe_blocked_range_is_not_blocked(self):
+        (self.repo / "requirements.txt").write_text("mcp<2\n", encoding="utf-8")
+        findings = self.run_checker()
+        self.assertEqual(self.verdicts(findings, "mcp"), [])
+        self.assertEqual(self.verdicts(findings, "lockfile"), ["NO_LOCK"])
+
+    def test_requirements_duplicate_declarations_are_all_checked(self):
+        (self.repo / "requirements.txt").write_text("mcp<2\nmcp>=2\n", encoding="utf-8")
+        self.assertEqual(self.verdicts(self.run_checker(), "mcp"), ["BLOCKED"])
+
+    def test_requirements_range_boundaries_use_normalized_versions(self):
+        data = json.loads(json.dumps(REGISTRY))
+        data["blocked"][0]["range"] = ">=2.0"
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+        (self.repo / "requirements.txt").write_text("mcp<2\n", encoding="utf-8")
+        self.assertEqual(self.verdicts(self.run_checker(), "mcp"), [])
+
+    def test_requirements_include_cycle_and_missing_file_are_input_errors(self):
+        (self.repo / "requirements.txt").write_text("-r child.txt\n", encoding="utf-8")
+        (self.repo / "child.txt").write_text("-r requirements.txt\n", encoding="utf-8")
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet")
+        self.assertEqual(result.returncode, 2)
+        (self.repo / "child.txt").write_text("-r missing.txt\n", encoding="utf-8")
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet")
+        self.assertEqual(result.returncode, 2)
+
+    def test_no_lock_manifest_reports_no_lock_and_missing_path_is_input_error(self):
+        fixture = SCRIPT.parents[1] / "tests" / "fixtures" / "versions" / "geo-no-lock"
+        result = self.cli(str(fixture), "--repo", "geo", "--mode", "report")
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("NO_LOCK", result.stdout)
+        missing = self.cli(str(self.root / "does-not-exist"), "--repo", "geo", "--quiet")
+        self.assertEqual(missing.returncode, 2)
+
+    def test_t005b_repository_fixtures(self):
+        fixtures = SCRIPT.parents[1] / "tests" / "fixtures" / "versions"
+        poetry = self.cli(str(fixtures / "ktdm"), "--repo", "app-a", "--mode", "report")
+        self.assertEqual(poetry.returncode, 0)
+        self.assertIn("custom-lib", poetry.stdout)
+        self.assertIn("OK", poetry.stdout)
+        requirements = self.cli(str(fixtures / "ktc"), "--repo", "app-a", "--mode", "report")
+        self.assertEqual(requirements.returncode, 0)
+        self.assertIn("NO_LOCK", requirements.stdout)
+        self.assertIn("FLOATING_REF", requirements.stdout)
 
     # --- 매니페스트·모드·CLI
     def test_manifest_lockfiles_and_registry_enforce(self):

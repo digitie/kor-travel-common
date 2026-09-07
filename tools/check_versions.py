@@ -8,7 +8,8 @@
 동작해야 한다.
 
 읽는 파일: package.json / package-lock.json(lockfileVersion 3) / pyproject.toml /
-uv.lock / requirements.txt. `poetry.lock` 파서는 T-005b.
+uv.lock / poetry.lock / requirements.txt. Poetry·requirements는 uv 전환 전까지의
+과도기 입력이며, requirements 설치본은 정확 핀만 후보로 보고 항상 `NO_LOCK`을 남긴다.
 
 판정 어휘(D-07): OK / BELOW_FLOOR / ABOVE_MAX / NOT_RECOMMENDED / NO_LOCK / NO_ENGINES /
 FLOATING_REF / BLOCKED / EXEMPT / EXEMPT_EXPIRED.
@@ -52,6 +53,7 @@ FLOATING_NAMES = frozenset({"main", "master", "develop", "dev", "head", "latest"
 VERSION_RE = re.compile(r"v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?(?:-slim|\+[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?")
 NPM_VERSION_RE = re.compile(r"(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?")
 REQ_RE = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)\s*(\[[^\]]*\])?\s*(.*)$")
+EXACT_REQUIREMENT_RE = re.compile(r"^==\s*(v?\d+(?:\.\d+){0,3})\s*$")
 
 
 # --------------------------------------------------------------------------- 버전 비교
@@ -107,6 +109,10 @@ def below(installed: tuple[int, ...], floor: tuple[int, ...]) -> bool:
 
 def at_or_above(installed: tuple[int, ...], limit: tuple[int, ...]) -> bool:
     return not below(installed, limit)
+
+
+def same_version(left: tuple[int, ...], right: tuple[int, ...]) -> bool:
+    return not below(left, right) and not below(right, left)
 
 
 def matches_prefix(installed: tuple[int, ...], prefix: tuple[int, ...]) -> bool:
@@ -440,6 +446,172 @@ def read_toml(path: Path) -> dict:
         return tomllib.load(handle)
 
 
+def read_poetry_lock(path: Path) -> dict:
+    """Poetry lock의 제한된 package/source 구조를 fail-close로 읽는다."""
+    try:
+        data = read_toml(path)
+    except (tomllib.TOMLDecodeError, UnicodeError) as exc:
+        raise ValueError("poetry.lock 지원 형식 오류") from exc
+    if not isinstance(data, dict) or not isinstance(data.get("package"), list):
+        raise ValueError("poetry.lock 지원 형식 오류")
+    metadata = data.get("metadata", {})
+    if not isinstance(metadata, dict):
+        raise ValueError("poetry.lock 지원 형식 오류")
+    for entry in data["package"]:
+        if not isinstance(entry, dict):
+            raise ValueError("poetry.lock 지원 형식 오류")
+        name, version = entry.get("name"), entry.get("version")
+        if not isinstance(name, str) or not name.strip() or not isinstance(version, str) or not version.strip():
+            raise ValueError("poetry.lock 지원 형식 오류")
+        source = entry.get("source")
+        if source is None:
+            continue
+        if not isinstance(source, dict):
+            raise ValueError("poetry.lock 지원 형식 오류")
+        source_type = source.get("type")
+        if not isinstance(source_type, str) or not source_type.strip():
+            raise ValueError("poetry.lock 지원 형식 오류")
+        if source_type == "git":
+            url = source.get("url")
+            if not isinstance(url, str) or not url.strip():
+                raise ValueError("poetry.lock 지원 형식 오류")
+            for field_name in ("reference", "resolved_reference"):
+                value = source.get(field_name, "")
+                if not isinstance(value, str):
+                    raise ValueError("poetry.lock 지원 형식 오류")
+        elif source_type not in {"legacy", "file", "directory"}:
+            raise ValueError("poetry.lock 지원 형식 오류")
+    return data
+
+
+def read_requirements(path: Path, *, _stack: tuple[Path, ...] = ()) -> list[str]:
+    """`-r`/`--requirement`를 재귀 확장하고 선언 행만 돌려준다."""
+    path = path.resolve()
+    if path in _stack or not path.is_file():
+        raise ValueError("requirements.txt 입력 구조 오류")
+    try:
+        raw_lines = path.read_text(encoding="utf-8-sig").splitlines()
+    except (OSError, UnicodeError) as exc:
+        raise ValueError("requirements.txt 입력 구조 오류") from exc
+    lines: list[str] = []
+    pending = ""
+    for raw in raw_lines:
+        line = raw.strip()
+        if pending:
+            pending += line
+        else:
+            pending = line
+        if pending.endswith("\\"):
+            pending = pending[:-1].rstrip()
+            continue
+        if pending:
+            lines.append(pending)
+        pending = ""
+    if pending:
+        lines.append(pending)
+
+    result: list[str] = []
+    stack = _stack + (path,)
+    for line in lines:
+        line = line.split(" #", 1)[0].strip()
+        if not line or line.startswith("#"):
+            continue
+        include: str | None = None
+        if line.startswith("-r") and not line.startswith("--"):
+            include = line[2:].strip()
+        elif line.startswith("--requirement"):
+            value = line[len("--requirement"):]
+            if value.startswith("="):
+                value = value[1:]
+            if not value or value[0].isspace():
+                include = value.strip()
+        if include is not None:
+            if not include:
+                raise ValueError("requirements.txt 입력 구조 오류")
+            result.extend(read_requirements(path.parent / include, _stack=stack))
+            continue
+        # pip의 인덱스·해시·제약 옵션은 패키지 선언이 아니므로 보고 대상에서 제외한다.
+        if line.startswith("-"):
+            continue
+        if parse_requirement(line) is None:
+            raise ValueError("requirements.txt 입력 구조 오류")
+        result.append(line)
+    return result
+
+
+def exact_requirement_version(spec: str) -> str | None:
+    match = EXACT_REQUIREMENT_RE.fullmatch(spec.strip())
+    if match is None or parse_version(match[1]) is None:
+        return None
+    return match[1]
+
+
+def _range_interval(spec: str):
+    """간단한 PEP 440 범위를 (하한, 포함, 상한, 포함) 목록으로 근사한다."""
+    intervals = []
+    for alternative in spec.split("||"):
+        lower = upper = None
+        lower_inclusive = upper_inclusive = True
+        exclusions: list[tuple[int, ...]] = []
+        parts = [part for part in re.split(r"[,\s]+", alternative.strip()) if part]
+        if not parts:
+            return None
+        for part in parts:
+            operator = ""
+            for candidate in (">=", "<=", "==", "!=", ">", "<", "~=", "^", "~", "="):
+                if part.startswith(candidate):
+                    operator, part = candidate, part[len(candidate):]
+                    break
+            version = parse_version(re.sub(r"(?:\.[xX*])$", "", part))
+            if version is None:
+                return None
+            if operator in {"", "=", "=="}:
+                lower = upper = version
+                lower_inclusive = upper_inclusive = True
+            elif operator in {">=", ">", "^", "~", "~=", "!="}:
+                if operator == "!=":
+                    exclusions.append(version)
+                elif lower is None or below(lower, version):
+                    lower, lower_inclusive = version, operator in {">=", "^", "~", "~="}
+            elif operator in {"<", "<="}:
+                if upper is None or below(version, upper):
+                    upper, upper_inclusive = version, operator == "<="
+            else:
+                return None
+        intervals.append((lower, lower_inclusive, upper, upper_inclusive, exclusions))
+    return intervals
+
+
+def ranges_overlap(left: str, right: str) -> bool:
+    """두 선언 범위가 겹치는지 보수적으로 판단한다. 해석 불가면 겹침으로 닫는다."""
+    left_intervals, right_intervals = _range_interval(left), _range_interval(right)
+    if left_intervals is None or right_intervals is None:
+        return True
+    for a_lower, a_lower_inc, a_upper, a_upper_inc, a_exclusions in left_intervals:
+        for b_lower, b_lower_inc, b_upper, b_upper_inc, b_exclusions in right_intervals:
+            lower = a_lower
+            lower_inc = a_lower_inc
+            if lower is None or (b_lower is not None and below(lower, b_lower)):
+                lower, lower_inc = b_lower, b_lower_inc
+            elif b_lower is not None and same_version(lower, b_lower):
+                lower_inc = lower_inc and b_lower_inc
+            upper = a_upper
+            upper_inc = a_upper_inc
+            if upper is None or (b_upper is not None and below(b_upper, upper)):
+                upper, upper_inc = b_upper, b_upper_inc
+            elif b_upper is not None and same_version(upper, b_upper):
+                upper_inc = upper_inc and b_upper_inc
+            if lower is not None and upper is not None:
+                if below(upper, lower) or (same_version(lower, upper) and not (lower_inc and upper_inc)):
+                    continue
+            if lower is not None and any(same_version(lower, excluded)
+                                         for excluded in a_exclusions + b_exclusions):
+                if upper is not None and same_version(lower, upper):
+                    continue
+            return True
+    return False
+
+
 UV_TOP_FIELDS = frozenset({
     "version", "revision", "requires-python", "resolution-markers", "supported-markers",
     "required-markers", "conflicts", "options", "manifest", "package", "distribution",
@@ -668,11 +840,10 @@ def discover(root: Path) -> list[Scope]:
             if lock is not None:
                 scopes.append(Scope("python", rel, manifest, lock, "uv"))
             elif (directory / "poetry.lock").is_file():
-                scopes.append(Scope("python", rel, manifest, directory / "poetry.lock", "poetry",
-                                    note="poetry.lock 파서 미지원(T-005b)"))
+                scopes.append(Scope("python", rel, manifest, directory / "poetry.lock", "poetry"))
             else:
                 scopes.append(Scope("python", rel, manifest, None, "none"))
-        elif "requirements.txt" in files:
+        if "requirements.txt" in files:
             scopes.append(Scope("python", rel, directory / "requirements.txt", None, "requirements",
                                 note="requirements.txt는 선언만 읽는다(T-005b)"))
     return scopes
@@ -695,8 +866,7 @@ def scopes_from_manifest(manifest_path: Path) -> tuple[str | None, list[Scope]]:
         elif kind in {"uv", "poetry"}:
             manifest = path.parent / "pyproject.toml"
             scopes.append(Scope("python", label, manifest if manifest.is_file() else None,
-                                path if path.is_file() else None, kind,
-                                note="poetry.lock 파서 미지원(T-005b)" if kind == "poetry" else ""))
+                                path if path.is_file() else None, kind))
         elif kind == "requirements":
             scopes.append(Scope("python", label, path if path.is_file() else None, None,
                                 "requirements", note="requirements.txt는 선언만 읽는다(T-005b)"))
@@ -719,6 +889,7 @@ class Checker:
         self.npm_floating: set[tuple[Path, str]] = set()
         self.npm_manifests: set[tuple[Path, str]] = set()
         self.uv_locks_scanned: set[Path] = set()
+        self.poetry_locks_scanned: set[Path] = set()
 
     # --- 공통
     def add(self, scope: str, key: str, ecosystem: str, declared: str, installed: str,
@@ -942,12 +1113,40 @@ class Checker:
         self.add(scope, key, ecosystem, spec, installed_text, verdict,
                  f"{prefix} {installed_text} · {detail}".strip(" ·"))
 
+    def record_requirement(self, scope: str, name: str, spec: str) -> None:
+        """requirements 선언을 설치본 후보·범위·차단 정책으로 분리해 기록한다."""
+        exact = exact_requirement_version(spec)
+        blocked_entries = [entry for entry in self.registry.data.get("blocked", [])
+                           if entry["ecosystem"] == "pypi"
+                           and package_identity("pypi", entry["name"]) == package_identity("pypi", name)]
+        if exact is None:
+            for entry in blocked_entries:
+                if ranges_overlap(spec, entry["range"]):
+                    self.add(scope, name, "pypi", spec, "", "BLOCKED",
+                             f"requirements 범위가 차단 범위와 겹침 · {entry['reason']}")
+            key = self.registry.axis_for("pypi", name)
+            if key is not None and self.registry.axes[key].get("checked", True):
+                self.add(scope, key, "pypi", spec, "", "NO_LOCK",
+                         "requirements.txt 범위 선언은 설치본 후보일 뿐이라 uv.lock 도입 전 대조 불가")
+            return
+        installed = installed_version("pypi", exact)
+        for entry in blocked_entries:
+            if installed is not None and range_contains(installed, entry["range"]):
+                self.add(scope, name, "pypi", spec, exact, "BLOCKED",
+                         f"since {entry.get('since', '?')} · {entry['reason']}")
+        key = self.registry.axis_for("pypi", name)
+        if key is not None and self.registry.axes[key].get("checked", True):
+            self.record_axis(scope, key, "pypi", spec, exact)
+
     # --- python
     def check_python(self, scope: Scope) -> None:
         label = scope.label
         declared: dict[str, str] = {}
         urls: dict[str, list[str]] = {}
+        requirement_specs: dict[str, list[str]] = {}
         requires_python: str | None = None
+        requirements_mode = scope.lock_kind == "requirements"
+        poetry_mode = scope.lock_kind == "poetry"
         manifest = scope.manifest
         if manifest is not None and manifest.name == "pyproject.toml":
             try:
@@ -1055,14 +1254,14 @@ class Checker:
                             urls.setdefault(normalize_name(name), []).append(
                                 f"{value['git']}@{ref}" if ref else value["git"]
                             )
-        elif manifest is not None and manifest.name == "requirements.txt":
-            for line in manifest.read_text(encoding="utf-8-sig").splitlines():
-                line = line.split(" #")[0].strip()
+        elif manifest is not None and requirements_mode:
+            for line in read_requirements(manifest):
                 parsed = parse_requirement(line)
                 if parsed is None:
-                    continue
+                    raise ValueError("requirements.txt 입력 구조 오류")
                 name, spec, url = parsed
                 declared.setdefault(name, spec)
+                requirement_specs.setdefault(name, []).append(spec)
                 if url:
                     urls.setdefault(name, []).append(url)
 
@@ -1087,61 +1286,107 @@ class Checker:
                     or manifest_bound.lower != lock_bound.lower
                     or manifest_bound.exact != lock_bound.exact):
                 self.record_range("python", f"{label} [uv.lock]", "runtime", lock_requires)
+        elif scope.lock is not None and scope.lock.is_file() and poetry_mode:
+            lock_data = read_poetry_lock(scope.lock)
+            for entry in lock_data["package"]:
+                lock_packages.setdefault(normalize_name(entry["name"]), []).append(entry)
+            lock_requires = lock_data.get("metadata", {}).get("python-versions")
+            if isinstance(lock_requires, str) and lock_requires.strip():
+                manifest_bound = lower_bound(str(requires_python)) if requires_python is not None else None
+                lock_bound = lower_bound(lock_requires)
+                if (requires_python is None or manifest_bound is None or lock_bound is None
+                        or manifest_bound.lower != lock_bound.lower
+                        or manifest_bound.exact != lock_bound.exact):
+                    self.record_range("python", f"{label} [poetry.lock]", "runtime", lock_requires)
 
         # git/URL 참조
+        def lock_git_reference(entry: dict) -> tuple[str, str] | None:
+            source = entry.get("source", {})
+            if scope.lock_kind == "uv" and isinstance(source, dict) and "git" in source:
+                return source["git"], source["git"]
+            if scope.lock_kind != "poetry" or not isinstance(source, dict) or source.get("type") != "git":
+                return None
+            url = source["url"]
+            reference = source.get("reference", "")
+            resolved = source.get("resolved_reference", "")
+            declared_ref = reference or (resolved if re.fullmatch(r"[0-9a-f]{40}", resolved) else "")
+            declared = f"git+{url}@{declared_ref}" if declared_ref else f"git+{url}"
+            # Poetry의 resolved_reference는 uv처럼 fragment에 두어 SHA 판정을 재사용한다.
+            locked = f"git+{url}#{resolved}" if resolved else declared
+            return declared, locked
+
         for name, url_specs in urls.items():
-            resolved_refs = [entry["source"]["git"] for entry in lock_packages.get(name, [])
-                             if "git" in entry.get("source", {})]
+            resolved_refs = [lock_git_reference(entry)[1] for entry in lock_packages.get(name, [])
+                             if lock_git_reference(entry) is not None]
             for url in url_specs:
                 if resolved_refs:
                     for resolved in resolved_refs:
                         self.record_ref(label, "pypi", name, url, resolved)
                 else:
                     self.record_ref(label, "pypi", name, url)
-        first_uv_lock_scan = False
-        if scope.lock is not None and scope.lock_kind == "uv" and lock_packages:
+        first_python_lock_scan = False
+        if scope.lock is not None and scope.lock_kind in {"uv", "poetry"} and lock_packages:
             # uv workspace는 멤버마다 같은 lock을 가리킬 수 있다. 첫 범위가 멤버여도
             # 공유 lock 전체의 전이 축·차단·git 참조를 한 번 검사한다.
             lock_path = scope.lock.resolve()
-            first_uv_lock_scan = lock_path not in self.uv_locks_scanned
-            if first_uv_lock_scan:
-                self.uv_locks_scanned.add(lock_path)
+            scanned = self.uv_locks_scanned if scope.lock_kind == "uv" else self.poetry_locks_scanned
+            first_python_lock_scan = lock_path not in scanned
+            if first_python_lock_scan:
+                scanned.add(lock_path)
             for name, entries in lock_packages.items():
-                if not first_uv_lock_scan or name in urls:
+                if not first_python_lock_scan or name in urls:
                     continue
                 for entry in entries:
-                    source = entry.get("source", {})
-                    if "git" in source:
-                        self.record_ref(label, "pypi", name, "(전이)", source["git"])
+                    lock_ref = lock_git_reference(entry)
+                    if lock_ref is not None:
+                        if scope.lock_kind == "uv":
+                            self.record_ref(label, "pypi", name, "(전이)", lock_ref[1])
+                        else:
+                            self.record_ref(label, "pypi", name, lock_ref[0], lock_ref[1])
 
+        if requirements_mode:
+            self.add(label, "lockfile", "pypi", "", "", "NO_LOCK",
+                     "requirements.txt은 lockfile이 아님 — uv.lock 도입 task(T-005b) 필요")
+            for name, specs in requirement_specs.items():
+                for spec in specs:
+                    self.record_requirement(label, name, spec)
+            return
         if not lock_packages:
+            missing_lock_note = scope.note or (
+                f"{scope.lock_kind}.lock 없음 — uv.lock 도입 task(T-005b) 필요"
+                if scope.lock_kind == "poetry" else
+                "uv.lock 없음 — 설치본 대조 불가(lockfile 의무 D-07)"
+            )
             added = 0
             for name, spec in declared.items():
                 key = self.registry.axis_for("pypi", name)
                 if key is not None:
                     self.add(label, key, "pypi", spec, "", "NO_LOCK",
-                             scope.note or "uv.lock 없음 — 설치본 대조 불가(lockfile 의무 D-07)")
+                             missing_lock_note)
                     added += 1
             if not added:
-                self.add(label, "lockfile", "pypi", "", "", "NO_LOCK", scope.note or "uv.lock 없음")
+                self.add(label, "lockfile", "pypi", "", "", "NO_LOCK", missing_lock_note)
             return
         for name, spec in declared.items():
             key = self.registry.axis_for("pypi", name)
             if key is None or not self.registry.axes[key].get("checked", True):
                 continue
-            entries = [e for e in lock_packages.get(name, []) if "registry" in e.get("source", {})]
+            if poetry_mode:
+                entries = lock_packages.get(name, [])
+            else:
+                entries = [e for e in lock_packages.get(name, []) if "registry" in e.get("source", {})]
             if not entries:
                 self.add(label, key, "pypi", spec, "", "NO_LOCK",
-                         f"uv.lock에 `{name}` registry 항목 없음")
+                         f"{scope.lock_kind}.lock에 `{name}` 항목 없음")
                 continue
             for entry in entries:
                 self.record_axis(label, key, "pypi", spec, str(entry.get("version", "")))
         # 전이 의존성까지 포함한 축·차단 검사는 공유 lock당 1회만 수행한다.
-        if first_uv_lock_scan:
+        if first_python_lock_scan:
             for name, entries in lock_packages.items():
                 for entry in entries:
                     version = str(entry.get("version", ""))
-                    if "registry" not in entry.get("source", {}):
+                    if not poetry_mode and "registry" not in entry.get("source", {}):
                         continue
                     self.record_blocked(label, "pypi", name, version)
                     key = self.registry.axis_for("pypi", name)

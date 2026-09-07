@@ -21,7 +21,7 @@
 1. `poetry.lock`: `[[package]]` `name`·`version`·`source`(git이면 `reference`/`resolved_reference`) 추출. `resolved_reference` 40자 SHA면 보고, 브랜치만 있으면 `FLOATING_REF`.
 2. `requirements.txt`(`-r` 재귀 포함): `pkg==x.y`는 설치본 후보, git URL `@main`은 `FLOATING_REF`, `mcp>=2` 범위가 `blocked[]`와 겹치면 `BLOCKED`; 파일이 lock이 아니므로 결과 표 머리에 `NO_LOCK` 배지를 남긴다.
 3. 유효한 소비자 경로/manifest와 선언 파일은 있으나 대응 lock이 없는 경우 `NO_LOCK`과 안내(“`uv.lock` 도입 task”)를 출력한다. 검사 대상 경로/manifest 자체가 없는 호출은 입력 오류(exit 2)이며 별도 음성 fixture로 보존한다.
-4. fixture: `ktdm.poetry.lock`(축약), `ktc.requirements.txt`(`mcp<2` 포함), 테스트 추가.
+4. fixture: `tests/fixtures/versions/ktdm/{pyproject.toml,poetry.lock}`(축약), `tests/fixtures/versions/ktc/requirements.txt`와 재귀 `requirements/base.txt`(`mcp<2` 포함), `geo-no-lock/pyproject.toml`, 테스트 추가.
 
 ## 범위 밖
 
@@ -29,7 +29,7 @@
 
 ## 예상 변경 파일
 
-예정 경로는 존재·실행 증거가 아니다. `tools/check_versions.py`, `tests/test_check_versions.py`, `tests/fixtures/versions/ktdm.poetry.lock`, `tests/fixtures/versions/ktc.requirements.txt`, `docs/standards/versions.md`(지원 lockfile 표).
+예정 경로는 존재·실행 증거가 아니다. `tools/check_versions.py`, `tests/test_check_versions.py`, `tests/fixtures/versions/ktdm/`, `tests/fixtures/versions/ktc/`, `tests/fixtures/versions/geo-no-lock/`, `docs/standards/versions.md`(지원 lockfile 표).
 
 ## 수용 기준
 
