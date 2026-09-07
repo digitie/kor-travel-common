@@ -8,7 +8,7 @@ T-101 초기 candidate `f8894e293ca9677f457011197052cd55dbdc9696`에서 A/B가 �
 
 `4c33a5d951e32df0c2170b7a865f324d122dbe05`에서 DTCG 2025.10 변환과 `$root` 계층, dark/profile 생성, build 전 `check`·생성 후 Git diff, 44개 light/dark 전수 비교, Tailwind v4/v3·Chromium·순수 CSS probe를 추가했다. 두 reviewer가 같은 immutable SHA/tree를 detached clean worktree에서 독립 재검토해 최초 12건을 모두 FIXED, 신규 P0–P3 0건으로 PASS했다([통합 리뷰](reviews/adversarial/2026-09-07-t101-post-fix-01.md), [manifest](reviews/adversarial/evidence/2026-09-07-t101-post-fix-01-manifest.md), [A](reviews/adversarial/evidence/2026-09-07-t101-post-fix-01-reviewer-a.md), [B](reviews/adversarial/evidence/2026-09-07-t101-post-fix-01-reviewer-b.md)). 원본 SHA256은 통합 보고서와 evidence에 보존했다.
 
-PR #11 정확한 head의 CI `34126309766` 6개 job이 성공했고 Windows/WSL package 7 tests·pack/install·plan/link/SPDX/secret/redaction/version gate를 직접 확인했다. main merge 후 main CI와 `codex/release-*` 실제 push CI는 `NOT_RUN(merge 후 gate)`로 남겼으며, 소비자 build/e2e·T-103·Release·npm/PyPI 게시·소비자 저장소 수정은 사용자 범위 또는 후속 task로 실행하지 않았다.
+PR #11 정확한 head의 CI `34126309766` 6개 job이 성공했고 Windows/WSL package 7 tests·pack/install·plan/link/SPDX/secret/redaction/version gate를 직접 확인했다. workflow와 표준 문서의 검사 순서 drift도 `6ab650d`에서 정렬했으며, 후속 표준 문서 리뷰 A/B가 PASS·신규 finding 0, CI `34128018010` 6개 job 성공을 확인했다([후속 판정](reviews/adversarial/2026-09-07-t101-ci-docs-post-fix.md), [A](reviews/adversarial/evidence/2026-09-07-t101-ci-docs-post-fix-reviewer-a.md), [B](reviews/adversarial/evidence/2026-09-07-t101-ci-docs-post-fix-reviewer-b.md)). main merge 후 main CI와 `codex/release-*` 실제 push CI는 `NOT_RUN(merge 후 gate)`로 남겼으며, 소비자 build/e2e·T-103·Release·npm/PyPI 게시·소비자 저장소 수정은 사용자 범위 또는 후속 task로 실행하지 않았다.
 
 ## 2026-09-07 (Codex, T-011 최종 review PASS·PR #10 merge gate)
 
