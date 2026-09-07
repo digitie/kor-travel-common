@@ -1,0 +1,13 @@
+version = 1
+revision = 3
+requires-python = ">=3.12"
+
+[[package]]
+name = "git-main-fixture"
+version = "0.0.0"
+source = { editable = "." }
+
+[[package]]
+name = "custom-lib"
+version = "1.0.0"
+source = { git = "https://github.com/example/custom-lib.git?rev=main" }

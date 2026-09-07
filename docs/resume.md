@@ -14,7 +14,7 @@ T-009는 [PR #5](https://github.com/digitie/kor-travel-common/pull/5)의 f15072f
 
 ## 다음 한 작업
 
-- 작업: [T-005a](tasks/T-005a-check-versions-uv-lock.md), READY. 선행 T-005는 DONE이다. PR #5 병합·main CI 확인 뒤 착수한다.
+- 작업: [T-005a](tasks/T-005a-check-versions-uv-lock.md), IN_PROGRESS. PR #5는 `6e1881b86f017d604ccfa416bd368e5aba24c669`로 병합됐고 main CI 34071150863의 5개 check가 모두 성공했다. uv lock 형식·공유 범위·Python 하한·git 소스 보고를 구현한다.
 - 사용자 재개 지시로 common 구현을 순차 진행한다. npm/PyPI 미게시·다른 저장소 수정 금지와 독립 두 리뷰·PR·CI·병합 경계를 유지한다.
 - PR #4는 `82dec2b939885863100802997f9e7548dffd3c9a`로 병합됐고 main CI 34066384346이 성공했다. 아직 구현하지 않은 패키지·후보 보존·외부 gate는 미완료다.
 

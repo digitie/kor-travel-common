@@ -16,7 +16,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
-| [T-005a](tasks/T-005a-check-versions-uv-lock.md) | READY | P1 | check_versions: `uv.lock` 파서 | T-005 |
+| [T-005a](tasks/T-005a-check-versions-uv-lock.md) | IN_PROGRESS | P1 | check_versions: `uv.lock` 파서 | T-005 |
 | [T-005b](tasks/T-005b-check-versions-poetry-requirements.md) | READY | P2 | check_versions: `poetry.lock`·`requirements.txt` 파서 + `NO_LOCK` 보고 | T-005 |
 | [T-005c](tasks/T-005c-workflow-static-report.md) | READY | P2 | workflow 고정 참조·CI Node 선언의 정적 보고 | T-005, T-009 |
 | [T-010](tasks/T-010-reusable-workflows-stage1.md) | BLOCKED | P1 | 재사용 워크플로 1단계(`versions-check`·`contrast-check`·`docs-check`) + `workflows-selftest` fixture + `consumers.pins.json` + consumer-smoke | T-005, T-009, T-101, T-103 |
