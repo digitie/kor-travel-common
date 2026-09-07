@@ -134,7 +134,7 @@ class ValidateManifestTests(unittest.TestCase):
         for path in ("C:/package-lock.json", "apps//package-lock.json", "apps/",
                      " ", "apps/\x00/package-lock.json", "apps/\t/package-lock.json",
                      "apps/\n/package-lock.json", "apps/\x7f/package-lock.json",
-                     "apps/package-lock.json\n"):
+                     "apps/package-lock.json\n", " /etc/fixture", "apps/ ", " ../fixture"):
             data = valid_manifest()
             data["lockfiles"] = [{"kind": "npm", "path": path, "scope": "root"}]
             with self.subTest(path=path):
@@ -148,10 +148,26 @@ class ValidateManifestTests(unittest.TestCase):
         schema = json.loads((ROOT / "templates" / "kor-travel-common.lock.schema.json").read_text(encoding="utf-8"))
         validator = Draft202012Validator(schema)
         for path in ("apps/\t/package-lock.json", "apps/\n/package-lock.json",
-                     "apps/\x1f/package-lock.json", "apps/\x7f/package-lock.json"):
+                     "apps/\x1f/package-lock.json", "apps/\x7f/package-lock.json",
+                     " /etc/fixture", "apps/ ", " ../fixture"):
             data = valid_manifest()
             data["lockfiles"] = [{"kind": "npm", "path": path, "scope": "root"}]
             with self.subTest(path=path):
+                self.assertTrue(list(validator.iter_errors(data)))
+
+    def test_json_schema_rejects_non_ascii_and_trailing_newline_dates(self):
+        try:
+            from jsonschema import Draft202012Validator
+        except ImportError:
+            self.skipTest("jsonschema 미설치")
+        schema = json.loads((ROOT / "templates" / "kor-travel-common.lock.schema.json").read_text(encoding="utf-8"))
+        validator = Draft202012Validator(schema)
+        for value in ("2026-09-07\n", "２０２６-０９-０７", "٢٠٢٦-٠٩-٠٧"):
+            data = valid_manifest()
+            data["exceptions"] = [{
+                "key": "react", "reason": "시험", "until": value, "review": "2026-09-30",
+            }]
+            with self.subTest(value=repr(value)):
                 self.assertTrue(list(validator.iter_errors(data)))
 
     def test_repo_must_be_a_versions_consumer_key(self):
@@ -254,6 +270,7 @@ class ValidateManifestTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="kor-travel-common-workspace-redaction-") as directory:
             root = Path(directory)
             marker = "secret_workspace_value12345678"
+            del_path = "workspace" + chr(127) + "path"
             member = root / marker
             member.mkdir(parents=True)
             manifest = root / "manifest.json"
@@ -272,6 +289,7 @@ class ValidateManifestTests(unittest.TestCase):
                              "engines": {"node": ">=22.12.0"},
                              "dependencies": {"react": "^19.0.0"}},
                     f"{marker}/node_modules/react": {"version": "19.2.8"},
+                    f"{del_path}/node_modules/react": {"version": "19.2.8"},
                 },
             }), encoding="utf-8")
             output = root / "report"
@@ -287,8 +305,11 @@ class ValidateManifestTests(unittest.TestCase):
             ], capture_output=True, text=True, encoding="utf-8", env=env)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             for path in (json_path, markdown_path, summary_path):
-                self.assertNotIn(marker, path.read_text(encoding="utf-8"))
+                content = path.read_text(encoding="utf-8")
+                self.assertNotIn(marker, content)
+                self.assertNotIn(del_path, content)
             self.assertNotIn(marker, result.stdout + result.stderr)
+            self.assertNotIn(del_path, result.stdout + result.stderr)
 
     def test_check_versions_rejects_companion_manifest_symlink_escape(self):
         with tempfile.TemporaryDirectory(prefix="kor-travel-common-symlink-") as directory:
@@ -364,6 +385,31 @@ class ValidateManifestTests(unittest.TestCase):
             self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
             self.assertNotIn("outside-requirements", result.stdout + result.stderr)
             self.assertNotIn("fastapi", result.stdout + result.stderr)
+
+    def test_requirements_self_symlink_is_input_error_without_traceback(self):
+        with tempfile.TemporaryDirectory(prefix="kor-travel-common-requirements-loop-") as directory:
+            root = Path(directory)
+            app = root / "apps" / "etl"
+            app.mkdir(parents=True)
+            loop = app / "loop.txt"
+            try:
+                loop.symlink_to(loop)
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"symlink 생성 불가: {exc}")
+            (app / "requirements.txt").write_text("-r loop.txt\n", encoding="utf-8")
+            manifest = app / "kor-travel-common.lock.json"
+            data = valid_manifest()
+            data["repo"] = "pinvi"
+            data["app"] = "apps/etl"
+            data["lockfiles"] = [{"kind": "requirements", "path": "apps/etl/requirements.txt", "scope": "apps/etl"}]
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            result = subprocess.run([
+                sys.executable, "-B", "-X", "utf8", str(ROOT / "tools" / "check_versions.py"),
+                str(root), "--manifest", str(manifest), "--repo", "pinvi",
+                "--mode", "fail", "--no-step-summary",
+            ], capture_output=True, text=True, encoding="utf-8")
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertNotIn("Traceback", result.stdout + result.stderr)
 
 
 if __name__ == "__main__":

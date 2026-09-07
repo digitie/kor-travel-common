@@ -668,11 +668,14 @@ REQUIREMENTS_PARAMETER_OPTIONS = frozenset({"--only-binary", "--no-binary"})
 
 def read_requirements(path: Path, *, _stack: tuple[Path, ...] = (), root: Path | None = None) -> list[str]:
     """`-r`/`--requirement`를 재귀 확장하고 유효한 선언 행만 돌려준다."""
-    path = path.resolve()
-    if root is not None:
-        root = root.resolve()
-        if not _path_within(path, root):
-            raise ValueError("requirements.txt 입력 구조 오류")
+    try:
+        path = path.resolve()
+        if root is not None:
+            root = root.resolve()
+    except (OSError, RuntimeError) as exc:
+        raise ValueError("requirements.txt 입력 구조 오류") from exc
+    if root is not None and not _path_within(path, root):
+        raise ValueError("requirements.txt 입력 구조 오류")
     if path in _stack or not path.is_file():
         raise ValueError("requirements.txt 입력 구조 오류")
     try:
@@ -1342,7 +1345,7 @@ def _workflow_display_value(value: object, fallback: str = "(workflow 값 비공
     if not isinstance(value, str):
         return ""
     text = value.replace("\r", " ").replace("\n", " ")
-    if (len(text) > 256 or any(ord(char) < 0x20 and char != "\t" for char in text)
+    if (len(text) > 256 or any(ord(char) < 0x20 or ord(char) == 0x7F for char in text)
             or any(0xD800 <= ord(char) <= 0xDFFF for char in text)):
         return fallback
     if _WORKFLOW_SENSITIVE_VALUE_RE.search(text):

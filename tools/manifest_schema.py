@@ -26,7 +26,7 @@ OPENAPI_FIELDS = frozenset({"exceptions"})
 EXCEPTION_COMMON_FIELDS = frozenset({"reason", "until", "review"})
 EXCEPTION_RULE_FIELDS = EXCEPTION_COMMON_FIELDS | {"rule", "surface"}
 EXCEPTION_KEY_FIELDS = EXCEPTION_COMMON_FIELDS | {"key"}
-DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+DATE_RE = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
 
 
 def _field_error(path: str, message: str) -> str:
@@ -63,6 +63,9 @@ def _check_relative_path(value: object, path: str, errors: list[str]) -> None:
         errors.append(_field_error(path, "비어 있지 않은 상대 경로여야 함"))
         return
     if any(ord(char) < 0x20 or ord(char) == 0x7F for char in value):
+        errors.append(_field_error(path, "저장소 루트 기준 정규 POSIX 상대 경로여야 함"))
+        return
+    if value != value.strip():
         errors.append(_field_error(path, "저장소 루트 기준 정규 POSIX 상대 경로여야 함"))
         return
     text = value.strip()
