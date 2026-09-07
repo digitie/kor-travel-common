@@ -27,7 +27,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
-| [T-101](tasks/T-101-tokens-package.md) | READY | P0 | packages/tokens(tokens.css map 값+.dark·theme.css `kt-`·shadcn.css·base.css·base.scoped.css·dark-class/media.css) + 생성물(tokens.json·tokens.ts·tailwind-preset.cjs; 정본 CSS) + 루트 npm workspace·lock + `npm pack` 설치 스모크 | T-003, T-004 |
+| [T-101](tasks/T-101-tokens-package.md) | IN_PROGRESS | P0 | packages/tokens(tokens.css map 값+.dark·theme.css `kt-`·shadcn.css·base.css·base.scoped.css·dark-class/media.css) + 생성물(tokens.json·tokens.ts·tailwind-preset.cjs; 정본 CSS) + 루트 npm workspace·lock + `npm pack` 설치 스모크 | T-003, T-004 |
 | [T-102](tasks/T-102-map-vocabulary-shim.md) | BLOCKED | P0 | 레거시 어휘 별칭 shim `aliases/map-vocabulary.css`(map·weather·geo 공통 이름 → `--kt-*`) + weather `--rail`·font 오버라이드 예제 + 별칭 충돌 검사 스크립트 | T-101 |
 | [T-103](tasks/T-103-kt-contrast-ux-lint.md) | BLOCKED | P1 | tools/kt_contrast.py(report·`contrast-baseline.json`) + `tools/ux_lint.py`(금지 7종+window.confirm, 전체 report·diff fail) + 4앱 오버라이드 예제 보고 | T-101 |
 | [T-104](tasks/T-104-design-tokens-standard.md) | BLOCKED | P0 | docs/standards/design-tokens.md 확정(패키지 실물과 대조·규칙 ID TK-n) | T-101 |

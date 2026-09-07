@@ -1,0 +1,80 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ */
+
+@import "./tokens.css";
+
+/* 변수 참조는 inline으로 두어 앱의 같은 이름 오버라이드가 런타임에 반영된다. */
+@theme inline {
+  --color-kt-surface-page: var(--kt-surface-page);
+  --color-kt-surface-subtle: var(--kt-surface-subtle);
+  --color-kt-surface-muted: var(--kt-surface-muted);
+  --color-kt-surface-card: var(--kt-surface-card);
+  --color-kt-text-primary: var(--kt-text-primary);
+  --color-kt-text-secondary: var(--kt-text-secondary);
+  --color-kt-text-tertiary: var(--kt-text-tertiary);
+  --color-kt-text-disabled: var(--kt-text-disabled);
+  --color-kt-text-strong: var(--kt-text-strong);
+  --color-kt-icon: var(--kt-icon);
+  --color-kt-border: var(--kt-border);
+  --color-kt-control-line: var(--kt-control-line);
+  --color-kt-brand: var(--kt-brand);
+  --color-kt-brand-hover: var(--kt-brand-hover);
+  --color-kt-brand-tint: var(--kt-brand-tint);
+  --color-kt-brand-foreground: var(--kt-brand-foreground);
+  --color-kt-focus: var(--kt-focus);
+  --color-kt-success: var(--kt-success);
+  --color-kt-success-tint: var(--kt-success-tint);
+  --color-kt-warning: var(--kt-warning);
+  --color-kt-warning-tint: var(--kt-warning-tint);
+  --color-kt-info: var(--kt-info);
+  --color-kt-info-tint: var(--kt-info-tint);
+  --color-kt-destructive: var(--kt-destructive);
+  --color-kt-destructive-tint: var(--kt-destructive-tint);
+  --color-kt-overlay: var(--kt-overlay);
+  --spacing-kt-control: var(--kt-control-h);
+  --spacing-kt-control-sm: var(--kt-control-h-sm);
+  --spacing-kt-rail: var(--kt-rail);
+  --container-kt-rail: var(--kt-rail);
+  --radius-kt-control: var(--kt-radius-control);
+  --radius-kt-panel: var(--kt-radius-panel);
+  --font-kt-sans: var(--kt-font-sans);
+  --font-kt-mono: var(--kt-font-mono);
+  --ease-kt-out: var(--kt-ease-out);
+  --ease-kt-in: var(--kt-ease-in);
+  --shadow-kt-elevated: var(--kt-shadow-elevated);
+  --shadow-kt-modal: var(--kt-shadow-modal);
+  --z-kt-nav: var(--kt-z-nav);
+  --z-kt-panel: var(--kt-z-panel);
+  --z-kt-overlay: var(--kt-z-overlay);
+  --z-kt-modal: var(--kt-z-modal);
+  --z-kt-toast: var(--kt-z-toast);
+}
+
+/* 타입 스케일은 비inline이어야 소비자가 변수만 가려 프로필을 바꿀 수 있다. */
+@theme {
+  --text-kt-2xs: 0.75rem;
+  --text-kt-2xs--line-height: 1.5;
+  --text-kt-xs: 0.84375rem;
+  --text-kt-xs--line-height: 1.5;
+  --text-kt-sm: 0.9375rem;
+  --text-kt-sm--line-height: 1.5;
+  --text-kt-md: 1.0625rem;
+  --text-kt-md--line-height: 1.4;
+  --text-kt-lg: 1.25rem;
+  --text-kt-lg--line-height: 1.3;
+  --text-kt-xl: 1.5rem;
+  --text-kt-xl--line-height: 1.25;
+  --text-kt-2xl: 1.875rem;
+  --text-kt-2xl--line-height: 1.2;
+}
+
+@utility duration-kt-fast {
+  --tw-duration: var(--kt-duration-fast);
+  transition-duration: var(--kt-duration-fast);
+}
+
+@utility duration-kt-base {
+  --tw-duration: var(--kt-duration-base);
+  transition-duration: var(--kt-duration-base);
+}

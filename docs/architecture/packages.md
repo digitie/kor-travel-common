@@ -26,7 +26,8 @@ common 후보 보존은 T-109a(tokens)·T-212a(UI 0.1)·T-213a(UI 0.2)·T-310a(P
 
 | subpath | 내용 | Tailwind 의존 |
 |---|---|---|
-| `.`(= `./tokens.css`) | `:root { --kt-* }` + `.dark { --kt-* }` 순수 CSS(값 정본) | 없음 |
+| `.` | ESM `tokens`·`tokenValues` 객체와 d.ts(생성물) | 없음 |
+| `./tokens.css` | `:root { --kt-* }` + `.dark { --kt-* }` 순수 CSS(값 정본) | 없음 |
 | `./theme.css` | `@import "./tokens.css"` + `@theme inline`(`--color-kt-*`·`--spacing-kt-*`·`--radius-kt-*`·`--font-kt-*`·`--shadow-kt-*`·`--ease-kt-*`) + `@theme`(`--text-kt-*`) + `@utility duration-kt-*` | v4 |
 | `./shadcn.css` | shadcn alias(`--background`…`--ring`, `--radius`) = `--kt-*` 참조, 의미 고정 | 없음 |
 | `./base.css` | `:focus-visible` 단일 레시피, hairline 2종, reduced-motion(+스피너 예외), `button:not(:disabled){cursor:pointer}` | 없음 |

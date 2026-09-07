@@ -1,0 +1,49 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ */
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--kt-focus);
+    outline-offset: 2px;
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@utility border-kt-hairline {
+  border-color: var(--kt-border);
+}
+
+@utility border-kt-control-line {
+  border-color: var(--kt-control-line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .transition-opacity,
+  [data-motion="crossfade"] {
+    transition-property: opacity !important;
+    transition-duration: var(--kt-duration-base) !important;
+  }
+
+  [data-slot="button-spinner"] svg,
+  [data-sonner-toast] [data-icon] svg.animate-spin {
+    animation-duration: 1.6s !important;
+    animation-iteration-count: infinite !important;
+  }
+}

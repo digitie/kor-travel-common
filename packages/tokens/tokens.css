@@ -1,0 +1,117 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ * Origin: kor-travel-map@c494e227 packages/kor-travel-map-admin/frontend/src/app/globals.css (GPL-3.0-or-later)
+ * Modified: 2026-09-07 — 공용 `--kt-*` semantic 계층과 배포용 다크 값으로 정리
+ */
+
+/*
+ * 값의 유일한 정본이다. 색 값은 kor-travel-map c494e227의 globals.css에서
+ * 추출했으며, 소비자별 브랜드·paper·ink 변경은 이 파일 뒤에서 재선언한다.
+ */
+:root {
+  color-scheme: light;
+
+  /* 표면·텍스트 */
+  --kt-surface-page: oklch(97.8% 0.003 128);
+  --kt-surface-subtle: oklch(96.7% 0.006 138);
+  --kt-surface-muted: oklch(92.5% 0.01 141);
+  --kt-surface-card: oklch(99.2% 0.002 140);
+  --kt-text-primary: oklch(30% 0.006 157);
+  --kt-text-secondary: oklch(48% 0.012 159);
+  --kt-text-tertiary: oklch(54% 0.012 154);
+  --kt-text-disabled: oklch(79% 0.012 154);
+  --kt-text-strong: var(--kt-text-primary);
+  --kt-icon: var(--kt-text-tertiary);
+  --kt-border: var(--kt-surface-muted);
+  --kt-control-line: oklch(61% 0.012 145);
+
+  /* 브랜드·상태 */
+  --kt-brand: oklch(51.4% 0.081 169);
+  --kt-brand-hover: oklch(46% 0.085 169);
+  --kt-brand-tint: oklch(95.2% 0.013 172);
+  --kt-brand-foreground: oklch(99% 0.002 140);
+  --kt-focus: oklch(45% 0.09 169);
+  --kt-success: oklch(46.9% 0.087 149);
+  --kt-success-tint: oklch(95% 0.03 150);
+  --kt-warning: oklch(50.9% 0.103 71);
+  --kt-warning-tint: oklch(96% 0.035 80);
+  --kt-info: oklch(50% 0.16 258);
+  --kt-info-tint: oklch(95.5% 0.025 255);
+  --kt-destructive: oklch(51.4% 0.167 27);
+  --kt-destructive-tint: oklch(96% 0.03 25);
+  --kt-overlay: oklch(30% 0.006 157 / 0.45);
+
+  /* 형태·밀도·모션 */
+  --kt-radius-control: 0.375rem;
+  --kt-radius-panel: 0.5rem;
+  --kt-control-h: 2.25rem;
+  --kt-control-h-sm: 1.875rem;
+  --kt-rail: 22rem;
+  --kt-duration-fast: 100ms;
+  --kt-duration-base: 150ms;
+  --kt-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --kt-ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --kt-shadow-elevated: 0 4px 12px oklch(30% 0.006 157 / 0.1);
+  --kt-shadow-modal: 0 8px 24px oklch(30% 0.006 157 / 0.14);
+  --kt-z-nav: 30;
+  --kt-z-panel: 40;
+  --kt-z-overlay: 50;
+  --kt-z-modal: 60;
+  --kt-z-toast: 70;
+
+  /* 폰트 파일은 소비자가 로드하고 common은 스택만 제공한다. */
+  --kt-font-sans: "Pretendard Variable", Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif;
+  --kt-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* map 정본의 dark 값 */
+  --kt-surface-page: oklch(19% 0.006 150);
+  --kt-surface-subtle: oklch(24% 0.008 145);
+  --kt-surface-muted: oklch(31% 0.012 145);
+  --kt-surface-card: oklch(23% 0.007 145);
+  --kt-text-primary: oklch(93% 0.006 155);
+  --kt-text-secondary: oklch(78% 0.01 155);
+  --kt-text-tertiary: oklch(68% 0.012 155);
+  --kt-text-disabled: oklch(52% 0.012 155);
+  --kt-text-strong: var(--kt-text-primary);
+  --kt-icon: oklch(70% 0.01 155);
+  --kt-border: var(--kt-surface-muted);
+  --kt-control-line: oklch(58% 0.012 145);
+  --kt-brand: oklch(76% 0.085 169);
+  --kt-brand-hover: oklch(81% 0.085 169);
+  --kt-brand-tint: oklch(31% 0.035 169);
+  --kt-brand-foreground: oklch(20% 0.02 165);
+  --kt-focus: oklch(80% 0.09 169);
+  --kt-success: oklch(75% 0.09 149);
+  --kt-success-tint: oklch(28% 0.04 150);
+  --kt-warning: oklch(77% 0.12 75);
+  --kt-warning-tint: oklch(30% 0.045 80);
+  --kt-info: oklch(75% 0.11 258);
+  --kt-info-tint: oklch(30% 0.05 258);
+  --kt-destructive: oklch(72% 0.14 27);
+  --kt-destructive-tint: oklch(30% 0.06 27);
+  --kt-overlay: oklch(10% 0.006 157 / 0.6);
+  --kt-shadow-elevated: 0 4px 12px oklch(10% 0.006 157 / 0.32);
+  --kt-shadow-modal: 0 8px 24px oklch(10% 0.006 157 / 0.4);
+
+  /* 색상 외 역할도 다크 프로필에서 명시적으로 보존한다. */
+  --kt-radius-control: 0.375rem;
+  --kt-radius-panel: 0.5rem;
+  --kt-control-h: 2.25rem;
+  --kt-control-h-sm: 1.875rem;
+  --kt-rail: 22rem;
+  --kt-duration-fast: 100ms;
+  --kt-duration-base: 150ms;
+  --kt-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --kt-ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --kt-z-nav: 30;
+  --kt-z-panel: 40;
+  --kt-z-overlay: 50;
+  --kt-z-modal: 60;
+  --kt-z-toast: 70;
+  --kt-font-sans: "Pretendard Variable", Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif;
+  --kt-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}

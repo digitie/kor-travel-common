@@ -1,0 +1,17 @@
+{
+  "name": "kor-travel-common",
+  "private": true,
+  "license": "GPL-3.0-or-later",
+  "packageManager": "npm@11.19.1",
+  "engines": {
+    "node": "^22.12.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace packages/tokens",
+    "check": "npm run check --workspace packages/tokens",
+    "test": "npm test --workspace packages/tokens"
+  }
+}

@@ -1,0 +1,50 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ */
+
+/* admin과 사용자 표면이 함께 있는 앱에서 공용 base 규칙을 표면 안으로 제한한다. */
+@layer base {
+  :where([data-kt-surface], [data-kt-surface] *) {
+    color-scheme: light;
+  }
+
+  :where([data-kt-surface], [data-kt-surface] *):focus-visible {
+    outline: 2px solid var(--kt-focus);
+    outline-offset: 2px;
+  }
+
+  :where([data-kt-surface], [data-kt-surface] *) button:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@utility border-kt-hairline-scoped {
+  border-color: var(--kt-border);
+}
+
+@utility border-kt-control-line-scoped {
+  border-color: var(--kt-control-line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where([data-kt-surface], [data-kt-surface] *),
+  :where([data-kt-surface], [data-kt-surface] *)::before,
+  :where([data-kt-surface], [data-kt-surface] *)::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  :where([data-kt-surface], [data-kt-surface] *) .transition-opacity,
+  :where([data-kt-surface], [data-kt-surface] *)[data-motion="crossfade"] {
+    transition-property: opacity !important;
+    transition-duration: var(--kt-duration-base) !important;
+  }
+
+  :where([data-kt-surface], [data-kt-surface] *) [data-slot="button-spinner"] svg,
+  :where([data-kt-surface], [data-kt-surface] *) [data-sonner-toast] [data-icon] svg.animate-spin {
+    animation-duration: 1.6s !important;
+    animation-iteration-count: infinite !important;
+  }
+}

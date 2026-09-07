@@ -1,0 +1,40 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ */
+
+@custom-variant dark (&:is(.dark *));
+
+/* class 토글 없이 OS 설정을 쓰는 앱을 위한 동일한 map dark 값이다. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --kt-surface-page: oklch(19% 0.006 150);
+    --kt-surface-subtle: oklch(24% 0.008 145);
+    --kt-surface-muted: oklch(31% 0.012 145);
+    --kt-surface-card: oklch(23% 0.007 145);
+    --kt-text-primary: oklch(93% 0.006 155);
+    --kt-text-secondary: oklch(78% 0.01 155);
+    --kt-text-tertiary: oklch(68% 0.012 155);
+    --kt-text-disabled: oklch(52% 0.012 155);
+    --kt-text-strong: var(--kt-text-primary);
+    --kt-icon: oklch(70% 0.01 155);
+    --kt-border: var(--kt-surface-muted);
+    --kt-control-line: oklch(58% 0.012 145);
+    --kt-brand: oklch(76% 0.085 169);
+    --kt-brand-hover: oklch(81% 0.085 169);
+    --kt-brand-tint: oklch(31% 0.035 169);
+    --kt-brand-foreground: oklch(20% 0.02 165);
+    --kt-focus: oklch(80% 0.09 169);
+    --kt-success: oklch(75% 0.09 149);
+    --kt-success-tint: oklch(28% 0.04 150);
+    --kt-warning: oklch(77% 0.12 75);
+    --kt-warning-tint: oklch(30% 0.045 80);
+    --kt-info: oklch(75% 0.11 258);
+    --kt-info-tint: oklch(30% 0.05 258);
+    --kt-destructive: oklch(72% 0.14 27);
+    --kt-destructive-tint: oklch(30% 0.06 27);
+    --kt-overlay: oklch(10% 0.006 157 / 0.6);
+    --kt-shadow-elevated: 0 4px 12px oklch(10% 0.006 157 / 0.32);
+    --kt-shadow-modal: 0 8px 24px oklch(10% 0.006 157 / 0.4);
+  }
+}
