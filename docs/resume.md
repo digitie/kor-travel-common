@@ -20,7 +20,7 @@ T-009는 [PR #5](https://github.com/digitie/kor-travel-common/pull/5)의 `6e1881
 
 ## 시작 파일과 검증
 
-[T-005c](tasks/T-005c-workflow-static-report.md), [버전 규약](standards/versions.md)의 workflow 고정 참조·Node 선언 계약부터 대조한다. 명령 사다리는 [개발 환경](dev-environment.md#6-검증-명령-사다리), 리뷰는 [agent workflow](runbooks/agent-workflow.md)를 따른다.
+[T-011](tasks/T-011-consumer-manifest-schema.md), [통합 계획](plan/integration-plan.md)의 소비자 매니페스트 스키마·validator 계약부터 대조한다. 명령 사다리는 [개발 환경](dev-environment.md#6-검증-명령-사다리), 리뷰는 [agent workflow](runbooks/agent-workflow.md)를 따른다.
 
 ## 차단 조건
 
