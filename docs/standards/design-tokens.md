@@ -1,7 +1,7 @@
 # 디자인 토큰 계약(--kt-*) — 색상 톤·형태·모션 규칙
 
 - 정본 지위: 이 문서는 @kor-travel/tokens의 토큰 **이름·의미·계층·프로필·오버라이드·검사 규칙**의 정본이다. 값의 정본은 [packages/tokens/tokens.css](../../packages/tokens/tokens.css)이고, dist/의 JSON·TypeScript·Tailwind preset은 이 CSS에서 생성한다.
-- 확정 task: **T-104**. T-101·T-102의 실제 파일과 대조해 TK-1~TK-13을 정리했으며, 두 적대적 리뷰 통과 후 확정한다. 마지막 갱신: 2026-09-08.
+- 확정 task: **T-104**. T-101·T-102의 실제 파일과 대조해 TK-1~TK-13을 정리했으며, 두 적대적 리뷰 통과로 확정했다. 최종 candidate `2ca6b0c`는 PR #17(`c573e7c`)로 병합했다. 마지막 갱신: 2026-09-08.
 - 조사 기준선: [디자인 토큰 조사](../survey/cross/design-tokens.md) §1의 앱별 기준 commit(c494e227, 9af25e5, 6003da9, 2bb1111/99b3f98, 1d9d74d, 7945305, 862562d, d078437)을 사용했다. common 실물 대조 기준은 T-102 병합 후 4cde7e8이다.
 - 규칙 어휘: **MUST**는 신규 채택에서 반드시 지키고, **SHOULD**는 벗어날 때 PR 또는 예외 매니페스트에 근거와 until을 남긴다. 열림(O-n)은 기본값으로 진행하되 사용자 확인이 필요한 결정이다. UX·반응형·파일 import 절차는 [ux-guide](ux-guide.md), [responsive-web](responsive-web.md), [style-delivery](../architecture/style-delivery.md), [consumer adoption runbook](../runbooks/consumer-adoption.md)의 정본을 따른다.
 

@@ -1,13 +1,13 @@
 # T-104 docs/standards/design-tokens.md 확정(패키지 실물과 대조·규칙 ID TK-n)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P0
 - Gate: 2인 리뷰
 - 선행: T-101
 
 ## 목표
 
-색상 톤 규칙의 정본 docs/standards/design-tokens.md를 규칙 ID TK-1~TK-13으로 확정했다. T-101·T-102의 실제 tokens.css·theme.css·shadcn.css와 변수 집합·alias 의미·프로필 값을 대조하고, 두 독립 reviewer의 PASS까지 확인한다.
+색상 톤 규칙의 정본 docs/standards/design-tokens.md를 규칙 ID TK-1~TK-13으로 확정했다. T-101·T-102의 실제 tokens.css·theme.css·shadcn.css와 변수 집합·alias 의미·프로필 값을 대조하고, 두 독립 reviewer의 PASS와 PR #17 병합까지 확인했다.
 
 ## 고정 결정
 
@@ -58,7 +58,7 @@ Git Bash에서 동일.
 
 ## evidence
 
-- 대조 결과는 tokens.css 44개 light/dark, shadcn 4 alias, admin profile 값이 모두 일치했다. 문서·plan·unittest·package check·diff 검증과 두 reviewer 원본 및 통합 report를 이 task와 journal에 연결한다. T-103 대비 도구, 소비자 build/e2e·6폭 시각 비교·npm/PyPI 게시는 NOT_RUN(후속 task 또는 사용자 범위)이다.
+- 대조 결과는 tokens.css 44개 light/dark, shadcn 4 alias, admin profile 값이 모두 일치했다. 문서·plan·unittest·package check·diff 검증과 두 reviewer 원본 및 [최종 통합 report](../reviews/adversarial/2026-09-08-t104-t020-t021.md)를 이 task와 journal에 연결한다. 최종 code candidate `2ca6b0c491ddcf542d0c77540b78d18ddf100dfb`를 PR #17로 squash merge했고 main merge SHA는 `c573e7c9477623b5c0e938d7b2fd1962be99cff2`, main CI는 `34168628049`다. T-103 대비 도구, 소비자 build/e2e·6폭 시각 비교·npm/PyPI 게시는 NOT_RUN(후속 task 또는 사용자 범위)이다.
 
 ## rollback 또는 release 차단 조건
 
