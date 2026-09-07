@@ -45,7 +45,7 @@
   --radius-panel: var(--kt-radius-panel);
   --radius-xs: var(--kt-radius-control);
   --radius-sm: var(--kt-radius-control);
-  --radius-md: var(--kt-radius-panel);
+  --radius-md: var(--kt-radius-control);
   --radius-lg: var(--kt-radius-panel);
   --radius-xl: var(--kt-radius-panel);
   --radius-2xl: var(--kt-radius-panel);
@@ -128,7 +128,7 @@
   --radius-panel: var(--kt-radius-panel);
   --radius-xs: var(--kt-radius-control);
   --radius-sm: var(--kt-radius-control);
-  --radius-md: var(--kt-radius-panel);
+  --radius-md: var(--kt-radius-control);
   --radius-lg: var(--kt-radius-panel);
   --radius-xl: var(--kt-radius-panel);
   --radius-2xl: var(--kt-radius-panel);

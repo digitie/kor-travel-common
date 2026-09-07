@@ -19,7 +19,7 @@ map 어휘를 그대로 쓰는 앱(weather 294회, geo 별칭 층)이 호출부�
 ## 구현 범위
 
 1. `packages/tokens/aliases/map-vocabulary.css`: map·weather·geo가 공유하는 이름(`--surface-page`… `--text-primary`… `--brand`… `--control-line`·`--border`·`--focus`·status 4+tint·`--radius-control/panel`·`--control-h/-sm`·`--rail`·`--duration-*`·`--ease-*`·`--shadow-*`·`--z-*`·`--font-sans/mono`)을 `var(--kt-*)`로 재선언. 목록은 `dt` §3.2.1·§3.2.3의 map 이름 열 전수 + weather `app/tokens.css`(조사 커밋)에서 재grep해 확정한다. 앱마다 값이 다른 weather·geo의 `--space-3xs..2xl`은 이 shim에 넣지 않는다. `.dark` 블록은 shim이 직접 선언하는 모든 이름을 동일하게 갖는다.
-2. `packages/tokens/examples/weather-overrides.css`: 고정 weather 원천의 light/dark 공통 토큰 값을 `--kt-*`로 재표현하고, navy brand 4종·`--kt-rail: 17rem`·현재 sans/mono 스택·`--space-3xs..2xl` 호환 값을 앱 소유 예제로 둔다. `examples/README.md`에 예제 비배포·원천 commit·6폭 diff 0 검증은 T-461 evidence임을 적는다.
+2. `packages/tokens/examples/weather-overrides.css`: 고정 weather 원천의 light/dark 공통 토큰 값을 `--kt-*`로 재표현하고, navy brand 4종·`--kt-rail: 17rem`·현재 sans/mono 스택·`--radius-md` panel 호환·`--space-3xs..2xl` 호환 값을 앱 소유 예제로 둔다. `examples/README.md`에 예제 비배포·원천 commit·6폭 diff 0 검증은 T-461 evidence임을 적는다.
 3. `tools/check_aliases.py` + `tests/test_check_aliases.py`(stdlib): (a) 별칭 파일의 모든 `var(--kt-…)` 대상이 `tokens.css`에 정의됨, (b) 별칭 파일이 `--kt-*` 이름을 정의하지 않음, (c) 별칭 이름이 `theme.css`의 `@theme` 네임스페이스(`--color-*`·`--spacing-*`·`--radius-*`·`--text-*`·`--font-*`)와 겹치지 않음, (d) `shadcn.css`와 중복 정의 없음. 출력 목록 + exit 0/1.
 4. `package.json` `exports`에 `./aliases/map-vocabulary.css` 추가(T-101 골격에 이미 예약), `npm run check`에 `check_aliases` 호출은 Node 빌드 외 Python이므로 CI `tools` job에서 실행.
 
@@ -35,7 +35,7 @@ map 어휘를 그대로 쓰는 앱(weather 294회, geo 별칭 층)이 호출부�
 
 - `check_aliases.py`가 `packages/tokens/aliases`에서 exit 0이고, 미정의 대상·`--kt-*` 정의·네임스페이스 충돌 fixture 각각에서 exit 1(테스트로 고정).
 - 별칭 이름 집합은 weather 원천에서 확인한 map·weather·geo 공유 이름의 누락 목록 0이어야 한다. weather에만 있고 geo와 값이 다른 `--space-3xs..2xl` 8개는 common shim에서 제외하고, 예제에 보존한 근거와 대조표를 evidence에 첨부한다.
-- weather 예제가 `tokens.css` + shim + 예제만으로 고정 원천의 common 토큰·navy·17rem·sans/mono·spacing·light/dark 값을 재현한다는 대조표(변수별 원값/결과값)가 evidence에 있다. 실제 소비자 화면 6폭 diff는 T-461에서 검증하며 이 task에서는 `NOT_RUN(T-461)`이다.
+- weather 예제가 `tokens.css` + shim + 예제만으로 고정 원천의 common 토큰·navy·17rem·sans/mono·`radius-md`·spacing·light/dark 값을 재현한다는 대조표(변수별 원값/결과값)가 evidence에 있다. map과 weather의 `radius-md` 의미가 다르므로 shim은 map의 control 값을 유지하고 weather 예제가 panel을 재선언한다. 실제 소비자 화면 6폭 diff는 T-461에서 검증하며 이 task에서는 `NOT_RUN(T-461)`이다.
 - `npm pack` tarball에 `aliases/map-vocabulary.css`가 포함되고 `examples/`는 포함되지 않는다.
 - Linux·Windows 결과 동일.
 
