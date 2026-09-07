@@ -63,9 +63,12 @@ Git Bash에서 동일(`/tmp` 대신 임의 디렉터리).
 
 ## evidence
 
-- 로컬 확인: Node `v25.9.0`, npm `11.12.1`에서 `npm ci --ignore-scripts --no-audit --no-fund`, `npm run build --workspace packages/tokens`, `npm run check --workspace packages/tokens`, `npm test --workspace packages/tokens`(6개 통과), `npm pack` 및 공개 subpath 설치 스모크를 실행했다. 요구 버전 Node 22.23.1/npm 11.19.1은 로컬에 없어 버전 일치 gate는 `NOT_RUN(로컬 런타임 미설치)`이다.
-- 현재 tarball은 CSS 7종·`LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md`·`dist/index.d.ts`·`dist/tokens.json`을 포함하며, 임시 프로젝트에서 공개 subpath 10개(`@kor-travel/tokens` 포함)의 `require.resolve`가 성공했다. 산출물은 `npm run check`에서 drift 0이다.
-- `kt_contrast`는 `NOT_RUN(T-103 대기)`, 소비자 저장소 build/e2e·실제 Release·npm/PyPI 게시·소비자 채택은 `NOT_RUN(사용자 범위와 후속 task)`이다. PR의 `packages` job과 main/release push 실제 run은 draft PR 이후 기록한다.
+- post-fix candidate `4c33a5d951e32df0c2170b7a865f324d122dbe05`에서 Windows(Node `v25.9.0`, npm `11.12.1`)과 WSL(Node `v22.22.2`, npm `11.19.1`)의 build/check/test를 실행했다. package test는 양 환경 7개 통과·skip 0이며, Windows의 Node engine 경고는 버전 일치 성공으로 세지 않았다.
+- 양 환경의 `npm pack`·별도 설치 스모크에서 CSS 7종·`LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md`·`dist/index.d.ts`·`dist/tokens.json`과 공개 subpath 11개를 확인했다. DTCG 2025.10 schema 검증은 light 44개·dark extension 44개 오류 0이다.
+- plan 106 task·오류 0, 문서 355개/대상 2306개·오류 0, SPDX 41개·오류 0, secret/redaction 466개·발견 0, `check_versions --self-check`, `git diff --check`를 확인했다. Windows Tailwind v4/v3와 Chromium dark/media·scoped·순수 CSS hairline probe도 통과했다.
+- [PR #11 CI run 34126309766](https://github.com/digitie/kor-travel-common/actions/runs/34126309766)은 정확한 candidate head에서 docs·tools 양 OS·secret-scan·check-versions·packages 6개 job이 모두 성공했다. packages job은 Node 22.23.1/npm 11.19.1, build 전후 drift check, 7 tests, pack/install을 확인했다.
+- 두 독립 post-fix reviewer는 초기 P1/P2/P3 finding 12건을 모두 `FIXED`, 신규 P0–P3 0건으로 판정했다([통합 리뷰](../reviews/adversarial/2026-09-07-t101-post-fix-01.md)). 현재 status는 merge 후 main/release push CI를 닫기 전까지 `IN_PROGRESS`로 유지한다.
+- `kt_contrast`는 `NOT_RUN(T-103 대기)`, 소비자 저장소 build/e2e·실제 Release·tag·npm/PyPI 게시·소비자 채택은 `NOT_RUN(사용자 범위와 후속 task)`이다. merge 후 main CI와 `codex/release-*` 검증 branch 실제 run은 별도 evidence로 추가한다.
 
 ## rollback 또는 release 차단 조건
 

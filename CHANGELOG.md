@@ -12,6 +12,10 @@
 
 - `@kor-travel/tokens` 계약 초안: `--kt-*` 의미 토큰(surface 4·text 4·icon·border·control-line·brand 4·focus·status 4+tint·overlay·radius 2·control 2·rail·duration 2·ease 2·shadow 2·z 5·font 스택), admin/consumer 프로필, `.dark` 값 완비·활성화 opt-in, 대비 검사 규칙, 정본 `tokens.css`와 생성물(`tokens.json`·`tokens.ts`·`tailwind-preset.cjs`), 레거시 어휘 shim `aliases/map-vocabulary.css`. 패키지 실물은 T-101([design tokens](docs/standards/design-tokens.md)).
 
+#### Fixed
+
+- T-101 post-fix에서 DTCG 2025.10 자료형·`$root` 계층·alias/profile 참조를 생성기에서 보장하고, build 전 생성물 drift 검사·dark 전수 값 비교·Tailwind v3/v4 유틸리티·OS/class dark 상속·Tailwind 없는 hairline 규칙을 고정했다. 두 독립 적대 리뷰어가 초기 12건을 모두 수정된 것으로 재현했다([최종 리뷰](docs/reviews/adversarial/2026-09-07-t101-post-fix-01.md)).
+
 ### ui
 
 #### Added

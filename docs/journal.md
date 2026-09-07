@@ -2,6 +2,14 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-101 반복 no-go 근본 원인 수정·post-fix PASS)
+
+T-101 초기 candidate `f8894e293ca9677f457011197052cd55dbdc9696`에서 A/B가 각각 BLOCK했다. A는 DTCG 자료형·token/group 충돌·Tailwind z/easing·dark-media·scoped dark 상속·profile/media drift·dark 전수 시험 누락을, B는 build 전 drift 검사 부재·scoped `color-scheme`·Tailwind 없는 hairline·T-102 경로 불일치를 독립 재현했다. 원인은 리뷰어가 달랐기 때문이 아니라, 생성물을 덮어쓴 뒤 검사하는 순서와 정본에서 파생되지 않는 중복 값, 실행 의미를 확인하지 않는 부분 시험이 한 계약으로 묶이지 않았기 때문이다.
+
+`4c33a5d951e32df0c2170b7a865f324d122dbe05`에서 DTCG 2025.10 변환과 `$root` 계층, dark/profile 생성, build 전 `check`·생성 후 Git diff, 44개 light/dark 전수 비교, Tailwind v4/v3·Chromium·순수 CSS probe를 추가했다. 두 reviewer가 같은 immutable SHA/tree를 detached clean worktree에서 독립 재검토해 최초 12건을 모두 FIXED, 신규 P0–P3 0건으로 PASS했다([통합 리뷰](reviews/adversarial/2026-09-07-t101-post-fix-01.md), [manifest](reviews/adversarial/evidence/2026-09-07-t101-post-fix-01-manifest.md), [A](reviews/adversarial/evidence/2026-09-07-t101-post-fix-01-reviewer-a.md), [B](reviews/adversarial/evidence/2026-09-07-t101-post-fix-01-reviewer-b.md)). 원본 SHA256은 통합 보고서와 evidence에 보존했다.
+
+PR #11 정확한 head의 CI `34126309766` 6개 job이 성공했고 Windows/WSL package 7 tests·pack/install·plan/link/SPDX/secret/redaction/version gate를 직접 확인했다. main merge 후 main CI와 `codex/release-*` 실제 push CI는 `NOT_RUN(merge 후 gate)`로 남겼으며, 소비자 build/e2e·T-103·Release·npm/PyPI 게시·소비자 저장소 수정은 사용자 범위 또는 후속 task로 실행하지 않았다.
+
 ## 2026-09-07 (Codex, T-011 최종 review PASS·PR #10 merge gate)
 
 T-011 `consumer-manifest.v1` strict schema·validator·10개 앱 표면 초안과 `check_versions --manifest` 저장소 root 경계를 `4680bacdf285f2cc86f1a18cc1de29ff4129f2a8`에서 마쳤다. 반복된 적대 리뷰 no-go의 근본 원인은 매니페스트·lock·workspace·app 입력을 각 호출부에서 `resolve/is_file/exists`로 따로 검사해 OS별 symlink loop와 누락 leaf의 결과가 달라지고, 존재성 조기 반환이 중간 symlink를 경계 검사 전에 소거한 데 있었다. `_resolve_input_path`·`_path_contains_symlink`로 경계를 중앙화하고 app 조기 반환·validator registry·check_versions registry 오류 원문을 닫았으며, Windows/WSL direct·중간·외부·self-symlink와 redaction 회귀를 고정했다.
