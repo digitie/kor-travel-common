@@ -450,6 +450,7 @@ UV_PACKAGE_FIELDS = frozenset({
 })
 UV_SOURCE_FIELDS = frozenset({"registry", "git", "editable", "directory", "virtual"})
 UV_SUPPORTED_REVISION = 4
+DEPENDENCY_GROUP_NAME_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$")
 
 
 def _uv_error(path: Path, detail: str) -> ValueError:
@@ -474,9 +475,11 @@ def uv_source_kind(source: object, path: Path, package_name: str) -> str:
     if kinds[0] in {"registry", "git"}:
         try:
             parsed = urlsplit(source[kinds[0]])
+            hostname = parsed.hostname
+            parsed.port
         except ValueError as exc:
             raise _uv_error(path, "source URL 형식 오류") from exc
-        if not parsed.scheme or not parsed.netloc:
+        if not parsed.scheme or not hostname:
             raise _uv_error(path, "source URL 형식 오류")
     elif "\x00" in source[kinds[0]]:
         raise _uv_error(path, "source 경로 형식 오류")
@@ -531,13 +534,20 @@ def read_uv_lock(path: Path) -> dict:
         uv_source_kind(entry.get("source"), path, name)
         if "dependencies" in entry and (
                 not isinstance(entry["dependencies"], list)
-                or any(not isinstance(item, dict) for item in entry["dependencies"])):
+                or any(not isinstance(item, dict)
+                       or not isinstance(item.get("name"), str)
+                       or not item["name"].strip() for item in entry["dependencies"])):
             raise _uv_error(path, "package dependencies 형식 오류")
         for field_name in ("optional-dependencies", "dependency-groups", "dev-dependencies"):
             if field_name not in entry:
                 continue
             value = entry[field_name]
-            if not isinstance(value, dict) or any(not isinstance(items, list) for items in value.values()):
+            if (not isinstance(value, dict)
+                    or any(not isinstance(items, list)
+                           or any(not isinstance(item, dict)
+                                  or not isinstance(item.get("name"), str)
+                                  or not item["name"].strip() for item in items)
+                           for items in value.values())):
                 raise _uv_error(path, "package group 형식 오류")
         for field_name in ("metadata", "sdist"):
             if field_name in entry and not isinstance(entry[field_name], dict):
@@ -582,6 +592,9 @@ def ref_is_pinned(text: str, *, kind: str = "npm") -> bool:
         return False
     if kind == "pypi":
         # Python 선언에서 fragment는 subdirectory 등 메타데이터이며 revision이 아니다.
+        # manifest에서 branch 종류를 보존하기 위해 넣은 내부 표식은 이름 모양과 무관하게 부동이다.
+        if "@branch:" in path:
+            return False
         return "@" in path and valid_ref(path.rsplit("@", 1)[1])
     # npm git 선언의 revision은 fragment다. URL query나 Python식 @rev를 혼용하지 않는다.
     return bool(fragment and valid_ref(fragment))
@@ -946,26 +959,44 @@ class Checker:
             dependency_groups = data.get("dependency-groups", {})
             if not isinstance(dependency_groups, dict):
                 raise _manifest_input_error()
+            normalized_groups: dict[str, list] = {}
+            for original_name, group in dependency_groups.items():
+                if (not isinstance(original_name, str)
+                        or not DEPENDENCY_GROUP_NAME_RE.fullmatch(original_name)
+                        or not isinstance(group, list)):
+                    raise _manifest_input_error()
+                normalized_name = normalize_name(original_name)
+                if normalized_name in normalized_groups:
+                    raise _manifest_input_error()
+                normalized_groups[normalized_name] = group
             expanded_groups: set[str] = set()
+            active_groups: set[str] = set()
 
-            def append_group(group_name: str, *, included: bool = False) -> None:
-                if group_name in expanded_groups:
+            def append_group(group_name: str) -> None:
+                if not isinstance(group_name, str) or not DEPENDENCY_GROUP_NAME_RE.fullmatch(group_name):
+                    raise _manifest_input_error()
+                normalized_name = normalize_name(group_name)
+                if normalized_name in active_groups or normalized_name not in normalized_groups:
+                    raise _manifest_input_error()
+                if normalized_name in expanded_groups:
                     return
-                if included and group_name not in dependency_groups:
-                    raise _manifest_input_error()
-                expanded_groups.add(group_name)
-                group = dependency_groups.get(group_name, [])
-                if not isinstance(group, list):
-                    raise _manifest_input_error()
-                for item in group:
-                    if isinstance(item, str):
-                        specs.append(item)
-                    elif isinstance(item, dict) and isinstance(item.get("include-group"), str):
-                        append_group(item["include-group"], included=True)
-                    else:
-                        raise _manifest_input_error()
+                active_groups.add(normalized_name)
+                try:
+                    for item in normalized_groups[normalized_name]:
+                        if isinstance(item, str):
+                            if parse_requirement(item) is None:
+                                raise _manifest_input_error()
+                            specs.append(item)
+                        elif (isinstance(item, dict) and set(item) == {"include-group"}
+                              and isinstance(item.get("include-group"), str)):
+                            append_group(item["include-group"])
+                        else:
+                            raise _manifest_input_error()
+                finally:
+                    active_groups.remove(normalized_name)
+                expanded_groups.add(normalized_name)
 
-            for group_name in dependency_groups:
+            for group_name in normalized_groups:
                 append_group(group_name)
             for text in specs:
                 parsed = parse_requirement(str(text))

@@ -398,6 +398,10 @@ class CheckVersionsTests(unittest.TestCase):
             lock_text + '\n[[package]]\nname = "custom-lib"\nversion = "1.1.0"\n'
             'source = { git = "https://github.com/example/pkg?rev=short#abc" }\n', encoding="utf-8")
         self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), ["FLOATING_REF"])
+        branch_url = "git+https://github.com/example/pkg.git@branch:topic@v1.2.3"
+        python_fixture(self.repo, requires=">=3.12", deps=["custom-lib @ " + branch_url], locked={},
+                       git_locked={"custom-lib": ("1.0.0", "https://github.com/example/pkg?branch=topic%40v1.2.3#" + sha)})
+        self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), ["FLOATING_REF"])
         npm_fixture(self.repo, deps={"custom-lib": "git+https://github.com/example/pkg.git#v1.2.3"},
                     engines={"node": ">=22.12"}, installed={"custom-lib": "1.2.3"})
         npm_findings = CV.Checker(CV.Registry.load(self.registry_path), "app-a", CV.date(2026, 9, 6))
@@ -550,6 +554,12 @@ class CheckVersionsTests(unittest.TestCase):
              'source = { registry = "https://[" }'),
             ('source = { registry = "https://pypi.org/simple" }',
              'source = { registry = "https://pypi.org/simple" }\ndependencies = { broken = true }'),
+            ('source = { registry = "https://pypi.org/simple" }',
+             'source = { registry = "https://@" }'),
+            ('source = { registry = "https://pypi.org/simple" }',
+             'source = { registry = "https://example.invalid:bad/simple" }'),
+            ('source = { registry = "https://pypi.org/simple" }',
+             'source = { registry = "https://pypi.org/simple" }\noptional-dependencies = { test = [42] }'),
         ):
             with self.subTest(replacement=replacement):
                 lock_path.write_text(original.replace(*replacement), encoding="utf-8")
@@ -609,6 +619,23 @@ class CheckVersionsTests(unittest.TestCase):
             'custom-lib = [\n  { git = "https://github.com/example/custom-lib", branch = "v1.2.3" },\n  { git = "https://github.com/example/custom-lib", tag = "v1.2.3" },\n]',
             'custom-lib = "invalid"')
         (self.repo / "pyproject.toml").write_text(malformed_source, encoding="utf-8")
+        self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+
+        normalized_group = malformed_group.replace(
+            '[dependency-groups]\nlint = "fastapi>=0.115"\ndev = [{ include-group = "lint" }]',
+            '[dependency-groups]\nTest_Group = ["fastapi>=0.115"]\ndev = [{ include-group = "test-group" }]')
+        (self.repo / "pyproject.toml").write_text(normalized_group, encoding="utf-8")
+        self.assertNotEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+
+        cyclic_group = normalized_group.replace(
+            'Test_Group = ["fastapi>=0.115"]', 'Test_Group = [{ include-group = "dev" }]')
+        (self.repo / "pyproject.toml").write_text(cyclic_group, encoding="utf-8")
+        self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+
+        extra_include_key = normalized_group.replace(
+            '{ include-group = "test-group" }',
+            '{ include-group = "test-group", unexpected = true }')
+        (self.repo / "pyproject.toml").write_text(extra_include_key, encoding="utf-8")
         self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
 
         missing_group = malformed_group.replace('lint = "fastapi>=0.115"',
