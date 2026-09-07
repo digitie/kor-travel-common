@@ -389,6 +389,10 @@ class CheckVersionsTests(unittest.TestCase):
                 python_fixture(self.repo, requires=">=3.12", deps=[], locked={},
                                git_locked={"custom-lib": ("1.0.0", "https://github.com/example/pkg?rev=main#" + fragment)})
                 self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), [expected])
+        python_fixture(self.repo, requires=">=3.12",
+                       deps=["custom-lib @ git+https://github.com/example/pkg.git@" + sha],
+                       locked={}, git_locked={"custom-lib": ("1.0.0", "https://github.com/example/pkg?rev=main#main")})
+        self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), ["FLOATING_REF"])
         npm_fixture(self.repo, deps={"custom-lib": "git+https://github.com/example/pkg.git#v1.2.3"},
                     engines={"node": ">=22.12"}, installed={"custom-lib": "1.2.3"})
         npm_findings = CV.Checker(CV.Registry.load(self.registry_path), "app-a", CV.date(2026, 9, 6))
@@ -572,6 +576,18 @@ class CheckVersionsTests(unittest.TestCase):
         findings = self.run_checker()
         self.assertEqual(self.verdicts(findings, "fastapi"), ["NO_LOCK"])
         self.assertEqual(self.verdicts(findings, "custom-lib"), ["FLOATING_REF", "OK"])
+
+        malformed_group = (self.repo / "pyproject.toml").read_text(encoding="utf-8").replace(
+            'lint = ["fastapi>=0.115"]', 'lint = "fastapi>=0.115"')
+        (self.repo / "pyproject.toml").write_text(malformed_group, encoding="utf-8")
+        self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+        malformed_source = malformed_group.replace('lint = "fastapi>=0.115"',
+                                                     'lint = ["fastapi>=0.115"]')
+        malformed_source = malformed_source.replace(
+            'custom-lib = [\n  { git = "https://github.com/example/custom-lib", branch = "main" },\n  { git = "https://github.com/example/custom-lib", tag = "v1.2.3" },\n]',
+            'custom-lib = "invalid"')
+        (self.repo / "pyproject.toml").write_text(malformed_source, encoding="utf-8")
+        self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
 
     def test_python_floating_ref_without_lock(self):
         python_fixture(self.repo, requires=None,

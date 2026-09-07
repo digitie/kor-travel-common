@@ -718,8 +718,13 @@ class Checker:
 
     def record_ref(self, scope: str, ecosystem: str, name: str, spec: str, resolved: str = "") -> None:
         # 선언이 브랜치를 가리키면 lock이 SHA를 기록해도 다음 설치에서 움직인다(D-11).
-        pinned = (ref_is_pinned(resolved, kind="uv" if ecosystem == "pypi" else "npm")
-                  if spec == "(전이)" else ref_is_pinned(spec, kind=ecosystem))
+        declared_pinned = (ref_is_pinned(spec, kind=ecosystem) if spec != "(전이)" else True)
+        if spec == "(전이)":
+            resolved_pinned = bool(resolved) and ref_is_pinned(resolved, kind="uv")
+        else:
+            resolved_pinned = (ref_is_pinned(resolved, kind="uv")
+                              if ecosystem == "pypi" and resolved else True)
+        pinned = declared_pinned and resolved_pinned
         provider = (normalize_name(name) in self.registry.provider_names()
                     or re.fullmatch(r"python-[a-z0-9-]+-api", normalize_name(name)) is not None)
         sha = SHA_RE.search(resolved or spec)
@@ -728,8 +733,12 @@ class Checker:
             self.add(scope, name, "git", spec, installed, "OK",
                      "providers 보고만(O-16)" if provider else "git 참조 고정됨")
         else:
+            if declared_pinned and not resolved_pinned:
+                detail = "선언은 고정됐지만 uv.lock source.git이 전체 SHA로 고정되지 않음"
+            else:
+                detail = "브랜치·미고정 참조 금지(D-11): SHA 또는 버전 태그로 고정"
             self.add(scope, name, "git", spec, installed, "FLOATING_REF",
-                     "브랜치·미고정 참조 금지(D-11): SHA 또는 버전 태그로 고정")
+                     detail)
 
     # --- npm
     def record_npm_declarations(self, label: str, declared: dict, packages: dict,
@@ -891,6 +900,8 @@ class Checker:
             for group in project.get("optional-dependencies", {}).values():
                 specs.extend(group)
             dependency_groups = data.get("dependency-groups", {})
+            if not isinstance(dependency_groups, dict):
+                raise ValueError(f"{manifest}: dependency-groups는 객체여야 함")
             expanded_groups: set[str] = set()
 
             def append_group(group_name: str) -> None:
@@ -899,12 +910,14 @@ class Checker:
                 expanded_groups.add(group_name)
                 group = dependency_groups.get(group_name, [])
                 if not isinstance(group, list):
-                    return
+                    raise ValueError(f"{manifest}: dependency-groups.{group_name}는 배열이어야 함")
                 for item in group:
                     if isinstance(item, str):
                         specs.append(item)
                     elif isinstance(item, dict) and isinstance(item.get("include-group"), str):
                         append_group(item["include-group"])
+                    else:
+                        raise ValueError(f"{manifest}: dependency-groups.{group_name} 항목 형식 오류")
 
             for group_name in dependency_groups:
                 append_group(group_name)
@@ -917,21 +930,24 @@ class Checker:
                 if url:
                     urls.setdefault(name, []).append(url)
             uv_sources = data.get("tool", {}).get("uv", {}).get("sources", {})
-            if isinstance(uv_sources, dict):
-                for name, source_value in uv_sources.items():
-                    source_entries = source_value if isinstance(source_value, list) else [source_value]
-                    for source in source_entries:
-                        if not isinstance(source, dict) or "git" not in source:
-                            continue
-                        git_url = source.get("git")
-                        if not isinstance(git_url, str) or not git_url.strip():
-                            continue
-                        if not git_url.startswith("git+"):
-                            git_url = "git+" + git_url
-                        ref = source.get("rev") or source.get("tag") or source.get("branch") or ""
-                        urls.setdefault(normalize_name(name), []).append(
-                            f"{git_url}@{ref}" if ref else git_url
-                        )
+            if not isinstance(uv_sources, dict):
+                raise ValueError(f"{manifest}: tool.uv.sources는 객체여야 함")
+            for name, source_value in uv_sources.items():
+                source_entries = source_value if isinstance(source_value, list) else [source_value]
+                if not source_entries or any(not isinstance(source, dict) for source in source_entries):
+                    raise ValueError(f"{manifest}: tool.uv.sources.{name} 항목 형식 오류")
+                for source in source_entries:
+                    if "git" not in source:
+                        continue
+                    git_url = source.get("git")
+                    if not isinstance(git_url, str) or not git_url.strip():
+                        raise ValueError(f"{manifest}: tool.uv.sources.{name}.git 형식 오류")
+                    if not git_url.startswith("git+"):
+                        git_url = "git+" + git_url
+                    ref = source.get("rev") or source.get("tag") or source.get("branch") or ""
+                    urls.setdefault(normalize_name(name), []).append(
+                        f"{git_url}@{ref}" if ref else git_url
+                    )
             poetry = data.get("tool", {}).get("poetry", {})
             if poetry:
                 requires_python = requires_python or poetry.get("dependencies", {}).get("python")
