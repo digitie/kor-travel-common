@@ -889,6 +889,10 @@ class CheckVersionsTests(unittest.TestCase):
             'fastapi==0.141.1; python_version >=\n',
             'fastapi==0.141.1; python_version >= dev\n',
             'fastapi==0.141.1; python_version >= = "3.11"\n',
+            'fastapi==0.141.1; python_version >= "3.11" AND extra == "dev"\n',
+            'fastapi==0.141.1; python_version IN "3.11"\n',
+            'fastapi==0.141.1; python_version >= "3.11" OR extra == "dev"\n',
+            'fastapi==0.141.1; extra NOT IN "dev"\n',
             'fastapi(((==0.141.1)))\n',
             '--only-binary\n',
         ):
@@ -901,7 +905,10 @@ class CheckVersionsTests(unittest.TestCase):
             'fastapi==0.141.1; (python_version >= "3.11" and extra == "dev")\n'
             'fastapi==0.141.1; "3.11" <= python_version\n'
             'fastapi==0.141.1; python_version >= "3.11" or '
-            '(python_version < "4" and extra in "dev")\n',
+            '(python_version < "4" and extra in "dev")\n'
+            'fastapi==0.141.1; platform_version == "x[y]"\n'
+            'fastapi==0.141.1; "3.11" == "3.11"\n'
+            'fastapi==0.141.1; python_version == os_name\n',
             encoding="utf-8")
         result = self.cli(str(self.repo), "--repo", "app-a", "--quiet")
         self.assertEqual(result.returncode, 0)

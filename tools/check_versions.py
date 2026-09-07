@@ -1125,7 +1125,7 @@ def _split_marker_top(text: str, keyword: str) -> list[str] | None:
                 return None
             index += 1
             continue
-        if depth == 0 and text[index:index + len(keyword)].lower() == keyword:
+        if depth == 0 and text[index:index + len(keyword)] == keyword:
             before = text[index - 1] if index else " "
             after_index = index + len(keyword)
             after = text[after_index] if after_index < len(text) else " "
@@ -1200,7 +1200,7 @@ def _marker_comparison(text: str) -> bool:
             continue
         if depth == 0:
             for operator in operators:
-                if text[index:index + len(operator)].lower() != operator:
+                if text[index:index + len(operator)] != operator:
                     continue
                 end = index + len(operator)
                 if operator in {"in", "not in"}:
@@ -1210,7 +1210,7 @@ def _marker_comparison(text: str) -> bool:
                         continue
                 left = _marker_operand(text[:index])
                 right = _marker_operand(text[end:])
-                if left is None or right is None or left[0] == right[0]:
+                if left is None or right is None:
                     return False
                 return True
         index += 1
@@ -1219,7 +1219,7 @@ def _marker_comparison(text: str) -> bool:
 
 def _valid_marker_expression(expression: str) -> bool:
     expression = expression.strip()
-    if not expression or "[" in expression or "]" in expression:
+    if not expression:
         return False
     while _outer_pair_wraps(expression):
         expression = expression[1:-1].strip()
