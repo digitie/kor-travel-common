@@ -402,6 +402,12 @@ class CheckVersionsTests(unittest.TestCase):
         python_fixture(self.repo, requires=">=3.12", deps=["custom-lib @ " + branch_url], locked={},
                        git_locked={"custom-lib": ("1.0.0", "https://github.com/example/pkg?branch=topic%40v1.2.3#" + sha)})
         self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), ["FLOATING_REF"])
+        for field in ("tag", "rev"):
+            python_fixture(self.repo, requires=">=3.12", deps=["custom-lib"], locked={},
+                           git_locked={"custom-lib": ("1.0.0", "https://github.com/example/pkg?rev=main#" + sha)})
+            with (self.repo / "pyproject.toml").open("a", encoding="utf-8") as stream:
+                stream.write(f'\n[tool.uv.sources]\ncustom-lib = {{ git = "https://github.com/example/pkg.git", {field} = "topic@v1.2.3" }}\n')
+            self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), ["FLOATING_REF"])
         npm_fixture(self.repo, deps={"custom-lib": "git+https://github.com/example/pkg.git#v1.2.3"},
                     engines={"node": ">=22.12"}, installed={"custom-lib": "1.2.3"})
         npm_findings = CV.Checker(CV.Registry.load(self.registry_path), "app-a", CV.date(2026, 9, 6))

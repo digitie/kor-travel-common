@@ -595,6 +595,9 @@ def ref_is_pinned(text: str, *, kind: str = "npm") -> bool:
         # manifest에서 branch 종류를 보존하기 위해 넣은 내부 표식은 이름 모양과 무관하게 부동이다.
         if "@branch:" in path:
             return False
+        # tag/rev/branch 이름에 `@`가 들어가면 마지막 조각만 버전 태그로 볼 수 없다.
+        if path.count("@") != 1:
+            return False
         return "@" in path and valid_ref(path.rsplit("@", 1)[1])
     # npm git 선언의 revision은 fragment다. URL query나 Python식 @rev를 혼용하지 않는다.
     return bool(fragment and valid_ref(fragment))
