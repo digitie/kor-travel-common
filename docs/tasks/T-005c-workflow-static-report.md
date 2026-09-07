@@ -1,6 +1,6 @@
 # T-005c workflow 고정 참조·CI Node 선언의 정적 보고
 
-- 상태: BLOCKED
+- 상태: READY
 - 우선순위: P2
 - Gate: 도구 테스트·두 OS CI·2인 리뷰
 - 선행: T-005, T-009

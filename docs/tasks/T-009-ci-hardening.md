@@ -1,6 +1,6 @@
-# T-009 common CI 하드닝(permissions·concurrency·timeout·ubuntu-24.04·액션 SHA 핀)·`tools` windows 매트릭스·`secret-scan`·`check-versions(report)` job·branch protection 문서·redaction guard
+# T-009 common CI 하드닝(permissions·concurrency·timeout·ubuntu-24.04·액션 SHA 핀)·`tools` windows 매트릭스·`secret-scan`·`check-versions(report)` job·branch protection 문서·redaction guard (2026-09-07, PR #5)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P1
 - Gate: CI
 - 선행: T-002, T-003
@@ -60,7 +60,21 @@ Git Bash에서 동일. CI 결과는 GitHub Actions 실행 링크로 기록한다
 
 ## evidence
 
+2026-09-07 완료: [최종 독립 리뷰](../reviews/adversarial/2026-09-07-t009-post-fix.md)는 A PASS/B PASS, 8개 원 finding 모두 FIXED·새 finding 0이다. 필수 실제 PR/release push 검증을 완료했으며 main merge 뒤 실행과 임시 branch 정리는 별도로 확인한다.
+
 ### 실제 CI 재실행
+
+최종 수정 후보 `f15072f4eb6543ead7636250671e8b12d60776e2`의 [PR CI](https://github.com/digitie/kor-travel-common/actions/runs/34070365064)가 5 check 모두 success다. 이후 코드 변경 없는 검증 commit `18b83bd0af84b4e685c4e00108f7104a00900c4a`을 PR branch와 임시 `codex/release-ci-t009-validation`에 push했고 [PR](https://github.com/digitie/kor-travel-common/actions/runs/34070419814)·[release push](https://github.com/digitie/kor-travel-common/actions/runs/34070419969)도 각각 5 check 모두 success였다. 두 commit의 tree는 `2230b30b2d088a26dbf57672f796bc8124e5119f`로 같다. 각 run의 모든 job에서 SOURCE_SHA 로그·checkout 비교 step·run head 일치를 다시 확인했다. 보고서 digest는 아래 ec34d6a 검증과 같고 로그에는 각 run의 실제 source가 기록돼 있다.
+
+| 빈 검증 commit의 check | PR 소요 시간·job | release push 소요 시간·job |
+|---|---|---|
+| docs | [14초](https://github.com/digitie/kor-travel-common/actions/runs/34070419814/job/101586597725) | [15초](https://github.com/digitie/kor-travel-common/actions/runs/34070419969/job/101586598485) |
+| tools (ubuntu-24.04) | [14초](https://github.com/digitie/kor-travel-common/actions/runs/34070419814/job/101586597778) | [15초](https://github.com/digitie/kor-travel-common/actions/runs/34070419969/job/101586598421) |
+| tools (windows-2025) | [34초](https://github.com/digitie/kor-travel-common/actions/runs/34070419814/job/101586597717) | [37초](https://github.com/digitie/kor-travel-common/actions/runs/34070419969/job/101586598506) |
+| secret-scan | [5초](https://github.com/digitie/kor-travel-common/actions/runs/34070419814/job/101586597608) | [5초](https://github.com/digitie/kor-travel-common/actions/runs/34070419969/job/101586598540) |
+| check-versions | [9초](https://github.com/digitie/kor-travel-common/actions/runs/34070419814/job/101586597981) | [5초](https://github.com/digitie/kor-travel-common/actions/runs/34070419969/job/101586598278) |
+
+이 검증에서 Windows Python 3.11.9의 135 tests·skip 0(PR 17.768초/release 19.099초), Ubuntu Python 3.11.16의 135 tests·skip 0을 확인했다. 로컬 수정본은 Windows 135 tests·skip 0(40.339초), WSL Python 3.11.15의 135 tests·skip 0(16.945초), link265/2131·plan102·SPDX18·guard324파일 오류 0이다. 최초 두 원본의 [8개 finding과 대응](../reviews/adversarial/2026-09-07-t009.md)은 두 독립 재검토에서 모두 FIXED로 확정됐다.
 
 수정 commit `ec34d6a254e1b24bba43261b6bc1df220213baa3`의 [PR run](https://github.com/digitie/kor-travel-common/actions/runs/34069558960)과 [release push run](https://github.com/digitie/kor-travel-common/actions/runs/34069558276)은 필수 check 5개 모두 success다. 각 job의 checkout 로그·source 확인 step 성공·run head SHA를 대조했다. report step은 같은 단계의 summary에 비어 있지 않은 표와 source가 있음을 단언한다. JSON report의 SHA256은 두 run 모두 `96c9a4ae83461111a418378976db515d6577de259c9dd5e53fb98388fa9cb403`이며 source는 위 commit이다. 제품 결과가 아닌 고정 fixture 보고다.
 

@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-09-07 | full post-fix | [T-009 최종 판정](adversarial/2026-09-07-t009-post-fix.md), f15072f | A 검사기·입력 / B CI·정본 | **A PASS / B PASS, 8 finding FIXED** |
 | 2026-09-07 | full | [T-009 CI·정보 검사](adversarial/2026-09-07-t009.md), 45c2388 | A 검사기·입력 / B CI·정본 | A BLOCK / B BLOCK, 8 finding 수정 후 재검토 대기 |
 | 2026-09-07 | full post-fix 03 | [T-015 최종 판정](adversarial/2026-09-07-t015-post-fix-03.md), 95c139f | A 정본·실행 / B source·발행 | **A PASS / B PASS, 누적 9 finding FIXED** |
 | 2026-09-07 | full post-fix 02 | [T-015 재검토](adversarial/2026-09-07-t015-post-fix-02.md), d1c7263 | A 정본·DAG / B 발행·CI | A BLOCK / B BLOCK, 기존 7건 FIXED·잔여 발행 경로 2개 ID 수정 후 재검토 |
