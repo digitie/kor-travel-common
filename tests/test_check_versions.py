@@ -1041,6 +1041,7 @@ class CheckVersionsTests(unittest.TestCase):
             "      - uses: ./.github/actions/local\n"
             "      - uses: ./.github/actions/missing\n"
             "      - uses: docker://node:22.12\n"
+            "      - uses: docker://registry.example:5000/app:1.2\n"
             "      - uses: docker://node:latest\n",
             encoding="utf-8")
         findings = self.run_checker()
@@ -1051,6 +1052,7 @@ class CheckVersionsTests(unittest.TestCase):
         self.assertEqual(by_declared["./.github/actions/local"].verdict, "OK")
         self.assertEqual(by_declared["./.github/actions/missing"].verdict, "NO_LOCK")
         self.assertEqual(by_declared["docker://node:22.12"].verdict, "OK")
+        self.assertEqual(by_declared["docker://registry.example:5000/app:1.2"].verdict, "OK")
         self.assertEqual(by_declared["docker://node:latest"].verdict, "FLOATING_REF")
 
     def test_workflow_yaml_unsupported_or_malformed_input_is_exit_two_and_redacted(self):
@@ -1087,6 +1089,8 @@ class CheckVersionsTests(unittest.TestCase):
         workflow_dir.mkdir(parents=True)
         (workflow_dir / "supported.yml").write_text(
             'name: "hello\\_world"\n'
+            "description: fixture's build\n"
+            'title: a"b\n'
             "jobs:\n  build:\n    steps:\n"
             '      - run: echo "hello"\n'
             '      - with:\n          node-version: "22.23"\n'
@@ -1104,7 +1108,7 @@ class CheckVersionsTests(unittest.TestCase):
             "name: {value}\n"
             "jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v4\n")
         for index, value in enumerate((
-                "bad: scalar", "[push]]", "*", "'one'two'three'")):
+                "bad: scalar", "[push]]", "*", "'one'two'three'", "@bad", "`bad")):
             path = workflow_dir / f"malformed-{index}.yml"
             path.write_text(malformed.format(value=value), encoding="utf-8")
             result = self.cli(str(self.repo), "--repo", "app-fail", "--mode", "fail", "--quiet")
@@ -1127,6 +1131,24 @@ class CheckVersionsTests(unittest.TestCase):
             self.assertEqual(result.returncode, 2, result.stdout)
             path.unlink()
 
+    def test_workflow_invalid_sibling_structure_is_not_hidden_by_valid_uses(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        cases = (
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: actions/checkout@v4\n      - name: useless\n",
+            "jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v4\n"
+            "  empty:\n    steps: []\n",
+            "jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v4\n"
+            "        with: [22, 24]\n",
+        )
+        for index, text in enumerate(cases):
+            path = workflow_dir / f"invalid-sibling-{index}.yml"
+            path.write_text(text, encoding="utf-8")
+            result = self.cli(str(self.repo), "--repo", "app-fail", "--mode", "fail", "--quiet")
+            self.assertEqual(result.returncode, 2, result.stdout)
+            path.unlink()
+
     def test_workflow_ref_structure_rejects_path_traversal_and_bad_docker_names(self):
         workflow_dir = self.repo / ".github" / "workflows"
         workflow_dir.mkdir(parents=True)
@@ -1134,11 +1156,14 @@ class CheckVersionsTests(unittest.TestCase):
             "jobs:\n  build:\n    steps:\n"
             "      - uses: ../repo@v4\n"
             "      - uses: docker://:1.2\n"
-            "      - uses: docker://bad@value@sha256:" + "a" * 64 + "\n",
+            "      - uses: docker://bad@value@sha256:" + "a" * 64 + "\n"
+            "      - uses: docker://UPPER:1.2\n"
+            "      - uses: docker://registry.example/path:123/app:1.2\n"
+            "      - uses: docker://image.:1.2\n",
             encoding="utf-8")
         findings = self.run_checker()
         uses = [finding for finding in findings if finding.key == "uses"]
-        self.assertEqual([finding.verdict for finding in uses], ["FLOATING_REF"] * 3)
+        self.assertEqual([finding.verdict for finding in uses], ["FLOATING_REF"] * 6)
 
     def test_workflow_outputs_redact_sensitive_values_in_all_channels(self):
         workflow_dir = self.repo / ".github" / "workflows"
@@ -1168,6 +1193,57 @@ class CheckVersionsTests(unittest.TestCase):
         report = json.loads(json_path.read_text(encoding="utf-8"))
         self.assertTrue(all(marker not in json.dumps(finding, ensure_ascii=False)
                             for finding in report["findings"]))
+
+    def test_workflow_unicode_surrogate_is_a_redacted_input_error(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        (workflow_dir / "unicode.yml").write_text(
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: actions/setup-node@v4\n"
+            '        with:\n          node-version: "\\uD800"\n',
+            encoding="utf-8")
+        output_dir = self.root / "unicode-output"
+        json_path = output_dir / "report.json"
+        markdown_path = output_dir / "report.md"
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--mode", "fail",
+                          "--json", str(json_path), "--markdown", str(markdown_path))
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertNotIn("Traceback", result.stdout + result.stderr)
+        self.assertFalse(json_path.exists())
+        self.assertFalse(markdown_path.exists())
+
+    def test_workflow_repo_and_private_address_are_redacted_when_repo_is_derived(self):
+        marker = "SYNTH" + "TOKEN" + "Z" * 12
+        private_host = ".".join(("10", "29", "41", "53"))
+        password_key = "pass" + "word"
+        derived_root = self.root / marker
+        workflow_dir = derived_root / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        (workflow_dir / "ci.yml").write_text(
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: docker://" + private_host + "/app:1.2\n"
+            "      - uses: actions/setup-node@v4\n"
+            '        with:\n          node-version: "' + password_key + '=' + marker + '"\n',
+            encoding="utf-8")
+        output_dir = self.root / "derived-output"
+        json_path = output_dir / "report.json"
+        markdown_path = output_dir / "report.md"
+        summary_path = output_dir / "summary.md"
+        env = os.environ.copy()
+        env["GITHUB_STEP_SUMMARY"] = str(summary_path)
+        result = subprocess.run(
+            [sys.executable, "-B", "-X", "utf8", str(SCRIPT), "--registry", str(self.registry_path),
+             "--mode", "fail", "--json", str(json_path), "--markdown", str(markdown_path),
+             str(derived_root)], capture_output=True, text=True, encoding="utf-8", env=env)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertNotIn(marker, result.stdout)
+        self.assertNotIn(private_host, result.stdout)
+        for path in (json_path, markdown_path, summary_path):
+            content = path.read_text(encoding="utf-8")
+            self.assertNotIn(marker, content)
+            self.assertNotIn(private_host, content)
+        report = json.loads(json_path.read_text(encoding="utf-8"))
+        self.assertNotEqual(report["repo"], marker)
 
     # --- 매니페스트·모드·CLI
     def test_manifest_lockfiles_and_registry_enforce(self):

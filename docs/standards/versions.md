@@ -99,7 +99,7 @@
 
 `tools/check_versions.py`는 저장소 루트와 manifest 기준 루트의 `.github/workflows/*.yml`·`*.yaml`에서 job/step의 `uses`를 정적으로 보고한다. `owner/repo@<40자리 SHA|버전형 태그>`는 `OK`, branch·unknown·ref 누락은 `FLOATING_REF`다. `./` local action은 저장소 안의 경로가 존재할 때만 `OK`, `docker://`는 기본 image 이름이 유효하고 버전형 tag 또는 sha256 digest일 때만 `OK`이며 원격 이미지·action의 실제 버전이나 major를 조회·추정하지 않는다. `actions/setup-node`의 정확한 step에 있는 정적 문자열 `with.node-version`만 런타임 하한과 대조하고, matrix·expression·list·비문자열·`node-version-file`은 `NO_ENGINES`다. 위치는 workflow 상대 경로와 원본 행으로 보고한다.
 
-파서는 block map/list·인용/일반 scalar와 단순 flow sequence만 지원한다. 이 subset의 plain scalar 예약 문자, single quote의 doubled escape, YAML double-quoted escape를 끝까지 소비하며 잘못된 quote·괄호·alias·colon 구조는 정상화하지 않는다. flow mapping, anchor/alias, block scalar, YAML tag/document stream, 중복 key, tab 들여쓰기와 잘못된 들여쓰기는 일반 입력 오류(exit 2)로 닫는다. job/step에 정적 `uses` 대상이 하나도 없거나 workflow·local 경로가 입력 root 밖으로 symlink된 경우도 빈 성공으로 만들지 않고 입력 오류로 닫는다. 진단·JSON·Markdown·step summary의 workflow 원문·경로는 비밀형 값과 제어 문자를 비식별화한다. 이 오류는 원문 값·경로를 재출력하지 않는다. T-009는 common 자체 workflow의 핀·실행 검증을, T-005c는 이 제한된 정적 보고를 소유한다.
+파서는 **2칸씩 증가하는** block map/list·인용/일반 scalar와 **trailing separator 없는** 단순 flow sequence만 지원한다. 이 subset의 plain scalar 예약 문자, single quote의 doubled escape, YAML double-quoted escape를 끝까지 소비하며 잘못된 quote·괄호·alias·colon 구조는 정상화하지 않는다. flow mapping, anchor/alias, block scalar, YAML tag/document stream, 중복 key, tab 들여쓰기와 잘못된 들여쓰기는 일반 입력 오류(exit 2)로 닫는다. job/step에 정적 `uses` 대상이 하나도 없거나 workflow·local 경로가 입력 root 밖으로 symlink된 경우도 빈 성공으로 만들지 않고 입력 오류로 닫는다. 진단·JSON·Markdown·step summary의 workflow 원문·경로는 비밀형 값과 제어 문자를 비식별화한다. 이 오류는 원문 값·경로를 재출력하지 않는다. T-009는 common 자체 workflow의 핀·실행 검증을, T-005c는 이 제한된 정적 보고를 소유한다.
 
 ### 3.9 기준선 갱신
 

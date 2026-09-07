@@ -14,6 +14,7 @@ T-009의 common 자체 workflow 검증과 구분해, 버전 검사기가 아직 
 - [버전 규약](../standards/versions.md) §3.8의 고정 참조·§8의 미지원 한계, [CI 규약](../standards/ci-deploy.md) §4의 하드닝이 정본이다. 수치와 `actions.checked`는 `versions.json`만 소유한다.
 - T-009 리뷰에서 확정된 범위 정정이다. 기존 checker에는 YAML 파서가 없으므로 이 task 전에는 자동 검사 성공으로 세지 않는다.
 - common만 수정하며 Python 3.11 표준 라이브러리·기존 positional/manifest 입력을 유지한다. 소비자 변경은 T-403의 별도 PR이다.
+- 제한 YAML parser의 block map/list는 2칸씩 증가하는 들여쓰기만, flow sequence는 scalar와 trailing separator 없는 형태만 지원한다. 그 밖의 YAML 표기는 전체 YAML 호환을 주장하지 않고 exit 2로 닫는다.
 
 ## 구현 범위
 
