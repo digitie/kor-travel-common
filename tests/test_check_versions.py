@@ -984,6 +984,103 @@ class CheckVersionsTests(unittest.TestCase):
         self.assertIn("NO_LOCK", requirements.stdout)
         self.assertIn("FLOATING_REF", requirements.stdout)
 
+    # --- T-005c workflow 정적 보고
+    def workflow_fixture(self, name: str) -> Path:
+        return SCRIPT.parents[1] / "tests" / "fixtures" / "versions" / "workflows" / name
+
+    def test_workflow_fixture_reports_refs_node_and_source_lines(self):
+        findings = self.run_checker(root=self.workflow_fixture("static"))
+        uses = [finding for finding in findings if finding.key == "uses"]
+        self.assertEqual({finding.verdict for finding in uses}, {"OK", "FLOATING_REF"})
+        self.assertIn("local", {finding.ecosystem for finding in uses})
+        self.assertIn("actions/checkout@v4", {finding.declared for finding in uses})
+        reusable = next(finding for finding in uses if "reusable.yml" in finding.declared)
+        self.assertEqual(reusable.verdict, "FLOATING_REF")
+        self.assertTrue(reusable.scope.endswith(":17"), reusable.scope)
+        node = next(finding for finding in findings if finding.key == "node")
+        self.assertEqual(node.verdict, "OK")
+        self.assertTrue(node.scope.endswith(":14"), node.scope)
+
+    def test_workflow_dynamic_node_values_are_not_installed_versions(self):
+        findings = self.run_checker(root=self.workflow_fixture("dynamic"))
+        node = [finding for finding in findings if finding.key == "node"]
+        self.assertEqual([finding.verdict for finding in node], ["NO_ENGINES", "NO_ENGINES"])
+        self.assertTrue(all(finding.installed == "" for finding in node))
+        self.assertTrue(all(": " not in finding.scope for finding in node))
+
+    def test_workflow_manifest_root_is_discovered_without_lockfile(self):
+        workflow_root = self.root / "manifest-workflow"
+        workflow_dir = workflow_root / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        (workflow_dir / "ci.yml").write_text(
+            "# SPDX-License-Identifier: GPL-3.0-or-later\n"
+            "jobs:\n  build:\n    steps:\n      - uses: actions/checkout@main\n",
+            encoding="utf-8")
+        manifest = workflow_root / "kor-travel-common.lock.json"
+        manifest.write_text(json.dumps({"schema": CV.MANIFEST_SCHEMA, "repo": "app-a",
+                                        "lockfiles": []}), encoding="utf-8")
+        repo, scopes = CV.scopes_from_manifest(manifest)
+        self.assertEqual(repo, "app-a")
+        self.assertEqual([scope.kind for scope in scopes], ["workflow"])
+        findings = self.run_checker(manifest=manifest)
+        self.assertEqual(self.verdicts(findings, "uses"), ["FLOATING_REF"])
+        result = self.cli("--manifest", str(manifest), "--repo", "app-a", "--quiet")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("FLOATING_REF", result.stdout)
+
+    def test_workflow_uses_classes_sha_tag_branch_local_and_docker(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        (self.repo / ".github" / "actions" / "local").mkdir(parents=True)
+        (workflow_dir / "refs.yml").write_text(
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: actions/checkout@" + "a" * 40 + "\n"
+            "      - uses: actions/setup-node@v4.1.0\n"
+            "      - uses: actions/foo@feature\n"
+            "      - uses: ./.github/actions/local\n"
+            "      - uses: ./.github/actions/missing\n"
+            "      - uses: docker://node:22.12\n"
+            "      - uses: docker://node:latest\n",
+            encoding="utf-8")
+        findings = self.run_checker()
+        by_declared = {finding.declared: finding for finding in findings if finding.key == "uses"}
+        self.assertEqual(by_declared["actions/checkout@" + "a" * 40].verdict, "OK")
+        self.assertEqual(by_declared["actions/setup-node@v4.1.0"].verdict, "OK")
+        self.assertEqual(by_declared["actions/foo@feature"].verdict, "FLOATING_REF")
+        self.assertEqual(by_declared["./.github/actions/local"].verdict, "OK")
+        self.assertEqual(by_declared["./.github/actions/missing"].verdict, "NO_LOCK")
+        self.assertEqual(by_declared["docker://node:22.12"].verdict, "OK")
+        self.assertEqual(by_declared["docker://node:latest"].verdict, "FLOATING_REF")
+
+    def test_workflow_yaml_unsupported_or_malformed_input_is_exit_two_and_redacted(self):
+        for name in ("duplicate.yml", "anchor.yml", "flow.yml", "block-scalar.yml"):
+            with self.subTest(name=name):
+                result = self.cli(str(self.workflow_fixture("malformed")), "--repo", "app-fail", "--quiet")
+                self.assertEqual(result.returncode, 2, result.stdout)
+                self.assertIn("소비자 입력 오류: workflow 입력 구조 오류", result.stdout)
+                self.assertNotIn(name, result.stdout)
+                self.assertNotIn(str(self.workflow_fixture("malformed")), result.stdout)
+
+        unsupported = self.repo / ".github" / "workflows"
+        unsupported.mkdir(parents=True)
+        (unsupported / "bad.yml").write_text(
+            "jobs:\n  build:\n    steps:\n      - uses: [actions/checkout@v4]\n", encoding="utf-8")
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("workflow 입력 구조 오류", result.stdout)
+
+    def test_workflow_bad_indentation_and_tabs_are_not_normalized(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        for index, text in enumerate((
+                "jobs:\n build:\n   steps:\n     - uses: actions/checkout@v4\n",
+                "jobs:\n\tbuild:\n\t  steps:\n\t    - uses: actions/checkout@v4\n")):
+            path = workflow_dir / f"bad-{index}.yml"
+            path.write_text(text, encoding="utf-8")
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("workflow 입력 구조 오류", result.stdout)
+
     # --- 매니페스트·모드·CLI
     def test_manifest_lockfiles_and_registry_enforce(self):
         repo = self.root / "app-fail"

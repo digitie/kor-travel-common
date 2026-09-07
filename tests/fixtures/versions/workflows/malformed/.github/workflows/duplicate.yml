@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+jobs:
+  build:
+    steps:
+      - uses: actions/checkout@v4
+        uses: actions/setup-node@v4

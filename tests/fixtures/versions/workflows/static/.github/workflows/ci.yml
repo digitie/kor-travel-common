@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+name: 정적 workflow fixture
+on:
+  push:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.23"
+      - uses: ./.github/actions/local
+  reusable:
+    uses: example/repository/.github/workflows/reusable.yml@main

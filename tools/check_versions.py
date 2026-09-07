@@ -8,8 +8,9 @@
 동작해야 한다.
 
 읽는 파일: package.json / package-lock.json(lockfileVersion 3) / pyproject.toml /
-uv.lock / poetry.lock / requirements.txt. Poetry·requirements는 uv 전환 전까지의
-과도기 입력이며, requirements 설치본은 정확 핀만 후보로 보고 항상 `NO_LOCK`을 남긴다.
+uv.lock / poetry.lock / requirements*.txt / `.github/workflows/*.yml|*.yaml`. Poetry·requirements는
+uv 전환 전까지의 과도기 입력이며, requirements 설치본은 정확 핀만 후보로 보고 항상
+`NO_LOCK`을 남긴다. workflow는 제한된 정적 YAML만 읽고 원격 실행 버전은 추정하지 않는다.
 
 판정 어휘(D-07): OK / BELOW_FLOOR / ABOVE_MAX / NOT_RECOMMENDED / NO_LOCK / NO_ENGINES /
 FLOATING_REF / BLOCKED / EXEMPT / EXEMPT_EXPIRED.
@@ -51,6 +52,9 @@ SKIP_DIRS = frozenset({"node_modules", ".venv", "venv", ".git", ".next", "dist",
 MAX_DEPTH = 4
 SHA_RE = re.compile(r"\b[0-9a-f]{40}\b")
 TAG_RE = re.compile(r"^(?:[A-Za-z0-9._-]+-)?v?\d+(?:\.\d+){1,3}(?:[-+.][0-9A-Za-z.-]+)?$")
+# GitHub Actions는 `@v4`처럼 major만 적는 태그도 사용하므로 일반 패키지
+# 태그 정규식과 분리한다. 실제 action major를 원격에서 확인하지는 않는다.
+WORKFLOW_TAG_RE = re.compile(r"^(?:[A-Za-z0-9._-]+-)?v?\d+(?:\.\d+){0,3}(?:[-+.][0-9A-Za-z.-]+)?$")
 FLOATING_NAMES = frozenset({"main", "master", "develop", "dev", "head", "latest", "trunk"})
 VERSION_RE = re.compile(r"v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?(?:-slim|\+[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?")
 NPM_VERSION_RE = re.compile(r"(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?")
@@ -1283,6 +1287,291 @@ def parse_requirement(text: str, *, strict: bool = False) -> tuple[str, str, str
     return normalize_name(name), spec, ""
 
 
+# --------------------------------------------------------------------------- workflow YAML
+
+@dataclass(frozen=True)
+class _WorkflowNode:
+    """제한된 YAML 값과 원본 행을 함께 보존한다."""
+
+    value: object
+    line: int
+
+
+@dataclass(frozen=True)
+class _WorkflowLine:
+    indent: int
+    content: str
+    line: int
+
+
+def _workflow_input_error() -> ValueError:
+    """workflow 파싱 실패를 입력값·경로를 노출하지 않는 일반 오류로 만든다."""
+    return ValueError("workflow 입력 구조 오류")
+
+
+def _strip_yaml_comment(line: str) -> str:
+    """인용 문자열 밖의 공백 뒤 `#`만 주석으로 제거한다."""
+    quote = ""
+    escaped = False
+    for index, char in enumerate(line):
+        if quote:
+            if quote == '"' and escaped:
+                escaped = False
+            elif quote == '"' and char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = ""
+            continue
+        if char in {"'", '"'}:
+            quote = char
+        elif char == "#" and (index == 0 or line[index - 1].isspace()):
+            return line[:index].rstrip()
+    if quote:
+        raise _workflow_input_error()
+    return line.rstrip()
+
+
+class _WorkflowYamlParser:
+    """GitHub workflow에서 필요한 block map/list만 읽는 YAML 부분 파서.
+
+    flow mapping, anchor/alias, block scalar, 태그와 document stream은
+    지원하지 않는다. 단순 flow sequence 외 지원하지 않는 문법을 문자열이나 빈 값으로 바꾸지 않고
+    입력 오류로 닫아야 정적 보고가 정상 판정을 만들지 않는다.
+    """
+
+    def __init__(self, text: str):
+        self.lines: list[_WorkflowLine] = []
+        for number, raw in enumerate(text.splitlines(), 1):
+            if number == 1 and raw.startswith("\ufeff"):
+                raw = raw[1:]
+            if "\t" in raw or "\x00" in raw:
+                raise _workflow_input_error()
+            clean = _strip_yaml_comment(raw)
+            if not clean.strip():
+                continue
+            indent = len(clean) - len(clean.lstrip(" "))
+            content = clean[indent:]
+            if content in {"---", "..."} or content.startswith("%"):
+                raise _workflow_input_error()
+            self.lines.append(_WorkflowLine(indent, content, number))
+
+    @staticmethod
+    def _split_pair(content: str) -> tuple[str, str] | None:
+        quote = ""
+        escaped = False
+        for index, char in enumerate(content):
+            if quote:
+                if quote == '"' and escaped:
+                    escaped = False
+                elif quote == '"' and char == "\\":
+                    escaped = True
+                elif char == quote:
+                    quote = ""
+                continue
+            if char in {"'", '"'}:
+                quote = char
+            elif char == ":" and (index + 1 == len(content) or content[index + 1].isspace()):
+                key = content[:index].strip()
+                if not key:
+                    raise _workflow_input_error()
+                return key, content[index + 1:].strip()
+        if quote:
+            raise _workflow_input_error()
+        return None
+
+    def _flow_sequence(self, value: str) -> list[object]:
+        """단순 scalar만 담은 flow sequence를 읽는다. flow mapping은 거부한다."""
+        if not value.endswith("]"):
+            raise _workflow_input_error()
+        inner = value[1:-1].strip()
+        if not inner:
+            return []
+        parts: list[str] = []
+        start = 0
+        quote = ""
+        escaped = False
+        for index, char in enumerate(inner):
+            if quote:
+                if quote == '"' and escaped:
+                    escaped = False
+                elif quote == '"' and char == "\\":
+                    escaped = True
+                elif char == quote:
+                    quote = ""
+                continue
+            if char in {"'", '"'}:
+                quote = char
+            elif char in "[{}":
+                raise _workflow_input_error()
+            elif char == ":" and index + 1 < len(inner) and inner[index + 1].isspace():
+                raise _workflow_input_error()
+            elif char == ",":
+                part = inner[start:index].strip()
+                if not part:
+                    raise _workflow_input_error()
+                parts.append(part)
+                start = index + 1
+        if quote:
+            raise _workflow_input_error()
+        part = inner[start:].strip()
+        if not part:
+            raise _workflow_input_error()
+        parts.append(part)
+        return [self._scalar(part) for part in parts]
+
+    def _scalar(self, raw: str) -> object:
+        value = raw.strip()
+        if not value:
+            raise _workflow_input_error()
+        if value.startswith("["):
+            return self._flow_sequence(value)
+        if value.startswith(("{", "|", ">", "!")):
+            raise _workflow_input_error()
+        if value.startswith("${{") and value.endswith("}}"):
+            return value
+        if value.startswith("'"):
+            if len(value) < 2 or not value.endswith("'"):
+                raise _workflow_input_error()
+            return value[1:-1].replace("''", "'")
+        if value.startswith('"'):
+            if len(value) < 2 or not value.endswith('"'):
+                raise _workflow_input_error()
+            try:
+                parsed = json.loads(value)
+            except (TypeError, ValueError, json.JSONDecodeError) as exc:
+                raise _workflow_input_error() from exc
+            if not isinstance(parsed, str):
+                raise _workflow_input_error()
+            return parsed
+        if re.search(r"(?:^|\s)[&*][A-Za-z0-9_.-]+(?:\s|$)", value):
+            raise _workflow_input_error()
+        if any(char in value for char in {"'", '"'}):
+            raise _workflow_input_error()
+        lowered = value.lower()
+        if lowered in {"null", "~"}:
+            return None
+        if lowered == "true":
+            return True
+        if lowered == "false":
+            return False
+        if re.fullmatch(r"[-+]?\d+", value):
+            try:
+                return int(value)
+            except ValueError as exc:
+                raise _workflow_input_error() from exc
+        if re.fullmatch(r"[-+]?(?:\d+\.\d*|\.\d+)", value):
+            try:
+                return float(value)
+            except ValueError as exc:
+                raise _workflow_input_error() from exc
+        return value
+
+    def _key(self, raw: str) -> str:
+        key = self._scalar(raw)
+        if not isinstance(key, str) or not key:
+            raise _workflow_input_error()
+        return key
+
+    def _parse_value(self, raw: str, line: _WorkflowLine, index: int,
+                     parent_indent: int) -> tuple[_WorkflowNode, int]:
+        if raw:
+            return _WorkflowNode(self._scalar(raw), line.line), index
+        if index < len(self.lines) and self.lines[index].indent > parent_indent:
+            if self.lines[index].indent != parent_indent + 2:
+                raise _workflow_input_error()
+            child, index = self._parse_block(self.lines[index].indent, index)
+            return _WorkflowNode(child.value, line.line), index
+        return _WorkflowNode(None, line.line), index
+
+    def _parse_map(self, indent: int, index: int) -> tuple[_WorkflowNode, int]:
+        values: dict[str, _WorkflowNode] = {}
+        first_line = self.lines[index].line
+        while index < len(self.lines):
+            current = self.lines[index]
+            if current.indent < indent:
+                break
+            if current.indent > indent or current.content == "-" or current.content.startswith("- "):
+                break
+            pair = self._split_pair(current.content)
+            if pair is None:
+                raise _workflow_input_error()
+            raw_key, raw_value = pair
+            key = self._key(raw_key)
+            if key in values:
+                raise _workflow_input_error()
+            node, index = self._parse_value(raw_value, current, index + 1, indent)
+            values[key] = node
+        if not values:
+            raise _workflow_input_error()
+        return _WorkflowNode(values, first_line), index
+
+    def _parse_list(self, indent: int, index: int) -> tuple[_WorkflowNode, int]:
+        values: list[_WorkflowNode] = []
+        first_line = self.lines[index].line
+        while index < len(self.lines):
+            current = self.lines[index]
+            if current.indent < indent:
+                break
+            if current.indent > indent or not (current.content == "-" or current.content.startswith("- ")):
+                break
+            rest = current.content[1:].strip()
+            index += 1
+            if not rest:
+                if index < len(self.lines) and self.lines[index].indent > indent:
+                    if self.lines[index].indent != indent + 2:
+                        raise _workflow_input_error()
+                    item, index = self._parse_block(self.lines[index].indent, index)
+                else:
+                    item = _WorkflowNode(None, current.line)
+                values.append(item)
+                continue
+            pair = self._split_pair(rest)
+            if pair is None:
+                item = _WorkflowNode(self._scalar(rest), current.line)
+                if index < len(self.lines) and self.lines[index].indent > indent:
+                    raise _workflow_input_error()
+                values.append(item)
+                continue
+            raw_key, raw_value = pair
+            key = self._key(raw_key)
+            mapping: dict[str, _WorkflowNode] = {}
+            item, index = self._parse_value(raw_value, current, index, indent)
+            mapping[key] = item
+            if index < len(self.lines) and self.lines[index].indent > indent:
+                continuation_indent = self.lines[index].indent
+                if continuation_indent != indent + 2:
+                    raise _workflow_input_error()
+                continuation, index = self._parse_map(continuation_indent, index)
+                if not isinstance(continuation.value, dict):
+                    raise _workflow_input_error()
+                for continuation_key, continuation_value in continuation.value.items():
+                    if continuation_key in mapping:
+                        raise _workflow_input_error()
+                    mapping[continuation_key] = continuation_value
+            values.append(_WorkflowNode(mapping, current.line))
+        if not values:
+            raise _workflow_input_error()
+        return _WorkflowNode(values, first_line), index
+
+    def _parse_block(self, indent: int, index: int) -> tuple[_WorkflowNode, int]:
+        if index >= len(self.lines) or self.lines[index].indent != indent:
+            raise _workflow_input_error()
+        current = self.lines[index]
+        if current.content == "-" or current.content.startswith("- "):
+            return self._parse_list(indent, index)
+        if current.content.startswith("-"):
+            raise _workflow_input_error()
+        return self._parse_map(indent, index)
+
+    def parse(self) -> _WorkflowNode:
+        if not self.lines or self.lines[0].indent != 0:
+            raise _workflow_input_error()
+        node, index = self._parse_block(0, 0)
+        if index != len(self.lines):
+            raise _workflow_input_error()
+        return node
+
+
 # --------------------------------------------------------------------------- 탐색
 
 def walk(root: Path):
@@ -1304,6 +1593,21 @@ def nearest_lock(start: Path, root: Path, name: str) -> Path | None:
         if current == root or current.parent == current:
             return None
         current = current.parent
+
+
+def discover_workflows(root: Path) -> list[Scope]:
+    """저장소 루트의 `.github/workflows` 정적 입력만 발견한다."""
+    root = root.resolve()
+    directory = root / ".github" / "workflows"
+    if not directory.is_dir():
+        return []
+    scopes: list[Scope] = []
+    for path in sorted(directory.iterdir(), key=lambda item: item.name):
+        if not path.is_file() or path.suffix.lower() not in {".yml", ".yaml"}:
+            continue
+        label = path.relative_to(root).as_posix()
+        scopes.append(Scope("workflow", label, None, path, "workflow"))
+    return scopes
 
 
 def discover(root: Path) -> list[Scope]:
@@ -1333,6 +1637,7 @@ def discover(root: Path) -> list[Scope]:
                                        if re.fullmatch(r"requirements[^/]*\.txt", name)):
             scopes.append(Scope("python", rel, directory / requirement_name, None, "requirements",
                                 note=f"{requirement_name}는 선언만 읽는다(T-005b)"))
+    scopes.extend(discover_workflows(root))
     return scopes
 
 
@@ -1360,6 +1665,8 @@ def scopes_from_manifest(manifest_path: Path) -> tuple[str | None, list[Scope]]:
         else:
             scopes.append(Scope("python", label, None, None, "none",
                                 note=f"알 수 없는 lockfile kind {kind!r}"))
+    # manifest가 lockfile 목록을 명시해도 저장소 루트 workflow는 같은 보고에 포함한다.
+    scopes.extend(discover_workflows(base))
     return data.get("repo"), scopes
 
 
@@ -1587,6 +1894,141 @@ class Checker:
                 if ((lock_path, path) not in self.npm_direct and key is not None
                         and self.registry.axes[key].get("checked", True)):
                     self.record_axis(location, key, "npm", "(전이)", version)
+
+    # --- workflow 정적 보고
+    @staticmethod
+    def _workflow_scope(scope: Scope, line: int) -> str:
+        return f"{scope.label}:{line}"
+
+    @staticmethod
+    def _workflow_map(node: _WorkflowNode | None) -> dict[str, _WorkflowNode] | None:
+        if node is None or not isinstance(node.value, dict):
+            return None
+        return node.value
+
+    @staticmethod
+    def _workflow_list(node: _WorkflowNode | None) -> list[_WorkflowNode] | None:
+        if node is None or not isinstance(node.value, list):
+            return None
+        return node.value
+
+    def _workflow_uses(self, scope: Scope, node: _WorkflowNode) -> tuple[str, str, str, str]:
+        """uses 문자열을 ecosystem·설치 표기·판정·설명으로 분류한다."""
+        if not isinstance(node.value, str):
+            raise _workflow_input_error()
+        text = node.value.strip()
+        if not text:
+            return "github-action", "-", "FLOATING_REF", "참조가 비어 있음"
+        workflow_path = scope.lock.resolve() if scope.lock is not None else None
+        repository_root = workflow_path.parents[2] if workflow_path is not None else Path.cwd()
+        if text.startswith("./"):
+            candidate = (repository_root / text).resolve()
+            try:
+                candidate.relative_to(repository_root)
+            except ValueError:
+                return "local", "-", "NO_LOCK", "저장소 밖 local action 경로"
+            if candidate.exists():
+                return "local", candidate.relative_to(repository_root).as_posix(), "OK", "local action 경로 존재"
+            return "local", "-", "NO_LOCK", "local action 경로 없음"
+        if text.startswith("docker://"):
+            image = text[len("docker://"):]
+            if not image or re.search(r"\s", image):
+                return "docker", "-", "FLOATING_REF", "Docker image 참조 형식 미지원"
+            if "@" in image:
+                name, digest = image.rsplit("@", 1)
+                if name and re.fullmatch(r"sha256:[0-9a-f]{64}", digest):
+                    return "docker", digest, "OK", "Docker digest로 고정됨"
+                return "docker", digest or "-", "FLOATING_REF", "Docker digest가 고정 형식이 아님"
+            if ":" not in image.rsplit("/", 1)[-1]:
+                return "docker", "-", "FLOATING_REF", "Docker image tag가 없음"
+            tag = image.rsplit(":", 1)[1]
+            if not tag or tag.lower() in FLOATING_NAMES or not WORKFLOW_TAG_RE.fullmatch(tag):
+                return "docker", tag or "-", "FLOATING_REF", "Docker image tag가 버전형이 아님"
+            return "docker", tag, "OK", "Docker image 버전형 tag"
+        if text.count("@") != 1:
+            return "github-action", "-", "FLOATING_REF", "owner/repo@ref 형식이 아니거나 ref가 없음"
+        target, ref = text.rsplit("@", 1)
+        if (not re.fullmatch(r"[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)+", target)
+                or not ref.strip() or re.search(r"\s", text)):
+            return "github-action", ref or "-", "FLOATING_REF", "action 참조 형식 미지원"
+        if re.fullmatch(r"[0-9a-f]{40}", ref):
+            return "github-action", ref[:12], "OK", "action commit SHA로 고정됨"
+        if WORKFLOW_TAG_RE.fullmatch(ref):
+            return "github-action", ref, "OK", "action 버전형 tag로 고정됨"
+        return "github-action", ref, "FLOATING_REF", "branch·미고정 action ref 금지"
+
+    def _check_workflow_uses(self, scope: Scope, node: _WorkflowNode) -> None:
+        ecosystem, installed, verdict, detail = self._workflow_uses(scope, node)
+        self.add(self._workflow_scope(scope, node.line), "uses", ecosystem,
+                 str(node.value) if isinstance(node.value, str) else "", installed, verdict, detail)
+
+    def _check_setup_node(self, scope: Scope, uses_node: _WorkflowNode,
+                          step: dict[str, _WorkflowNode]) -> None:
+        with_node = step.get("with")
+        with_values = self._workflow_map(with_node)
+        if with_values is None:
+            self.add(self._workflow_scope(scope, uses_node.line), "node", "runtime", "", "",
+                     "NO_ENGINES", "actions/setup-node의 정적 `with.node-version` 없음")
+            return
+        node_node = with_values.get("node-version")
+        if node_node is None or not isinstance(node_node.value, str):
+            line = node_node.line if node_node is not None else uses_node.line
+            self.add(self._workflow_scope(scope, line), "node", "runtime",
+                     str(node_node.value) if node_node is not None and node_node.value is not None else "",
+                     "", "NO_ENGINES", "node-version이 정적 문자열이 아님")
+            return
+        value = node_node.value.strip()
+        if not value or "${{" in value or "}}" in value or "$" in value:
+            self.add(self._workflow_scope(scope, node_node.line), "node", "runtime", value, "",
+                     "NO_ENGINES", "node-version expression·동적 값은 해석하지 않음")
+            return
+        self.record_range("node", self._workflow_scope(scope, node_node.line), "runtime", value)
+
+    def check_workflow(self, scope: Scope) -> None:
+        """workflow의 uses와 setup-node 정적 선언만 검사한다."""
+        if scope.lock is None or not scope.lock.is_file():
+            raise _workflow_input_error()
+        try:
+            text = scope.lock.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as exc:
+            raise _workflow_input_error() from exc
+        root = _WorkflowYamlParser(text).parse()
+        root_map = self._workflow_map(root)
+        if root_map is None:
+            raise _workflow_input_error()
+        jobs_node = root_map.get("jobs")
+        jobs = self._workflow_map(jobs_node)
+        if jobs is None or not jobs:
+            raise _workflow_input_error()
+        for job_node in jobs.values():
+            job = self._workflow_map(job_node)
+            if job is None:
+                raise _workflow_input_error()
+            job_uses = job.get("uses")
+            if job_uses is not None:
+                if "steps" in job:
+                    raise _workflow_input_error()
+                self._check_workflow_uses(scope, job_uses)
+                continue
+            steps_node = job.get("steps")
+            if steps_node is None:
+                continue
+            steps = self._workflow_list(steps_node)
+            if steps is None:
+                raise _workflow_input_error()
+            for step_node in steps:
+                step = self._workflow_map(step_node)
+                if step is None:
+                    raise _workflow_input_error()
+                uses_node = step.get("uses")
+                if uses_node is None:
+                    continue
+                if "run" in step:
+                    raise _workflow_input_error()
+                self._check_workflow_uses(scope, uses_node)
+                if (isinstance(uses_node.value, str)
+                        and uses_node.value.split("@", 1)[0] == "actions/setup-node"):
+                    self._check_setup_node(scope, uses_node, step)
 
     def record_range(self, key: str, scope: str, ecosystem: str, spec: str) -> None:
         bound = lower_bound(spec)
@@ -1936,6 +2378,8 @@ class Checker:
                              "package.json 없음(매니페스트 lockfiles 경로 확인)")
                     continue
                 self.check_npm(scope)
+            elif scope.kind == "workflow":
+                self.check_workflow(scope)
             else:
                 if scope.manifest is None or not scope.manifest.is_file():
                     self.add(scope.label, "pyproject.toml", "pypi", "", "", "NO_LOCK",
@@ -1943,7 +2387,8 @@ class Checker:
                     continue
                 self.check_python(scope)
         self.check_npm_locks()
-        order = {"runtime": 0, "npm": 1, "pypi": 2, "git": 3}
+        order = {"runtime": 0, "npm": 1, "pypi": 2, "git": 3,
+                 "github-action": 4, "local": 5, "docker": 6}
         self.findings.sort(key=lambda f: (f.repo, f.scope, order.get(f.ecosystem, 9), f.key, f.installed))
         # 한 축에 여러 패키지(react/react-dom 등)가 대응하면 같은 판정 행을 하나로 접는다.
         merged: dict[tuple[str, str, str, str, str], Finding] = {}
