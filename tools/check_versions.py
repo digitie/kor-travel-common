@@ -1376,6 +1376,22 @@ def _resolve_input_path(path: Path, message: str) -> Path:
         raise ValueError(message) from exc
 
 
+def _path_contains_symlink(path: Path) -> bool:
+    """경로 중간의 symlink loop도 Windows의 느슨한 resolve 결과와 함께 감지한다."""
+    parts = path.parts
+    current = Path(path.anchor) if path.anchor else Path()
+    if path.anchor:
+        parts = parts[1:]
+    for part in parts:
+        current /= part
+        try:
+            if current.is_symlink():
+                return True
+        except (OSError, RuntimeError):
+            return True
+    return False
+
+
 def _workflow_input_error() -> ValueError:
     """workflow 파싱 실패를 입력값·경로를 노출하지 않는 일반 오류로 만든다."""
     return ValueError("workflow 입력 구조 오류")
@@ -1810,7 +1826,7 @@ def _safe_declared_file(candidate: Path, root: Path) -> Path | None:
     resolved = _resolve_input_path(candidate, "매니페스트 동반 선언 파일 입력 구조 오류")
     if not _path_within(resolved, root):
         raise ValueError("매니페스트 동반 선언 파일이 소비자 저장소 루트 밖에 있음")
-    if candidate.is_symlink() and not resolved.is_file():
+    if _path_contains_symlink(candidate) and not resolved.is_file():
         raise ValueError("매니페스트 동반 선언 파일 입력 구조 오류")
     return resolved if candidate.is_file() else None
 
@@ -1825,7 +1841,7 @@ def _manifest_declaration_scopes(root: Path, app: object) -> list[Scope]:
     app_dir = _resolve_input_path(candidate, "매니페스트 app 입력 구조 오류")
     if not _path_within(app_dir, root):
         raise ValueError("매니페스트 app 경로가 소비자 저장소 루트 밖에 있음")
-    if candidate.is_symlink() and not app_dir.is_dir():
+    if _path_contains_symlink(candidate) and not app_dir.is_dir():
         raise ValueError("매니페스트 app 입력 구조 오류")
     if not app_dir.is_dir():
         return []
@@ -1863,7 +1879,7 @@ def scopes_from_manifest(
     """
     declared_manifest_path = manifest_path
     manifest_path = _resolve_input_path(manifest_path, "매니페스트 입력 구조 오류")
-    if declared_manifest_path.is_symlink() and not manifest_path.is_file():
+    if _path_contains_symlink(declared_manifest_path) and not manifest_path.is_file():
         raise ValueError("매니페스트 입력 구조 오류")
     base = _resolve_input_path(root or manifest_path.parent, "매니페스트 입력 구조 오류")
     if not _path_within(manifest_path, base):
@@ -1883,7 +1899,7 @@ def scopes_from_manifest(
         path = _resolve_input_path(declared_path, "매니페스트 lock path 입력 구조 오류")
         if not _path_within(path, base):
             raise ValueError("매니페스트 lock path가 소비자 저장소 루트 밖에 있음")
-        if declared_path.is_symlink() and not path.is_file():
+        if _path_contains_symlink(declared_path) and not path.is_file():
             raise ValueError("매니페스트 lock path 입력 구조 오류")
         raw_label = entry.get("scope")
         if not isinstance(raw_label, str) or not raw_label:

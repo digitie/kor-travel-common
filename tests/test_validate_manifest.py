@@ -435,6 +435,39 @@ class ValidateManifestTests(unittest.TestCase):
             self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
             self.assertNotIn("Traceback", result.stdout + result.stderr)
 
+    def test_manifest_workspace_and_intermediate_symlink_loops_are_exit_two(self):
+        with tempfile.TemporaryDirectory(prefix="kor-travel-common-workspace-loop-") as directory:
+            root = Path(directory)
+            manifest = root / "manifest.json"
+            (root / "package-lock.json").write_text(json.dumps({
+                "lockfileVersion": 3, "packages": {"": {}},
+            }), encoding="utf-8")
+            loop = root / "loop"
+            try:
+                loop.symlink_to(loop)
+            except (OSError, NotImplementedError) as exc:
+                self.skipTest(f"symlink 생성 불가: {exc}")
+            data = valid_manifest()
+
+            def run() -> subprocess.CompletedProcess[str]:
+                return subprocess.run([
+                    sys.executable, "-B", "-X", "utf8", str(ROOT / "tools" / "check_versions.py"),
+                    str(root), "--manifest", str(manifest), "--repo", "kor-travel-map",
+                    "--mode", "fail", "--no-step-summary",
+                ], capture_output=True, text=True, encoding="utf-8")
+
+            data["lockfiles"] = [{"kind": "npm", "path": "package-lock.json", "scope": "loop"}]
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            result = run()
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertNotIn("Traceback", result.stdout + result.stderr)
+
+            data["lockfiles"] = [{"kind": "npm", "path": "loop/package-lock.json", "scope": "root"}]
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            result = run()
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertNotIn("Traceback", result.stdout + result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()
