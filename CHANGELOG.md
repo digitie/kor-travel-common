@@ -11,6 +11,7 @@
 #### Added
 
 - `@kor-travel/tokens` 계약 초안: `--kt-*` 의미 토큰(surface 4·text 4·icon·border·control-line·brand 4·focus·status 4+tint·overlay·radius 2·control 2·rail·duration 2·ease 2·shadow 2·z 5·font 스택), admin/consumer 프로필, `.dark` 값 완비·활성화 opt-in, 대비 검사 규칙, 정본 `tokens.css`와 생성물(`tokens.json`·`tokens.ts`·`tailwind-preset.cjs`), 레거시 어휘 shim `aliases/map-vocabulary.css`. 패키지 실물은 T-101([design tokens](docs/standards/design-tokens.md)).
+- T-102에서 map·weather·geo 공통 어휘를 `--kt-*`로 연결하는 선택 shim, weather의 `--rail`·font·spacing·panel radius 오버라이드 예제, CSS 문법·import closure·mode·경로 경계를 검사하는 `check_aliases.py`를 추가했다. shim은 map의 `radius-md` control 의미를 유지하고 weather 예제에서 panel 의미를 앱 소유로 재선언한다([T-102](docs/tasks/T-102-map-vocabulary-shim.md)).
 
 #### Fixed
 

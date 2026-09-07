@@ -1,0 +1,102 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ * Origin: kor-travel-weather@6003da995fa4b35799f9dadc406c6ba2878bfbae packages/kor-travel-weather-admin/frontend/app/tokens.css (GPL-3.0-or-later)
+ * Modified: 2026-09-07 — weather 값을 --kt-* 앱 오버라이드 예제로 재표현
+ */
+
+/*
+ * 고정 weather 원천의 앱 소유 값을 재현하는 예제다. 이 파일은 common의
+ * 배포 CSS가 아니며, tokens.css와 shim 뒤에서 앱이 선택적으로 import한다.
+ */
+:root {
+  /* weather 고유 legacy spacing은 common 의미 토큰으로 승격하지 않는다. */
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+
+  --kt-font-sans: var(--font-geist, "Geist"), var(--font-pretendard, "Pretendard Variable"), Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --kt-font-mono: var(--font-geist-mono, "Geist Mono"), ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --kt-radius-control: 0.375rem;
+  --kt-radius-panel: 0.5rem;
+  --radius-md: var(--kt-radius-panel);
+  --kt-control-h: 2.25rem;
+  --kt-control-h-sm: 1.875rem;
+  --kt-rail: 17rem;
+
+  --kt-surface-page: oklch(97.8% 0.003 250);
+  --kt-surface-subtle: oklch(96.7% 0.006 250);
+  --kt-surface-muted: oklch(92.5% 0.01 250);
+  --kt-surface-card: oklch(99.2% 0.002 250);
+  --kt-text-primary: oklch(30% 0.025 255);
+  --kt-text-secondary: oklch(48% 0.04 255);
+  --kt-text-tertiary: oklch(54% 0.04 255);
+  --kt-text-disabled: oklch(79% 0.025 255);
+  --kt-icon: oklch(54% 0.04 255);
+  --kt-control-line: oklch(61% 0.035 255);
+  --kt-brand: oklch(47% 0.14 255);
+  --kt-brand-hover: oklch(41% 0.15 255);
+  --kt-brand-tint: oklch(95% 0.025 250);
+  --kt-brand-foreground: oklch(99% 0.002 250);
+  --kt-success: oklch(46.9% 0.087 149);
+  --kt-success-tint: oklch(95% 0.03 150);
+  --kt-warning: oklch(50.9% 0.103 71);
+  --kt-warning-tint: oklch(96% 0.035 80);
+  --kt-info: oklch(50% 0.16 258);
+  --kt-info-tint: oklch(95.5% 0.025 255);
+  --kt-destructive: oklch(51.4% 0.167 27);
+  --kt-destructive-tint: oklch(96% 0.03 25);
+  --kt-focus: oklch(43% 0.13 255);
+  --kt-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --kt-ease-in: cubic-bezier(0.7, 0, 0.84, 1);
+  --kt-duration-fast: 100ms;
+  --kt-duration-base: 150ms;
+  --kt-shadow-elevated: 0 4px 12px oklch(30% 0.025 255 / 0.1);
+  --kt-shadow-modal: 0 8px 24px oklch(30% 0.025 255 / 0.14);
+}
+
+.dark {
+  --kt-font-sans: var(--font-geist, "Geist"), var(--font-pretendard, "Pretendard Variable"), Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --kt-font-mono: var(--font-geist-mono, "Geist Mono"), ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --kt-radius-control: 0.375rem;
+  --kt-radius-panel: 0.5rem;
+  --radius-md: var(--kt-radius-panel);
+  --kt-control-h: 2.25rem;
+  --kt-control-h-sm: 1.875rem;
+  --kt-rail: 17rem;
+
+  --kt-surface-page: oklch(19% 0.025 255);
+  --kt-surface-subtle: oklch(24% 0.03 255);
+  --kt-surface-muted: oklch(31% 0.04 255);
+  --kt-surface-card: oklch(23% 0.028 255);
+  --kt-text-primary: oklch(93% 0.02 255);
+  --kt-text-secondary: oklch(78% 0.025 255);
+  --kt-text-tertiary: oklch(68% 0.03 255);
+  --kt-text-disabled: oklch(52% 0.025 255);
+  --kt-icon: oklch(70% 0.03 255);
+  --kt-control-line: oklch(58% 0.035 255);
+  --kt-brand: oklch(76% 0.13 250);
+  --kt-brand-hover: oklch(81% 0.13 250);
+  --kt-brand-tint: oklch(31% 0.06 250);
+  --kt-brand-foreground: oklch(20% 0.04 250);
+  --kt-success: oklch(75% 0.09 149);
+  --kt-success-tint: oklch(28% 0.04 150);
+  --kt-warning: oklch(77% 0.12 75);
+  --kt-warning-tint: oklch(30% 0.045 80);
+  --kt-info: oklch(75% 0.11 258);
+  --kt-info-tint: oklch(30% 0.05 258);
+  --kt-destructive: oklch(72% 0.14 27);
+  --kt-destructive-tint: oklch(30% 0.06 27);
+  --kt-focus: oklch(80% 0.12 250);
+  --kt-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --kt-ease-in: cubic-bezier(0.7, 0, 0.84, 1);
+  --kt-duration-fast: 100ms;
+  --kt-duration-base: 150ms;
+  /* weather 원천은 .dark에서 shadow를 재선언하지 않아 light 값을 상속한다. */
+  --kt-shadow-elevated: 0 4px 12px oklch(30% 0.025 255 / 0.1);
+  --kt-shadow-modal: 0 8px 24px oklch(30% 0.025 255 / 0.14);
+}

@@ -28,6 +28,7 @@
 | PV-011 | `templates/agent-config/opencode.json` | kor-travel-geo | `1d9d74d3a852bbaaa09144b75bb69b99a58a6002` | `opencode.json` | GPL-3.0-only | instructions 추가·키 정렬 (2026-09-07 확인) | [설정 고지](templates/agent-config/README.md) |
 | PV-012 | `templates/agent-config/gemini.mcp.json` | kor-travel-geo | `1d9d74d3a852bbaaa09144b75bb69b99a58a6002` | `antigravity.json` | GPL-3.0-only | filesystem 항목 제거 (2026-09-07 확인) | [설정 고지](templates/agent-config/README.md) |
 | PV-013 | `packages/tokens/tokens.css` | kor-travel-map | `c494e227e010565be295de3f9670b2f7c8c20944` | `packages/kor-travel-map-admin/frontend/src/app/globals.css` | GPL-3.0-or-later | semantic 토큰·다크 값·형태·모션 값을 추출해 `--kt-*` 이름과 공개 패키지 계약에 맞게 재구성. 의미·접근성 규칙은 같은 커밋의 `packages/kor-travel-map-admin/frontend/design.md`와 대조 (2026-09-07) | [T-101](docs/tasks/T-101-tokens-package.md), [디자인 토큰 조사](docs/survey/cross/design-tokens.md) §3.2·§3.6 |
+| PV-014 | `packages/tokens/examples/weather-overrides.css` | kor-travel-weather | `6003da995fa4b35799f9dadc406c6ba2878bfbae` | `packages/kor-travel-weather-admin/frontend/app/tokens.css` | GPL-3.0-or-later | weather light/dark 값을 `--kt-*` 앱 오버라이드와 비배포 `--space-*` 호환 예제로 재표현. 원천 파일은 수정하지 않으며 실제 이관·6폭 diff는 T-461 범위 (2026-09-07) | [T-102](docs/tasks/T-102-map-vocabulary-shim.md), [weather 토큰 조사](docs/survey/inventory/kor-travel-weather.md) §3.1 |
 
 ### 2026-09-07 출처 대조 정정
 
