@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import asdict, dataclass, field
 from datetime import date
+import ipaddress
 import json
 import os
 from pathlib import Path
@@ -461,16 +462,52 @@ def _poetry_error() -> ValueError:
     return ValueError("poetry.lock 지원 형식 오류")
 
 
+def _validate_bracketed_host(netloc: str) -> None:
+    """URL authority의 대괄호 호스트가 실제 IPv6 주소인지 확인한다."""
+    if "[" not in netloc and "]" not in netloc:
+        return
+    if "@" in netloc:
+        userinfo = netloc.rsplit("@", 1)[0]
+        if "[" in userinfo or "]" in userinfo:
+            raise ValueError("URL 호스트 형식 오류")
+    authority = netloc.rsplit("@", 1)[-1]
+    if not authority.startswith("["):
+        raise ValueError("URL 호스트 형식 오류")
+    closing = authority.find("]")
+    if closing <= 1:
+        raise ValueError("URL 호스트 형식 오류")
+    host = authority[1:closing]
+    try:
+        ipaddress.ip_address(host)
+    except ValueError as exc:
+        raise ValueError("URL 호스트 형식 오류") from exc
+    suffix = authority[closing + 1:]
+    if suffix and not re.fullmatch(r":\d+", suffix):
+        raise ValueError("URL 호스트 형식 오류")
+
+
+def _parse_url(value: str):
+    """URL을 파싱하고 파서가 놓치는 잘못된 대괄호 호스트도 거부한다."""
+    parsed_text = value.removeprefix("git+")
+    try:
+        parsed = urlsplit(parsed_text)
+        # hostname/port 접근은 잘못된 bracket·port를 표준 라이브러리에서
+        # ValueError로 닫게 한다. 원문은 예외 메시지에 재출력하지 않는다.
+        hostname = parsed.hostname
+        parsed.port
+        _validate_bracketed_host(parsed.netloc)
+    except ValueError as exc:
+        raise ValueError("URL 형식 오류") from exc
+    return parsed, hostname
+
+
 def _validate_url(value: object, *, require_host: bool) -> str:
     if not isinstance(value, str) or not value.strip() or "\x00" in value:
         raise _poetry_error()
     text = value.strip()
     # Poetry는 git+ 접두를 기록하기도 하고, 일반 git URL을 기록하기도 한다.
-    parsed_text = text.removeprefix("git+")
     try:
-        parsed = urlsplit(parsed_text)
-        hostname = parsed.hostname
-        parsed.port
+        parsed, hostname = _parse_url(text)
     except ValueError as exc:
         raise _poetry_error() from exc
     if require_host and (not parsed.scheme or not hostname):
@@ -579,7 +616,10 @@ def _editable_requirement(line: str) -> str | None:
 def _strip_requirement_hashes(line: str) -> str:
     """선언 행의 per-requirement `--hash` 토큰을 제거하고 형식을 검증한다."""
     try:
-        tokens = shlex.split(line, posix=True)
+        # posix=False로 marker의 문자열 인용부호를 보존한다. 인용부호를
+        # 제거하면 `>=`가 `>`와 `=`로 다시 해석되는 등 잘못된 marker가
+        # 정상 입력으로 통과할 수 있다.
+        tokens = shlex.split(line, posix=False)
     except ValueError as exc:
         raise ValueError("requirements.txt 입력 구조 오류") from exc
     kept: list[str] = []
@@ -588,10 +628,16 @@ def _strip_requirement_hashes(line: str) -> str:
         token = tokens[index]
         if token == "--hash":
             index += 1
-            if index >= len(tokens) or not re.fullmatch(r"[A-Za-z0-9_-]+:[0-9A-Fa-f]+", tokens[index]):
+            hash_value = tokens[index] if index < len(tokens) else ""
+            if len(hash_value) >= 2 and hash_value[0] in {"'", '"'} and hash_value[-1] == hash_value[0]:
+                hash_value = hash_value[1:-1]
+            if not re.fullmatch(r"[A-Za-z0-9_-]+:[0-9A-Fa-f]+", hash_value):
                 raise ValueError("requirements.txt 입력 구조 오류")
         elif token.startswith("--hash="):
-            if not re.fullmatch(r"--hash=[A-Za-z0-9_-]+:[0-9A-Fa-f]+", token):
+            hash_value = token[len("--hash="):]
+            if len(hash_value) >= 2 and hash_value[0] in {"'", '"'} and hash_value[-1] == hash_value[0]:
+                hash_value = hash_value[1:-1]
+            if not re.fullmatch(r"[A-Za-z0-9_-]+:[0-9A-Fa-f]+", hash_value):
                 raise ValueError("requirements.txt 입력 구조 오류")
         elif token.startswith("--"):
             kept.append(token)
@@ -866,9 +912,7 @@ def uv_source_kind(source: object, path: Path, package_name: str) -> str:
         raise _uv_error(path, f"package {package_name!r} source 종류·값이 잘못됨")
     if kinds[0] in {"registry", "git"}:
         try:
-            parsed = urlsplit(source[kinds[0]])
-            hostname = parsed.hostname
-            parsed.port
+            parsed, hostname = _parse_url(source[kinds[0]])
         except ValueError as exc:
             raise _uv_error(path, "source URL 형식 오류") from exc
         if not parsed.scheme or not hostname:
@@ -967,11 +1011,7 @@ def ref_is_pinned(text: str, *, kind: str = "npm") -> bool:
     if not isinstance(text, str) or not text.strip():
         raise ValueError("git 참조 형식 오류")
     try:
-        parsed = urlsplit(text.removeprefix("git+"))
-        # hostname/port는 URL이 실제로 해석 가능한지 확인한다. 원문 예외는
-        # 입력 값이 로그로 재출력될 수 있으므로 일반 오류로 닫는다.
-        hostname = parsed.hostname
-        parsed.port
+        parsed, hostname = _parse_url(text)
     except ValueError as exc:
         raise ValueError("git 참조 형식 오류") from exc
     if parsed.scheme.lower() in {"http", "https", "ssh", "git"} and not hostname:
@@ -1018,11 +1058,6 @@ REQUIREMENT_MARKER_NAMES = frozenset({
     "platform_system", "platform_version", "platform_machine", "platform_python_implementation",
     "implementation_name", "implementation_version", "extra",
 })
-REQUIREMENT_MARKER_CLAUSE_RE = re.compile(
-    r"^(?P<left>[A-Za-z_][A-Za-z0-9_]*)\s*"
-    r"(?P<operator>not\s+in|in|===|==|!=|<=|>=|~=|<|>)\s*(?P<right>.+)$",
-    re.IGNORECASE,
-)
 
 
 def _outer_pair_wraps(text: str) -> bool:
@@ -1053,25 +1088,154 @@ def _outer_pair_wraps(text: str) -> bool:
     return depth == 0 and not quote
 
 
+def _marker_boundary(char: str) -> bool:
+    return not (char.isalnum() or char == "_")
+
+
+def _split_marker_top(text: str, keyword: str) -> list[str] | None:
+    """인용 문자열·괄호 안을 보존한 채 최상위 boolean 항을 나눈다."""
+    parts: list[str] = []
+    start = 0
+    depth = 0
+    quote = ""
+    escaped = False
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if quote:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = ""
+            index += 1
+            continue
+        if char in {"'", '"'}:
+            quote = char
+            index += 1
+            continue
+        if char == "(":
+            depth += 1
+            index += 1
+            continue
+        if char == ")":
+            depth -= 1
+            if depth < 0:
+                return None
+            index += 1
+            continue
+        if depth == 0 and text[index:index + len(keyword)].lower() == keyword:
+            before = text[index - 1] if index else " "
+            after_index = index + len(keyword)
+            after = text[after_index] if after_index < len(text) else " "
+            if _marker_boundary(before) and _marker_boundary(after):
+                parts.append(text[start:index].strip())
+                start = after_index
+                index = after_index
+                continue
+        index += 1
+    if quote or depth != 0:
+        return None
+    parts.append(text[start:].strip())
+    return parts
+
+
+def _marker_string(text: str) -> bool:
+    """PEP 508 marker 문자열 리터럴인지 확인한다."""
+    if len(text) < 2 or text[0] not in {"'", '"'} or text[-1] != text[0]:
+        return False
+    quote = text[0]
+    escaped = False
+    for char in text[1:-1]:
+        if escaped:
+            escaped = False
+        elif char == "\\":
+            escaped = True
+        elif char == quote or char in {"\r", "\n"}:
+            return False
+    return not escaped
+
+
+def _marker_operand(text: str) -> tuple[str, str] | None:
+    text = text.strip()
+    if text in REQUIREMENT_MARKER_NAMES:
+        return "name", text
+    if _marker_string(text):
+        return "value", text
+    return None
+
+
+def _marker_comparison(text: str) -> bool:
+    """단일 marker 비교를 확인하며 피연산자 역순도 허용한다."""
+    operators = ("not in", "===", "~=", "==", "!=", "<=", ">=", "<", ">", "in")
+    depth = 0
+    quote = ""
+    escaped = False
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if quote:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = ""
+            index += 1
+            continue
+        if char in {"'", '"'}:
+            quote = char
+            index += 1
+            continue
+        if char == "(":
+            depth += 1
+            index += 1
+            continue
+        if char == ")":
+            depth -= 1
+            if depth < 0:
+                return False
+            index += 1
+            continue
+        if depth == 0:
+            for operator in operators:
+                if text[index:index + len(operator)].lower() != operator:
+                    continue
+                end = index + len(operator)
+                if operator in {"in", "not in"}:
+                    before = text[index - 1] if index else " "
+                    after = text[end] if end < len(text) else " "
+                    if not _marker_boundary(before) or not _marker_boundary(after):
+                        continue
+                left = _marker_operand(text[:index])
+                right = _marker_operand(text[end:])
+                if left is None or right is None or left[0] == right[0]:
+                    return False
+                return True
+        index += 1
+    return False
+
+
+def _valid_marker_expression(expression: str) -> bool:
+    expression = expression.strip()
+    if not expression or "[" in expression or "]" in expression:
+        return False
+    while _outer_pair_wraps(expression):
+        expression = expression[1:-1].strip()
+    if not expression:
+        return False
+    for keyword in ("or", "and"):
+        parts = _split_marker_top(expression, keyword)
+        if parts is None:
+            return False
+        if len(parts) > 1:
+            return all(_valid_marker_expression(part) for part in parts)
+    return _marker_comparison(expression)
+
+
 def _valid_requirement_marker(marker: str) -> bool:
-    marker = marker.strip()
-    if not marker:
-        return False
-    if any(marker.count(opening) != marker.count(closing)
-           for opening, closing in (("(", ")"), ("[", "]"))):
-        return False
-    clauses = re.split(r"\s+(?:and|or)\s+", marker, flags=re.IGNORECASE)
-    for clause in clauses:
-        clause = clause.strip()
-        while _outer_pair_wraps(clause):
-            clause = clause[1:-1].strip()
-        match = REQUIREMENT_MARKER_CLAUSE_RE.fullmatch(clause)
-        if match is None or match["left"] not in REQUIREMENT_MARKER_NAMES:
-            return False
-        right = match["right"].strip()
-        if not right or right[0] in {"(", ")", "[", "]"}:
-            return False
-    return True
+    return _valid_marker_expression(marker)
 
 
 def _normalize_requirement_spec(rest: str) -> str | None:

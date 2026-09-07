@@ -861,15 +861,50 @@ class CheckVersionsTests(unittest.TestCase):
         self.assertFalse(markdown.exists())
         self.assertFalse(summary.exists())
 
+    def test_manifest_malformed_bracket_git_input_does_not_create_output_rows(self):
+        marker = "BROKENHOST" + "A" * 8
+        (self.repo / "pyproject.toml").write_text(
+            '[project]\nname = "fixture"\nversion = "0.0.0"\nrequires-python = ">=3.11"\n'
+            'dependencies = ["custom-lib @ https://[' + marker + ']repo.git@v1.2.3"]\n',
+            encoding="utf-8")
+        (self.repo / "uv.lock").write_text(
+            'version = 1\nrevision = 3\nrequires-python = ">=3.11"\n\n'
+            '[[package]]\nname = "custom-lib"\nversion = "1.2.3"\n'
+            'source = { git = "https://example.com/repo.git#' + "a" * 40 + '" }\n',
+            encoding="utf-8")
+        report = self.root / "bracket-manifest-error.json"
+        markdown = self.root / "bracket-manifest-error.md"
+        summary = self.root / "bracket-manifest-summary.md"
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet", "--json", str(report),
+                          "--markdown", str(markdown), "--no-step-summary")
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn(marker, result.stdout)
+        self.assertFalse(report.exists())
+        self.assertFalse(markdown.exists())
+        self.assertFalse(summary.exists())
+
     def test_requirements_malformed_marker_parentheses_and_option_value_fail_closed(self):
         for invalid in (
             'fastapi==0.141.1; this is invalid\n',
+            'fastapi==0.141.1; python_version >=\n',
+            'fastapi==0.141.1; python_version >= dev\n',
+            'fastapi==0.141.1; python_version >= = "3.11"\n',
             'fastapi(((==0.141.1)))\n',
             '--only-binary\n',
         ):
             with self.subTest(invalid=invalid):
                 (self.repo / "requirements.txt").write_text(invalid, encoding="utf-8")
                 self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+
+    def test_requirements_marker_compound_and_reversed_comparisons(self):
+        (self.repo / "requirements.txt").write_text(
+            'fastapi==0.141.1; (python_version >= "3.11" and extra == "dev")\n'
+            'fastapi==0.141.1; "3.11" <= python_version\n'
+            'fastapi==0.141.1; python_version >= "3.11" or '
+            '(python_version < "4" and extra in "dev")\n',
+            encoding="utf-8")
+        result = self.cli(str(self.repo), "--repo", "app-a", "--quiet")
+        self.assertEqual(result.returncode, 0)
 
     def test_poetry_upstream_optional_fields_are_accepted(self):
         (self.repo / "pyproject.toml").write_text(
