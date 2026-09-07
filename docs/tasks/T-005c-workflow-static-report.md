@@ -1,6 +1,6 @@
 # T-005c workflow 고정 참조·CI Node 선언의 정적 보고
 
-- 상태: READY
+- 상태: IN_PROGRESS
 - 우선순위: P2
 - Gate: 도구 테스트·두 OS CI·2인 리뷰
 - 선행: T-005, T-009
@@ -51,7 +51,7 @@ Git Bash에서 동일. fixture CLI와 실제 결과를 구현 후 evidence에 �
 
 ## evidence
 
-NOT_RUN(미구현). T-009의 버전 fixture CI는 현재 npm 입력 보고만 검증한다. 원본 finding A-P2-04·B-P2-04의 범위 충돌은 이 task와 정본 한계의 연결로 정정하며 기능 구현은 아직 완료하지 않았다. 담당은 common 유지자/이 task 실행 에이전트, 목표 시점은 기반 단계에서 T-005a/b 다음·T-011 이전이다.
+구현을 시작했다. T-009의 버전 fixture CI는 현재 npm 입력 보고만 검증하므로 workflow 정적 보고의 두 OS 실행·리뷰·PR CI를 이 task에서 추가로 확인한다. 원본 finding A-P2-04·B-P2-04의 범위 충돌은 이 task와 정본 한계의 연결로 정정하며, 완료 전까지 기능·문서·리뷰 evidence를 갱신한다. 담당은 common 유지자/이 task 실행 에이전트, 목표 시점은 기반 단계에서 T-005a/b 다음·T-011 이전이다.
 
 ## rollback 또는 release 차단 조건
 
