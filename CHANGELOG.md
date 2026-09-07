@@ -44,6 +44,7 @@
 #### Changed
 
 - npm·PyPI 게시·이름 확보 계획을 제외하고 파일 배포용 식별자를 확정했다. 검증한 common 후보를 보존한 뒤 다음 minor 구현을 진행하며, 실제 소비자 검증과 정식 발행은 별도 gate로 유지한다([ADR-014](docs/adr/014-common-implementation-without-registry-publishing.md)).
+- T-104 대비 계약은 일반 텍스트·상태 텍스트 4.5:1, 비텍스트 아이콘·컨트롤 경계·focus·tint mark 3:1로 정렬했다. `surface-muted`를 읽기 배경으로 사용하는 앱은 4.5:1 쌍을 추가한다.
 
 #### Fixed
 

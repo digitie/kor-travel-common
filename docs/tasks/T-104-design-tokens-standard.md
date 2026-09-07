@@ -35,6 +35,8 @@
 
 - TK-3 표의 변수명 집합이 packages/tokens/tokens.css에서 추출한 44개와 같다(실제 경로는 package root이며 src 경로가 아니다).
 - TK-4 alias 4항이 `shadcn.css` 정의와 일치하고, TK-5 admin 값이 `tokens.css` 값과 같다.
+- TK-8의 일반 텍스트·상태 텍스트 4.5:1과 비텍스트 3:1 기준이 T-103·style-delivery와 일치한다.
+- `surface-muted`는 장식·선택 행 원천으로 기본 텍스트 읽기 표면에서 제외하고, 앱이 읽기 배경으로 쓰는 경우 4.5:1 쌍을 추가한다.
 - `shadcn.css`가 `--chart-1..5`를 선언하지 않으며, 차트 팔레트 앱 소유 경계와 스코프 회귀 시험이 문서와 일치한다.
 - 모든 TK 규칙에 MUST/SHOULD·근거 절이 있고, O-4·O-11·O-13이 열림 표에 기본값과 함께 있다.
 - consumer 프로필 값(8/14/20/32·44·16)은 "pinvi 소유"로만 적고 정본화하지 않는다.

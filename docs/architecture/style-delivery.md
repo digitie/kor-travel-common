@@ -95,7 +95,7 @@ common 토큰을 도입한 앱은 `@config tailwind.config.ts`를 두지 않고 
 
 | 항목 | 규칙 |
 |---|---|
-| 검사 쌍 | TK-8과 같은 쌍·기준을 쓴다: primary/secondary/strong·brand-foreground 4.5:1, tertiary·icon·control-line·focus·brand↔tint·status↔tint 3:1, disabled 제외. `dt` §3.4.2의 재검증 쌍을 그대로 쓴다 |
+| 검사 쌍 | TK-8과 같은 쌍·기준을 쓴다: primary/secondary/strong/tertiary·brand-foreground·status 텍스트 4.5:1(tertiary는 page/subtle/card; muted를 읽기 배경으로 쓰면 추가), icon·control-line·focus·brand↔tint mark·icon 3:1, disabled 제외. `dt` §3.4.2의 재검증 쌍을 그대로 쓴다 |
 | 대상 | 앱 `brand.css`(오버라이드 결과값)와 `tokens.css` 기본값. light 쌍 필수, dark 쌍은 dark 활성 앱만 |
 | 모드 | report 기본. 앱 `contrast-baseline.json`(미달 쌍 + `until`)에 없는 **신규 미달**만 fail. 검사를 끄지 않는다(임시 예외는 owner·기한이 있는 `DEFERRED`로만) |
 | 실행 | `python3 -B -X utf8 tools/kt_contrast.py <brand.css> [--baseline contrast-baseline.json] [--dark]`(인자는 T-103 확정). 소비자 CI는 `contrast-check.yml` 재사용 워크플로로 호출 |

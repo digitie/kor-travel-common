@@ -109,17 +109,16 @@ common은 의미 이름, 기본값, 프로필 모양, alias 의미, 대비 쌍, 
 
 | 쌍 | 기준 | 표면·용도 |
 |---|---:|---|
-| text primary/secondary/strong ↔ surface 4종 | 4.5:1 | 본문·강조 라벨 |
-| text tertiary ↔ surface 4종 | 3:1 | 메타·캡션 |
+| text primary/secondary/strong/tertiary ↔ 읽기 표면(page/subtle/card) | 4.5:1 | 일반 본문·강조 라벨·메타·캡션 |
 | text disabled ↔ surface 4종 | 검사 제외 | 비활성 상태는 대비 합격 쌍에서 제외 |
 | icon ↔ surface 4종 | 3:1 | 아이콘 |
 | control-line ↔ surface 4종 | 3:1 | WCAG 1.4.11 컨트롤 경계 |
 | focus ↔ surface-page | 3:1 | 포커스 링 |
 | brand-foreground ↔ brand | 4.5:1 | CTA 채움 위 텍스트 |
 | brand ↔ brand-tint | 3:1 | tint 위 mark·아이콘 |
-| status 4종 ↔ status-tint | 3:1 | tint 위 상태 텍스트 |
+| status 4종 ↔ status-tint | 4.5:1 | tint 위 상태 텍스트 |
 
---kt-border는 장식 전용이므로 대비 쌍에서 제외하고 컨트롤 경계로 사용하면 TK-3·TK-4 위반이다. report는 전체 결과와 JSON을 남기며, 기존 미달은 앱의 contrast-baseline.json에 {pair, surface, measured, required, until}로 등록한다. **새 미달만 fail**하고 until 만료는 EXEMPT_EXPIRED 오류로 승격한다. 허용 오차는 조사 기준 ±0.03이다(dt §3.4.2).
+--kt-surface-muted는 선택 행·장식 border 원천이므로 일반 텍스트 쌍의 기본 읽기 표면에서 제외한다. 앱이 muted를 읽기 배경으로 사용하면 해당 text 쌍을 추가해 4.5:1을 만족해야 한다. --kt-border는 장식 전용이므로 대비 쌍에서 제외하고 컨트롤 경계로 사용하면 TK-3·TK-4 위반이다. report는 전체 결과와 JSON을 남기며, 기존 미달은 앱의 contrast-baseline.json에 {pair, surface, measured, required, until}로 등록한다. **새 미달만 fail**하고 until 만료는 EXEMPT_EXPIRED 오류로 승격한다. 허용 오차는 조사 기준 ±0.03이다(dt §3.4.2).
 
 **TK-9 (SHOULD) — 값 형식과 alpha.** 기본값은 OKLCH(oklch(L% C H))를 권고하고 hex를 허용한다. hex를 쓰는 앱은 오버라이드 주석에 대응 OKLCH를 남긴다. alpha는 overlay와 shadow에만 허용하며 status·brand tint와 컴포넌트 팔레트에는 쓰지 않는다. 컴포넌트·페이지의 raw #hex·oklch()·rgb()·hsl()와 팔레트 alpha 유틸리티는 금지한다. 이 문서는 UX 금지 패턴을 복제하지 않고 [ux-guide §4](ux-guide.md)의 정본을 가리킨다.
 
