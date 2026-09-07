@@ -505,7 +505,7 @@ git ls-remote --tags https://github.com/actions/<action>       # SHA→태그
 
 결론:
 - TypeScript 7.0.2는 lockfile에 실제로 해석·고정돼 있고, 기준 커밋 `2bb1111`의 GitHub Actions에서 `tsc --noEmit`과 `next build`가 통과했다(사실). 따라서 "선언만 7이고 실제로는 5가 설치된다"는 가설은 기각된다.
-- `live-e2e` 실패는 외부 URL(`E2E_BASE_URL=https://pr.digitie.mywire.org`)에 대한 E2E job이며 TypeScript와 무관하다는 것은 job 이름·env로부터의 **추정**이다(로그 미열람).
+- `live-e2e` 실패는 외부 URL(`E2E_BASE_URL=https://<prod-host>`)에 대한 E2E job이며 TypeScript와 무관하다는 것은 job 이름·env로부터의 **추정**이다(로그 미열람).
 - airport에는 ESLint·typescript-eslint가 없어 TS 7의 생태계 제약이 드러나지 않는다. 다른 앱이 따라가면 typescript-eslint(peer `<6.1.0`) 문제가 발생한다(사실). 즉 "airport가 7에서 동작한다"는 것이 "전 앱 7 정렬이 가능하다"를 뜻하지 않는다.
 - 후보: 정책상 TS 기준선을 5.9.x로 두고 airport를 하향하거나, 6.x를 중간 단계로 두고 typescript-eslint 지원 범위 확장을 기다린다. 어느 쪽이든 결정은 TS 7이 필요한 이유(빌드 속도 등)가 airport 문서에 기록돼 있지 않으므로(미확인) 확인 후에 한다.
 

@@ -215,7 +215,7 @@ git -C /mnt/f/dev/kor-travel-common-wt/review-<id> status --porcelain=v1
 1. `git status`로 사용자 파일, 로컬 파일(`*.local.md`, `.env*`), 빌드 산출물이 섞이지 않았는지 확인한다.
 2. `git diff --staged` 전체를 직접 읽는다.
 3. secret, private key, API key, 세션·토큰 값, 운영 호스트 주소·IP·도메인, 관리자 자격증명, 개인정보가 없는지 검사한다. common은 prod 값을 가질 이유가 없으므로 전체 트리가 redaction 대상이다(D-18).
-4. 생성물·문서 링크·task index가 source와 일치하는지 확인한다(§4 문서 검증 4종). 새 소스 파일에는 SPDX 헤더와 `Origin:` 행이 있어야 한다([CONTRIBUTING](../../CONTRIBUTING.md) §2; `tools/check_spdx.py`는 T-003 잔여).
+4. 생성물·문서 링크·task index가 source와 일치하는지 확인한다(§4 문서 검증 4종). 새 소스 파일에는 SPDX·저작권 헤더가 있어야 하며 이식 파일만 `Origin:` 행을 갖는다([CONTRIBUTING](../../CONTRIBUTING.md) §2; `tools/check_spdx.py`는 T-003 잔여).
 5. branch를 push하고 `main` 대상 Draft PR을 만든다. 보존 후보의 릴리스 준비 PR만 [release §2.1~2.2](release.md#21-common-후보-보존과-후속-구현)에 따라 해당 minor release branch를 base로 사용하며, 현재 원장 완료 기록은 별도 main 문서 PR으로 반영한다. `main`에 직접 push하지 않는다. 커밋 제목은 Conventional Commits 영어 type + 한국어 문장이다(D-32).
 
 ```bash

@@ -48,7 +48,7 @@ docs/standards/backend-stack.md                          # 모듈 표 갱신(sta
 ## 수용 기준
 
 - [ ] `BaseAppSettings`를 접두 없이 서브클래스하면 env 접두를 강제하지 않고, `SecretStr` 필드 검증 실패 메시지에 원문이 나타나지 않는다(정규식 단언).
-- [ ] `normalize_dsn("postgres://u:p@h/db", driver="asyncpg")`가 `postgresql+asyncpg://…`, `driver="psycopg"`가 `postgresql+psycopg://…`를 만들고 이미 정규화된 DSN은 그대로 둔다.
+- [ ] `normalize_dsn("postgres://<user>:<password>@h/db", driver="asyncpg")`가 `postgresql+asyncpg://…`, `driver="psycopg"`가 `postgresql+psycopg://…`를 만들고 이미 정규화된 DSN은 그대로 둔다.
 - [ ] testcontainers PostgreSQL에서 asyncpg·psycopg 두 드라이버로 엔진을 만들어 `SHOW statement_timeout`·`SHOW search_path`가 인자값과 같다(Docker 없으면 `NOT_RUN`).
 - [ ] `hash_public_api_key(" abc ") == sha256("abc")`, `generate_public_api_key()`가 32자 영숫자, `key_hint`가 마지막 6자.
 - [ ] `extract_api_key`가 기본값에서 `?key=`를 무시하고 `allow_query_param=True`일 때만 읽는다.
