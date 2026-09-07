@@ -1,6 +1,6 @@
-# T-005c workflow 고정 참조·CI Node 선언의 정적 보고
+# T-005c workflow 고정 참조·CI Node 선언의 정적 보고 (2026-09-07, PR #8)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P2
 - Gate: 도구 테스트·두 OS CI·2인 리뷰
 - 선행: T-005, T-009
@@ -52,7 +52,9 @@ Git Bash에서 동일. fixture CLI와 실제 결과를 구현 후 evidence에 �
 
 ## evidence
 
-구현을 시작했다. T-009의 버전 fixture CI는 현재 npm 입력 보고만 검증하므로 workflow 정적 보고의 두 OS 실행·리뷰·PR CI를 이 task에서 추가로 확인한다. 원본 finding A-P2-04·B-P2-04의 범위 충돌은 이 task와 정본 한계의 연결로 정정하며, 완료 전까지 기능·문서·리뷰 evidence를 갱신한다. 담당은 common 유지자/이 task 실행 에이전트, 목표 시점은 기반 단계에서 T-005a/b 다음·T-011 이전이다.
+구현·fixture·정본 문서·두 OS 검증을 완료했다. 최종 candidate `5807e535c16310c41c21f9efce87b2113aa17ee5`의 PR CI `34097813843`에서 5개 job이 성공했고, 두 독립 reviewer가 누적 finding을 모두 FIXED로 확인해 PASS했다. 최종 통합 evidence는 [T005c 최종 리뷰](../reviews/adversarial/2026-09-07-t005c-post-fix-03.md)와 [post-fix-03d manifest](../reviews/adversarial/evidence/2026-09-07-t005c-post3d-manifest.md)다. Windows/WSL 전체 179개·focused 84개 테스트, 문서·계획·SPDX·secret/redaction·self-check validator가 모두 skip/오류 없이 통과했다. 소비자 저장소·npm/PyPI는 건드리거나 게시하지 않았다.
+
+실행 결과와 두 reviewer의 원본은 최종 리뷰 report와 evidence에 보존한다. 패키지 build/install, 실제 소비자 workflow·CI·e2e, 원격 action major·Docker image 조회는 범위 밖이며 `NOT_RUN(사유)`다. 다음 순차 task는 T-011이다.
 
 ## rollback 또는 release 차단 조건
 

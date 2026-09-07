@@ -2,6 +2,14 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-005c 최종 review 완료·PR #8 merge gate)
+
+T-005c workflow 고정 참조·CI Node 선언 정적 보고를 `codex/t005c-workflow-static-report`에서 마쳤다. 최종 code candidate `5807e535c16310c41c21f9efce87b2113aa17ee5`는 plain/flow YAML quote·delimiter 경계, workflow 출력 redaction, 저장소 식별자 분리, Docker 이름 문법, local action root containment와 빈 구조 fail-close를 포함한다. PR #8 CI `34097813843`의 docs·tools(Windows/Ubuntu)·check-versions·secret-scan 5개 job이 모두 성공했다.
+
+Windows/WSL에서 전체 179 tests·focused 84 tests를 각각 skip 0으로 실행했다. 문서 link(311/2202), plan(102), SPDX(29), secret/redaction(386), self-check와 diff 공백 검사가 오류 없이 통과했다. 전문 영역이 다른 두 reviewer의 최종 post3d 원본과 manifest를 [최종 통합 리뷰](reviews/adversarial/2026-09-07-t005c-post-fix-03.md) 및 [evidence](reviews/adversarial/evidence/2026-09-07-t005c-post3d-manifest.md)에 보존했고 A/B 모두 PASS, 누적 finding은 모두 FIXED다.
+
+이번 변경은 common 저장소의 코드·fixture·문서·리뷰 evidence만 포함하며 소비자 저장소 변경과 npm/PyPI 게시를 하지 않았다. 실제 소비자 workflow·CI·빌드·e2e, 원격 action major·Docker image 조회, package build/install/publish와 merge 후 main CI는 `NOT_RUN(사유)` 범위로 남긴다. 완료 원장과 [resume](resume.md)을 T-005c DONE·다음 T-011 READY로 갱신하고 PR #8 merge gate에 올린다.
+
 ## 2026-09-07 (Codex, T-005b 완료·PR #7 병합 준비)
 
 T-005b를 `codex/t005b-poetry-requirements`에서 완료했다. 최종 candidate `5b687585cddf6e7a5145911e75647a0e814d9078`은 PR #7에 push했고 [CI 34087885355](https://github.com/digitie/kor-travel-common/actions/runs/34087885355)의 5개 check가 모두 성공했다. Poetry lock의 package/source·metadata·조건별 Git reference, 재귀 requirements의 include·hash·editable·범위/차단·`NO_LOCK`, URL 오류 비공개와 PEP 508 marker 문법을 common 코드와 회귀 시험으로 마무리했다.

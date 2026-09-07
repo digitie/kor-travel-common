@@ -21,6 +21,7 @@
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
 | 2026-09-07 | full post-fix 01 | [T-005c post-fix 판정](adversarial/2026-09-07-t005c-post-fix.md), `03f2cae` | A parser·YAML·Node / B CI·redaction·path | A BLOCK / B BLOCK, 누적 8개 고유 finding 재수정 후 재검토 |
+| 2026-09-07 | full post-fix 03 | [T-005c 최종 판정](adversarial/2026-09-07-t005c-post-fix-03.md), `5807e53` | A parser·YAML·구조 / B redaction·정책·Docker | **A PASS / B PASS, 누적 finding 모두 FIXED** |
 | 2026-09-07 | full post-fix 02 | [T-005c post-fix 02](adversarial/2026-09-07-t005c-post-fix-02.md), `ae6d257` | A parser·구조·출력 / B CI·redaction·정책·Docker | A BLOCK / B BLOCK, 잔여 OPEN 6개 |
 | 2026-09-07 | full | [T-005c workflow 정적 보고](adversarial/2026-09-07-t005c.md), `5526c01` | A parser·YAML·Node / B CI·정합·redaction | A BLOCK / B BLOCK, 8개 고유 finding 수정 후 post-fix 재검토 |
 | 2026-09-07 | full post-fix 04 | [T-005b 최종 판정](adversarial/2026-09-07-t005b-post4.md), `5b68758` | A marker·requirements / B Poetry·URL | **A PASS / B PASS, 누적 finding 모두 FIXED** |
