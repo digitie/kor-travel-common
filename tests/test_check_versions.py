@@ -1190,6 +1190,15 @@ class CheckVersionsTests(unittest.TestCase):
         self.assertEqual(uses["docker://a__b:1.2"].verdict, "OK")
         self.assertEqual(uses["docker://a---b:1.2"].verdict, "OK")
 
+        (workflow_dir / "single-repository.yml").write_text(
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: docker://a_b.c:1.2\n",
+            encoding="utf-8")
+        single = self.run_checker()
+        self.assertEqual(
+            next(f for f in single if f.key == "uses" and f.declared == "docker://a_b.c:1.2").verdict,
+            "OK")
+
     def test_workflow_outputs_redact_sensitive_values_in_all_channels(self):
         workflow_dir = self.repo / ".github" / "workflows"
         workflow_dir.mkdir(parents=True)

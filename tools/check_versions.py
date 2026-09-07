@@ -2111,7 +2111,7 @@ class Checker:
                 if (not host or not port.isdigit()
                         or not all(host_label.fullmatch(label) for label in host.split("."))):
                     return False
-            elif index == 0 and ("." in part or part == "localhost"):
+            elif index == 0 and len(parts) > 1 and ("." in part or part == "localhost"):
                 if not all(host_label.fullmatch(label) for label in part.split(".")):
                     return False
             elif not component.fullmatch(part):
