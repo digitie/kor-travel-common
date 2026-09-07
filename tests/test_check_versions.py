@@ -1095,6 +1095,8 @@ class CheckVersionsTests(unittest.TestCase):
             "comma: a, 'b\n"
             "colon-quote: a:'b\n"
             "bracket-quote: a[ 'b\n"
+            "matrix: ['a: b', ' #tag']\n"
+            'matrix-double: ["a: b", " #tag"]\n'
             "jobs:\n  build:\n    steps:\n"
             '      - run: echo "hello"\n'
             '      - with:\n          node-version: "22.23"\n'

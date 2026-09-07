@@ -1368,6 +1368,7 @@ def _yaml_quote_starts(text: str, index: int, *, flow: bool = False) -> bool:
         if match.start() >= index:
             break
         mapping_colon = match.start()
+        break
     if mapping_colon < 0:
         return False
     value_start = mapping_colon + 1
