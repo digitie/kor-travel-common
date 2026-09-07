@@ -53,5 +53,5 @@
 
 <!--
 push 전 확인: git add -A/. 미사용 / git diff --staged 직접 읽음 / 비밀·운영 호스트·*.local.md 없음 /
-validator 3종 + git diff --check 통과 / 새 소스 파일 SPDX 헤더·Origin 행 / 기록 갱신(resume·tasks·ADR·journal·CHANGELOG·review index)
+validator 3종 + git diff --check 통과 / 새 소스 파일 SPDX·저작권 헤더, 이식 파일만 Origin 행 / 기록 갱신(resume·tasks·ADR·journal·CHANGELOG·review index)
 -->

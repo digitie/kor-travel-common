@@ -4,7 +4,7 @@
 
 ## 현재 상태
 
-[PR #1](https://github.com/digitie/kor-travel-common/pull/1)의 계획·문서와 [PR #2](https://github.com/digitie/kor-travel-common/pull/2)의 T-003 고지·출처·SPDX 구현을 main에 squash merge했다. [PR #3](https://github.com/digitie/kor-travel-common/pull/3)의 T-005는 f050997에서 두 독립 reviewer PASS, 최초 9개 finding 모두 FIXED다. 완료 기록 CI 34064140128 성공 후 PR #3을 659aa6d로 병합했다. T-015의 npm/PyPI 미게시·common 구현 선행 정리와 T-006의 범위 변경 기록을 [PR #4](https://github.com/digitie/kor-travel-common/pull/4)에 반영했다. 최종 candidate 95c139f는 두 reviewer PASS·누적 9개 finding FIXED이며 CI 34066138272가 성공했다. 현재 완료 10개·열린 91개다.
+[PR #1](https://github.com/digitie/kor-travel-common/pull/1)의 계획·문서와 [PR #2](https://github.com/digitie/kor-travel-common/pull/2)의 T-003 고지·출처·SPDX 구현을 main에 squash merge했다. [PR #3](https://github.com/digitie/kor-travel-common/pull/3)의 T-005는 f050997에서 두 독립 reviewer PASS, 최초 9개 finding 모두 FIXED다. 완료 기록 CI 34064140128 성공 후 PR #3을 659aa6d로 병합했다. T-015의 npm/PyPI 미게시·common 구현 선행 정리와 T-006의 범위 변경 기록을 [PR #4](https://github.com/digitie/kor-travel-common/pull/4)에 반영했다. 최종 candidate 95c139f는 두 reviewer PASS·누적 9개 finding FIXED이며 CI 34066138272가 성공했다. 현재 완료 10개·열린 92개다. T-009 리뷰에서 workflow 정적 검사 범위의 누락을 T-005c로 명시했다.
 
 T-005는 Windows Python 3.14.3·WSL Python 3.11.15에서 각각 전체 115 tests 성공·skip 0, SPDX 13개 오류 0, CI 성공이다. 7개 소비자의 고정 입력 48파일·306개 판정을 재현했다. report에 fail 기준 위반 102행이 있어 소비자 정책 준수·제품 검증 완료로 세지 않는다. [최종 리뷰](reviews/adversarial/2026-09-07-t005-post-fix.md)에 원본·경계 재현·한계를 연결했다.
 

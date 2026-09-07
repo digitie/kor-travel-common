@@ -140,7 +140,7 @@ def policy(snapshot: Snapshot, name: str):
             raise ScanError("정규식 누락")
         try:
             compiled = re.compile(expression)
-        except re.error:
+        except (re.error, RecursionError):
             raise ScanError("정규식 컴파일 실패") from None
         if compiled.search(""):
             raise ScanError("빈 문자열에 일치하는 정규식")
@@ -178,6 +178,8 @@ def main(default_patterns: str, argv: list[str] | None = None) -> int:
         patterns, allowed = policy(snapshot, args.patterns)
         findings, exceptions = [], 0
         for name in sorted(snapshot.selected):
+            if any(expression.search(name) for expression in patterns.values()):
+                raise ScanError("탐지 패턴에 일치하는 경로명 — 원문 비공개")
             value = decode(snapshot.read(name))
             for identifier, expression in patterns.items():
                 lines = {value.count("\n", 0, match.start()) + 1 for match in expression.finditer(value)}

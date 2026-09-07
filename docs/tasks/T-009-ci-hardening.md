@@ -60,6 +60,22 @@ Git Bash에서 동일. CI 결과는 GitHub Actions 실행 링크로 기록한다
 
 ## evidence
 
+### 실제 CI 재실행
+
+수정 commit `ec34d6a254e1b24bba43261b6bc1df220213baa3`의 [PR run](https://github.com/digitie/kor-travel-common/actions/runs/34069558960)과 [release push run](https://github.com/digitie/kor-travel-common/actions/runs/34069558276)은 필수 check 5개 모두 success다. 각 job의 checkout 로그·source 확인 step 성공·run head SHA를 대조했다. report step은 같은 단계의 summary에 비어 있지 않은 표와 source가 있음을 단언한다. JSON report의 SHA256은 두 run 모두 `96c9a4ae83461111a418378976db515d6577de259c9dd5e53fb98388fa9cb403`이며 source는 위 commit이다. 제품 결과가 아닌 고정 fixture 보고다.
+
+| check | PR 소요 시간·job | release push 소요 시간·job |
+|---|---|---|
+| docs | [16초](https://github.com/digitie/kor-travel-common/actions/runs/34069558960/job/101584261844) | [13초](https://github.com/digitie/kor-travel-common/actions/runs/34069558276/job/101584259808) |
+| tools (ubuntu-24.04) | [17초](https://github.com/digitie/kor-travel-common/actions/runs/34069558960/job/101584261932) | [16초](https://github.com/digitie/kor-travel-common/actions/runs/34069558276/job/101584259966) |
+| tools (windows-2025) | [35초](https://github.com/digitie/kor-travel-common/actions/runs/34069558960/job/101584261864) | [34초](https://github.com/digitie/kor-travel-common/actions/runs/34069558276/job/101584259770) |
+| secret-scan | [7초](https://github.com/digitie/kor-travel-common/actions/runs/34069558960/job/101584261686) | [6초](https://github.com/digitie/kor-travel-common/actions/runs/34069558276/job/101584259850) |
+| check-versions | [7초](https://github.com/digitie/kor-travel-common/actions/runs/34069558960/job/101584261826) | [5초](https://github.com/digitie/kor-travel-common/actions/runs/34069558276/job/101584259706) |
+
+Windows 러너 Python 3.11.9에서 132 tests·skip 0(PR 17.390초/release 16.557초), Ubuntu Python 3.11.16에서 132 tests·skip 0이다. 같은 수정의 로컬 검증도 Windows 132 tests·skip 0(100.572초), WSL Python 3.11.15의 132 tests·skip 0(30.276초)로 성공했다. main의 새 workflow 실행은 merge 후 확인하며 아직 NOT_RUN이다. 원격 ruleset 조회는 빈 목록이었고 설정은 적용하지 않았다.
+
+### 초기 실패와 구현 검증
+
 첫 실제 [PR CI](https://github.com/digitie/kor-travel-common/actions/runs/34069260693)와 [release push CI](https://github.com/digitie/kor-travel-common/actions/runs/34069314480)에서 두 실패를 확인했다. report는 이전 step의 summary에 source가 있다고 잘못 가정했고, Windows Python 3.11.9는 TEMP의 짧은 경로 별칭과 해석한 긴 경로를 상대화하다 실패했다. GitHub의 [변수 문서](https://docs.github.com/en/actions/reference/workflows-and-actions/variables)(조회일 2026-09-07)의 step별 summary 경로 계약에 맞춰 report step 자체에서 source를 확인·기록했다. manifest의 기준 경로도 resolve하고 별칭 경로 회귀 시험이 수정 전 실패함을 재현했다. 수정 후 실제 CI 결과는 뒤 검증으로 구분한다.
 
 2026-09-07 재개: PR #4 merge `82dec2b939885863100802997f9e7548dffd3c9a`와 main CI 34066384346 성공을 확인했다. [PR #5](https://github.com/digitie/kor-travel-common/pull/5)에서 구현한다. 공식 [checkout v7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1)·[setup-python v7.0.0](https://github.com/actions/setup-python/releases/tag/v7.0.0)의 release/tag API를 조회해 workflow의 40자 commit과 일치함을 확인했다(조회일 2026-09-07). 실제 값은 workflow가 정본이다.

@@ -119,6 +119,27 @@ class SecretScanTests(RepositoryCase):
         (self.root / "sample.txt").unlink()
         self.assertEqual(self.run_scan().returncode, 2)
 
+    def test_deep_policy_regex_fails_without_traceback(self):
+        marker = "review-" + "private-marker"
+        expression = "(" * 700 + marker + ")" * 700
+        for filename, script in ((POLICY, SCRIPT), (".prod-redaction-patterns", ROOT / "tools/check_prod_redaction.py")):
+            self.write(filename, 'version=1\n[[patterns]]\nid="TEST-RULE"\nregex="' + expression + '"\n')
+            result = self.run_scan(script=script)
+            self.assertEqual(result.returncode, 2)
+            self.assertNotIn("Traceback", result.stdout + result.stderr)
+            self.assertNotIn(marker, result.stdout + result.stderr)
+
+    def test_sensitive_filename_and_parent_never_print(self):
+        marker = "AK" + "IA" + "A" * 16
+        for name in (marker + ".txt", marker + "/sample.txt"):
+            path = self.write(name, "안전한 본문")
+            for content in ("안전한 본문", marker):
+                path.write_text(content, encoding="utf-8")
+                result = self.run_scan()
+                self.assertEqual(result.returncode, 2)
+                self.assertNotIn(marker, result.stdout + result.stderr)
+            path.unlink()
+
     def test_exact_rule_exception_and_bad_allowlist(self):
         original = (ROOT / POLICY).read_text(encoding="utf-8")
         self.write("sample.txt", "api_" + "key=" + "abcdefghijk")

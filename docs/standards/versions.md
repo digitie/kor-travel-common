@@ -93,7 +93,7 @@
 
 ### 3.8 floating 참조 금지(D-11)
 
-`@main`·branch·참조 없는 git URL, `latest` 태그, npm `*`/`latest` 선언은 `FLOATING_REF`다. 허용되는 고정 형식: 40자리 SHA, GitHub `/tarball|/archive|/commit/<sha>`, GitHub Release 자산 URL(`/releases/download/<tag>/…` — common npm 배포 형식), 버전형 태그(`v1.2.3`, `py-v0.1.0`; `uv.lock`이 SHA를 기록). 관찰된 위반: pinvi `apps/etl` `python-kasi-api@main`(`vm` §2.7), RustFS/mc `latest` 이미지(도구 범위 밖, [ci-deploy](ci-deploy.md)). 재사용 워크플로 참조(`uses: digitie/kor-travel-common/.github/workflows/x.yml@<tag|sha>`)도 같은 규칙이며 T-009에서 검사 대상에 넣는다.
+`@main`·branch·참조 없는 git URL, `latest` 태그, npm `*`/`latest` 선언은 `FLOATING_REF`다. 허용되는 고정 형식: 40자리 SHA, GitHub `/tarball|/archive|/commit/<sha>`, GitHub Release 자산 URL(`/releases/download/<tag>/…` — common npm 배포 형식), 버전형 태그(`v1.2.3`, `py-v0.1.0`; `uv.lock`이 SHA를 기록). 관찰된 위반: pinvi `apps/etl` `python-kasi-api@main`(`vm` §2.7), RustFS/mc `latest` 이미지(도구 범위 밖, [ci-deploy](ci-deploy.md)). 재사용 워크플로 참조(`uses: digitie/kor-travel-common/.github/workflows/x.yml@<tag|sha>`)도 같은 규칙이다. 현재 checker는 YAML을 읽지 않으며 자동 정적 보고는 [T-005c](../tasks/T-005c-workflow-static-report.md)가 소유한다. T-009는 common 자체 workflow의 핀·실행 검증만 완료 범위로 둔다.
 
 ### 3.9 기준선 갱신
 
@@ -142,7 +142,7 @@
 |---|---|---|
 | 머리 | `schema`(고정 문자열)·`baseline`(`YYYY-MM`)·`updated`·`next_review`·`policy`·`source` | schema 고정·문자열·YYYY-MM·ISO 날짜 검사, 미지 필드 exit 2 |
 | `axes.<key>` | `ecosystem` ∈ `runtime`/`npm`/`pypi`/`image`/`tool`/`db`(필수), `packages[]`(생략 시 key), `floor`/`recommended`/`max`(문자열 또는 null), `image`, `check`, `checked`(기본 true), `note`, `source` | `runtime` 축은 `engines.node`·`engines.npm`(또는 `packageManager`)·`requires-python`의 **하한**을 대조하고, exact 값이면 recommended까지 대조 |
-| `actions` | `consumer_policy`·`common{}`·`checked: false` | 도구 미검사(T-009에서 워크플로 파서 추가 후보) |
+| `actions` | `consumer_policy`·`common{}`·`checked: false` | 현재 미검사. 정적 참조 보고는 T-005c가 소유하며 SHA의 액션 major 실측과 구분한다 |
 | `exceptions[]` | `repo`(consumers 키)·`key`(axes 키)·`installed`(접두)·`reason`·`until`(ISO)·`review` — 6개 모두 필수 | 숫자 접두 일치 시에만 적용; 같은 저장소·축의 중첩 접두는 거부; 다른 설치본이면 무효 |
 | `blocked[]` | `ecosystem`·`name`·`range`·`reason`(필수)·`since`·`source` | `range`는 `>=`·`<`·`==`·`,` 조합 |
 | `consumers.<repo>` | `enforce`(`report`/`warn`/`fail`)·`clean_runs`·`aliases[]`·`note` | 7개 고정. 신규 소비자는 common PR |
@@ -168,7 +168,7 @@ python3 -B -X utf8 tools/check_versions.py /path/to/app --repo wx --today 2027-0
 - 출력: 표준 출력에 Markdown 표(범위·축·생태계·선언·설치·판정·비고) + GitHub annotation(`::error::`/`::warning::`) + 요약 1줄. `--json`은 `kor-travel-common.version-report.v1`. `GITHUB_STEP_SUMMARY`가 있으면 표를 덧붙인다.
 - exit: 0(report·warn), 1(fail 모드 실패 후보 존재 또는 `--self-check` 예외 만료), 2(레지스트리·매니페스트·경로 오류). 자체 검사는 소비자 report 모드와 별개로 만료를 실패 처리한다.
 - 읽는 것: `package.json`·`package-lock.json`(v3)·`pyproject.toml`(PEP 621·Poetry 선언)·`uv.lock`·`requirements.txt`(선언만). 쓰는 것: `--json`·`--markdown` 출력 파일뿐. 네트워크 없음. Python 3.11+ 표준 라이브러리(`tomllib`)만 쓰며 Windows에서 동작한다(D-03 Tier 2; 회귀 시험 `tests/test_check_versions.py`).
-- 한계(사실): `poetry.lock` 파서 없음(T-005b) → `NO_LOCK`; Docker 이미지·GitHub Actions·CI Node 버전은 읽지 않음(T-009); git 고정 판정은 §3.8 휴리스틱; npm 사전 배포 버전·별칭·로컬 링크는 안정 원 패키지와 비교하지 않고 `NO_LOCK`으로 보고한다. npm 설치본은 `major.minor.patch`와 선택적 build metadata만 지원한다. 런타임/정책 숫자 접두와 이미지 `-slim`은 별도 허용한다. 런타임 하한은 단일 숫자/`=`/`==`/`^`/`~`/`~=`/`>=` 접두, `>=`·`<` 교집합, 이들의 `||` 대안을 지원한다. 빈 교집합과 `>`·`<=`·`!=` 및 그 밖의 혼합 문법은 NO_ENGINES다. 전체 SemVer/PEP 440 범위 해석기가 아니며 lock과 선언의 만족 여부는 소비자의 `npm ci`·`uv sync --locked` gate가 검증한다.
+- 한계(사실): `poetry.lock` 파서 없음(T-005b) → `NO_LOCK`; Docker 이미지·GitHub Actions·CI Node 버전은 읽지 않음. workflow 정적 참조·Node 선언은 T-005c 미구현으로 NOT_RUN이며 실제 실행 버전·Docker 파서는 범위 밖이다; git 고정 판정은 §3.8 휴리스틱; npm 사전 배포 버전·별칭·로컬 링크는 안정 원 패키지와 비교하지 않고 `NO_LOCK`으로 보고한다. npm 설치본은 `major.minor.patch`와 선택적 build metadata만 지원한다. 런타임/정책 숫자 접두와 이미지 `-slim`은 별도 허용한다. 런타임 하한은 단일 숫자/`=`/`==`/`^`/`~`/`~=`/`>=` 접두, `>=`·`<` 교집합, 이들의 `||` 대안을 지원한다. 빈 교집합과 `>`·`<=`·`!=` 및 그 밖의 혼합 문법은 NO_ENGINES다. 전체 SemVer/PEP 440 범위 해석기가 아니며 lock과 선언의 만족 여부는 소비자의 `npm ci`·`uv sync --locked` gate가 검증한다.
 - CI 연동: common `check-versions(report)` job(T-009)과 재사용 워크플로 `versions-check.yml`(T-010). 소비자는 기존 워크플로에 job을 추가하는 방식으로 호출하며 required check 이름은 입력으로 개방한다([ci-deploy](ci-deploy.md)).
 
 ## 9. 열린 결정(사용자 확인 필요; 기본값으로 진행)

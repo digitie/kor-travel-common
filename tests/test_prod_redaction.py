@@ -39,3 +39,14 @@ class ProdRedactionTests(RepositoryCase):
         self.write("sample.txt", "<prod-address>")
         self.assertEqual(self.run_scan("--staged", script=SCRIPT).returncode, 1)
         self.assertEqual(self.run_scan("--all", script=SCRIPT).returncode, 0)
+
+    def test_sensitive_filename_and_parent_never_print(self):
+        marker = "192." + "168.1.2"
+        for name in (marker + ".txt", marker + "/sample.txt"):
+            path = self.write(name, "안전한 본문")
+            for content in ("안전한 본문", marker):
+                path.write_text(content, encoding="utf-8")
+                result = self.run_scan(script=SCRIPT)
+                self.assertEqual(result.returncode, 2)
+                self.assertNotIn(marker, result.stdout + result.stderr)
+            path.unlink()
