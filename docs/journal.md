@@ -2,6 +2,10 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-005b 시작)
+
+T-005a 문서 후속 커밋 `a9bef6c4ca4ac93544040961874e00e5238e7116`을 PR #6으로 squash merge해 main `796445fadb9b4fa6de2f392d6169f31abdccc0fa`에 반영했다. PR CI `34081699365`와 main CI `34081751051`의 필수 5개 check가 모두 성공했고 리뷰 worktree를 정리했다. 이제 T-005b를 `codex/t005b-poetry-requirements`에서 시작한다. 소비자 저장소 쓰기·npm/PyPI 게시·설치는 하지 않는다.
+
 ## 2026-09-07 (Codex, T-005a 완료·PR #6 병합 준비)
 
 T-005a의 최종 code candidate `3c5801f14855a067080f257ec83d2279de32c74a`를 PR #6에 올렸다. `uv.lock`의 version/revision/source와 Python 하한, 공유 lock의 전이 축·차단·git source, PEP 735 group, `tool.uv.sources` 복수 항목을 검사하고 malformed input은 exit 2로 닫는다. branch/tag/rev 이름에 `@`가 들어간 경우 마지막 조각을 버전 태그로 오인하지 않도록 보수적으로 FLOATING_REF 처리했다. npm·PyPI 게시나 소비자 저장소 쓰기는 하지 않았다.

@@ -10,11 +10,11 @@ T-005는 Windows Python 3.14.3·WSL Python 3.11.15에서 각각 전체 115 tests
 
 `packages/tokens`·`packages/ui`·Python 패키지 실물은 아직 없다. 패키지 build·pack/wheel 설치·소비자 빌드·e2e·시각 검증은 NOT_RUN(실물 없음). T-009의 SPDX 필수 CI 단계·Windows matrix와 비밀/운영 정보 guard를 구현하고 실제 CI를 검증했다. 소비자 저장소는 수정하지 않았다.
 
-T-009는 [PR #5](https://github.com/digitie/kor-travel-common/pull/5)의 `6e1881b86f017d604ccfa416bd368e5aba24c669`로 병합했고 main CI 34071150863의 5개 check가 성공했다. [최종 리뷰](reviews/adversarial/2026-09-07-t009-post-fix.md)와 [CI evidence](tasks/T-009-ci-hardening.md#evidence)에 기록했다.
+T-009는 [PR #5](https://github.com/digitie/kor-travel-common/pull/5)의 `6e1881b86f017d604ccfa416bd368e5aba24c669`로 병합했고 main CI 34071150863의 5개 check가 성공했다. T-005a도 [PR #6](https://github.com/digitie/kor-travel-common/pull/6)의 squash merge `796445fadb9b4fa6de2f392d6169f31abdccc0fa`로 main에 반영했고 main CI 34081751051의 5개 check가 성공했다. [최종 리뷰](reviews/adversarial/2026-09-07-t009-post-fix.md)와 [T-005a evidence](tasks/T-005a-check-versions-uv-lock.md#evidence)에 기록했다.
 
 ## 다음 한 작업
 
-- 작업: [T-005b](tasks/T-005b-check-versions-poetry-requirements.md), READY. T-005a는 [PR #6](https://github.com/digitie/kor-travel-common/pull/6)의 최종 candidate `3c5801f14855a067080f257ec83d2279de32c74a`에서 A/B PASS·8 finding FIXED와 CI 34080403871 성공을 확인했다. PR #6 병합 후 T-005b를 시작한다.
+- 작업: [T-005b](tasks/T-005b-check-versions-poetry-requirements.md), IN_PROGRESS. T-005a는 [PR #6](https://github.com/digitie/kor-travel-common/pull/6)의 최종 candidate `3c5801f14855a067080f257ec83d2279de32c74a`에서 A/B PASS·8 finding FIXED와 PR CI 34081699365, main CI 34081751051 성공을 확인했다. `poetry.lock`·재귀 requirements 파서와 `NO_LOCK`·`BLOCKED` 보고를 구현한다.
 - 사용자 재개 지시로 common 구현을 순차 진행한다. npm/PyPI 미게시·다른 저장소 수정 금지와 독립 두 리뷰·PR·CI·병합 경계를 유지한다.
 - PR #4는 `82dec2b939885863100802997f9e7548dffd3c9a`로 병합됐고 main CI 34066384346이 성공했다. 아직 구현하지 않은 패키지·후보 보존·외부 gate는 미완료다.
 
