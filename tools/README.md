@@ -12,6 +12,8 @@
 | `scan_secrets.py` | 자격증명 값 패턴, 파일·행·규칙 ID만 출력. 스냅샷·예외·exit code는 [CI §8.1](../docs/standards/ci-deploy.md#81-검사-범위와-실패-처리) | `python3 -B -X utf8 tools/scan_secrets.py --all` (`--staged`/`--base <commit>`) |
 | `check_prod_redaction.py` | 같은 입력 선택기로 전체 트리의 사설 주소·내부 호스트·운영 서비스 형식 검사 | `python3 -B -X utf8 tools/check_prod_redaction.py --all` |
 | `check_aliases.py` | `packages/tokens/aliases`의 `--kt-*` 참조·Tailwind namespace·shadcn 중복·root/dark 완전성·재귀 import와 package/symlink 경계를 검사 | `python3 -B -X utf8 tools/check_aliases.py packages/tokens/aliases` |
+| `kt_contrast.py` | canonical `tokens.css`와 순서가 있는 오버라이드의 TK-8 대비 쌍(OKLCH·hex·`var()`·alpha 합성)을 light/dark로 계산하고 baseline `until`·신규 미달을 판정 | `python3 -B -X utf8 tools/kt_contrast.py packages/tokens/tokens.css [override.css ...] [--baseline contrast-baseline.json --fail-new]` |
+| `ux_lint.py` | 앱 소스의 UX 금지 규칙 P1~P8(대비 P4a/P4b 포함)을 전체 report하고 `--base` 추가 행·baseline 건수·만료를 판정. `--root`·`--token-files`로 검사 범위와 토큰 CSS allowlist를 지정 | `python3 -B -X utf8 tools/ux_lint.py --root <frontend-dir> --baseline ux-baseline.json [--base <sha>] [--token-files tokens.css,brand.css]` |
 
 `validate_document_links.py`·`validate_plan.py`는 canview 저장소의 동명 도구를 kor-travel-common 경로에 맞게 적응한 것이다. 검사 규칙은 [tasks-rule](../docs/tasks-rule.md)과 [documentation maintenance](../docs/runbooks/documentation-maintenance.md)가 정본이며, 도구가 통과했다는 사실은 제품 gate 통과를 뜻하지 않는다.
 

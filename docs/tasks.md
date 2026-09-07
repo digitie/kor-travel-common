@@ -27,7 +27,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
-| [T-103](tasks/T-103-kt-contrast-ux-lint.md) | READY | P1 | tools/kt_contrast.py(report·`contrast-baseline.json`) + `tools/ux_lint.py`(금지 7종+window.confirm, 전체 report·diff fail) + 4앱 오버라이드 예제 보고 | T-101 |
+| [T-103](tasks/T-103-kt-contrast-ux-lint.md) | IN_PROGRESS | P1 | tools/kt_contrast.py(report·`contrast-baseline.json`) + `tools/ux_lint.py`(금지 7종+window.confirm, 전체 report·diff fail) + 4앱 오버라이드 예제 보고 | T-101 |
 | [T-105](tasks/T-105-ux-guide-standard.md) | READY | P1 | docs/standards/ux-guide.md 확정(UX-Gn.m·MUST/SHOULD·C1~C22·baseline·예외) | 없음 |
 | [T-106](tasks/T-106-responsive-web-standard.md) | BLOCKED | P1 | docs/standards/responsive-web.md 확정 | T-108 |
 | [T-107](tasks/T-107-frontend-stack-templates.md) | READY | P1 | docs/standards/frontend-stack.md 확정 + `templates/eslint/*.mjs`·tsconfig base·postcss·components.json 조각 | T-003 |

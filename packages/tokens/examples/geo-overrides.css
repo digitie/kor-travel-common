@@ -1,0 +1,28 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ * Modified: 2026-09-08 — 조사 기준 Geo 값을 --kt-* 대비 예제로 재표현
+ */
+
+/* 조사 스냅샷의 Geo 값이다. 실제 앱 이관은 T-441이 소유한다. */
+:root {
+  --kt-surface-page: oklch(0.975 0.008 262.9);
+  --kt-surface-card: oklch(0.992 0.004 262.9);
+  --kt-surface-subtle: oklch(0.95 0.014 262.9);
+  --kt-surface-muted: oklch(0.916 0.021 262.9);
+  --kt-text-strong: oklch(0.235 0.023 244);
+  --kt-text-primary: oklch(0.35 0.025 244);
+  --kt-text-secondary: oklch(0.51 0.018 244);
+  --kt-text-tertiary: oklch(0.6 0.014 244);
+  --kt-icon: oklch(0.51 0.018 244);
+  --kt-control-line: oklch(0.72 0.02 210);
+  --kt-brand: oklch(0.546 0.215 262.9);
+  --kt-brand-tint: oklch(0.932 0.032 255.6);
+  --kt-brand-foreground: oklch(0.992 0.004 262.9);
+  --kt-focus: oklch(0.546 0.215 262.9);
+  --kt-success: oklch(0.48 0.13 151);
+  --kt-success-tint: oklch(0.94 0.04 151);
+  --kt-warning: oklch(0.55 0.135 68);
+  --kt-warning-tint: oklch(0.95 0.05 85);
+  --kt-destructive: oklch(0.51 0.175 28);
+  --kt-destructive-tint: oklch(0.95 0.042 28);
+}

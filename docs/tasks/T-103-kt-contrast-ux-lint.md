@@ -1,6 +1,6 @@
 # T-103 tools/kt_contrast.py(report·`contrast-baseline.json`) + `tools/ux_lint.py`(금지 7종+window.confirm, 전체 report·diff fail) + 4앱 오버라이드 예제 보고
 
-- 상태: READY
+- 상태: IN_PROGRESS
 - 우선순위: P1
 - Gate: 도구 테스트
 - 선행: T-101
@@ -19,7 +19,7 @@
 ## 구현 범위
 
 1. `tools/kt_contrast.py`: 입력 `tokens.css` + 오버라이드 CSS(0..n) + `--dark`; 파서(`:root`/`.dark` 블록의 `--kt-*` 값, OKLCH·hex·`var()` 1단 참조); 검사 쌍과 기준은 [디자인 토큰 TK-8](../standards/design-tokens.md#6-대비와-값-형식)을 그대로 사용한다(text primary/secondary/strong/tertiary × 읽기 표면 page/subtle/card → 4.5:1, muted를 읽기 배경으로 쓰는 앱은 쌍 추가, disabled 제외, icon × surface 4 → 3:1, control-line × surface 4 → 3:1, brand-foreground × brand → 4.5:1, brand × brand-tint mark·icon → 3:1, status 4 × tint 위 텍스트 → 4.5:1, focus × surface-page → 3:1). 조사 수치 대조의 ±0.03은 검사기 판정에 적용하지 않으며, 반올림으로 기준 미만을 합격 처리하지 않는다. `--baseline <json>`(미달 쌍 + `until`; 만료는 `EXEMPT_EXPIRED`); `--fail-new`; 출력 Markdown·`--json`·step summary.
-2. `tools/ux_lint.py`: 대상 확장자 `.tsx .ts .css .mdx`; 패턴 7 + `window.confirm`; 백틱·주석 안 인용 제외; `--base <sha>`면 `git diff -U0 <sha>`의 추가 행만 fail 대상, 전체는 report; `--baseline <json>`(파일·패턴·건수); 출력 동일 형식.
+2. `tools/ux_lint.py`: 대상 확장자 `.tsx .ts .css .mdx`; [UX-G9 금지 규칙](../standards/ux-guide.md) P1~P8(`P4a/P4b` raw 색상·`P8`은 `window.confirm`과 bare `confirm()` 포함); 백틱·주석 안 인용 제외; `--root`·`--token-files` 범위/allowlist; `--base <sha>`면 `git diff -U0 <sha>`의 추가 행만 fail 대상, 전체는 report; `--baseline <json>`(`schema`, 규칙·경로·건수·reason·until·task); 출력 동일 형식.
 3. 테스트: `tests/test_kt_contrast.py`(변환 정확도: map 문서 수치 ±0.05, 쌍 판정, baseline 만료), `tests/test_ux_lint.py`(패턴별 양성·음성 fixture, diff 모드).
 4. 4앱 예제: `packages/tokens/examples/{docker-manager,concierge,geo,airport}-overrides.css`(조사 문서 값) + 각 `contrast-baseline.example.json`; 실행 결과 표(미달 쌍·수치)를 evidence와 `docs/journal.md`에 보고. 실제 앱 baseline 등록은 각 이관 task.
 5. `templates/contrast-baseline.json`·`templates/ux-baseline.json` 빈 형식 + `tools/README.md` 행.
@@ -30,7 +30,7 @@
 
 ## 예상 변경 파일
 
-예정 경로는 존재·실행 증거가 아니다. `tools/kt_contrast.py`, `tools/ux_lint.py`, `tests/test_kt_contrast.py`, `tests/test_ux_lint.py`, `tests/fixtures/ux/*`, `packages/tokens/examples/*-overrides.css`, `packages/tokens/examples/*.contrast-baseline.example.json`, `templates/contrast-baseline.json`, `templates/ux-baseline.json`, `tools/README.md`, `.github/workflows/contrast-check.yml`(활성화).
+예정 경로는 존재·실행 증거가 아니다. `tools/kt_contrast.py`, `tools/ux_lint.py`, `tests/test_kt_contrast.py`, `tests/test_ux_lint.py`, `tests/fixtures/ux/*`, `packages/tokens/examples/*-overrides.css`, `packages/tokens/examples/*.contrast-baseline.example.json`, `templates/contrast-baseline.json`, `templates/ux-baseline.json`, `tools/README.md`가 이 task의 변경 대상이다. 재사용 워크플로 `.github/workflows/contrast-check.yml`은 T-010 소유이므로 이 task에서 만들지 않는다.
 
 ## 수용 기준
 
@@ -43,9 +43,9 @@
 ## 검증 명령
 
 ```bash
-python3 -B -X utf8 tools/kt_contrast.py packages/tokens/src/tokens.css; echo "exit=$?"
-python3 -B -X utf8 tools/kt_contrast.py packages/tokens/src/tokens.css packages/tokens/examples/docker-manager-overrides.css --baseline packages/tokens/examples/docker-manager.contrast-baseline.example.json --fail-new; echo "exit=$?"
-python3 -B -X utf8 tools/ux_lint.py tests/fixtures/ux --base HEAD~1; echo "exit=$?"
+python3 -B -X utf8 tools/kt_contrast.py packages/tokens/tokens.css; echo "exit=$?"
+python3 -B -X utf8 tools/kt_contrast.py packages/tokens/tokens.css packages/tokens/examples/docker-manager-overrides.css --baseline packages/tokens/examples/docker-manager.contrast-baseline.example.json --fail-new; echo "exit=$?"
+python3 -B -X utf8 tools/ux_lint.py --root tests/fixtures/ux --base HEAD~1; echo "exit=$?"
 python3 -B -X utf8 -m unittest discover -s tests -p "test_kt_contrast.py" -v
 python3 -B -X utf8 -m unittest discover -s tests -p "test_ux_lint.py" -v
 ```

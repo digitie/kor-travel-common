@@ -1,0 +1,29 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ * Modified: 2026-09-08 — 조사 기준 Concierge 값을 --kt-* 대비 예제로 재표현
+ */
+
+/* 조사 스냅샷의 Concierge 값이다. 실제 앱 이관은 T-453이 소유한다. */
+:root {
+  --kt-surface-page: #f4f5f0;
+  --kt-surface-card: #fcfcf9;
+  --kt-surface-subtle: #edf0e9;
+  --kt-surface-muted: #dce3d9;
+  --kt-text-tertiary: #7e8982;
+  --kt-control-line: #aab5ad;
+  --kt-brand: #7c3aed;
+  --kt-brand-tint: #ede9fe;
+  --kt-brand-foreground: #ffffff;
+}
+
+.dark {
+  --kt-surface-page: #151b17;
+  --kt-surface-card: #1d2721;
+  --kt-surface-subtle: #243027;
+  --kt-surface-muted: #344238;
+  --kt-text-tertiary: #8f9d94;
+  --kt-control-line: #66756a;
+  --kt-brand: #a78bfa;
+  --kt-brand-tint: #3b1670;
+  --kt-brand-foreground: #1e1b4b;
+}

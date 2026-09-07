@@ -1,0 +1,37 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ * Modified: 2026-09-08 — 조사 기준 Airport 값을 --kt-* 대비 예제로 재표현
+ */
+
+/* 조사 스냅샷의 Airport 값이다. 실제 앱 이관은 T-431이 소유한다. */
+:root {
+  --kt-surface-page: oklch(97.5% 0.012 86);
+  --kt-surface-card: oklch(99.2% 0.008 86);
+  --kt-surface-subtle: oklch(95% 0.022 86);
+  --kt-surface-muted: oklch(95% 0.022 86);
+  --kt-text-primary: oklch(24% 0.026 258);
+  --kt-text-secondary: oklch(52% 0.025 258);
+  --kt-text-tertiary: oklch(52% 0.025 258);
+  --kt-icon: oklch(52% 0.025 258);
+  --kt-control-line: oklch(24% 0.026 258 / 14%);
+  --kt-brand: oklch(48% 0.15 38);
+  --kt-brand-tint: oklch(61% 0.16 43 / 13%);
+  --kt-brand-foreground: oklch(100% 0 0);
+  --kt-focus: oklch(61% 0.16 43);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --kt-surface-page: oklch(18% 0.022 258);
+    --kt-surface-card: oklch(27% 0.03 258);
+    --kt-control-line: oklch(96% 0.012 86 / 16%);
+    --kt-text-primary: oklch(96% 0.012 86);
+    --kt-text-secondary: oklch(76% 0.025 258);
+    --kt-text-tertiary: oklch(76% 0.025 258);
+    --kt-icon: oklch(76% 0.025 258);
+    --kt-brand: oklch(72% 0.14 58);
+    --kt-brand-tint: oklch(72% 0.14 58 / 20%);
+    --kt-brand-foreground: oklch(20% 0.025 258);
+    --kt-focus: oklch(72% 0.14 58);
+  }
+}

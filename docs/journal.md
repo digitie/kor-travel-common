@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-08 (Codex, T-103 구현 시작)
+
+T-103을 `codex/t103-kt-contrast-ux-lint`에서 시작했다. 조사 원문과 현재 `packages/tokens/tokens.css`를 다시 대조해 `tools/kt_contrast.py`(OKLCH·hex·`var()`·alpha 합성·TK-8 27쌍·light/dark·baseline)와 `tools/ux_lint.py`(UX-G9 P1~P8·`--root`·`--token-files`·baseline·diff)를 common 안에 작성했다. ktdm·concierge·geo·airport 조사 스냅샷 오버라이드와 baseline 예제, 회귀 fixture/evidence도 common에만 추가했다.
+
+현재 Windows Python 전체 247 tests, focused T-103 11 tests, 문서 link 394/2410, plan 106, SPDX 56, secret/redaction 526, `git diff --check`가 통과했다. canonical 대비는 light/dark 27쌍 모두 PASS이며 4앱 미달 수치는 [T-103 evidence](evidence/t103-kt-contrast-ux-lint.md)에 기록했다. 소비자 저장소 build/e2e·재사용 workflow selftest는 `NOT_RUN(T-010 및 소비자 task)`. 다음은 동일 immutable candidate에 대한 reviewer A/B 독립 적대적 리뷰다.
+
 ## 2026-09-08 (Codex, T-104·T-020·T-021 최종 PASS·PR #17 merge·main CI 완료)
 
 T-104 디자인 토큰 표준과 T-020 pinvi·T-021 concierge·docker-manager GPL-3.0-or-later 결정·요청 문서를 최종 정리했다. 반복 no-go의 근본 원인은 WCAG 일반 텍스트/비텍스트 기준, 조사 재현 오차/검사기 합격 판정, 소비자 license-only PR/후속 코드 채택 evidence, common 완료/외부 gate 완료, chart palette 소유권을 한 gate에 섞은 문서 계약이었다. TK-8·T-103·style-delivery의 4.5:1/3:1 기준과 `±0.03` 재현 오차를 분리하고 반올림 합격을 금지했으며, chart 슬롯은 앱 소유로 전환하고 Breaking/Migration·회귀 시험을 기록했다. T-020/T-021의 DONE은 common 결정·요청 문서 gate만 닫고 외부 LICENSE PR과 소비자 채택은 `OPEN/NOT_RUN`으로 유지한다.

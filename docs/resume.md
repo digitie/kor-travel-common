@@ -16,7 +16,7 @@ common 안에서 결정·요청 문서만 완료했으며 실제 소비자 저�
 
 ## 다음 한 작업
 
-- 작업: [T-103](tasks/T-103-kt-contrast-ux-lint.md), READY(P1). T-104 디자인 토큰 표준과 T-020/T-021 GPL common 문서·review gate를 완료했으며, 이제 `kt_contrast`·`ux_lint` 구현 task를 순차 진행한다.
+- 작업: [T-103](tasks/T-103-kt-contrast-ux-lint.md), IN_PROGRESS(P1). `kt_contrast`·`ux_lint` 구현·회귀 시험·4앱 조사 예제를 작성했고, 두 적대적 reviewer의 독립 검토와 PR/CI/merge gate가 남아 있다.
 - 사용자 재개 지시로 common 구현을 순차 진행한다. npm/PyPI 미게시·다른 저장소 수정 금지와 독립 두 리뷰·PR·CI·병합 경계를 유지한다.
 - T-101은 PR #12로 병합했고, T-102는 PR #15 final2 PASS·candidate CI 성공 후 `4cde7e83910fba08f5b92a3c2f08274297e94223`로 squash merge했다. 초기 draft PR #14의 source와 evidence는 보존했다. 외부 소비자 gate와 실제 release 게시를 수행하지 않는다.
 

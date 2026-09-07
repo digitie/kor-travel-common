@@ -1,0 +1,14 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ * Modified: 2026-09-08 — 조사 기준 Ember 값을 --kt-* 대비 예제로 재표현
+ */
+
+/* 조사 스냅샷의 docker-manager 값이다. 실제 앱 이관은 T-472가 소유한다. */
+:root {
+  --kt-surface-page: oklch(98.2% 0.006 41);
+  --kt-surface-card: oklch(100% 0 0);
+  --kt-text-tertiary: oklch(61% 0.019 41);
+  --kt-brand: oklch(64.6% 0.222 41.1);
+  --kt-brand-tint: oklch(95.4% 0.038 75.2);
+  --kt-brand-foreground: oklch(100% 0 0);
+}
