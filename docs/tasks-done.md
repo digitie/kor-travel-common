@@ -6,6 +6,7 @@
 
 | ID | 상태 | 우선순위 | 작업 | 선행 |
 |---|---|---:|---|---|
+| [T-005c](tasks/T-005c-workflow-static-report.md) | DONE | P2 | workflow 고정 참조·CI Node 선언의 정적 보고 (2026-09-07, PR #8) | T-005, T-009 |
 | [T-005b](tasks/T-005b-check-versions-poetry-requirements.md) | DONE | P2 | check_versions: `poetry.lock`·`requirements.txt` 파서 + `NO_LOCK` 보고 | T-005 |
 | [T-005a](tasks/T-005a-check-versions-uv-lock.md) | DONE | P1 | check_versions: `uv.lock` 파서 | T-005 |
 | [T-009](tasks/T-009-ci-hardening.md) | DONE | P1 | common CI 하드닝(permissions·concurrency·timeout·ubuntu-24.04·액션 SHA 핀)·`tools` windows 매트릭스·`secret-scan`·`check-versions(report)` job·branch protection 문서·redaction guard (2026-09-07, PR #5) | T-002, T-003 |

@@ -16,3 +16,7 @@
 # 라이선스 원문 사본의 공백을 변경하지 않는다.
 LICENSES/*.txt -whitespace
 LICENSES/upstream/*.txt -whitespace
+# reviewer 원본 B evidence의 trailing blank 한 종류만 바이트 그대로 보존한다.
+docs/reviews/adversarial/evidence/2026-09-07-t005c-post3d-reviewer-b.md whitespace=-blank-at-eof
+# mixed-line-ending manifest 원본의 SHA·공백을 바이트 그대로 보존한다.
+docs/reviews/adversarial/evidence/2026-09-07-t005c-post3d-manifest.md -text -eol -whitespace

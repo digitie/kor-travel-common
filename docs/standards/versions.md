@@ -95,7 +95,11 @@
 
 ### 3.8 floating 참조 금지(D-11)
 
-`@main`·branch·참조 없는 git URL, `latest` 태그, npm `*`/`latest` 선언은 `FLOATING_REF`다. 허용되는 고정 형식: 40자리 SHA, GitHub `/tarball|/archive|/commit/<sha>`, GitHub Release 자산 URL(`/releases/download/<tag>/…` — common npm 배포 형식), 버전형 태그(`v1.2.3`, `py-v0.1.0`; `uv.lock`이 SHA를 기록). 관찰된 위반: pinvi `apps/etl` `python-kasi-api@main`(`vm` §2.7), RustFS/mc `latest` 이미지(도구 범위 밖, [ci-deploy](ci-deploy.md)). 재사용 워크플로 참조(`uses: digitie/kor-travel-common/.github/workflows/x.yml@<tag|sha>`)도 같은 규칙이다. 현재 checker는 YAML을 읽지 않으며 자동 정적 보고는 [T-005c](../tasks/T-005c-workflow-static-report.md)가 소유한다. T-009는 common 자체 workflow의 핀·실행 검증만 완료 범위로 둔다.
+`@main`·branch·참조 없는 git URL, `latest` 태그, npm `*`/`latest` 선언은 `FLOATING_REF`다. 허용되는 고정 형식: 40자리 SHA, GitHub `/tarball|/archive|/commit/<sha>`, GitHub Release 자산 URL(`/releases/download/<tag>/…` — common npm 배포 형식), 버전형 태그(`v1.2.3`, `py-v0.1.0`; `uv.lock`이 SHA를 기록). 관찰된 위반: pinvi `apps/etl` `python-kasi-api@main`(`vm` §2.7), RustFS/mc `latest` 이미지(도구 범위 밖, [ci-deploy](ci-deploy.md)). 재사용 워크플로 참조(`uses: digitie/kor-travel-common/.github/workflows/x.yml@<tag|sha>`)도 같은 규칙이다.
+
+`tools/check_versions.py`는 저장소 루트와 manifest 기준 루트의 `.github/workflows/*.yml`·`*.yaml`에서 job/step의 `uses`를 정적으로 보고한다. `owner/repo@<40자리 SHA|버전형 태그>`는 `OK`, branch·unknown·ref 누락은 `FLOATING_REF`다. `./` local action은 저장소 안의 경로가 존재할 때만 `OK`, `docker://`는 기본 image 이름이 유효하고 버전형 tag 또는 sha256 digest일 때만 `OK`이며 원격 이미지·action의 실제 버전이나 major를 조회·추정하지 않는다. `actions/setup-node`의 정확한 step에 있는 정적 문자열 `with.node-version`만 런타임 하한과 대조하고, matrix·expression·list·비문자열·`node-version-file`은 `NO_ENGINES`다. 위치는 workflow 상대 경로와 원본 행으로 보고한다.
+
+파서는 **2칸씩 증가하는** block map/list·인용/일반 scalar와 **trailing separator 없는** 단순 flow sequence만 지원한다. 이 subset의 plain scalar 예약 문자, single quote의 doubled escape, YAML double-quoted escape를 끝까지 소비하며 잘못된 quote·괄호·alias·colon 구조는 정상화하지 않는다. flow mapping, anchor/alias, block scalar, YAML tag/document stream, 중복 key, tab 들여쓰기와 잘못된 들여쓰기는 일반 입력 오류(exit 2)로 닫는다. job/step에 정적 `uses` 대상이 하나도 없거나 workflow·local 경로가 입력 root 밖으로 symlink된 경우도 빈 성공으로 만들지 않고 입력 오류로 닫는다. 진단·JSON·Markdown·step summary의 workflow 원문·경로는 비밀형 값과 제어 문자를 비식별화한다. 이 오류는 원문 값·경로를 재출력하지 않는다. T-009는 common 자체 workflow의 핀·실행 검증을, T-005c는 이 제한된 정적 보고를 소유한다.
 
 ### 3.9 기준선 갱신
 
@@ -155,7 +159,7 @@
 ## 8. 도구 사용법(`tools/check_versions.py`)
 
 ```bash
-# 소비 저장소 체크아웃을 자동 탐색(package.json·pyproject.toml·requirements.txt, 깊이 4, node_modules 제외)
+# 소비 저장소 체크아웃을 자동 탐색(package.json·pyproject.toml·requirements*.txt·.github/workflows/*.yml|*.yaml, 깊이 4, node_modules 제외)
 python3 -B -X utf8 tools/check_versions.py /path/to/kor-travel-map --repo kor-travel-map
 
 # 매니페스트의 lockfiles[]만 대조(T-011 이후 CI 표준 호출; --mode 없음 = versions.json enforce)
@@ -169,8 +173,8 @@ python3 -B -X utf8 tools/check_versions.py /path/to/app --repo wx --today 2027-0
 - 인자: 위치 인자 = 저장소 루트(여러 개 가능), `--manifest`, `--registry`(기본 common 루트 `versions.json`), `--repo`(consumers 키 또는 별칭; 기본 매니페스트 `repo` → 디렉터리 이름), `--mode`(로컬 override), `--today`, `--json`, `--markdown`, `--no-step-summary`, `--quiet`, `--self-check`(형식·순서·예외 만료).
 - 출력: 표준 출력에 Markdown 표(범위·축·생태계·선언·설치·판정·비고) + GitHub annotation(`::error::`/`::warning::`) + 요약 1줄. `--json`은 `kor-travel-common.version-report.v1`. `GITHUB_STEP_SUMMARY`가 있으면 표를 덧붙인다.
 - exit: 0(report·warn), 1(fail 모드 실패 후보 존재 또는 `--self-check` 예외 만료), 2(레지스트리·매니페스트·경로 오류). 자체 검사는 소비자 report 모드와 별개로 만료를 실패 처리한다.
-- 읽는 것: `package.json`·`package-lock.json`(v3)·`pyproject.toml`(PEP 621·Poetry 선언)·`uv.lock`·`poetry.lock`·`requirements*.txt`(재귀 선언). 쓰는 것: `--json`·`--markdown` 출력 파일뿐. 네트워크 없음. Python 3.11+ 표준 라이브러리(`tomllib`)만 쓰며 Windows에서 동작한다(D-03 Tier 2; 회귀 시험 `tests/test_check_versions.py`).
-- 한계(사실): Poetry lock은 제한된 package/version·metadata·git source만 읽고 requirements 설치본은 정확 핀 후보와 차단 범위만 보고하며 두 입력 모두 uv lock을 대신하지 않는다. Docker 이미지·GitHub Actions·CI Node 버전은 읽지 않으며 workflow 정적 참조·Node 선언은 T-005c 미구현으로 NOT_RUN이다. 실제 실행 버전·Docker 파서는 범위 밖이고 git 고정 판정은 §3.8 휴리스틱이다. 지원 범위는 전체 Poetry resolver·전체 PEP 440 해석기가 아니며 lock과 선언의 만족 여부는 소비자의 `npm ci`·`uv sync --locked` gate가 검증한다. npm 사전 배포 버전·별칭·로컬 링크는 안정 원 패키지와 비교하지 않고 `NO_LOCK`으로 보고한다. npm 설치본은 `major.minor.patch`와 선택적 build metadata만 지원한다. 런타임/정책 숫자 접두와 이미지 `-slim`은 별도 허용한다. 런타임 하한은 단일 숫자와 제한된 비교·compatible·wildcard·교집합·`||` 대안을 지원하며 해석할 수 없는 범위는 안전한 정상 판정으로 축소하지 않는다.
+- 읽는 것: `package.json`·`package-lock.json`(v3)·`pyproject.toml`(PEP 621·Poetry 선언)·`uv.lock`·`poetry.lock`·`requirements*.txt`(재귀 선언)·`.github/workflows/*.yml|*.yaml`(제한된 정적 YAML). 쓰는 것: `--json`·`--markdown` 출력 파일뿐. 네트워크 없음. Python 3.11+ 표준 라이브러리(`tomllib`)만 쓰며 Windows에서 동작한다(D-03 Tier 2; 회귀 시험 `tests/test_check_versions.py`).
+- 한계(사실): Poetry lock은 제한된 package/version·metadata·git source만 읽고 requirements 설치본은 정확 핀 후보와 차단 범위만 보고하며 두 입력 모두 uv lock을 대신하지 않는다. workflow는 §3.8의 제한된 YAML과 `uses`·setup-node 정적 선언만 읽고 실제 실행 버전·액션 major·Docker digest의 이미지 내용을 확인하지 않는다. 지원 밖 YAML·빈 대조 범위·root 밖 symlink는 exit 2, 동적 Node 값은 `NO_ENGINES`, 이동 ref와 기본 구조가 잘못된 Docker/remote target은 `FLOATING_REF`이며 `actions.checked`를 활성화하지 않는다. 실제 실행 버전·Docker 파서는 범위 밖이고 git 고정 판정은 §3.8 휴리스틱이다. 지원 범위는 전체 Poetry resolver·전체 PEP 440 해석기가 아니며 lock과 선언의 만족 여부는 소비자의 `npm ci`·`uv sync --locked` gate가 검증한다. npm 사전 배포 버전·별칭·로컬 링크는 안정 원 패키지와 비교하지 않고 `NO_LOCK`으로 보고한다. npm 설치본은 `major.minor.patch`와 선택적 build metadata만 지원한다. 런타임/정책 숫자 접두와 이미지 `-slim`은 별도 허용한다. 런타임 하한은 단일 숫자와 제한된 비교·compatible·wildcard·교집합·`||` 대안을 지원하며 해석할 수 없는 범위는 안전한 정상 판정으로 축소하지 않는다.
 - CI 연동: common `check-versions(report)` job(T-009)과 재사용 워크플로 `versions-check.yml`(T-010). 소비자는 기존 워크플로에 job을 추가하는 방식으로 호출하며 required check 이름은 입력으로 개방한다([ci-deploy](ci-deploy.md)).
 
 ## 9. 열린 결정(사용자 확인 필요; 기본값으로 진행)

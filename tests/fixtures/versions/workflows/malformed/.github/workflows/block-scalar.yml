@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+name: |
+  지원하지 않는 block scalar
+jobs:
+  build:
+    steps:
+      - uses: actions/checkout@v4

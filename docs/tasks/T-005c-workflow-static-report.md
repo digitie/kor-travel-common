@@ -1,6 +1,6 @@
-# T-005c workflow 고정 참조·CI Node 선언의 정적 보고
+# T-005c workflow 고정 참조·CI Node 선언의 정적 보고 (2026-09-07, PR #8)
 
-- 상태: READY
+- 상태: DONE
 - 우선순위: P2
 - Gate: 도구 테스트·두 OS CI·2인 리뷰
 - 선행: T-005, T-009
@@ -14,6 +14,7 @@ T-009의 common 자체 workflow 검증과 구분해, 버전 검사기가 아직 
 - [버전 규약](../standards/versions.md) §3.8의 고정 참조·§8의 미지원 한계, [CI 규약](../standards/ci-deploy.md) §4의 하드닝이 정본이다. 수치와 `actions.checked`는 `versions.json`만 소유한다.
 - T-009 리뷰에서 확정된 범위 정정이다. 기존 checker에는 YAML 파서가 없으므로 이 task 전에는 자동 검사 성공으로 세지 않는다.
 - common만 수정하며 Python 3.11 표준 라이브러리·기존 positional/manifest 입력을 유지한다. 소비자 변경은 T-403의 별도 PR이다.
+- 제한 YAML parser의 block map/list는 2칸씩 증가하는 들여쓰기만, flow sequence는 scalar와 trailing separator 없는 형태만 지원한다. 그 밖의 YAML 표기는 전체 YAML 호환을 주장하지 않고 exit 2로 닫는다.
 
 ## 구현 범위
 
@@ -51,7 +52,9 @@ Git Bash에서 동일. fixture CLI와 실제 결과를 구현 후 evidence에 �
 
 ## evidence
 
-NOT_RUN(미구현). T-009의 버전 fixture CI는 현재 npm 입력 보고만 검증한다. 원본 finding A-P2-04·B-P2-04의 범위 충돌은 이 task와 정본 한계의 연결로 정정하며 기능 구현은 아직 완료하지 않았다. 담당은 common 유지자/이 task 실행 에이전트, 목표 시점은 기반 단계에서 T-005a/b 다음·T-011 이전이다.
+구현·fixture·정본 문서·두 OS 검증을 완료했다. 최종 code candidate `5807e535c16310c41c21f9efce87b2113aa17ee5`의 PR CI `34097813843`에서 5개 job이 성공했고, 두 독립 reviewer가 누적 finding을 모두 FIXED로 확인해 PASS했다. 이후 문서 수정 candidate `7b35ff07b077cef85d7d0d6e0971cacff210374f`도 PR CI `34099960667`의 5개 job과 두 독립 docs reviewer PASS를 확인했다. 최종 통합 evidence는 [T005c 최종 리뷰](../reviews/adversarial/2026-09-07-t005c-post-fix-03.md), [문서 post-fix 판정](../reviews/adversarial/2026-09-07-t005c-docs-post-fix.md)과 [post-fix-03d manifest](../reviews/adversarial/evidence/2026-09-07-t005c-post3d-manifest.md)다. Windows/WSL 전체 179개·focused 84개 테스트, 문서·계획·SPDX·secret/redaction·self-check validator가 모두 skip/오류 없이 통과했다. 소비자 저장소·npm/PyPI는 건드리거나 게시하지 않았다.
+
+실행 결과와 두 reviewer의 원본은 최종 리뷰 report와 evidence에 보존한다. 패키지 build/install, 실제 소비자 workflow·CI·e2e, 원격 action major·Docker image 조회는 범위 밖이며 `NOT_RUN(사유)`다. 다음 순차 task는 T-011이다.
 
 ## rollback 또는 release 차단 조건
 

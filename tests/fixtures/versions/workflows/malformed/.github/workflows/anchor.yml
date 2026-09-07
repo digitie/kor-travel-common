@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+name: &workflow-name 잘못된 anchor
+jobs:
+  build:
+    steps:
+      - uses: actions/checkout@v4

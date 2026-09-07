@@ -7,6 +7,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -983,6 +984,372 @@ class CheckVersionsTests(unittest.TestCase):
         self.assertEqual(requirements.returncode, 0)
         self.assertIn("NO_LOCK", requirements.stdout)
         self.assertIn("FLOATING_REF", requirements.stdout)
+
+    # --- T-005c workflow 정적 보고
+    def workflow_fixture(self, name: str) -> Path:
+        return SCRIPT.parents[1] / "tests" / "fixtures" / "versions" / "workflows" / name
+
+    def test_workflow_fixture_reports_refs_node_and_source_lines(self):
+        findings = self.run_checker(root=self.workflow_fixture("static"))
+        uses = [finding for finding in findings if finding.key == "uses"]
+        self.assertEqual({finding.verdict for finding in uses}, {"OK", "FLOATING_REF"})
+        self.assertIn("local", {finding.ecosystem for finding in uses})
+        self.assertIn("actions/checkout@v4", {finding.declared for finding in uses})
+        reusable = next(finding for finding in uses if "reusable.yml" in finding.declared)
+        self.assertEqual(reusable.verdict, "FLOATING_REF")
+        self.assertTrue(reusable.scope.endswith(":17"), reusable.scope)
+        node = next(finding for finding in findings if finding.key == "node")
+        self.assertEqual(node.verdict, "OK")
+        self.assertTrue(node.scope.endswith(":14"), node.scope)
+
+    def test_workflow_dynamic_node_values_are_not_installed_versions(self):
+        findings = self.run_checker(root=self.workflow_fixture("dynamic"))
+        node = [finding for finding in findings if finding.key == "node"]
+        self.assertEqual([finding.verdict for finding in node], ["NO_ENGINES", "NO_ENGINES"])
+        self.assertTrue(all(finding.installed == "" for finding in node))
+        self.assertTrue(all(": " not in finding.scope for finding in node))
+
+    def test_workflow_manifest_root_is_discovered_without_lockfile(self):
+        workflow_root = self.root / "manifest-workflow"
+        workflow_dir = workflow_root / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        (workflow_dir / "ci.yml").write_text(
+            "# SPDX-License-Identifier: GPL-3.0-or-later\n"
+            "jobs:\n  build:\n    steps:\n      - uses: actions/checkout@main\n",
+            encoding="utf-8")
+        manifest = workflow_root / "kor-travel-common.lock.json"
+        manifest.write_text(json.dumps({"schema": CV.MANIFEST_SCHEMA, "repo": "app-a",
+                                        "lockfiles": []}), encoding="utf-8")
+        repo, scopes = CV.scopes_from_manifest(manifest)
+        self.assertEqual(repo, "app-a")
+        self.assertEqual([scope.kind for scope in scopes], ["workflow"])
+        findings = self.run_checker(manifest=manifest)
+        self.assertEqual(self.verdicts(findings, "uses"), ["FLOATING_REF"])
+        result = self.cli("--manifest", str(manifest), "--repo", "app-a", "--quiet")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("FLOATING_REF", result.stdout)
+
+    def test_workflow_uses_classes_sha_tag_branch_local_and_docker(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        (self.repo / ".github" / "actions" / "local").mkdir(parents=True)
+        (workflow_dir / "refs.yml").write_text(
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: actions/checkout@" + "a" * 40 + "\n"
+            "      - uses: actions/setup-node@v4.1.0\n"
+            "      - uses: actions/foo@feature\n"
+            "      - uses: ./.github/actions/local\n"
+            "      - uses: ./.github/actions/missing\n"
+            "      - uses: docker://node:22.12\n"
+            "      - uses: docker://registry.example:5000/app:1.2\n"
+            "      - uses: docker://node:latest\n",
+            encoding="utf-8")
+        findings = self.run_checker()
+        by_declared = {finding.declared: finding for finding in findings if finding.key == "uses"}
+        self.assertEqual(by_declared["actions/checkout@" + "a" * 40].verdict, "OK")
+        self.assertEqual(by_declared["actions/setup-node@v4.1.0"].verdict, "OK")
+        self.assertEqual(by_declared["actions/foo@feature"].verdict, "FLOATING_REF")
+        self.assertEqual(by_declared["./.github/actions/local"].verdict, "OK")
+        self.assertEqual(by_declared["./.github/actions/missing"].verdict, "NO_LOCK")
+        self.assertEqual(by_declared["docker://node:22.12"].verdict, "OK")
+        self.assertEqual(by_declared["docker://registry.example:5000/app:1.2"].verdict, "OK")
+        self.assertEqual(by_declared["docker://node:latest"].verdict, "FLOATING_REF")
+
+    def test_workflow_yaml_unsupported_or_malformed_input_is_exit_two_and_redacted(self):
+        for name in ("duplicate.yml", "anchor.yml", "flow.yml", "block-scalar.yml"):
+            with self.subTest(name=name):
+                result = self.cli(str(self.workflow_fixture("malformed")), "--repo", "app-fail", "--quiet")
+                self.assertEqual(result.returncode, 2, result.stdout)
+                self.assertIn("소비자 입력 오류: workflow 입력 구조 오류", result.stdout)
+                self.assertNotIn(name, result.stdout)
+                self.assertNotIn(str(self.workflow_fixture("malformed")), result.stdout)
+
+        unsupported = self.repo / ".github" / "workflows"
+        unsupported.mkdir(parents=True)
+        (unsupported / "bad.yml").write_text(
+            "jobs:\n  build:\n    steps:\n      - uses: [actions/checkout@v4]\n", encoding="utf-8")
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("workflow 입력 구조 오류", result.stdout)
+
+    def test_workflow_bad_indentation_and_tabs_are_not_normalized(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        for index, text in enumerate((
+                "jobs:\n build:\n   steps:\n     - uses: actions/checkout@v4\n",
+                "jobs:\n\tbuild:\n\t  steps:\n\t    - uses: actions/checkout@v4\n")):
+            path = workflow_dir / f"bad-{index}.yml"
+            path.write_text(text, encoding="utf-8")
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("workflow 입력 구조 오류", result.stdout)
+
+    def test_workflow_supported_quotes_and_list_mapping_keep_node_check(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        (workflow_dir / "supported.yml").write_text(
+            'name: "hello\\_world"\n'
+            "description: fixture's build\n"
+            "summary: a 'b\n"
+            'title: a "b\n'
+            "comma: a, 'b\n"
+            "colon-quote: a:'b\n"
+            "bracket-quote: a[ 'b\n"
+            "matrix: ['a: b', ' #tag']\n"
+            'matrix-double: ["a: b", " #tag"]\n'
+            "jobs:\n  build:\n    steps:\n"
+            '      - run: echo "hello"\n'
+            '      - with:\n          node-version: "22.23"\n'
+            '        uses: " actions/setup-node@v4 "\n',
+            encoding="utf-8")
+        findings = self.run_checker()
+        uses = [finding for finding in findings if finding.key == "uses"]
+        self.assertEqual([finding.verdict for finding in uses], ["OK"])
+        self.assertEqual(self.verdicts(findings, "node"), ["OK"])
+
+    def test_workflow_malformed_scalar_and_flow_edges_fail_closed(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        malformed = (
+            "name: {value}\n"
+            "jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v4\n")
+        for index, value in enumerate((
+                "bad: scalar", "[push]]", "*", "'one'two'three'", "@bad", "`bad",
+                ",bad", "]bad", "}bad")):
+            path = workflow_dir / f"malformed-{index}.yml"
+            path.write_text(malformed.format(value=value), encoding="utf-8")
+            result = self.cli(str(self.repo), "--repo", "app-fail", "--mode", "fail", "--quiet")
+            self.assertEqual(result.returncode, 2, result.stdout)
+            path.unlink()
+
+    def test_workflow_without_targets_or_with_non_map_is_input_error(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        cases = (
+            "jobs:\n  build:\n    runs-on: ubuntu-latest\n",
+            "jobs:\n  build:\n    steps: []\n",
+            "jobs:\n  build:\n    steps:\n      - run: echo hello\n",
+            "jobs:\n  build:\n    steps:\n      - uses: actions/setup-node@v4\n        with: [22, 23]\n",
+            "jobs:\n  build:\n    steps:\n      - run: []\n",
+            "jobs:\n  build:\n    steps:\n      - run: null\n",
+            "jobs:\n  build:\n    uses: owner/repo/.github/workflows/ci.yml@v4\n    with: []\n",
+        )
+        for index, text in enumerate(cases):
+            path = workflow_dir / f"empty-{index}.yml"
+            path.write_text(text, encoding="utf-8")
+            result = self.cli(str(self.repo), "--repo", "app-fail", "--mode", "fail", "--quiet")
+            self.assertEqual(result.returncode, 2, result.stdout)
+            path.unlink()
+
+    def test_workflow_invalid_sibling_structure_is_not_hidden_by_valid_uses(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        cases = (
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: actions/checkout@v4\n      - name: useless\n",
+            "jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v4\n"
+            "  empty:\n    steps: []\n",
+            "jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v4\n"
+            "        with: [22, 24]\n",
+        )
+        for index, text in enumerate(cases):
+            path = workflow_dir / f"invalid-sibling-{index}.yml"
+            path.write_text(text, encoding="utf-8")
+            result = self.cli(str(self.repo), "--repo", "app-fail", "--mode", "fail", "--quiet")
+            self.assertEqual(result.returncode, 2, result.stdout)
+            path.unlink()
+
+    def test_workflow_ref_structure_rejects_path_traversal_and_bad_docker_names(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        (workflow_dir / "refs.yml").write_text(
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: ../repo@v4\n"
+            "      - uses: docker://:1.2\n"
+            "      - uses: docker://bad@value@sha256:" + "a" * 64 + "\n"
+            "      - uses: docker://UPPER:1.2\n"
+            "      - uses: docker://registry.example/path:123/app:1.2\n"
+            "      - uses: docker://image.:1.2\n",
+            encoding="utf-8")
+        findings = self.run_checker()
+        uses = [finding for finding in findings if finding.key == "uses"]
+        self.assertEqual([finding.verdict for finding in uses], ["FLOATING_REF"] * 6)
+
+    def test_workflow_docker_separator_and_registry_labels_fail_closed(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        (workflow_dir / "refs.yml").write_text(
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: docker://a..b:1.2\n"
+            "      - uses: docker://a___b:1.2\n"
+            "      - uses: docker://reg.-example:5000/app:1.2\n"
+            "      - uses: docker://a__b:1.2\n"
+            "      - uses: docker://a---b:1.2\n",
+            encoding="utf-8")
+        findings = self.run_checker()
+        uses = {finding.declared: finding for finding in findings if finding.key == "uses"}
+        for declared in (
+                "docker://a..b:1.2", "docker://a___b:1.2",
+                "docker://reg.-example:5000/app:1.2"):
+            self.assertEqual(uses[declared].verdict, "FLOATING_REF")
+        self.assertEqual(uses["docker://a__b:1.2"].verdict, "OK")
+        self.assertEqual(uses["docker://a---b:1.2"].verdict, "OK")
+
+        (workflow_dir / "single-repository.yml").write_text(
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: docker://a_b.c:1.2\n",
+            encoding="utf-8")
+        single = self.run_checker()
+        self.assertEqual(
+            next(f for f in single if f.key == "uses" and f.declared == "docker://a_b.c:1.2").verdict,
+            "OK")
+
+    def test_workflow_outputs_redact_sensitive_values_in_all_channels(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        marker = "SYNTH" + "TOKEN" + "Z" * 12
+        (workflow_dir / "redaction.yml").write_text(
+            "jobs:\n  build:\n    steps:\n"
+            '      - uses: "https://user:' + marker + '@example.com/"\n'
+            '      - uses: actions/setup-node@v4\n'
+            '        with:\n          node-version: "' + marker + '"\n',
+            encoding="utf-8")
+        output_dir = self.root / "output"
+        json_path = output_dir / "report.json"
+        markdown_path = output_dir / "report.md"
+        summary_path = output_dir / "summary.md"
+        env = os.environ.copy()
+        env["GITHUB_STEP_SUMMARY"] = str(summary_path)
+        result = subprocess.run(
+            [sys.executable, "-B", "-X", "utf8", str(SCRIPT), "--registry", str(self.registry_path),
+             "--repo", "app-fail", "--mode", "fail", "--json", str(json_path),
+             "--markdown", str(markdown_path), str(self.repo)],
+            capture_output=True, text=True, encoding="utf-8", env=env)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertNotIn(marker, result.stdout)
+        for path in (json_path, markdown_path, summary_path):
+            self.assertNotIn(marker, path.read_text(encoding="utf-8"))
+        report = json.loads(json_path.read_text(encoding="utf-8"))
+        self.assertTrue(all(marker not in json.dumps(finding, ensure_ascii=False)
+                            for finding in report["findings"]))
+
+    def test_workflow_redaction_matches_policy_prefix_ipv6_and_password_hash(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        marker = "SYNTH" + "TOKEN" + "Z" * 12
+        values = (
+            "DB_PASSWORD=" + marker,
+            ":".join(("fd12", "3456", "789a", "", "1")),
+            "pbkdf2_" + "sha256$600000$salt$hashhash",
+            "api." + ".".join(("one", "two", "example", "com")),
+        )
+        for index, value in enumerate(values):
+            with self.subTest(index=index):
+                (workflow_dir / "redaction.yml").write_text(
+                    "jobs:\n  build:\n    steps:\n"
+                    "      - uses: actions/setup-node@v4\n"
+                    "        with:\n          node-version: '" + value + "'\n",
+                    encoding="utf-8")
+                output_dir = self.root / f"policy-redaction-{index}"
+                json_path = output_dir / "report.json"
+                markdown_path = output_dir / "report.md"
+                summary_path = output_dir / "summary.md"
+                env = os.environ.copy()
+                env["GITHUB_STEP_SUMMARY"] = str(summary_path)
+                result = subprocess.run(
+                    [sys.executable, "-B", "-X", "utf8", str(SCRIPT), "--registry",
+                     str(self.registry_path), "--repo", "app-fail", "--mode", "fail",
+                     "--json", str(json_path), "--markdown", str(markdown_path),
+                     str(self.repo)], capture_output=True, text=True, encoding="utf-8", env=env)
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                for path in (json_path, markdown_path, summary_path):
+                    self.assertNotIn(value, path.read_text(encoding="utf-8"))
+                self.assertNotIn(value, result.stdout)
+
+    def test_workflow_repo_display_is_separate_from_registry_policy_identity(self):
+        marker = "SYNTH" + "TOKEN" + "Z" * 12
+        data = json.loads(json.dumps(REGISTRY))
+        data["consumers"][marker] = {"enforce": "fail"}
+        data["exceptions"] = [{
+            "repo": marker, "key": "node", "installed": "22.23",
+            "reason": "합성 예외 대조", "until": "2026-09-06", "review": "T-005c",
+        }]
+        self.registry_path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        (workflow_dir / "policy.yml").write_text(
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: actions/setup-node@v4\n"
+            "        with:\n          node-version: \"22.23\"\n",
+            encoding="utf-8")
+        report_path = self.root / "repo-policy-report.json"
+        markdown_path = self.root / "repo-policy-report.md"
+        summary_path = self.root / "repo-policy-summary.md"
+        env = os.environ.copy()
+        env["GITHUB_STEP_SUMMARY"] = str(summary_path)
+        result = subprocess.run(
+            [sys.executable, "-B", "-X", "utf8", str(SCRIPT), "--registry",
+             str(self.registry_path), "--repo", marker, "--today", "2026-09-07",
+             "--json", str(report_path), "--markdown", str(markdown_path), str(self.repo)],
+            capture_output=True, text=True, encoding="utf-8", env=env)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertNotIn(marker, result.stdout)
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(report["summary"]["EXEMPT_EXPIRED"], 1)
+        self.assertNotIn(marker, json.dumps(report, ensure_ascii=False))
+        for path in (markdown_path, summary_path):
+            self.assertNotIn(marker, path.read_text(encoding="utf-8"))
+
+    def test_workflow_unicode_surrogate_is_a_redacted_input_error(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        (workflow_dir / "unicode.yml").write_text(
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: actions/setup-node@v4\n"
+            '        with:\n          node-version: "\\uD800"\n',
+            encoding="utf-8")
+        output_dir = self.root / "unicode-output"
+        json_path = output_dir / "report.json"
+        markdown_path = output_dir / "report.md"
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--mode", "fail",
+                          "--json", str(json_path), "--markdown", str(markdown_path))
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertNotIn("Traceback", result.stdout + result.stderr)
+        self.assertFalse(json_path.exists())
+        self.assertFalse(markdown_path.exists())
+
+    def test_workflow_repo_and_private_address_are_redacted_when_repo_is_derived(self):
+        marker = "SYNTH" + "TOKEN" + "Z" * 12
+        private_host = ".".join(("10", "29", "41", "53"))
+        password_key = "pass" + "word"
+        derived_root = self.root / marker
+        workflow_dir = derived_root / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        (workflow_dir / "ci.yml").write_text(
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: docker://" + private_host + "/app:1.2\n"
+            "      - uses: actions/setup-node@v4\n"
+            '        with:\n          node-version: "' + password_key + '=' + marker + '"\n',
+            encoding="utf-8")
+        output_dir = self.root / "derived-output"
+        json_path = output_dir / "report.json"
+        markdown_path = output_dir / "report.md"
+        summary_path = output_dir / "summary.md"
+        env = os.environ.copy()
+        env["GITHUB_STEP_SUMMARY"] = str(summary_path)
+        result = subprocess.run(
+            [sys.executable, "-B", "-X", "utf8", str(SCRIPT), "--registry", str(self.registry_path),
+             "--mode", "fail", "--json", str(json_path), "--markdown", str(markdown_path),
+             str(derived_root)], capture_output=True, text=True, encoding="utf-8", env=env)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertNotIn(marker, result.stdout)
+        self.assertNotIn(private_host, result.stdout)
+        for path in (json_path, markdown_path, summary_path):
+            content = path.read_text(encoding="utf-8")
+            self.assertNotIn(marker, content)
+            self.assertNotIn(private_host, content)
+        report = json.loads(json_path.read_text(encoding="utf-8"))
+        self.assertNotEqual(report["repo"], marker)
 
     # --- 매니페스트·모드·CLI
     def test_manifest_lockfiles_and_registry_enforce(self):
