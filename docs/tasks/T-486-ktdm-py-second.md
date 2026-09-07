@@ -4,7 +4,7 @@
 - 우선순위: P3
 - Gate: ci.yml
 - 선행: T-471, T-311
-- 외부 선행: ktdm 루트 GPL-3.0-or-later 정렬(L8, O-2; T-021 결과) — 브리프 선행 열에는 없으나 D-16이 L8 전 코드 소비를 금지하므로 common 모듈 import는 L8 후에만
+- 외부 선행: T-021 common 결정 완료(2026-09-08); ktdm license-only 외부 PR evidence는 [T-021 external evidence](T-021-ktc-ktdm-license-l8.md#외부-evidence현재-open)의 docker-manager 행에서 확인한다. D-16에 따라 common 모듈 import는 그 evidence 후에만 진행한다.
 
 ## 목표
 
@@ -50,7 +50,7 @@ kor-travel-common.lock.json, docs/standards/openapi-exceptions.yaml(common)
 - [ ] `ci.yml` green(pytest 수 기록, ruff·mypy baseline 통과, 규범 문서 테스트 통과).
 - [ ] 계약 테스트: 수신 `X-Request-ID`를 무시하고 서버 발급 값이 응답 헤더·envelope `request_id`·로그에 동일하게 나타남; 오류 envelope 본문 byte 무변경(부분 문자열 단언 테스트 통과).
 - [ ] `git diff --stat backend/src`에서 request_context·main 외 변경은 baseline 축소 파일뿐이며 재포맷성 diff 0.
-- [ ] `check_versions` ktdm Python 행 `OK`; L8 evidence PR 본문 기재.
+- [ ] `check_versions` ktdm Python 행 `OK`; T-021 docker-manager 행의 license-only 외부 PR URL·main merge SHA·root LICENSE 첫 줄·검사 결과를 본문에 인용한다.
 - [ ] pinset/manifest/journal 관련 테스트 무변경 통과(교차 저장소 계약 미접촉 증명).
 
 ## 검증 명령
@@ -70,4 +70,4 @@ PR 본문(CI run·계약 테스트 출력·baseline 축소 표·L8 링크), `con
 
 ## rollback·release 차단 조건
 
-- L8(T-021) 미완이면 PR을 열지 않는다(B9). envelope 본문 변화·규범 문서 테스트 실패면 머지 금지; 머지 후 운영 로그 상관관계 회귀 시 revert + 재프로비저닝.
+- L8 외부 LICENSE evidence가 없으면 PR을 열지 않는다(B9). envelope 본문 변화·규범 문서 테스트 실패면 머지 금지; 머지 후 운영 로그 상관관계 회귀 시 revert + 재프로비저닝.

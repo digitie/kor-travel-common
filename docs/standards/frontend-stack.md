@@ -151,7 +151,7 @@ lockfile은 의무(`package-lock.json` v3, D-07)이며 `check_versions.py`가 �
 | `doctor` | `react-doctor --offline …` | MAY | map 선례(`doctor.config.json` 잠금). 채택 시 설정 파일을 검증 스크립트로 잠근다 |
 | `verify:npm-tree` / `audit:high` | 설치 트리·감사 | SHOULD | map 보안 게이트 모델(`inv/map` §8-23) |
 | `ux:lint` | `python3 -B -X utf8 tools/ux_lint.py …`(common 도구 호출) | MUST(report) → fail 승격 | [ux-guide](ux-guide.md) §4 |
-| `contrast` | `tools/kt_contrast.py` | MUST(report) → fail 승격 | [design-tokens](design-tokens.md) TK-13 |
+| `contrast` | `tools/kt_contrast.py` | MUST(report) → fail 승격 | [design-tokens](design-tokens.md) TK-8 |
 | — | `tools/check_versions.py`(CI job) | MUST(report) | [versions.md](versions.md) |
 
 - 게이트 명령을 PR 본문에 적는 것은 실행 증거가 아니다. 실제 결과(test 수·exit code)를 적는다(D-25).
@@ -159,7 +159,7 @@ lockfile은 의무(`package-lock.json` v3, D-07)이며 `check_versions.py`가 �
 
 ## 7. 폰트
 
-**FS-11 (SHOULD)** 폰트 로딩은 앱 책임이며 스택 문자열만 토큰이다(TK-15). 권장 방식은 두 가지다.
+**FS-11 (SHOULD)** 폰트 로딩은 앱 책임이며 스택 문자열만 토큰이다(TK-12). 권장 방식은 두 가지다.
 
 | 방식 | 예 | 채택 앱 |
 |---|---|---|

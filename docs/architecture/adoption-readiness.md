@@ -2,7 +2,7 @@
 
 > airport의 WIP·Admin 범위는 조사 이후 변경됐다. [인계 시점 재확인](../plan/handoff-verification.md)과 T-430의 현재 SHA·잔여 gate 대조를 먼저 적용한다. 아래 조사 기준 표를 최신 배포 상태로 해석하지 않는다.
 
-- 정본 지위: 소비자별 채택 gate 정의와 현재 판정의 추적표(초안). §3 매트릭스는 T-012부터 `tools/collect_manifests.py` 출력으로 갱신하며 §2 gate 정의만 수기로 유지한다. 확정 task: T-008(설계 초기판)·T-012. 마지막 갱신: 2026-09-06.
+- 정본 지위: 소비자별 채택 gate 정의와 현재 판정의 추적표(초안). §3 매트릭스는 T-012부터 `tools/collect_manifests.py` 출력으로 갱신하며 §2 gate 정의만 수기로 유지한다. 확정 task: T-008(설계 초기판)·T-012. 라이선스 결정 상태 갱신: 2026-09-08.
 - 근거: [브리프](../plan/design-brief.md) D-06~D-08·D-16·D-17·D-19·D-21·D-25, O-1·O-2·O-6·O-8·O-9·O-25, `docs/survey/commonality-matrix.md` §3.2·§4.1, `docs/survey/cross/licensing.md` §3.6·§4, `docs/survey/cross/version-matrix.md` §1.1·§2.1·§3.2, `docs/survey/cross/ci-deploy.md` §1.1·§1.2, `docs/survey/cross/design-tokens.md` §3.4.2.
 
 이 문서는 [아키텍처 개요](README.md)의 소비자 경계를 gate와 남은 조건으로 통합한다. 소비자 개요는 [소비자](consumers.md), 개별 채택 범위와 acceptance는 해당 [상세 task](../tasks/)가 정본이다. canview `requirements-coverage.md`의 "요구 → 정본 → task → 검증 상태 → 남은 gate" 형식을 "소비자 → gate → 정본 → task → 현재 상태 → 남은 gate"로 바꾼 것이다.
@@ -19,7 +19,7 @@
 
 | gate | 판정 기준 | 정본 | 검사 수단 |
 |---|---|---|---|
-| G-LIC 라이선스 | 소비자 루트 라이선스가 GPL-3.0-or-later와 정합: L6(pinvi 선언·공개), L8(ktc·ktdm 정렬), L9(map 전문 복원), L10(geo `-only` 병기 또는 재선언), L11(`license` 필드). **코드 링크 전 필수**; 규칙 문서·`tokens.json` 참조는 면제 | [licensing](../standards/licensing.md), [ADR-004](../adr/004-gpl-3-0-or-later-and-provenance-gate.md) | 사용자 결정(O-1·O-2) + 각 저장소 PR 확인 |
+| G-LIC 라이선스 | 소비자 루트 라이선스가 GPL-3.0-or-later와 정합: L6(pinvi 선언·공개), L8(ktc·ktdm 정렬), L9(map 전문 복원), L10(geo `-only` 병기 또는 재선언), L11(`license` 필드). **코드 링크 전 필수**; 규칙 문서·`tokens.json` 참조는 면제 | [licensing](../standards/licensing.md), [ADR-004](../adr/004-gpl-3-0-or-later-and-provenance-gate.md) | common 결정(O-1·O-2) 완료 + 소비자별 LICENSE-only PR의 main SHA·검사 결과 확인 |
 | G-REACT React 19 | `react`·`react-dom` 설치본 `^19.0.0` (ui 채택에만 필수; tokens·py는 무관) | `versions.json`, [ADR-007](../adr/007-react-ui-package-delivery.md) | `check_versions` |
 | G-LOCK lockfile | `package-lock.json` v3 커밋 + `npm ci`; `uv.lock` 커밋 + CI·Docker `--locked` | [versions](../standards/versions.md), D-07 | `check_versions` `NO_LOCK` |
 | G-CI | CI 존재, `check_versions` report job 삽입, 액션 SHA 핀 | [ci-deploy](../standards/ci-deploy.md), D-18 | T-403; `versions-check.yml` |
@@ -36,14 +36,14 @@
 | 소비자 | G-LIC | G-REACT | G-LOCK npm / py | G-CI | G-NODE | G-TW4 | G-WIP | G-VIS | G-CONTRAST | G-MANIFEST | G-OA |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | kta | OPEN(루트 GPL 원문은 있음; L11 `license` 필드·`-or-later` 명시) | PASS(19) | PASS / OPEN(CI만 `--locked`, Docker `pip install -e`) | OPEN(3~5종; prod `live-e2e` required 금지 권고) | PASS(22) | OPEN(main 미도입; WIP 4.3.3) | WAIT(O-9) | NOT_RUN | OPEN(alpha line 유지, 미검증) | OPEN | OPEN(export만, CI 없음; 스펙 422 불일치 예외 등록) |
-| ktc | WAIT(O-2, L8) | PASS(19) | PASS / OPEN(lock 없음, `requirements.txt` 4벌) | OPEN(CI 없음) | N/A(CI 없음; `engines >=22`) | OPEN(4.x + `@config`, hex fallback 블록) | N/A | NOT_RUN | OPEN(`dt` §3.4.2 미달) | OPEN | OPEN(산출물 없음) |
-| ktdm | WAIT(O-2, L8) | OPEN(18.3.1 → T-470) | PASS / OPEN(Poetry lock 없음) | OPEN(2 job; `check_versions` 없음) | OPEN(20) | OPEN(4.3.1 `@theme`; `ops-*` CSS) | N/A | NOT_RUN | OPEN(`dt` §3.4.2 미달) | OPEN | OPEN(산출물 없음) |
+| ktc | OPEN(결정 완료, T-021 license-only evidence 대기) | PASS(19) | PASS / OPEN(lock 없음, `requirements.txt` 4벌) | OPEN(CI 없음) | N/A(CI 없음; `engines >=22`) | OPEN(4.x + `@config`, hex fallback 블록) | N/A | NOT_RUN | OPEN(`dt` §3.4.2 미달) | OPEN | OPEN(산출물 없음) |
+| ktdm | OPEN(결정 완료, T-021 license-only evidence 대기) | OPEN(18.3.1 → T-470) | PASS / OPEN(Poetry lock 없음) | OPEN(2 job; `check_versions` 없음) | OPEN(20) | OPEN(4.3.1 `@theme`; `ops-*` CSS) | N/A | NOT_RUN | OPEN(`dt` §3.4.2 미달) | OPEN | OPEN(산출물 없음) |
 | geo | OPEN(`-only` 병기, O-20) | OPEN(18.3.1, ADR-019 → O-25·T-443) | PASS / OPEN(lock 없음) | OPEN(`check_versions` 없음; openapi·typegen drift는 PASS) | OPEN(20) | OPEN(4.3.1 + `@config` 잔존) | N/A | NOT_RUN | OPEN(`outline-color: color-mix` 반투명 기본, 미달) | OPEN | PASS(`--check` + `openapi.yml`; v1 VWorld 예외 등록) |
 | map | OPEN(L9 25행 요약본 → 전문 복원, `license` 필드) | PASS(19) | PASS(v3 + `verify:npm-tree`) / OPEN(lock 없음) | OPEN(`check_versions` 없음; 10종+ gate) | PASS(22.23.1; npm 12.0.1 exact는 `EXEMPT` 등록 대상) | PASS(4.x, `@theme inline`, `@config` 없음) | N/A | NOT_RUN | PASS(map만 수치 검증, `dt` §3.4.2) | OPEN | PASS(profile 3종 `--check`; `starlette<1.0` 예외) |
 | wx | PASS(GPL-3.0; L11 `license` 필드는 OPEN) | PASS(19) | PASS / PASS(`uv.lock` CI·Docker `--locked`) | OPEN(vitest·mypy 미실행; `check_versions` 없음) | OPEN(20) | OPEN(미도입; Phase 1은 `tokens.css` 교체만이라 tokens 채택에는 N/A) | N/A | NOT_RUN | OPEN(navy 오버라이드 미검증) | OPEN | OPEN(export + `git diff`; `--check` 전환 T-481) |
-| pinvi admin | WAIT(O-1, L6; README/AGENTS 상충) | PASS(19.2.6 override) | PASS(`check:lockfile`) / OPEN(`uv.lock` 미소비) | OPEN(`check_versions` 없음; aggregate gate 보전) | PASS(22 + npm 11.19.1) | OPEN(4.x + `@config` v3 preset) | N/A | NOT_RUN | OPEN(admin hex, 미검증) | OPEN | OPEN(산출물 없음; `{error:{}}`·정수 `If-Match` 예외 등록) |
-| pinvi 사용자 웹 | WAIT(O-1) | N/A(코드 소비 없음) | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A |
-| pinvi 모바일 | WAIT(O-1) | N/A | N/A | N/A | N/A | WAIT(O-8; Tailwind 3.4.19·NativeWind 4) | N/A | N/A | N/A | N/A | N/A |
+| pinvi admin | OPEN(결정 완료, T-420 외부 PR 대기) | PASS(19.2.6 override) | PASS(`check:lockfile`) / OPEN(`uv.lock` 미소비) | OPEN(`check_versions` 없음; aggregate gate 보전) | PASS(22 + npm 11.19.1) | OPEN(4.x + `@config` v3 preset) | N/A | NOT_RUN | OPEN(admin hex, 미검증) | OPEN | OPEN(산출물 없음; `{error:{}}`·정수 `If-Match` 예외 등록) |
+| pinvi 사용자 웹 | OPEN(결정 완료, T-420 외부 PR 대기) | N/A(코드 소비 없음) | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A |
+| pinvi 모바일 | OPEN(결정 완료, T-420 외부 PR 대기) | N/A | N/A | N/A | N/A | WAIT(O-8; Tailwind 3.4.19·NativeWind 4) | N/A | N/A | N/A | N/A | N/A |
 
 ## 4. 소비자 → 배포 단위별 남은 gate
 
@@ -58,17 +58,17 @@
 | kta | tokens | ADR-006, D-20 | T-431 | 미채택 | G-WIP(T-430, O-9) → T-109 → 320px 게이트 |
 | kta | ui(소형) | ADR-007 | T-432 | 미채택 | T-431·T-212 |
 | kta | py | ADR-011, ADR-009 | T-482 | 미채택 | T-310 → `code`/`request_id` additive → 스펙 422 정합 |
-| pinvi admin | tokens | ADR-006, D-29 | T-421 | 미채택 | G-LIC(L6, T-020·T-420) → T-109 → 사용자 표면 무변경 e2e |
+| pinvi admin | tokens | ADR-006, D-29 | T-421 | 미채택 | G-LIC(T-420 외부 PR) → T-109 → 사용자 표면 무변경 e2e |
 | pinvi admin | ui | ADR-007 | T-422 | 미채택 | T-421·T-213 → `AdminTable` 어댑터 유지·44px 예외 등록(O-21) |
 | pinvi | py | ADR-011 | T-484 | 미채택 | T-310·T-420 → `uv.lock` 소비·etl `@main` 제거 |
 | geo | tokens | ADR-006, ADR-012 ③ | T-441 | 미채택 | T-109 → `@config` 실효값 빌드 검증 → `@theme` 단일화 → G-CONTRAST baseline |
 | geo | ui | ADR-007 | T-444 | 미채택 | G-REACT(T-443, O-25) → radix→base-ui 12파일·`asChild` 17곳 → T-213 |
 | geo | py | ADR-011 | T-483 | 미채택 | T-308·T-440 → health alias 병행·securitySchemes |
 | ktc | tokens | ADR-006, ADR-012 ④ | T-453 | 미채택 | T-451(CI 신설)·T-109 → hex fallback·`@config` 제거 |
-| ktc | ui | ADR-007 | T-454 | 미채택 | G-LIC(L8, T-021, O-2) → T-453·T-213 |
+| ktc | ui | ADR-007 | T-454 | 미채택 | G-LIC(T-021 ktc LICENSE-only evidence) → T-453·T-213 |
 | ktc | py | ADR-011 | T-485 | 미채택 | T-451·T-310 → features export 계약(map provider 동시 수정) |
 | ktdm | tokens | ADR-006, ADR-012 ② | T-472 | 미채택 | T-470(Next 16·React 19·ESLint 9·Node 22) → T-109 |
-| ktdm | ui(부분) | ADR-007 | T-473 | 미채택 | G-LIC(L8) → T-472·T-213 |
+| ktdm | ui(부분) | ADR-007 | T-473 | 미채택 | G-LIC(T-021 docker-manager LICENSE-only evidence) → T-472·T-213 |
 | ktdm | py | ADR-011 | T-486 | 미채택 | T-471·T-307 → `trust_incoming=False` |
 | 전 소비자 | 규칙 문서 | standards | — | 참조 가능 | 없음(G-LIC 면제) |
 | 전 소비자 | CI·매니페스트 | ADR-008, ADR-010 | T-403 | 미채택 | T-010·T-011 → Node 22·SHA 핀·report job·매니페스트 커밋 |
@@ -79,7 +79,7 @@
 |---|---|---|
 | Python lockfile을 CI·Docker 양쪽에서 `--locked`로 소비하는 곳은 weather뿐(`vm` §2.1) | G-LOCK을 py 채택 gate로 고정; geo·map·ktdm·ktc는 lock 도입 task(T-440·T-410·T-471·T-450) 선행 | lock 존재 ≠ 소비; pinvi `apps/api/uv.lock`은 미소비 상태 |
 | Node 20 CI 3곳(ktdm·geo·wx)은 EOL(2026-04-30) | G-NODE, T-403 | floor 22.12 |
-| 라이선스 결정이 pinvi 전 트랙과 ktc·ktdm 코드 채택을 막음 | L6·L8을 Phase 0 외부 확인(T-020·T-021)으로 승격; 규칙 참조는 면제 | 사용자 결정(O-1·O-2) 없이는 gate를 닫지 않음 |
+| 라이선스 결정은 common에서 완료했지만 소비자 반영이 남아 있음 | O-1·O-2 결정·요청 문서는 T-020·T-021에서 완료; 소비자별 license-only 외부 PR과 SHA가 없으면 G-LIC를 닫지 않음 | T-420·T-021 external evidence |
 | 대비 수치 검증은 map만(`dt` §3.4.2) | G-CONTRAST는 report 기본 + 앱 baseline; 신규 미달만 fail | 초기 baseline 등록은 채택 PR에서 |
 | 시각 기준선은 어느 앱도 없음 | G-VIS는 `NOT_RUN`으로 두고 T-402·각 채택 PR evidence에서 닫음 | 저장소 파일이 아닌 PR evidence(D-21) |
 | airport Admin 정의(D-20)와 WIP 병합(O-9) | tokens + 소형 부품 범위; 셸·로그인 소비는 T-035 라우트 분리 후 | 사용자 확인 |

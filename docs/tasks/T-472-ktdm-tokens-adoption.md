@@ -4,7 +4,7 @@
 - 우선순위: P2
 - Gate: 시각 diff(수동)
 - 선행: T-470, T-109
-- 외부 선행: ktdm 루트 GPL-3.0-or-later 정렬(L8, O-2; T-021 결과) — 브리프 선행 열에는 없으나 D-16이 L8 전 코드 소비를 금지하므로 tokens 패키지 설치는 L8 후에만
+- 외부 선행: T-021 common 결정 완료(2026-09-08); ktdm license-only 외부 PR evidence는 [T-021 external evidence](T-021-ktc-ktdm-license-l8.md#외부-evidence현재-open)의 docker-manager 행에서 확인한다. D-16에 따라 tokens 패키지 설치는 그 evidence 후에만 진행한다.
 
 ## 목표
 
@@ -53,7 +53,7 @@ DESIGN.md
 - [ ] 빌드 CSS에서 기존 `--color-page` 등 20종의 계산값이 착수 전과 동일(`getComputedStyle` 대조표 또는 CSS grep).
 - [ ] `kt_contrast` light 신규 미달 0, 기존 미달은 baseline(`until` 포함); tint 4종은 라벨 대비 규칙 통과.
 - [ ] vitest 8 파일·`next build`·`eslint --max-warnings=0` green; `git diff --stat frontend/src` 가 `globals.css` 헤더 외 0.
-- [ ] L8 evidence(T-021 결과 PR 링크·루트 LICENSE) PR 본문 기재; `check_versions` ktdm tokens `OK`.
+- [ ] T-021 docker-manager 행의 license-only 외부 PR URL·main merge SHA·root LICENSE 첫 줄·검사 결과를 PR 본문에 인용하고, `check_versions` ktdm tokens `OK`.
 
 ## 검증 명령
 
@@ -73,5 +73,5 @@ PR 본문(6폭 diff·계산값 대조표·contrast report·L8 링크), `consumer
 
 ## rollback·release 차단 조건
 
-- 원인 불명 diff → revert(D-08). L8(T-021) 미완이면 PR을 열지 않는다(B9).
+- 원인 불명 diff → revert(D-08). L8 외부 LICENSE evidence가 없으면 PR을 열지 않는다(B9).
 - T-470 미머지 상태에서는 열지 않는다(D-08 ② 순서; Tailwind 4.3.1 자체는 토큰 소비 가능하나 순서 고정).

@@ -4,7 +4,7 @@
 - 우선순위: P2
 - Gate: e2e 45
 - 선행: T-021, T-453, T-213
-- 외부 선행: 사용자 O-2(ktc 루트 GPL 정렬 결정, L8)
+- 외부 선행: T-021 common 결정 완료(2026-09-08); concierge license-only 외부 PR evidence는 [T-021 external evidence](T-021-ktc-ktdm-license-l8.md#외부-evidence현재-open)의 ktc 행에서 확인한다.
 
 ## 목표
 
@@ -52,7 +52,7 @@ frontend/kor-travel-common.lock.json
 - [ ] `npm ls @base-ui/react @hookform/resolvers`가 1.8.x / 5.x 단일이고 peer 경고 0.
 - [ ] 6폭 스크린샷 diff 0(대시보드·목록·모달·폼 오류 상태).
 - [ ] `grep -rn 'render=' src | wc -l` 변경분이 9줄 이내로 PR 본문 표와 일치.
-- [ ] L8 evidence(T-021 결과 PR 링크·루트 LICENSE) 확인, `tools/ui_drift.py` 로컬 패치 0건, `ux_lint --base` 신규 위반 0.
+- [ ] T-021 ktc 행의 license-only 외부 PR URL·main merge SHA·root LICENSE 첫 줄·검사 결과 확인, `tools/ui_drift.py` 로컬 패치 0건, `ux_lint --base` 신규 위반 0.
 
 ## 검증 명령
 
@@ -72,5 +72,5 @@ PR 본문(e2e 수·peer 검사·render 9줄 표·6폭 diff·L8 링크), `consume
 
 ## rollback·release 차단 조건
 
-- O-2 미결 또는 T-021 미완이면 PR을 열지 않는다(B9). e2e red·peer 경고면 머지 금지, 머지 후 회귀 시 revert 1회.
+- T-021 결정 또는 L8 외부 LICENSE evidence가 없으면 PR을 열지 않는다(B9). e2e red·peer 경고면 머지 금지, 머지 후 회귀 시 revert 1회.
 - 우회 패치 필요 시 `ui-v0.2.x` patch; 2회 이상은 D-28 재검토.

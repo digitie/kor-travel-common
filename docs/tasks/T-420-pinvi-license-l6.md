@@ -4,7 +4,7 @@
 - 우선순위: P0
 - Gate: docs
 - 선행: T-020
-- 외부 선행: 사용자 O-1(pinvi 라이선스·공개 여부 결정)
+- 외부 선행: T-020 common 결정 완료(2026-09-08). 실제 pinvi 반영은 이 저장소 밖의 PR이다.
 
 ## 목표
 
@@ -12,7 +12,7 @@ T-020에서 기록된 사용자 결정(기본값: 공개 + `GPL-3.0-or-later`)�
 
 ## 고정 결정
 
-- [design-brief](../plan/design-brief.md) D-16(pinvi admin tokens/ui 1차는 L6 완료 조건)·D-17(pinvi는 L6 전 추출 금지 B1; 전 앱 `license` 필드 L11)·O-1 기본값(공개 + GPL-3.0-or-later, 1 PR).
+- [design-brief](../plan/design-brief.md) D-16(pinvi admin tokens/ui 1차는 L6 완료 조건)·D-17(pinvi는 L6 전 추출 금지 B1; 전 앱 `license` 필드 L11)·O-1 채택값(공개 + GPL-3.0-or-later, 1 PR).
 - ADR-004(라이선스·출처 gate)·ADR-010 — [ADR 색인](../adr/README.md). 정본: [licensing](../standards/licensing.md).
 - 사실: 루트 `LICENSE` 없음, README "비공개(사내)" vs AGENTS "공개" 상충, `apps/api/pyproject.toml` MIT, `docs/integrations/maplibre-vworld.md:23` 라이선스 표기 오류, map 이식 파일 35+(P1)·geo 이식(P2)·GPL tgz 3(P3)·`python-kasi-api` 의존 — [lic §2.1·§2.2 D4·D5·§3.6·§3.7 L6·§4 B1](../survey/cross/licensing.md), [inv/pinvi §9](../survey/inventory/pinvi.md), [cm §4.1 B1](../survey/commonality-matrix.md).
 - PR 순서: [judge-migration-feasibility §3.1 pinvi #0](../plan/design-panel/judge-migration-feasibility.md)(3파일 + 문서 1).
@@ -67,7 +67,7 @@ python3 -B -X utf8 tools/validate_document_links.py
 
 ## evidence
 
-PR URL·머지 SHA·사용자 결정 원문(T-020 기록 링크)을 이 파일 "실행 기록"과 `docs/journal.md`에 남긴다. 사용자 결정이 없으면 `NOT_RUN(O-1 미결)`로 두고 BLOCKED 유지.
+PR URL·머지 SHA·T-020 결정 링크를 이 파일 "실행 기록"과 `docs/journal.md`에 남긴다. 외부 PR evidence 전에는 BLOCKED를 유지한다.
 
 ## rollback·release 차단 조건
 

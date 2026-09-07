@@ -4,7 +4,7 @@
 - 우선순위: P3
 - Gate: vitest
 - 선행: T-021, T-472, T-213
-- 외부 선행: 사용자 O-2(ktdm 루트 GPL 정렬 결정, L8)
+- 외부 선행: T-021 common 결정 완료(2026-09-08); docker-manager license-only 외부 PR evidence는 [T-021 external evidence](T-021-ktc-ktdm-license-l8.md#외부-evidence현재-open)의 docker-manager 행에서 확인한다.
 
 ## 목표
 
@@ -54,7 +54,7 @@ frontend/kor-travel-common.lock.json
 - [ ] `DashboardClient.tsx` diff 0(어댑터로 흡수), `error.tsx`/`global-error.tsx` diff 0.
 - [ ] 6폭 스크린샷: StatStrip·섹션 헤더 영역 diff는 부품 교체로 허용(전후 나란히 첨부), 나머지 diff 0.
 - [ ] shim 헤더 SPDX + `Origin:`(ktdm MIT 원천 → common GPL 고지 보존; geo 계보는 `-only` 병기 여부 확인, O-20).
-- [ ] `tools/ui_drift.py` 로컬 패치 0건; L8 evidence PR 본문 기재.
+- [ ] `tools/ui_drift.py` 로컬 패치 0건; T-021 docker-manager 행의 license-only 외부 PR URL·main merge SHA·root LICENSE 첫 줄·검사 결과를 PR 본문에 인용한다.
 
 ## 검증 명령
 
@@ -74,4 +74,4 @@ PR 본문(전후 캡처·테스트 수·L8 링크), `consumers.pins.json`·`docs
 
 ## rollback·release 차단 조건
 
-- O-2 미결/T-021 미완이면 PR을 열지 않는다(B9). vitest red·호출부 변경 필요(어댑터로 흡수 불가)면 머지 금지, 머지 후 회귀 시 revert + 재배포.
+- T-021 결정 또는 L8 외부 LICENSE evidence가 없으면 PR을 열지 않는다(B9). vitest red·호출부 변경 필요(어댑터로 흡수 불가)면 머지 금지, 머지 후 회귀 시 revert + 재배포.

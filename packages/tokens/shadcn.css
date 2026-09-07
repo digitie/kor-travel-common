@@ -24,12 +24,9 @@
   --destructive: var(--kt-destructive);
   --destructive-foreground: var(--kt-brand-foreground);
   --radius: var(--kt-radius-control);
-  --chart-1: var(--kt-brand);
-  --chart-2: var(--kt-info);
-  --chart-3: var(--kt-success);
-  --chart-4: var(--kt-warning);
-  --chart-5: var(--kt-destructive);
 }
+
+/* --chart-1..5는 소비자 앱이 선언하는 슬롯이다. common은 색을 정본화하지 않는다. */
 
 .dark {
   --background: var(--kt-surface-page);
@@ -52,9 +49,32 @@
   --destructive: var(--kt-destructive);
   --destructive-foreground: var(--kt-brand-foreground);
   --radius: var(--kt-radius-control);
-  --chart-1: var(--kt-brand);
-  --chart-2: var(--kt-info);
-  --chart-3: var(--kt-success);
-  --chart-4: var(--kt-warning);
-  --chart-5: var(--kt-destructive);
+}
+
+/*
+ * 프로필 스코프에서는 상속된 root alias가 먼저 계산되어 semantic 오버라이드를
+ * 가리는 일을 막는다. [data-kt-surface]를 쓰는 소비자는 같은 스코프에서
+ * semantic과 파생 alias가 함께 다시 계산되도록 한다.
+ */
+:where([data-kt-surface]) {
+  --background: var(--kt-surface-page);
+  --foreground: var(--kt-text-primary);
+  --card: var(--kt-surface-card);
+  --card-foreground: var(--kt-text-primary);
+  --popover: var(--kt-surface-card);
+  --popover-foreground: var(--kt-text-primary);
+  --primary: var(--kt-brand);
+  --primary-foreground: var(--kt-brand-foreground);
+  --secondary: var(--kt-surface-subtle);
+  --secondary-foreground: var(--kt-text-primary);
+  --muted: var(--kt-surface-subtle);
+  --muted-foreground: var(--kt-text-secondary);
+  --accent: var(--kt-brand-tint);
+  --accent-foreground: var(--kt-brand);
+  --border: var(--kt-border);
+  --input: var(--kt-control-line);
+  --ring: var(--kt-focus);
+  --destructive: var(--kt-destructive);
+  --destructive-foreground: var(--kt-brand-foreground);
+  --radius: var(--kt-radius-control);
 }

@@ -106,7 +106,7 @@
 
 ## 8. 다크 기본
 
-**RW-8 (MUST)** 웹 표면은 light 기본이다(`ux` C14, 4앱 사실). 토큰은 `.dark` 값을 준비하고(TK-9) 활성화는 앱이 `dark-class.css`/`dark-media.css` 중 하나를 import해 opt-in한다. kta처럼 OS 설정을 따르는 자동 dark는 `dark-media.css` 경로로 허용한다. e2e·시각 기준선은 light에서 캡처하고, dark 활성 앱만 dark 기준선을 추가한다. 열림 O-11.
+**RW-8 (MUST)** 웹 표면은 light 기본이다(`ux` C14, 4앱 사실). 토큰은 `.dark` 값을 준비하고(TK-7) 활성화는 앱이 `dark-class.css`/`dark-media.css` 중 하나를 import해 opt-in한다. kta처럼 OS 설정을 따르는 자동 dark는 `dark-media.css` 경로로 허용한다. e2e·시각 기준선은 light에서 캡처하고, dark 활성 앱만 dark 기준선을 추가한다. 열림 O-11.
 
 ## 9. 모바일 셸 전략
 

@@ -261,7 +261,7 @@
 
 | # | 항목 | 기본값(이 문서) |
 |---|---|---|
-| O-1 | pinvi 라이선스(L6) | ui 1차 소비자 = map + pinvi admin; L6 미결이면 airport 소형 부품으로 대체(D-16) |
+| O-1 | pinvi 라이선스(L6) | ui 1차 소비자 = map + pinvi admin; L6 외부 반영 전이면 airport 소형 부품으로 대체(D-16) |
 | O-3 | UI 배포 방식 | npm 1차 |
 | O-22 | dirty 이탈 경고 | Dialog `hasUnsavedInput`만 흡수, `beforeunload` 규칙 없음 |
 | — | 컴포넌트별 subpath, `sortTestIdPrefix`, `reloadStorageKey`, `HelpTip.mode`, `FilterBar role="search"`, `CardTitle headingLevel`, Badge variant 목록 | 후보. T-201·T-203·T-204 확정 |

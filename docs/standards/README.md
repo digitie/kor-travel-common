@@ -1,19 +1,19 @@
 # kor-travel-common 공통 규칙(standards) 색인
 
 - 정본 지위: 이 문서는 `docs/standards/` 규칙 문서의 **색인**이며 규범 본문을 갖지 않는다. 각 규칙의 정본은 아래 표의 문서다. 상위 문서 지도는 [docs/README.md](../README.md), 결정 배경은 [ADR 색인](../adr/README.md), 확정 결정 레지스터는 [설계 브리프](../plan/design-brief.md)다.
-- 확정 task: 표의 "확정 task" 열. 마지막 갱신: 2026-09-06(브리프 확정판 기준 초안).
+- 확정 task: 표의 확정 task 열. 마지막 갱신: 2026-09-08.
 
 ## 1. 이 디렉터리의 역할
 
 `docs/standards/`는 소비 저장소 7곳(kor-travel-airport·concierge·docker-manager·geo·map·weather, pinvi)이 **공통으로 따라야 할 규칙**을 둔다([문서 유지보수 runbook](../runbooks/documentation-maintenance.md) §1). 특정 앱만의 예외는 각 규칙 문서가 지정한 예외 레지스트리 또는 소비자 매니페스트(`kor-travel-common.lock.json`, 브리프 D-19)에 두고, 조사 기록은 [`docs/survey/`](../survey/README.md)에 둔다. 조사는 근거이지 규칙이 아니다.
 
-규칙 문서는 실물(패키지·도구·워크플로)보다 먼저 쓰인 **정본 초안**이며, 실물과 대조해 확정하는 task가 남아 있다(브리프 §7). 확정 전에도 신규 코드는 이 문서를 따르고, 실물과 문서가 어긋나면 문서를 고치는 PR이 실물 PR과 같은 리뷰 gate를 지난다.
+규칙 문서는 패키지·도구·워크플로와 대조해 확정한다. 현재 design-tokens.md는 T-104로 정리했으며 두 적대적 리뷰 통과 후 확정한다. 나머지 문서는 각 표의 확정 task가 끝날 때까지 정본 초안으로 관리한다. 확정 전에도 신규 코드는 해당 문서를 따르고 실물과 어긋나면 같은 리뷰 gate에서 문서를 고친다.
 
 ## 2. 문서 목록
 
 | 문서 | 한 줄 | 적용 대상 | 검증 수단 | 규칙 ID | 확정 task |
 |---|---|---|---|---|---|
-| [design-tokens.md](design-tokens.md) | `--kt-*` 토큰 계약: 정본 CSS·계층·역할·shadcn alias·프로필·오버라이드·다크·대비·값 형식·폰트·별칭 shim | tokens 소비 앱 전부(admin 6 + pinvi admin; consumer 프로필은 의미 이름만) | `tools/kt_contrast.py`(report + `contrast-baseline.json`), `packages/tokens` 생성물 diff | `TK-n` | T-104(선행 T-101) |
+| [design-tokens.md](design-tokens.md) | `--kt-*` 토큰 계약: 정본 CSS·계층·역할·shadcn alias·프로필·오버라이드·다크·대비·값 형식·폰트·별칭 shim | tokens 소비 앱 전부(admin 6 + pinvi admin; consumer 프로필은 의미 이름만) | `tools/kt_contrast.py`(report + `contrast-baseline.json`), `packages/tokens` 생성물 diff | `TK-n` | T-104 진행 중(선행 T-101) |
 | [ux-guide.md](ux-guide.md) | UX 규칙 G0~G9(셸·목록·상세·피드백·상태·위험 작업·로그인·도움말·접근성), 충돌 결정 C1~C22, 금지 패턴, 위반 baseline | admin 표면 전부 + 사용자 표면 장 | `tools/ux_lint.py`(전체 report + `--base <sha>` diff fail), 2인 리뷰 | `UX-Gn.m` | T-105 |
 | [responsive-web.md](responsive-web.md) | 표면 분류·breakpoint·검사 폭·터치·타이포 하한·안전영역·overflow·다크 기본·모바일 셸 | 전 앱(웹); 모바일 앱은 터치·안전영역만 | 6폭 시각 기준선(`templates/playwright.baseline.ts`), e2e 320px 게이트 | `RW-n` | T-106 |
 | [frontend-stack.md](frontend-stack.md) | Next/React/TS/Tailwind/shadcn/base-ui/ESLint/Vitest/Playwright 표준 구성 파일·품질 게이트·`kt-`·`cn`·금지 사항 | 프론트엔드 앱 전부 | `tools/check_versions.py`, 재사용 워크플로 `node-quality.yml`, consumer-smoke | `FS-n` | T-107 |

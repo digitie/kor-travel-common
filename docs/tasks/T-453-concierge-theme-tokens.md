@@ -4,7 +4,7 @@
 - 우선순위: P1
 - Gate: e2e 45·시각 diff
 - 선행: T-451, T-109
-- 외부 선행: ktc 루트 GPL-3.0-or-later 정렬(L8, O-2; T-021 결과) — 브리프 선행 열에는 없으나 D-16이 L8 전 코드 소비를 금지하므로 tokens 패키지 설치 단계(PR 3)는 L8 후에만
+- 외부 선행: T-021 common 결정 완료(2026-09-08); ktc license-only 외부 PR evidence는 [T-021 external evidence](T-021-ktc-ktdm-license-l8.md#외부-evidence현재-open)의 ktc 행에서 확인한다. D-16에 따라 tokens 패키지 설치 단계(PR 3)는 그 evidence 후에만 진행한다.
 
 ## 목표
 
@@ -52,7 +52,7 @@ frontend/contrast-baseline.json
 - [ ] PR마다 6폭 스크린샷 diff 0(대시보드·목록·`ReviewWorkspace`·로그인·모달), Playwright 45 test green(로컬 또는 dispatch job), `node-quality` green.
 - [ ] PR 2 후 `@config`·`tailwind.config.ts` 0건, `text-xs`가 13px로 유지됨을 빌드 CSS로 확인(design.md 13.5px가 아닌 코드 정본).
 - [ ] PR 3 후 빌드 CSS에 `--kt-*` 정의 존재, `--ktc-*` 별칭이 `var(--kt-…)` 참조(grep 첨부); `kt_contrast` 신규 미달 0.
-- [ ] `check_versions` report ktc 행에 `@kor-travel/tokens` `OK`; L8 완료 evidence(T-021 PR 링크)가 PR 3 본문에 있다.
+- [ ] `check_versions` report ktc 행에 `@kor-travel/tokens` `OK`; T-021 ktc 행의 license-only 외부 PR URL·main merge SHA·root LICENSE 첫 줄·검사 결과를 PR 3 본문에 인용한다.
 
 ## 검증 명령
 
@@ -72,5 +72,5 @@ PR 3개 본문(빌드 CSS diff·6폭 diff·e2e 수), `consumers.pins.json`·`doc
 
 ## rollback·release 차단 조건
 
-- 원인 불명 diff → 해당 PR revert(D-08). PR 1·2는 L8과 무관하게 진행 가능하지만 PR 3은 L8(T-021 결과) 전 머지 금지.
+- 원인 불명 diff → 해당 PR revert(D-08). PR 1·2는 L8과 무관하게 진행 가능하지만 PR 3은 L8 외부 LICENSE evidence 전 머지 금지.
 - T-451 CI가 없는 상태에서는 e2e evidence를 로컬 실행으로 대체하되 `NOT_RUN`이 아닌 실제 실행 기록만 인정.
