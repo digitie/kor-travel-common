@@ -6,6 +6,7 @@
 
 | ID | 상태 | 우선순위 | 작업 | 선행 |
 |---|---|---:|---|---|
+| [T-102](tasks/T-102-map-vocabulary-shim.md) | DONE | P0 | 레거시 어휘 별칭 shim `aliases/map-vocabulary.css`(map·weather·geo 공통 이름 → `--kt-*`) + weather `--rail`·font 오버라이드 예제 + 별칭 충돌 검사 스크립트 (2026-09-08, PR #14) | T-101 |
 | [T-101](tasks/T-101-tokens-package.md) | DONE | P0 | packages/tokens(tokens.css map 값+.dark·theme.css `kt-`·shadcn.css·base.css·base.scoped.css·dark-class/media.css) + 생성물(tokens.json·tokens.ts·tailwind-preset.cjs; 정본 CSS) + 루트 npm workspace·lock + `npm pack` 설치 스모크 (2026-09-07, PR #12) | T-003, T-004 |
 | [T-011](tasks/T-011-consumer-manifest-schema.md) | DONE | P1 | 소비자 매니페스트 스키마 `consumer-manifest.v1` + `tools/validate_manifest.py` + 7 소비자 초기 매니페스트 초안 | T-005, T-016 |
 | [T-016](tasks/T-016-common-shared-systems-scope.md) | DONE | P0 | 공용 시스템 범위 재정의와 전체 계획 동기화 (2026-09-07, PR #9) | 없음 |

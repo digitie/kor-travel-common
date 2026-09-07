@@ -2,6 +2,14 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-08 (Codex, T-102 반복 no-go 근본 원인 수정·최종 PASS·PR #14 merge gate)
+
+T-102의 반복 no-go는 reviewer별 판단 차이가 아니라, 초기 checker가 CSS를 변수 정규식과 부분 블록 문자열로만 다뤄 실제 적용 scope·import 변형·Unicode identifier·escape 경계를 브라우저 의미와 다르게 승인한 데서 시작됐다. Windows에서는 lexical 8.3 표기와 canonical 경계를 섞어 정상 fixture를 외부 경로로 오판했고, 진단이 입력 경로·식별자·값을 재출력할 수 있었다. 고정 원천을 다시 대조하기 전에는 map의 `radius-md` control과 weather의 panel 의미도 분리되지 않았다. raw reviewer evidence의 줄바꿈·공백을 immutable bytes로 보존하는 CI 정책도 후보 artifact와 함께 닫지 못해 문서/Windows gate가 반복 실패했다.
+
+`0b50a63`·`ded1631`에서 parser를 지원 문법에 맞춰 fail-closed로 보강하고 direct mode stack, combined selector 중복, Unicode 정의·참조, escape·import·path/redaction 경계를 회귀 시험으로 고정했다. map shim은 control radius를 유지하고 weather 예제는 panel radius·dark shadow·앱 spacing을 소유하며, 원본 provenance를 보존했다. 최종 code candidate `ded1631b81d464ed919d36d73ab9c2a1111d38f4`(tree `41dd1c6551994b62d94a04c8a3c1f8bf98414de7`)에서 A/B final2 원본이 모두 PASS·신규 P0–P3 0건이다([통합 판정](reviews/adversarial/2026-09-08-t102-post-fix-01.md)). 원본 SHA256은 A `735D4718F53B8349A89638D3BCE1D4DF28593BD5418D14B56DA3EC5B3A03C63B`, B `B675AC97A9A9B9574B809008513BC187B0D18DA3368EF63CC66E53A1EDE6ECDA`이며 review archive와 path별 attributes 예외로 bytes를 보존했다.
+
+정확한 candidate CI [34137474603](https://github.com/digitie/kor-travel-common/actions/runs/34137474603)의 docs·tools(Windows/Ubuntu)·packages·secret-scan·check-versions 6개 job이 모두 성공했다. reviewer가 Windows 전체 238 tests·focused alias 35 tests, WSL 전체 235 pass·focused 34 pass(+플랫폼 skip), tokens check/build/test 7개·임시 tarball 19개 파일·install smoke를 확인했다. 소비자 저장소 변경, npm/PyPI 게시, T-461 weather 실교체/6폭 visual diff, T-103·T-104 후속 작업은 `NOT_RUN(범위 또는 후속 task)`로 유지한다. PR [#14](https://github.com/digitie/kor-travel-common/pull/14)의 문서 closure를 반영한 뒤 ready 전환·squash merge하고, merge source SHA와 main CI는 별도 gate로 확인한다.
+
 ## 2026-09-07 (Codex, T-101 반복 no-go 근본 원인 수정·post-fix PASS)
 
 T-101 초기 candidate `f8894e293ca9677f457011197052cd55dbdc9696`에서 A/B가 각각 BLOCK했다. A는 DTCG 자료형·token/group 충돌·Tailwind z/easing·dark-media·scoped dark 상속·profile/media drift·dark 전수 시험 누락을, B는 build 전 drift 검사 부재·scoped `color-scheme`·Tailwind 없는 hairline·T-102 경로 불일치를 독립 재현했다. 원인은 리뷰어가 달랐기 때문이 아니라, 생성물을 덮어쓴 뒤 검사하는 순서와 정본에서 파생되지 않는 중복 값, 실행 의미를 확인하지 않는 부분 시험이 한 계약으로 묶이지 않았기 때문이다.
