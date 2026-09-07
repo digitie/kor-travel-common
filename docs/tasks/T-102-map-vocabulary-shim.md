@@ -55,7 +55,7 @@ Git Bash에서 동일.
 - 두 독립 reviewer의 final2 원본은 [A](../reviews/adversarial/evidence/2026-09-08-t102-final2-reviewer-a.md)(SHA256 `735D4718F53B8349A89638D3BCE1D4DF28593BD5418D14B56DA3EC5B3A03C63B`)와 [B](../reviews/adversarial/evidence/2026-09-08-t102-final2-reviewer-b.md)(SHA256 `B675AC97A9A9B9574B809008513BC187B0D18DA3368EF63CC66E53A1EDE6ECDA`)이며 모두 PASS·신규 P0–P3 finding 0건이다.
 - exact candidate CI [34137474603](https://github.com/digitie/kor-travel-common/actions/runs/34137474603)의 docs·tools(Windows/Ubuntu)·packages·secret-scan·check-versions 6개 job이 모두 성공했다. Windows 전체 238 tests와 focused alias 35 tests, WSL 전체 235 pass와 focused 34 pass(+플랫폼 skip)는 reviewer 원본에 보존했다. `check_aliases`·문서 link/plan·SPDX·secret/redaction·versions self-check·`git diff --check`도 오류 0이다.
 - tokens package check/build/test 7개, 임시 tarball 19개 파일의 alias 포함·examples 제외와 install smoke를 통과했으며 npm/PyPI 게시·소비자 저장소 변경은 하지 않았다. 별칭 수·원천 대조는 최종 통합 판정과 review evidence를 정본으로 한다.
-- `NOT_RUN(T-461)`: 소비자 weather 실제 교체, build/e2e 및 6폭 visual diff. `NOT_RUN(사용자 범위)`: npm/PyPI 게시·GitHub Release/tag·소비자 installation. `NOT_RUN(후속 task)`: T-103 contrast/UX lint·T-104 standards 실물 대조. merge 후 main CI는 merge source SHA를 별도로 기록한다.
+- `NOT_RUN(T-461)`: 소비자 weather 실제 교체, build/e2e 및 6폭 visual diff. `NOT_RUN(사용자 범위)`: npm/PyPI 게시·GitHub Release/tag·소비자 installation. `NOT_RUN(후속 task)`: T-103 contrast/UX lint·T-104 standards 실물 대조. PR #15 squash merge SHA는 `4cde7e83910fba08f5b92a3c2f08274297e94223`이며 merge 후 main CI [34139949549](https://github.com/digitie/kor-travel-common/actions/runs/34139949549)의 6개 job이 모두 성공했다.
 
 ## rollback 또는 release 차단 조건
 
