@@ -123,16 +123,16 @@ C9 부속 결정: ktdm `ok/warn/danger`는 이름 alias(ok=success, warn=warning
 
 | ID | 규칙 | 수준 | 근거 |
 |---|---|---|---|
-| UX-G9.1 | focus 링 = `outline 2px` 불투명 토큰 + offset 2px, 즉시 표시(transition 밖). `outline-none` 금지. 끄는 자리는 프로그램 포커스 컨테이너 닫힌 목록뿐 | MUST | `ux` G9.1, [design-tokens](design-tokens.md) TK-14 |
+| UX-G9.1 | focus 링 = `outline 2px` 불투명 토큰 + offset 2px, 즉시 표시(transition 밖). `outline-none` 금지. 끄는 자리는 프로그램 포커스 컨테이너 닫힌 목록뿐 | MUST | `ux` G9.1, [design-tokens](design-tokens.md) TK-8 |
 | UX-G9.2 | `disabled`와 `aria-disabled` 두 벌. 진행 중은 `aria-busy` + `aria-disabled`(native disabled 안 걺, 포커스 유지). 흐림은 root가 아니라 라벨 자식 래퍼에만 | MUST | `ux` G9.2, D-09 Button |
 | UX-G9.3 | reduced-motion 전역 규칙 + "사라지면 상태를 알 수 없는 애니메이션(스피너)은 유지, 자리표시(skeleton)는 끈다" | MUST | `ux` G9.3, §1.12(7앱 전역 규칙 보유) |
 | UX-G9.4 | 전환 유틸은 열거형만. `transition-all`·`transition-colors`·맨 `transition` 금지(v4 전환 목록에 `outline-color`가 포함돼 링이 페이드된다) | MUST | `ux` G9.4, §4 P1 |
 | UX-G9.5 | 한글 라벨에 `uppercase`·`tracking-*` 금지 | MUST | `ux` G9.5(4앱) |
-| UX-G9.6 | admin 타입 스케일 7단(12/13.5/15/17/20/24/30), 본문 15px, 최소 12px, `text-[Npx]` 금지 | MUST | `ux` G9.6, C13, [design-tokens](design-tokens.md) TK-5 |
+| UX-G9.6 | admin 타입 스케일 7단(12/13.5/15/17/20/24/30), 본문 15px, 최소 12px, `text-[Npx]` 금지 | MUST | `ux` G9.6, C13, [design-tokens](design-tokens.md) TK-3 |
 | UX-G9.7 | radius 2종(6px 컨트롤/8px 패널), 컨트롤 높이 2종(36/30px). micro-control(≥24px)은 정렬 버튼·닫기·HelpTip·Copy 등 닫힌 목록만 | MUST | `ux` G9.7(6앱), `dt` §3.1.2 |
-| UX-G9.8 | hairline 2종: 장식 `border-kt-border` vs 컨트롤 경계 `border-kt-control-line`(3:1). 장식선을 입력 경계에 쓰지 않는다 | MUST | `ux` G9.8, TK-4·TK-13 |
+| UX-G9.8 | hairline 2종: 장식 `border-kt-border` vs 컨트롤 경계 `border-kt-control-line`(3:1). 장식선을 입력 경계에 쓰지 않는다 | MUST | `ux` G9.8, TK-4·TK-8 |
 | UX-G9.9 | `html, body { overflow-x: clip }`(`hidden` 금지). 표·지도·작업면만 자체 overflow | MUST | `ux` G9.9(4앱), [responsive-web](responsive-web.md) §7 |
-| UX-G9.10 | 다크 모드는 light 기본. 다크 값은 토큰이 준비하고 활성화는 앱 opt-in | MUST | `ux` C14, TK-9 |
+| UX-G9.10 | 다크 모드는 light 기본. 다크 값은 토큰이 준비하고 활성화는 앱 opt-in | MUST | `ux` C14, TK-7 |
 
 ## 2. 사용자 표면(pinvi 사용자 웹·모바일 앱·kta 대시보드)
 
@@ -175,9 +175,9 @@ C9 부속 결정: ktdm `ok/warn/danger`는 이름 alias(ok=success, warn=warning
 | C9 | 상태 tone 이름 | 5-tone 채택 | UX-G5.1 | geo CANCELLED 매핑 보류 |
 | C10 | 정렬 기본값 | 페이징 목록 = 서버 정렬, DataTable `manualSorting` 기본 `true` | UX-G2.3, [ui-contract](ui-contract.md) DataTable | pinvi `AdminTable`은 `false` 명시 유지 |
 | C11 | 빈 상태 정렬 | 좌정렬, 모바일 앱만 가운데 허용 | UX-G4.4, §2 | ktdm 모달 EmptyState 가운데 → 정렬(T-473) |
-| C12 | 폰트 스택 | Pretendard 1순위(로드하는 앱), 로딩은 앱 | [design-tokens](design-tokens.md) TK-15 | weather Geist 1순위·ktdm Noto 1순위는 채택 시 오버라이드 |
+| C12 | 폰트 스택 | Pretendard 1순위(로드하는 앱), 로딩은 앱 | [design-tokens](design-tokens.md) TK-12 | weather Geist 1순위·ktdm Noto 1순위는 채택 시 오버라이드 |
 | C13 | 본문 14px·11px | 15/12 하한 | UX-G9.6 | ktdm·kta 스케일 정렬 |
-| C14 | 다크 자동 vs 준비 vs 없음 | light 기본, `.dark` 슬롯 준비, kta media dark 허용 | UX-G9.10, TK-9 | 열림 O-11 |
+| C14 | 다크 자동 vs 준비 vs 없음 | light 기본, `.dark` 슬롯 준비, kta media dark 허용 | UX-G9.10, TK-7 | 열림 O-11 |
 | C15 | 로그인 아이콘 타일 vs 워드마크 vs graphite 분할 | 타이포 워드마크 | UX-G7.1 | geo·weather 아이콘 타일 후속 정렬 |
 | C16 | 헤더 2종 공존·pathname 노출 | breadcrumb/section만 | UX-G1.5 | pinvi `AdminPage` → `AdminPageHeader` 수렴; weather `page-path` 제거 |
 | C17 | HelpTip tooltip+popover vs popover-only | popover-only 허용 하위집합, 히트 ≥24px 필수 | UX-G8.1 | — |
@@ -196,9 +196,9 @@ C9 부속 결정: ktdm `ok/warn/danger`는 이름 alias(ok=success, warn=warning
 | P1 | `(^\|[\s"'`])transition(-all\|-colors)?(?=[\s"'`]\|$)` | `transition-all`, `transition-colors`, 맨 `transition` | `transition-[color,background-color,border-color]`, `transition-opacity` | UX-G9.4 |
 | P2 | `text-\[\d+(\.\d+)?px\]` | px 임의 폰트 크기 | `text-kt-2xs`~`text-kt-2xl` | UX-G9.6 |
 | P3 | `rounded(-[a-z]{1,2})?-(2xl\|3xl\|4xl\|\[)` | 큰 radius·임의 radius | `rounded-kt-control`, `rounded-kt-panel` | UX-G9.7 |
-| P4a | `(bg\|text\|border\|outline\|ring\|fill\|stroke\|from\|to\|via)-\[(#\|oklch\(\|rgba?\(\|hsla?\()` | 클래스 안 raw 색 | `bg-kt-*` 토큰 유틸리티 | TK-12 |
-| P4b | `#[0-9a-fA-F]{3,8}\b\|oklch\(\|rgba?\(\|hsla?\(` (CSS, allowlist 밖) | 토큰 파일 밖 raw 색 | 토큰 파일로 이동 | TK-12 |
-| P5 | `\b(bg\|text\|border\|ring\|outline\|fill\|stroke\|from\|to\|via\|shadow)-[a-z][a-z0-9-]*/\d{1,3}\b` | 팔레트 alpha | 불투명 tint 토큰, overlay 토큰 | TK-11 |
+| P4a | `(bg\|text\|border\|outline\|ring\|fill\|stroke\|from\|to\|via)-\[(#\|oklch\(\|rgba?\(\|hsla?\()` | 클래스 안 raw 색 | `bg-kt-*` 토큰 유틸리티 | TK-9 |
+| P4b | `#[0-9a-fA-F]{3,8}\b\|oklch\(\|rgba?\(\|hsla?\(` (CSS, allowlist 밖) | 토큰 파일 밖 raw 색 | 토큰 파일로 이동 | TK-9 |
+| P5 | `\b(bg\|text\|border\|ring\|outline\|fill\|stroke\|from\|to\|via\|shadow)-[a-z][a-z0-9-]*/\d{1,3}\b` | 팔레트 alpha | 불투명 tint 토큰, overlay 토큰 | TK-9 |
 | P6 | `\boutline-none\b` | 포커스 링 제거(모든 variant 접두 포함) | `focus-visible:outline-0`(닫힌 목록만) | UX-G9.1 |
 | P7 | `aria-(disabled\|busy):opacity-` | root 흐림 | 라벨 자식 래퍼 `opacity-55` | UX-G9.2 |
 | P8 | `\bwindow\.confirm\b\|(^\|[^.\w])confirm\(` | 브라우저 확인 대화상자 | 공용 확인 다이얼로그 | UX-G4.6 |

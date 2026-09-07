@@ -4,7 +4,7 @@
 - 우선순위: P2
 - Gate: CI
 - 선행: T-451, T-311
-- 외부 선행: T-021 common 결정 완료(2026-09-08); ktc 외부 LICENSE evidence(L8) — 브리프 선행 열에는 없으나 D-16이 L8 전 코드 소비를 금지하므로 common 모듈 import 단계는 L8 후에만
+- 외부 선행: T-021 common 결정 완료(2026-09-08); ktc license-only 외부 PR evidence는 [T-021 external evidence](T-021-ktc-ktdm-license-l8.md#외부-evidence현재-open)의 ktc 행에서 확인한다. D-16에 따라 common 모듈 import 단계는 그 evidence 후에만 진행한다.
 
 ## 목표
 
@@ -51,7 +51,7 @@ kor-travel-common.lock.json, docs/standards/openapi-exceptions.yaml(common)
 - [ ] 모든 응답에 `X-Request-ID` 헤더가 있고 `{detail}` 오류 본문 byte 무변경(계약 테스트); 로그에 request_id contextvar 포함.
 - [ ] `/health` 응답 무변경(healthcheck 유지), `/readyz`·`/version`이 openapi.md 계약과 일치.
 - [ ] features export 계약 문서가 존재하고 map provider 파일 경로·핀 방식·동시 수정 절차가 적혀 있으며 common `openapi-exceptions.yaml` 항목이 그 문서를 가리킨다.
-- [ ] L8 외부 LICENSE evidence(T-454/T-473 PR) PR 본문 기재; `check_versions` ktc Python 행 `OK`.
+- [ ] T-021 ktc 행의 license-only 외부 PR URL·main merge SHA·root LICENSE 첫 줄·검사 결과를 PR 본문에 인용하고, `check_versions` ktc Python 행 `OK`.
 
 ## 검증 명령
 

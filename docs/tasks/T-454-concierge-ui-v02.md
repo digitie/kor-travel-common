@@ -4,7 +4,7 @@
 - 우선순위: P2
 - Gate: e2e 45
 - 선행: T-021, T-453, T-213
-- 외부 선행: T-021 common 결정 완료(2026-09-08); concierge 루트 LICENSE·metadata·고지의 외부 PR evidence
+- 외부 선행: T-021 common 결정 완료(2026-09-08); concierge license-only 외부 PR evidence는 [T-021 external evidence](T-021-ktc-ktdm-license-l8.md#외부-evidence현재-open)의 ktc 행에서 확인한다.
 
 ## 목표
 
@@ -52,7 +52,7 @@ frontend/kor-travel-common.lock.json
 - [ ] `npm ls @base-ui/react @hookform/resolvers`가 1.8.x / 5.x 단일이고 peer 경고 0.
 - [ ] 6폭 스크린샷 diff 0(대시보드·목록·모달·폼 오류 상태).
 - [ ] `grep -rn 'render=' src | wc -l` 변경분이 9줄 이내로 PR 본문 표와 일치.
-- [ ] L8 외부 LICENSE evidence(T-454 PR 링크·루트 LICENSE) 확인, `tools/ui_drift.py` 로컬 패치 0건, `ux_lint --base` 신규 위반 0.
+- [ ] T-021 ktc 행의 license-only 외부 PR URL·main merge SHA·root LICENSE 첫 줄·검사 결과 확인, `tools/ui_drift.py` 로컬 패치 0건, `ux_lint --base` 신규 위반 0.
 
 ## 검증 명령
 

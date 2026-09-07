@@ -18,7 +18,7 @@
 
 ## 구현 범위
 
-1. `tools/kt_contrast.py`: 입력 `tokens.css` + 오버라이드 CSS(0..n) + `--dark`; 파서(`:root`/`.dark` 블록의 `--kt-*` 값, OKLCH·hex·`var()` 1단 참조); 검사 쌍(text 4 × surface 4 → 4.5:1(tertiary·disabled는 3:1 문서 규칙에 따름), control-line × surface 4 → 3:1, brand-foreground × brand → 4.5:1, status 4 × tint → 3:1, focus × surface-page → 3:1); `--baseline <json>`(미달 쌍 + `until`; 만료는 `EXEMPT_EXPIRED`); `--fail-new`; 출력 Markdown·`--json`·step summary.
+1. `tools/kt_contrast.py`: 입력 `tokens.css` + 오버라이드 CSS(0..n) + `--dark`; 파서(`:root`/`.dark` 블록의 `--kt-*` 값, OKLCH·hex·`var()` 1단 참조); 검사 쌍과 기준은 [디자인 토큰 TK-8](../standards/design-tokens.md#6-대비와-값-형식)을 그대로 사용한다(text primary/secondary/strong × surface 4 → 4.5:1, tertiary × surface 4 → 3:1, disabled 제외, control-line × surface 4 → 3:1, brand-foreground × brand → 4.5:1, status 4 × tint → 3:1, focus × surface-page → 3:1); `--baseline <json>`(미달 쌍 + `until`; 만료는 `EXEMPT_EXPIRED`); `--fail-new`; 출력 Markdown·`--json`·step summary.
 2. `tools/ux_lint.py`: 대상 확장자 `.tsx .ts .css .mdx`; 패턴 7 + `window.confirm`; 백틱·주석 안 인용 제외; `--base <sha>`면 `git diff -U0 <sha>`의 추가 행만 fail 대상, 전체는 report; `--baseline <json>`(파일·패턴·건수); 출력 동일 형식.
 3. 테스트: `tests/test_kt_contrast.py`(변환 정확도: map 문서 수치 ±0.05, 쌍 판정, baseline 만료), `tests/test_ux_lint.py`(패턴별 양성·음성 fixture, diff 모드).
 4. 4앱 예제: `packages/tokens/examples/{docker-manager,concierge,geo,airport}-overrides.css`(조사 문서 값) + 각 `contrast-baseline.example.json`; 실행 결과 표(미달 쌍·수치)를 evidence와 `docs/journal.md`에 보고. 실제 앱 baseline 등록은 각 이관 task.

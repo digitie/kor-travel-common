@@ -34,9 +34,9 @@
 
 - 고지 파일: `NOTICE`, `THIRD_PARTY_NOTICES.md`, `PROVENANCE.md`, `CONTRIBUTING.md`, `LICENSES/`(T-003; `check_spdx.py`·`LICENSES/` 원문은 잔여)
 - 규칙: `docs/standards/licensing.md`
-- 외부 확인: T-420(pinvi L6), T-454·T-473(ktc·ktdm L8 evidence), T-410(map L9·`license` 필드)
+- 외부 확인: T-420(pinvi L6), T-021의 ktc·docker-manager license-only evidence, T-410(map L9·`license` 필드)
 - 패키지 실물: T-101·T-201·T-302(메타데이터 적용)
 
 ## 후속 결정(2026-09-08)
 
-사용자는 T-020·T-021에 대해 모든 라이브러리를 GPLv3로 통일하라고 지시했다. 이에 O-1은 공개 pinvi + GPL-3.0-or-later, O-2는 concierge·docker-manager 루트 GPL-3.0-or-later 정렬과 GPLv3 §7 추가 허가 없음으로 닫았다. common은 [pinvi 요청](../plan/requests/pinvi-license-l6.md), [concierge 요청](../plan/requests/concierge-license-l8.md), [docker-manager 요청](../plan/requests/docker-manager-license-l8.md)을 작성했지만 소비자 저장소는 수정하지 않았다. 실제 반영은 pinvi T-420과 concierge·docker-manager의 외부 PR evidence(T-454·T-473에서 링크)에서 LICENSE 첫 줄, 40자리 SHA, 자체 검증 evidence를 확인한 뒤 G-LIC gate를 닫는다.
+사용자는 T-020·T-021에 대해 모든 라이브러리를 GPLv3로 통일하라고 지시했다. 이에 O-1은 공개 pinvi + GPL-3.0-or-later, O-2는 concierge·docker-manager 루트 GPL-3.0-or-later 정렬과 GPLv3 §7 추가 허가 없음으로 닫았다. common은 [pinvi 요청](../plan/requests/pinvi-license-l6.md), [concierge 요청](../plan/requests/concierge-license-l8.md), [docker-manager 요청](../plan/requests/docker-manager-license-l8.md)을 작성했지만 소비자 저장소는 수정하지 않았다. 외부 소비자는 먼저 license-only PR을 머지하고 T-021 소비자별 evidence 행에 LICENSE 첫 줄, 40자리 SHA, 자체 검증 evidence를 기록해야 한다. 그 뒤에만 T-453·T-454·T-472·T-473·T-485·T-486 코드 채택을 시작하고 G-LIC gate를 닫는다.

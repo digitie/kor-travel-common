@@ -21,7 +21,7 @@
 
 | 항목 | 확인 방법 | 통과 조건 | 근거 |
 |---|---|---|---|
-| 라이선스 gate | 저장소 루트 `LICENSE`·`package.json`/`pyproject.toml` `license` 필드 | GPL-3.0-or-later 정렬. pinvi는 T-020(O-1), concierge·docker-manager는 T-021(O-2) 전에는 규칙 문서·`tokens.json` 의미 이름 참조까지만 허용하고 코드 채택 금지 | D-16·D-17, [licensing](../standards/licensing.md), `docs/survey/cross/licensing.md` §3.6·§4 B1 |
+| 라이선스 gate | 저장소 루트 `LICENSE`·`package.json`/`pyproject.toml` `license` 필드 | GPL-3.0-or-later 정렬. pinvi는 T-020(O-1)와 T-420 evidence, concierge·docker-manager는 T-021(O-2)의 소비자별 license-only evidence 전에는 규칙 문서·`tokens.json` 의미 이름 참조까지만 허용하고 코드 채택 금지 | D-16·D-17, [licensing](../standards/licensing.md), `docs/survey/cross/licensing.md` §3.6·§4 B1 |
 | 버전 기준선 | `python3 -B -X utf8 tools/check_versions.py <소비자 저장소 루트> --manifest <소비자 저장소 루트>/<앱 경로>/kor-travel-common.lock.json`(report 모드) | `BELOW_FLOOR`·`BLOCKED`·`FLOATING_REF` 0(등록된 `exceptions[]` 제외). ui는 React `^19.0.0` 필수(React 18 앱은 tokens부터), `theme.css`는 Tailwind 4.3+ 필수 | D-06·D-07·D-09·T-011, [versions](../standards/versions.md) |
 | lockfile | `package-lock.json`(`lockfileVersion: 3`)·`uv.lock` 존재, lock 항목 `integrity` 보유 | 존재 + `npm ci`/`uv sync --locked` 재현 | D-07, `docs/survey/cross/version-matrix.md` §3.6(pinvi `check-lockfile-integrity.mjs` 선례) |
 | 릴리스 자산 | `gh release view <tag> --repo digitie/kor-travel-common` | 태그가 존재하고 tarball/wheel + `SHA256SUMS`가 첨부됨. `-rc.N`은 검증 PR에만, 정식 태그만 merge | D-11, [release](release.md) §2 |
@@ -233,7 +233,7 @@ Tailwind가 없는 앱은 `next build` 후 `.next/static/css/*.css`를 같은 �
 | pinvi admin | tokens(`[data-pv-surface='admin']` 스코프) → ui | L6 외부 LICENSE evidence(T-420) | `docs/survey/inventory/pinvi.md` §3.2·§8, `docs/survey/cross/licensing.md` §3.6 | T-420~T-422, T-484 |
 | airport | tokens → 소형 ui | WIP 병합(T-430, O-9) | `docs/survey/inventory/kor-travel-airport.md` §3.2·§9 | T-430~T-433, T-482 |
 | geo | tokens(`--ui-*` 별칭 유지) → React 19(O-25) → ui | `@config` 실효값 검증(T-441) | `docs/survey/inventory/kor-travel-geo.md` §8·§9, `docs/survey/cross/ui-components.md` §5.2 | T-440~T-444, T-483 |
-| concierge | 규칙 참조 → CI 신설 → tokens → ui | L8 external LICENSE evidence(T-454/T-473), CI(T-451) | `docs/survey/inventory/kor-travel-concierge.md` §8·§11.12 | T-450~T-454, T-485 |
-| docker-manager | 규칙 참조 → 업그레이드 PR → tokens → 부분 ui | L8 external LICENSE evidence(T-454/T-473), Next 16·React 19(T-470) | `docs/survey/inventory/kor-travel-docker-manager.md` §8·§9 | T-470~T-473, T-486 |
+| concierge | 규칙 참조 → **T-021 ktc license-only evidence** → CI 신설 → tokens → ui | T-021 ktc 행의 LICENSE 첫 줄·main SHA·검사 결과, CI(T-451) | `docs/survey/inventory/kor-travel-concierge.md` §8·§11.12 | T-450~T-454, T-485 |
+| docker-manager | 규칙 참조 → **T-021 docker-manager license-only evidence** → 업그레이드 PR → tokens → 부분 ui | T-021 docker-manager 행의 LICENSE 첫 줄·main SHA·검사 결과, Next 16·React 19(T-470) | `docs/survey/inventory/kor-travel-docker-manager.md` §8·§9 | T-470~T-473, T-486 |
 
 task 상세는 [tasks](../tasks.md)와 `docs/tasks/T-4xx-*.md`, 순서·Phase는 [integration plan](../plan/integration-plan.md), 앱별 이관 PR 수·규모 판정 근거는 [migration-feasibility 판정](../plan/design-panel/judge-migration-feasibility.md) §3.1, 소비자별 계약 요약은 [consumers](../architecture/consumers.md)를 본다. pinvi 사용자 표면·모바일은 코드 소비 대상이 아니며 consumer 프로필 규칙과 `tokens.json` 의미 이름만 참조한다(D-29; 모바일 Tailwind 3 예외는 O-8 사용자 승인 대기).

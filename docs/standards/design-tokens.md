@@ -61,13 +61,13 @@ common은 의미 이름, 기본값, 프로필 모양, alias 의미, 대비 쌍, 
 | --kt-duration-base | 기본 전환 시간 | 150ms | 150ms | 필수 | 프로필만 |
 | --kt-ease-out | 진입·확장 easing | cubic-bezier(0.16, 1, 0.3, 1) | cubic-bezier(0.16, 1, 0.3, 1) | 필수 | 프로필만 |
 | --kt-ease-in | 종료·축소 easing | cubic-bezier(0.7, 0, 0.84, 0) | cubic-bezier(0.7, 0, 0.84, 0) | 필수 | 프로필만 |
-| --kt-shadow-elevated | 제한적인 elevated 그림자 | 0 4px 12px oklch(30% 0.006 157 / 0.1) | 0 4px 12px oklch(10% 0.006 157 / 0.32) | 필수 | 금지(공통 층) |
-| --kt-shadow-modal | 모달 전용 그림자 | 0 8px 24px oklch(30% 0.006 157 / 0.14) | 0 8px 24px oklch(10% 0.006 157 / 0.4) | 필수 | 금지(공통 층) |
-| --kt-z-nav | nav stacking 층 | 30 | 30 | 필수 | 금지 |
-| --kt-z-panel | panel stacking 층 | 40 | 40 | 필수 | 금지 |
-| --kt-z-overlay | overlay stacking 층 | 50 | 50 | 필수 | 금지 |
-| --kt-z-modal | modal stacking 층 | 60 | 60 | 필수 | 금지 |
-| --kt-z-toast | toast stacking 층 | 70 | 70 | 필수 | 금지 |
+| --kt-shadow-elevated | 제한적인 elevated 그림자 | 0 4px 12px oklch(30% 0.006 157 / 0.1) | 0 4px 12px oklch(10% 0.006 157 / 0.32) | 필수 | 프로필·등록 예외만 |
+| --kt-shadow-modal | 모달 전용 그림자 | 0 8px 24px oklch(30% 0.006 157 / 0.14) | 0 8px 24px oklch(10% 0.006 157 / 0.4) | 필수 | 프로필·등록 예외만 |
+| --kt-z-nav | nav stacking 층 | 30 | 30 | 필수 | 프로필·등록 예외만 |
+| --kt-z-panel | panel stacking 층 | 40 | 40 | 필수 | 프로필·등록 예외만 |
+| --kt-z-overlay | overlay stacking 층 | 50 | 50 | 필수 | 프로필·등록 예외만 |
+| --kt-z-modal | modal stacking 층 | 60 | 60 | 필수 | 프로필·등록 예외만 |
+| --kt-z-toast | toast stacking 층 | 70 | 70 | 필수 | 프로필·등록 예외만 |
 | --kt-font-sans | 공통 sans 스택 문자열 | "Pretendard Variable", Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif | "Pretendard Variable", Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif | 필수 | 허용(스택) |
 | --kt-font-mono | 공통 mono 스택 문자열 | ui-monospace, "SF Mono", Menlo, Consolas, monospace | ui-monospace, "SF Mono", Menlo, Consolas, monospace | 필수 | 허용(스택) |
 
@@ -86,7 +86,7 @@ common은 의미 이름, 기본값, 프로필 모양, alias 의미, 대비 쌍, 
 
 ## 4. 프로필
 
-**TK-5 (MUST) — admin/consumer 분리.** common은 admin 프로필의 실물 값을 제공하고 consumer 프로필은 의미 이름만 제공한다. 한 앱에서 섞을 때는 [data-kt-surface="admin"] 같은 스코프에서 프로필 변수만 재선언한다.
+**TK-5 (MUST) — admin/consumer 분리.** common은 admin 프로필의 실물 값을 제공하고 consumer 프로필은 의미 이름만 제공한다. 한 앱에서 섞을 때는 `[data-kt-surface="admin"]` 같은 스코프에서 프로필 변수만 재선언한다. shadcn alias를 사용하는 컴포넌트는 `shadcn.css`의 `[data-kt-surface]` 파생 블록을 함께 로드해 semantic 오버라이드가 alias에도 반영되게 한다.
 
 | 프로필 | common이 확정하는 내용 | 값의 소유권·대조 |
 |---|---|---|
@@ -96,12 +96,12 @@ common은 의미 이름, 기본값, 프로필 모양, alias 의미, 대비 쌍, 
 **TK-6 (MUST) — 허용·금지 오버라이드.** 앱 brand.css는 tokens.css 뒤에서 아래 허용 목록만 재선언한다.
 
 - 허용: --kt-brand, --kt-brand-hover, --kt-brand-tint, --kt-brand-foreground, --kt-focus, 네 surface, --kt-text-primary/secondary/tertiary/disabled와 선택적 --kt-text-strong, --kt-control-line, 네 status와 tint, --kt-font-sans, --kt-font-mono.
-- 프로필 전용: radius·control 높이·타입 스케일·duration/ease·rail·z/shadow는 프로필 파일이나 등록된 예외에서만 바꾼다. weather rail=17rem처럼 이관 중인 값은 소비자 task와 예외 매니페스트에 until을 함께 적기 전까지 common 기본값을 대체하지 않는다.
+- 프로필 전용: radius·control 높이·타입 스케일·duration/ease·rail·z/shadow는 프로필 파일이나 등록된 예외에서만 바꾼다. 표의 `프로필·등록 예외만`은 brand.css에서 임의로 바꿀 수 없다는 뜻이다. weather rail=17rem처럼 이관 중인 값은 소비자 task와 예외 매니페스트에 until을 함께 적기 전까지 common 기본값을 대체하지 않는다.
 - 금지: --kt-border, --kt-icon, --kt-overlay의 직접 값 변경, alias만의 값 변경, 컴포넌트 안 raw 색·팔레트 alpha, 공통 토큰에 앱 접두 값을 추가하는 행위. 형태·높이·모션을 개별 컴포넌트에서 덮어쓰지 않는다.
 
 ## 5. 다크 모드
 
-**TK-7 (MUST) — 정의는 완비하고 활성화는 선택한다.** tokens.css의 :root는 color-scheme: light를 선언하고, .dark는 위 44개 변수의 값을 모두 명시한다. 앱은 dark-class.css 또는 dark-media.css 중 하나를 명시적으로 import해 활성화하며 둘을 동시에 import하지 않는다. 앱이 브랜드 값을 오버라이드할 때 dark 재선언은 선택이지만, 선언하지 않으면 common dark 값이 적용된다. dark 대비 검사는 dark를 실제 활성화하는 앱만 대상으로 한다(dt §3.6.6).
+**TK-7 (MUST) — 정의는 완비하고 활성화는 선택한다.** tokens.css의 :root는 color-scheme: light를 선언하고, .dark는 위 44개 변수의 값을 모두 명시한다. 앱은 dark-class.css 또는 dark-media.css 중 하나를 명시적으로 import해 활성화하며 둘을 동시에 import하지 않는다. 앱이 브랜드 값을 오버라이드할 때 dark 재선언은 선택이지만, common dark fallback을 사용하려면 class 경로는 light 값을 `:root:not(.dark)`에, media 경로는 `@media (prefers-color-scheme: light)` 안의 `:root`에 둔다. 일반 `:root` 오버라이드는 활성 dark 선언보다 뒤에서 이겨 common dark를 덮을 수 있으므로 fallback을 보장하지 않는다. dark 대비 검사는 dark를 실제 활성화하는 앱만 대상으로 한다(dt §3.6.6).
 
 ## 6. 대비와 값 형식
 
@@ -109,14 +109,15 @@ common은 의미 이름, 기본값, 프로필 모양, alias 의미, 대비 쌍, 
 
 | 쌍 | 기준 | 표면·용도 |
 |---|---:|---|
-| text primary/secondary/tertiary/strong ↔ surface 4종 | 4.5:1 | 본문·라벨 |
+| text primary/secondary/strong ↔ surface 4종 | 4.5:1 | 본문·강조 라벨 |
+| text tertiary ↔ surface 4종 | 3:1 | 메타·캡션 |
+| text disabled ↔ surface 4종 | 검사 제외 | 비활성 상태는 대비 합격 쌍에서 제외 |
 | icon ↔ surface 4종 | 3:1 | 아이콘 |
 | control-line ↔ surface 4종 | 3:1 | WCAG 1.4.11 컨트롤 경계 |
 | focus ↔ surface-page | 3:1 | 포커스 링 |
 | brand-foreground ↔ brand | 4.5:1 | CTA 채움 위 텍스트 |
 | brand ↔ brand-tint | 3:1 | tint 위 mark·아이콘 |
-| status 4종 ↔ status-tint | 4.5:1 | tint 위 상태 텍스트 |
-| status 4종 ↔ surface-page | 4.5:1 | 배지·인라인 상태 텍스트 |
+| status 4종 ↔ status-tint | 3:1 | tint 위 상태 텍스트 |
 
 --kt-border는 장식 전용이므로 대비 쌍에서 제외하고 컨트롤 경계로 사용하면 TK-3·TK-4 위반이다. report는 전체 결과와 JSON을 남기며, 기존 미달은 앱의 contrast-baseline.json에 {pair, surface, measured, required, until}로 등록한다. **새 미달만 fail**하고 until 만료는 EXEMPT_EXPIRED 오류로 승격한다. 허용 오차는 조사 기준 ±0.03이다(dt §3.4.2).
 

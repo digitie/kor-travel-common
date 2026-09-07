@@ -17,7 +17,7 @@
 5. 이관 PR 규격(D-24): 한 PR = 한 산출물, 프레임워크 업그레이드 PR과 분리, `git revert` 1회로 원복, lock 동반 커밋, 본문에 검사 결과·스크린샷·되돌리기 명령, 파일 상한(tokens 10·ui 30·py 10, 초과 시 분할). `templates/consumer-pr.md`.
 6. NOT_RUN(D-25): common에서 실행 못 한 검증은 evidence에 `NOT_RUN(사유)`로 남기고 DONE 전 `외부 선행`으로 승격한다. 0 test·skip을 pass로 집계하지 않고, 명령을 적은 것은 실행 증거가 아니다.
 7. 회수 측정(D-28): 분기 `docs/reports/adoption-YYYY-QN.md`에 선행 보고서 §11 지표 + drift·EXEMPT·enforce 전환 수. 순절감 ≤0 2분기 → 범위 축소; npm 소비자 우회 패치 ≥2 → 배포 방식 재검토.
-8. 소비자 저장소는 직접 수정하지 않는다. 외부 선행(L6·L8·WIP 병합·React 19)은 결정 기록·PR 요청 문서와 외부 evidence(T-020·T-021·T-420·T-454·T-473·T-505)로 추적한다.
+8. 소비자 저장소는 직접 수정하지 않는다. 외부 선행(L6·L8·WIP 병합·React 19)은 결정 기록·LICENSE-only PR 요청 문서와 외부 evidence(T-020·T-021·T-420·T-505)로 추적하고, 코드 채택 PR(T-454·T-473)은 그 evidence를 소비한다.
 
 ## 대안 검토
 
@@ -38,7 +38,7 @@
 - 현재 설계: `docs/architecture/consumers.md`, `docs/architecture/adoption-readiness.md`, `docs/integration-map.md`
 - 절차: `docs/runbooks/consumer-adoption.md`(T-007), `templates/consumer-pr.md`·`templates/consumer-adoption-checklist.md`
 - 도구: T-011(매니페스트 스키마·`validate_manifest`), T-012(`collect_manifests`), T-108(playwright 기준선), T-402(기준선 초기 캡처)
-- 외부 확인: T-420(pinvi LICENSE), T-454(concierge LICENSE evidence), T-473(docker-manager LICENSE evidence), T-430(airport WIP), T-443(geo React 19)
+- 외부 확인: T-420(pinvi LICENSE), T-021의 concierge·docker-manager license-only evidence, T-430(airport WIP), T-443(geo React 19)
 - 보고: T-503(회수 1회차), T-506(분기 감사)
 
 후속: [ADR-013](013-package-release-execution-contract.md)이 릴리스 실행·peer 호환·검증 소비자에 관한 위 일부 조항을 구체화한다. 나머지 결정은 유지한다.

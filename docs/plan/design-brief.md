@@ -118,7 +118,7 @@
 | # | 결정 | 기본값 | 막히는 것 |
 |---|---|---|---|
 | O-1 [닫힘·2026-09-08] | pinvi 라이선스·공개 여부(L6) | 공개 + GPL-3.0-or-later, 1 PR(루트 LICENSE·README/AGENTS 정합·apps/api pyproject·maplibre 문서 정정) | T-420 외부 반영 PR → pinvi 전 트랙 |
-| O-2 [닫힘·2026-09-08] | ktc·ktdm 루트 GPL 정렬, common §7 추가 허가 없음(L8) | GPL-3.0-or-later 정렬(각 1 PR) | concierge·docker-manager 외부 LICENSE PR evidence(T-454·T-473) → T-45x·T-47x 코드 채택 |
+| O-2 [닫힘·2026-09-08] | ktc·ktdm 루트 GPL 정렬, common §7 추가 허가 없음(L8) | GPL-3.0-or-later 정렬(각 license-only PR 1개, 코드 채택 PR과 분리) | T-021 external evidence(소비자별 license-only PR) → T-45x·T-47x 코드 채택 |
 | O-3 | UI 배포 방식 | npm 1차 + 레지스트리는 셸·템플릿 채널만 | T-201 |
 | O-4 | 유틸리티/변수 네임스페이스 | `kt-` / `--kt-*` | T-101 |
 | O-5 | 패키지 식별자 | 닫힘: ADR-014로 확정, 사용자 지시로 공개 registry 이름 확보 제외 | T-015·T-006 |
@@ -207,7 +207,7 @@
 | T-012 | `tools/collect_manifests.py` → `docs/integration-map.md` 생성 + `docs/architecture/adoption-readiness.md` gate 표 갱신 | T-011 | P2 | 도구 테스트 | common | |
 | T-014 | common 테스트 fixture 포트 점검 + ktdm sibling 포트 문서 정합성 요청 | 없음 | P3 | 외부 확인 | common/ktdm | |
 | T-020 | pinvi 라이선스 결정(L6) 반영: 결정 기록·pinvi PR 요청 문서·common 소비 gate 해제 조건(결정 완료 2026-09-08, 외부 반영 T-420) | 없음 | P0 | 문서 | common/pinvi | 외부 PR 대기 |
-| T-021 | ktc·ktdm 라이선스 정렬(L8) 결정 반영: 결정 기록·각 저장소 PR 요청 문서(결정 완료 2026-09-08, 외부 evidence T-454·T-473) | 없음 | P1 | 문서 | common/ktc/ktdm | 외부 PR 대기 |
+| T-021 | ktc·ktdm 라이선스 정렬(L8) 결정 반영: 결정 기록·각 저장소 LICENSE-only PR 요청 문서(결정 완료 2026-09-08, 외부 evidence는 소비자별 행) | 없음 | P1 | 문서 | common/ktc/ktdm | 외부 PR 대기 |
 
 ### Phase 1 — T-1xx 토큰·스타일·UX 규약 (그룹: 토큰)
 
@@ -282,7 +282,7 @@
 | T-450 | concierge: `pyproject.toml`·`uv.lock`(`mcp<2` blocked)·ruff/mypy baseline 도입 | T-305 | P0 | 로컬 4 gate | concierge | |
 | T-451 | concierge: CI 신설(재사용 워크플로 호출·versions-check) + production `frontend/Dockerfile` | T-401, T-450 | P0 | CI | concierge | |
 | T-453 | concierge: hex fallback 블록 제거 → `@config`→`@theme inline` → `--ktc-*`를 `--kt-*` 오버라이드로 + contrast baseline + 매니페스트 | T-451, T-109 | P1 | e2e 45·시각 diff | concierge | |
-| T-454 | concierge: ui v0.2 채택(18종 shim·base-ui 1.8·`render` 9줄) | T-021, T-453, T-213 | P2 | e2e 45 | concierge | 외부 선행: T-021 common 결정 완료 + 소비자 LICENSE evidence |
+| T-454 | concierge: ui v0.2 채택(18종 shim·base-ui 1.8·`render` 9줄) | T-021, T-453, T-213 | P2 | e2e 45 | concierge | 외부 선행: T-021 common 결정 완료 + ktc license-only evidence |
 | T-460 | weather: Next 16·Vitest 4·Node 22 CI·eslint-config-next 16·`moduleResolution: bundler`·react-query 미사용 정리·CI vitest/mypy 추가(별도 PR) | T-005 | P1 | ci.yml | weather | |
 | T-461 | weather: `app/tokens.css` → `@kor-travel/tokens/tokens.css` + `aliases/map-vocabulary.css` + navy·`--rail`·font 오버라이드 + 매니페스트(6폭 diff 0 evidence) | T-109 | P0 | 시각 diff(수동) | weather | |
 | T-462 | weather: Tailwind v4 도입(theme+utilities, preflight 제외) + `@theme inline` 1:1 매핑 | T-460, T-461 | P1 | 시각 diff | weather | |
@@ -291,7 +291,7 @@
 | T-470 | ktdm: Next 16·React 19·ESLint 9·Node 22 CI 업그레이드(재포맷 금지, recharts 3·`target es5` 실검증, 별도 PR) | T-005 | P1 | vitest 8·build | ktdm | |
 | T-471 | ktdm: Poetry→`uv.lock`·하한 상향·CI 핀 정리 + quality baseline | T-305 | P1 | ci.yml | ktdm | |
 | T-472 | ktdm: tokens 채택(`@theme`→`--kt-*`·Ember 값 유지·tint 4종) + contrast baseline + 매니페스트 | T-470, T-109 | P2 | 시각 diff(수동) | ktdm | |
-| T-473 | ktdm: ui 부분 채택(StatStrip·AppErrorPanel·SectionCard; `ops-*` 잔존 허용) | T-021, T-472, T-213 | P3 | vitest | ktdm | 외부 선행: T-021 common 결정 완료 + 소비자 LICENSE evidence |
+| T-473 | ktdm: ui 부분 채택(StatStrip·AppErrorPanel·SectionCard; `ops-*` 잔존 허용) | T-021, T-472, T-213 | P3 | vitest | ktdm | 외부 선행: T-021 common 결정 완료 + docker-manager license-only evidence |
 | T-480 | map-api: py 1차 채택(export CLI·health·time·quality) + `type` URI·429 코드 정렬 + pinvi/ktdm pin 갱신 PR 동반 | T-310 | P1 | openapi.yml·pin 대조 | map(+pinvi/ktdm) | |
 | T-481 | weather-api: py 1차 채택 + `--check` 전환 + airkorea 스냅샷 정본 결정(L15) + Python 3.11/3.12/3.13 정합 | T-310 | P1 | ci.yml | weather | |
 | T-482 | airport: py 1차 채택 + `code`/`request_id` additive + 스펙 422 정합 + `--check` CI + Docker `uv sync --locked` | T-310 | P1 | backend CI | airport | |

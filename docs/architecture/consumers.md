@@ -35,7 +35,7 @@
 |---|---|---|---|---|
 | kta | WIP `codex/shadcn-ui-foundation` 병합(O-9, T-430; 값 16/10·alpha line 유지, `cn`→clsx+tailwind-merge, shadcn/postcss devDependencies); L11 `license` 필드 | TS 7.0.2 예외 등록(O-6)·ESLint 도입 판정·`engines`·절대 링크 상대화(T-433); Docker `uv sync --locked`(T-482); AdminPageHeader·셸 소비는 T-035 라우트 분리 후(O-9) | T-109·T-212·T-310 | tokens 대기(WIP 병합 후) |
 | ktc | L8 GPL 정렬(O-2, T-021) | `pyproject.toml`·`uv.lock`(`mcp<2` blocked)·ruff/mypy baseline(T-450); CI 신설 + production `frontend/Dockerfile`(T-451); hex fallback·`@config` 제거·`--ktc-*`→`--kt-*` 오버라이드(T-453) | T-401·T-305·T-109·T-213 | 규칙 참조만(외부 L8 evidence 전) |
-| ktdm | L8(O-2); 포트 `-latest`·sibling 등록 질의(T-014, O-24) | Next 16·React 19·ESLint 9·Node 22 별도 PR(T-470, 재포맷 금지); Poetry→`uv.lock`(T-471) | T-305·T-109·T-213·T-307 | 규칙 참조만(외부 L8 evidence 전) |
+| ktdm | L8(O-2); 포트 `-latest`·sibling 등록 질의(T-014, O-24) | Next 16·React 19·ESLint 9·Node 22 별도 PR(T-470, 재포맷 금지); Poetry→`uv.lock`(T-471) | T-305·T-109·T-213·T-307 | 규칙 참조만(T-021 license-only evidence 전) |
 | geo | React 19 승인(O-25, ADR-019 갱신, T-443); `-only` 재선언 여부(O-20) | Node 22 CI·`uv.lock`·pre-commit rev 정렬(T-440); `@config` 실효값 빌드 검증 → `@theme` 단일화(T-441) | T-109·T-213·T-308 | tokens 가능(T-109 후, React 19와 독립) |
 | map | 없음(L9 LICENSE 전문 복원·`license` 필드는 T-410 채택 PR 동반) | Next 16.3·base-ui 1.8·Playwright 1.63 상향 별도 PR(T-413); OpenAPI 산출물 변경 시 pinvi·ktdm sha256 pin 갱신 PR 동반(T-480) | T-109·T-212·T-213·T-310 | 1차 대상 |
 | wx | 없음 | Next 16·Vitest 4·Node 22·`moduleResolution: bundler`·CI vitest/mypy 추가(T-460); Python 3.11/3.12/3.13 정합·airkorea 스냅샷 정본(L15, T-481) | T-109·T-102(shim)·T-213·T-310 | 1차 대상(`tokens.css` 교체는 Next 버전과 독립) |

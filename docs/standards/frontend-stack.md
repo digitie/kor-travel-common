@@ -124,7 +124,7 @@ lockfile은 의무(`package-lock.json` v3, D-07)이며 `check_versions.py`가 �
 |---|---|---|
 | FS-7.1 `source(none)` + 명시 `@source` | 문서·테스트 산출물의 `shadow-[var(--…)]` 같은 프로즈가 스캔되어 파서가 죽는 문제 회피. `@source` 누락은 클래스 미생성으로 나타나므로 consumer-smoke가 `kt-` 유틸리티 존재를 단언 | `inv/geo` §3·§9 |
 | FS-7.2 `@config` 금지 | v3 JS config 브리지(`@config "../tailwind.config.ts"`)는 전환 완료 후 제거한다. `@config`와 `@theme`의 병합 우선순위가 미확인이므로 같은 유틸리티 이름을 두 곳에 두지 않는다 | `dt` §3.6.3, T-441·T-453·T-421 |
-| FS-7.3 `@theme inline` vs `@theme` | 색·radius·spacing처럼 `var()`를 참조하는 항목은 `@theme inline`, 타입 스케일은 비inline `@theme`(TK-5). 앱이 `theme.css` 밖에서 같은 네임스페이스 이름을 재정의하지 않는다 | `dt` §3.6.5 |
+| FS-7.3 `@theme inline` vs `@theme` | 색·radius·spacing처럼 `var()`를 참조하는 항목은 `@theme inline`, 타입 스케일은 비inline `@theme`(TK-3). 앱이 `theme.css` 밖에서 같은 네임스페이스 이름을 재정의하지 않는다 | `dt` §3.6.5 |
 | FS-7.4 `dark` variant | `dark-class.css`는 `.dark` 선택자 variant를 선언하고 `dark-media.css`는 Tailwind v4 기본 `prefers-color-scheme` variant를 유지한다. 앱이 선택한 방식과 다른 variant를 중복 선언하면 소유 검증 테스트(map `test_frontend_owns_every_named_shadcn_css_token_it_uses` 선례)가 실패해야 한다 | `dt` §3.4.1 |
 | FS-7.5 `@utility` | `duration-kt-*`·`z-kt-*`는 `theme.css`가 정의. 앱 `@utility`는 앱 접두 | |
 | FS-7.6 preflight | v4 preflight를 켠다. weather처럼 전역 요소 규칙에 의존하는 앱은 `@import "tailwindcss/theme" layer(theme); @import "tailwindcss/utilities" layer(utilities);`로 preflight 없이 시작해 마지막 단계에서 켠다(D-08 ⑥) | `inv/weather` §9.1 |
@@ -151,7 +151,7 @@ lockfile은 의무(`package-lock.json` v3, D-07)이며 `check_versions.py`가 �
 | `doctor` | `react-doctor --offline …` | MAY | map 선례(`doctor.config.json` 잠금). 채택 시 설정 파일을 검증 스크립트로 잠근다 |
 | `verify:npm-tree` / `audit:high` | 설치 트리·감사 | SHOULD | map 보안 게이트 모델(`inv/map` §8-23) |
 | `ux:lint` | `python3 -B -X utf8 tools/ux_lint.py …`(common 도구 호출) | MUST(report) → fail 승격 | [ux-guide](ux-guide.md) §4 |
-| `contrast` | `tools/kt_contrast.py` | MUST(report) → fail 승격 | [design-tokens](design-tokens.md) TK-13 |
+| `contrast` | `tools/kt_contrast.py` | MUST(report) → fail 승격 | [design-tokens](design-tokens.md) TK-8 |
 | — | `tools/check_versions.py`(CI job) | MUST(report) | [versions.md](versions.md) |
 
 - 게이트 명령을 PR 본문에 적는 것은 실행 증거가 아니다. 실제 결과(test 수·exit code)를 적는다(D-25).
@@ -159,7 +159,7 @@ lockfile은 의무(`package-lock.json` v3, D-07)이며 `check_versions.py`가 �
 
 ## 7. 폰트
 
-**FS-11 (SHOULD)** 폰트 로딩은 앱 책임이며 스택 문자열만 토큰이다(TK-15). 권장 방식은 두 가지다.
+**FS-11 (SHOULD)** 폰트 로딩은 앱 책임이며 스택 문자열만 토큰이다(TK-12). 권장 방식은 두 가지다.
 
 | 방식 | 예 | 채택 앱 |
 |---|---|---|
