@@ -150,7 +150,7 @@ common은 의미 이름, 기본값, 프로필 모양, alias 의미, 대비 쌍, 
 
 ## 8. 소비와 변경
 
-소비자는 [consumer adoption runbook](../runbooks/consumer-adoption.md)의 import 순서와 @source 경로를 따른다. 일반적인 Tailwind v4 진입은 tokens.css(값) → theme.css(유틸리티) → 필요 시 shadcn.css·base.css·선택 shim 순서다. CSS 파일 경로와 토큰 이름·의미는 공개 계약이므로 변경은 0.x minor의 breaking 절차와 alias 유지 기간을 [ui-contract §9](ui-contract.md)와 [release runbook](../runbooks/release.md)에 기록한다.
+소비자는 [consumer adoption runbook](../runbooks/consumer-adoption.md)의 import 순서와 @source 경로를 따른다. 일반적인 Tailwind v4 진입은 tokens.css(값) → theme.css(유틸리티) → 필요 시 shadcn.css·base.css·선택 shim 순서다. `--chart-1..5`는 common이 선언하지 않는 앱 소유 슬롯이므로 shadcn을 사용하는 앱이 `:root`·`.dark` 또는 `[data-kt-surface]`에서 직접 선언한다. CSS 파일 경로와 토큰 이름·의미는 공개 계약이므로 변경은 0.x minor의 breaking 절차와 alias 유지 기간을 [ui-contract §9](ui-contract.md)와 [release runbook](../runbooks/release.md)에 기록한다.
 
 ## 9. 예외와 열린 결정
 

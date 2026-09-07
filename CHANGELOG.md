@@ -13,6 +13,14 @@
 - `@kor-travel/tokens` 계약: `--kt-*` 의미 토큰(surface 4·text 4·icon·border·control-line·brand 4·focus·status 4+tint·overlay·radius 2·control 2·rail·duration 2·ease 2·shadow 2·z 5·font 스택), admin/consumer 프로필, `.dark` 값 완비·활성화 opt-in, 대비 검사 규칙, 정본 `tokens.css`와 생성물(`tokens.json`·`tokens.ts`·`tailwind-preset.cjs`), 레거시 어휘 shim `aliases/map-vocabulary.css`. 패키지 실물은 T-101([design tokens](docs/standards/design-tokens.md)).
 - T-102에서 map·weather·geo 공통 어휘를 `--kt-*`로 연결하는 선택 shim, weather의 `--rail`·font·spacing·panel radius 오버라이드 예제, CSS 문법·import closure·mode·경로 경계를 검사하는 `check_aliases.py`를 추가했다. shim은 map의 `radius-md` control 의미를 유지하고 weather 예제에서 panel 의미를 앱 소유로 재선언한다([T-102](docs/tasks/T-102-map-vocabulary-shim.md)).
 
+#### Breaking
+
+- T-104에서 `shadcn.css`는 `--chart-1..5`를 선언하지 않는다. 차트 슬롯은 common 값이 아닌 소비자 앱 소유 계약으로 확정했으므로, 채택 앱은 `shadcn.css`를 로드하기 전 또는 같은 프로필 스코프에서 다섯 슬롯을 직접 선언해야 한다. `--background`·`--foreground` 등 semantic 파생 alias는 그대로 유지된다.
+
+#### Migration
+
+- 기존 common fallback을 사용한 앱은 차트 팔레트의 실제 색을 앱의 `:root`와 `.dark` 또는 `[data-kt-surface]` 스코프에 옮긴 뒤 CSS 산출물에서 `--chart-1..5`가 존재하는지 확인한다. common은 차트 색을 결정하거나 스코프에서 재선언하지 않는다. 채택 PR은 전·후 값 diff와 6폭 시각 기준선을 evidence로 남긴다([consumer adoption](docs/runbooks/consumer-adoption.md) §4.4·§5).
+
 #### Fixed
 
 - T-101 post-fix에서 DTCG 2025.10 자료형·`$root` 계층·alias/profile 참조를 생성기에서 보장하고, build 전 생성물 drift 검사·dark 전수 값 비교·Tailwind v3/v4 유틸리티·OS/class dark 상속·Tailwind 없는 hairline 규칙을 고정했다. 두 독립 적대 리뷰어가 초기 12건을 모두 수정된 것으로 재현했다([최종 리뷰](docs/reviews/adversarial/2026-09-07-t101-post-fix-01.md)).

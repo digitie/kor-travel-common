@@ -116,6 +116,7 @@ uv run python -c "import kortravelcommon; print(kortravelcommon.__version__)"
 | `@config "tailwind.config.ts"`와 `theme.extend`의 같은 utility 이름 | `@theme`과 config가 같은 이름을 두 값으로 해석함([failure patterns](agent-failure-patterns.md)) | geo·concierge·pinvi web |
 | `tailwind.config.ts` 자체 | `@theme` 단일화 후 삭제(geo는 실효값 검증 후, D-08 ③) | geo |
 | hex fallback 블록 | `--ktc-*`를 `--kt-*` 오버라이드로 재해석한 뒤 불필요(D-08 ④) | concierge |
+| shadcn 차트 슬롯 | common `shadcn.css`는 `--chart-1..5` 값을 발행하지 않는다. 소비자 앱이 `:root`·`.dark` 또는 `[data-kt-surface]`에서 팔레트를 선언하고 산출 CSS에 다섯 슬롯이 있는지 확인한다 | shadcn 사용 앱 |
 | 앱 `tokens.css`의 map 값 복사본 | common `tokens.css`가 정본; 앱에는 오버라이드만 남김 | weather·pinvi admin(`--color-admin-*`)·docker-manager(`@theme`) |
 | 앱 `cn` 구현(`cn` 패키지 등) | `@kor-travel/ui/cn`(clsx + `extendTailwindMerge`) 재수출로 교체; pinvi는 `cn` 재수출 유지 | airport WIP·pinvi |
 | `lucide-react` peer 기대 | ui는 인라인 SVG를 가져 peer가 없다(D-01). 앱이 직접 쓰는 lucide는 그대로 둔다 | 전 앱 |
