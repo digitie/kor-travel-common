@@ -20,7 +20,7 @@
 python3 -B -X utf8 -m unittest discover -s tests -p "test_*.py" -v
 ```
 
-매니페스트 기반 버전 검사는 소비자 저장소 루트와 매니페스트 경로를 함께 준다. `lockfiles[].path`와 `.github/workflows`는 저장소 루트에서 해석하고 `scope`가 `root`가 아니면 lockfile 기준 workspace 멤버 선언을 선택한다. lock·동반 선언·workspace·workflow의 최종 경로가 root 밖이면 exit 2다.
+매니페스트 기반 버전 검사는 소비자 저장소 루트와 매니페스트 경로를 함께 준다. `lockfiles[].path`와 `.github/workflows`는 저장소 루트에서 해석하고 `scope`가 `root`가 아니면 lockfile 기준 workspace 멤버 선언을 선택한다. lock·동반 선언·workspace·workflow·requirements 재귀 include의 최종 경로가 root 밖이면 exit 2다. 전이 lock scope와 경로는 민감한 값이 보고 채널로 재조합되지 않게 비식별화한다.
 
 ```bash
 python3 -B -X utf8 tools/check_versions.py <consumer-repo-root> \

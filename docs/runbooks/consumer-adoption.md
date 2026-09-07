@@ -196,7 +196,7 @@ Tailwind가 없는 앱은 `next build` 후 `.next/static/css/*.css`를 같은 �
 
 ## 9. 매니페스트·integration-map 갱신
 
-각 소비 저장소(모노레포는 앱 디렉터리)에 `kor-travel-common.lock.json`을 두고 채택·상향 PR마다 갱신한다(D-19). `lockfiles.path`는 저장소 루트 기준이며 검사 호출에는 저장소 루트와 manifest 경로를 함께 전달해 shared lock과 루트 workflow를 읽는다. npm `scope`가 `root`이면 해당 lockfile의 루트 package, 그 밖이면 lockfile 기준 workspace 멤버 package를 선택한다. lock이 없는 선언 전용 앱은 빈 `lockfiles`와 `app` 경로로 선언을 남기고 report에서 `NO_LOCK`을 확인한다. `enforce`는 매니페스트에 두지 않으며 common `versions.json`의 `consumers.<repo>.enforce`가 소유한다(D-07).
+각 소비 저장소(모노레포는 앱 디렉터리)에 `kor-travel-common.lock.json`을 두고 채택·상향 PR마다 갱신한다(D-19). `lockfiles.path`는 저장소 루트 기준이며 검사 호출에는 저장소 루트와 manifest 경로를 함께 전달해 shared lock과 루트 workflow를 읽는다. npm `scope`가 `root`이면 해당 lockfile의 루트 package, 그 밖이면 lockfile 기준 workspace 멤버 package를 선택한다. lock이 없는 선언 전용 앱은 빈 `lockfiles`와 `app` 경로로 선언을 남기고 report에서 `NO_LOCK`을 확인한다. requirements의 `-r`·`--requirement` 재귀 include도 저장소 root 안의 최종 파일만 읽으며 root 밖 파일·symlink는 exit 2로 닫는다. 민감한 scope·lock 내부 경로는 보고 채널에서 비식별화한다. `enforce`는 매니페스트에 두지 않으며 common `versions.json`의 `consumers.<repo>.enforce`가 소유한다(D-07).
 
 ```json
 {

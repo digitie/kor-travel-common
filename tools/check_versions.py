@@ -238,6 +238,7 @@ class Scope:
     lock_kind: str = ""  # package-lock | uv | poetry | requirements | none
     workspace: str = ""  # lock 기준 상대 경로(워크스페이스 멤버일 때)
     note: str = ""
+    root: Path | None = None  # strict 매니페스트의 소비자 저장소 루트
 
 
 @dataclass
@@ -665,9 +666,13 @@ REQUIREMENTS_VALUE_OPTIONS = frozenset({
 REQUIREMENTS_PARAMETER_OPTIONS = frozenset({"--only-binary", "--no-binary"})
 
 
-def read_requirements(path: Path, *, _stack: tuple[Path, ...] = ()) -> list[str]:
+def read_requirements(path: Path, *, _stack: tuple[Path, ...] = (), root: Path | None = None) -> list[str]:
     """`-r`/`--requirement`를 재귀 확장하고 유효한 선언 행만 돌려준다."""
     path = path.resolve()
+    if root is not None:
+        root = root.resolve()
+        if not _path_within(path, root):
+            raise ValueError("requirements.txt 입력 구조 오류")
     if path in _stack or not path.is_file():
         raise ValueError("requirements.txt 입력 구조 오류")
     try:
@@ -703,7 +708,7 @@ def read_requirements(path: Path, *, _stack: tuple[Path, ...] = ()) -> list[str]
         if include is not None:
             if not include:
                 raise ValueError("requirements.txt 입력 구조 오류")
-            result.extend(read_requirements(path.parent / include, _stack=stack))
+            result.extend(read_requirements(path.parent / include, _stack=stack, root=root))
             continue
         editable = _editable_requirement(line)
         if editable is not None:
@@ -1345,6 +1350,13 @@ def _workflow_display_value(value: object, fallback: str = "(workflow 값 비공
     return text
 
 
+def _display_lock_location(label: object, path: object) -> str:
+    """lock 내부 경로가 보고 채널에서 민감한 scope를 재조합하지 않게 한다."""
+    display_label = _workflow_display_value(label, "(scope 경로 비공개)")
+    display_path = _workflow_display_value(path, "(lock 경로 비공개)")
+    return f"{display_label} [lock:{display_path}]"
+
+
 def _path_within(path: Path, root: Path) -> bool:
     try:
         path.relative_to(root)
@@ -1804,16 +1816,17 @@ def _manifest_declaration_scopes(root: Path, app: object) -> list[Scope]:
     scopes: list[Scope] = []
     package_manifest = _safe_declared_file(app_dir / "package.json", root)
     if package_manifest is not None:
-        scopes.append(Scope("npm", display_label, package_manifest, None, "none"))
+        scopes.append(Scope("npm", display_label, package_manifest, None, "none", root=root))
     python_manifest = _safe_declared_file(app_dir / "pyproject.toml", root)
     if python_manifest is not None:
-        scopes.append(Scope("python", display_label, python_manifest, None, "none"))
+        scopes.append(Scope("python", display_label, python_manifest, None, "none", root=root))
     for path in sorted(app_dir.glob("requirements*.txt"), key=lambda item: item.name):
         requirement = _safe_declared_file(path, root)
         if requirement is not None:
             scopes.append(Scope(
                 "python", display_label, requirement, None, "requirements",
                 note=f"{path.name}는 선언만 읽는다(T-005b)",
+                root=root,
             ))
     return scopes
 
@@ -1863,17 +1876,18 @@ def scopes_from_manifest(
                 raise ValueError("매니페스트 npm workspace가 소비자 저장소 루트 밖에 있음")
             manifest = _safe_declared_file(workspace_root / "package.json", base)
             scopes.append(Scope("npm", label, manifest,
-                                path if path.is_file() else None, "package-lock", workspace=workspace))
+                                path if path.is_file() else None, "package-lock", workspace=workspace,
+                                root=base))
         elif isinstance(kind, str) and kind in {"uv", "poetry"}:
             manifest = _safe_declared_file(path.parent / "pyproject.toml", base)
             scopes.append(Scope("python", label, manifest,
-                                path if path.is_file() else None, kind))
+                                path if path.is_file() else None, kind, root=base))
         elif kind == "requirements":
             scopes.append(Scope("python", label, path if path.is_file() else None, None,
-                                "requirements", note="requirements.txt는 선언만 읽는다(T-005b)"))
+                                "requirements", note="requirements.txt는 선언만 읽는다(T-005b)", root=base))
         else:
             scopes.append(Scope("python", label, None, None, "none",
-                                note="알 수 없는 lockfile kind"))
+                                note="알 수 없는 lockfile kind", root=base))
     if not data.get("lockfiles"):
         scopes.extend(_manifest_declaration_scopes(base, data.get("app")))
     # manifest가 lockfile 목록을 명시해도 저장소 루트 workflow는 같은 보고에 포함한다.
@@ -2073,13 +2087,13 @@ class Checker:
                     continue
                 declared = {**entry.get("dependencies", {}), **entry.get("devDependencies", {}),
                             **entry.get("optionalDependencies", {})}
-                self.record_npm_declarations(f"{label} [lock:{path}]", declared, packages, path, lock_path,
+                self.record_npm_declarations(_display_lock_location(label, path), declared, packages, path, lock_path,
                                              transitive=True)
             for path, entry in packages.items():
                 if not re.search(r"(?:^|/)node_modules/", path):
                     continue
                 name = entry.get("name") or path.rsplit("node_modules/", 1)[1]
-                location = f"{label} [lock:{path}]"
+                location = _display_lock_location(label, path)
                 if entry.get("link"):
                     target = packages.get(entry.get("resolved", ""), {})
                     names = {name, target.get("name", name)}
@@ -2510,7 +2524,7 @@ class Checker:
                         add_poetry_dependency(name, value)
                 requires_python = nonlocal_requires[0]
         elif manifest is not None and requirements_mode:
-            for line in read_requirements(manifest):
+            for line in read_requirements(manifest, root=scope.root):
                 parsed = parse_requirement(line)
                 if parsed is None:
                     raise ValueError("requirements.txt 입력 구조 오류")

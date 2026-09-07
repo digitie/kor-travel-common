@@ -37,7 +37,7 @@
    | `apps/etl/` | `pinvi.apps-etl.lock.json` | `pinvi` | `apps/etl` | lock 없음(선언만) |
 
    값은 조사 기준 커밋 현재값(인벤토리 §10)이며 `tokens.version` 등은 미채택이면 `null`.
-5. `tests/test_validate_manifest.py`(정상·미지 필드·`enforce`·`until`/`review` 날짜·kind 오류·workspace·symlink·빈 lock 선언).
+5. `tests/test_validate_manifest.py`(정상·미지 필드·`enforce`·`until`/`review` 날짜·kind 오류·workspace·symlink·빈 lock 선언·requirements 재귀 root 이탈·제어문자 schema parity·민감한 전이 scope redaction).
 
 ## 범위 밖
 
@@ -53,7 +53,7 @@
 - `validate_manifest.py`가 10개 초안 전부 exit 0, 미지 필드·`until` 누락·잘못된 `kind` fixture는 exit 1(테스트로 고정).
 - `check_versions.py <fixture-repo-root> --manifest <fixture-repo-root>/templates/manifests/map.lock.json`이 저장소 루트의 shared lock과 root workflow를 읽어 표를 낸다. lock/workflow가 fixture로 없으면 각각 `NO_LOCK`/빈 workflow로 명시한다.
 - npm `scope`가 workspace 경로면 해당 멤버 선언을 읽고, lock 옆 동반 선언의 root 밖 symlink는 exit 2로 닫는다. 빈 lock 목록의 선언 전용 앱은 `NO_LOCK` 행을 낸다.
-- validator·check_versions의 오류·보고 채널은 미지 field와 민감한 scope 원문을 재출력하지 않는다. JSON Schema와 stdlib validator의 상대 경로·날짜 음성 corpus가 같은 결과를 낸다.
+- validator·check_versions의 오류·보고 채널은 미지 field와 민감한 scope 원문을 재출력하지 않는다. JSON Schema와 stdlib validator의 상대 경로·제어문자·날짜 음성 corpus가 같은 결과를 내며, requirements 재귀 include도 소비자 root 밖으로 나가지 않는다.
 - 초안의 10개 `repo`·`app` 값이 `versions.json consumers` 키·인벤토리 앱 경로와 일치하고 대응표와 파일 수가 같다.
 - Linux·Windows 결과 동일.
 

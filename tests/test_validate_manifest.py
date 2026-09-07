@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -131,11 +132,27 @@ class ValidateManifestTests(unittest.TestCase):
 
     def test_schema_path_edge_cases_are_rejected(self):
         for path in ("C:/package-lock.json", "apps//package-lock.json", "apps/",
-                     " ", "apps/\x00/package-lock.json"):
+                     " ", "apps/\x00/package-lock.json", "apps/\t/package-lock.json",
+                     "apps/\n/package-lock.json", "apps/\x7f/package-lock.json",
+                     "apps/package-lock.json\n"):
             data = valid_manifest()
             data["lockfiles"] = [{"kind": "npm", "path": path, "scope": "root"}]
             with self.subTest(path=path):
                 self.assertTrue(validate_manifest(data, {"kor-travel-map"}))
+
+    def test_json_schema_rejects_control_character_paths_like_stdlib(self):
+        try:
+            from jsonschema import Draft202012Validator
+        except ImportError:
+            self.skipTest("jsonschema 미설치")
+        schema = json.loads((ROOT / "templates" / "kor-travel-common.lock.schema.json").read_text(encoding="utf-8"))
+        validator = Draft202012Validator(schema)
+        for path in ("apps/\t/package-lock.json", "apps/\n/package-lock.json",
+                     "apps/\x1f/package-lock.json", "apps/\x7f/package-lock.json"):
+            data = valid_manifest()
+            data["lockfiles"] = [{"kind": "npm", "path": path, "scope": "root"}]
+            with self.subTest(path=path):
+                self.assertTrue(list(validator.iter_errors(data)))
 
     def test_repo_must_be_a_versions_consumer_key(self):
         data = valid_manifest()
@@ -233,6 +250,46 @@ class ValidateManifestTests(unittest.TestCase):
             self.assertIn("apps/web", result.stdout)
             self.assertIn("BELOW_FLOOR", result.stdout)
 
+    def test_sensitive_workspace_path_is_redacted_from_all_report_channels(self):
+        with tempfile.TemporaryDirectory(prefix="kor-travel-common-workspace-redaction-") as directory:
+            root = Path(directory)
+            marker = "secret_workspace_value12345678"
+            member = root / marker
+            member.mkdir(parents=True)
+            manifest = root / "manifest.json"
+            data = valid_manifest()
+            data["lockfiles"] = [{"kind": "npm", "path": "package-lock.json", "scope": marker}]
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            (member / "package.json").write_text(json.dumps({
+                "name": "fixture-member", "version": "0.0.0",
+                "engines": {"node": ">=22.12.0"}, "dependencies": {"react": "^19.0.0"},
+            }), encoding="utf-8")
+            (root / "package-lock.json").write_text(json.dumps({
+                "name": "fixture-root", "lockfileVersion": 3,
+                "packages": {
+                    "": {"name": "fixture-root", "version": "0.0.0"},
+                    marker: {"name": "fixture-member", "version": "0.0.0",
+                             "engines": {"node": ">=22.12.0"},
+                             "dependencies": {"react": "^19.0.0"}},
+                    f"{marker}/node_modules/react": {"version": "19.2.8"},
+                },
+            }), encoding="utf-8")
+            output = root / "report"
+            json_path = output.with_suffix(".json")
+            markdown_path = output.with_suffix(".md")
+            summary_path = output.with_name("summary.md")
+            env = dict(os.environ)
+            env["GITHUB_STEP_SUMMARY"] = str(summary_path)
+            result = subprocess.run([
+                sys.executable, "-B", "-X", "utf8", str(ROOT / "tools" / "check_versions.py"),
+                str(root), "--manifest", str(manifest), "--repo", "kor-travel-map",
+                "--mode", "fail", "--json", str(json_path), "--markdown", str(markdown_path),
+            ], capture_output=True, text=True, encoding="utf-8", env=env)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            for path in (json_path, markdown_path, summary_path):
+                self.assertNotIn(marker, path.read_text(encoding="utf-8"))
+            self.assertNotIn(marker, result.stdout + result.stderr)
+
     def test_check_versions_rejects_companion_manifest_symlink_escape(self):
         with tempfile.TemporaryDirectory(prefix="kor-travel-common-symlink-") as directory:
             root = Path(directory)
@@ -280,6 +337,33 @@ class ValidateManifestTests(unittest.TestCase):
             ], capture_output=True, text=True, encoding="utf-8")
             self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
             self.assertIn("NO_LOCK", result.stdout)
+
+    def test_requirements_include_cannot_escape_consumer_root(self):
+        with tempfile.TemporaryDirectory(prefix="kor-travel-common-requirements-root-") as directory:
+            root = Path(directory)
+            app = root / "apps" / "etl"
+            app.mkdir(parents=True)
+            manifest = app / "kor-travel-common.lock.json"
+            data = valid_manifest()
+            data["repo"] = "pinvi"
+            data["app"] = "apps/etl"
+            data["lockfiles"] = []
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            (app / "requirements.txt").write_text(
+                "-r ../../../outside-requirements.txt\n", encoding="utf-8")
+            outside = root.parent / "outside-requirements.txt"
+            outside.write_text("fastapi==0.1.0\n", encoding="utf-8")
+            try:
+                result = subprocess.run([
+                    sys.executable, "-B", "-X", "utf8", str(ROOT / "tools" / "check_versions.py"),
+                    str(root), "--manifest", str(manifest), "--repo", "pinvi",
+                    "--mode", "fail", "--no-step-summary",
+                ], capture_output=True, text=True, encoding="utf-8")
+            finally:
+                outside.unlink(missing_ok=True)
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertNotIn("outside-requirements", result.stdout + result.stderr)
+            self.assertNotIn("fastapi", result.stdout + result.stderr)
 
 
 if __name__ == "__main__":

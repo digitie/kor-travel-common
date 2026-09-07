@@ -62,6 +62,9 @@ def _check_relative_path(value: object, path: str, errors: list[str]) -> None:
     if not _is_string(value):
         errors.append(_field_error(path, "비어 있지 않은 상대 경로여야 함"))
         return
+    if any(ord(char) < 0x20 or ord(char) == 0x7F for char in value):
+        errors.append(_field_error(path, "저장소 루트 기준 정규 POSIX 상대 경로여야 함"))
+        return
     text = value.strip()
     parts = text.split("/")
     if (
@@ -69,7 +72,6 @@ def _check_relative_path(value: object, path: str, errors: list[str]) -> None:
         or text.startswith("/")
         or ":" in text
         or any(part in {"", ".", ".."} for part in parts)
-        or any(ord(char) < 0x20 or ord(char) == 0x7F for char in text)
     ):
         errors.append(_field_error(path, "저장소 루트 기준 정규 POSIX 상대 경로여야 함"))
 
