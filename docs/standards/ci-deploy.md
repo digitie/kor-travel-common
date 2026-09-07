@@ -146,7 +146,7 @@ jobs:
 | CI-17 | 슬롯을 명문화한다(정본 규칙의 보강, ktdm 등록 요청 T-014): `00` DB, `01` API(+`/metrics` 동일 포트), `02` worker/Dagster/MCP, `03` 보조 metrics/exporter(weather 14103 선례), `04` 관측 로컬 예약, `05` Web, `06~09` 추가 Web/BFF, `10~99` 임시·E2E(pinvi 12855 선례) | `ci` §3.1-2 |
 | CI-18 | 컨테이너 내부 포트는 호스트 포트와 **동일**하게 listen한다(geo·map·weather 선례; host 네트워크 전제). 내부 8000/3000 + 매핑(airport·concierge·pinvi api/web)은 예외로 소비자 매니페스트 `exceptions[]`에 등록 | `ci` §1.6 집계 |
 | CI-19 | sibling 대역 `140xx` kor-travel-airport·`141xx` kor-travel-weather를 `docs/ports.md` 표에 명시 행으로 등록 요청한다(현재 weather는 문장, airport는 없음). airport web `14002`(`+5` 규칙 이탈)는 예외 등록이 기본안(O-24; 14005 이전은 HAProxy·CORS·`require_exact` 변경 비용) | `ci` §1.9 충돌 (b)·(d), §3.1-3; T-014 |
-| CI-20 | common 자체 대역은 `130xx`(후보: 13001 smoke API, 13005 consumer-smoke web). 12xxx는 ktdm 예약, 14xxx는 sibling, 13100은 concierge E2E가 쓰므로 `130xx`만 비어 있으나 로컬 프로세스 점유는 미확인이며 T-014에서 확인 후 확정한다(O-24) | `ci` §3.1-4·열린 질문 11 |
+| CI-20 | common 테스트가 필요하면 `13001`·`13005` 등을 실행 시 임시 주입할 수 있다. 이는 common 운영 대역·서비스 등록·포트 소유권을 뜻하지 않으며 ktdm `docs/ports.md`에는 등록하지 않는다. 소비자 운영 대역은 각 소비자와 ktdm 정본이 소유한다(T-014) | `ci` §3.1-4·T-014·ADR-015 |
 | CI-21 | 컨테이너명 `-latest` 접미 제거 여부는 ktdm 결정이다(ktdm `docker-targets.yml`·registry 테스트·geo `docker_app.sh`가 참조). common은 `<project>-<role>[-<lane>]` 형식만 권고 | `ci` §3.2·열린 질문 4; O-24 |
 
 인용용 현행 대역표(사실, `ci` §1.9; 값은 ktdm `docs/ports.md`가 정본):
@@ -162,7 +162,7 @@ jobs:
 | `129xx` | docker-manager | — | 12901 backend | — | — | 12905 |
 | `140xx` | kor-travel-airport(미등록) | 14000 | 14001 | **14002 web**(예외) | — | — |
 | `141xx` | kor-travel-weather(문장만) | 14100 | 14101 | 14102 gateway | 14103 metrics | 14105 |
-| `130xx` | kor-travel-common(후보) | — | 13001 smoke | — | — | 13005 |
+| `130xx` | common 테스트 fixture(운영 등록 없음) | — | 실행 시 주입 | — | — | 실행 시 주입 |
 
 ## 6. 명명 표준
 
@@ -282,7 +282,7 @@ ktdm runtime pin 레지스트리(`kor-travel-docker-manager.runtime-pin-registry
 | O-15 | common 공개 여부·cross-repo 호출 | 공개(GPL) 전제 + 체크아웃 fallback 문서 | 열림(사용자 확인 필요) |
 | O-17 | Windows 지원 tier | Tier 2(도구·validator + CI windows job) | 열림(사용자 확인 필요) |
 | O-23 | prod redaction 범위 | common 전체 트리, 소비자 opt-in | 열림(사용자 확인 필요) |
-| O-24 | 포트 `130xx`·airport 14002·`-latest` | 130xx 점유 확인 후; 14002 예외; `-latest`는 ktdm | 열림(사용자 확인 필요) |
+| O-24 | airport 14002·`-latest` | airport 14002 예외; `-latest`는 ktdm. common `130xx`는 운영 등록 없이 fixture 실행 시 주입 | 열림(사용자 확인 필요) |
 | — | 외부 secret 스캐너 채택 | 미채택(grep 패턴) | 후보(`ci` 열린 질문 6) |
 | — | arm64/odroid 대상 | common CI는 amd64만 | 후보(`ci` 열린 질문 7) |
 | — | Prometheus major(v2.53 vs v3.5)·scrape 결선(ktdm에 map·concierge·pinvi job 없음) | ktdm 소유, common 규약 밖 | 후보(`ci` 열린 질문 9; 매트릭스 D39) |

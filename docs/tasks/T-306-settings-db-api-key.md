@@ -11,7 +11,7 @@
 
 ## 고정 결정
 
-- [design-brief](../plan/design-brief.md) D-15(2차 C1·C9·C7; core=stdlib+pydantic, db는 `[db]` extra, 인증 서비스는 범위 밖), D-06(pydantic 2.9·pydantic-settings 2.5·SQLAlchemy 2.0.35·asyncpg 0.29·psycopg 3.2 floor), D-14(N2 신규 표면 `?key=` 금지·legacy 예외), D-01(인증 서비스 비보유). ADR-011·ADR-001 — [ADR 색인](../adr/README.md). 규칙 정본: [backend-stack](../standards/backend-stack.md).
+- [design-brief](../plan/design-brief.md) D-15(2차 C1·C9·C7; core=stdlib+pydantic, db는 `[db]` extra), [ADR-015](../adr/015-common-shared-systems-scope.md), D-06(pydantic 2.9·pydantic-settings 2.5·SQLAlchemy 2.0.35·asyncpg 0.29·psycopg 3.2 floor), D-14(N2 신규 표면 `?key=` 금지·legacy 예외), D-01(인증 서버·사용자 저장소는 소비자 소유). ADR-011·ADR-001 — [ADR 색인](../adr/README.md). 규칙 정본: [backend-stack](../standards/backend-stack.md).
 - settings: env 접두는 서브클래스가 지정(common은 접두를 정하지 않음), `SecretStr` 마스킹 + `hide_input_in_errors` + ValidationError input 재작성(pinvi), `get_settings/set_settings` 싱글턴은 geo 방식([be C1](../survey/cross/backend.md)). fail-closed 프로파일 검증은 훅만 제공.
 - db: asyncpg `server_settings`와 psycopg `options`를 한 인자 집합으로 흡수, 세션 GUC 기본값(pinvi lock/idle/statement, geo statement/search_path)은 앱 인자; weather sync 엔진은 별도 함수 후보([be C9](../survey/cross/backend.md)). 엔진 메트릭 훅 지점만 두고 지표 정의는 T-307.
 - public_api_key: 32자 `ascii_letters+digits` `secrets.choice`, `strip()` 후 무염 SHA-256, `key_hint = key[-6:]`, 상태 `active/revoked`; 저장소는 Protocol(ORM/raw SQL/SQLite는 앱 구현); 헤더 이름은 인자, query 파라미터 추출은 `allow_query_param=True`일 때만(N2).
@@ -28,7 +28,7 @@
 
 ## 범위 밖
 
-비밀번호 해시·세션·CSRF·JWT·RBAC(D-01 범위 밖), `ops.public_api_keys` DDL·저장소 구현(앱 소유), 헤더 AppId 통일(D-22), request_id·metrics(T-307), trusted_proxy·testing 픽스처 배포(T-308), 앱 채택 PR(T-480~T-486), 좌표 경계 상수(공통화 금지).
+비밀번호 해시·세션·CSRF·JWT·RBAC(공용 구현은 T-312 범위), `ops.public_api_keys` DDL·저장소 구현(앱 소유), 헤더 AppId 통일(D-22), request_id·metrics(T-307), trusted_proxy·testing 픽스처 배포(T-308), 앱 채택 PR(T-480~T-486), 좌표 경계 상수(공통화 금지).
 
 ## 예상 변경 파일
 

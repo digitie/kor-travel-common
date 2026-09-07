@@ -1,7 +1,8 @@
 # ADR-011: Python 공통 패키지 구조(extras·3.11 호환·모듈 우선순위·인증 범위 밖·메트릭 접두)
 
-- 상태: accepted — O-7(앱 floor 3.12 시점)·O-12(메트릭 접두 map·pinvi)는 기본값으로 진행
+- 상태: partially superseded by ADR-015 — O-7(앱 floor 3.12 시점)·O-12(메트릭 접두 map·pinvi)는 기본값으로 진행
 - 날짜: 2026-09-06
+- 인증 프리미티브 제외 결정은 [ADR-015](015-common-shared-systems-scope.md)로 대체하며 Python 버전·extras·모듈 순서는 유지한다.
 - 근거 문서: `docs/plan/design-brief.md` D-15·D-22·O-7·O-12, `docs/survey/cross/backend.md` §2.1~§2.19·§3·§4·§5.3·§7, `docs/survey/cross/openapi.md` §5, `docs/survey/commonality-matrix.md` §1.4·§2.4, `docs/survey/README.md` §6.2(common Python floor 3.11)
 
 ## 컨텍스트

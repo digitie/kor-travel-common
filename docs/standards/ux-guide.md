@@ -108,7 +108,7 @@ C9 부속 결정: ktdm `ok/warn/danger`는 이름 alias(ok=success, warn=warning
 | UX-G7.2 | 오류 문구는 상태 코드/오류 코드 → 한국어 맵(503 설정 누락 / 429 시도 제한 / 403 출처 / 기타 자격 증명) | MUST | `ux` G7.2(5앱) |
 | UX-G7.3 | `next` 리다이렉트 경로는 로컬 경로만 허용(`sanitizeLocalPath`) | MUST(보안) | `ux` G7.3(weather) |
 
-로그인 폼 코드는 인증 경계라 common 범위 밖이다(D-01). 셸 골격·로그인 페이지는 레지스트리 채널 템플릿(T-211)으로만 배포한다.
+공용 `LoginForm`은 T-214에서 접근성·오류·상태 슬롯과 입력 계약을 제공한다. endpoint·IdP·redirect·세션 왕복·운영 rate limit은 앱이 주입하고 소유한다. 앱별 셸 골격과 로그인 페이지 조립은 레지스트리 채널 템플릿(T-211) 또는 소비자 코드가 담당한다([ADR-015](../adr/015-common-shared-systems-scope.md)).
 
 ### UX-G8. 도움말·복사·JSON·지도
 

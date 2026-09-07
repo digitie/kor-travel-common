@@ -64,7 +64,7 @@ kor-travel-common: docs/integration-map.md         # tools/collect_manifests.py 
 ```bash
 # common
 python3 -B -X utf8 tools/validate_manifest.py ../kor-travel-map/packages/kor-travel-map-admin/frontend/kor-travel-common.lock.json
-python3 -B -X utf8 tools/check_versions.py --manifest <path> --mode report   # 인자 이름은 docs/standards/versions.md 정본
+python3 -B -X utf8 tools/check_versions.py <consumer-repo-root> --manifest <app-dir>/kor-travel-common.lock.json --mode report   # lock path는 저장소 루트 기준
 python3 -B -X utf8 tools/collect_manifests.py && git diff --stat docs/integration-map.md
 # 각 소비 저장소
 grep -nE 'uses: .*@(main|v[0-9]+)$' .github/workflows/*.yml   # 0건이어야 함

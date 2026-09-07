@@ -57,7 +57,7 @@
 
 - `maplibre-vworld-react`(`95b49d3`)·`maplibre-vworld-js`(`2a13ce0`)·`digitie/python-*-api` 13종·`python-kraddr-base`는 common 범위 밖이며 의존만 한다. `versions.json` `providers` 절은 보고만 하고 정렬 주체는 각 저장소다(O-16).
 - 사실로 확인된 불일치: `python-kma-api` map `a75d1e1` vs weather `0868b76`; `python-kasi-api` airport `51c39c1` vs pinvi etl `@main`; `python-airkorea-api` weather 저장소 내 path vs map SHA; `vworld-style.ts` map·weather 중복(`be` §5.1, `vm` §2.7). 정리 요청 문서는 T-505(`maplibre-vworld-react` npm 게시·`license` 필드, 마커 팔레트 P-01~16 hex 정본 포함).
-- 인증(비밀번호·세션·CSRF·JWT·RBAC)과 앱 도메인은 소비자 소유다.
+- 인증 서버·사용자/세션 저장소·운영 비밀·앱별 역할/접근 정책과 앱 도메인은 소비자 소유다. 공용 로그인 위젯과 저장소·키를 주입받는 인증 프리미티브는 common이 제공한다([ADR-015](../adr/015-common-shared-systems-scope.md)).
 
 ## 7. 회수 측정(D-28)
 

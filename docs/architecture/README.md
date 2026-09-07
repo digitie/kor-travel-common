@@ -1,7 +1,7 @@
 # kor-travel-common 아키텍처
 
 - 정본 지위: 현재 설계의 상위 정본(초안). 확정 task: T-008(설계 초기판) → T-101·T-201·T-302(실물 패키지와 대조해 확정). 마지막 갱신: 2026-09-06.
-- 근거: [브리프](../plan/design-brief.md) D-01·D-02·D-09~D-12·D-15·D-31, `docs/survey/commonality-matrix.md` §1·§2, `docs/survey/cross/ui-components.md` §4·§6.2, `docs/survey/cross/backend.md` §3~§5, `docs/survey/cross/design-tokens.md` §3.6.
+- 근거: [브리프](../plan/design-brief.md) D-01·D-02·D-09~D-12·D-15·D-31, [ADR-015](../adr/015-common-shared-systems-scope.md), `docs/survey/commonality-matrix.md` §1·§2, `docs/survey/cross/ui-components.md` §4·§6.2, `docs/survey/cross/backend.md` §3~§5, `docs/survey/cross/design-tokens.md` §3.6.
 
 이 문서는 kor-travel-common의 배포 단위, 의존 방향과 책임 경계를 설명하는 상위 아키텍처 정본이다. 여기서 전체 형태를 확인한 뒤 변경 대상에 해당하는 상세 문서만 읽는다. 소비자별 채택 gate는 [채택 준비 기준](adoption-readiness.md), 결정의 역사는 [ADR 색인](../adr/README.md), 현재 작업은 [tasks](../tasks.md)를 따른다. 이 문서와 하위 architecture 문서는 정본 초안이며, 실물 패키지(T-101 tokens·T-201 ui·T-302 py)와 대조해 확정하는 task가 남아 있다.
 
@@ -46,9 +46,9 @@ kor-travel-common은 kor-travel 제품군의 UI·백엔드 공통 코드와 공�
 
 패키지 식별자는 [packages](packages.md#1-요약표)에서 확정한다. npm/PyPI 게시·계정 확보를 하지 않는 결정과 common 후보 보존 후 구현 순서는 [ADR-014](../adr/014-common-implementation-without-registry-publishing.md)를 따른다.
 
-만들지 않는 것: `config` npm 패키지(`templates/eslint/*.mjs` 조각과 [frontend-stack](../standards/frontend-stack.md)으로 대체), `api-client-core`(Phase 5 T-508 재평가), 아이콘 패키지(ui는 인라인 SVG, `lucide-react` peer 없음 — `vm` §1.3의 0.363~1.41 혼재), shadcn 전면 레지스트리(셸·로그인·playwright 기준선 템플릿 채널만, T-211).
+만들지 않는 것: `config` npm 패키지(`templates/eslint/*.mjs` 조각과 [frontend-stack](../standards/frontend-stack.md)으로 대체), `api-client-core`(Phase 5 T-508 재평가), 아이콘 패키지(ui는 인라인 SVG, `lucide-react` peer 없음 — `vm` §1.3의 0.363~1.41 혼재), shadcn 전면 레지스트리(앱 소유 셸·기준선 템플릿 채널만, T-211), 인증 서버·사용자 DB·IdP.
 
-소비자 한 곳에 있다는 이유만으로 공통화하지 않는다. common은 앱 도메인 모듈, 지도 엔진(`maplibre-vworld-react`·`maplibre-vworld-js`), provider 라이브러리(`python-*-api`·`python-kraddr-base`), 인증 서비스(비밀번호·세션·CSRF·JWT·RBAC)를 갖지 않으며 이들과 중복되는 코드를 만들지 않는다(`be` §4, `ui` §4.3, `lic` §4 B2).
+소비자 한 곳에 있다는 이유만으로 공통화하지 않는다. common은 앱 도메인 모듈, 지도 엔진(`maplibre-vworld-react`·`maplibre-vworld-js`), provider 라이브러리(`python-*-api`·`python-kraddr-base`), 인증 서버·사용자 DB를 갖지 않는다. 여러 소비자가 재사용하는 로그인 위젯·인증 계약·주입형 프리미티브는 공용 계층으로 제공하고 저장소·비밀·앱별 정책은 소비자에 남긴다([ADR-015](../adr/015-common-shared-systems-scope.md)).
 
 ## 2. 데이터·의존 흐름
 
@@ -74,7 +74,7 @@ kor-travel-common은 kor-travel 제품군의 UI·백엔드 공통 코드와 공�
 의존 규칙은 다음과 같다.
 
 1. 방향은 앱 → ui → tokens, 앱 → py의 단방향이다. tokens은 어떤 패키지도 import하지 않는다(React·Tailwind 무관; `theme.css`만 소비자의 Tailwind v4 빌드 컨텍스트 안에서 의미를 가진다). py는 프론트와 독립이며 core는 stdlib + pydantic만 의존한다(D-15).
-2. common은 소비자 코드를 import하지 않는다. 앱 도메인·지도·provider·인증은 §1의 금지 경계다. 소비자 저장소를 직접 수정하지 않고 PR 요청 문서(T-020·T-021·T-505)로 요청한다.
+2. common은 소비자 코드를 import하지 않는다. 앱 도메인·지도·provider·인증 서버·사용자 데이터는 §1의 금지 경계이며, 공용 인증 프리미티브는 소비자 저장소·비밀을 주입받는 라이브러리다. 소비자 저장소를 직접 수정하지 않고 PR 요청 문서(T-020·T-021·T-505)로 요청한다.
 3. 규칙 문서는 코드 링크 없이 참조되므로 GPL 결합 판단(`lic` §3.6)과 독립이다. MIT 앱(ktc·ktdm)은 L8 결정 전까지 규칙 문서와 `tokens.json` 참조까지만 허용한다(D-16).
 4. 매니페스트 → `check_versions` → `integration-map`은 보고 경로이며, 강제 수준(`enforce`)은 common `versions.json`이 소유한다(D-07·D-30).
 5. 벤더링 원본(shadcn 생성물·map 유래 파일)은 `PROVENANCE.md`와 SPDX/`Origin:` 헤더로 출처를 남기며(D-17), 생성물(`tokens.json`·`tokens.ts`·`tailwind-preset.cjs`)은 정본 `tokens.css`에서만 만든다.
@@ -84,8 +84,8 @@ kor-travel-common은 kor-travel 제품군의 UI·백엔드 공통 코드와 공�
 | 계층 | 허용 책임 | 금지 책임 |
 |---|---|---|
 | `@kor-travel/tokens` | `--kt-*` 의미 토큰 이름·역할·기본값(map 값)·`.dark` 값, `kt-` 유틸리티 매핑, shadcn alias 의미 고정, 프로필 admin 값, base 레시피(focus·hairline·reduced-motion), 별칭 shim, 생성물 | 앱 브랜드 값 확정, consumer 프로필 값(pinvi 소유), 마커 팔레트 hex(map 소유), 폰트 파일 배포·로딩, 다크 활성화 강제 |
-| `@kor-travel/ui` | 프리미티브·부품의 마크업 계약(data-slot·testid·heading·sr-only), 키보드·포커스 동작, prop 기본값, `cn`, 인라인 아이콘, React 19 전용 구현 | 앱 도메인 부품, 지도 뷰, 셸 nav·로그아웃·RBAC, 토스트·모달 엔진 선택(정책만), 세션·인증, 앱 고유 확장의 흡수 없는 복제 |
-| `kor-travel-common`(py) | openapi export CLI, health/readyz/version, time, quality 베이스, settings 베이스, db 엔진 팩토리, public_api_key, request_id, metrics, problem+json, security_headers, cors, trusted_proxy, testing 픽스처, alembic 템플릿, http, dagster 어댑터 | 비밀번호·세션·CSRF·JWT·RBAC, 도메인 결합 부분(geo loaders·map RoutePolicy·pinvi M05 등, `be` §4), 좌표 경계 상수 공통화, provider 재래핑, 서비스 간 클라이언트 |
+| `@kor-travel/ui` | 프리미티브·부품·로그인 위젯의 마크업 계약(data-slot·testid·heading·sr-only), 키보드·포커스 동작, prop 기본값, `cn`, 인라인 아이콘, React 19 전용 구현 | 앱 도메인 부품, 지도 뷰, 앱별 셸 nav·로그아웃·RBAC 구성, 토스트·모달 엔진 선택(정책만), endpoint·IdP 왕복, 앱 고유 확장의 흡수 없는 복제 |
+| `kor-travel-common`(py) | openapi export CLI, health/readyz/version, time, quality 베이스, settings 베이스, db 엔진 팩토리, public_api_key, request_id, metrics, problem+json, security_headers, cors, trusted_proxy, testing 픽스처, alembic 템플릿, http, dagster 어댑터, 저장소·비밀을 주입받는 인증 프리미티브 | 인증 서버·사용자/세션 DB·외부 IdP·운영 비밀·앱별 역할/라우트 정책, 도메인 결합 부분(geo loaders·map RoutePolicy·pinvi M05 등, `be` §4), 좌표 경계 상수 공통화, provider 재래핑, 서비스 간 클라이언트 |
 | `docs/standards/*` | 규칙 ID(TK-n·UX-Gn.m·M/S/N·판정 어휘)·MUST/SHOULD·예외 레지스트리 형식·검사 도구 지정 | 앱별 예외 값 본문 수록(예외는 레지스트리·앱 baseline 파일로), 조사 기록, 특정 앱 절차 |
 | `templates/*` | 복사 시점의 정본 사본, 형식·필수 항목 | 복사 후 앱 파일의 동기화 강제(drift는 `ui_drift`·분기 감사로 보고만) |
 | `versions.json`·`tools/*.py`·재사용 워크플로 | floor/recommended/exceptions/blocked, `enforce` 모드, 판정 어휘, 매니페스트 스키마, 대조·대비·UX lint·SPDX 검사, `workflow_call` job | 앱 워크플로 전면 대체, 운영 호출 job(kta `live-e2e`) required 지정, provider SHA 정렬 주체(보고만, O-16) |

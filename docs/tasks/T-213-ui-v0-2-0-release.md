@@ -3,7 +3,7 @@
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: consumer-smoke·2인 리뷰
-- 선행: T-208, T-209, T-210, T-212
+- 선행: T-212, T-213a
 - 외부 선행: 검증 소비자 PR은 해당 앱의 ui v0.1 채택(map T-411과 두 번째 소비자 pinvi T-422a 또는 airport T-432)과 `@base-ui/react` ≥ floor 설치 위에서만 가능; pinvi는 L6(O-1), airport는 WIP 병합(O-9)에 묶임
 
 ## 목표
@@ -18,7 +18,7 @@ v0.2.0은 T-205~T-210의 2차 부품 전부를 담는 첫 minor이며, 0.x 규�
 
 ## 구현 범위
 
-먼저 이 task가 0.2 후보 보존을 소유한다. 현재 main에서 해당 minor의 전체 구현·선행·공개 계약을 대조하고 [release §2.1](../runbooks/release.md#21-common-후보-보존과-후속-구현)의 재빌드·digest·원격 ref 검증을 수행한다. `candidate-ui-0.2.0-<N>`으로 보존한 40자리 commit에서 `codex/release-ui-0.2`를 분기하고 버전 준비 PR을 그 branch에 병합한다. 0.1 후보/branch의 버전만 올리지 않는다. 이후 rc·정식은 검증한 release merge commit을 명시적으로 태그한다. 완료 원장은 [release §2.2](../runbooks/release.md#22-릴리스-소스와-현재-작업-원장의-연결)의 main 문서 PR에서만 갱신한다.
+T-213a가 보존한 `candidate-ui-0.2.0-<N>`의 40자리 commit에서 `codex/release-ui-0.2`를 분기하고 버전 준비 PR을 그 branch에 병합한다. 이 task는 T-212의 이전 minor 정식·소비자 evidence와 T-213a의 common 후보 evidence를 대조한 뒤 rc·소비자 검증·정식을 진행한다. 0.1 후보/branch의 버전만 올리지 않는다. 이후 rc·정식은 검증한 release merge commit을 명시적으로 태그한다. 완료 원장은 [release §2.2](../runbooks/release.md#22-릴리스-소스와-현재-작업-원장의-연결)의 main 문서 PR에서만 갱신한다.
 
 - `packages/ui/package.json` version `0.2.0-rc.1`; peer 확정(`@kor-travel/tokens ~0.1.0`([ADR-013](../adr/013-package-release-execution-contract.md)), `@base-ui/react ^1.6.0`, optional `@tanstack/react-table ^8.21.0`·`@tanstack/react-virtual ^3.14.0`), `exports` 전체 목록 검토(deep import 없음).
 - `CHANGELOG.md` `### @kor-travel/ui 0.2.0`: Added(부품 목록), `Breaking` 절([release](../runbooks/release.md) 형식; v0.1 대비 data-slot·prop·testid 변경 목록 — 없으면 "없음" 명시), 이관 절(map·pinvi shim 예, Checkbox `onCheckedChange(boolean)` 시그니처, 선택 열 셀렉터 `[data-slot=checkbox]`).
@@ -46,7 +46,7 @@ docs/integration-map.md  (생성물)  docs/journal.md  docs/resume.md
 
 ## 수용 기준
 
-- 0.2 전체 구현의 후보 tag object/commit·두 빌드 digest·CI artifact와 별도 0.2 release branch가 연결돼 있다. source·release merge·main 완료 기록 commit을 구분하고 양 branch의 plan 검증이 통과한다.
+- T-213a의 0.2 전체 구현 후보 tag object/commit·두 빌드 digest·CI artifact와 별도 0.2 release branch가 연결돼 있다. source·release merge·main 완료 기록 commit을 구분하고 양 branch의 plan 검증이 통과한다.
 
 - rc 태그·자산·`SHA256SUMS` 존재, `sha256sum -c` 통과, tarball 라이선스 파일 3종 동봉.
 - v0.1 대비 공개 API diff(`exports`·d.ts·data-slot·testid·prop 기본값)가 표로 정리되고 CHANGELOG `Breaking` 절과 1:1 대응한다; 폐기 항목은 alias가 1 minor 동안 남는다.

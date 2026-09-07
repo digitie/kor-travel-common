@@ -10,14 +10,14 @@ kor-travel-common은 kor-travel 제품군의 UI·백엔드 공통 코드와 공�
 |---|---|---|
 | 디자인 토큰 | `packages/tokens` → npm 형식 `@kor-travel/tokens` | `--kt-*` 의미 토큰·`kt-` 유틸리티·프로필(admin/consumer)·다크 값·별칭 shim. 정본은 `tokens.css` |
 | React UI | `packages/ui` → npm 형식 `@kor-travel/ui` | React 19 전용 프리미티브·컴포넌트와 마크업 계약(`data-slot`·testid) |
-| Python 공통 | `packages/py/kor-travel-common` → Python 배포 이름 `kor-travel-common`, import `kortravelcommon` | OpenAPI export·health·time·quality 등 얇은 인프라 모듈. 인증은 범위 밖 |
+| Python 공통 | `packages/py/kor-travel-common` → Python 배포 이름 `kor-travel-common`, import `kortravelcommon` | OpenAPI export·health·time·quality와 주입형 인증 프리미티브 등 얇은 공용 코어. 인증 서버·사용자 저장소·운영 비밀은 소비자 소유 |
 | 규칙 문서 | `docs/standards/*` | 토큰·UX·반응형·프론트/백엔드 스택·UI 계약·OpenAPI·CI·라이선스·버전·에이전트 규약 |
 | 템플릿·레지스트리·도구 | `templates/*`, `versions.json`, `tools/*.py` | 소비자 설정 조각, 버전 floor/recommended/exceptions, 검사 도구 |
 
 소비자는 kor-travel-airport(Admin 포함)·kor-travel-concierge·kor-travel-docker-manager·kor-travel-geo·kor-travel-map·kor-travel-weather·pinvi(PinVi Admin 포함; 사용자 웹·모바일은 규칙만) 7개 저장소다. 의존 방향은 앱 → ui → tokens, 앱 → py 단방향이다. 소비자 목록·표면·채택 순서는 [consumers](docs/architecture/consumers.md)가 정본이다.
 
 - 소비자 한 곳에 있다는 이유만으로 공통화하지 않는다. 승격 근거는 조사 문서의 사실(여러 앱의 관찰 또는 저장소 간 계약 비용)과 채택 PR의 실측이다.
-- common은 앱 도메인 모듈, 지도 엔진(`maplibre-vworld-react`·`maplibre-vworld-js`), provider 라이브러리(`python-*-api`·`python-kraddr-base`), 인증 서비스(비밀번호·세션·CSRF·JWT·RBAC)를 갖지 않는다. 기존 공유 라이브러리와 중복하지 않고 의존만 한다.
+- common은 독립 실행 시스템이나 인증 서비스·사용자 DB·외부 IdP를 갖지 않는다. 다만 여러 소비자가 재사용하는 로그인 위젯·인증 계약과 주입형 프리미티브(비밀번호·세션/토큰·CSRF·JWT·RBAC)는 공용 라이브러리로 제공한다. 앱별 저장소·운영 비밀·역할 정책·배포는 소비자가 소유한다. 앱 도메인 모듈, 지도 엔진(`maplibre-vworld-react`·`maplibre-vworld-js`), provider 라이브러리(`python-*-api`·`python-kraddr-base`)는 기존 공유 라이브러리와 중복하지 않고 의존만 한다([ADR-015](docs/adr/015-common-shared-systems-scope.md)).
 - common 작업 중 소비자 저장소를 직접 수정하지 않는다. 소비자 변경은 해당 저장소의 이관 task와 PR로만 요청한다.
 - 유지자는 한 명이며 공통 API·릴리스 담당과 소비자 통합 담당을 겸임한다(D-33). 긴급 패치는 앱에 임시 복사를 허용하되 종료 조건(common 릴리스 버전·제거 task)을 그 앱과 common task에 함께 기록한다.
 

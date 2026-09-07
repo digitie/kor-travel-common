@@ -26,7 +26,7 @@ weather admin의 손수 CSS 중 common 부품으로 대체 가능한 40~48%(약 
 
 ## 범위 밖
 
-preflight·도메인 CSS(workbench·Dagster·마커, T-464), 지도 뷰(`vworld-map-view`, 공유 라이브러리 소관), 인증 로직, API 타입 생성기 도입.
+preflight·도메인 CSS(workbench·Dagster·마커, T-464), 지도 뷰(`vworld-map-view`, 공유 라이브러리 소관), 앱별 인증 로직·사용자 저장소·IdP 왕복, API 타입 생성기 도입. 로그인 UI는 common 위젯 계약과 앱 어댑터를 사용한다.
 
 ## 대상 저장소·브랜치·PR·되돌리기
 

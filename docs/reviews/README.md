@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-09-07 | full post-fix | [T-016 공용 범위 재점검 최종 판정](adversarial/2026-09-07-t016-common-scope-post-fix.md), `a9fc2f5` | A 정본·task DAG / B 외부 gate·tag/source | **A PASS / B PASS, 누적 finding 모두 FIXED** |
 | 2026-09-07 | full post-fix 01 | [T-005c post-fix 판정](adversarial/2026-09-07-t005c-post-fix.md), `03f2cae` | A parser·YAML·Node / B CI·redaction·path | A BLOCK / B BLOCK, 누적 8개 고유 finding 재수정 후 재검토 |
 | 2026-09-07 | full post-fix 03 | [T-005c 최종 판정](adversarial/2026-09-07-t005c-post-fix-03.md), `5807e53` | A parser·YAML·구조 / B redaction·정책·Docker | **A PASS / B PASS, 누적 finding 모두 FIXED** |
 | 2026-09-07 | docs post-fix | [T-005c 문서 최종 판정](adversarial/2026-09-07-t005c-docs-post-fix.md), `7b35ff0` | A/B 문서·evidence·정합성·공백 | **A PASS / B PASS, docs finding 모두 FIXED** |

@@ -8,7 +8,7 @@ REST/OpenAPI 계약(에러 본문·health 경로·요청 ID·헤더 이름)은 [
 
 - 7개 저장소 Python 코드 19개 항목을 비교한 결과, 설정 클래스 6곳·메트릭 5곳·공개 API 키 함수 4곳(본문 동일)·OpenAPI export 4곳·alembic env 3곳(동형)·ruff 기본 규칙 5곳이 이미 수렴해 있다(사실: [backend 횡단 비교](../survey/cross/backend.md) §2.19). 공통 패키지는 이 수렴 구간만 담고, 도메인 결합 부분(§10)은 담지 않는다.
 - 런타임 공유 백엔드나 SSO는 만들지 않는다. 얇은 계약 코드(problem 핸들러·request-id·export/drift·health·time·quality 산출물)만 배포한다(`be` §6; `oa` §3.5).
-- 공통 패키지는 앱 → common 단방향이며 앱 도메인 모듈·지도 엔진·provider 라이브러리(`python-*-api`)·인증 서비스를 import하지 않는다(D-01).
+- 공통 패키지는 앱 → common 단방향이며 앱 도메인 모듈·지도 엔진·provider 라이브러리(`python-*-api`)·인증 서버를 import하지 않는다. 저장소·키를 주입받는 공용 인증 프리미티브는 common API로 제공한다([ADR-015](../adr/015-common-shared-systems-scope.md)).
 - 앱의 env 이름·접두·메트릭 이름·응답 형식·경로는 배포 계약이다. 공통 모듈은 이름을 인자로 받고, 기본값이 계약을 바꾸는 경우 opt-in으로만 둔다.
 
 ## 2. 문서 사용법
@@ -103,7 +103,7 @@ forbidden_modules = ["fastapi", "starlette", "uvicorn"]
 | BE-19 | `time`(C13) | `KST = ZoneInfo("Asia/Seoul")`, `kst_now()`, `utc_now()`(aware), `check_aware_datetime()`(naive 거부), 한국식 timestamp 파서·간격 정렬(airport). 고정 오프셋 `timezone(timedelta(hours=9))`(weather)과 naive UTC(ktdm)는 전환 시 명시 결정([openapi-exceptions.yaml](openapi-exceptions.yaml) ktdm M7) | map·weather·pinvi 함수 이름 동일(`be` §2.12) | T-304 |
 | BE-20 | `http`(C15) | `httpx.AsyncClient` 팩토리(`httpx.Timeout` 프로파일), tenacity 재시도 정책(geo 파라미터: 3회, 지수 0.2→2.0초), api-call 이벤트 훅(민감 쿼리 키 마스킹). 호출마다 `AsyncClient`를 만드는 관행은 lifespan 공유로 전환 권고 | geo tenacity, pinvi·weather 수제 동형(`be` §2.11) | T-308 |
 | BE-21 | `dagster`(C18) | `build_definitions(required_keys, defaults, real_resources)` 3단 폴백(value → real `@resource` → missing-guard; geo=map 동일), `run_failure_sensor` 통지 어댑터, `dagster.yaml` postgres 템플릿. op/job vs asset 스타일은 앱 소유 | geo·map 골격 동일(`be` §2.14) | T-308 |
-| BE-22 | 인증 범위 밖 | 비밀번호 해시·세션 저장소·CSRF·JWT·RBAC·역할 판정은 common에 두지 않는다. 세션 상수(8h·PBKDF2 310k·5회/10분)는 규칙 문서 참조만 | 선행 보고서 §3.6 유지(`be` §4·§6) | — |
+| BE-22 | 인증 공용 코어·앱 소유 경계 | 비밀번호 해시·세션/토큰·CSRF·JWT·RBAC 검증 프리미티브와 주입 인터페이스는 common에 둘 수 있다. 사용자·세션 저장소, 키·비밀, 외부 IdP, 역할/라우트 판정과 운영 rate limit은 앱이 소유한다. 세션 상수(8h·PBKDF2 310k·5회/10분)는 구현 task에서 계약을 고정한다 | ADR-015·T-312 | T-312 |
 
 ### 5.1 사용 예시(후보 API — T-304·T-307·T-308에서 확정)
 
@@ -202,14 +202,14 @@ geo·map은 import-linter로 라이브러리 계층의 `fastapi/starlette` impor
 |---|---|
 | geo: 주소 DTO·geocoder·GDAL loaders·GeoIP Korea-only 게이트·admission control·source registry·backup artifact·VWorld 호환 오류 형식 | GDAL 시스템 결합, ADR-037 정책, 외부 계약 |
 | map: route policy matrix·`SurfaceScopedCORSMiddleware`·ServiceToken scope/digest·cache-target 프로토콜·alembic 300 baseline·ADR-090 런타임 권한 경계·provider fetcher/retry 예산 | 도메인 결합, 400행 `env.py` |
-| pinvi: JWT/refresh/OAuth/RBAC(404 은닉)/rate-limit·geofence·cache-target sync·M05 계약 JSON·백업 셸 스크립트·서비스 영역 좌표 경계 | 감사·마이그레이션 이력 보유 |
+| pinvi: 앱별 JWT/refresh/OAuth/RBAC(404 은닉) 정책·rate-limit·geofence·cache-target sync·M05 계약 JSON·백업 셸 스크립트·서비스 영역 좌표 경계 | 감사·마이그레이션 이력 보유. 공용 JWT 검증/RBAC 인터페이스 채택 여부는 T-312 이후 앱 task에서 결정 |
 | ktdm: docker/compose 오케스트레이션·runtime pin registry·`docker exec pg_dump`·SQLite 메트릭 DB·HMAC 서명 세션 쿠키·월간 로그 롤링 | 운영 도구 자체 |
 | concierge: LLM 클라이언트·YouTube ETL·APScheduler 워커·MCP 서버·int ID keyset cursor | 도메인 |
 | weather: sync provider 어댑터·Dagster 전용 multiprocess 메트릭 청소·자격증명 암호화 | 도메인 |
 | airport: 주차 도메인·sqlite/PG 이중 방언·lifespan 스케줄러 | 도메인 |
 | 서비스 간 클라이언트(pinvi `clients/kor_travel_*.py`, geo·map Dagster 클라이언트) | 선행 보고서 §7.2 facade 금지, map ADR-006 |
 | 한국 좌표 경계 상수 | 세 앱의 값이 다르고 각각 근거 문서가 있다(geo 123–132/32–39 개구간, map 124–132/33–39.5, pinvi 124–132/33–43 + 39.5) |
-| 비밀번호 해시·세션 저장소·CSRF | BE-22 |
+| 앱별 비밀번호·세션 저장소·CSRF secret·세션 폐기 정책 | BE-22. 공용 해시·토큰·CSRF 검증 프리미티브는 T-312에서 주입형으로 제공 |
 | 기존 공유 라이브러리 재래핑(`python-*-api` 13종, `maplibre-vworld-*`, `python-kraddr-base`) | D-01·D-23; 라이선스 B2 |
 | 백업 오케스트레이터 | 5개 구현이 각자 도메인 결합; 산출물 규약(파일명·sha256·manifest)만 문서(C21 보류) |
 

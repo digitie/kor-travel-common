@@ -196,7 +196,7 @@ Tailwind가 없는 앱은 `next build` 후 `.next/static/css/*.css`를 같은 �
 
 ## 9. 매니페스트·integration-map 갱신
 
-각 소비 저장소(모노레포는 앱 디렉터리)에 `kor-travel-common.lock.json`을 두고 채택·상향 PR마다 갱신한다(D-19). `enforce`는 매니페스트에 두지 않으며 common `versions.json`의 `consumers.<repo>.enforce`가 소유한다(D-07).
+각 소비 저장소(모노레포는 앱 디렉터리)에 `kor-travel-common.lock.json`을 두고 채택·상향 PR마다 갱신한다(D-19). `lockfiles.path`는 저장소 루트 기준이며 검사 호출에는 저장소 루트와 manifest 경로를 함께 전달해 shared lock과 루트 workflow를 읽는다. `enforce`는 매니페스트에 두지 않으며 common `versions.json`의 `consumers.<repo>.enforce`가 소유한다(D-07).
 
 ```json
 {

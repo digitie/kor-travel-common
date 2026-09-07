@@ -15,7 +15,7 @@ D-15의 3차 모듈 8종을 넣는다. 모두 "계약 일부 변경 또는 정�
 - C5 원형: map `_error_response`/`_augment_problem_responses`, weather `Problem`·`_safe_errors`([oa §2.5·§5 C1](../survey/cross/openapi.md)). `type` 접두는 인자(map `https://kor-travel-map/errors/`, 기본 `about:blank`), 상태→코드 사전은 common 기본 + 앱 덮어쓰기.
 - C16: nosniff/DENY/Referrer/Permissions/CSP/HSTS, HSTS는 실제 scheme https 또는 production일 때만이 기본(pinvi #344), `trust_forwarded_proto=True`는 kta용 옵션([be §2.9](../survey/cross/backend.md)). C17: `parse_origins_csv`(`*`와 credentials 동시 사용 제거). C8: peer CIDR + 비밀 상수시간 비교 + actor/roles 파싱, 헤더 이름 인자([be C8](../survey/cross/backend.md)).
 - C11: testcontainers(map·pinvi) + 외부 DSN 가드(geo `_pg_guard`) 두 계열 모두 지원, 이미지 digest 핀 옵션, loop-scope 가이드([be §2.16](../survey/cross/backend.md)). C10: async `env.py` 골격(kta≈ktc≈pinvi)·NullPool·`%` 이스케이프·선택적 advisory lock — import 의존 없는 템플릿. C15: `AsyncClient` 팩토리 + tenacity 정책(geo 파라미터 3회·0.2→2.0s). C18: 3단 리소스 폴백(geo=map)·`run_failure_sensor` 통지 어댑터·`dagster.yaml` 템플릿.
-- 도메인 결합 부분과 인증 서비스는 넣지 않는다([be §4](../survey/cross/backend.md)).
+- 도메인 결합 부분과 인증 서버·사용자 저장소는 넣지 않는다. 공용 인증 프리미티브는 T-312에서 별도로 다룬다([ADR-015](../adr/015-common-shared-systems-scope.md), [be §4](../survey/cross/backend.md)).
 
 ## 구현 범위
 
