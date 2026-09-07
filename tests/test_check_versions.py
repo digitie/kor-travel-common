@@ -1090,7 +1090,8 @@ class CheckVersionsTests(unittest.TestCase):
         (workflow_dir / "supported.yml").write_text(
             'name: "hello\\_world"\n'
             "description: fixture's build\n"
-            'title: a"b\n'
+            "summary: a 'b\n"
+            'title: a "b\n'
             "jobs:\n  build:\n    steps:\n"
             '      - run: echo "hello"\n'
             '      - with:\n          node-version: "22.23"\n'
@@ -1108,7 +1109,8 @@ class CheckVersionsTests(unittest.TestCase):
             "name: {value}\n"
             "jobs:\n  build:\n    steps:\n      - uses: actions/checkout@v4\n")
         for index, value in enumerate((
-                "bad: scalar", "[push]]", "*", "'one'two'three'", "@bad", "`bad")):
+                "bad: scalar", "[push]]", "*", "'one'two'three'", "@bad", "`bad",
+                ",bad", "]bad", "}bad")):
             path = workflow_dir / f"malformed-{index}.yml"
             path.write_text(malformed.format(value=value), encoding="utf-8")
             result = self.cli(str(self.repo), "--repo", "app-fail", "--mode", "fail", "--quiet")
@@ -1123,6 +1125,9 @@ class CheckVersionsTests(unittest.TestCase):
             "jobs:\n  build:\n    steps: []\n",
             "jobs:\n  build:\n    steps:\n      - run: echo hello\n",
             "jobs:\n  build:\n    steps:\n      - uses: actions/setup-node@v4\n        with: [22, 23]\n",
+            "jobs:\n  build:\n    steps:\n      - run: []\n",
+            "jobs:\n  build:\n    steps:\n      - run: null\n",
+            "jobs:\n  build:\n    uses: owner/repo/.github/workflows/ci.yml@v4\n    with: []\n",
         )
         for index, text in enumerate(cases):
             path = workflow_dir / f"empty-{index}.yml"
@@ -1165,6 +1170,26 @@ class CheckVersionsTests(unittest.TestCase):
         uses = [finding for finding in findings if finding.key == "uses"]
         self.assertEqual([finding.verdict for finding in uses], ["FLOATING_REF"] * 6)
 
+    def test_workflow_docker_separator_and_registry_labels_fail_closed(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        (workflow_dir / "refs.yml").write_text(
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: docker://a..b:1.2\n"
+            "      - uses: docker://a___b:1.2\n"
+            "      - uses: docker://reg.-example:5000/app:1.2\n"
+            "      - uses: docker://a__b:1.2\n"
+            "      - uses: docker://a---b:1.2\n",
+            encoding="utf-8")
+        findings = self.run_checker()
+        uses = {finding.declared: finding for finding in findings if finding.key == "uses"}
+        for declared in (
+                "docker://a..b:1.2", "docker://a___b:1.2",
+                "docker://reg.-example:5000/app:1.2"):
+            self.assertEqual(uses[declared].verdict, "FLOATING_REF")
+        self.assertEqual(uses["docker://a__b:1.2"].verdict, "OK")
+        self.assertEqual(uses["docker://a---b:1.2"].verdict, "OK")
+
     def test_workflow_outputs_redact_sensitive_values_in_all_channels(self):
         workflow_dir = self.repo / ".github" / "workflows"
         workflow_dir.mkdir(parents=True)
@@ -1193,6 +1218,73 @@ class CheckVersionsTests(unittest.TestCase):
         report = json.loads(json_path.read_text(encoding="utf-8"))
         self.assertTrue(all(marker not in json.dumps(finding, ensure_ascii=False)
                             for finding in report["findings"]))
+
+    def test_workflow_redaction_matches_policy_prefix_ipv6_and_password_hash(self):
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        marker = "SYNTH" + "TOKEN" + "Z" * 12
+        values = (
+            "DB_PASSWORD=" + marker,
+            ":".join(("fd12", "3456", "789a", "", "1")),
+            "pbkdf2_" + "sha256$600000$salt$hashhash",
+            "api." + ".".join(("one", "two", "example", "com")),
+        )
+        for index, value in enumerate(values):
+            with self.subTest(index=index):
+                (workflow_dir / "redaction.yml").write_text(
+                    "jobs:\n  build:\n    steps:\n"
+                    "      - uses: actions/setup-node@v4\n"
+                    "        with:\n          node-version: '" + value + "'\n",
+                    encoding="utf-8")
+                output_dir = self.root / f"policy-redaction-{index}"
+                json_path = output_dir / "report.json"
+                markdown_path = output_dir / "report.md"
+                summary_path = output_dir / "summary.md"
+                env = os.environ.copy()
+                env["GITHUB_STEP_SUMMARY"] = str(summary_path)
+                result = subprocess.run(
+                    [sys.executable, "-B", "-X", "utf8", str(SCRIPT), "--registry",
+                     str(self.registry_path), "--repo", "app-fail", "--mode", "fail",
+                     "--json", str(json_path), "--markdown", str(markdown_path),
+                     str(self.repo)], capture_output=True, text=True, encoding="utf-8", env=env)
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                for path in (json_path, markdown_path, summary_path):
+                    self.assertNotIn(value, path.read_text(encoding="utf-8"))
+                self.assertNotIn(value, result.stdout)
+
+    def test_workflow_repo_display_is_separate_from_registry_policy_identity(self):
+        marker = "SYNTH" + "TOKEN" + "Z" * 12
+        data = json.loads(json.dumps(REGISTRY))
+        data["consumers"][marker] = {"enforce": "fail"}
+        data["exceptions"] = [{
+            "repo": marker, "key": "node", "installed": "22.23",
+            "reason": "합성 예외 대조", "until": "2026-09-06", "review": "T-005c",
+        }]
+        self.registry_path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+        workflow_dir = self.repo / ".github" / "workflows"
+        workflow_dir.mkdir(parents=True)
+        (workflow_dir / "policy.yml").write_text(
+            "jobs:\n  build:\n    steps:\n"
+            "      - uses: actions/setup-node@v4\n"
+            "        with:\n          node-version: \"22.23\"\n",
+            encoding="utf-8")
+        report_path = self.root / "repo-policy-report.json"
+        markdown_path = self.root / "repo-policy-report.md"
+        summary_path = self.root / "repo-policy-summary.md"
+        env = os.environ.copy()
+        env["GITHUB_STEP_SUMMARY"] = str(summary_path)
+        result = subprocess.run(
+            [sys.executable, "-B", "-X", "utf8", str(SCRIPT), "--registry",
+             str(self.registry_path), "--repo", marker, "--today", "2026-09-07",
+             "--json", str(report_path), "--markdown", str(markdown_path), str(self.repo)],
+            capture_output=True, text=True, encoding="utf-8", env=env)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertNotIn(marker, result.stdout)
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(report["summary"]["EXEMPT_EXPIRED"], 1)
+        self.assertNotIn(marker, json.dumps(report, ensure_ascii=False))
+        for path in (markdown_path, summary_path):
+            self.assertNotIn(marker, path.read_text(encoding="utf-8"))
 
     def test_workflow_unicode_surrogate_is_a_redacted_input_error(self):
         workflow_dir = self.repo / ".github" / "workflows"

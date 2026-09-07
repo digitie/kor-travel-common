@@ -1308,15 +1308,20 @@ _WORKFLOW_SENSITIVE_VALUE_RE = re.compile(
     r"(?ix)(?:"
     r"\b(?:AKIA|ASIA)[0-9A-Z]{16}\b|"
     r"\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b|"
-    r"\b(?:api[_-]?key|client[_-]?secret|secret|password|passwd|access[_-]?token|refresh[_-]?token|token)"
-    r"\b\s*[:=]\s*['\"]?(?!<|\$\{)[A-Za-z0-9+/_.=-]{8,}|"
+    r"(?<![\w])(?:[a-z0-9]+_)*(?:api[_-]?key|client[_-]?secret|secret|password|passwd|access[_-]?token|refresh[_-]?token|token)"
+    r"\b['\"]?\s*[:=]\s*['\"]?(?!<|\$\{)[A-Za-z0-9+/_.=-]{8,}|"
+    r"(?<![\w])(?:[a-z0-9]+_)*(?:api[_-]?key|client[_-]?secret|secret|password|passwd|access[_-]?token|refresh[_-]?token|token)"
+    r"\b['\"]?\s*[:=]\s*['\"][^'\"\r\n<\${}]+['\"]|"
     r"(?:secret|password|passwd|token|api[_-]?key|access[_-]?token|refresh[_-]?token)"
     r"[-_A-Za-z0-9]{8,}\b|"
+    r"\bpbkdf2_sha256\$[0-9]+\$[^\s$]+\$[A-Za-z0-9+/=]+|"
     r"\b[a-z][a-z0-9+.-]*://[^\s/:@<>]+:[^\s/@<>]+@|"
     r"(?<![\w.])(?:10\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(?:1[6-9]|2[0-9]|3[01])\.(?:[0-9]{1,3}\.)[0-9]{1,3})(?!\w|\.[0-9])|"
+    r"(?<![\w:])(?:f[cd][0-9a-f]{2}|fe[89ab][0-9a-f]):[0-9a-f:]+(?:%[a-z0-9_-]+)?(?![\w:])|"
     r"(?<![\w.-])(?:[a-z0-9][a-z0-9-]*\.)+(?:internal|local|lan|corp)(?![\w-]|\.[\w-])|"
     r"(?<![\w.-])(?:[a-z0-9][a-z0-9-]*\.)+(?:iptime\.org|duckdns\.org|ddns\.net|myddns\.me)(?![\w-]|\.[\w-])|"
     r"(?<![\w.-])(?:prod|production)[.-](?:[a-z0-9][a-z0-9-]*\.)+(?:com|net|org|kr|io|dev)(?![\w-]|\.[\w-])|"
+    r"(?<![\w.-])(?:api|web|weather|airport|dagster)[a-z0-9-]*\.(?:[a-z0-9-]+\.){2,}(?:com|net|org|kr|io|dev)(?![\w-]|\.[\w-])|"
     r"-----BEGIN (?:[A-Z0-9]+ )?PRIVATE KEY-----|"
     r"\$\{\{\s*secrets(?:\.|\s|\[)"
     r")"
@@ -1351,7 +1356,11 @@ def _workflow_input_error() -> ValueError:
 
 def _yaml_quote_starts(text: str, index: int) -> bool:
     """plain scalar 내부의 apostrophe·quote를 인용 시작으로 오인하지 않는다."""
-    return index == 0 or text[index - 1].isspace() or text[index - 1] in ":[,"
+    if index == 0 or not text[:index].strip() or text[:index].strip() == "-":
+        return True
+    delimiter = max(text.rfind(":", 0, index), text.rfind("[", 0, index),
+                    text.rfind(",", 0, index))
+    return delimiter >= 0 and not text[delimiter + 1:index].strip()
 
 
 def _strip_yaml_comment(line: str) -> str:
@@ -1541,7 +1550,9 @@ class _WorkflowYamlParser:
             return "".join(result)
         if value.startswith(("@", "`", "&", "*", "%", "#")):
             raise _workflow_input_error()
-        if value[:1] in {"?", ":", ",", "]", "}"} and (len(value) == 1 or value[1].isspace()):
+        if value[:1] in {",", "]", "}"}:
+            raise _workflow_input_error()
+        if value[:1] in {"?", ":"} and (len(value) == 1 or value[1].isspace()):
             raise _workflow_input_error()
         if re.search(r"(?:^|\s)[&*](?:[A-Za-z0-9_.-]+)?(?:\s|$)", value):
             raise _workflow_input_error()
@@ -1779,6 +1790,7 @@ def scopes_from_manifest(manifest_path: Path) -> tuple[str | None, list[Scope]]:
 class Checker:
     def __init__(self, registry: Registry, repo: str, today: date):
         self.registry = registry
+        self.repo_id = repo
         self.repo = _workflow_display_value(repo, "(소비자 식별자 비공개)")
         self.today = today
         self.findings: list[Finding] = []
@@ -1813,7 +1825,7 @@ class Checker:
 
     def apply_exception(self, key: str, installed: tuple[int, ...] | None,
                         verdict: str, detail: str) -> tuple[str, str]:
-        entry = self.registry.exception(self.repo, key, installed)
+        entry = self.registry.exception(self.repo_id, key, installed)
         if entry is None:
             return verdict, detail
         expired = self.today > date.fromisoformat(entry["until"])
@@ -2089,18 +2101,20 @@ class Checker:
         parts = name.split("/")
         if any(not part or part in {".", ".."} for part in parts):
             return False
+        component = re.compile(r"[a-z0-9]+(?:(?:[._]|__|-+)[a-z0-9]+)*")
+        host_label = re.compile(r"[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
         for index, part in enumerate(parts):
             if ":" in part:
                 if index != 0:
                     return False
                 host, port = part.rsplit(":", 1)
                 if (not host or not port.isdigit()
-                        or host != host.lower()
-                        or not re.fullmatch(r"[a-z0-9][a-z0-9.-]*", host)
-                        or host.endswith((".", "-"))):
+                        or not all(host_label.fullmatch(label) for label in host.split("."))):
                     return False
-            elif (not re.fullmatch(r"[a-z0-9][a-z0-9_.-]*", part)
-                  or part.endswith((".", "-", "_"))):
+            elif index == 0 and ("." in part or part == "localhost"):
+                if not all(host_label.fullmatch(label) for label in part.split(".")):
+                    return False
+            elif not component.fullmatch(part):
                 return False
         return True
 
@@ -2165,6 +2179,8 @@ class Checker:
             if job_uses is not None:
                 if "steps" in job:
                     raise _workflow_input_error()
+                if "with" in job and self._workflow_map(job.get("with")) is None:
+                    raise _workflow_input_error()
                 checked_targets += 1
                 self._check_workflow_uses(scope, job_uses)
                 continue
@@ -2182,7 +2198,9 @@ class Checker:
                 if "with" in step and self._workflow_map(step.get("with")) is None:
                     raise _workflow_input_error()
                 if uses_node is None:
-                    if "run" not in step:
+                    run_node = step.get("run")
+                    if (run_node is None or not isinstance(run_node.value, str)
+                            or not run_node.value.strip()):
                         raise _workflow_input_error()
                     continue
                 if "run" in step:
@@ -2592,13 +2610,14 @@ def render_markdown(findings: list[Finding], registry: Registry, repo: str, mode
     display_roots = [_workflow_display_value(root, "(입력 경로 비공개)") for root in roots]
     display_repo = _workflow_display_value(repo, "(소비자 식별자 비공개)")
     display_registry_name = _workflow_display_value(registry.path.name, "(레지스트리 이름 비공개)")
+    display_mode_source = _workflow_display_value(mode_source, "(모드 출처 비공개)")
     lines = [
         f"## check_versions — {display_repo}",
         "",
         f"- 레지스트리: `{display_registry_name}` (baseline {registry.data.get('baseline')}, "
         f"updated {registry.data.get('updated')})",
         f"- 대상: {', '.join('`' + r + '`' for r in display_roots) or '-'}",
-        f"- 모드: `{mode}` ({mode_source}) · 기준일 {today.isoformat()} · exit {exit_code(mode, findings)}",
+        f"- 모드: `{mode}` ({display_mode_source}) · 기준일 {today.isoformat()} · exit {exit_code(mode, findings)}",
         "- 판정 요약: " + " · ".join(f"{verdict} {count}" for verdict, count in counts.items() if count),
         "",
         "| 범위 | 축 | 생태계 | 선언 | 설치·하한 | 판정 | 비고 |",
@@ -2640,7 +2659,7 @@ def build_report(findings: list[Finding], registry: Registry, repo: str, mode: s
         "repo": _workflow_display_value(repo, "(소비자 식별자 비공개)"),
         "roots": [_workflow_display_value(root, "(입력 경로 비공개)") for root in roots],
         "mode": mode,
-        "mode_source": mode_source,
+        "mode_source": _workflow_display_value(mode_source, "(모드 출처 비공개)"),
         "today": today.isoformat(),
         "summary": summarize(findings),
         "exit_code": exit_code(mode, findings),
@@ -2722,7 +2741,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.mode:
         mode, mode_source = args.mode, "--mode 로컬 override"
     else:
-        mode, mode_source = registry.enforce(repo), f"versions.json consumers.{repo}.enforce" if registry.consumer(repo) else "미등록 소비자 기본값"
+        mode, mode_source = (registry.enforce(repo),
+                             f"versions.json consumers.{_workflow_display_value(repo, '(소비자 식별자 비공개)')}.enforce"
+                             if registry.consumer(repo) else "미등록 소비자 기본값")
     today = args.today or date.today()
 
     checker = Checker(registry, repo, today)
