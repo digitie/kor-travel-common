@@ -60,6 +60,8 @@ Git Bash에서 동일. CI 결과는 GitHub Actions 실행 링크로 기록한다
 
 ## evidence
 
+첫 실제 [PR CI](https://github.com/digitie/kor-travel-common/actions/runs/34069260693)와 [release push CI](https://github.com/digitie/kor-travel-common/actions/runs/34069314480)에서 두 실패를 확인했다. report는 이전 step의 summary에 source가 있다고 잘못 가정했고, Windows Python 3.11.9는 TEMP의 짧은 경로 별칭과 해석한 긴 경로를 상대화하다 실패했다. GitHub의 [변수 문서](https://docs.github.com/en/actions/reference/workflows-and-actions/variables)(조회일 2026-09-07)의 step별 summary 경로 계약에 맞춰 report step 자체에서 source를 확인·기록했다. manifest의 기준 경로도 resolve하고 별칭 경로 회귀 시험이 수정 전 실패함을 재현했다. 수정 후 실제 CI 결과는 뒤 검증으로 구분한다.
+
 2026-09-07 재개: PR #4 merge `82dec2b939885863100802997f9e7548dffd3c9a`와 main CI 34066384346 성공을 확인했다. [PR #5](https://github.com/digitie/kor-travel-common/pull/5)에서 구현한다. 공식 [checkout v7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1)·[setup-python v7.0.0](https://github.com/actions/setup-python/releases/tag/v7.0.0)의 release/tag API를 조회해 workflow의 40자 commit과 일치함을 확인했다(조회일 2026-09-07). 실제 값은 workflow가 정본이다.
 
 검사기와 CI를 구현했고 [조사 보안 정정](../survey/README.md#9-t-009-보안-정정)을 기록했다. 전체 현재 트리 319파일에서 비밀·운영 주소 발견 0, 명시적 예외 0이며 SPDX 18파일 오류 0이다. Git index/commit 스냅샷·정책 읽기, 값 비공개, 실패 종료와 주소 경계를 회귀 검증한다. 첫 시험에서 Windows Git의 금지 파일명 생성 실패·fixture 패턴의 자기 일치·내부 호스트 뒤 문장부호 누락을 확인하고, 경로 파서 직접 시험·정규식 수정으로 대응했다. Windows Python 3.14.3에서 전체 131 tests·skip 0(29.892초), WSL Python 3.11.15에서 131 tests·skip 0(13.107초)을 새로 실행해 성공했다. link260문서·2107대상과 plan101·diff 오류 0이다. 실제 CI·임시 release push·두 독립 리뷰는 아직 수행 전이며 완료로 판정하지 않는다.

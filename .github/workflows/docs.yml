@@ -129,6 +129,8 @@ jobs:
         run: python -B -X utf8 tools/check_versions.py --self-check
       - name: 고정 fixture의 report와 step summary 검증
         run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          printf '검사 source: `%s`\n' "$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
           printf '\n다음 표는 고정 CI fixture이며 소비자 실측이 아닙니다.\n' >> "$GITHUB_STEP_SUMMARY"
           python -B -X utf8 tools/check_versions.py tests/fixtures/version-report --repo common-ci-report-fixture --mode report --json dist/ci/version-report.json
           python -B -X utf8 - <<'PY'
@@ -144,5 +146,6 @@ jobs:
           digest = hashlib.sha256(Path('dist/ci/version-report.json').read_bytes()).hexdigest()
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as handle:
               handle.write(f'\n보고 SHA256: `{digest}`, source: `{os.environ["SOURCE_SHA"]}`\n')
+          print(f'보고 SHA256: {digest}, source: {os.environ["SOURCE_SHA"]}')
           print('fixture report·비어 있지 않은 step summary 확인')
           PY
