@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+fastapi==0.141.1
+custom-lib @ git+https://github.com/example/custom-lib.git@main

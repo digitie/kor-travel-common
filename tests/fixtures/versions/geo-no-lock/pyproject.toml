@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+[project]
+name = "geo-no-lock-fixture"
+version = "0.0.0"
+requires-python = ">=3.11"
+dependencies = ["fastapi>=0.115"]

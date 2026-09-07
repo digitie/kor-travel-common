@@ -8,7 +8,8 @@
 동작해야 한다.
 
 읽는 파일: package.json / package-lock.json(lockfileVersion 3) / pyproject.toml /
-uv.lock / requirements.txt. `poetry.lock` 파서는 T-005b.
+uv.lock / poetry.lock / requirements.txt. Poetry·requirements는 uv 전환 전까지의
+과도기 입력이며, requirements 설치본은 정확 핀만 후보로 보고 항상 `NO_LOCK`을 남긴다.
 
 판정 어휘(D-07): OK / BELOW_FLOOR / ABOVE_MAX / NOT_RECOMMENDED / NO_LOCK / NO_ENGINES /
 FLOATING_REF / BLOCKED / EXEMPT / EXEMPT_EXPIRED.
@@ -23,13 +24,15 @@ from __future__ import annotations
 import argparse
 from dataclasses import asdict, dataclass, field
 from datetime import date
+import ipaddress
 import json
 import os
 from pathlib import Path
 import re
+import shlex
 import sys
 import tomllib
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, urlsplit, urlunsplit
 
 
 REGISTRY_SCHEMA = "kor-travel-common.version-registry.v1"
@@ -52,6 +55,7 @@ FLOATING_NAMES = frozenset({"main", "master", "develop", "dev", "head", "latest"
 VERSION_RE = re.compile(r"v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?(?:-slim|\+[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?")
 NPM_VERSION_RE = re.compile(r"(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?")
 REQ_RE = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)\s*(\[[^\]]*\])?\s*(.*)$")
+EXACT_REQUIREMENT_RE = re.compile(r"^==\s*(v?\d+(?:\.\d+){0,3})\s*$")
 
 
 # --------------------------------------------------------------------------- 버전 비교
@@ -107,6 +111,10 @@ def below(installed: tuple[int, ...], floor: tuple[int, ...]) -> bool:
 
 def at_or_above(installed: tuple[int, ...], limit: tuple[int, ...]) -> bool:
     return not below(installed, limit)
+
+
+def same_version(left: tuple[int, ...], right: tuple[int, ...]) -> bool:
+    return not below(left, right) and not below(right, left)
 
 
 def matches_prefix(installed: tuple[int, ...], prefix: tuple[int, ...]) -> bool:
@@ -440,6 +448,436 @@ def read_toml(path: Path) -> dict:
         return tomllib.load(handle)
 
 
+POETRY_TOP_FIELDS = frozenset({"package", "metadata", "extras"})
+POETRY_PACKAGE_FIELDS = frozenset({
+    "name", "version", "description", "category", "optional", "python-versions", "groups",
+    "files", "dependencies", "extras", "source", "develop", "markers",
+})
+POETRY_SOURCE_FIELDS = frozenset({"type", "url", "reference", "resolved_reference", "subdirectory"})
+POETRY_SOURCE_TYPES = frozenset({"git", "url", "legacy", "file", "directory"})
+
+
+def _poetry_error() -> ValueError:
+    """Poetry 입력 원문을 출력하지 않는 일반 오류."""
+    return ValueError("poetry.lock 지원 형식 오류")
+
+
+def _validate_bracketed_host(netloc: str) -> None:
+    """URL authority의 대괄호 호스트가 실제 IPv6 주소인지 확인한다."""
+    if "[" not in netloc and "]" not in netloc:
+        return
+    if "@" in netloc:
+        userinfo = netloc.rsplit("@", 1)[0]
+        if "[" in userinfo or "]" in userinfo:
+            raise ValueError("URL 호스트 형식 오류")
+    authority = netloc.rsplit("@", 1)[-1]
+    if not authority.startswith("["):
+        raise ValueError("URL 호스트 형식 오류")
+    closing = authority.find("]")
+    if closing <= 1:
+        raise ValueError("URL 호스트 형식 오류")
+    host = authority[1:closing]
+    try:
+        ipaddress.ip_address(host)
+    except ValueError as exc:
+        raise ValueError("URL 호스트 형식 오류") from exc
+    suffix = authority[closing + 1:]
+    if suffix and not re.fullmatch(r":\d+", suffix):
+        raise ValueError("URL 호스트 형식 오류")
+
+
+def _parse_url(value: str):
+    """URL을 파싱하고 파서가 놓치는 잘못된 대괄호 호스트도 거부한다."""
+    parsed_text = value.removeprefix("git+")
+    try:
+        parsed = urlsplit(parsed_text)
+        # hostname/port 접근은 잘못된 bracket·port를 표준 라이브러리에서
+        # ValueError로 닫게 한다. 원문은 예외 메시지에 재출력하지 않는다.
+        hostname = parsed.hostname
+        parsed.port
+        _validate_bracketed_host(parsed.netloc)
+    except ValueError as exc:
+        raise ValueError("URL 형식 오류") from exc
+    return parsed, hostname
+
+
+def _validate_url(value: object, *, require_host: bool) -> str:
+    if not isinstance(value, str) or not value.strip() or "\x00" in value:
+        raise _poetry_error()
+    text = value.strip()
+    # Poetry는 git+ 접두를 기록하기도 하고, 일반 git URL을 기록하기도 한다.
+    try:
+        parsed, hostname = _parse_url(text)
+    except ValueError as exc:
+        raise _poetry_error() from exc
+    if require_host and (not parsed.scheme or not hostname):
+        raise _poetry_error()
+    return text
+
+
+def read_poetry_lock(path: Path) -> dict:
+    """Poetry lock의 제한된 package/source 구조를 fail-close로 읽는다."""
+    try:
+        data = read_toml(path)
+    except (tomllib.TOMLDecodeError, UnicodeError) as exc:
+        raise _poetry_error() from exc
+    if not isinstance(data, dict) or set(data) - POETRY_TOP_FIELDS:
+        raise _poetry_error()
+    packages = data.get("package")
+    metadata = data.get("metadata")
+    extras = data.get("extras", {})
+    if (not isinstance(packages, list) or not isinstance(metadata, dict)
+            or not isinstance(extras, (dict, list))):
+        raise _poetry_error()
+    python_versions = metadata.get("python-versions")
+    if (not isinstance(python_versions, str) or not python_versions.strip()
+            or _range_interval(python_versions) is None
+            or not any(item[0] is not None or item[2] is not None for item in _range_interval(python_versions))):
+        raise _poetry_error()
+    for entry in packages:
+        if not isinstance(entry, dict) or set(entry) - POETRY_PACKAGE_FIELDS:
+            raise _poetry_error()
+        name, version = entry.get("name"), entry.get("version")
+        if (not isinstance(name, str) or not name.strip()
+                or not isinstance(version, str) or not version.strip()):
+            raise _poetry_error()
+        source = entry.get("source")
+        if source is None:
+            continue
+        if not isinstance(source, dict) or set(source) - POETRY_SOURCE_FIELDS:
+            raise _poetry_error()
+        source_type = source.get("type")
+        if not isinstance(source_type, str) or source_type not in POETRY_SOURCE_TYPES:
+            raise _poetry_error()
+        for field_name in ("url", "reference", "resolved_reference"):
+            if field_name in source and (
+                    not isinstance(source[field_name], str) or not source[field_name].strip()):
+                raise _poetry_error()
+        if source_type in {"git", "url", "legacy"}:
+            if "url" not in source:
+                raise _poetry_error()
+            _validate_url(source["url"], require_host=True)
+        elif "url" in source:
+            _validate_url(source["url"], require_host=False)
+        else:
+            raise _poetry_error()
+        if "subdirectory" in source and (
+                not isinstance(source["subdirectory"], str) or not source["subdirectory"].strip()):
+            raise _poetry_error()
+        if source_type == "git" and "resolved_reference" in source:
+            # SHA 이외의 값은 오류가 아니라 부동 참조로 보고한다.
+            if not source["resolved_reference"].strip():
+                raise _poetry_error()
+    return data
+
+
+def _strip_inline_comment(line: str) -> str:
+    """공백 또는 탭 뒤의 주석만 제거한다(URL fragment의 `#`는 보존)."""
+    return re.split(r"[ \t]+#", line, maxsplit=1)[0].rstrip()
+
+
+def _include_path(value: str) -> str:
+    """requirements include 인자를 따옴표 하나의 경로로 정규화한다."""
+    value = value.strip()
+    if not value:
+        raise ValueError("requirements.txt 입력 구조 오류")
+    if value[0] in {"'", '"'}:
+        quote = value[0]
+        if len(value) < 2 or value[-1] != quote or quote in value[1:-1]:
+            raise ValueError("requirements.txt 입력 구조 오류")
+        return value[1:-1]
+    if "'" in value or '"' in value:
+        raise ValueError("requirements.txt 입력 구조 오류")
+    return value
+
+
+def _editable_requirement(line: str) -> str | None:
+    """지원하는 editable git 행을 일반 PEP 508 URL 행으로 바꾼다."""
+    match = re.match(r"^(?:-e|--editable)(?:=|[ \t]+)(.+)$", line)
+    if match is None:
+        return None
+    value = match[1].strip()
+    if not value:
+        raise ValueError("requirements.txt 입력 구조 오류")
+    try:
+        parsed = urlsplit(value)
+    except ValueError as exc:
+        raise ValueError("requirements.txt 입력 구조 오류") from exc
+    egg = next((item.split("=", 1)[1] for item in parsed.fragment.split("&")
+                if item.startswith("egg=") and "=" in item), None)
+    if not egg or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", egg):
+        raise ValueError("requirements.txt 입력 구조 오류")
+    if not value.lower().startswith(("git+", "git:", "github:", "gitlab:", "bitbucket:")):
+        raise ValueError("requirements.txt 입력 구조 오류")
+    without_egg = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, parsed.query, ""))
+    return f"{egg} @ {without_egg}"
+
+
+def _strip_requirement_hashes(line: str) -> str:
+    """선언 행의 per-requirement `--hash` 토큰을 제거하고 형식을 검증한다."""
+    try:
+        # posix=False로 marker의 문자열 인용부호를 보존한다. 인용부호를
+        # 제거하면 `>=`가 `>`와 `=`로 다시 해석되는 등 잘못된 marker가
+        # 정상 입력으로 통과할 수 있다.
+        tokens = shlex.split(line, posix=False)
+    except ValueError as exc:
+        raise ValueError("requirements.txt 입력 구조 오류") from exc
+    kept: list[str] = []
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        if token == "--hash":
+            index += 1
+            hash_value = tokens[index] if index < len(tokens) else ""
+            if len(hash_value) >= 2 and hash_value[0] in {"'", '"'} and hash_value[-1] == hash_value[0]:
+                hash_value = hash_value[1:-1]
+            if not re.fullmatch(r"[A-Za-z0-9_-]+:[0-9A-Fa-f]+", hash_value):
+                raise ValueError("requirements.txt 입력 구조 오류")
+        elif token.startswith("--hash="):
+            hash_value = token[len("--hash="):]
+            if len(hash_value) >= 2 and hash_value[0] in {"'", '"'} and hash_value[-1] == hash_value[0]:
+                hash_value = hash_value[1:-1]
+            if not re.fullmatch(r"[A-Za-z0-9_-]+:[0-9A-Fa-f]+", hash_value):
+                raise ValueError("requirements.txt 입력 구조 오류")
+        elif token.startswith("--"):
+            kept.append(token)
+        else:
+            kept.append(token)
+        index += 1
+    return " ".join(kept)
+
+
+REQUIREMENTS_IGNORED_OPTIONS = frozenset({
+    "--no-index", "--pre", "--require-hashes", "--use-pep517", "--no-use-pep517",
+    "--prefer-binary", "--no-cache-dir",
+})
+REQUIREMENTS_VALUE_OPTIONS = frozenset({
+    "--index-url", "--extra-index-url", "--trusted-host", "--find-links",
+})
+REQUIREMENTS_PARAMETER_OPTIONS = frozenset({"--only-binary", "--no-binary"})
+
+
+def read_requirements(path: Path, *, _stack: tuple[Path, ...] = ()) -> list[str]:
+    """`-r`/`--requirement`를 재귀 확장하고 유효한 선언 행만 돌려준다."""
+    path = path.resolve()
+    if path in _stack or not path.is_file():
+        raise ValueError("requirements.txt 입력 구조 오류")
+    try:
+        raw_lines = path.read_text(encoding="utf-8-sig").splitlines()
+    except (OSError, UnicodeError) as exc:
+        raise ValueError("requirements.txt 입력 구조 오류") from exc
+    lines: list[str] = []
+    pending = ""
+    for raw in raw_lines:
+        current = raw.strip()
+        pending = (pending + " " + current) if pending else current
+        if pending.endswith("\\"):
+            pending = pending[:-1].rstrip()
+            continue
+        if pending:
+            lines.append(pending)
+        pending = ""
+    if pending:
+        raise ValueError("requirements.txt 입력 구조 오류")
+
+    result: list[str] = []
+    stack = _stack + (path,)
+    for original in lines:
+        line = _strip_inline_comment(original).strip()
+        if not line or line.startswith("#"):
+            continue
+        include: str | None = None
+        if re.match(r"^-r(?:[ \t]+|$)", line) or (line.startswith("-r") and not line.startswith("--")):
+            include = _include_path(line[2:])
+        elif line == "--requirement" or line.startswith("--requirement=") or line.startswith("--requirement ") or line.startswith("--requirement\t"):
+            value = line[len("--requirement"):]
+            include = _include_path(value[1:] if value.startswith("=") else value)
+        if include is not None:
+            if not include:
+                raise ValueError("requirements.txt 입력 구조 오류")
+            result.extend(read_requirements(path.parent / include, _stack=stack))
+            continue
+        editable = _editable_requirement(line)
+        if editable is not None:
+            result.append(editable)
+            continue
+        if line.startswith(("-e", "--editable")):
+            raise ValueError("requirements.txt 입력 구조 오류")
+        normalized = _strip_requirement_hashes(line)
+        if not normalized:
+            raise ValueError("requirements.txt 입력 구조 오류")
+        tokens = normalized.split()
+        option = tokens[0]
+        if option in REQUIREMENTS_IGNORED_OPTIONS:
+            if len(tokens) != 1:
+                raise ValueError("requirements.txt 입력 구조 오류")
+            continue
+        option_name, separator, option_value = option.partition("=")
+        if option_name in REQUIREMENTS_VALUE_OPTIONS:
+            if (separator and not option_value) or (not separator and len(tokens) != 2):
+                raise ValueError("requirements.txt 입력 구조 오류")
+            continue
+        if option_name in REQUIREMENTS_PARAMETER_OPTIONS:
+            if separator:
+                if not option_value:
+                    raise ValueError("requirements.txt 입력 구조 오류")
+            elif len(tokens) != 2 or not tokens[1]:
+                raise ValueError("requirements.txt 입력 구조 오류")
+            continue
+        if option.startswith("-"):
+            raise ValueError("requirements.txt 입력 구조 오류")
+        if parse_requirement(normalized, strict=True) is None:
+            raise ValueError("requirements.txt 입력 구조 오류")
+        result.append(normalized)
+    return result
+
+
+def exact_requirement_version(spec: str) -> str | None:
+    match = EXACT_REQUIREMENT_RE.fullmatch(spec.strip())
+    if match is None or parse_version(match[1]) is None:
+        return None
+    return match[1]
+
+
+def _range_interval(spec: str):
+    """PEP 440의 하한·상한을 닫힌/열린 구간으로 보수적으로 해석한다."""
+
+    def next_release(version: tuple[int, ...], operator: str) -> tuple[int, ...]:
+        values = list(version)
+        if operator == "^":
+            if values[0] > 0:
+                return (values[0] + 1,)
+            if len(values) > 1 and values[1] > 0:
+                return (0, values[1] + 1)
+            return (0, 0, (values[2] + 1) if len(values) > 2 else 1)
+        if operator == "~=":
+            if len(values) <= 2:
+                return (values[0] + 1,)
+            return tuple(values[:-2] + [values[-2] + 1])
+        if operator == "~":
+            if len(values) <= 1:
+                return (values[0] + 1,)
+            return tuple(values[:-1] + [values[-1] + 1])
+        return tuple(values)
+
+    def parse_version_token(token: str) -> tuple[tuple[int, ...], tuple[int, ...] | None] | None:
+        if token in {"", "*", "x", "X"}:
+            return None
+        wildcard = re.fullmatch(r"(v?\d+(?:\.\d+)*)\.[xX*]", token)
+        if wildcard:
+            lower = parse_version(wildcard[1])
+            if lower is None:
+                return None
+            values = list(lower)
+            values[-1] += 1
+            return lower, tuple(values)
+        version = parse_version(token)
+        if version is None or "*" in token.lower() or "x" in token.lower():
+            return None
+        return version, None
+
+    def update_lower(old, old_inc, new, new_inc):
+        if old is None or below(old, new):
+            return new, new_inc
+        if same_version(old, new):
+            return old, old_inc and new_inc
+        return old, old_inc
+
+    def update_upper(old, old_inc, new, new_inc):
+        if old is None or below(new, old):
+            return new, new_inc
+        if same_version(old, new):
+            return old, old_inc and new_inc
+        return old, old_inc
+
+    intervals = []
+    for alternative in spec.split("||"):
+        normalized = re.sub(r"(===|==|!=|~=|>=|<=|>|<|\^|~|=)\s+", r"\1", alternative.strip())
+        if not normalized:
+            return None
+        parts = [part for part in re.split(r"[,\s]+", normalized) if part]
+        if not parts:
+            return None
+        lower = upper = None
+        lower_inclusive = upper_inclusive = True
+        exclusions: list[tuple[int, ...]] = []
+        for part in parts:
+            match = re.match(r"^(===|==|!=|~=|>=|<=|>|<|\^|~|=)?(.*)$", part)
+            if match is None:
+                return None
+            operator = match[1] or ""
+            token = match[2]
+            if token in {"*", "x", "X"}:
+                if operator == "":
+                    continue
+                return None
+            parsed = parse_version_token(token)
+            if parsed is None:
+                return None
+            version, wildcard_upper = parsed
+            if operator in {"==", "="} and wildcard_upper is not None:
+                lower, lower_inclusive = update_lower(lower, lower_inclusive, version, True)
+                upper, upper_inclusive = update_upper(upper, upper_inclusive, wildcard_upper, False)
+                continue
+            if wildcard_upper is not None:
+                if operator == "!=":
+                    # 제외 wildcard는 구간으로 정확히 표현하지 못하므로 전체와 겹칠
+                    # 가능성이 있는 것으로 남겨 둔다(보수적 BLOCKED).
+                    continue
+                return None
+            if operator in {"", "===", "=="}:
+                lower, lower_inclusive = update_lower(lower, lower_inclusive, version, True)
+                upper, upper_inclusive = update_upper(upper, upper_inclusive, version, True)
+            elif operator == "!=":
+                exclusions.append(version)
+            elif operator in {">=", ">"}:
+                lower, lower_inclusive = update_lower(lower, lower_inclusive, version, operator == ">=")
+            elif operator in {"<", "<="}:
+                upper, upper_inclusive = update_upper(upper, upper_inclusive, version, operator == "<=")
+            elif operator in {"^", "~", "~="}:
+                lower, lower_inclusive = update_lower(lower, lower_inclusive, version, True)
+                upper, upper_inclusive = update_upper(upper, upper_inclusive,
+                                                      next_release(version, operator), False)
+            else:
+                return None
+        if (lower is not None and upper is not None
+                and (below(upper, lower)
+                     or (same_version(lower, upper) and not (lower_inclusive and upper_inclusive)))):
+            return None
+        intervals.append((lower, lower_inclusive, upper, upper_inclusive, exclusions))
+    return intervals or None
+
+
+def ranges_overlap(left: str, right: str) -> bool:
+    """두 선언 범위가 겹치는지 보수적으로 판단한다. 해석 불가면 겹침으로 닫는다."""
+    left_intervals, right_intervals = _range_interval(left), _range_interval(right)
+    if left_intervals is None or right_intervals is None:
+        return True
+    for a_lower, a_lower_inc, a_upper, a_upper_inc, a_exclusions in left_intervals:
+        for b_lower, b_lower_inc, b_upper, b_upper_inc, b_exclusions in right_intervals:
+            lower = a_lower
+            lower_inc = a_lower_inc
+            if lower is None or (b_lower is not None and below(lower, b_lower)):
+                lower, lower_inc = b_lower, b_lower_inc
+            elif b_lower is not None and same_version(lower, b_lower):
+                lower_inc = lower_inc and b_lower_inc
+            upper = a_upper
+            upper_inc = a_upper_inc
+            if upper is None or (b_upper is not None and below(b_upper, upper)):
+                upper, upper_inc = b_upper, b_upper_inc
+            elif b_upper is not None and same_version(upper, b_upper):
+                upper_inc = upper_inc and b_upper_inc
+            if lower is not None and upper is not None:
+                if below(upper, lower) or (same_version(lower, upper) and not (lower_inc and upper_inc)):
+                    continue
+            if lower is not None and any(same_version(lower, excluded)
+                                         for excluded in a_exclusions + b_exclusions):
+                if upper is not None and same_version(lower, upper):
+                    continue
+            return True
+    return False
+
+
 UV_TOP_FIELDS = frozenset({
     "version", "revision", "requires-python", "resolution-markers", "supported-markers",
     "required-markers", "conflicts", "options", "manifest", "package", "distribution",
@@ -474,9 +912,7 @@ def uv_source_kind(source: object, path: Path, package_name: str) -> str:
         raise _uv_error(path, f"package {package_name!r} source 종류·값이 잘못됨")
     if kinds[0] in {"registry", "git"}:
         try:
-            parsed = urlsplit(source[kinds[0]])
-            hostname = parsed.hostname
-            parsed.port
+            parsed, hostname = _parse_url(source[kinds[0]])
         except ValueError as exc:
             raise _uv_error(path, "source URL 형식 오류") from exc
         if not parsed.scheme or not hostname:
@@ -572,7 +1008,14 @@ def ref_is_pinned(text: str, *, kind: str = "npm") -> bool:
     def valid_ref(ref: str) -> bool:
         return bool(re.fullmatch(r"[0-9a-f]{40}", ref) or TAG_RE.fullmatch(ref))
 
-    parsed = urlsplit(text.removeprefix("git+"))
+    if not isinstance(text, str) or not text.strip():
+        raise ValueError("git 참조 형식 오류")
+    try:
+        parsed, hostname = _parse_url(text)
+    except ValueError as exc:
+        raise ValueError("git 참조 형식 오류") from exc
+    if parsed.scheme.lower() in {"http", "https", "ssh", "git"} and not hostname:
+        raise ValueError("git 참조 형식 오류")
     path = unquote(parsed.path)
     fragment = unquote(parsed.fragment)
     hosted = parsed.hostname in {"github.com", "gitlab.com"}
@@ -610,19 +1053,234 @@ def is_vcs_spec(spec: str) -> bool:
             or bool(re.match(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(#.*)?$", spec)))
 
 
-def parse_requirement(text: str) -> tuple[str, str, str] | None:
+REQUIREMENT_MARKER_NAMES = frozenset({
+    "python_version", "python_full_version", "os_name", "sys_platform", "platform_release",
+    "platform_system", "platform_version", "platform_machine", "platform_python_implementation",
+    "implementation_name", "implementation_version", "extra",
+})
+
+
+def _outer_pair_wraps(text: str) -> bool:
+    if not text.startswith("(") or not text.endswith(")"):
+        return False
+    depth = 0
+    quote = ""
+    escaped = False
+    for index, char in enumerate(text):
+        if quote:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = ""
+            continue
+        if char in {"'", '"'}:
+            quote = char
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth == 0 and index != len(text) - 1:
+                return False
+            if depth < 0:
+                return False
+    return depth == 0 and not quote
+
+
+def _marker_boundary(char: str) -> bool:
+    return not (char.isalnum() or char == "_")
+
+
+def _split_marker_top(text: str, keyword: str) -> list[str] | None:
+    """인용 문자열·괄호 안을 보존한 채 최상위 boolean 항을 나눈다."""
+    parts: list[str] = []
+    start = 0
+    depth = 0
+    quote = ""
+    escaped = False
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if quote:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = ""
+            index += 1
+            continue
+        if char in {"'", '"'}:
+            quote = char
+            index += 1
+            continue
+        if char == "(":
+            depth += 1
+            index += 1
+            continue
+        if char == ")":
+            depth -= 1
+            if depth < 0:
+                return None
+            index += 1
+            continue
+        if depth == 0 and text[index:index + len(keyword)] == keyword:
+            before = text[index - 1] if index else " "
+            after_index = index + len(keyword)
+            after = text[after_index] if after_index < len(text) else " "
+            if _marker_boundary(before) and _marker_boundary(after):
+                parts.append(text[start:index].strip())
+                start = after_index
+                index = after_index
+                continue
+        index += 1
+    if quote or depth != 0:
+        return None
+    parts.append(text[start:].strip())
+    return parts
+
+
+def _marker_string(text: str) -> bool:
+    """PEP 508 marker 문자열 리터럴인지 확인한다."""
+    if len(text) < 2 or text[0] not in {"'", '"'} or text[-1] != text[0]:
+        return False
+    quote = text[0]
+    escaped = False
+    for char in text[1:-1]:
+        if escaped:
+            escaped = False
+        elif char == "\\":
+            escaped = True
+        elif char == quote or char in {"\r", "\n"}:
+            return False
+    return not escaped
+
+
+def _marker_operand(text: str) -> tuple[str, str] | None:
+    text = text.strip()
+    if text in REQUIREMENT_MARKER_NAMES:
+        return "name", text
+    if _marker_string(text):
+        return "value", text
+    return None
+
+
+def _marker_comparison(text: str) -> bool:
+    """단일 marker 비교를 확인하며 피연산자 역순도 허용한다."""
+    operators = ("not in", "===", "~=", "==", "!=", "<=", ">=", "<", ">", "in")
+    depth = 0
+    quote = ""
+    escaped = False
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if quote:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = ""
+            index += 1
+            continue
+        if char in {"'", '"'}:
+            quote = char
+            index += 1
+            continue
+        if char == "(":
+            depth += 1
+            index += 1
+            continue
+        if char == ")":
+            depth -= 1
+            if depth < 0:
+                return False
+            index += 1
+            continue
+        if depth == 0:
+            for operator in operators:
+                if text[index:index + len(operator)] != operator:
+                    continue
+                end = index + len(operator)
+                if operator in {"in", "not in"}:
+                    before = text[index - 1] if index else " "
+                    after = text[end] if end < len(text) else " "
+                    if not _marker_boundary(before) or not _marker_boundary(after):
+                        continue
+                left = _marker_operand(text[:index])
+                right = _marker_operand(text[end:])
+                if left is None or right is None:
+                    return False
+                return True
+        index += 1
+    return False
+
+
+def _valid_marker_expression(expression: str) -> bool:
+    expression = expression.strip()
+    if not expression:
+        return False
+    while _outer_pair_wraps(expression):
+        expression = expression[1:-1].strip()
+    if not expression:
+        return False
+    for keyword in ("or", "and"):
+        parts = _split_marker_top(expression, keyword)
+        if parts is None:
+            return False
+        if len(parts) > 1:
+            return all(_valid_marker_expression(part) for part in parts)
+    return _marker_comparison(expression)
+
+
+def _valid_requirement_marker(marker: str) -> bool:
+    return _valid_marker_expression(marker)
+
+
+def _normalize_requirement_spec(rest: str) -> str | None:
+    spec = rest.strip()
+    if not spec:
+        return ""
+    if spec.startswith("("):
+        if not _outer_pair_wraps(spec):
+            return None
+        spec = spec[1:-1].strip()
+    if any(char in spec for char in "()"):
+        return None
+    return spec
+
+
+def parse_requirement(text: str, *, strict: bool = False) -> tuple[str, str, str] | None:
     """PEP 508 문자열 → (이름, 범위, URL). URL 의존성은 범위가 빈 문자열."""
-    text = text.split(";")[0].strip()
+    text, separator, marker = text.partition(";")
+    if strict and separator and not _valid_requirement_marker(marker):
+        return None
+    text = text.strip()
     if not text or text.startswith(("-", "#")):
         return None
     match = REQ_RE.match(text)
     if match is None:
         return None
-    name, _extras, rest = match.groups()
+    name, extras, rest = match.groups()
+    if strict and extras is not None:
+        values = extras[1:-1].split(",")
+        if any(not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", value.strip()) for value in values):
+            return None
     rest = rest.strip()
     if rest.startswith("@"):
-        return normalize_name(name), "", rest[1:].strip()
-    return normalize_name(name), rest.strip("() "), ""
+        url = rest[1:].strip()
+        if strict and (not url or url.startswith("@")
+                       or not url.lower().startswith(("git+", "git:", "github:", "gitlab:",
+                                                       "bitbucket:", "https://", "http://", "file:"))):
+            return None
+        return normalize_name(name), "", url
+    spec = _normalize_requirement_spec(rest) if strict else rest.strip("() ")
+    if spec is None:
+        return None
+    if strict and spec and _range_interval(spec) is None:
+        return None
+    return normalize_name(name), spec, ""
 
 
 # --------------------------------------------------------------------------- 탐색
@@ -668,13 +1326,13 @@ def discover(root: Path) -> list[Scope]:
             if lock is not None:
                 scopes.append(Scope("python", rel, manifest, lock, "uv"))
             elif (directory / "poetry.lock").is_file():
-                scopes.append(Scope("python", rel, manifest, directory / "poetry.lock", "poetry",
-                                    note="poetry.lock 파서 미지원(T-005b)"))
+                scopes.append(Scope("python", rel, manifest, directory / "poetry.lock", "poetry"))
             else:
                 scopes.append(Scope("python", rel, manifest, None, "none"))
-        elif "requirements.txt" in files:
-            scopes.append(Scope("python", rel, directory / "requirements.txt", None, "requirements",
-                                note="requirements.txt는 선언만 읽는다(T-005b)"))
+        for requirement_name in sorted(name for name in files
+                                       if re.fullmatch(r"requirements[^/]*\.txt", name)):
+            scopes.append(Scope("python", rel, directory / requirement_name, None, "requirements",
+                                note=f"{requirement_name}는 선언만 읽는다(T-005b)"))
     return scopes
 
 
@@ -695,8 +1353,7 @@ def scopes_from_manifest(manifest_path: Path) -> tuple[str | None, list[Scope]]:
         elif kind in {"uv", "poetry"}:
             manifest = path.parent / "pyproject.toml"
             scopes.append(Scope("python", label, manifest if manifest.is_file() else None,
-                                path if path.is_file() else None, kind,
-                                note="poetry.lock 파서 미지원(T-005b)" if kind == "poetry" else ""))
+                                path if path.is_file() else None, kind))
         elif kind == "requirements":
             scopes.append(Scope("python", label, path if path.is_file() else None, None,
                                 "requirements", note="requirements.txt는 선언만 읽는다(T-005b)"))
@@ -719,6 +1376,7 @@ class Checker:
         self.npm_floating: set[tuple[Path, str]] = set()
         self.npm_manifests: set[tuple[Path, str]] = set()
         self.uv_locks_scanned: set[Path] = set()
+        self.poetry_locks_scanned: set[Path] = set()
 
     # --- 공통
     def add(self, scope: str, key: str, ecosystem: str, declared: str, installed: str,
@@ -942,12 +1600,40 @@ class Checker:
         self.add(scope, key, ecosystem, spec, installed_text, verdict,
                  f"{prefix} {installed_text} · {detail}".strip(" ·"))
 
+    def record_requirement(self, scope: str, name: str, spec: str) -> None:
+        """requirements 선언을 설치본 후보·범위·차단 정책으로 분리해 기록한다."""
+        exact = exact_requirement_version(spec)
+        blocked_entries = [entry for entry in self.registry.data.get("blocked", [])
+                           if entry["ecosystem"] == "pypi"
+                           and package_identity("pypi", entry["name"]) == package_identity("pypi", name)]
+        if exact is None:
+            for entry in blocked_entries:
+                if ranges_overlap(spec, entry["range"]):
+                    self.add(scope, name, "pypi", spec, "", "BLOCKED",
+                             f"requirements 범위가 차단 범위와 겹침 · {entry['reason']}")
+            key = self.registry.axis_for("pypi", name)
+            if key is not None and self.registry.axes[key].get("checked", True):
+                self.add(scope, key, "pypi", spec, "", "NO_LOCK",
+                         "requirements.txt 범위 선언은 설치본 후보일 뿐이라 uv.lock 도입 전 대조 불가")
+            return
+        installed = installed_version("pypi", exact)
+        for entry in blocked_entries:
+            if installed is not None and range_contains(installed, entry["range"]):
+                self.add(scope, name, "pypi", spec, exact, "BLOCKED",
+                         f"since {entry.get('since', '?')} · {entry['reason']}")
+        key = self.registry.axis_for("pypi", name)
+        if key is not None and self.registry.axes[key].get("checked", True):
+            self.record_axis(scope, key, "pypi", spec, exact)
+
     # --- python
     def check_python(self, scope: Scope) -> None:
         label = scope.label
         declared: dict[str, str] = {}
         urls: dict[str, list[str]] = {}
+        requirement_specs: dict[str, list[str]] = {}
         requires_python: str | None = None
+        requirements_mode = scope.lock_kind == "requirements"
+        poetry_mode = scope.lock_kind == "poetry"
         manifest = scope.manifest
         if manifest is not None and manifest.name == "pyproject.toml":
             try:
@@ -1036,33 +1722,80 @@ class Checker:
                     urls.setdefault(normalize_name(name), []).append(
                         f"{git_url}@{ref}" if ref else git_url
                     )
-            poetry = data.get("tool", {}).get("poetry", {})
+            tool = data.get("tool", {})
+            if not isinstance(tool, dict):
+                raise _manifest_input_error()
+            poetry = tool.get("poetry", {})
             if poetry:
-                requires_python = requires_python or poetry.get("dependencies", {}).get("python")
-                groups = [poetry.get("dependencies", {})]
-                groups.extend(g.get("dependencies", {}) for g in poetry.get("group", {}).values())
+                if not isinstance(poetry, dict):
+                    raise _manifest_input_error()
+                poetry_dependencies = poetry.get("dependencies", {})
+                poetry_groups = poetry.get("group", {})
+                if not isinstance(poetry_dependencies, dict) or not isinstance(poetry_groups, dict):
+                    raise _manifest_input_error()
+                groups = [poetry_dependencies]
+                for group in poetry_groups.values():
+                    if not isinstance(group, dict) or not isinstance(group.get("dependencies", {}), dict):
+                        raise _manifest_input_error()
+                    groups.append(group["dependencies"])
+
+                def add_poetry_dependency(name: object, value: object) -> None:
+                    if not isinstance(name, str) or not name.strip():
+                        raise _manifest_input_error()
+                    values = value if isinstance(value, list) else [value]
+                    if not values or any(not isinstance(item, (str, dict)) for item in values):
+                        raise _manifest_input_error()
+                    normalized = normalize_name(name)
+                    for item in values:
+                        if isinstance(item, str):
+                            config = {}
+                            spec = item
+                        else:
+                            config = item
+                            spec = config.get("version", "")
+                            if not isinstance(spec, str):
+                                raise _manifest_input_error()
+                        if normalized == "python":
+                            if not isinstance(spec, str) or not spec.strip():
+                                raise _manifest_input_error()
+                            nonlocal_requires[0] = nonlocal_requires[0] or spec
+                            continue
+                        declared.setdefault(normalized, spec)
+                        git_url = config.get("git") if isinstance(config, dict) else None
+                        if isinstance(config, dict) and any(field_name in config
+                                                           for field_name in ("rev", "tag", "branch")) and git_url is None:
+                            raise _manifest_input_error()
+                        if git_url is None:
+                            continue
+                        if not isinstance(git_url, str) or not git_url.strip():
+                            raise _manifest_input_error()
+                        refs = [field_name for field_name in ("rev", "tag", "branch")
+                                if field_name in config and config[field_name] is not None]
+                        if len(refs) > 1 or any(not isinstance(config[field_name], str)
+                                                or not config[field_name].strip() for field_name in refs):
+                            raise _manifest_input_error()
+                        normalized_url = git_url if git_url.startswith("git+") else "git+" + git_url
+                        if config.get("branch") is not None:
+                            ref = f"branch:{config['branch']}"
+                        else:
+                            ref = config.get("rev") or config.get("tag") or ""
+                        urls.setdefault(normalized, []).append(
+                            f"{normalized_url}@{ref}" if ref else normalized_url
+                        )
+
+                nonlocal_requires = [requires_python]
                 for group in groups:
                     for name, value in group.items():
-                        if normalize_name(name) == "python":
-                            continue
-                        spec = value.get("version", "") if isinstance(value, dict) else str(value)
-                        declared.setdefault(normalize_name(name), spec)
-                        if isinstance(value, dict) and value.get("git"):
-                            if value.get("branch") is not None and not value.get("rev") and not value.get("tag"):
-                                ref = f"branch:{value['branch']}"
-                            else:
-                                ref = value.get("rev") or value.get("tag") or ""
-                            urls.setdefault(normalize_name(name), []).append(
-                                f"{value['git']}@{ref}" if ref else value["git"]
-                            )
-        elif manifest is not None and manifest.name == "requirements.txt":
-            for line in manifest.read_text(encoding="utf-8-sig").splitlines():
-                line = line.split(" #")[0].strip()
+                        add_poetry_dependency(name, value)
+                requires_python = nonlocal_requires[0]
+        elif manifest is not None and requirements_mode:
+            for line in read_requirements(manifest):
                 parsed = parse_requirement(line)
                 if parsed is None:
-                    continue
+                    raise ValueError("requirements.txt 입력 구조 오류")
                 name, spec, url = parsed
                 declared.setdefault(name, spec)
+                requirement_specs.setdefault(name, []).append(spec)
                 if url:
                     urls.setdefault(name, []).append(url)
 
@@ -1087,61 +1820,108 @@ class Checker:
                     or manifest_bound.lower != lock_bound.lower
                     or manifest_bound.exact != lock_bound.exact):
                 self.record_range("python", f"{label} [uv.lock]", "runtime", lock_requires)
+        elif scope.lock is not None and scope.lock.is_file() and poetry_mode:
+            lock_data = read_poetry_lock(scope.lock)
+            for entry in lock_data["package"]:
+                lock_packages.setdefault(normalize_name(entry["name"]), []).append(entry)
+            lock_requires = lock_data.get("metadata", {}).get("python-versions")
+            if isinstance(lock_requires, str) and lock_requires.strip():
+                manifest_bound = lower_bound(str(requires_python)) if requires_python is not None else None
+                lock_bound = lower_bound(lock_requires)
+                if (requires_python is None or manifest_bound is None or lock_bound is None
+                        or manifest_bound.lower != lock_bound.lower
+                        or manifest_bound.exact != lock_bound.exact):
+                    self.record_range("python", f"{label} [poetry.lock]", "runtime", lock_requires)
 
         # git/URL 참조
+        def lock_git_reference(entry: dict) -> tuple[str, str] | None:
+            source = entry.get("source", {})
+            if scope.lock_kind == "uv" and isinstance(source, dict) and "git" in source:
+                return source["git"], source["git"]
+            if scope.lock_kind != "poetry" or not isinstance(source, dict) or source.get("type") != "git":
+                return None
+            url = source["url"]
+            reference = source.get("reference", "")
+            resolved = source.get("resolved_reference", "")
+            normalized_url = url if url.startswith("git+") else "git+" + url
+            declared_ref = reference or (resolved if re.fullmatch(r"[0-9a-f]{40}", resolved) else "")
+            declared = f"{normalized_url}@{declared_ref}" if declared_ref else normalized_url
+            # Poetry의 resolved_reference는 uv처럼 fragment에 두어 SHA 판정을 재사용한다.
+            locked = f"{normalized_url}#{resolved}" if resolved else declared
+            return declared, locked
+
         for name, url_specs in urls.items():
-            resolved_refs = [entry["source"]["git"] for entry in lock_packages.get(name, [])
-                             if "git" in entry.get("source", {})]
+            resolved_refs = [lock_git_reference(entry)[1] for entry in lock_packages.get(name, [])
+                             if lock_git_reference(entry) is not None]
             for url in url_specs:
                 if resolved_refs:
                     for resolved in resolved_refs:
                         self.record_ref(label, "pypi", name, url, resolved)
                 else:
                     self.record_ref(label, "pypi", name, url)
-        first_uv_lock_scan = False
-        if scope.lock is not None and scope.lock_kind == "uv" and lock_packages:
+        first_python_lock_scan = False
+        if scope.lock is not None and scope.lock_kind in {"uv", "poetry"} and lock_packages:
             # uv workspace는 멤버마다 같은 lock을 가리킬 수 있다. 첫 범위가 멤버여도
             # 공유 lock 전체의 전이 축·차단·git 참조를 한 번 검사한다.
             lock_path = scope.lock.resolve()
-            first_uv_lock_scan = lock_path not in self.uv_locks_scanned
-            if first_uv_lock_scan:
-                self.uv_locks_scanned.add(lock_path)
+            scanned = self.uv_locks_scanned if scope.lock_kind == "uv" else self.poetry_locks_scanned
+            first_python_lock_scan = lock_path not in scanned
+            if first_python_lock_scan:
+                scanned.add(lock_path)
             for name, entries in lock_packages.items():
-                if not first_uv_lock_scan or name in urls:
+                if not first_python_lock_scan or name in urls:
                     continue
                 for entry in entries:
-                    source = entry.get("source", {})
-                    if "git" in source:
-                        self.record_ref(label, "pypi", name, "(전이)", source["git"])
+                    lock_ref = lock_git_reference(entry)
+                    if lock_ref is not None:
+                        if scope.lock_kind == "uv":
+                            self.record_ref(label, "pypi", name, "(전이)", lock_ref[1])
+                        else:
+                            self.record_ref(label, "pypi", name, lock_ref[0], lock_ref[1])
 
+        if requirements_mode:
+            self.add(label, "lockfile", "pypi", "", "", "NO_LOCK",
+                     "requirements.txt은 lockfile이 아님 — uv.lock 도입 task(T-005b) 필요")
+            for name, specs in requirement_specs.items():
+                for spec in specs:
+                    self.record_requirement(label, name, spec)
+            return
         if not lock_packages:
+            missing_lock_note = scope.note or (
+                f"{scope.lock_kind}.lock 없음 — uv.lock 도입 task(T-005b) 필요"
+                if scope.lock_kind == "poetry" else
+                "uv.lock 없음 — 설치본 대조 불가(lockfile 의무 D-07)"
+            )
             added = 0
             for name, spec in declared.items():
                 key = self.registry.axis_for("pypi", name)
                 if key is not None:
                     self.add(label, key, "pypi", spec, "", "NO_LOCK",
-                             scope.note or "uv.lock 없음 — 설치본 대조 불가(lockfile 의무 D-07)")
+                             missing_lock_note)
                     added += 1
             if not added:
-                self.add(label, "lockfile", "pypi", "", "", "NO_LOCK", scope.note or "uv.lock 없음")
+                self.add(label, "lockfile", "pypi", "", "", "NO_LOCK", missing_lock_note)
             return
         for name, spec in declared.items():
             key = self.registry.axis_for("pypi", name)
             if key is None or not self.registry.axes[key].get("checked", True):
                 continue
-            entries = [e for e in lock_packages.get(name, []) if "registry" in e.get("source", {})]
+            if poetry_mode:
+                entries = lock_packages.get(name, [])
+            else:
+                entries = [e for e in lock_packages.get(name, []) if "registry" in e.get("source", {})]
             if not entries:
                 self.add(label, key, "pypi", spec, "", "NO_LOCK",
-                         f"uv.lock에 `{name}` registry 항목 없음")
+                         f"{scope.lock_kind}.lock에 `{name}` 항목 없음")
                 continue
             for entry in entries:
                 self.record_axis(label, key, "pypi", spec, str(entry.get("version", "")))
         # 전이 의존성까지 포함한 축·차단 검사는 공유 lock당 1회만 수행한다.
-        if first_uv_lock_scan:
+        if first_python_lock_scan:
             for name, entries in lock_packages.items():
                 for entry in entries:
                     version = str(entry.get("version", ""))
-                    if "registry" not in entry.get("source", {}):
+                    if not poetry_mode and "registry" not in entry.get("source", {}):
                         continue
                     self.record_blocked(label, "pypi", name, version)
                     key = self.registry.axis_for("pypi", name)

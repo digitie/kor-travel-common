@@ -2,6 +2,18 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-005b 완료·PR #7 병합 준비)
+
+T-005b를 `codex/t005b-poetry-requirements`에서 완료했다. 최종 candidate `5b687585cddf6e7a5145911e75647a0e814d9078`은 PR #7에 push했고 [CI 34087885355](https://github.com/digitie/kor-travel-common/actions/runs/34087885355)의 5개 check가 모두 성공했다. Poetry lock의 package/source·metadata·조건별 Git reference, 재귀 requirements의 include·hash·editable·범위/차단·`NO_LOCK`, URL 오류 비공개와 PEP 508 marker 문법을 common 코드와 회귀 시험으로 마무리했다.
+
+Windows Python 3.14.3·WSL Python 3.11.15에서 각각 전체 162 tests·skip 0, focused 67 tests·skip 0이 성공했다. 문서 link 283/2166, plan 102, SPDX 22, secret/redaction 351, self-check와 diff 공백 검사가 오류 0이다. `ktdm`·`ktc`·`geo-no-lock` fixture와 합성 `mcp>=2` 차단 사례를 실행했으며, 실제 소비자 설치·빌드·e2e·Poetry/pip/uv 설치·전환은 `NOT_RUN`이다. 조사 fixture의 `mcp<2`는 차단되지 않는 음성 사례로 보존했다.
+
+최초부터 post4까지 A/B 독립 원본을 서로 비공개로 확정했다. 최초·post-fix·post2·post3은 BLOCK finding을 수정해 누적 finding을 닫았고, 최종 post4에서 A/B 모두 PASS·새 finding 0을 확인했다([최종 통합 리뷰](reviews/adversarial/2026-09-07-t005b-post4.md), [manifest](reviews/adversarial/evidence/2026-09-07-t005b-manifest.md)). 소비자 저장소는 수정하지 않았고 npm/PyPI에 게시하지 않았다. PR #7 merge와 main CI 확인 후 T-005c를 순차 진행한다.
+
+## 2026-09-07 (Codex, T-005b 시작)
+
+T-005a 문서 후속 커밋 `a9bef6c4ca4ac93544040961874e00e5238e7116`을 PR #6으로 squash merge해 main `796445fadb9b4fa6de2f392d6169f31abdccc0fa`에 반영했다. PR CI `34081699365`와 main CI `34081751051`의 필수 5개 check가 모두 성공했고 리뷰 worktree를 정리했다. 이제 T-005b를 `codex/t005b-poetry-requirements`에서 시작한다. 소비자 저장소 쓰기·npm/PyPI 게시·설치는 하지 않는다.
+
 ## 2026-09-07 (Codex, T-005a 완료·PR #6 병합 준비)
 
 T-005a의 최종 code candidate `3c5801f14855a067080f257ec83d2279de32c74a`를 PR #6에 올렸다. `uv.lock`의 version/revision/source와 Python 하한, 공유 lock의 전이 축·차단·git source, PEP 735 group, `tool.uv.sources` 복수 항목을 검사하고 malformed input은 exit 2로 닫는다. branch/tag/rev 이름에 `@`가 들어간 경우 마지막 조각을 버전 태그로 오인하지 않도록 보수적으로 FLOATING_REF 처리했다. npm·PyPI 게시나 소비자 저장소 쓰기는 하지 않았다.

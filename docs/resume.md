@@ -4,17 +4,17 @@
 
 ## 현재 상태
 
-[PR #1](https://github.com/digitie/kor-travel-common/pull/1)의 계획·문서와 [PR #2](https://github.com/digitie/kor-travel-common/pull/2)의 T-003 고지·출처·SPDX 구현을 main에 squash merge했다. [PR #3](https://github.com/digitie/kor-travel-common/pull/3)의 T-005는 f050997에서 두 독립 reviewer PASS, 최초 9개 finding 모두 FIXED다. 완료 기록 CI 34064140128 성공 후 PR #3을 659aa6d로 병합했다. T-015의 npm/PyPI 미게시·common 구현 선행 정리와 T-006의 범위 변경 기록을 [PR #4](https://github.com/digitie/kor-travel-common/pull/4)에 반영했다. 최종 candidate 95c139f는 두 reviewer PASS·누적 9개 finding FIXED이며 CI 34066138272가 성공했다. 현재 완료 12개·열린 90개다. T-005a uv.lock 파서도 완료했고, T-009 리뷰에서 workflow 정적 검사 범위의 누락을 T-005c로 명시했다.
+[PR #1](https://github.com/digitie/kor-travel-common/pull/1)의 계획·문서와 [PR #2](https://github.com/digitie/kor-travel-common/pull/2)의 T-003 고지·출처·SPDX 구현을 main에 squash merge했다. [PR #3](https://github.com/digitie/kor-travel-common/pull/3)의 T-005는 f050997에서 두 독립 reviewer PASS, 최초 9개 finding 모두 FIXED다. 완료 기록 CI 34064140128 성공 후 PR #3을 659aa6d로 병합했다. T-015의 npm/PyPI 미게시·common 구현 선행 정리와 T-006의 범위 변경 기록을 [PR #4](https://github.com/digitie/kor-travel-common/pull/4)에 반영했다. 최종 candidate 95c139f는 두 reviewer PASS·누적 9개 finding FIXED이며 CI 34066138272가 성공했다. T-005a uv.lock 파서와 T-005b Poetry·requirements 파서를 완료했다. T-005b 최종 candidate `5b687585cddf6e7a5145911e75647a0e814d9078`은 PR #7 CI 34087885355의 5개 check와 두 reviewer PASS를 확인했으며, 현재 완료 13개·열린 89개다.
 
 T-005는 Windows Python 3.14.3·WSL Python 3.11.15에서 각각 전체 115 tests 성공·skip 0, SPDX 13개 오류 0, CI 성공이다. 7개 소비자의 고정 입력 48파일·306개 판정을 재현했다. report에 fail 기준 위반 102행이 있어 소비자 정책 준수·제품 검증 완료로 세지 않는다. [최종 리뷰](reviews/adversarial/2026-09-07-t005-post-fix.md)에 원본·경계 재현·한계를 연결했다.
 
 `packages/tokens`·`packages/ui`·Python 패키지 실물은 아직 없다. 패키지 build·pack/wheel 설치·소비자 빌드·e2e·시각 검증은 NOT_RUN(실물 없음). T-009의 SPDX 필수 CI 단계·Windows matrix와 비밀/운영 정보 guard를 구현하고 실제 CI를 검증했다. 소비자 저장소는 수정하지 않았다.
 
-T-009는 [PR #5](https://github.com/digitie/kor-travel-common/pull/5)의 `6e1881b86f017d604ccfa416bd368e5aba24c669`로 병합했고 main CI 34071150863의 5개 check가 성공했다. [최종 리뷰](reviews/adversarial/2026-09-07-t009-post-fix.md)와 [CI evidence](tasks/T-009-ci-hardening.md#evidence)에 기록했다.
+T-009는 [PR #5](https://github.com/digitie/kor-travel-common/pull/5)의 `6e1881b86f017d604ccfa416bd368e5aba24c669`로 병합했고 main CI 34071150863의 5개 check가 성공했다. T-005a도 [PR #6](https://github.com/digitie/kor-travel-common/pull/6)의 squash merge `796445fadb9b4fa6de2f392d6169f31abdccc0fa`로 main에 반영했고 main CI 34081751051의 5개 check가 성공했다. [최종 리뷰](reviews/adversarial/2026-09-07-t009-post-fix.md)와 [T-005a evidence](tasks/T-005a-check-versions-uv-lock.md#evidence)에 기록했다.
 
 ## 다음 한 작업
 
-- 작업: [T-005b](tasks/T-005b-check-versions-poetry-requirements.md), READY. T-005a는 [PR #6](https://github.com/digitie/kor-travel-common/pull/6)의 최종 candidate `3c5801f14855a067080f257ec83d2279de32c74a`에서 A/B PASS·8 finding FIXED와 CI 34080403871 성공을 확인했다. PR #6 병합 후 T-005b를 시작한다.
+- 작업: [T-005c](tasks/T-005c-workflow-static-report.md), READY. T-005b는 [PR #7](https://github.com/digitie/kor-travel-common/pull/7)의 최종 candidate `5b687585cddf6e7a5145911e75647a0e814d9078`에서 A/B PASS·누적 finding FIXED와 PR CI 34087885355 성공을 확인했다. PR #7 merge와 main CI 확인 후 workflow `uses`·Node 선언 정적 보고를 common에서 구현한다. T-005a는 [PR #6](https://github.com/digitie/kor-travel-common/pull/6)의 최종 candidate `3c5801f14855a067080f257ec83d2279de32c74a`에서 A/B PASS·8 finding FIXED와 PR CI 34081699365, main CI 34081751051 성공을 확인했다.
 - 사용자 재개 지시로 common 구현을 순차 진행한다. npm/PyPI 미게시·다른 저장소 수정 금지와 독립 두 리뷰·PR·CI·병합 경계를 유지한다.
 - PR #4는 `82dec2b939885863100802997f9e7548dffd3c9a`로 병합됐고 main CI 34066384346이 성공했다. 아직 구현하지 않은 패키지·후보 보존·외부 gate는 미완료다.
 

@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+[[package]]
+name = "fastapi"
+version = "0.141.1"
+description = "fixture"
+
+[[package]]
+name = "custom-lib"
+version = "1.2.3"
+
+[package.source]
+type = "git"
+url = "https://github.com/example/custom-lib.git"
+reference = "v1.2.3"
+resolved_reference = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+[metadata]
+lock-version = "2.1"
+python-versions = ">=3.11,<4.0"
+content-hash = "fixture"
