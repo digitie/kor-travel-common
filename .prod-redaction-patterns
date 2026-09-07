@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+# 실제 운영 주소 대신 대역·형식만 정의한다.
+version = 1
+
+[[patterns]]
+id = "PRIVATE-IPV4"
+regex = '''(?<![\w.])(?:10\.(?:[0-9]{1,3}\.){2}[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(?:1[6-9]|2[0-9]|3[01])\.[0-9]{1,3}\.[0-9]{1,3})(?!\w|\.[0-9])'''
+
+[[patterns]]
+id = "PRIVATE-IPV6"
+regex = '''(?i)(?<![\w:])(?:f[cd][0-9a-f]{2}|fe[89ab][0-9a-f]):[0-9a-f:]+(?:%[a-z0-9_-]+)?(?![\w:])'''
+
+[[patterns]]
+id = "INTERNAL-HOST"
+regex = '''(?i)(?<![\w.-])(?!(?:host|gateway)\.docker\.internal(?![\w-]|\.[\w-]))(?:[a-z0-9][a-z0-9-]*\.)+(?:internal|local|lan|corp)(?![\w-]|\.[\w-])'''
+
+[[patterns]]
+id = "DYNAMIC-DNS"
+regex = '''(?i)(?<![\w.-])(?:[a-z0-9][a-z0-9-]*\.)+(?:iptime\.org|duckdns\.org|ddns\.net|myddns\.me)(?![\w-]|\.[\w-])'''
+
+[[patterns]]
+id = "PRODUCTION-HOST"
+regex = '''(?i)(?<![\w.-])(?:prod|production)[.-](?:[a-z0-9][a-z0-9-]*\.)+(?:com|net|org|kr|io|dev)(?![\w-]|\.[\w-])'''
+
+[[patterns]]
+id = "SERVICE-ENDPOINT"
+regex = '''(?i)(?<![\w.-])(?:api|web|weather|airport|dagster)[a-z0-9-]*\.(?:[a-z0-9-]+\.){2,}(?:com|net|org|kr|io|dev)(?![\w-]|\.[\w-])'''

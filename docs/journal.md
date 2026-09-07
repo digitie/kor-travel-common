@@ -2,6 +2,20 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-009 두 리뷰 종료·완료 기록)
+
+f15072f의 post-fix 원본을 각각 확정한 뒤 교차 비교했다. A/B PASS·원 finding 8개 FIXED·새 finding 0이다([최종 리뷰](reviews/adversarial/2026-09-07-t009-post-fix.md)). Windows/WSL 각각 135 tests·skip 0, 두 reviewer의 경로/정규식·8.3 별칭·step summary 원 반례가 성공했다. 초기 CI 실패·수정과 각 검증 수치/한계는 [T-009](tasks/T-009-ci-hardening.md#evidence)에 연결했다.
+
+candidate PR CI 34070365064, 같은 tree의 빈 검증 commit 18b83bd에 대한 PR 34070419814/release push 34070419969가 5 check 모두 성공했다. source·보고 digest 일치를 확인했고 실제 Release·태그·registry 게시·ruleset·다른 저장소 쓰기는 하지 않았다. T-009를 DONE으로 옮기고 선행이 충족된 T-005c를 READY로 정렬했다. 다음 한 작업은 T-005a이며 이번 완료 기록 CI와 PR merge·main CI 후 착수한다.
+
+## 2026-09-07 (Codex, T-009 CI·스냅샷 정보 검사 구현)
+
+사용자 재개 지시로 T-009를 착수하고 [PR #5](https://github.com/digitie/kor-travel-common/pull/5)를 draft로 만들었다. docs·tools(ubuntu-24.04/windows-2025)·secret-scan·check-versions에 액션 SHA·읽기 권한·timeout·concurrency·PR/main/release push source SHA를 연결했다. report는 비설치용 고정 fixture로 비어 있지 않은 판정·step summary를 확인한다. 원격 branch protection 설정은 변경하지 않고 절차만 작성했다.
+
+검사기는 같은 작업 트리/index/HEAD 스냅샷의 파일과 정책을 읽는다. Git·정규식·인코딩·링크·빈 범위 오류는 exit 2, 발견은 exit 1이며 원문 대신 파일·행·규칙 ID만 출력한다. 조사 문서의 민감 값은 [보안 정정](survey/README.md#9-t-009-보안-정정)에 따라 치환했고 다른 저장소는 수정하지 않았다. 삭제된 원문 값이 diff 로그에 다시 나오지 않도록 리뷰 출력도 마스킹한다.
+
+Windows 131 tests·skip 0(29.892초), WSL Python 3.11의 131 tests·skip 0(13.107초), link260/2107·plan101·SPDX18·전체 트리 두 검사·diff가 성공했다. 실제 CI·release push 및 두 독립 리뷰는 candidate 이후 실행하며 현재 NOT_RUN이다. 초기 검사에서 발견한 실패와 수정 근거는 T-009 evidence에 기록했다.
+
 ## 2026-09-07 (Codex, T-015 최종 리뷰·완료 기록·대기)
 
 95c139f의 두 reviewer 원본을 각각 확정한 뒤 교차 비교했다. 최종 PASS/PASS, 누적 9개 ID 모두 FIXED·새 finding 0이다([최종 리뷰](reviews/adversarial/2026-09-07-t015-post-fix-03.md)). 두 reviewer가 수정된 자산 명령 8개 시나리오와 문서·plan·diff를 새로 확인했고, 변경 없는 코드/정본의 이전 115 tests·발행/source 검증은 동일성 확인 후 재사용했음을 원본에 구분했다. candidate CI 34066138272 성공도 확인했다.

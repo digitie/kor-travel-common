@@ -128,7 +128,7 @@ Third-party notices: THIRD_PARTY_NOTICES.md. Provenance of ported files: PROVENA
 - 대상 확장자는 대소문자와 관계없이 검사한다. 색인의 common 경로는 실제 파일의 대소문자와 같은 정규 상대 경로여야 한다. `./`·중복 구분자·대소문자 별칭·중복 등록은 오류이며 표의 선행 공백은 허용한다. geo의 `소유자/저장소` 표기와 색인에 명시된 `GPL-3.0-only` 원천에도 -only 고지를 요구한다.
 - `dist/`·`build/`·`.next/`·`.turbo/`·`coverage/`, 의존성·환경 디렉터리(`node_modules/`·`.venv/`·`venv/`·`__pycache__/`), `.git/`·`LICENSES/`와 `*.gen.*`·`*.d.ts`·lockfile은 제외한다. 생성물의 고지 동봉은 LIC-17과 패키지 gate에서 별도로 확인한다.
 - 검사 범위 0개, 읽기 실패, 대상 심볼릭 링크, 헤더·출처 오류는 exit 1이다. 정상 파일을 실제 검사한 경우에만 exit 0이다. `--root`는 독립 fixture 또는 다른 common checkout 검증에 쓴다.
-- 현재 CLI와 회귀 시험은 실행 가능하며 CI의 필수 SPDX 명령 연결·Windows job은 T-009가 담당한다. 현재 CI 연결이 끝난 것처럼 표시하지 않는다.
+- 현재 CLI와 회귀 시험은 실행 가능하며 SPDX 명령은 [docs.yml](../../.github/workflows/docs.yml)의 tools 두 OS에 연결한다. 실제 CI 검증 결과는 T-009 evidence를 따른다.
 
 ## 6. 패키지 메타데이터
 
@@ -208,7 +208,7 @@ common 측 이식 PR 본문(`.github/pull_request_template.md`)에 다음을 evi
 
 | gate | 검사 | 실패 조건 | 실행 |
 |---|---|---|---|
-| 헤더 | `python3 -B -X utf8 tools/check_spdx.py` | 대상 파일에 `SPDX-License-Identifier` 없음, `-only` 병기 누락, `Origin:` 형식 오류 | 로컬 CLI; CI 필수 연결은 T-009 |
+| 헤더 | `python3 -B -X utf8 tools/check_spdx.py` | 대상 파일에 `SPDX-License-Identifier` 없음, `-only` 병기 누락, `Origin:` 형식 오류 | 로컬 CLI·tools 두 OS CI(T-009 evidence) |
 | 고지 목록 | `THIRD_PARTY_NOTICES.md` 항목 ↔ 루트 `package-lock.json`·`uv.lock`의 `license` 필드 대조(후보 도구) | 락에 있는 직접 의존성이 목록에 없음 | T-101·T-302에서 확정 |
 | 출처 | 이식 PR 체크리스트: `PROVENANCE.md` 행·헤더 `Origin:`·B1~B10 해당 여부 | 행 누락, 차단 원천 | PR 리뷰(D-04 비면제: `packages/*` 공개 API) |
 | 동봉 | `npm pack` tarball·wheel에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 존재 | 누락 | `packages`·`python-package` job |

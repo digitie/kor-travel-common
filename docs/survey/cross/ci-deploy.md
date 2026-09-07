@@ -44,7 +44,7 @@ kor-travel 계열 7개 저장소의 GitHub Actions, pre-commit, npm 검증 스�
 | Python / 설치 | 3.12 / `uv sync --extra dev --locked` | — | 3.11 / `pip install -e ./backend httpx==0.28.1 pytest==9.1.1 ruff==0.16.4` | 3.12 / apt GDAL + `pip install -e ".[api,loaders,dev]"` | 3.11·3.12·3.13 / `pip install -e ".[dev]"` ×3 패키지 (`setup-uv@v6`는 설치만 하고 미사용) | 3.12 / `uv sync --locked --extra dev --extra dagster` | 3.12 / `pip install -e ".[dev]"` |
 | Node / npm | 22 / 동봉 | — | 20 / 동봉 | 20 / 동봉 | 22.23.1 / `npx --yes npm@12.0.1` | 20 / `npm ci --ignore-scripts --no-audit --no-fund` | 22 / `npm install -g npm@11.19.1` |
 | CI DB | `services.postgres: postgres:16` | — | 없음 | 없음(`services` 블록 없음) | testcontainers PostGIS(digest) | `services.postgres: postgres:16` | `postgis/postgis:16-3.5-alpine` service (`version-matrix.md` §3.2) |
-| 실제 운영 호출 | `live-e2e`가 `https://pr.digitie.mywire.org` 호출(`ci.yml:64`) | — | 없음 | 없음 | 없음(Playwright는 n150에서 수동) | 없음 | `e2e`는 mock(`page.route`); live-mutating은 `--list`만 |
+| 실제 운영 호출 | `live-e2e`가 `https://<prod-host>` 호출(`ci.yml:64`) | — | 없음 | 없음 | 없음(Playwright는 n150에서 수동) | 없음 | `e2e`는 mock(`page.route`); live-mutating은 `--list`만 |
 | branch protection | 문서만(`docs/runbooks/branch-protection.md`: 2026-08-23 `404 Branch not protected`) | — | 미확인 | `docs/agent-guide.md` §7.5.6(운영자 수동 설정 지시) | `docs/runbooks/branch-protection.md` §4 required check 8개 | 미확인(문서 없음) | ruleset `main-pr-only`(id `17146781`) 적용, required는 `Aggregate CI gate` 하나(`.github/workflows/README.md:30-56`) |
 
 ### 1.2 게이트 매트릭스 (사실, 재확인)
@@ -197,8 +197,8 @@ Compose 프로젝트명 부여 방식(사실): kta·ktdm은 파일 `name:`; pinv
 
 | 항목 | kta | ktc | ktdm | geo | map | wx | pinvi |
 |---|---|---|---|---|---|---|---|
-| prod 오케스트레이터 | 자체 `scripts/deploy-server14.sh`(git archive → scp → ssh → `docker compose up -d --build`) | **ktdm**(ADR-28) | 자체: trusted installer `scripts/install-ktdm-trusted-release` + systemd(`ktdm-backend.service` root, `ktdm-frontend.service`) | **ktdm**; 이미지 빌드/전송은 `scripts/deploy_app.py`(buildx amd64+arm64, 노드 `n150=deploy@n150.local`, `odroid=deploy@odroid.local`) | **ktdm** pinned runtime(generation manifest v6 / rebuild journal v8) | 자체: 호스트에서 `git pull --ff-only` + `docker compose --env-file .env -f compose.yaml -f deploy/compose.n150.yaml up -d --build` | **ktdm** `ktdctl pinvi-pair rebuild-pinned --confirm`; fallback `scripts/deploy-node.sh`(2,592줄, `PINVI_DOCKER_MANAGER_UNAVAILABLE=1`) |
-| 호스트 표기 | `192.168.1.14`(README·AGENTS.md), `pr.digitie.mywire.org` | `<domain>` placeholder(ADR-28) | `manager.<domain>` placeholder | `deploy@n150.local`, `geo-dagster.digitie.mywire.org`(`docs/ports.md:34`) | `<prod-host-alias>`/`<prod-host-ip>` placeholder(redaction guard) | `digitie@192.168.1.14`, `weather*.digitie.mywire.org`(`deploy/n150.md`) | placeholder(ADR-047, 공개 repo) |
+| prod 오케스트레이터 | 자체 `scripts/deploy-server14.sh`(git archive → scp → ssh → `docker compose up -d --build`) | **ktdm**(ADR-28) | 자체: trusted installer `scripts/install-ktdm-trusted-release` + systemd(`ktdm-backend.service` root, `ktdm-frontend.service`) | **ktdm**; 이미지 빌드/전송은 `scripts/deploy_app.py`(buildx amd64+arm64, 노드 `n150=deploy@<internal-host>`, `odroid=deploy@<internal-host>`) | **ktdm** pinned runtime(generation manifest v6 / rebuild journal v8) | 자체: 호스트에서 `git pull --ff-only` + `docker compose --env-file .env -f compose.yaml -f deploy/compose.n150.yaml up -d --build` | **ktdm** `ktdctl pinvi-pair rebuild-pinned --confirm`; fallback `scripts/deploy-node.sh`(2,592줄, `PINVI_DOCKER_MANAGER_UNAVAILABLE=1`) |
+| 호스트 표기 | `<prod-address>`(README·AGENTS.md), `<prod-host>` | `<domain>` placeholder(ADR-28) | `manager.<domain>` placeholder | `deploy@<internal-host>`, `<prod-host>`(`docs/ports.md:34`) | `<prod-host-alias>`/`<prod-host-ip>` placeholder(redaction guard) | `digitie@<prod-address>`, `<prod-host>`(`deploy/n150.md`) | placeholder(ADR-047, 공개 repo) |
 | 로컬 런북 | 없음(`*.local.md` gitignore도 없음) | `docs/deploy-runbook.local.md`(정본, DO NOT 10) | `docs/deploy-runbook.local.md`(DO NOT 14) | `docs/deploy-runbook.local.md` + `docs/prod-access.local.md` | 동일 2개 | gitignore만 복사(`docs/deploy-runbook.local.md`·`prod-access.local.md` 항목 존재, 파일 미확인) | `docs/deploy-runbook.local.md` + 커밋된 `docs/runbooks/deploy.md` |
 | 배포 후 검증 의무 | `/health`의 `release_sha` == 후보 SHA(`deploy-server14.sh:120-132`) | 로그인 POST 200 + Set-Cookie, UI 컨테이너 `${#KTC_ADMIN_PASSWORD_HASH} != 0` | `/health`·`:12905` 200 + 브라우저 로그인→대시보드→로그아웃 전환 + WS 재연결 루프 없음 | 런북(로컬)에 위임; `AGENTS.md:112-113` "#399 이후 로그인 깨짐" | 로그인 POST + `${#KOR_TRAVEL_MAP_UI_ADMIN_PASSWORD_HASH} != 0` | `curl /health`, `/server_info`(Basic Auth), `open /login`(권고, 의무 문구 없음) | `docs/runbooks/deploy.md` §4 운영 체크 |
 | 리버스 프록시 | 없음(LAN 포트 직접 + 외부 도메인 1개) | Caddy(`deploy/Caddyfile`, 도메인 env 주입, MCP `basic_auth` fail-safe 기본 해시) | 저장소 밖(§5) + 신뢰 프록시 IP exact `/32` | 라우터 TLS 종단(`docs/ports.md:34`) | 저장소 밖(`*.local.md`) | HAProxy(저장소 밖) + nginx Dagster gateway(Basic Auth) | Cloudflare Tunnel + WAF 한국 전용(`infra/cloudflare/waf-korea-only.md`), 선택 nginx GeoIP2 |
@@ -207,7 +207,7 @@ Compose 프로젝트명 부여 방식(사실): kta·ktdm은 파일 `name:`; pinv
 
 prod 도메인/IP 문자열 노출 집계(사실; 추적 파일, `*.local.md` 제외):
 
-| 저장소 | `digitie.mywire.org` 파일 수(그중 `docs/`) | `192.168.x.x` 파일 수(그중 `docs/`) | 대표 비-docs 위치 |
+| 저장소 | `<prod-host>` 파일 수(그중 `docs/`) | `192.168.x.x` 파일 수(그중 `docs/`) | 대표 비-docs 위치 |
 |---|---|---|---|
 | kta | 17 (12) | 26 (13) | `.github/workflows/ci.yml`, `README.md`, `AGENTS.md`, `CLAUDE.md`, `.env.server14.example` |
 | ktc | 1 (1) | 4 (2) | `.env.example`, `backend/ktc/core/config.py` |
@@ -322,7 +322,7 @@ common 저장소 `.github/workflows/`에 `workflow_call` 워크플로를 두고,
 
 1. **정본은 계속 ktdm `docs/ports.md`** 하나로 두고, common은 그 규칙을 문서 규약으로 인용만 한다(정본 이원화 금지 — ktdm `docs/bindings.md` 원칙과 동일).
 2. 대역 규칙을 슬롯까지 명문화: `12{n}00` DB, `01` API, `02` worker/Dagster/MCP, `03` 보조 metrics/exporter(wx 14103 선례), `04` 예약(관측 로컬), `05` Web, `06~09` 추가 Web/BFF, `10~99` 임시·E2E(pinvi 12855 선례). 컨테이너 내부 포트는 **호스트 포트와 동일**하게 listen(geo/map/wx 선례; ktdm `docs/ports.md:14-16` host 네트워크 전제)을 권장하고, 8000/3000 내부 포트(kta·ktc·pinvi)는 예외로 등록한다.
-3. sibling 대역 등록: `140xx` kor-travel-airport, `141xx` kor-travel-weather를 `docs/ports.md` 표에 **명시 행**으로 추가(현재 weather만 문장으로, airport는 없음). airport web 14002는 (a) 예외 등록 또는 (b) 14005 이전(`deploy-server14.sh` `require_exact PUBLIC_WEB_PORT 14002`, `README.md`, CORS 원본 `192.168.1.14:14002`, HAProxy 매핑 변경 필요) 중 결정 — 이 문서는 (a)를 기본안으로 둔다(운영 변경 비용).
+3. sibling 대역 등록: `140xx` kor-travel-airport, `141xx` kor-travel-weather를 `docs/ports.md` 표에 **명시 행**으로 추가(현재 weather만 문장으로, airport는 없음). airport web 14002는 (a) 예외 등록 또는 (b) 14005 이전(`deploy-server14.sh` `require_exact PUBLIC_WEB_PORT 14002`, `README.md`, CORS 원본 `<prod-address>:14002`, HAProxy 매핑 변경 필요) 중 결정 — 이 문서는 (a)를 기본안으로 둔다(운영 변경 비용).
 4. common 자체 대역 후보: `130xx`(예: 13001 smoke API, 13005 showcase/문서 사이트). 근거: 12xxx는 ktdm 예약, 14xxx는 sibling, 13100은 ktc E2E가 사용하므로 `130xx`만 비어 있음(사실: 조사 파일 내 `130[0-9]{2}` 사용 없음 — 단 grep 범위는 §방법의 문서·compose·스크립트로 한정, **미확인** 영역 있음).
 
 ### 3.2 서비스명·컨테이너명·이미지·볼륨·네트워크

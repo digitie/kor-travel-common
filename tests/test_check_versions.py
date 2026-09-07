@@ -194,6 +194,16 @@ class CheckVersionsTests(unittest.TestCase):
         self.assertEqual(self.verdicts(findings, "bad"), ["NO_LOCK"])
         self.assertEqual(self.cli("--manifest", str(manifest)).returncode, 1)
 
+    def test_manifest_parent_alias_uses_resolved_scope(self):
+        npm_fixture(self.repo, deps={"react": "19.0.0"}, engines={"node": ">=22.12"},
+                    installed={"react": "19.0.0"})
+        manifest = self.repo / "kor-travel-common.lock.json"
+        manifest.write_text(json.dumps({"schema": CV.MANIFEST_SCHEMA, "repo": "app-a",
+                                       "lockfiles": [{"kind": "npm", "path": "package-lock.json"}]}),
+                            encoding="utf-8")
+        alias = self.repo / ".." / self.repo.name / manifest.name
+        self.assertEqual(CV.scopes_from_manifest(alias), CV.scopes_from_manifest(manifest.resolve()))
+
     def test_npm_transitive_declarations_and_urls(self):
         cases = [
             ("git+https://github.com/example/custom#main", "git+https://github.com/example/custom#" + "a" * 40, "FLOATING_REF"),

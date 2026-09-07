@@ -554,7 +554,7 @@ def scopes_from_manifest(manifest_path: Path) -> tuple[str | None, list[Scope]]:
     data = read_json(manifest_path)
     if data.get("schema") not in (None, MANIFEST_SCHEMA):
         raise ValueError(f"{manifest_path}: schema가 {MANIFEST_SCHEMA}가 아님")
-    base = manifest_path.parent
+    base = manifest_path.parent.resolve()
     scopes: list[Scope] = []
     for entry in data.get("lockfiles", []):
         kind = entry.get("kind", "")

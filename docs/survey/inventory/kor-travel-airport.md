@@ -18,7 +18,7 @@
 4. **별도 admin 앱은 없다.** 운영 표면은 같은 단일 페이지 안의 백업/복원 패널(`frontend/src/components/backup-panel.tsx`)과 `/v1/admin/*` 엔드포인트(수집 상태, 백업 목록/생성/다운로드/복원)이며, 앱 레벨 인증 없이 내부망/게이트웨이 보호를 전제로 한다 (`docs/adr/003-unauthenticated-backup-network-restriction.md`, `backend/app/main.py` 692~880행). 사용자 지시의 "kor-travel-airport Admin"은 이 패널·엔드포인트 묶음으로 해석해야 한다(§9 참고).
 5. 스택: FastAPI + SQLAlchemy 2(async) + PostgreSQL 16 + Alembic / Next.js App Router + React + TypeScript / pytest + Vitest + Playwright / Docker Compose (`README.md` "기술 스택", `docs/architecture/architecture.md`).
 6. 형제 프로젝트 연동은 **코드 호출이 아니라 라이브러리 소비와 규약 이식**이다. 백엔드는 `python-krairport-api`(krairport)와 `python-kasi-api`(kasi)를 git 커밋 고정으로 소비하고(ADR-004/006), 문서 구조·OpenAPI export·`/v1` 버저닝은 `kor-travel-map`에서, DB 분리 compose 패턴은 `kor-travel-docker-manager`에서 가져왔다 (`backend/pyproject.toml`, `docs/adr/004-*.md`, `docs/adr/005-*.md`, `docs/tasks-done.md` T-028/T-032). geo/weather/concierge/pinvi 서비스에 대한 HTTP 호출은 없다(§7).
-7. 운영: n150(`192.168.1.14`)에서만 Docker/PostgreSQL을 실행하고, 13번(`192.168.1.13`)은 읽기 전용 legacy다. 공개 포트는 DB `14000`(loopback), API `14001`, web `14002`, 외부 도메인 `https://pr.digitie.mywire.org` / `https://pr-api.digitie.mywire.org` (`README.md` "192.168.1.14 운영 배포", `docs/runbooks/deployment.md`).
+7. 운영: n150(`<prod-address>`)에서만 Docker/PostgreSQL을 실행하고, 13번(`<prod-address>`)은 읽기 전용 legacy다. 공개 포트는 DB `14000`(loopback), API `14001`, web `14002`, 외부 도메인 `https://<prod-host>` / `https://<prod-host>` (`README.md` "<prod-address> 운영 배포", `docs/runbooks/deployment.md`).
 8. 진행 중 initiative: WIP 브랜치 `codex/shadcn-ui-foundation`이 T-033(Tailwind v4 + shadcn/ui 기반 도입)을 커밋했고, 후속 T-034~T-038(컴포넌트 교체, 라우트 기반 앱 셸, 과거 자료 조회, Hallmark 재감사/재설계)이 `docs/tasks.md`에 등록돼 있다(§3.2).
 
 ## 2. 저장소 구조
@@ -292,7 +292,7 @@
 - `.github/workflows/ci.yml`(push: `main`, `codex/**`; pull_request):
   - `backend`: ubuntu, `services.postgres: postgres:16`, `setup-python 3.12`, `astral-sh/setup-uv@v6`, `uv sync --extra dev --locked`, `uv run alembic upgrade head`, `uv run alembic check`, `uv run pytest tests -q`.
   - `frontend`: `setup-node 22`(npm cache), `npm ci`, `npm run test -- --run`, `npx tsc -p tsconfig.test.json --noEmit`, `npm run build`.
-  - `live-e2e`: `E2E_BASE_URL=https://pr.digitie.mywire.org`, `EXPECTED_RELEASE_SHA=${{ pr.head.sha || sha }}`, `playwright install chromium`, `npm run test:e2e` — 실제 운영을 호출하므로 서버가 내려가면 PR이 막힌다(`branch-protection.md`).
+  - `live-e2e`: `E2E_BASE_URL=https://<prod-host>`, `EXPECTED_RELEASE_SHA=${{ pr.head.sha || sha }}`, `playwright install chromium`, `npm run test:e2e` — 실제 운영을 호출하므로 서버가 내려가면 PR이 막힌다(`branch-protection.md`).
   - lint job 없음, OpenAPI drift job 없음, pre-commit 없음.
 - Docker compose:
   - `docker-compose.yml`(project `kor-travel-airport`): backend(`${PUBLIC_API_PORT:-14001}:8000`, healthcheck `/health`, `./backups` bind), frontend(`${PUBLIC_WEB_PORT:-14002}:3000`, `depends_on backend healthy`), 외부 네트워크 `kor-travel-airport-net`.

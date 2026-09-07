@@ -1,6 +1,6 @@
 # kor-travel-common CI·배포·운영 규약
 
-이 문서는 [규칙 문서 색인](README.md)에 속한 재사용 워크플로 계약·CI 하드닝·포트·명명·컨테이너 최소 규약·redaction·common 자체 CI의 정본이다. 정본 지위: **확정 초안** — [브리프](../plan/design-brief.md) D-18·D-03·D-06·D-07을 규칙 ID `CI-n`으로 옮긴 것이며, 워크플로 실물(T-009 하드닝·T-010 1단계·T-309 2단계·T-401 3단계)과 포트 확정(T-014)에서 대조해 확정하는 task가 남아 있다. 마지막 갱신: 2026-09-06.
+이 문서는 [규칙 문서 색인](README.md)에 속한 재사용 워크플로 계약·CI 하드닝·포트·명명·컨테이너 최소 규약·redaction·common 자체 CI의 정본이다. 정본 지위: **확정 초안** — [브리프](../plan/design-brief.md) D-18·D-03·D-06·D-07을 규칙 ID `CI-n`으로 옮긴 것이며, 워크플로 실물(T-009 하드닝·T-010 1단계·T-309 2단계·T-401 3단계)과 포트 확정(T-014)에서 대조해 확정하는 task가 남아 있다. 마지막 갱신: 2026-09-07, T-009 구현 대조 중.
 
 릴리스 절차(태그·rc·CHANGELOG)는 [release](../runbooks/release.md), 소비자 도입 절차는 [consumer adoption](../runbooks/consumer-adoption.md), 버전 값은 [versions](versions.md)·`versions.json`이 정본이다. 이 문서는 계약과 기본값만 정한다.
 
@@ -98,7 +98,7 @@ jobs:
 | CI-7 | `permissions: contents: read`를 워크플로 최상위에 두고 쓰기 권한은 job 단위로만 연다 | ktdm·weather top-level, pinvi `permissions: {}` + job write(`ci` §1.3) |
 | CI-8 | `concurrency: { group: <name>-${{ github.workflow }}-${{ github.ref }}, cancel-in-progress: true }` | map 5개·pinvi 전부 |
 | CI-9 | 모든 job에 `timeout-minutes`(기본 30; docker 60·postgis 30 허용) | pinvi 전 job 10~45 |
-| CI-10 | `runs-on: ubuntu-24.04` 고정(`ubuntu-latest` 금지 — 러너 이미지 갱신에 무방비). common `tools` job만 `windows-latest` 매트릭스 추가(D-03 Tier 2) | ktdm; 6곳 `ubuntu-latest` |
+| CI-10 | `runs-on: ubuntu-24.04` 고정(`ubuntu-latest` 금지 — 러너 이미지 갱신에 무방비). common `tools` job은 `windows-2025` 매트릭스 추가(D-03 Tier 2) | ktdm; 6곳 `ubuntu-latest` |
 | CI-11 | PR에서는 `ref: ${{ github.event.pull_request.head.sha \|\| github.sha }}`로 head SHA를 체크아웃한다(merge ref 아님) | pinvi web/etl/api |
 | CI-12 | 액션 참조는 `owner/repo@<40자 SHA> # vX.Y.Z` 형식으로 SHA 핀 + 주석 버전. common 내부 기준은 `actions/checkout` v7·`actions/setup-node` v7·`actions/setup-python` v7·`astral-sh/setup-uv` v10(값은 `versions.json` `actions` 절). 소비자는 현행 major 유지 + SHA 핀 권고(D-06) | ktdm SHA 핀; 최신값 `vm` §4.4 |
 | CI-13 | `secrets.*`는 원칙적으로 0개다. CI 더미값(DB 접속 문자열·`NEXT_PUBLIC_*`)은 평문 허용하되 실제 운영값과 달라야 하고 redaction guard 대상이다 | pinvi repository secret 0개 문서화(`ci` §1.3·§1.11) |
@@ -200,21 +200,35 @@ jobs:
 
 | ID | 규칙 | 근거 |
 |---|---|---|
-| CI-40 | prod 도메인/IP redaction: common은 **전체 트리**를 검사한다(운영값을 가질 이유가 없다). 패턴은 map `scripts/check_prod_redaction.py`의 2종(운영 도메인 문자열, 사설 IP `192.168.*` 대역)을 계승해 `.prod-redaction-patterns` 파일로 일반화한다. 소비자는 opt-in이며 운영 기록을 추적 파일에 두는 앱(airport README·`ci.yml` 17/26 파일, weather `compose.n150.yaml`)은 placeholder 치환 또는 `*.local.md` 이전 후 켠다(O-23) | `ci` §1.10 노출 집계·열린 질문 5 |
-| CI-41 | `docs/survey/**`는 조사 기준 커밋의 사실을 인용하므로 redaction 패턴에 걸리는 문자열이 있을 수 있다. common 전체 트리 검사에서 `docs/survey/**`를 제외할지 조사 문서를 치환할지는 T-009에서 결정한다(열림 아님, 구현 결정) | [survey README](../survey/README.md) §8 갱신 규칙 |
-| CI-42 | secret scan: PR diff와 staged diff에 grep 패턴 `api[_-]?key`, `secret`, `password`, `passwd`, `token`, `pbkdf2_sha256`, `AKIA[0-9A-Z]{16}`, `BEGIN [A-Z ]*PRIVATE KEY`(concierge·ktdm·pinvi AGENTS 절차 공통 패턴) + 프로젝트별 패턴 파일. `.env.example`은 placeholder만. 외부 스캐너(gitleaks 등) 채택은 후보 | [docs-conventions 횡단 비교](../survey/cross/docs-conventions.md) §1.16; `ci` §2.1 |
+| CI-40 | common의 추적 파일과 ignore되지 않은 새 파일 전체를 `check_prod_redaction.py --all`로 검사한다. `.prod-redaction-patterns`에 사설 IPv4/IPv6·내부 호스트·운영 서비스/DNS의 일반 형식을 정규식으로 둔다. 실제 운영 값은 패턴에도 쓰지 않는다. 소비자는 opt-in | D-18·T-009 |
+| CI-41 | `docs/survey/**`도 검사한다. 과거 조사에 남은 민감 값은 [보안 정정 기록](../survey/README.md#9-t-009-보안-정정)에 따라 placeholder로 치환하고 기준 커밋·나머지 조사 사실은 보존한다. 디렉터리 전체 제외는 허용하지 않는다 | AGENTS 비밀·운영 정보 금지, T-009 |
+| CI-42 | `scan_secrets.py`는 `.secret-scan-patterns`의 값 형태·개인키·제공자 token/hash·URL 자격증명 패턴으로 차단한다. 필드명만 찾는 기존 보안 grep은 수동 감사 보조이며 자동 fail 기준과 구분한다. 원문은 출력하지 않고 파일·행·규칙 ID만 출력한다. `.env.example`에는 placeholder만 둔다 | D-18·T-009 |
 | CI-43 | `git add -A`·`git add .` 금지, staged diff 직접 읽기, 경로별 명시 stage — 절차는 [agent workflow](../runbooks/agent-workflow.md) §7 | canview A8.4; geo·canview 선례 |
 | CI-44 | `.gitignore`에 `.env`, `.env.*`, `!.env.example`, `*.local.md`, `*.local.sh`가 있어야 한다. airport는 `*.local.md` 항목이 없다(T-433) | `ci` §1.11; 현행 `.gitignore` |
 | CI-45 | GitHub Actions secret은 0개가 원칙이며 `github.token`만 쓴다. 외부 저장소 체크아웃이 필요하면 공개 저장소 + 태그 참조로 해결한다 | pinvi `secrets.md`, map `GITHUB_TOKEN` 선택 |
 
+### 8.1 검사 범위와 실패 처리
+
+두 CLI는 Python 3.11 표준 라이브러리와 Git만 사용한다. 기본/`--all`은 추적 파일 및 ignore되지 않은 새 파일의 현재 내용, `--staged`는 변경 파일의 index blob, `--base <commit>`은 해당 commit과 HEAD 사이 변경 파일의 HEAD blob을 검사한다. 변경 파일 전체를 읽으며 삭제된 파일과 삭제된 행은 성공 근거로 세지 않는다. 빈 변경 범위는 exit 2·NOT_RUN이다.
+
+정책 파일도 같은 스냅샷에서 읽는다. unstaged 수정으로 staged 비밀이나 정책을 가리는 것을 막는다. `--patterns`는 저장소 상대 경로이며 기본 파일을 바꿀 때는 정책 diff도 두 독립 리뷰 대상이다. Git 추적 밖의 무시된 로컬 파일·과거 commit 전체는 검사 범위가 아니다.
+
+패턴 파일은 TOML `version = 1`, `[[patterns]]`의 고유 `id`·`regex`를 갖는다. 예외가 필요한 경우 `[[allowlist]]`의 정확한 `path`·`rules`·한국어 `reason`을 검토받는다. wildcard·없는 파일·없는 규칙·빈 사유는 오류다. 파일 내용 전체를 읽되 허용된 규칙의 일치 수를 별도 표시한다. 현재 예외는 없다.
+
+exit 0은 선택 범위의 패턴 일치가 없거나 명시적 예외로 처리됐다는 뜻이다. 발견은 exit 1, Git/경로/정책/읽기/UTF-8/NUL 오류는 exit 2다. 심볼릭 링크·junction·submodule·바이너리는 조용히 건너뛰지 않고 오류로 처리한다. 예약 호스트 `host.docker.internal`·`gateway.docker.internal`, loopback·문서 예시 주소 대역은 운영 주소 패턴과 구분한다.
+
+선택한 정책의 패턴에 파일명·부모 디렉터리를 포함한 경로가 일치하면 본문·allowlist와 무관하게 원문 없는 입력 오류(exit 2)로 중단한다. 그 실행의 발견 목록도 출력하지 않는다. 정책 정규식의 컴파일 깊이 초과는 traceback 없이 같은 입력 오류로 처리한다. 경로 검사도 선택한 패턴의 범위 안에서만 보장한다.
+
+정규식은 모든 비밀·도메인을 식별하는 보증이 아니다. 분할·암호화된 값, 새 제공자 형식과 업무 맥락은 staged diff 수동 감사와 독립 리뷰로 보완한다. source나 패턴 파일에 실제 값을 복사해 탐지 규칙을 만들지 않는다.
+
 ## 9. common 자체 CI
 
-현행(사실): [docs.yml](../../.github/workflows/docs.yml) 하나 — `ubuntu-latest`, `actions/checkout@v6`·`setup-python@v6` 미핀, 링크 검사 → plan 검사 → unittest → `git diff --check`. `permissions`·`concurrency`·`timeout` 없음. T-009에서 §4 기본값을 적용한다.
+현행 구현: [docs.yml](../../.github/workflows/docs.yml)의 docs·tools(두 OS)·secret-scan·check-versions. checkout/setup-python은 공식 release commit SHA로 고정하고 권한·동시 실행·timeout·명시 source 확인을 적용했다. 실제 CI gate 결과는 [T-009 evidence](../tasks/T-009-ci-hardening.md#evidence)에 기록한다.
 
 | job | 트리거 | 내용 | 러너 | task |
 |---|---|---|---|---|
 | `docs` | PR, push `main`·`codex/release-*` | `validate_document_links.py` → `validate_plan.py` → `unittest discover -s tests -p "test_*.py"` → `git diff --check` → redaction 전체 트리(CI-40) | ubuntu-24.04 | T-002·T-009 |
-| `tools` | PR, push `main`·`codex/release-*` | 도구 자기 테스트(`check_versions`·`kt_contrast`·`ux_lint`·validator) | ubuntu-24.04 + windows-latest 매트릭스(D-03) | T-009 |
+| `tools` | PR, push `main`·`codex/release-*` | validator·unittest·check_versions 자체 검사·SPDX·secret/redaction(토큰 도구는 T-103 구현 후) | ubuntu-24.04 + windows-2025 매트릭스(D-03) | T-009 |
 | `workflows-selftest` | PR(`.github/**`) | 재사용 워크플로를 fixture로 호출 | ubuntu-24.04 | T-010 |
 | `packages` | PR, push `main`·`codex/release-*` | `npm install -g npm@11.19.1` → `npm ci` → lint → type-check → test → build → `npm pack` → 임시 디렉터리 tarball 설치 → webpack·Turbopack `next build` 스모크(D-10) | ubuntu-24.04 | T-101·T-201 |
 | `python-package` | PR, push `main`·`codex/release-*` | `uv build` → wheel 설치 → import 스모크 → starlette 0.4x/1.6 매트릭스 | ubuntu-24.04 | T-302 |
@@ -222,13 +236,13 @@ jobs:
 | `secret-scan` | PR, push `main`·`codex/release-*` | CI-42 패턴 | ubuntu-24.04 | T-009 |
 | `check-versions` | PR, push `main`·`codex/release-*` | `tools/check_versions.py` report 모드(`FLOATING_REF`·`BLOCKED`·`EXEMPT_EXPIRED`는 `::error::`) | ubuntu-24.04 | T-005·T-009 |
 
-**릴리스 후보에도 필요한 실행 경로(ADR-014)**: `docs`·`tools`·`secret-scan`·`check-versions` 및 존재하는 `packages`·`python-package`는 PR 외에 `main`과 `codex/release-*` push에서도 실행한다. release push에서는 path filter나 PR 전용 조건으로 필수 job을 생략하지 않고 `github.sha`의 실제 merge commit을 checkout한다. run의 head SHA와 build/artifact source SHA가 릴리스 evidence의 `RELEASE_SHA`와 같아야 한다. PR head 성공은 다른 merge SHA의 실행으로 세지 않는다. 아래 구현 task가 이를 적용하고, 후보 보존 전에 실행 경로를 확인해야 과거 후보에서 분기한 release branch에서도 사용할 수 있다. 현재 미구현은 NOT_RUN이며 발행을 차단한다.
+**릴리스 후보에도 필요한 실행 경로(ADR-014)**: `docs`·`tools`·`secret-scan`·`check-versions` 및 존재하는 `packages`·`python-package`는 PR 외에 `main`과 `codex/release-*` push에서도 실행한다. release push에서는 path filter나 PR 전용 조건으로 필수 job을 생략하지 않고 `github.sha`의 실제 merge commit을 checkout한다. run의 head SHA와 build/artifact source SHA가 릴리스 evidence의 `RELEASE_SHA`와 같아야 한다. PR head 성공은 다른 merge SHA의 실행으로 세지 않는다. 아래 구현 task가 이를 적용하고, 후보 보존 전에 실행 경로를 확인해야 과거 후보에서 분기한 release branch에서도 사용할 수 있다. 현재 packages/python-package의 미구현은 NOT_RUN이며 해당 발행을 차단한다. T-009의 기반 job은 실제 PR·release push run으로 검증한다.
 
 - T-009: docs·tools(두 OS)·secret-scan·check-versions의 push 실행과 SHA evidence.
 - T-101: 같은 push에서 tokens/UI `packages` 검증과 artifact source 기록(T-201에서 UI 추가).
 - T-302: 같은 push에서 Python 지원/extras 매트릭스·wheel 검증과 artifact source 기록.
 
-branch protection(문서, T-009): PR 필수, required check `docs`·`tools`·`packages`(패키지 생성 후), linear history, force-push 차단. required check 이름은 재사용 워크플로 이름 변경과 함께 관리한다.
+branch protection의 실제 check 이름과 설정 절차는 [branch protection](../runbooks/branch-protection.md)에 있다. T-009는 설정 문서만 작성하며 원격 ruleset을 적용하지 않는다. check-versions의 표는 [고정 fixture](../../tests/fixtures/version-report/README.md)이며 소비자 실측으로 세지 않는다. 모든 job summary에는 실제 checkout source SHA가 기록된다.
 
 ### 9.1 `consumers.pins.json` 형식(후보, T-010)
 

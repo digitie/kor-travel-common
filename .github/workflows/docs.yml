@@ -4,28 +4,148 @@ name: docs
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'codex/release-*']
   pull_request:
 
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
 jobs:
-  validate-docs:
-    runs-on: ubuntu-latest
+  docs:
+    name: docs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
-      - uses: actions/setup-python@v6
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.12"
-      - name: Validate local Markdown links
-        run: python -B -X utf8 tools/validate_document_links.py
-      - name: Validate task metadata and dependency DAG
-        run: python -B -X utf8 tools/validate_plan.py
-      - name: 전체 도구 회귀 테스트
-        run: python -B -X utf8 -m unittest discover -s tests -p 'test_*.py' -v
-      - name: 버전 정책·예외 만료 자체 검사
-        run: python -B -X utf8 tools/check_versions.py --self-check
-      - name: Whitespace check
+          python-version: '3.11'
+      - name: 검사 source SHA 확인
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          printf '검사 source: `%s`\n' "$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - name: 문서·계획·회귀 검사
+        run: |
+          python -B -X utf8 tools/validate_document_links.py
+          python -B -X utf8 tools/validate_plan.py
+          python -B -X utf8 -m unittest discover -s tests -p 'test_*.py'
+      - name: 변경 공백 검사
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: git diff --check "$BASE_SHA" HEAD
+        run: |
+          if [[ -n "$BASE_SHA" && "$BASE_SHA" != 0000000000000000000000000000000000000000 ]]; then
+            git diff --check "$BASE_SHA" HEAD
+          else
+            git show --format= --check HEAD
+          fi
+      - name: 운영 정보 전체 트리 검사
+        run: python -B -X utf8 tools/check_prod_redaction.py --all
+
+  tools:
+    name: tools (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+      - name: 검사 source SHA 확인
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          printf '검사 source: `%s`\n' "$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - name: Windows·Ubuntu 도구 검증
+        run: |
+          python -B -X utf8 tools/validate_document_links.py
+          python -B -X utf8 tools/validate_plan.py
+          python -B -X utf8 -m unittest discover -s tests -p 'test_*.py'
+          python -B -X utf8 tools/check_versions.py --self-check
+          python -B -X utf8 tools/check_spdx.py
+          python -B -X utf8 tools/scan_secrets.py --all
+          python -B -X utf8 tools/check_prod_redaction.py --all
+
+  secret-scan:
+    name: secret-scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+      - name: 검사 source SHA 확인
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          printf '검사 source: `%s`\n' "$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - name: 비밀 값 전체 트리 검사
+        run: python -B -X utf8 tools/scan_secrets.py --all
+
+  check-versions:
+    name: check-versions
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+      - name: 검사 source SHA 확인
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          printf '검사 source: `%s`\n' "$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - name: 버전 레지스트리 자기 검사
+        run: python -B -X utf8 tools/check_versions.py --self-check
+      - name: 고정 fixture의 report와 step summary 검증
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          printf '검사 source: `%s`\n' "$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          printf '\n다음 표는 고정 CI fixture이며 소비자 실측이 아닙니다.\n' >> "$GITHUB_STEP_SUMMARY"
+          python -B -X utf8 tools/check_versions.py tests/fixtures/version-report --repo common-ci-report-fixture --mode report --json dist/ci/version-report.json
+          python -B -X utf8 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          data = json.loads(Path('dist/ci/version-report.json').read_text(encoding='utf-8'))
+          assert data['mode'] == 'report'
+          assert data['summary']['BELOW_FLOOR'] >= 1 and data['findings']
+          summary = Path(os.environ['GITHUB_STEP_SUMMARY']).read_text(encoding='utf-8')
+          assert 'BELOW_FLOOR' in summary and os.environ['SOURCE_SHA'] in summary
+          digest = hashlib.sha256(Path('dist/ci/version-report.json').read_bytes()).hexdigest()
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as handle:
+              handle.write(f'\n보고 SHA256: `{digest}`, source: `{os.environ["SOURCE_SHA"]}`\n')
+          print(f'보고 SHA256: {digest}, source: {os.environ["SOURCE_SHA"]}')
+          print('fixture report·비어 있지 않은 step summary 확인')
+          PY

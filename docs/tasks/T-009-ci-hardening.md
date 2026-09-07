@@ -1,6 +1,6 @@
-# T-009 common CI 하드닝(permissions·concurrency·timeout·ubuntu-24.04·액션 SHA 핀)·`tools` windows 매트릭스·`secret-scan`·`check-versions(report)` job·branch protection 문서·redaction guard
+# T-009 common CI 하드닝(permissions·concurrency·timeout·ubuntu-24.04·액션 SHA 핀)·`tools` windows 매트릭스·`secret-scan`·`check-versions(report)` job·branch protection 문서·redaction guard (2026-09-07, PR #5)
 
-- 상태: READY
+- 상태: DONE
 - 우선순위: P1
 - Gate: CI
 - 선행: T-002, T-003
@@ -14,7 +14,7 @@ common 자체 CI를 D-18 구성으로 재편해, 소비자에게 배포할 재�
 - [설계 브리프](../plan/design-brief.md) D-18(job 목록·하드닝 항목·redaction 범위 common 전체 트리), D-03(`tools` job ubuntu+windows), D-06(액션: checkout v7·setup-node v7·setup-python v7·setup-uv v10, SHA 핀), O-17, O-23.
 - [ci 조사](../survey/cross/ci-deploy.md) §1.3(하드닝 관행: ktdm SHA 핀·ubuntu-24.04, map·pinvi concurrency, pinvi timeout·head SHA checkout), §2.1(`secret-scan` 패턴·`docs-check` redaction), §4(common 자체 CI 제안·branch protection).
 - [버전 매트릭스](../survey/cross/version-matrix.md) §4.4(액션 최신 major·SHA), [문서 규약 비교](../survey/cross/docs-conventions.md) §1.16(push 전 보안 감사 grep 패턴)·§2 C14(CI green 전제).
-- 현재 상태(사실): `docs.yml` 1개, `actions/checkout@v6`·`setup-python@v6`, `ubuntu-latest`, `permissions`·`concurrency`·`timeout-minutes` 없음.
+- 착수 기준(82dec2b의 사실): `docs.yml` 1개, `actions/checkout@v6`·`setup-python@v6`, `ubuntu-latest`, `permissions`·`concurrency`·`timeout-minutes` 없음.
 
 ## 구현 범위
 
@@ -23,8 +23,8 @@ docs·tools(두 OS)·secret-scan·check-versions job은 [ci-deploy §9](../stand
 1. `.github/workflows/docs.yml` 재편: job `docs`(link·plan·unittest·`git diff --check`·redaction 전체 트리), `tools`(matrix `ubuntu-24.04` + Windows 러너; `python -B -X utf8`로 validator·unittest·`check_versions --self-check`·`check_spdx`), `secret-scan`(`tools/scan_secrets.py`: `dc` §1.16 패턴 + `.secret-scan-patterns` 프로젝트 패턴, staged/diff·전체 트리), `check-versions`(report; `$GITHUB_STEP_SUMMARY`).
 2. 하드닝: 최상위 `permissions: contents: read`, `concurrency: ${{ github.workflow }}-${{ github.ref }}` cancel-in-progress, job별 `timeout-minutes`, `runs-on: ubuntu-24.04`, PR head SHA checkout(`ref: ${{ github.event.pull_request.head.sha || github.sha }}`), 모든 `uses:`를 40자 SHA + `# vX.Y.Z` 주석.
 3. `tools/check_prod_redaction.py` + `.prod-redaction-patterns`: 사설 IP 대역·내부 호스트명 형식·운영 도메인 형식을 정규식으로만 정의(실제 운영 값을 패턴 파일에 적지 않음), common 전체 트리 검사(`docs/survey/**` 포함), 예외는 파일 단위 allowlist.
-4. `docs/runbooks/branch-protection.md`: required check 이름(`docs`·`tools`·`secret-scan`), PR 필수·linear history·force-push 차단, 이름 변경 시 갱신 절차. runbook 인덱스 행 추가는 coordinator 소유 → open item.
-5. `tests/test_scan_secrets.py`·`tests/test_prod_redaction.py`.
+4. `docs/runbooks/branch-protection.md`: required check 이름(`docs`·`tools`·`secret-scan`), PR 필수·linear history·force-push 차단, 이름 변경 시 갱신 절차. 실제 matrix check 이름은 runbook에서 대조하며 인덱스에 연결한다. 원격 ruleset 설정은 적용하지 않는다.
+5. `tests/test_scan_secrets.py`·`tests/test_prod_redaction.py`, `tests/fixtures/version-report`의 비설치용 report 입력.
 
 ## 범위 밖
 
@@ -32,7 +32,7 @@ docs·tools(두 OS)·secret-scan·check-versions job은 [ci-deploy §9](../stand
 
 ## 예상 변경 파일
 
-예정 경로는 존재·실행 증거가 아니다. `.github/workflows/docs.yml`, `tools/scan_secrets.py`, `tools/check_prod_redaction.py`, `.secret-scan-patterns`, `.prod-redaction-patterns`, `tests/test_scan_secrets.py`, `tests/test_prod_redaction.py`, `docs/runbooks/branch-protection.md`, `tools/README.md`(행 추가).
+예정 경로는 존재·실행 증거가 아니다. `.github/workflows/docs.yml`, `tools/scan_secrets.py`, `tools/check_prod_redaction.py`, 공통 입력 선택기 `tools/_scan.py`, `.secret-scan-patterns`, `.prod-redaction-patterns`, `tests/test_scan_secrets.py`, `tests/test_prod_redaction.py`, `docs/runbooks/branch-protection.md`, `tools/README.md`(행 추가).
 
 ## 수용 기준
 
@@ -59,6 +59,42 @@ python3 -B -X utf8 -m unittest discover -s tests -p "test_*.py" -v
 Git Bash에서 동일. CI 결과는 GitHub Actions 실행 링크로 기록한다.
 
 ## evidence
+
+2026-09-07 완료: [최종 독립 리뷰](../reviews/adversarial/2026-09-07-t009-post-fix.md)는 A PASS/B PASS, 8개 원 finding 모두 FIXED·새 finding 0이다. 필수 실제 PR/release push 검증을 완료했으며 main merge 뒤 실행과 임시 branch 정리는 별도로 확인한다.
+
+### 실제 CI 재실행
+
+최종 수정 후보 `f15072f4eb6543ead7636250671e8b12d60776e2`의 [PR CI](https://github.com/digitie/kor-travel-common/actions/runs/34070365064)가 5 check 모두 success다. 이후 코드 변경 없는 검증 commit `18b83bd0af84b4e685c4e00108f7104a00900c4a`을 PR branch와 임시 `codex/release-ci-t009-validation`에 push했고 [PR](https://github.com/digitie/kor-travel-common/actions/runs/34070419814)·[release push](https://github.com/digitie/kor-travel-common/actions/runs/34070419969)도 각각 5 check 모두 success였다. 두 commit의 tree는 `2230b30b2d088a26dbf57672f796bc8124e5119f`로 같다. 각 run의 모든 job에서 SOURCE_SHA 로그·checkout 비교 step·run head 일치를 다시 확인했다. 보고서 digest는 아래 ec34d6a 검증과 같고 로그에는 각 run의 실제 source가 기록돼 있다.
+
+| 빈 검증 commit의 check | PR 소요 시간·job | release push 소요 시간·job |
+|---|---|---|
+| docs | [14초](https://github.com/digitie/kor-travel-common/actions/runs/34070419814/job/101586597725) | [15초](https://github.com/digitie/kor-travel-common/actions/runs/34070419969/job/101586598485) |
+| tools (ubuntu-24.04) | [14초](https://github.com/digitie/kor-travel-common/actions/runs/34070419814/job/101586597778) | [15초](https://github.com/digitie/kor-travel-common/actions/runs/34070419969/job/101586598421) |
+| tools (windows-2025) | [34초](https://github.com/digitie/kor-travel-common/actions/runs/34070419814/job/101586597717) | [37초](https://github.com/digitie/kor-travel-common/actions/runs/34070419969/job/101586598506) |
+| secret-scan | [5초](https://github.com/digitie/kor-travel-common/actions/runs/34070419814/job/101586597608) | [5초](https://github.com/digitie/kor-travel-common/actions/runs/34070419969/job/101586598540) |
+| check-versions | [9초](https://github.com/digitie/kor-travel-common/actions/runs/34070419814/job/101586597981) | [5초](https://github.com/digitie/kor-travel-common/actions/runs/34070419969/job/101586598278) |
+
+이 검증에서 Windows Python 3.11.9의 135 tests·skip 0(PR 17.768초/release 19.099초), Ubuntu Python 3.11.16의 135 tests·skip 0을 확인했다. 로컬 수정본은 Windows 135 tests·skip 0(40.339초), WSL Python 3.11.15의 135 tests·skip 0(16.945초), link265/2131·plan102·SPDX18·guard324파일 오류 0이다. 최초 두 원본의 [8개 finding과 대응](../reviews/adversarial/2026-09-07-t009.md)은 두 독립 재검토에서 모두 FIXED로 확정됐다.
+
+수정 commit `ec34d6a254e1b24bba43261b6bc1df220213baa3`의 [PR run](https://github.com/digitie/kor-travel-common/actions/runs/34069558960)과 [release push run](https://github.com/digitie/kor-travel-common/actions/runs/34069558276)은 필수 check 5개 모두 success다. 각 job의 checkout 로그·source 확인 step 성공·run head SHA를 대조했다. report step은 같은 단계의 summary에 비어 있지 않은 표와 source가 있음을 단언한다. JSON report의 SHA256은 두 run 모두 `96c9a4ae83461111a418378976db515d6577de259c9dd5e53fb98388fa9cb403`이며 source는 위 commit이다. 제품 결과가 아닌 고정 fixture 보고다.
+
+| check | PR 소요 시간·job | release push 소요 시간·job |
+|---|---|---|
+| docs | [16초](https://github.com/digitie/kor-travel-common/actions/runs/34069558960/job/101584261844) | [13초](https://github.com/digitie/kor-travel-common/actions/runs/34069558276/job/101584259808) |
+| tools (ubuntu-24.04) | [17초](https://github.com/digitie/kor-travel-common/actions/runs/34069558960/job/101584261932) | [16초](https://github.com/digitie/kor-travel-common/actions/runs/34069558276/job/101584259966) |
+| tools (windows-2025) | [35초](https://github.com/digitie/kor-travel-common/actions/runs/34069558960/job/101584261864) | [34초](https://github.com/digitie/kor-travel-common/actions/runs/34069558276/job/101584259770) |
+| secret-scan | [7초](https://github.com/digitie/kor-travel-common/actions/runs/34069558960/job/101584261686) | [6초](https://github.com/digitie/kor-travel-common/actions/runs/34069558276/job/101584259850) |
+| check-versions | [7초](https://github.com/digitie/kor-travel-common/actions/runs/34069558960/job/101584261826) | [5초](https://github.com/digitie/kor-travel-common/actions/runs/34069558276/job/101584259706) |
+
+Windows 러너 Python 3.11.9에서 132 tests·skip 0(PR 17.390초/release 16.557초), Ubuntu Python 3.11.16에서 132 tests·skip 0이다. 같은 수정의 로컬 검증도 Windows 132 tests·skip 0(100.572초), WSL Python 3.11.15의 132 tests·skip 0(30.276초)로 성공했다. main의 새 workflow 실행은 merge 후 확인하며 아직 NOT_RUN이다. 원격 ruleset 조회는 빈 목록이었고 설정은 적용하지 않았다.
+
+### 초기 실패와 구현 검증
+
+첫 실제 [PR CI](https://github.com/digitie/kor-travel-common/actions/runs/34069260693)와 [release push CI](https://github.com/digitie/kor-travel-common/actions/runs/34069314480)에서 두 실패를 확인했다. report는 이전 step의 summary에 source가 있다고 잘못 가정했고, Windows Python 3.11.9는 TEMP의 짧은 경로 별칭과 해석한 긴 경로를 상대화하다 실패했다. GitHub의 [변수 문서](https://docs.github.com/en/actions/reference/workflows-and-actions/variables)(조회일 2026-09-07)의 step별 summary 경로 계약에 맞춰 report step 자체에서 source를 확인·기록했다. manifest의 기준 경로도 resolve하고 별칭 경로 회귀 시험이 수정 전 실패함을 재현했다. 수정 후 실제 CI 결과는 뒤 검증으로 구분한다.
+
+2026-09-07 재개: PR #4 merge `82dec2b939885863100802997f9e7548dffd3c9a`와 main CI 34066384346 성공을 확인했다. [PR #5](https://github.com/digitie/kor-travel-common/pull/5)에서 구현한다. 공식 [checkout v7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1)·[setup-python v7.0.0](https://github.com/actions/setup-python/releases/tag/v7.0.0)의 release/tag API를 조회해 workflow의 40자 commit과 일치함을 확인했다(조회일 2026-09-07). 실제 값은 workflow가 정본이다.
+
+검사기와 CI를 구현했고 [조사 보안 정정](../survey/README.md#9-t-009-보안-정정)을 기록했다. 전체 현재 트리 319파일에서 비밀·운영 주소 발견 0, 명시적 예외 0이며 SPDX 18파일 오류 0이다. Git index/commit 스냅샷·정책 읽기, 값 비공개, 실패 종료와 주소 경계를 회귀 검증한다. 첫 시험에서 Windows Git의 금지 파일명 생성 실패·fixture 패턴의 자기 일치·내부 호스트 뒤 문장부호 누락을 확인하고, 경로 파서 직접 시험·정규식 수정으로 대응했다. Windows Python 3.14.3에서 전체 131 tests·skip 0(29.892초), WSL Python 3.11.15에서 131 tests·skip 0(13.107초)을 새로 실행해 성공했다. link260문서·2107대상과 plan101·diff 오류 0이다. 실제 CI·임시 release push·두 독립 리뷰는 아직 수행 전이며 완료로 판정하지 않는다.
 
 2026-09-06 종료 재검토: 필수 Windows tools job이 T-003의 check_spdx.py를 실행하므로 해당 task를 내부 선행으로 명시했다. T-003이 DONE이 되기 전에는 직접 지정받아도 착수하지 않는다. T-005 전체 완료는 현재 checker 자체 검사의 기술적 선행과 구분하며 기본 실행 대기열은 T-003 → T-005 → T-009를 유지한다.
 

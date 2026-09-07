@@ -176,3 +176,17 @@
 - 조사 문서는 §2.1의 기준 커밋에 고정된 스냅샷이다. 저장소가 바뀌어도 본문을 고치지 않고, 재조사 시 기준 커밋을 갱신한 새 절 또는 새 문서를 만든다(`docs/runbooks/documentation-maintenance.md` §2 "조사 기준 커밋 갱신").
 - 이 README §6.2의 오기(항목 1·2·4·5·6·7·11·18)는 해당 인벤토리를 수정하지 않고 여기에 정정 기록으로만 둔다. 설계 문서는 정정된 값을 인용한다.
 - 문서 링크는 저장소 상대 경로만 쓴다(`cross/docs-conventions.md` C11).
+
+## 9. T-009 보안 정정
+
+2026-09-07, common 기준 `82dec2b939885863100802997f9e7548dffd3c9a`의 추적 조사에서 운영 주소·접속정보를 재확인했다. AGENTS의 비밀·운영 정보 금지와 common 전체 트리 검사 요구를 우선해 해당 값만 placeholder로 치환했다. §8의 일반 재조사 규칙과 구분되는 보안 정정이며 조사 기준 커밋·비민감 관찰은 그대로다. Git 이력을 재작성하지 않았고 소비자 원본에는 쓰지 않았다. 아래 수는 문자열 치환 횟수이며 실제 값은 보존하지 않는다.
+
+| 문서 | 사설 주소 | 내부 호스트 | 운영 도메인 | 접속 자격증명 |
+|---|---:|---:|---:|---:|
+| cross/ci-deploy.md | 3 | 3 | 5 | 0 |
+| cross/version-matrix.md | 0 | 0 | 1 | 0 |
+| inventory/kor-travel-airport.md | 3 | 0 | 3 | 0 |
+| inventory/kor-travel-geo.md | 0 | 1 | 0 | 1 |
+| inventory/kor-travel-weather.md | 2 | 0 | 3 | 0 |
+
+Docker 예약 호스트는 운영 주소가 아니므로 유지했다. T-306의 DSN 변환 예시도 같은 placeholder 표기로 맞췄다. 검사 범위·패턴의 한계는 [CI 규약 §8](../standards/ci-deploy.md#8-redactionsecret-scan)을 따른다.

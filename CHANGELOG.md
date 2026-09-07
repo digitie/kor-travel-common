@@ -26,6 +26,8 @@
 
 ### standards
 
+- common CI의 고정 액션·읽기 권한·두 OS 검증과 source SHA 확인을 구현했다. 비밀·운영 주소 guard의 스냅샷/예외/실패 계약 및 branch protection 절차를 추가하고 조사 문서의 민감 값을 치환했다(T-009).
+
 #### Changed
 
 - npm·PyPI 게시·이름 확보 계획을 제외하고 파일 배포용 식별자를 확정했다. 검증한 common 후보를 보존한 뒤 다음 minor 구현을 진행하며, 실제 소비자 검증과 정식 발행은 별도 gate로 유지한다([ADR-014](docs/adr/014-common-implementation-without-registry-publishing.md)).
