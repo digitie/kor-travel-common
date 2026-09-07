@@ -1836,12 +1836,15 @@ def _manifest_declaration_scopes(root: Path, app: object) -> list[Scope]:
     if not isinstance(app, str) or not app:
         return []
     candidate = (root / app)
+    contains_symlink = _path_contains_symlink(candidate)
     if not candidate.exists() and not candidate.is_symlink():
+        if contains_symlink:
+            raise ValueError("매니페스트 app 입력 구조 오류")
         return []
     app_dir = _resolve_input_path(candidate, "매니페스트 app 입력 구조 오류")
     if not _path_within(app_dir, root):
         raise ValueError("매니페스트 app 경로가 소비자 저장소 루트 밖에 있음")
-    if _path_contains_symlink(candidate) and not app_dir.is_dir():
+    if contains_symlink and not app_dir.is_dir():
         raise ValueError("매니페스트 app 입력 구조 오류")
     if not app_dir.is_dir():
         return []

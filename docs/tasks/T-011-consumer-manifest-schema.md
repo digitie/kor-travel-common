@@ -37,7 +37,7 @@
    | `apps/etl/` | `pinvi.apps-etl.lock.json` | `pinvi` | `apps/etl` | lock 없음(선언만) |
 
    값은 조사 기준 커밋 현재값(인벤토리 §10)이며 `tokens.version` 등은 미채택이면 `null`.
-5. `tests/test_validate_manifest.py`(정상·미지 필드·`enforce`·`until`/`review` 날짜·비ASCII/끝 개행 날짜·kind 오류·workspace·workspace/intermediate symlink loop·빈 lock 선언·requirements 재귀 root 이탈·self-symlink·제어문자/경계 공백 schema parity·민감한 전이 scope/DEL redaction).
+5. `tests/test_validate_manifest.py`(정상·미지 필드·`enforce`·`until`/`review` 날짜·비ASCII/끝 개행 날짜·kind 오류·workspace·workspace/app/intermediate symlink loop·빈 lock 선언·requirements 재귀 root 이탈·self-symlink·제어문자/경계 공백 schema parity·민감한 전이 scope/DEL redaction).
 
 ## 범위 밖
 

@@ -462,6 +462,13 @@ class ValidateManifestTests(unittest.TestCase):
             self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
             self.assertNotIn("Traceback", result.stdout + result.stderr)
 
+            data["lockfiles"] = []
+            data["app"] = "loop/etl"
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            result = run()
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertNotIn("Traceback", result.stdout + result.stderr)
+
             data["lockfiles"] = [{"kind": "npm", "path": "loop/package-lock.json", "scope": "root"}]
             manifest.write_text(json.dumps(data), encoding="utf-8")
             result = run()
