@@ -2,6 +2,14 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-08 (Codex, T-104·T-020·T-021 최종 PASS·PR #17 merge·main CI 완료)
+
+T-104 디자인 토큰 표준과 T-020 pinvi·T-021 concierge·docker-manager GPL-3.0-or-later 결정·요청 문서를 최종 정리했다. 반복 no-go의 근본 원인은 WCAG 일반 텍스트/비텍스트 기준, 조사 재현 오차/검사기 합격 판정, 소비자 license-only PR/후속 코드 채택 evidence, common 완료/외부 gate 완료, chart palette 소유권을 한 gate에 섞은 문서 계약이었다. TK-8·T-103·style-delivery의 4.5:1/3:1 기준과 `±0.03` 재현 오차를 분리하고 반올림 합격을 금지했으며, chart 슬롯은 앱 소유로 전환하고 Breaking/Migration·회귀 시험을 기록했다. T-020/T-021의 DONE은 common 결정·요청 문서 gate만 닫고 외부 LICENSE PR과 소비자 채택은 `OPEN/NOT_RUN`으로 유지한다.
+
+최종 candidate `2ca6b0c491ddcf542d0c77540b78d18ddf100dfb`에서 reviewer A/B가 각각 누적 finding 7건/4건을 모두 FIXED로 확인하고 신규·잔여 P0–P3 0건으로 PASS했다. 원본 SHA256은 A `935C2F57F9FF313307FE5C8498463BD50AC635D99EFAEF6D5E593031A7ABDE0C`, B `0FD0B3BE1E0EB26B90F9CAF3D801FA72FF249163CDB9BB7EEA9779FBBF480685`다. [최종 통합 리뷰](reviews/adversarial/2026-09-08-t104-t020-t021.md)와 [A/B 원본](reviews/adversarial/evidence/2026-09-08-t104-t020-t021-reviewer-a-post-fix-04.md), [B](reviews/adversarial/evidence/2026-09-08-t104-t020-t021-reviewer-b-post-fix-04.md)에 기준선·명령·disposition을 보존했다.
+
+PR #17(`4131c9d`)의 6개 job CI `34168541026`이 성공했고, squash merge SHA는 `c573e7c9477623b5c0e938d7b2fd1962be99cff2`다. merge 후 main CI `34168628049`의 6개 job도 모두 성공했다. 로컬에서는 문서 링크(393/2403, 오류 0), plan(106, 오류 0), SPDX(45, 오류 0), secret/redaction(508, 발견 0), tokens check·7 tests, Python 238 tests OK를 확인했다. T-103 실제 검사기·소비자 build/e2e/시각 검증·외부 LICENSE evidence·npm/PyPI 게시는 `NOT_RUN`이다. 다음 작업은 T-103 READY다.
+
 ## 2026-09-08 (Codex, T-102 반복 no-go 근본 원인 수정·최종 PASS·PR #15 merge·main CI 완료)
 
 T-102의 반복 no-go는 reviewer별 판단 차이가 아니라, 초기 checker가 CSS를 변수 정규식과 부분 블록 문자열로만 다뤄 실제 적용 scope·import 변형·Unicode identifier·escape 경계를 브라우저 의미와 다르게 승인한 데서 시작됐다. Windows에서는 lexical 8.3 표기와 canonical 경계를 섞어 정상 fixture를 외부 경로로 오판했고, 진단이 입력 경로·식별자·값을 재출력할 수 있었다. 고정 원천을 다시 대조하기 전에는 map의 `radius-md` control과 weather의 panel 의미도 분리되지 않았다. raw reviewer evidence의 줄바꿈·공백을 immutable bytes로 보존하는 CI 정책도 후보 artifact와 함께 닫지 못해 문서/Windows gate가 반복 실패했다.
