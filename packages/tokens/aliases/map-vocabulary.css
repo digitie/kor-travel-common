@@ -1,0 +1,177 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ * Modified: 2026-09-07 — map·weather·geo 레거시 어휘를 --kt-*로 연결
+ */
+
+/*
+ * 이 파일은 선택형 이관 shim이다. shadcn 이름(--card, --border 등)은
+ * 공개 shadcn.css를 한 번만 가져와 중복 선언하지 않는다. 앱 전용
+ * --color-admin-*·--ui-*·--ktc-*와 도메인 팔레트는 이 파일에 추가하지 않는다.
+ */
+@import "../shadcn.css";
+
+:root {
+  /* 표면·텍스트·아이콘 */
+  --surface-page: var(--kt-surface-page);
+  --surface-subtle: var(--kt-surface-subtle);
+  --surface-muted: var(--kt-surface-muted);
+  --surface-card: var(--kt-surface-card);
+  --text-primary: var(--kt-text-primary);
+  --text-secondary: var(--kt-text-secondary);
+  --text-tertiary: var(--kt-text-tertiary);
+  --text-disabled: var(--kt-text-disabled);
+  --text-strong: var(--kt-text-strong);
+  --icon: var(--kt-icon);
+  --icon-default: var(--kt-icon);
+  --control-line: var(--kt-control-line);
+
+  /* 브랜드·상태·포커스 */
+  --brand: var(--kt-brand);
+  --brand-hover: var(--kt-brand-hover);
+  --brand-tint: var(--kt-brand-tint);
+  --brand-foreground: var(--kt-brand-foreground);
+  --focus: var(--kt-focus);
+  --success: var(--kt-success);
+  --success-tint: var(--kt-success-tint);
+  --warning: var(--kt-warning);
+  --warning-tint: var(--kt-warning-tint);
+  --info: var(--kt-info);
+  --info-tint: var(--kt-info-tint);
+  --destructive-tint: var(--kt-destructive-tint);
+  --overlay: var(--kt-overlay);
+
+  /* 형태·크기·모션·층 */
+  --radius-control: var(--kt-radius-control);
+  --radius-panel: var(--kt-radius-panel);
+  --radius-xs: var(--kt-radius-control);
+  --radius-sm: var(--kt-radius-control);
+  --radius-md: var(--kt-radius-control);
+  --radius-lg: var(--kt-radius-panel);
+  --radius-xl: var(--kt-radius-panel);
+  --radius-2xl: var(--kt-radius-panel);
+  --radius-3xl: var(--kt-radius-panel);
+  --radius-4xl: var(--kt-radius-panel);
+  --control-h: var(--kt-control-h);
+  --control-h-sm: var(--kt-control-h-sm);
+  --rail: var(--kt-rail);
+  --duration-fast: var(--kt-duration-fast);
+  --duration-base: var(--kt-duration-base);
+  --dur-fast: var(--kt-duration-fast);
+  --dur-base: var(--kt-duration-base);
+  --ease-out: var(--kt-ease-out);
+  --ease-in: var(--kt-ease-in);
+  --default-transition-duration: var(--kt-duration-fast);
+  --default-transition-timing-function: var(--kt-ease-out);
+  --shadow-card: none;
+  --shadow-card-hover: none;
+  --shadow-elevated: var(--kt-shadow-elevated);
+  --shadow-modal: var(--kt-shadow-modal);
+  --z-nav: var(--kt-z-nav);
+  --z-panel: var(--kt-z-panel);
+  --z-overlay: var(--kt-z-overlay);
+  --z-modal: var(--kt-z-modal);
+  --z-toast: var(--kt-z-toast);
+
+  /* common은 폰트 파일을 배포하지 않고 스택만 제공한다. */
+  --font-sans: var(--kt-font-sans);
+  --font-display: var(--kt-font-sans);
+  --font-body: var(--kt-font-sans);
+  --font-heading: var(--kt-font-sans);
+  --font-mono: var(--kt-font-mono);
+
+  /* weather의 기존 무접두 color 별칭은 의미 토큰의 파생 이름으로 유지한다. */
+  --color-ink: var(--kt-text-primary);
+  --color-ink-muted: var(--kt-text-secondary);
+  --color-paper: var(--kt-surface-page);
+  --color-panel: var(--kt-surface-card);
+  --color-rule: var(--kt-border);
+  --color-rule-soft: var(--kt-surface-subtle);
+  --color-accent: var(--kt-brand);
+  --color-accent-ink: var(--kt-brand-foreground);
+  --color-accent-soft: var(--kt-brand-tint);
+  --color-danger: var(--kt-destructive);
+  --color-danger-soft: var(--kt-destructive-tint);
+  --color-warning: var(--kt-warning);
+  --color-warning-soft: var(--kt-warning-tint);
+  --color-info: var(--kt-info);
+  --color-info-soft: var(--kt-info-tint);
+}
+
+.dark {
+  /* dark 값은 tokens.css의 활성 profile을 그대로 따른다. */
+  --surface-page: var(--kt-surface-page);
+  --surface-subtle: var(--kt-surface-subtle);
+  --surface-muted: var(--kt-surface-muted);
+  --surface-card: var(--kt-surface-card);
+  --text-primary: var(--kt-text-primary);
+  --text-secondary: var(--kt-text-secondary);
+  --text-tertiary: var(--kt-text-tertiary);
+  --text-disabled: var(--kt-text-disabled);
+  --text-strong: var(--kt-text-strong);
+  --icon: var(--kt-icon);
+  --icon-default: var(--kt-icon);
+  --control-line: var(--kt-control-line);
+  --brand: var(--kt-brand);
+  --brand-hover: var(--kt-brand-hover);
+  --brand-tint: var(--kt-brand-tint);
+  --brand-foreground: var(--kt-brand-foreground);
+  --focus: var(--kt-focus);
+  --success: var(--kt-success);
+  --success-tint: var(--kt-success-tint);
+  --warning: var(--kt-warning);
+  --warning-tint: var(--kt-warning-tint);
+  --info: var(--kt-info);
+  --info-tint: var(--kt-info-tint);
+  --destructive-tint: var(--kt-destructive-tint);
+  --overlay: var(--kt-overlay);
+  --radius-control: var(--kt-radius-control);
+  --radius-panel: var(--kt-radius-panel);
+  --radius-xs: var(--kt-radius-control);
+  --radius-sm: var(--kt-radius-control);
+  --radius-md: var(--kt-radius-control);
+  --radius-lg: var(--kt-radius-panel);
+  --radius-xl: var(--kt-radius-panel);
+  --radius-2xl: var(--kt-radius-panel);
+  --radius-3xl: var(--kt-radius-panel);
+  --radius-4xl: var(--kt-radius-panel);
+  --control-h: var(--kt-control-h);
+  --control-h-sm: var(--kt-control-h-sm);
+  --rail: var(--kt-rail);
+  --duration-fast: var(--kt-duration-fast);
+  --duration-base: var(--kt-duration-base);
+  --dur-fast: var(--kt-duration-fast);
+  --dur-base: var(--kt-duration-base);
+  --ease-out: var(--kt-ease-out);
+  --ease-in: var(--kt-ease-in);
+  --default-transition-duration: var(--kt-duration-fast);
+  --default-transition-timing-function: var(--kt-ease-out);
+  --shadow-card: none;
+  --shadow-card-hover: none;
+  --shadow-elevated: var(--kt-shadow-elevated);
+  --shadow-modal: var(--kt-shadow-modal);
+  --z-nav: var(--kt-z-nav);
+  --z-panel: var(--kt-z-panel);
+  --z-overlay: var(--kt-z-overlay);
+  --z-modal: var(--kt-z-modal);
+  --z-toast: var(--kt-z-toast);
+  --font-sans: var(--kt-font-sans);
+  --font-display: var(--kt-font-sans);
+  --font-body: var(--kt-font-sans);
+  --font-heading: var(--kt-font-sans);
+  --font-mono: var(--kt-font-mono);
+  --color-ink: var(--kt-text-primary);
+  --color-ink-muted: var(--kt-text-secondary);
+  --color-paper: var(--kt-surface-page);
+  --color-panel: var(--kt-surface-card);
+  --color-rule: var(--kt-border);
+  --color-rule-soft: var(--kt-surface-subtle);
+  --color-accent: var(--kt-brand);
+  --color-accent-ink: var(--kt-brand-foreground);
+  --color-accent-soft: var(--kt-brand-tint);
+  --color-danger: var(--kt-destructive);
+  --color-danger-soft: var(--kt-destructive-tint);
+  --color-warning: var(--kt-warning);
+  --color-warning-soft: var(--kt-warning-tint);
+  --color-info: var(--kt-info);
+  --color-info-soft: var(--kt-info-tint);
+}

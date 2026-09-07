@@ -21,6 +21,7 @@
     "shadcn.css",
     "theme.css",
     "tokens.css",
+    "aliases/*.css",
     "LICENSE",
     "NOTICE",
     "THIRD_PARTY_NOTICES.md"
@@ -38,6 +39,7 @@
     "./base.scoped.css": "./base.scoped.css",
     "./dark-class.css": "./dark-class.css",
     "./dark-media.css": "./dark-media.css",
+    "./aliases/map-vocabulary.css": "./aliases/map-vocabulary.css",
     "./aliases/*": "./aliases/*",
     "./tokens.json": "./dist/tokens.json",
     "./tokens.ts": "./dist/tokens.ts",

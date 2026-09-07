@@ -1,0 +1,23 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ * Modified: 2026-09-07 — weather navy·rail·font 오버라이드 예제
+ */
+
+/* weather의 기존 값을 재현하는 앱 소유 오버라이드 예제다. */
+:root {
+  --kt-brand: oklch(47% 0.14 255);
+  --kt-brand-hover: oklch(41% 0.15 255);
+  --kt-brand-tint: oklch(95% 0.025 250);
+  --kt-brand-foreground: oklch(99% 0.002 250);
+  --kt-rail: 17rem;
+  --kt-font-sans: var(--font-geist, "Geist"), var(--font-pretendard, "Pretendard Variable"), Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+
+.dark {
+  --kt-brand: oklch(76% 0.13 250);
+  --kt-brand-hover: oklch(81% 0.13 250);
+  --kt-brand-tint: oklch(31% 0.06 250);
+  --kt-brand-foreground: oklch(20% 0.04 250);
+  --kt-rail: 17rem;
+  --kt-font-sans: var(--font-geist, "Geist"), var(--font-pretendard, "Pretendard Variable"), Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}

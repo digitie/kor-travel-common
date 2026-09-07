@@ -81,6 +81,7 @@ jobs:
           python -B -X utf8 tools/validate_document_links.py
           python -B -X utf8 tools/validate_plan.py
           python -B -X utf8 -m unittest discover -s tests -p 'test_*.py'
+          python -B -X utf8 tools/check_aliases.py packages/tokens/aliases
           python -B -X utf8 tools/check_versions.py --self-check
           python -B -X utf8 tools/check_spdx.py
           python -B -X utf8 tools/scan_secrets.py --all
