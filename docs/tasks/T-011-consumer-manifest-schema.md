@@ -1,6 +1,6 @@
 # T-011 소비자 매니페스트 스키마 `consumer-manifest.v1` + `tools/validate_manifest.py` + 7 소비자 초기 매니페스트 초안
 
-- 상태: BLOCKED
+- 상태: READY
 - 우선순위: P1
 - Gate: 도구 테스트
 - 선행: T-005, T-016

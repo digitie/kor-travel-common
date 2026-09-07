@@ -1,6 +1,6 @@
-# T-016 공용 시스템 범위 재정의와 전체 계획 동기화
+# T-016 공용 시스템 범위 재정의와 전체 계획 동기화 (2026-09-07, PR #9)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P0
 - Gate: 문서·계획 검증·2인 적대적 리뷰
 - 선행: 없음
@@ -56,8 +56,9 @@ git diff --check
 ## evidence
 
 - 변경 전 기준선: `c8f81be7e70abbce892417eb0247a5d2337f31`.
-- reviewer A/B의 독립 report와 post-fix report를 `docs/reviews/adversarial/`에 추가한다.
-- 소비자 저장소 변경·빌드·e2e·registry 게시: `NOT_RUN(공용 범위 동기화 task의 범위 밖)`.
+- 최종 candidate `a9fc2f5187bcf2517cb1da54ece9b12ab04b82ff`와 tree `4b9acba43d126f1adf31b680ed64389a4e74b440`에서 reviewer A/B가 독립 PASS했다([통합 report](../reviews/adversarial/2026-09-07-t016-common-scope-post-fix.md), [manifest](../reviews/adversarial/evidence/2026-09-07-t016-common-scope-post-fix-manifest.md)).
+- candidate CI [34107732188](https://github.com/digitie/kor-travel-common/actions/runs/34107732188)의 docs·tools(ubuntu/windows)·check-versions·secret-scan 5개 job이 성공했다. Windows Python 3.14.3 전체 179 tests·skip 0, plan 106·links 324/2261·redaction 399·diff 검사가 성공했다.
+- T-011은 manifest root 계약을 반영한 READY로 전환했다. 소비자 저장소 변경·빌드·e2e·registry 게시·패키지 실물 구현은 `NOT_RUN(후속 task 또는 외부 범위)`이다.
 
 ## rollback 또는 release 차단 조건
 

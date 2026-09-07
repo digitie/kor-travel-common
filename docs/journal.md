@@ -2,6 +2,14 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-07 (Codex, T-016 완료·PR #9 병합 대기)
+
+T-016 공용 시스템 범위 재점검을 `a9fc2f5187bcf2517cb1da54ece9b12ab04b82ff`에서 마쳤다. ADR-015로 common을 독립 운영 시스템이 아닌 위젯·디자인 토큰·공용 코어·로그인 UI/주입형 인증 프리미티브를 제공하는 저장소로 확정하고, 서버·사용자/세션 DB·운영 비밀·IdP·앱 정책은 소비자 소유로 남겼다. T-213a common UI 0.2 후보 보존과 T-214 로그인 위젯을 외부 UI 정식 릴리스 T-213에서 분리했으며 T-011은 READY가 됐다.
+
+두 reviewer가 같은 immutable candidate/tree에서 독립 PASS했다. A/B 누적 finding 10건과 중복 B finding을 모두 FIXED로 재확인했고 새 finding은 없다([통합 리뷰](reviews/adversarial/2026-09-07-t016-common-scope-post-fix.md), [manifest](reviews/adversarial/evidence/2026-09-07-t016-common-scope-post-fix-manifest.md)). PR #9 CI `34107732188`의 5개 job, plan 106/오류0, link 324문서·2261대상, redaction 399파일, Windows 전체 179 tests·skip 0, diff 검사가 성공했다.
+
+소비자 저장소 변경·패키지 실물 build/pack/wheel 설치·실제 후보 tag/Release·소비자 build/e2e·npm/PyPI 게시·권리 gate는 `NOT_RUN(후속 task 또는 외부 범위)`이다. PR #9를 병합한 뒤 main CI를 확인하고 다음 작업은 T-011부터 순차 진행한다.
+
 ## 2026-09-07 (Codex, T-016 공용 범위 재점검 시작)
 
 사용자가 common의 목표를 위젯·디자인 토큰·공용 코어 로직·로그인과 같은 공용 시스템을 한 저장소에 모으는 것으로 재확인했다. 기존 ADR-001·ADR-011·AGENTS·architecture·backend/UI 규칙의 “인증 전체 제외” 문구와 충돌하므로 [ADR-015](adr/015-common-shared-systems-scope.md)와 [범위 재점검](plan/common-scope-recheck-2026-09-07.md)을 작성하고 T-016으로 정본·task를 동기화한다. 로그인 UI와 저장소·키 주입형 인증 프리미티브는 common 책임으로 포함하되 인증 서버·사용자/세션 DB·운영 비밀·외부 IdP·앱별 정책은 소비자 소유로 고정했다.
