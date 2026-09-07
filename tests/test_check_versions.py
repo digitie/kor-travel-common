@@ -393,6 +393,11 @@ class CheckVersionsTests(unittest.TestCase):
                        deps=["custom-lib @ git+https://github.com/example/pkg.git@" + sha],
                        locked={}, git_locked={"custom-lib": ("1.0.0", "https://github.com/example/pkg?rev=main#main")})
         self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), ["FLOATING_REF"])
+        lock_text = (self.repo / "uv.lock").read_text(encoding="utf-8")
+        (self.repo / "uv.lock").write_text(
+            lock_text + '\n[[package]]\nname = "custom-lib"\nversion = "1.1.0"\n'
+            'source = { git = "https://github.com/example/pkg?rev=short#abc" }\n', encoding="utf-8")
+        self.assertEqual(self.verdicts(self.run_checker(), "custom-lib"), ["FLOATING_REF"])
         npm_fixture(self.repo, deps={"custom-lib": "git+https://github.com/example/pkg.git#v1.2.3"},
                     engines={"node": ">=22.12"}, installed={"custom-lib": "1.2.3"})
         npm_findings = CV.Checker(CV.Registry.load(self.registry_path), "app-a", CV.date(2026, 9, 6))
@@ -538,14 +543,31 @@ class CheckVersionsTests(unittest.TestCase):
         for replacement in (
             ("version = 1", "version = 2"),
             ("revision = 3", "revision = 5"),
+            ("revision = 3", "revision = 3\nresolution-markers = 42"),
             ('source = { registry = "https://pypi.org/simple" }',
              'source = { registry = "https://pypi.org/simple", git = "https://example.invalid/repo" }'),
+            ('source = { registry = "https://pypi.org/simple" }',
+             'source = { registry = "https://[" }'),
+            ('source = { registry = "https://pypi.org/simple" }',
+             'source = { registry = "https://pypi.org/simple" }\ndependencies = { broken = true }'),
         ):
             with self.subTest(replacement=replacement):
                 lock_path.write_text(original.replace(*replacement), encoding="utf-8")
                 with self.assertRaises(ValueError):
                     self.run_checker()
         lock_path.write_text(original, encoding="utf-8")
+
+    def test_uv_input_error_does_not_echo_input_names(self):
+        python_fixture(self.repo, requires=">=3.12", deps=["fastapi>=0.115"],
+                       locked={"fastapi": "0.141.1"})
+        lock_path = self.repo / "uv.lock"
+        lock_path.write_text(lock_path.read_text(encoding="utf-8")
+                             .replace("version = 1", "version = 1\nSENTINEL_INPUT_FIELD = true"),
+                             encoding="utf-8")
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet")
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn("SENTINEL_INPUT_FIELD", result.stdout)
+        self.assertNotIn(str(self.repo), result.stdout)
 
     def test_uv_shared_lock_checks_transitive_package_from_member_scope(self):
         workspace = self.root / "workspace"
@@ -570,7 +592,7 @@ class CheckVersionsTests(unittest.TestCase):
             '[project]\nname = "fixture"\nversion = "0.0.0"\nrequires-python = ">=3.12"\n'
             'dependencies = []\n\n[dependency-groups]\nlint = ["fastapi>=0.115"]\ndev = [{ include-group = "lint" }]\n\n'
             '[tool.uv.sources]\ncustom-lib = [\n'
-            '  { git = "https://github.com/example/custom-lib", branch = "main" },\n'
+            '  { git = "https://github.com/example/custom-lib", branch = "v1.2.3" },\n'
             '  { git = "https://github.com/example/custom-lib", tag = "v1.2.3" },\n]\n',
             encoding="utf-8")
         findings = self.run_checker()
@@ -584,9 +606,14 @@ class CheckVersionsTests(unittest.TestCase):
         malformed_source = malformed_group.replace('lint = "fastapi>=0.115"',
                                                      'lint = ["fastapi>=0.115"]')
         malformed_source = malformed_source.replace(
-            'custom-lib = [\n  { git = "https://github.com/example/custom-lib", branch = "main" },\n  { git = "https://github.com/example/custom-lib", tag = "v1.2.3" },\n]',
+            'custom-lib = [\n  { git = "https://github.com/example/custom-lib", branch = "v1.2.3" },\n  { git = "https://github.com/example/custom-lib", tag = "v1.2.3" },\n]',
             'custom-lib = "invalid"')
         (self.repo / "pyproject.toml").write_text(malformed_source, encoding="utf-8")
+        self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+
+        missing_group = malformed_group.replace('lint = "fastapi>=0.115"',
+                                                  'lint = [{ include-group = "missing" }]')
+        (self.repo / "pyproject.toml").write_text(missing_group, encoding="utf-8")
         self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
 
     def test_python_floating_ref_without_lock(self):

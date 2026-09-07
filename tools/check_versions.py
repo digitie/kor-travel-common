@@ -453,7 +453,12 @@ UV_SUPPORTED_REVISION = 4
 
 
 def _uv_error(path: Path, detail: str) -> ValueError:
-    return ValueError(f"{path}: uv.lock 지원 형식 오류: {detail}")
+    return ValueError("uv.lock 지원 형식 오류")
+
+
+def _manifest_input_error() -> ValueError:
+    """입력의 이름·경로·값을 로그에 재출력하지 않는 manifest 오류."""
+    return ValueError("Python manifest 지원 형식 오류")
 
 
 def uv_source_kind(source: object, path: Path, package_name: str) -> str:
@@ -466,12 +471,24 @@ def uv_source_kind(source: object, path: Path, package_name: str) -> str:
     kinds = [key for key in UV_SOURCE_FIELDS if key in source]
     if len(kinds) != 1 or not isinstance(source[kinds[0]], str) or not source[kinds[0]].strip():
         raise _uv_error(path, f"package {package_name!r} source 종류·값이 잘못됨")
+    if kinds[0] in {"registry", "git"}:
+        try:
+            parsed = urlsplit(source[kinds[0]])
+        except ValueError as exc:
+            raise _uv_error(path, "source URL 형식 오류") from exc
+        if not parsed.scheme or not parsed.netloc:
+            raise _uv_error(path, "source URL 형식 오류")
+    elif "\x00" in source[kinds[0]]:
+        raise _uv_error(path, "source 경로 형식 오류")
     return kinds[0]
 
 
 def read_uv_lock(path: Path) -> dict:
     """uv v1 revision 0~4의 검사 대상 필드만 허용하는 오프라인 파서."""
-    data = read_toml(path)
+    try:
+        data = read_toml(path)
+    except (tomllib.TOMLDecodeError, UnicodeError) as exc:
+        raise _uv_error(path, "TOML 형식 오류") from exc
     if not isinstance(data, dict):
         raise _uv_error(path, "최상위가 객체가 아님")
     unknown = set(data) - UV_TOP_FIELDS
@@ -487,6 +504,13 @@ def read_uv_lock(path: Path) -> dict:
         raise _uv_error(path, "requires-python이 비어 있거나 문자열이 아님")
     if lower_bound(requires_python) is None or lower_bound(requires_python).lower is None:
         raise _uv_error(path, "requires-python의 하한을 해석할 수 없음")
+    for field_name in ("resolution-markers", "supported-markers", "required-markers"):
+        if field_name in data and (not isinstance(data[field_name], list)
+                                   or any(not isinstance(item, str) for item in data[field_name])):
+            raise _uv_error(path, "marker 형식 오류")
+    for field_name in ("conflicts", "options", "manifest"):
+        if field_name in data and not isinstance(data[field_name], (dict, list)):
+            raise _uv_error(path, "lock 메타데이터 형식 오류")
     packages = data.get("package", data.get("distribution", []))
     if "package" in data and "distribution" in data:
         raise _uv_error(path, "package와 distribution을 동시에 사용할 수 없음")
@@ -505,9 +529,26 @@ def read_uv_lock(path: Path) -> dict:
         if not isinstance(version, str):
             raise _uv_error(path, f"package[{name!r}].version은 문자열이어야 함")
         uv_source_kind(entry.get("source"), path, name)
-        for field_name in ("dependencies", "optional-dependencies", "dependency-groups", "dev-dependencies"):
-            if field_name in entry and not isinstance(entry[field_name], (list, dict)):
-                raise _uv_error(path, f"package[{name!r}].{field_name} 형식 오류")
+        if "dependencies" in entry and (
+                not isinstance(entry["dependencies"], list)
+                or any(not isinstance(item, dict) for item in entry["dependencies"])):
+            raise _uv_error(path, "package dependencies 형식 오류")
+        for field_name in ("optional-dependencies", "dependency-groups", "dev-dependencies"):
+            if field_name not in entry:
+                continue
+            value = entry[field_name]
+            if not isinstance(value, dict) or any(not isinstance(items, list) for items in value.values()):
+                raise _uv_error(path, "package group 형식 오류")
+        for field_name in ("metadata", "sdist"):
+            if field_name in entry and not isinstance(entry[field_name], dict):
+                raise _uv_error(path, "package metadata 형식 오류")
+        if "wheels" in entry and (not isinstance(entry["wheels"], list)
+                                   or any(not isinstance(item, dict) for item in entry["wheels"])):
+            raise _uv_error(path, "package wheel 형식 오류")
+        if "resolution-markers" in entry and (
+                not isinstance(entry["resolution-markers"], list)
+                or any(not isinstance(item, str) for item in entry["resolution-markers"])):
+            raise _uv_error(path, "package marker 형식 오류")
     return data
 
 
@@ -893,7 +934,10 @@ class Checker:
         requires_python: str | None = None
         manifest = scope.manifest
         if manifest is not None and manifest.name == "pyproject.toml":
-            data = read_toml(manifest)
+            try:
+                data = read_toml(manifest)
+            except (tomllib.TOMLDecodeError, UnicodeError) as exc:
+                raise _manifest_input_error() from exc
             project = data.get("project", {})
             requires_python = project.get("requires-python")
             specs = list(project.get("dependencies", []))
@@ -901,23 +945,25 @@ class Checker:
                 specs.extend(group)
             dependency_groups = data.get("dependency-groups", {})
             if not isinstance(dependency_groups, dict):
-                raise ValueError(f"{manifest}: dependency-groups는 객체여야 함")
+                raise _manifest_input_error()
             expanded_groups: set[str] = set()
 
-            def append_group(group_name: str) -> None:
+            def append_group(group_name: str, *, included: bool = False) -> None:
                 if group_name in expanded_groups:
                     return
+                if included and group_name not in dependency_groups:
+                    raise _manifest_input_error()
                 expanded_groups.add(group_name)
                 group = dependency_groups.get(group_name, [])
                 if not isinstance(group, list):
-                    raise ValueError(f"{manifest}: dependency-groups.{group_name}는 배열이어야 함")
+                    raise _manifest_input_error()
                 for item in group:
                     if isinstance(item, str):
                         specs.append(item)
                     elif isinstance(item, dict) and isinstance(item.get("include-group"), str):
-                        append_group(item["include-group"])
+                        append_group(item["include-group"], included=True)
                     else:
-                        raise ValueError(f"{manifest}: dependency-groups.{group_name} 항목 형식 오류")
+                        raise _manifest_input_error()
 
             for group_name in dependency_groups:
                 append_group(group_name)
@@ -931,20 +977,28 @@ class Checker:
                     urls.setdefault(name, []).append(url)
             uv_sources = data.get("tool", {}).get("uv", {}).get("sources", {})
             if not isinstance(uv_sources, dict):
-                raise ValueError(f"{manifest}: tool.uv.sources는 객체여야 함")
+                raise _manifest_input_error()
             for name, source_value in uv_sources.items():
                 source_entries = source_value if isinstance(source_value, list) else [source_value]
                 if not source_entries or any(not isinstance(source, dict) for source in source_entries):
-                    raise ValueError(f"{manifest}: tool.uv.sources.{name} 항목 형식 오류")
+                    raise _manifest_input_error()
                 for source in source_entries:
                     if "git" not in source:
                         continue
                     git_url = source.get("git")
                     if not isinstance(git_url, str) or not git_url.strip():
-                        raise ValueError(f"{manifest}: tool.uv.sources.{name}.git 형식 오류")
+                        raise _manifest_input_error()
+                    refs = [field_name for field_name in ("rev", "tag", "branch")
+                            if source.get(field_name) is not None]
+                    if len(refs) > 1 or any(not isinstance(source[field_name], str)
+                                            or not source[field_name].strip() for field_name in refs):
+                        raise _manifest_input_error()
                     if not git_url.startswith("git+"):
                         git_url = "git+" + git_url
-                    ref = source.get("rev") or source.get("tag") or source.get("branch") or ""
+                    if source.get("branch") is not None and not source.get("rev") and not source.get("tag"):
+                        ref = f"branch:{source['branch']}"
+                    else:
+                        ref = source.get("rev") or source.get("tag") or ""
                     urls.setdefault(normalize_name(name), []).append(
                         f"{git_url}@{ref}" if ref else git_url
                     )
@@ -960,7 +1014,10 @@ class Checker:
                         spec = value.get("version", "") if isinstance(value, dict) else str(value)
                         declared.setdefault(normalize_name(name), spec)
                         if isinstance(value, dict) and value.get("git"):
-                            ref = value.get("rev") or value.get("tag") or value.get("branch") or ""
+                            if value.get("branch") is not None and not value.get("rev") and not value.get("tag"):
+                                ref = f"branch:{value['branch']}"
+                            else:
+                                ref = value.get("rev") or value.get("tag") or ""
                             urls.setdefault(normalize_name(name), []).append(
                                 f"{value['git']}@{ref}" if ref else value["git"]
                             )
@@ -999,13 +1056,14 @@ class Checker:
 
         # git/URL 참조
         for name, url_specs in urls.items():
-            resolved = ""
-            for entry in lock_packages.get(name, []):
-                source = entry.get("source", {})
-                if "git" in source:
-                    resolved = source["git"]
+            resolved_refs = [entry["source"]["git"] for entry in lock_packages.get(name, [])
+                             if "git" in entry.get("source", {})]
             for url in url_specs:
-                self.record_ref(label, "pypi", name, url, resolved)
+                if resolved_refs:
+                    for resolved in resolved_refs:
+                        self.record_ref(label, "pypi", name, url, resolved)
+                else:
+                    self.record_ref(label, "pypi", name, url)
         first_uv_lock_scan = False
         if scope.lock is not None and scope.lock_kind == "uv" and lock_packages:
             # uv workspace는 멤버마다 같은 lock을 가리킬 수 있다. 첫 범위가 멤버여도
