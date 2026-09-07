@@ -1,6 +1,6 @@
 # T-103 tools/kt_contrast.py(report·`contrast-baseline.json`) + `tools/ux_lint.py`(금지 7종+window.confirm, 전체 report·diff fail) + 4앱 오버라이드 예제 보고
 
-- 상태: BLOCKED
+- 상태: READY
 - 우선순위: P1
 - Gate: 도구 테스트
 - 선행: T-101
