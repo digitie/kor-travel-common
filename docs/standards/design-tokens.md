@@ -24,7 +24,7 @@
 | `shadcn.css` | `:root/.dark { --background: var(--kt-surface-page); … }` alias(TK-6) | shadcn 사용 앱 | 없음 |
 | `base.css` | `:focus-visible` 단일 레시피, hairline 2종 유틸, reduced-motion 전역(+스피너 예외), `button:not(:disabled){cursor:pointer}` | 원하는 앱 | 없음 |
 | `base.scoped.css` | `base.css`와 같은 규칙을 `[data-kt-surface]` 하위에만 적용 | 사용자 표면과 admin이 한 앱에 공존하는 앱(pinvi) | 없음 |
-| `dark-class.css` / `dark-media.css` | 다크 활성화 파일(TK-9). 앱이 하나만 import | 다크 활성 앱 | v4 variant 선언 포함 |
+| `dark-class.css` / `dark-media.css` | 다크 활성화 파일(TK-9). 앱이 하나만 import | 다크 활성 앱 | v4 class variant / 기본 media variant |
 | `aliases/map-vocabulary.css` | 레거시 어휘 별칭 shim(TK-16) | map·weather·geo 이관 기간 | 없음 |
 | `tokens.json` / `tokens.ts` / `tailwind-preset.cjs` | 생성물. DTCG JSON, TS 상수, Tailwind v3 preset(NativeWind) | pinvi mobile·`@pinvi/design-tokens` 재수출, 도구 | — |
 
@@ -169,7 +169,7 @@ utility     kt-*                             theme.css @theme = semantic 참조
 | 항목 | 규칙 |
 |---|---|
 | 기본 | `tokens.css`가 `:root { color-scheme: light }`를 선언한다. 토글 없는 앱에서 media 변형이 우연히 켜지지 않는다(airport `globals.css` 선례) |
-| 활성화 | `dark-class.css`(`.dark { color-scheme: dark }` + `@custom-variant dark (&:is(.dark *))`) 또는 `dark-media.css`(`@media (prefers-color-scheme: dark)` 아래 같은 dark 값 재선언 + variant) 중 **하나만** 명시 import. 둘 다 import 금지 |
+| 활성화 | `dark-class.css`(`.dark { color-scheme: dark }` + `@custom-variant dark (&:is(.dark *))`) 또는 `dark-media.css`(`@media (prefers-color-scheme: dark)` 아래 같은 dark 값 재선언 + Tailwind v4 기본 media `dark` variant 유지) 중 **하나만** 명시 import. 둘 다 import 금지 |
 | 앱 오버라이드의 dark 값 | 선택. 미정의 시 map dark 값이 그 역할에 적용되므로 브랜드 오버라이드 앱은 dark 활성 전에 4종 이상을 정의해야 한다 |
 | 검사 | dark 쌍 대비 검사는 dark 활성 앱(매니페스트 `contrast.dark: true`)만(§9) |
 | 열림 O-11 | "정의 필수(map 기본)·활성화 opt-in·앱 오버라이드 dark 선택"이 기본값. 사용자 확인 필요 |

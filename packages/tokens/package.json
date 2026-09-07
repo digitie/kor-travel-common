@@ -1,0 +1,57 @@
+{
+  "name": "@kor-travel/tokens",
+  "version": "0.1.0",
+  "description": "kor-travel 공용 디자인 토큰과 CSS 전달 파일",
+  "license": "GPL-3.0-or-later",
+  "author": "Youn-sok Choi (digitie)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digitie/kor-travel-common.git",
+    "directory": "packages/tokens"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "base.css",
+    "base.scoped.css",
+    "dark-class.css",
+    "dark-media.css",
+    "dist",
+    "shadcn.css",
+    "theme.css",
+    "tokens.css",
+    "LICENSE",
+    "NOTICE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./tokens.css": "./tokens.css",
+    "./theme.css": "./theme.css",
+    "./shadcn.css": "./shadcn.css",
+    "./base.css": "./base.css",
+    "./base.scoped.css": "./base.scoped.css",
+    "./dark-class.css": "./dark-class.css",
+    "./dark-media.css": "./dark-media.css",
+    "./aliases/*": "./aliases/*",
+    "./tokens.json": "./dist/tokens.json",
+    "./tokens.ts": "./dist/tokens.ts",
+    "./tailwind-preset": "./dist/tailwind-preset.cjs",
+    "./tailwind-preset.cjs": "./dist/tailwind-preset.cjs",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "*.css",
+    "aliases/*.css"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs --check",
+    "test": "node --test test/*.test.mjs"
+  }
+}

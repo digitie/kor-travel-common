@@ -1,0 +1,13 @@
+kor-travel-common — @kor-travel/tokens
+Copyright (C) 2026 Youn-sok Choi (digitie)
+SPDX-License-Identifier: GPL-3.0-or-later
+
+이 패키지의 자체 작성 부분은 GNU 일반 공중 사용 허가서 버전 3 또는
+(수령자의 선택에 따라) 그 이후 버전에 따라 재배포·수정할 수 있다. 전문은
+동봉한 LICENSE 파일에 있다. GPLv3 7조의 추가 허가는 부여하지 않는다.
+
+토큰 정본은 tokens.css이며, 원천과 수정 범위는 저장소의 PROVENANCE.md에
+기록되어 있다. 이 패키지는 폰트 파일·외부 런타임 의존성을 포함하지 않는다.
+
+소스 저장소: https://github.com/digitie/kor-travel-common
+이슈: https://github.com/digitie/kor-travel-common/issues

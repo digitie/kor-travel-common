@@ -26,12 +26,13 @@ common 후보 보존은 T-109a(tokens)·T-212a(UI 0.1)·T-213a(UI 0.2)·T-310a(P
 
 | subpath | 내용 | Tailwind 의존 |
 |---|---|---|
-| `.`(= `./tokens.css`) | `:root { --kt-* }` + `.dark { --kt-* }` 순수 CSS(값 정본) | 없음 |
+| `.` | ESM `tokens`·`tokenValues` 객체와 d.ts(생성물) | 없음 |
+| `./tokens.css` | `:root { --kt-* }` + `.dark { --kt-* }` 순수 CSS(값 정본) | 없음 |
 | `./theme.css` | `@import "./tokens.css"` + `@theme inline`(`--color-kt-*`·`--spacing-kt-*`·`--radius-kt-*`·`--font-kt-*`·`--shadow-kt-*`·`--ease-kt-*`) + `@theme`(`--text-kt-*`) + `@utility duration-kt-*` | v4 |
 | `./shadcn.css` | shadcn alias(`--background`…`--ring`, `--radius`) = `--kt-*` 참조, 의미 고정 | 없음 |
 | `./base.css` | `:focus-visible` 단일 레시피, hairline 2종, reduced-motion(+스피너 예외), `button:not(:disabled){cursor:pointer}` | 없음 |
 | `./base.scoped.css` | 위 base를 `[data-kt-surface]` 스코프로 한정한 변형 | 없음 |
-| `./dark-class.css` / `./dark-media.css` | `@custom-variant dark (&:is(.dark *))` / `prefers-color-scheme` 래퍼 | v4 |
+| `./dark-class.css` / `./dark-media.css` | `@custom-variant dark (&:is(.dark *))` / `prefers-color-scheme` 래퍼(기본 media variant 유지) | v4 |
 | `./aliases/map-vocabulary.css` | map·weather·geo 공통 레거시 이름 → `var(--kt-*)` shim(T-102) | 없음 |
 | `./tokens.json` | DTCG 형식 생성물(의미 이름·값·프로필) | 없음 |
 | `./tokens.ts` | TS 상수 생성물(ESM + d.ts) | 없음 |

@@ -20,6 +20,8 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-09-07 | docs post-fix | [T-101 CI 표준 문서 후속 판정](adversarial/2026-09-07-t101-ci-docs-post-fix.md), `6ab650d` | A 표준·workflow / B CI 순서·소유 경계 | **A PASS / B PASS, 신규 finding 0** |
+| 2026-09-07 | full post-fix 01 | [T-101 토큰 패키지 최종 판정](adversarial/2026-09-07-t101-post-fix-01.md), `4c33a5d` | A DTCG·Tailwind·브라우저 / B CI·drift·CSS·이관 | **A PASS / B PASS, 누적 finding 모두 FIXED** |
 | 2026-09-07 | full post-fix 07 | [T-011 최종 판정](adversarial/2026-09-07-t011-post-fix-07.md), `4680bac` | A 입력·경계 / B redaction·교차 OS | **A PASS / B PASS, 누적 finding 모두 FIXED** |
 | 2026-09-07 | full post-fix 06 | [T-011 재검토](adversarial/2026-09-07-t011-post-fix-06.md), `56d6ae1` | A 경계·입력 / B redaction·교차 OS | A BLOCK / B BLOCK, registry 원문 노출 수정 후 재검토 |
 | 2026-09-07 | full post-fix 05 | [T-011 재검토](adversarial/2026-09-07-t011-post-fix-05.md), `94c445e` | A 경계·입력 / B redaction·교차 OS | A BLOCK / B BLOCK, app·validator 경계 수정 후 재검토 |

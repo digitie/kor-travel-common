@@ -149,3 +149,71 @@ jobs:
           print(f'보고 SHA256: {digest}, source: {os.environ["SOURCE_SHA"]}')
           print('fixture report·비어 있지 않은 step summary 확인')
           PY
+
+  packages:
+    name: packages
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: 검사 source SHA 확인
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          printf '검사 source: `%s`\n' "$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - name: Node.js 설치
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: npm 고정 버전 설치
+        run: npm install -g npm@11.19.1
+      - name: workspace 의존성 설치
+        run: npm ci --no-audit --no-fund
+      - name: tokens 패키지 빌드·검사·테스트
+        run: |
+          npm run lint --if-present --workspace packages/tokens
+          npm run type-check --if-present --workspace packages/tokens
+          npm run check --workspace packages/tokens
+          npm run build --workspace packages/tokens
+          npm run check --workspace packages/tokens
+          git diff --exit-code -- packages/tokens/dist packages/tokens/dark-media.css
+          npm test --workspace packages/tokens
+      - name: tarball 설치 스모크
+        run: |
+          package_dir="$(mktemp -d)"
+          tarball_dir="$(mktemp -d)"
+          trap 'rm -rf "$package_dir" "$tarball_dir"' EXIT
+          npm pack --workspace packages/tokens --pack-destination "$tarball_dir"
+          tarball="$(find "$tarball_dir" -maxdepth 1 -type f -name '*.tgz' -print -quit)"
+          test -n "$tarball"
+          (
+            cd "$package_dir"
+            npm init -y >/dev/null
+            npm install --ignore-scripts --no-audit --no-fund "$tarball"
+            node --input-type=module - <<'NODE'
+          import { createRequire } from 'node:module';
+          const require = createRequire(import.meta.url);
+          for (const subpath of [
+            '@kor-travel/tokens',
+            '@kor-travel/tokens/tokens.css',
+            '@kor-travel/tokens/theme.css',
+            '@kor-travel/tokens/shadcn.css',
+            '@kor-travel/tokens/base.css',
+            '@kor-travel/tokens/base.scoped.css',
+            '@kor-travel/tokens/dark-class.css',
+            '@kor-travel/tokens/dark-media.css',
+            '@kor-travel/tokens/tokens.json',
+            '@kor-travel/tokens/tailwind-preset',
+          ]) {
+            console.log(`${subpath}: ${require.resolve(subpath)}`);
+          }
+          NODE
+          )
+          printf 'tarball source: `%s`, source SHA: `%s`\n' "$(basename "$tarball")" "$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"

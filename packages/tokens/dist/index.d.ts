@@ -1,0 +1,1015 @@
+export declare const tokens: {
+  "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
+  "$description": "kor-travel-common의 --kt-* 디자인 토큰. 값의 정본은 tokens.css이다.",
+  "$extensions": {
+    "kor-travel-common": {
+      "profiles": {
+        "admin": {
+          "description": "공용 admin 밀도 프로필",
+          "radius": {
+            "control": "{radius.control}",
+            "panel": "{radius.panel}"
+          },
+          "controlHeight": {
+            "default": "{control.h}",
+            "small": "{control.h-sm}"
+          },
+          "body": "sm",
+          "typeScale": [
+            "2xs",
+            "xs",
+            "sm",
+            "md",
+            "lg",
+            "xl",
+            "2xl"
+          ]
+        },
+        "consumer": {
+          "description": "의미 이름만 common이 제공하며 값과 밀도는 소비자가 소유한다.",
+          "ownedBy": "consumer",
+          "semanticGroups": [
+            "surface",
+            "text",
+            "brand",
+            "status",
+            "font"
+          ]
+        }
+      }
+    }
+  },
+  "surface": {
+    "page": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.978,
+          0.003,
+          128
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.19,
+              0.006,
+              150
+            ]
+          }
+        }
+      }
+    },
+    "subtle": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.967,
+          0.006,
+          138
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.24,
+              0.008,
+              145
+            ]
+          }
+        }
+      }
+    },
+    "muted": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.925,
+          0.01,
+          141
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.31,
+              0.012,
+              145
+            ]
+          }
+        }
+      }
+    },
+    "card": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.992,
+          0.002,
+          140
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.23,
+              0.007,
+              145
+            ]
+          }
+        }
+      }
+    }
+  },
+  "text": {
+    "primary": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.3,
+          0.006,
+          157
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.93,
+              0.006,
+              155
+            ]
+          }
+        }
+      }
+    },
+    "secondary": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.48,
+          0.012,
+          159
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.78,
+              0.01,
+              155
+            ]
+          }
+        }
+      }
+    },
+    "tertiary": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.54,
+          0.012,
+          154
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.68,
+              0.012,
+              155
+            ]
+          }
+        }
+      }
+    },
+    "disabled": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.79,
+          0.012,
+          154
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.52,
+              0.012,
+              155
+            ]
+          }
+        }
+      }
+    },
+    "strong": {
+      "$type": "color",
+      "$value": "{text.primary}",
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.93,
+              0.006,
+              155
+            ]
+          }
+        }
+      }
+    }
+  },
+  "icon": {
+    "$root": {
+      "$type": "color",
+      "$value": "{text.tertiary}",
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.7,
+              0.01,
+              155
+            ]
+          }
+        }
+      }
+    }
+  },
+  "border": {
+    "$root": {
+      "$type": "color",
+      "$value": "{surface.muted}",
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.31,
+              0.012,
+              145
+            ]
+          }
+        }
+      }
+    }
+  },
+  "control": {
+    "line": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.61,
+          0.012,
+          145
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.58,
+              0.012,
+              145
+            ]
+          }
+        }
+      }
+    },
+    "h": {
+      "$type": "dimension",
+      "$value": {
+        "value": 2.25,
+        "unit": "rem"
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "value": 2.25,
+            "unit": "rem"
+          }
+        }
+      }
+    },
+    "h-sm": {
+      "$type": "dimension",
+      "$value": {
+        "value": 1.875,
+        "unit": "rem"
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "value": 1.875,
+            "unit": "rem"
+          }
+        }
+      }
+    }
+  },
+  "brand": {
+    "$root": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.514,
+          0.081,
+          169
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.76,
+              0.085,
+              169
+            ]
+          }
+        }
+      }
+    },
+    "hover": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.46,
+          0.085,
+          169
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.81,
+              0.085,
+              169
+            ]
+          }
+        }
+      }
+    },
+    "tint": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.952,
+          0.013,
+          172
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.31,
+              0.035,
+              169
+            ]
+          }
+        }
+      }
+    },
+    "foreground": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.99,
+          0.002,
+          140
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.2,
+              0.02,
+              165
+            ]
+          }
+        }
+      }
+    }
+  },
+  "focus": {
+    "$root": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.45,
+          0.09,
+          169
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.8,
+              0.09,
+              169
+            ]
+          }
+        }
+      }
+    }
+  },
+  "success": {
+    "$root": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.469,
+          0.087,
+          149
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.75,
+              0.09,
+              149
+            ]
+          }
+        }
+      }
+    },
+    "tint": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.95,
+          0.03,
+          150
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.28,
+              0.04,
+              150
+            ]
+          }
+        }
+      }
+    }
+  },
+  "warning": {
+    "$root": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.509,
+          0.103,
+          71
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.77,
+              0.12,
+              75
+            ]
+          }
+        }
+      }
+    },
+    "tint": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.96,
+          0.035,
+          80
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.3,
+              0.045,
+              80
+            ]
+          }
+        }
+      }
+    }
+  },
+  "info": {
+    "$root": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.5,
+          0.16,
+          258
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.75,
+              0.11,
+              258
+            ]
+          }
+        }
+      }
+    },
+    "tint": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.955,
+          0.025,
+          255
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.3,
+              0.05,
+              258
+            ]
+          }
+        }
+      }
+    }
+  },
+  "destructive": {
+    "$root": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.514,
+          0.167,
+          27
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.72,
+              0.14,
+              27
+            ]
+          }
+        }
+      }
+    },
+    "tint": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.96,
+          0.03,
+          25
+        ]
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.3,
+              0.06,
+              27
+            ]
+          }
+        }
+      }
+    }
+  },
+  "overlay": {
+    "$root": {
+      "$type": "color",
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.3,
+          0.006,
+          157
+        ],
+        "alpha": 0.45
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "colorSpace": "oklch",
+            "components": [
+              0.1,
+              0.006,
+              157
+            ],
+            "alpha": 0.6
+          }
+        }
+      }
+    }
+  },
+  "radius": {
+    "control": {
+      "$type": "dimension",
+      "$value": {
+        "value": 0.375,
+        "unit": "rem"
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "value": 0.375,
+            "unit": "rem"
+          }
+        }
+      }
+    },
+    "panel": {
+      "$type": "dimension",
+      "$value": {
+        "value": 0.5,
+        "unit": "rem"
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "value": 0.5,
+            "unit": "rem"
+          }
+        }
+      }
+    }
+  },
+  "rail": {
+    "$root": {
+      "$type": "dimension",
+      "$value": {
+        "value": 22,
+        "unit": "rem"
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "value": 22,
+            "unit": "rem"
+          }
+        }
+      }
+    }
+  },
+  "duration": {
+    "fast": {
+      "$type": "duration",
+      "$value": {
+        "value": 100,
+        "unit": "ms"
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "value": 100,
+            "unit": "ms"
+          }
+        }
+      }
+    },
+    "base": {
+      "$type": "duration",
+      "$value": {
+        "value": 150,
+        "unit": "ms"
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "value": 150,
+            "unit": "ms"
+          }
+        }
+      }
+    }
+  },
+  "ease": {
+    "out": {
+      "$type": "cubicBezier",
+      "$value": [
+        0.16,
+        1,
+        0.3,
+        1
+      ],
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": [
+            0.16,
+            1,
+            0.3,
+            1
+          ]
+        }
+      }
+    },
+    "in": {
+      "$type": "cubicBezier",
+      "$value": [
+        0.7,
+        0,
+        0.84,
+        0
+      ],
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": [
+            0.7,
+            0,
+            0.84,
+            0
+          ]
+        }
+      }
+    }
+  },
+  "shadow": {
+    "elevated": {
+      "$type": "shadow",
+      "$value": {
+        "color": {
+          "colorSpace": "oklch",
+          "components": [
+            0.3,
+            0.006,
+            157
+          ],
+          "alpha": 0.1
+        },
+        "offsetX": {
+          "value": 0,
+          "unit": "px"
+        },
+        "offsetY": {
+          "value": 4,
+          "unit": "px"
+        },
+        "blur": {
+          "value": 12,
+          "unit": "px"
+        },
+        "spread": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "color": {
+              "colorSpace": "oklch",
+              "components": [
+                0.1,
+                0.006,
+                157
+              ],
+              "alpha": 0.32
+            },
+            "offsetX": {
+              "value": 0,
+              "unit": "px"
+            },
+            "offsetY": {
+              "value": 4,
+              "unit": "px"
+            },
+            "blur": {
+              "value": 12,
+              "unit": "px"
+            },
+            "spread": {
+              "value": 0,
+              "unit": "px"
+            }
+          }
+        }
+      }
+    },
+    "modal": {
+      "$type": "shadow",
+      "$value": {
+        "color": {
+          "colorSpace": "oklch",
+          "components": [
+            0.3,
+            0.006,
+            157
+          ],
+          "alpha": 0.14
+        },
+        "offsetX": {
+          "value": 0,
+          "unit": "px"
+        },
+        "offsetY": {
+          "value": 8,
+          "unit": "px"
+        },
+        "blur": {
+          "value": 24,
+          "unit": "px"
+        },
+        "spread": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": {
+            "color": {
+              "colorSpace": "oklch",
+              "components": [
+                0.1,
+                0.006,
+                157
+              ],
+              "alpha": 0.4
+            },
+            "offsetX": {
+              "value": 0,
+              "unit": "px"
+            },
+            "offsetY": {
+              "value": 8,
+              "unit": "px"
+            },
+            "blur": {
+              "value": 24,
+              "unit": "px"
+            },
+            "spread": {
+              "value": 0,
+              "unit": "px"
+            }
+          }
+        }
+      }
+    }
+  },
+  "z": {
+    "nav": {
+      "$type": "number",
+      "$value": 30,
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": 30
+        }
+      }
+    },
+    "panel": {
+      "$type": "number",
+      "$value": 40,
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": 40
+        }
+      }
+    },
+    "overlay": {
+      "$type": "number",
+      "$value": 50,
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": 50
+        }
+      }
+    },
+    "modal": {
+      "$type": "number",
+      "$value": 60,
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": 60
+        }
+      }
+    },
+    "toast": {
+      "$type": "number",
+      "$value": 70,
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": 70
+        }
+      }
+    }
+  },
+  "font": {
+    "sans": {
+      "$type": "fontFamily",
+      "$value": [
+        "Pretendard Variable",
+        "Pretendard",
+        "Noto Sans KR",
+        "Apple SD Gothic Neo",
+        "system-ui",
+        "sans-serif"
+      ],
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": [
+            "Pretendard Variable",
+            "Pretendard",
+            "Noto Sans KR",
+            "Apple SD Gothic Neo",
+            "system-ui",
+            "sans-serif"
+          ]
+        }
+      }
+    },
+    "mono": {
+      "$type": "fontFamily",
+      "$value": [
+        "ui-monospace",
+        "SF Mono",
+        "Menlo",
+        "Consolas",
+        "monospace"
+      ],
+      "$extensions": {
+        "kor-travel-common": {
+          "dark": [
+            "ui-monospace",
+            "SF Mono",
+            "Menlo",
+            "Consolas",
+            "monospace"
+          ]
+        }
+      }
+    }
+  }
+};
+export declare const tokenValues: Readonly<Record<string, string>>;
+export type TokenName = keyof typeof tokenValues;
