@@ -448,7 +448,7 @@ UV_PACKAGE_FIELDS = frozenset({
     "name", "version", "source", "dependencies", "optional-dependencies", "dependency-groups",
     "dev-dependencies", "resolution-markers", "metadata", "sdist", "wheels",
 })
-UV_SOURCE_FIELDS = frozenset({"registry", "git", "editable", "directory"})
+UV_SOURCE_FIELDS = frozenset({"registry", "git", "editable", "directory", "virtual"})
 UV_SUPPORTED_REVISION = 4
 
 

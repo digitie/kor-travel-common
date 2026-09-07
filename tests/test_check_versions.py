@@ -552,7 +552,7 @@ class CheckVersionsTests(unittest.TestCase):
             'dependencies = ["fastapi>=0.115"]\n', encoding="utf-8")
         (workspace / "uv.lock").write_text(
             'version = 1\nrevision = 3\nrequires-python = ">=3.12"\n\n'
-            '[[package]]\nname = "member"\nversion = "0.0.0"\nsource = { editable = "packages/api" }\n\n'
+            '[[package]]\nname = "member"\nversion = "0.0.0"\nsource = { virtual = "." }\n\n'
             '[[package]]\nname = "fastapi"\nversion = "0.141.1"\n'
             'source = { registry = "https://pypi.org/simple" }\n\n'
             '[[package]]\nname = "mcp"\nversion = "2.1.1"\n'
