@@ -751,6 +751,15 @@ class CheckVersionsTests(unittest.TestCase):
         self.assertEqual(self.verdicts(findings, "fastapi"), ["OK"])
         self.assertEqual(len([f for f in findings if f.key == "fastapi"]), 1)
 
+    def test_requirements_quoted_include_paths_are_expanded(self):
+        (self.repo / "requirements.txt").write_text(
+            '-r "child name.txt"\n--requirement="second child.txt"\n', encoding="utf-8")
+        (self.repo / "child name.txt").write_text("mcp>=2\n", encoding="utf-8")
+        (self.repo / "second child.txt").write_text("fastapi==0.141.1\n", encoding="utf-8")
+        findings = self.run_checker()
+        self.assertEqual(self.verdicts(findings, "mcp"), ["BLOCKED"])
+        self.assertEqual(self.verdicts(findings, "fastapi"), ["OK"])
+
     def test_requirements_editable_git_and_invalid_options_fail_closed(self):
         (self.repo / "requirements.txt").write_text(
             "-e git+https://example.com/repo.git@main#egg=custom-lib\n", encoding="utf-8")
@@ -783,6 +792,14 @@ class CheckVersionsTests(unittest.TestCase):
         for left, right, expected in cases:
             with self.subTest(left=left, right=right):
                 self.assertEqual(CV.ranges_overlap(left, right), expected)
+
+    def test_requirements_range_equalities_intersect_idempotently(self):
+        for spec in ("mcp==2.*,==2.1", "mcp==2.1,==2.*", "mcp==2.*,==2.*"):
+            with self.subTest(spec=spec):
+                (self.repo / "requirements.txt").write_text(spec + "\n", encoding="utf-8")
+                self.assertEqual(self.cli(str(self.repo), "--repo", "app-a", "--quiet").returncode, 0)
+        (self.repo / "requirements.txt").write_text("mcp==2.1,==2.2\n", encoding="utf-8")
+        self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
 
     def test_poetry_source_and_metadata_validation_fail_closed(self):
         (self.repo / "pyproject.toml").write_text(
@@ -821,6 +838,57 @@ class CheckVersionsTests(unittest.TestCase):
         result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet")
         self.assertEqual(result.returncode, 2)
         self.assertNotIn(marker, result.stdout)
+
+    def test_manifest_git_input_error_does_not_create_output_rows(self):
+        marker = "BADPORT" + "A" * 8
+        (self.repo / "pyproject.toml").write_text(
+            '[project]\nname = "fixture"\nversion = "0.0.0"\nrequires-python = ">=3.11"\n'
+            'dependencies = ["custom-lib @ https://example.com:' + marker + '/repo.git@v1.2.3"]\n',
+            encoding="utf-8")
+        (self.repo / "uv.lock").write_text(
+            'version = 1\nrevision = 3\nrequires-python = ">=3.11"\n\n'
+            '[[package]]\nname = "custom-lib"\nversion = "1.2.3"\n'
+            'source = { git = "https://example.com/repo.git#' + "a" * 40 + '" }\n',
+            encoding="utf-8")
+        report = self.root / "manifest-error.json"
+        markdown = self.root / "manifest-error.md"
+        summary = self.root / "manifest-summary.md"
+        result = self.cli(str(self.repo), "--repo", "app-fail", "--quiet", "--json", str(report),
+                          "--markdown", str(markdown), "--no-step-summary")
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn(marker, result.stdout)
+        self.assertFalse(report.exists())
+        self.assertFalse(markdown.exists())
+        self.assertFalse(summary.exists())
+
+    def test_requirements_malformed_marker_parentheses_and_option_value_fail_closed(self):
+        for invalid in (
+            'fastapi==0.141.1; this is invalid\n',
+            'fastapi(((==0.141.1)))\n',
+            '--only-binary\n',
+        ):
+            with self.subTest(invalid=invalid):
+                (self.repo / "requirements.txt").write_text(invalid, encoding="utf-8")
+                self.assertEqual(self.cli(str(self.repo), "--repo", "app-fail", "--quiet").returncode, 2)
+
+    def test_poetry_upstream_optional_fields_are_accepted(self):
+        (self.repo / "pyproject.toml").write_text(
+            '[tool.poetry]\nname = "fixture"\nversion = "0.0.0"\n\n'
+            '[tool.poetry.dependencies]\npython = "^3.11"\n'
+            'fastapi = "^0.110.0"\ncustom-lib = { git = "https://example.com/repo.git", tag = "v1.2.3", subdirectory = "python" }\n',
+            encoding="utf-8")
+        (self.repo / "poetry.lock").write_text(
+            '[[package]]\nname = "fastapi"\nversion = "0.141.1"\n'
+            '[package.source]\ntype = "legacy"\nurl = "https://example.com/simple"\nreference = "mirror"\n\n'
+            '[[package]]\nname = "custom-lib"\nversion = "1.2.3"\n'
+            '[package.source]\ntype = "git"\nurl = "https://example.com/repo.git"\n'
+            'reference = "v1.2.3"\nsubdirectory = "python"\nresolved_reference = "' + "a" * 40 + '"\n\n'
+            '[extras]\nweb = ["fastapi"]\n\n'
+            '[metadata]\nlock-version = "2.1"\npython-versions = ">=3.11,<4.0"\n',
+            encoding="utf-8")
+        findings = self.run_checker()
+        self.assertEqual(self.verdicts(findings, "fastapi"), ["OK"])
+        self.assertEqual(self.verdicts(findings, "custom-lib"), ["OK"])
 
     def test_poetry_dependency_list_preserves_branch_and_rejects_malformed_list(self):
         (self.repo / "pyproject.toml").write_text(

@@ -447,12 +447,12 @@ def read_toml(path: Path) -> dict:
         return tomllib.load(handle)
 
 
-POETRY_TOP_FIELDS = frozenset({"package", "metadata"})
+POETRY_TOP_FIELDS = frozenset({"package", "metadata", "extras"})
 POETRY_PACKAGE_FIELDS = frozenset({
     "name", "version", "description", "category", "optional", "python-versions", "groups",
     "files", "dependencies", "extras", "source", "develop", "markers",
 })
-POETRY_SOURCE_FIELDS = frozenset({"type", "url", "reference", "resolved_reference"})
+POETRY_SOURCE_FIELDS = frozenset({"type", "url", "reference", "resolved_reference", "subdirectory"})
 POETRY_SOURCE_TYPES = frozenset({"git", "url", "legacy", "file", "directory"})
 
 
@@ -488,7 +488,9 @@ def read_poetry_lock(path: Path) -> dict:
         raise _poetry_error()
     packages = data.get("package")
     metadata = data.get("metadata")
-    if not isinstance(packages, list) or not isinstance(metadata, dict):
+    extras = data.get("extras", {})
+    if (not isinstance(packages, list) or not isinstance(metadata, dict)
+            or not isinstance(extras, (dict, list))):
         raise _poetry_error()
     python_versions = metadata.get("python-versions")
     if (not isinstance(python_versions, str) or not python_versions.strip()
@@ -522,7 +524,8 @@ def read_poetry_lock(path: Path) -> dict:
             _validate_url(source["url"], require_host=False)
         else:
             raise _poetry_error()
-        if source_type != "git" and ("reference" in source or "resolved_reference" in source):
+        if "subdirectory" in source and (
+                not isinstance(source["subdirectory"], str) or not source["subdirectory"].strip()):
             raise _poetry_error()
         if source_type == "git" and "resolved_reference" in source:
             # SHA 이외의 값은 오류가 아니라 부동 참조로 보고한다.
@@ -534,6 +537,21 @@ def read_poetry_lock(path: Path) -> dict:
 def _strip_inline_comment(line: str) -> str:
     """공백 또는 탭 뒤의 주석만 제거한다(URL fragment의 `#`는 보존)."""
     return re.split(r"[ \t]+#", line, maxsplit=1)[0].rstrip()
+
+
+def _include_path(value: str) -> str:
+    """requirements include 인자를 따옴표 하나의 경로로 정규화한다."""
+    value = value.strip()
+    if not value:
+        raise ValueError("requirements.txt 입력 구조 오류")
+    if value[0] in {"'", '"'}:
+        quote = value[0]
+        if len(value) < 2 or value[-1] != quote or quote in value[1:-1]:
+            raise ValueError("requirements.txt 입력 구조 오류")
+        return value[1:-1]
+    if "'" in value or '"' in value:
+        raise ValueError("requirements.txt 입력 구조 오류")
+    return value
 
 
 def _editable_requirement(line: str) -> str | None:
@@ -585,11 +603,12 @@ def _strip_requirement_hashes(line: str) -> str:
 
 REQUIREMENTS_IGNORED_OPTIONS = frozenset({
     "--no-index", "--pre", "--require-hashes", "--use-pep517", "--no-use-pep517",
-    "--prefer-binary", "--only-binary", "--no-binary", "--no-cache-dir",
+    "--prefer-binary", "--no-cache-dir",
 })
 REQUIREMENTS_VALUE_OPTIONS = frozenset({
     "--index-url", "--extra-index-url", "--trusted-host", "--find-links",
 })
+REQUIREMENTS_PARAMETER_OPTIONS = frozenset({"--only-binary", "--no-binary"})
 
 
 def read_requirements(path: Path, *, _stack: tuple[Path, ...] = ()) -> list[str]:
@@ -623,10 +642,10 @@ def read_requirements(path: Path, *, _stack: tuple[Path, ...] = ()) -> list[str]
             continue
         include: str | None = None
         if re.match(r"^-r(?:[ \t]+|$)", line) or (line.startswith("-r") and not line.startswith("--")):
-            include = line[2:].strip()
+            include = _include_path(line[2:])
         elif line == "--requirement" or line.startswith("--requirement=") or line.startswith("--requirement ") or line.startswith("--requirement\t"):
             value = line[len("--requirement"):]
-            include = value[1:].strip() if value.startswith("=") else value.strip()
+            include = _include_path(value[1:] if value.startswith("=") else value)
         if include is not None:
             if not include:
                 raise ValueError("requirements.txt 입력 구조 오류")
@@ -644,10 +663,19 @@ def read_requirements(path: Path, *, _stack: tuple[Path, ...] = ()) -> list[str]
         tokens = normalized.split()
         option = tokens[0]
         if option in REQUIREMENTS_IGNORED_OPTIONS:
+            if len(tokens) != 1:
+                raise ValueError("requirements.txt 입력 구조 오류")
             continue
         option_name, separator, option_value = option.partition("=")
         if option_name in REQUIREMENTS_VALUE_OPTIONS:
             if (separator and not option_value) or (not separator and len(tokens) != 2):
+                raise ValueError("requirements.txt 입력 구조 오류")
+            continue
+        if option_name in REQUIREMENTS_PARAMETER_OPTIONS:
+            if separator:
+                if not option_value:
+                    raise ValueError("requirements.txt 입력 구조 오류")
+            elif len(tokens) != 2 or not tokens[1]:
                 raise ValueError("requirements.txt 입력 구조 오류")
             continue
         if option.startswith("-"):
@@ -727,7 +755,6 @@ def _range_interval(spec: str):
         lower = upper = None
         lower_inclusive = upper_inclusive = True
         exclusions: list[tuple[int, ...]] = []
-        exact_seen = False
         for part in parts:
             match = re.match(r"^(===|==|!=|~=|>=|<=|>|<|\^|~|=)?(.*)$", part)
             if match is None:
@@ -743,9 +770,6 @@ def _range_interval(spec: str):
                 return None
             version, wildcard_upper = parsed
             if operator in {"==", "="} and wildcard_upper is not None:
-                if exact_seen:
-                    return None
-                exact_seen = True
                 lower, lower_inclusive = update_lower(lower, lower_inclusive, version, True)
                 upper, upper_inclusive = update_upper(upper, upper_inclusive, wildcard_upper, False)
                 continue
@@ -756,9 +780,6 @@ def _range_interval(spec: str):
                     continue
                 return None
             if operator in {"", "===", "=="}:
-                if exact_seen and (lower is None or not same_version(lower, version)):
-                    return None
-                exact_seen = True
                 lower, lower_inclusive = update_lower(lower, lower_inclusive, version, True)
                 upper, upper_inclusive = update_upper(upper, upper_inclusive, version, True)
             elif operator == "!=":
@@ -943,14 +964,18 @@ def ref_is_pinned(text: str, *, kind: str = "npm") -> bool:
     def valid_ref(ref: str) -> bool:
         return bool(re.fullmatch(r"[0-9a-f]{40}", ref) or TAG_RE.fullmatch(ref))
 
+    if not isinstance(text, str) or not text.strip():
+        raise ValueError("git 참조 형식 오류")
     try:
         parsed = urlsplit(text.removeprefix("git+"))
         # hostname/port는 URL이 실제로 해석 가능한지 확인한다. 원문 예외는
-        # 입력 값이 로그로 재출력될 수 있으므로 여기서 일반 판정으로 닫는다.
-        parsed.hostname
+        # 입력 값이 로그로 재출력될 수 있으므로 일반 오류로 닫는다.
+        hostname = parsed.hostname
         parsed.port
-    except ValueError:
-        return False
+    except ValueError as exc:
+        raise ValueError("git 참조 형식 오류") from exc
+    if parsed.scheme.lower() in {"http", "https", "ssh", "git"} and not hostname:
+        raise ValueError("git 참조 형식 오류")
     path = unquote(parsed.path)
     fragment = unquote(parsed.fragment)
     hosted = parsed.hostname in {"github.com", "gitlab.com"}
@@ -988,10 +1013,84 @@ def is_vcs_spec(spec: str) -> bool:
             or bool(re.match(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(#.*)?$", spec)))
 
 
+REQUIREMENT_MARKER_NAMES = frozenset({
+    "python_version", "python_full_version", "os_name", "sys_platform", "platform_release",
+    "platform_system", "platform_version", "platform_machine", "platform_python_implementation",
+    "implementation_name", "implementation_version", "extra",
+})
+REQUIREMENT_MARKER_CLAUSE_RE = re.compile(
+    r"^(?P<left>[A-Za-z_][A-Za-z0-9_]*)\s*"
+    r"(?P<operator>not\s+in|in|===|==|!=|<=|>=|~=|<|>)\s*(?P<right>.+)$",
+    re.IGNORECASE,
+)
+
+
+def _outer_pair_wraps(text: str) -> bool:
+    if not text.startswith("(") or not text.endswith(")"):
+        return False
+    depth = 0
+    quote = ""
+    escaped = False
+    for index, char in enumerate(text):
+        if quote:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = ""
+            continue
+        if char in {"'", '"'}:
+            quote = char
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth == 0 and index != len(text) - 1:
+                return False
+            if depth < 0:
+                return False
+    return depth == 0 and not quote
+
+
+def _valid_requirement_marker(marker: str) -> bool:
+    marker = marker.strip()
+    if not marker:
+        return False
+    if any(marker.count(opening) != marker.count(closing)
+           for opening, closing in (("(", ")"), ("[", "]"))):
+        return False
+    clauses = re.split(r"\s+(?:and|or)\s+", marker, flags=re.IGNORECASE)
+    for clause in clauses:
+        clause = clause.strip()
+        while _outer_pair_wraps(clause):
+            clause = clause[1:-1].strip()
+        match = REQUIREMENT_MARKER_CLAUSE_RE.fullmatch(clause)
+        if match is None or match["left"] not in REQUIREMENT_MARKER_NAMES:
+            return False
+        right = match["right"].strip()
+        if not right or right[0] in {"(", ")", "[", "]"}:
+            return False
+    return True
+
+
+def _normalize_requirement_spec(rest: str) -> str | None:
+    spec = rest.strip()
+    if not spec:
+        return ""
+    if spec.startswith("("):
+        if not _outer_pair_wraps(spec):
+            return None
+        spec = spec[1:-1].strip()
+    if any(char in spec for char in "()"):
+        return None
+    return spec
+
+
 def parse_requirement(text: str, *, strict: bool = False) -> tuple[str, str, str] | None:
     """PEP 508 문자열 → (이름, 범위, URL). URL 의존성은 범위가 빈 문자열."""
     text, separator, marker = text.partition(";")
-    if strict and separator and not marker.strip():
+    if strict and separator and not _valid_requirement_marker(marker):
         return None
     text = text.strip()
     if not text or text.startswith(("-", "#")):
@@ -1012,7 +1111,9 @@ def parse_requirement(text: str, *, strict: bool = False) -> tuple[str, str, str
                                                        "bitbucket:", "https://", "http://", "file:"))):
             return None
         return normalize_name(name), "", url
-    spec = rest.strip("() ")
+    spec = _normalize_requirement_spec(rest) if strict else rest.strip("() ")
+    if spec is None:
+        return None
     if strict and spec and _range_interval(spec) is None:
         return None
     return normalize_name(name), spec, ""
