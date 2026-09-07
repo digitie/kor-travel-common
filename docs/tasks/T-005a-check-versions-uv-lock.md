@@ -1,6 +1,6 @@
 # T-005a check_versions: `uv.lock` 파서
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P1
 - Gate: 도구 테스트
 - 선행: T-005
@@ -54,7 +54,11 @@ Git Bash에서 동일.
 
 ## evidence
 
-- 테스트 수·exit code·판정 표를 이 절과 `docs/journal.md`에 남긴다. 실제 소비자 `uv.lock`(weather·airport, 조사 기준 커밋) 대조 결과를 첨부하고 미실행이면 `NOT_RUN`.
+- 최종 candidate `3c5801f14855a067080f257ec83d2279de32c74a`의 PR #6 CI run `34080403871`에서 `docs`, `tools (ubuntu-24.04)`, `tools (windows-2025)`, `secret-scan`, `check-versions`가 모두 성공했다.
+- Windows Python 3.14.3·WSL Python 3.11.15에서 전체 140 tests·skip 0, `test_check_versions.py` 45 tests, `check_versions.py --self-check`, SPDX·문서 링크·계획·비밀/운영정보 검사와 `git diff --check`가 성공했다.
+- 두 독립 reviewer의 최종 post-fix가 A PASS/B PASS이고 누적 8개 finding이 모두 FIXED다. [통합 판정](../reviews/adversarial/2026-09-07-t005a-post3.md), [A 원본](../reviews/adversarial/evidence/2026-09-07-t005a-post3-reviewer-a.md), [B 원본](../reviews/adversarial/evidence/2026-09-07-t005a-post3-reviewer-b.md)에 실행 ID·반례·clean SHA를 보존했다.
+- 실제 공항 저장소는 읽기 전용으로 양 OS에서 `findings=24 failing=2 exit=0`, weather fixture는 `findings=2 failing=0 exit=0`을 재현했다. 이는 제품 gate 성공이 아닌 정적 관찰이다.
+- NOT_RUN: 실제 소비자 `uv sync --locked`·설치·빌드·e2e, 전체 upstream lock 생성 형식 동등성, npm/PyPI 게시·Release·태그, 소비자 저장소 쓰기.
 
 ## rollback 또는 release 차단 조건
 
