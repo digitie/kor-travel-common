@@ -1,6 +1,6 @@
 # T-005b check_versions: `poetry.lock`·`requirements.txt` 파서 + `NO_LOCK` 보고
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P2
 - Gate: 도구 테스트
 - 선행: T-005
@@ -55,7 +55,12 @@ Git Bash에서 동일.
 
 ## evidence
 
-- 테스트 수·exit code·판정 표를 이 절과 `docs/journal.md`에 남긴다. 실제 ktdm·ktc 파일(조사 기준 커밋) 대조 결과를 첨부하고 미실행이면 `NOT_RUN`.
+- PR #7의 최종 candidate `5b687585cddf6e7a5145911e75647a0e814d9078`를 `codex/t005b-poetry-requirements`에 push했다. PR CI run [34087885355](https://github.com/digitie/kor-travel-common/actions/runs/34087885355)의 docs·check-versions·secret-scan·tools Windows·tools Ubuntu 5개 job이 candidate HEAD와 일치해 모두 성공했다.
+- Windows Python 3.14.3과 WSL Python 3.11.15에서 전체 162 tests·skip 0, `test_check_versions.py` focused 67 tests·skip 0이 각각 성공했다. 문서 링크 283/2166, plan 102, SPDX 22, secrets/redaction 351, `check_versions.py --self-check`, `git diff --check`도 오류 0이다.
+- fixture `ktdm`은 Poetry Python·fastapi·custom-lib 판정을 보고하고, `ktc`는 requirements `NO_LOCK`·정확 핀·Git `FLOATING_REF`를 보고한다. 조사 원문에 있는 `mcp<2`는 차단되지 않는 정상 음성 사례이며, 합성 `mcp>=2`에서는 `BLOCKED`와 error annotation을 확인했다. `geo-no-lock`은 report 0과 `NO_LOCK`, 경로/manifest 부재 호출은 exit 2다.
+- requirements `-r`·`--requirement` 공백/등호/축약형·순환·누락·quoted path·주석/hash·editable, PEP 440 wildcard/compatible/교집합, Poetry source/metadata/조건별 Git, malformed URL 출력 비공개, PEP 508 marker 괄호·인용 문자열·소문자 keyword·역순·값/값·변수/변수 비교를 Windows·WSL 직접 CLI로 확인했다.
+- 최초부터 네 차례의 독립 리뷰 원본과 disposition은 [T-005b review archive](../reviews/adversarial/2026-09-07-t005b-post4.md), [manifest](../reviews/adversarial/evidence/2026-09-07-t005b-manifest.md), [A/B post4 원본](../reviews/adversarial/evidence/2026-09-07-t005b-post4-reviewer-a.md), [B 원본](../reviews/adversarial/evidence/2026-09-07-t005b-post4-reviewer-b.md)에 보존했다. 최종은 A PASS / B PASS, 누적 finding 모두 FIXED다.
+- `NOT_RUN`: 실제 소비자 저장소 설치·빌드·e2e·Poetry/pip/uv 설치·전환, 전체 resolver 동등성, 소비자 변경·CI, npm/PyPI 게시·Release·태그, merge 후 main CI. common fixture·임시 입력·정적 parser/validator와 PR CI만 실행했다.
 
 ## rollback 또는 release 차단 조건
 

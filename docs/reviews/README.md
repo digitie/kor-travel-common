@@ -20,6 +20,11 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-09-07 | full post-fix 04 | [T-005b 최종 판정](adversarial/2026-09-07-t005b-post4.md), `5b68758` | A marker·requirements / B Poetry·URL | **A PASS / B PASS, 누적 finding 모두 FIXED** |
+| 2026-09-07 | full post-fix 03 | [T-005b 세 번째 재검토](adversarial/2026-09-07-t005b-post3.md), `1863721` | A marker·입력 / B URL·정본 | A BLOCK / B BLOCK, marker 경계 수정 후 재검토 |
+| 2026-09-07 | full post-fix 02 | [T-005b 두 번째 재검토](adversarial/2026-09-07-t005b-post2.md), `ca461c4` | A marker·requirements / B URL·Poetry | A BLOCK / B BLOCK, 잔여 marker·URL 수정 후 재검토 |
+| 2026-09-07 | full post-fix | [T-005b 재검토](adversarial/2026-09-07-t005b-post-fix.md), `cdf7ba0` | A requirements·범위 / B Poetry·Git | A BLOCK / B BLOCK, 잔여 6개 finding 수정 후 재검토 |
+| 2026-09-07 | full | [T-005b 최초 통합](adversarial/2026-09-07-t005b.md), `12570cc` | A requirements·범위 / B Poetry·정본 | A BLOCK / B BLOCK, finding 수정 후 재검토 |
 | 2026-09-07 | full post-fix 03 | [T-005a 최종 판정](adversarial/2026-09-07-t005a-post3.md), `3c5801f` | A 입력·PEP 735 / B git ref·정본 | **A PASS / B PASS, 8 finding FIXED** |
 | 2026-09-07 | full 통합 | [T-005a 최초·수정 통합](adversarial/2026-09-07-t005a.md), `3bc0f47` → `3c5801f` | A uv 입력·workspace / B lock·Python 축 | 최초 BLOCK 후 **최종 PASS / PASS** |
 | 2026-09-07 | full post-fix | [T-009 최종 판정](adversarial/2026-09-07-t009-post-fix.md), f15072f | A 검사기·입력 / B CI·정본 | **A PASS / B PASS, 8 finding FIXED** |
