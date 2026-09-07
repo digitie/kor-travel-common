@@ -1779,6 +1779,45 @@ def discover(root: Path) -> list[Scope]:
     return scopes
 
 
+def _safe_declared_file(candidate: Path, root: Path) -> Path | None:
+    """동반 선언 파일의 최종 경로를 소비자 root 안으로 제한한다."""
+    resolved = candidate.resolve()
+    if not _path_within(resolved, root):
+        raise ValueError("매니페스트 동반 선언 파일이 소비자 저장소 루트 밖에 있음")
+    return resolved if candidate.is_file() else None
+
+
+def _manifest_declaration_scopes(root: Path, app: object) -> list[Scope]:
+    """빈 lockfiles 매니페스트의 앱 선언을 NO_LOCK scope로 보존한다."""
+    if not isinstance(app, str) or not app:
+        return []
+    candidate = (root / app)
+    if not candidate.exists() and not candidate.is_symlink():
+        return []
+    app_dir = candidate.resolve()
+    if not _path_within(app_dir, root):
+        raise ValueError("매니페스트 app 경로가 소비자 저장소 루트 밖에 있음")
+    if not app_dir.is_dir():
+        return []
+    label = app_dir.relative_to(root).as_posix() or "."
+    display_label = _workflow_display_value(label, "(scope 경로 비공개)")
+    scopes: list[Scope] = []
+    package_manifest = _safe_declared_file(app_dir / "package.json", root)
+    if package_manifest is not None:
+        scopes.append(Scope("npm", display_label, package_manifest, None, "none"))
+    python_manifest = _safe_declared_file(app_dir / "pyproject.toml", root)
+    if python_manifest is not None:
+        scopes.append(Scope("python", display_label, python_manifest, None, "none"))
+    for path in sorted(app_dir.glob("requirements*.txt"), key=lambda item: item.name):
+        requirement = _safe_declared_file(path, root)
+        if requirement is not None:
+            scopes.append(Scope(
+                "python", display_label, requirement, None, "requirements",
+                note=f"{path.name}는 선언만 읽는다(T-005b)",
+            ))
+    return scopes
+
+
 def scopes_from_manifest(
     manifest_path: Path,
     *,
@@ -1801,7 +1840,7 @@ def scopes_from_manifest(
             raise ValueError("매니페스트 strict 검증 실패: " + "; ".join(errors[:8]))
     data = read_json(manifest_path)
     if data.get("schema") not in (None, MANIFEST_SCHEMA):
-        raise ValueError(f"{manifest_path}: schema가 {MANIFEST_SCHEMA}가 아님")
+        raise ValueError(f"매니페스트 schema가 {MANIFEST_SCHEMA}가 아님")
     scopes: list[Scope] = []
     for entry in data.get("lockfiles", []):
         kind = entry.get("kind", "")
@@ -1809,22 +1848,34 @@ def scopes_from_manifest(
         path = (base / raw_path).resolve()
         if not _path_within(path, base):
             raise ValueError("매니페스트 lock path가 소비자 저장소 루트 밖에 있음")
-        label = entry.get("scope") or path.parent.relative_to(base).as_posix() or "."
-        workspace = "" if label in {".", "root"} else label
+        raw_label = entry.get("scope")
+        if not isinstance(raw_label, str) or not raw_label:
+            raw_label = path.parent.relative_to(base).as_posix() or "."
+        workspace = "" if raw_label in {".", "root"} else raw_label
+        label = _workflow_display_value(raw_label, "(scope 경로 비공개)")
         if kind == "npm":
-            manifest = path.parent / "package.json"
-            scopes.append(Scope("npm", label, manifest if manifest.is_file() else None,
+            if root is None and not strict:
+                # 기존 최소 fixture는 scope를 보고 label로만 사용하고 lock 옆 manifest를 읽는다.
+                workspace_root = path.parent
+            else:
+                workspace_root = (path.parent / workspace).resolve() if workspace else path.parent
+            if not _path_within(workspace_root, base):
+                raise ValueError("매니페스트 npm workspace가 소비자 저장소 루트 밖에 있음")
+            manifest = _safe_declared_file(workspace_root / "package.json", base)
+            scopes.append(Scope("npm", label, manifest,
                                 path if path.is_file() else None, "package-lock", workspace=workspace))
-        elif kind in {"uv", "poetry"}:
-            manifest = path.parent / "pyproject.toml"
-            scopes.append(Scope("python", label, manifest if manifest.is_file() else None,
+        elif isinstance(kind, str) and kind in {"uv", "poetry"}:
+            manifest = _safe_declared_file(path.parent / "pyproject.toml", base)
+            scopes.append(Scope("python", label, manifest,
                                 path if path.is_file() else None, kind))
         elif kind == "requirements":
             scopes.append(Scope("python", label, path if path.is_file() else None, None,
                                 "requirements", note="requirements.txt는 선언만 읽는다(T-005b)"))
         else:
             scopes.append(Scope("python", label, None, None, "none",
-                                note=f"알 수 없는 lockfile kind {kind!r}"))
+                                note="알 수 없는 lockfile kind"))
+    if not data.get("lockfiles"):
+        scopes.extend(_manifest_declaration_scopes(base, data.get("app")))
     # manifest가 lockfile 목록을 명시해도 저장소 루트 workflow는 같은 보고에 포함한다.
     scopes.extend(discover_workflows(base))
     return data.get("repo"), scopes

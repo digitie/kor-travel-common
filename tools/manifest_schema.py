@@ -43,7 +43,7 @@ def _check_object(value: object, path: str, fields: frozenset[str], errors: list
         return False
     unknown = sorted(set(value) - fields)
     if unknown:
-        errors.append(_field_error(path, f"미지 필드: {', '.join(unknown)}"))
+        errors.append(_field_error(path, f"미지 필드 {len(unknown)}개"))
     return True
 
 
@@ -67,9 +67,9 @@ def _check_relative_path(value: object, path: str, errors: list[str]) -> None:
     if (
         "\\" in text
         or text.startswith("/")
-        or ":" in parts[0]
+        or ":" in text
         or any(part in {"", ".", ".."} for part in parts)
-        or "\x00" in text
+        or any(ord(char) < 0x20 or ord(char) == 0x7F for char in text)
     ):
         errors.append(_field_error(path, "저장소 루트 기준 정규 POSIX 상대 경로여야 함"))
 
@@ -120,17 +120,18 @@ def _check_exceptions(value: object, path: str, errors: list[str]) -> None:
         unknown = sorted(keys - expected)
         missing = sorted(expected - keys)
         if unknown:
-            errors.append(_field_error(entry_path, f"미지 필드: {', '.join(unknown)}"))
+            errors.append(_field_error(entry_path, f"미지 필드 {len(unknown)}개"))
         if missing:
             errors.append(_field_error(entry_path, f"누락 필드: {', '.join(missing)}"))
         for field in required:
             if field in entry:
                 _check_string(entry[field], f"{entry_path}.{field}", errors)
-        for field in ("reason", "review"):
-            if field in entry:
-                _check_string(entry[field], f"{entry_path}.{field}", errors)
+        if "reason" in entry:
+            _check_string(entry["reason"], f"{entry_path}.reason", errors)
         if "until" in entry:
             _check_date(entry["until"], f"{entry_path}.until", errors)
+        if "review" in entry:
+            _check_date(entry["review"], f"{entry_path}.review", errors)
 
 
 def validate_manifest(data: object, consumer_repos: set[str] | None = None) -> list[str]:
@@ -142,7 +143,7 @@ def validate_manifest(data: object, consumer_repos: set[str] | None = None) -> l
     unknown = sorted(set(data) - TOP_LEVEL_FIELDS)
     missing = sorted(TOP_LEVEL_FIELDS - set(data))
     if unknown:
-        errors.append(_field_error("$", f"미지 필드: {', '.join(unknown)}"))
+        errors.append(_field_error("$", f"미지 필드 {len(unknown)}개"))
     if missing:
         errors.append(_field_error("$", f"누락 필드: {', '.join(missing)}"))
 
@@ -170,7 +171,7 @@ def validate_manifest(data: object, consumer_repos: set[str] | None = None) -> l
                 if field not in entry:
                     errors.append(_field_error(f"{entry_path}.{field}", "필수 필드"))
             if "kind" in entry:
-                if entry["kind"] not in LOCKFILE_KINDS:
+                if not isinstance(entry["kind"], str) or entry["kind"] not in LOCKFILE_KINDS:
                     errors.append(_field_error(f"{entry_path}.kind", "지원하지 않는 lockfile 종류"))
             if "path" in entry:
                 _check_relative_path(entry["path"], f"{entry_path}.path", errors)

@@ -70,7 +70,7 @@ class ValidateManifestTests(unittest.TestCase):
         data["enforce"] = "report"
         data["tokens"]["future"] = True
         errors = validate_manifest(data, {"kor-travel-map"})
-        self.assertTrue(any("enforce" in error for error in errors))
+        self.assertTrue(any("$." in error and "미지 필드" in error for error in errors))
         self.assertTrue(any("$.tokens" in error for error in errors))
         self.assertEqual(self.run_cli(data).returncode, 1)
 
@@ -87,6 +87,18 @@ class ValidateManifestTests(unittest.TestCase):
             errors = validate_manifest(data, {"kor-travel-map"})
             self.assertTrue(any("$.exceptions[0].until" in error for error in errors), until)
 
+    def test_review_is_required_and_must_be_a_real_date(self):
+        for review in (None, "tomorrow", "2026/09/30", "2026-02-30"):
+            data = valid_manifest()
+            data["exceptions"] = [{
+                "key": "react",
+                "reason": "시험",
+                "until": "2026-12-31",
+                "review": review,
+            }]
+            errors = validate_manifest(data, {"kor-travel-map"})
+            self.assertTrue(any("$.exceptions[0].review" in error for error in errors), review)
+
     def test_lockfile_kind_and_path_are_strict(self):
         for kind, path in (("pipenv", "package-lock.json"), ("npm", "../package-lock.json"),
                            ("npm", "C:/package-lock.json")):
@@ -94,6 +106,36 @@ class ValidateManifestTests(unittest.TestCase):
             data["lockfiles"] = [{"kind": kind, "path": path, "scope": "root"}]
             errors = validate_manifest(data, {"kor-travel-map"})
             self.assertTrue(any("$.lockfiles[0]" in error for error in errors), (kind, path))
+
+    def test_kind_non_string_values_return_errors_without_traceback(self):
+        for kind in ([], {}, None, True, 7):
+            data = valid_manifest()
+            data["lockfiles"] = [{"kind": kind, "path": "package-lock.json", "scope": "root"}]
+            with self.subTest(kind=kind):
+                errors = validate_manifest(data, {"kor-travel-map"})
+                self.assertTrue(any("$.lockfiles[0].kind" in error for error in errors))
+                result = self.run_cli(data)
+                self.assertEqual(result.returncode, 1)
+                self.assertNotIn("Traceback", result.stderr)
+
+    def test_unknown_field_does_not_echo_input(self):
+        data = valid_manifest()
+        marker = "opaque_input_" + "A" * 36
+        data[marker] = True
+        errors = validate_manifest(data, {"kor-travel-map"})
+        self.assertTrue(errors)
+        self.assertNotIn(marker, "\n".join(errors))
+        result = self.run_cli(data)
+        self.assertEqual(result.returncode, 1)
+        self.assertNotIn(marker, result.stdout + result.stderr)
+
+    def test_schema_path_edge_cases_are_rejected(self):
+        for path in ("C:/package-lock.json", "apps//package-lock.json", "apps/",
+                     " ", "apps/\x00/package-lock.json"):
+            data = valid_manifest()
+            data["lockfiles"] = [{"kind": "npm", "path": path, "scope": "root"}]
+            with self.subTest(path=path):
+                self.assertTrue(validate_manifest(data, {"kor-travel-map"}))
 
     def test_repo_must_be_a_versions_consumer_key(self):
         data = valid_manifest()
@@ -145,6 +187,99 @@ class ValidateManifestTests(unittest.TestCase):
             ], capture_output=True, text=True, encoding="utf-8")
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertNotIn("검사 대상 scope가 없음", result.stdout)
+
+    def test_check_versions_selects_workspace_manifest(self):
+        with tempfile.TemporaryDirectory(prefix="kor-travel-common-workspace-") as directory:
+            root = Path(directory)
+            app = root / "apps" / "web"
+            app.mkdir(parents=True)
+            manifest = root / "apps" / "web" / "kor-travel-common.lock.json"
+            data = valid_manifest()
+            data["app"] = "apps/web"
+            data["lockfiles"] = [{"kind": "npm", "path": "package-lock.json", "scope": "apps/web"}]
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            (root / "package.json").write_text(json.dumps({
+                "name": "fixture-root",
+                "version": "0.0.0",
+                "workspaces": ["apps/*"],
+                "engines": {"node": ">=22.12.0"},
+                "dependencies": {"react": "^19.0.0"},
+            }), encoding="utf-8")
+            (app / "package.json").write_text(json.dumps({
+                "name": "fixture-web",
+                "version": "0.0.0",
+                "engines": {"node": ">=18.0.0"},
+                "dependencies": {"react": "^19.0.0"},
+            }), encoding="utf-8")
+            (root / "package-lock.json").write_text(json.dumps({
+                "name": "fixture-root",
+                "lockfileVersion": 3,
+                "packages": {
+                    "": {"name": "fixture-root", "version": "0.0.0",
+                         "engines": {"node": ">=22.12.0"},
+                         "workspaces": ["apps/*"], "dependencies": {"react": "^19.0.0"}},
+                    "apps/web": {"name": "fixture-web", "version": "0.0.0",
+                                  "engines": {"node": ">=18.0.0"},
+                                  "dependencies": {"react": "^19.0.0"}},
+                    "node_modules/react": {"version": "19.2.8"},
+                },
+            }), encoding="utf-8")
+            result = subprocess.run([
+                sys.executable, "-B", "-X", "utf8", str(ROOT / "tools" / "check_versions.py"),
+                str(root), "--manifest", str(manifest), "--repo", "kor-travel-map",
+                "--mode", "fail", "--today", "2026-09-07", "--no-step-summary",
+            ], capture_output=True, text=True, encoding="utf-8")
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertIn("apps/web", result.stdout)
+            self.assertIn("BELOW_FLOOR", result.stdout)
+
+    def test_check_versions_rejects_companion_manifest_symlink_escape(self):
+        with tempfile.TemporaryDirectory(prefix="kor-travel-common-symlink-") as directory:
+            root = Path(directory)
+            outside = root.parent / f"{root.name}-outside-package.json"
+            outside.write_text(json.dumps({
+                "name": "outside", "version": "0.0.0", "engines": {"node": ">=22.12.0"},
+            }), encoding="utf-8")
+            try:
+                (root / "package.json").symlink_to(outside)
+            finally:
+                outside.unlink(missing_ok=True)
+            (root / "package-lock.json").write_text(json.dumps({
+                "name": "fixture", "lockfileVersion": 3,
+                "packages": {"": {"name": "fixture", "version": "0.0.0"}},
+            }), encoding="utf-8")
+            manifest = root / "manifest.json"
+            manifest.write_text(json.dumps(valid_manifest()), encoding="utf-8")
+            result = subprocess.run([
+                sys.executable, "-B", "-X", "utf8", str(ROOT / "tools" / "check_versions.py"),
+                str(root), "--manifest", str(manifest), "--repo", "kor-travel-map",
+                "--mode", "fail", "--no-step-summary",
+            ], capture_output=True, text=True, encoding="utf-8")
+            self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+            self.assertNotIn(str(outside), result.stdout + result.stderr)
+
+    def test_empty_lockfiles_report_declaration_only_app(self):
+        with tempfile.TemporaryDirectory(prefix="kor-travel-common-etl-") as directory:
+            root = Path(directory)
+            app = root / "apps" / "etl"
+            app.mkdir(parents=True)
+            manifest = app / "kor-travel-common.lock.json"
+            data = valid_manifest()
+            data["repo"] = "pinvi"
+            data["app"] = "apps/etl"
+            data["lockfiles"] = []
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            (app / "pyproject.toml").write_text(
+                "[project]\nname = 'fixture-etl'\nversion = '0.0.0'\ndependencies = []\n",
+                encoding="utf-8",
+            )
+            result = subprocess.run([
+                sys.executable, "-B", "-X", "utf8", str(ROOT / "tools" / "check_versions.py"),
+                str(root), "--manifest", str(manifest), "--repo", "pinvi",
+                "--mode", "fail", "--today", "2026-09-07", "--no-step-summary",
+            ], capture_output=True, text=True, encoding="utf-8")
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertIn("NO_LOCK", result.stdout)
 
 
 if __name__ == "__main__":

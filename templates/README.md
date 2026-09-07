@@ -32,6 +32,8 @@
 
 ## 2. 사용법
 
+매니페스트에서 npm `scope`가 `root`이면 해당 lockfile의 루트 package를 뜻하고, 그 밖의 값은 lockfile 디렉터리 기준 workspace 멤버 경로다. `map`과 `pinvi.apps-web` 초안은 각각 실제 workspace 경로를 지정하며, `pinvi.apps-etl`의 빈 `lockfiles`는 선언만 있고 lock이 없는 상태를 보존한다.
+
 1. 파일을 복사한다. 마커·판 주석(`kor-travel-common … 판 2026-09`)은 지우지 않는다 — drift 대조 기준이다.
 2. 소비자 경로가 다르면(모노레포 앱 디렉터리) 배치만 바꾸고 내용은 바꾸지 않는다. 바꿔야 한다면 common PR로 제안한다.
 3. 규약 PR(AGENTS·CLAUDE·설정 파일·dependabot)은 코드 채택 PR과 분리한다(D-24: 한 PR = 한 산출물).

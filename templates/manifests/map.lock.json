@@ -6,7 +6,7 @@
   "ui": { "version": null },
   "python": { "version": null },
   "lockfiles": [
-    { "kind": "npm", "path": "package-lock.json", "scope": "root" }
+    { "kind": "npm", "path": "package-lock.json", "scope": "packages/kor-travel-map-admin/frontend" }
   ],
   "contrast": { "baseline": null, "dark": false },
   "ux_gate": { "baseline": null },

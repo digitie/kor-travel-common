@@ -6,7 +6,7 @@
   "ui": { "version": null },
   "python": { "version": null },
   "lockfiles": [
-    { "kind": "npm", "path": "package-lock.json", "scope": "root" }
+    { "kind": "npm", "path": "package-lock.json", "scope": "apps/web" }
   ],
   "contrast": { "baseline": null, "dark": false },
   "ux_gate": { "baseline": null },
