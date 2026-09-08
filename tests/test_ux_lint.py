@@ -275,6 +275,10 @@ window.confirm('확인');
                 "unicode-greek.mdx": "\u037a && window.confirm('x')",
                 "unicode-middle-dot.mdx": "a\u00b7 && window.confirm('x')",
                 "unicode-ano-teleia.mdx": "a\u0387 && window.confirm('x')",
+                "unicode-new-script.mdx": "\U00011f02 && window.confirm('x')",
+                "unicode-new-cjk.mdx": "\U0002ebf0 && window.confirm('x')",
+                "unicode-feff-leading.mdx": "\ufeff\u2118 && window.confirm('x')",
+                "unicode-feff-between.mdx": "\u2118\ufeff&& window.confirm('x')",
                 "async-arrow.mdx": "async x => window.confirm('x')",
             }
             for name, expression in expressions.items():

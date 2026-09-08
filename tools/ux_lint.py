@@ -140,7 +140,7 @@ def _skip_mdx_expression_leading(text: str, start: int, boundary: int) -> int:
 
     index = start
     while index < boundary:
-        if text[index].isspace():
+        if _is_mdx_whitespace(text[index]):
             index += 1
             continue
         if text.startswith("/*", index):
@@ -157,6 +157,12 @@ def _skip_mdx_expression_leading(text: str, start: int, boundary: int) -> int:
             continue
         break
     return index
+
+
+def _is_mdx_whitespace(char: str) -> bool:
+    """Python 버전과 무관하게 ECMAScript 공백 문자인지 확인한다."""
+
+    return char.isspace() or char == "\ufeff"
 
 
 def _consume_mdx_unicode_escape(text: str, start: int, boundary: int) -> int | None:
@@ -187,6 +193,9 @@ def _is_mdx_identifier_start(char: str) -> bool:
         or char.isidentifier()
         or category[0] == "L"
         or category == "Nl"
+        # 구버전 Python의 unicodedata가 아직 이름을 모르는 최신
+        # ECMAScript 문자도 미종결 span 뒤 실행식으로 보존한다.
+        or (category == "Cn" and ord(char) > 0x7F)
     )
 
 
