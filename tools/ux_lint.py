@@ -18,10 +18,10 @@ from typing import Iterable, Mapping, Sequence
 
 TARGET_EXTENSIONS = {".tsx", ".ts", ".css", ".mdx"}
 SKIP_DIRECTORIES = {".git", "node_modules", ".next", "dist", "build", "coverage", "__pycache__", "e2e", "tests", "vendor"}
-_MDX_LINE_BREAK_PATTERN = r"(?:\r\n|[\n\u2028\u2029]|\r(?!\n))"
+_MARKDOWN_LINE_BREAK_PATTERN = r"(?:\r\n|\n|\r(?!\n))"
 _MDX_PARAGRAPH_BOUNDARY = re.compile(
-    rf"{_MDX_LINE_BREAK_PATTERN}"
-    rf"(?:[ \t]*{_MDX_LINE_BREAK_PATTERN}|[ \t]*>(?:[ \t]*>)*[ \t]*{_MDX_LINE_BREAK_PATTERN})"
+    rf"{_MARKDOWN_LINE_BREAK_PATTERN}"
+    rf"(?:[ \t]*{_MARKDOWN_LINE_BREAK_PATTERN}|[ \t]*>(?:[ \t]*>)*[ \t]*{_MARKDOWN_LINE_BREAK_PATTERN})"
 )
 _MDX_EXPRESSION_KEYWORDS = {
     "await",
@@ -44,6 +44,7 @@ _MDX_EXPRESSION_START_CHARS = frozenset(".!~+-([{</\"'`")
 _MDX_EXPRESSION_FOLLOWING_CHARS = frozenset(".([{:?,=+*%|&!<>)}`-^/")
 _MDX_EXPRESSION_BINARY_WORDS = {"as", "in", "instanceof"}
 _MDX_LINE_TERMINATORS = frozenset("\r\n\u2028\u2029")
+_MARKDOWN_LINE_TERMINATORS = frozenset("\r\n")
 # ECMAScript의 Unicode ID_Start/ID_Continue에 포함되지만 Python의
 # XID 판정이나 일반 범주만으로는 보존되지 않는 예외 문자다.
 _MDX_OTHER_ID_START = frozenset("\u2118\u212e\u309b\u309c")
@@ -191,25 +192,39 @@ def _find_mdx_line_terminator(text: str, start: int, boundary: int) -> int:
     return min(found, default=boundary)
 
 
-def _line_terminator_end(text: str, start: int, boundary: int | None = None) -> int:
-    """한 줄 종결자의 다음 위치를 반환한다(CRLF는 한 줄로 소비한다)."""
+def _is_markdown_line_terminator(char: str) -> bool:
+    """CommonMark 줄 종결자(LF·CR·CRLF)의 문자 부분인지 확인한다."""
+
+    return char in _MARKDOWN_LINE_TERMINATORS
+
+
+def _find_markdown_line_terminator(text: str, start: int, boundary: int) -> int:
+    """Markdown 문법에서 줄을 끝내는 가장 가까운 위치를 반환한다."""
+
+    positions = [text.find(char, start, boundary) for char in _MARKDOWN_LINE_TERMINATORS]
+    found = [position for position in positions if position >= 0]
+    return min(found, default=boundary)
+
+
+def _markdown_line_terminator_end(text: str, start: int, boundary: int | None = None) -> int:
+    """Markdown 줄 종결자의 다음 위치를 반환한다(CRLF는 한 줄로 소비한다)."""
 
     limit = len(text) if boundary is None else boundary
     if start >= limit:
         return start
     if text.startswith("\r\n", start) and start + 1 < limit:
         return start + 2
-    return start + 1 if _is_mdx_line_terminator(text[start]) else start
+    return start + 1 if _is_markdown_line_terminator(text[start]) else start
 
 
-def _line_start(text: str, index: int) -> int:
-    """네 가지 줄 종결자를 보존하면서 현재 줄의 시작 위치를 찾는다."""
+def _markdown_line_start(text: str, index: int) -> int:
+    """CommonMark 줄 종결자만 사용해 현재 줄의 시작 위치를 찾는다."""
 
-    positions = [text.rfind(char, 0, index) for char in _MDX_LINE_TERMINATORS]
+    positions = [text.rfind(char, 0, index) for char in _MARKDOWN_LINE_TERMINATORS]
     latest = max(positions, default=-1)
     if latest < 0:
         return 0
-    return _line_terminator_end(text, latest, index)
+    return _markdown_line_terminator_end(text, latest, index)
 
 
 def _consume_mdx_unicode_escape(text: str, start: int, boundary: int) -> int | None:
@@ -336,7 +351,7 @@ def _mask_unclosed_inline_span(output: list[str], text: str, start: int, run_len
     resume_candidates: list[int] = []
     remainder = text[content_start:boundary]
     for pattern in (
-        r"<(?:[A-Za-z]|>)|^[ \t]*(?:export\s+)?(?:const|let|var|return)\b",
+        r"<(?:[A-Za-z]|>)|(?:^|(?<=[\r\n]))[ \t]*(?:export\s+)?(?:const|let|var|return)\b",
     ):
         match = re.search(pattern, remainder, re.MULTILINE)
         if match:
@@ -347,7 +362,7 @@ def _mask_unclosed_inline_span(output: list[str], text: str, start: int, run_len
             break
     resume = content_start + min(resume_candidates) if resume_candidates else boundary
     for offset in range(start, resume):
-        if not _is_mdx_line_terminator(text[offset]):
+        if not _is_markdown_line_terminator(text[offset]):
             output[offset] = " "
     return resume
 
@@ -406,7 +421,7 @@ def _has_open_jsx_expression(text: str, start: int) -> bool:
 def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
     """MDX의 Markdown code span과 JSX/JavaScript template을 구분한다."""
 
-    line_start = _line_start(text, start)
+    line_start = _markdown_line_start(text, start)
     line_prefix = text[line_start:start]
     leading = line_prefix.lstrip()
     if leading.startswith(">"):
@@ -436,7 +451,7 @@ def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
         previous_line_end -= 1
         if text[previous_line_end] == "\n" and previous_line_end > 0 and text[previous_line_end - 1] == "\r":
             previous_line_end -= 1
-    previous_line_start = _line_start(text, previous_line_end) if line_start else 0
+    previous_line_start = _markdown_line_start(text, previous_line_end) if line_start else 0
     previous_line = text[previous_line_start:previous_line_end].rstrip() if line_start else ""
     declaration = bool(re.search(r"\b(?:export\s+)?(?:const|let|var)\b", statement)) and "=" in statement
     if declaration and (line_prefix != line_prefix.lstrip() or re.search(r"(?:=|=>|[([{,:])\s*$", previous_line)):
@@ -489,30 +504,30 @@ def _has_open_inline_span(text: str, index: int) -> bool:
 def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
     """MDX의 줄 단위 backtick/tilde fence 전체를 공백으로 가린다."""
 
-    line_start = _line_start(text, start)
+    line_start = _markdown_line_start(text, start)
     if text[line_start:start].strip():
         return "", start
-    opener_end = _find_mdx_line_terminator(text, start, len(text))
+    opener_end = _find_markdown_line_terminator(text, start, len(text))
     opener_run = 0
     while start + opener_run < opener_end and text[start + opener_run] == marker:
         opener_run += 1
     if opener_run < 3:
         return "", start
-    cursor = _line_terminator_end(text, opener_end)
+    cursor = _markdown_line_terminator_end(text, opener_end)
     closing = len(text)
     while cursor < len(text):
-        next_end = _find_mdx_line_terminator(text, cursor, len(text))
+        next_end = _find_markdown_line_terminator(text, cursor, len(text))
         candidate = text[cursor:next_end].lstrip()
         closing_run = 0
         while closing_run < len(candidate) and candidate[closing_run] == marker:
             closing_run += 1
         if closing_run >= opener_run and not candidate[closing_run:].strip():
-            closing = _line_terminator_end(text, next_end)
+            closing = _markdown_line_terminator_end(text, next_end)
             break
-        cursor = _line_terminator_end(text, next_end)
+        cursor = _markdown_line_terminator_end(text, next_end)
     output = list(text[start:closing])
     for offset, char in enumerate(text[start:closing]):
-        if not _is_mdx_line_terminator(char):
+        if not _is_markdown_line_terminator(char):
             output[offset] = " "
     return "".join(output), closing
 
@@ -632,7 +647,7 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                     continue
                 stop = min(end + run_length, len(text))
                 for offset in range(index, stop):
-                    if not _is_mdx_line_terminator(text[offset]):
+                    if not _is_markdown_line_terminator(text[offset]):
                         output[offset] = " "
                 index = stop
                 continue
@@ -645,7 +660,7 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                     continue
                 stop = min(end + 1, len(text))
                 for offset in range(index, stop):
-                    if not _is_mdx_line_terminator(text[offset]):
+                    if not _is_markdown_line_terminator(text[offset]):
                         output[offset] = " "
                 index = stop
                 continue

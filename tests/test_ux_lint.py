@@ -341,33 +341,53 @@ window.confirm('확인');
         for separator in ("\r", "\n", "\r\n", "\u2028", "\u2029"):
             with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
                 root = Path(directory)
-                paragraph = root / "paragraph.mdx"
-                paragraph.write_bytes(
-                    (
-                        f"Example `` unmatched{separator}{separator}"
-                        f"<div className=\"outline-none\"/>{separator}{separator}"
-                        f"Later `` delimiter{separator}"
-                    ).encode("utf-8")
-                )
-                fence = root / "fence.mdx"
-                fence.write_bytes(
-                    (
-                        f"~~~tsx{separator}<div className=\"outline-none\"/>{separator}"
-                        f"~~~{separator}<div className=\"outline-none\"/>{separator}"
-                    ).encode("utf-8")
-                )
-                quoted = root / "quoted.mdx"
-                quoted.write_bytes(
-                    f"export const x = {{}}{separator}{separator}"
-                    f"Example: `window.confirm(\"quoted\")`{separator}".encode("utf-8")
-                )
+                if separator in ("\r", "\n", "\r\n"):
+                    paragraph = root / "paragraph.mdx"
+                    paragraph.write_bytes(
+                        (
+                            f"Example `` unmatched{separator}{separator}"
+                            f"<div className=\"outline-none\"/>{separator}{separator}"
+                            f"Later `` delimiter{separator}"
+                        ).encode("utf-8")
+                    )
+                    fence = root / "fence.mdx"
+                    fence.write_bytes(
+                        (
+                            f"~~~tsx{separator}<div className=\"outline-none\"/>{separator}"
+                            f"~~~{separator}<div className=\"outline-none\"/>{separator}"
+                        ).encode("utf-8")
+                    )
+                    quoted = root / "quoted.mdx"
+                    quoted.write_bytes(
+                        f"export const x = {{}}{separator}{separator}"
+                        f"Example: `window.confirm(\"quoted\")`{separator}".encode("utf-8")
+                    )
+                    esm = root / "esm.mdx"
+                    esm.write_bytes(
+                        (
+                            f"Example `` unmatched{separator}{separator}"
+                            f"export const X = <div className=\"outline-none\" />{separator}"
+                        ).encode("utf-8")
+                    )
+                    expected = [("esm.mdx", "P6"), ("fence.mdx", "P6"), ("paragraph.mdx", "P6")]
+                else:
+                    for run_length in (1, 2, 3):
+                        delimiter = "`" * run_length
+                        quoted = root / f"quoted-{run_length}.mdx"
+                        quoted.write_bytes(
+                            (
+                                f"Example {delimiter} outline-none{separator}{separator}"
+                                f"{{window.confirm(\"quoted\")}} {delimiter}{separator}"
+                            ).encode("utf-8")
+                        )
+                    expected = []
 
                 result = self.run_tool(root, "--root", root, "--json")
                 self.assertEqual(result.returncode, 0, result.stderr)
                 findings = json.loads(result.stdout)["findings"]
                 self.assertEqual(
                     [(item["file"], item["pattern"]) for item in findings],
-                    [("fence.mdx", "P6"), ("paragraph.mdx", "P6")],
+                    expected,
                 )
 
     def test_escaped_template_text_remains_scannable(self):
