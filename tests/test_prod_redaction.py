@@ -48,6 +48,11 @@ class ProdRedactionTests(RepositoryCase):
         outside = self.run_scan("--all", "--scope", "private", script=SCRIPT)
         self.assertEqual(outside.returncode, 1, outside.stdout)
 
+    def test_nested_checkout_is_not_caller_input(self):
+        self.git("init", "-q", "nested-checkout")
+        self.write("nested-checkout/private.txt", "192." + "168.1.2")
+        self.assertEqual(self.run_scan("--all", script=SCRIPT).returncode, 0)
+
     def test_sensitive_filename_and_parent_never_print(self):
         marker = "192." + "168.1.2"
         for name in (marker + ".txt", marker + "/sample.txt"):

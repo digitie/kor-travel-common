@@ -79,7 +79,18 @@ class Snapshot:
         if self.working:
             for raw_name in git(root, "ls-files", "--others", "--exclude-standard", "-z").split(b"\0"):
                 if raw_name:
-                    self.entries[path_name(raw_name)] = ("100644", "")
+                    # reusable workflow가 caller root 안에 common을 nested checkout할 수 있다.
+                    # 그 checkout은 caller의 입력 파일이 아니므로 경로를 읽기 전에 제외한다.
+                    name = path_name(raw_name.rstrip(b"/"))
+                    current = self.root
+                    nested = False
+                    for part in PurePosixPath(name).parts:
+                        current /= part
+                        if current != self.root and (current / ".git").exists():
+                            nested = True
+                            break
+                    if not nested:
+                        self.entries[name] = ("100644", "")
             self.selected = set(self.entries)
         else:
             self.selected = {path_name(name) for name in changed.split(b"\0") if name}
