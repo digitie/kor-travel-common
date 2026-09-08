@@ -10,10 +10,11 @@
 | `validate_manifest.py` | `consumer-manifest.v1` 필수 필드·미지 필드·`enforce` 금지·lockfile 종류·정규 POSIX 상대 경로·`until`/`review` 유효 날짜·`versions.json consumers` 정식 repo key를 strict 검사(exit 0/1). 오류에는 입력 field 원문을 재출력하지 않는다 | `python3 -B -X utf8 tools/validate_manifest.py <kor-travel-common.lock.json>` |
 | `check_spdx.py` | 소스 선두 SPDX·저작권·Origin/Modified/Derived-From을 PROVENANCE와 대조. 전체 범위·제외·exit code는 [licensing §5.2](../docs/standards/licensing.md#52-검사-범위와-출처-대조) | `python3 -B -X utf8 tools/check_spdx.py` (`--root`로 fixture 지정) |
 | `scan_secrets.py` | 자격증명 값 패턴, 파일·행·규칙 ID만 출력. 스냅샷·예외·exit code는 [CI §8.1](../docs/standards/ci-deploy.md#81-검사-범위와-실패-처리) | `python3 -B -X utf8 tools/scan_secrets.py --all` (`--staged`/`--base <commit>`) |
-| `check_prod_redaction.py` | 같은 입력 선택기로 전체 트리의 사설 주소·내부 호스트·운영 서비스 형식 검사 | `python3 -B -X utf8 tools/check_prod_redaction.py --all` |
+| `check_prod_redaction.py` | 같은 입력 선택기로 전체 또는 `--scope` 범위의 사설 주소·내부 호스트·운영 서비스 형식 검사 | `python3 -B -X utf8 tools/check_prod_redaction.py --all [--scope docs/]` |
 | `check_aliases.py` | `packages/tokens/aliases`의 `--kt-*` 참조·Tailwind namespace·shadcn 중복·root/dark 완전성·재귀 import와 package/symlink 경계를 검사 | `python3 -B -X utf8 tools/check_aliases.py packages/tokens/aliases` |
 | `kt_contrast.py` | canonical `tokens.css`와 순서가 있는 오버라이드의 TK-8 대비 쌍(OKLCH·hex·`var()`·sRGB alpha 합성)을 light/dark로 계산하고 baseline `until`·신규 미달을 판정. `--read-surface muted`로 앱별 추가 읽기 표면을 선언 | `python3 -B -X utf8 tools/kt_contrast.py packages/tokens/tokens.css [override.css ...] [--read-surface muted] [--baseline contrast-baseline.json --fail-new]` |
 | `ux_lint.py` | 앱 소스의 UX 금지 규칙 P1~P8(대비 P4a/P4b 포함)을 전체 report하고 `--base` 추가 행·baseline 건수·만료를 판정. `--root`가 지정한 저장소의 Git 기준으로 diff를 계산하며 `--token-files`로 토큰 CSS allowlist를 지정 | `python3 -B -X utf8 tools/ux_lint.py --root <frontend-dir> --baseline ux-baseline.json [--base <sha>] [--token-files tokens.css,brand.css]` |
+| `consumer_smoke.py` | `consumers.pins.json`의 공개 저장소·40자 SHA·GPL 승인과 후보 npm tarball의 URL·SHA256·안전한 package metadata를 검증. checkout·`npm ci`·type-check·Next webpack/Turbopack 빌드는 workflow가 수행 | `python3 -B -X utf8 tools/consumer_smoke.py --pins consumers.pins.json --role map-tokens --asset candidate.tgz --asset-sha256 <sha256> --asset-url <release-url>` |
 
 `validate_document_links.py`·`validate_plan.py`는 canview 저장소의 동명 도구를 kor-travel-common 경로에 맞게 적응한 것이다. 검사 규칙은 [tasks-rule](../docs/tasks-rule.md)과 [documentation maintenance](../docs/runbooks/documentation-maintenance.md)가 정본이며, 도구가 통과했다는 사실은 제품 gate 통과를 뜻하지 않는다.
 

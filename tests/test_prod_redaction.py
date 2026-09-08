@@ -40,6 +40,14 @@ class ProdRedactionTests(RepositoryCase):
         self.assertEqual(self.run_scan("--staged", script=SCRIPT).returncode, 1)
         self.assertEqual(self.run_scan("--all", script=SCRIPT).returncode, 0)
 
+    def test_scope_limits_the_selected_files(self):
+        self.write("docs/safe.md", "공개 문서")
+        self.write("private/sample.txt", "192." + "168.1.2")
+        scoped = self.run_scan("--all", "--scope", "docs/", script=SCRIPT)
+        self.assertEqual(scoped.returncode, 0, scoped.stdout)
+        outside = self.run_scan("--all", "--scope", "private", script=SCRIPT)
+        self.assertEqual(outside.returncode, 1, outside.stdout)
+
     def test_sensitive_filename_and_parent_never_print(self):
         marker = "192." + "168.1.2"
         for name in (marker + ".txt", marker + "/sample.txt"):

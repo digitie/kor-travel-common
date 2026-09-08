@@ -1,0 +1,139 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+name: consumer smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      role:
+        description: "consumers.pins.json의 승인된 npm 소비자 역할"
+        required: true
+        type: string
+      asset-url:
+        description: "후보 tarball의 고정 GitHub Release URL"
+        required: true
+        type: string
+      asset-sha256:
+        description: "후보 tarball의 64자 SHA256"
+        required: true
+        type: string
+      common-ref:
+        description: "common workflow와 핀 레지스트리의 태그 또는 40자 commit SHA"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: consumer-smoke-${{ inputs.role }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: consumer smoke (${{ inputs.role }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: common checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: digitie/kor-travel-common
+          ref: ${{ inputs.common-ref }}
+          path: .kor-travel-common
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Python 설치
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: immutable common ref 확인
+        env:
+          COMMON_REF: ${{ inputs.common-ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$COMMON_REF" =~ ^[0-9a-f]{40}$ || "$COMMON_REF" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$ ]]
+          [[ "$COMMON_REF" != "main" && "$COMMON_REF" != "master" ]]
+
+      - name: 후보 tarball 다운로드
+        env:
+          ASSET_URL: ${{ inputs.asset-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - "$ASSET_URL" <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('.kor-travel-common/tools').resolve()))
+          from consumer_smoke import validate_asset_url
+          validate_asset_url(sys.argv[1])
+          PY
+          curl --fail --location --proto '=https' --tlsv1.2 --output candidate.tgz "$ASSET_URL"
+
+      - name: 핀·승인·자산 digest·metadata 검증
+        id: pin
+        env:
+          ROLE: ${{ inputs.role }}
+          ASSET_SHA256: ${{ inputs.asset-sha256 }}
+          ASSET_URL: ${{ inputs.asset-url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B -X utf8 .kor-travel-common/tools/consumer_smoke.py \
+            --pins .kor-travel-common/consumers.pins.json \
+            --role "$ROLE" \
+            --asset candidate.tgz \
+            --asset-sha256 "$ASSET_SHA256" \
+            --asset-url "$ASSET_URL" > smoke.json
+          python - smoke.json <<'PY'
+          import json
+          import sys
+
+          data = json.load(open(sys.argv[1], encoding="utf-8"))
+          import os
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              for key in ("repository", "revision", "path", "package"):
+                  value = data[key]
+                  if "\n" in value or "\r" in value:
+                      raise SystemExit(f"출력 값에 줄바꿈이 있습니다: {key}")
+                  output.write(f"{key}={value}\n")
+          PY
+          cat smoke.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: pinned consumer checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ steps.pin.outputs.repository }}
+          ref: ${{ steps.pin.outputs.revision }}
+          path: consumer
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: 소비자 npm 설치·type-check·Next 빌드
+        env:
+          SOURCE_PATH: ${{ steps.pin.outputs.path }}
+          ASSET_PACKAGE: ${{ steps.pin.outputs.package }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$SOURCE_PATH" in
+            ""|/*|*\\*|*../*|../*) echo 'source path가 안전하지 않습니다' >&2; exit 2 ;;
+          esac
+          source_dir="$GITHUB_WORKSPACE/consumer/$SOURCE_PATH"
+          test -d "$source_dir"
+          if [[ -f "$GITHUB_WORKSPACE/consumer/package-lock.json" ]]; then
+            npm ci --ignore-scripts --prefix "$GITHUB_WORKSPACE/consumer"
+          elif [[ -f "$source_dir/package-lock.json" ]]; then
+            npm ci --ignore-scripts --prefix "$source_dir"
+          else
+            echo 'npm ci 대상 package-lock.json이 없습니다' >&2
+            exit 2
+          fi
+          npm install --ignore-scripts --no-save --prefix "$source_dir" "$GITHUB_WORKSPACE/candidate.tgz"
+          test "$(node -p "require('$source_dir/node_modules/$ASSET_PACKAGE/package.json').name")" = "$ASSET_PACKAGE"
+          npm run type-check --prefix "$source_dir"
+          npm run build --prefix "$source_dir" -- --webpack
+          npm run build --prefix "$source_dir" -- --turbopack

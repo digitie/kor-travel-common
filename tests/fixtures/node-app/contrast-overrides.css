@@ -1,0 +1,8 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ * Modified: 2026-09-09 — 재사용 대비 workflow의 report fixture
+ */
+:root {
+  --kt-surface-page: oklch(90% 0 0);
+  --kt-text-primary: oklch(90% 0 0);
+}

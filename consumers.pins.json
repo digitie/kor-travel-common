@@ -1,0 +1,54 @@
+{
+  "schema": "kor-travel-common.consumer-pins.v1",
+  "updated": "2026-09-09",
+  "sources": [
+    {
+      "role": "map-tokens",
+      "url": "https://github.com/digitie/kor-travel-map",
+      "revision": "c494e227e010565be295de3f9670b2f7c8c20944",
+      "path": "packages/kor-travel-map-admin/frontend",
+      "package": "@kor-travel/tokens",
+      "approval": {
+        "status": "approved",
+        "task": "T-010",
+        "license": "GPL-3.0-or-later"
+      }
+    },
+    {
+      "role": "weather-tokens",
+      "url": "https://github.com/digitie/kor-travel-weather",
+      "revision": "6003da995fa4b35799f9dadc406c6ba2878bfbae",
+      "path": "packages/kor-travel-weather-admin/frontend",
+      "package": "@kor-travel/tokens",
+      "approval": {
+        "status": "approved",
+        "task": "T-010",
+        "license": "GPL-3.0-or-later"
+      }
+    },
+    {
+      "role": "map-ui",
+      "url": "https://github.com/digitie/kor-travel-map",
+      "revision": "c494e227e010565be295de3f9670b2f7c8c20944",
+      "path": "packages/kor-travel-map-admin/frontend",
+      "package": "@kor-travel/ui",
+      "approval": {
+        "status": "approved",
+        "task": "T-010",
+        "license": "GPL-3.0-or-later"
+      }
+    },
+    {
+      "role": "airport-ui",
+      "url": "https://github.com/digitie/kor-travel-airport",
+      "revision": "2bb1111fc322843de40a35276613feb4d67bac5b",
+      "path": "frontend",
+      "package": "@kor-travel/ui",
+      "approval": {
+        "status": "approved",
+        "task": "T-010",
+        "license": "GPL-3.0-or-later"
+      }
+    }
+  ]
+}

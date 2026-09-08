@@ -1,0 +1,119 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+name: common docs check
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: "호출 저장소에서 보일 job 이름"
+        required: true
+        type: string
+      common-ref:
+        description: "검사기에 사용할 common 태그 또는 40자 commit SHA"
+        required: true
+        type: string
+      link-check:
+        description: "저장소 내부 Markdown 링크 검사 여부"
+        required: false
+        default: true
+        type: boolean
+      redaction-patterns-file:
+        description: "호출 저장소 루트 기준 redaction 정책 파일"
+        required: false
+        default: .prod-redaction-patterns
+        type: string
+      redaction-scope:
+        description: "redaction 적용 범위를 설명하는 저장소 상대 디렉터리"
+        required: false
+        default: .
+        type: string
+      task-ledger:
+        description: "호출 저장소의 task 원장 검증 여부"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: common-docs-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: ${{ inputs.name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: 호출 저장소 checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: common checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: digitie/kor-travel-common
+          ref: ${{ inputs.common-ref }}
+          path: .kor-travel-common
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Python 설치
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: 입력 경로와 immutable ref 확인
+        env:
+          COMMON_REF: ${{ inputs.common-ref }}
+          REDACTION_FILE: ${{ inputs.redaction-patterns-file }}
+          REDACTION_SCOPE: ${{ inputs.redaction-scope }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$COMMON_REF" =~ ^[0-9a-f]{40}$ || "$COMMON_REF" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$ ]]
+          [[ "$COMMON_REF" != "main" && "$COMMON_REF" != "master" ]]
+          python - "$REDACTION_FILE" "$REDACTION_SCOPE" "$GITHUB_WORKSPACE" <<'PY'
+          import sys
+          from pathlib import Path
+
+          root = Path(sys.argv[3]).resolve()
+          for raw, label in ((sys.argv[1], "redaction-patterns-file"), (sys.argv[2], "redaction-scope")):
+              path = Path(raw)
+              if raw != "." and (path.is_absolute() or "\\" in raw or any(part in {"", ".", ".."} for part in raw.split("/"))):
+                  raise SystemExit(f"{label} 경로가 안전하지 않습니다")
+              resolved = (root / path).resolve()
+              if root not in resolved.parents and resolved != root:
+                  raise SystemExit(f"{label} 경로가 caller 루트 밖입니다")
+              if label == "redaction-patterns-file" and not resolved.is_file():
+                  raise SystemExit("redaction-patterns-file이 없습니다")
+              if label == "redaction-scope" and not resolved.is_dir():
+                  raise SystemExit("redaction-scope 디렉터리가 없습니다")
+          PY
+
+      - name: 내부 문서 링크 검사
+        if: ${{ inputs.link-check }}
+        run: python -B -X utf8 .kor-travel-common/tools/validate_document_links.py "$GITHUB_WORKSPACE"
+
+      - name: 운영 정보 전체 트리 검사
+        env:
+          REDACTION_FILE: ${{ inputs.redaction-patterns-file }}
+          REDACTION_SCOPE: ${{ inputs.redaction-scope }}
+        run: python -B -X utf8 .kor-travel-common/tools/check_prod_redaction.py --root "$GITHUB_WORKSPACE" --patterns "$REDACTION_FILE" --scope "$REDACTION_SCOPE" --all
+
+      - name: task 원장 검사
+        if: ${{ inputs.task-ledger }}
+        run: python -B -X utf8 .kor-travel-common/tools/validate_plan.py --root "$GITHUB_WORKSPACE"
+
+      - name: 검사 source 기록
+        env:
+          COMMON_REF: ${{ inputs.common-ref }}
+        shell: bash
+        run: |
+          printf '검사 source: `%s`\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          printf 'common ref: `%s`\n' "$COMMON_REF" >> "$GITHUB_STEP_SUMMARY"

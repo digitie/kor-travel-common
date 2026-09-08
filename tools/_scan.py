@@ -168,6 +168,7 @@ def main(default_patterns: str, argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="원문을 출력하지 않는 저장소 정보 유출 검사")
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--patterns", default=default_patterns, help="같은 스냅샷의 패턴 파일 상대 경로")
+    parser.add_argument("--scope", default=".", help="저장소 루트 기준 검사 범위(기본: 전체)")
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--all", action="store_true", help="추적 파일과 ignore되지 않은 새 파일의 현재 내용")
     modes.add_argument("--staged", action="store_true", help="staged 변경 파일의 index blob")
@@ -176,8 +177,19 @@ def main(default_patterns: str, argv: list[str] | None = None) -> int:
     try:
         snapshot = Snapshot(args.root, args.staged, args.base)
         patterns, allowed = policy(snapshot, args.patterns)
+        if args.scope == ".":
+            scope_prefix = ""
+        else:
+            scope_value = args.scope.rstrip("/")
+            scope_prefix = path_name(scope_value) + "/"
+        selected = {
+            name for name in snapshot.selected
+            if not scope_prefix or name.startswith(scope_prefix)
+        }
+        if not selected:
+            raise ScanError("검사 scope에 파일 없음(NOT_RUN)")
         findings, exceptions = [], 0
-        for name in sorted(snapshot.selected):
+        for name in sorted(selected):
             if any(expression.search(name) for expression in patterns.values()):
                 raise ScanError("탐지 패턴에 일치하는 경로명 — 원문 비공개")
             value = decode(snapshot.read(name))
@@ -189,7 +201,7 @@ def main(default_patterns: str, argv: list[str] | None = None) -> int:
                     findings.extend((name, line, identifier) for line in sorted(lines))
         for name, line, identifier in sorted(findings):
             print(json.dumps({"path": name, "line": line, "rule": identifier}, ensure_ascii=False))
-        print(f"검사 {len(snapshot.selected)}개 파일, 발견 {len(findings)}건, 명시적 예외 {exceptions}건")
+        print(f"검사 {len(selected)}개 파일, 발견 {len(findings)}건, 명시적 예외 {exceptions}건")
         return 1 if findings else 0
     except (ScanError, OSError, ValueError, TypeError, KeyError, IndexError, UnicodeError) as error:
         message = str(error) if isinstance(error, ScanError) else "입력 읽기·형식 오류"

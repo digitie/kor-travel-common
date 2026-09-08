@@ -1,0 +1,121 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+name: common contrast check
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: "호출 저장소에서 보일 job 이름"
+        required: true
+        type: string
+      common-ref:
+        description: "검사기에 사용할 common 태그 또는 40자 commit SHA"
+        required: true
+        type: string
+      tokens-css:
+        description: "canonical tokens.css의 common checkout 기준 상대 경로"
+        required: false
+        default: .kor-travel-common/packages/tokens/tokens.css
+        type: string
+      override-css:
+        description: "호출 저장소 루트 기준 선택 CSS override 경로"
+        required: false
+        default: ''
+        type: string
+      baseline:
+        description: "호출 저장소 루트 기준 선택 대비 baseline 경로"
+        required: false
+        default: ''
+        type: string
+      dark:
+        description: "dark 모드 대비를 검사할지 여부"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: common-contrast-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: ${{ inputs.name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: 호출 저장소 checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: common checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: digitie/kor-travel-common
+          ref: ${{ inputs.common-ref }}
+          path: .kor-travel-common
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Python 설치
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: 입력 경로와 immutable ref 확인
+        env:
+          COMMON_REF: ${{ inputs.common-ref }}
+          TOKENS_CSS: ${{ inputs.tokens-css }}
+          OVERRIDE_CSS: ${{ inputs.override-css }}
+          BASELINE: ${{ inputs.baseline }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$COMMON_REF" =~ ^[0-9a-f]{40}$ || "$COMMON_REF" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$ ]]
+          [[ "$COMMON_REF" != "main" && "$COMMON_REF" != "master" ]]
+          python - "$TOKENS_CSS" "$OVERRIDE_CSS" "$BASELINE" "$GITHUB_WORKSPACE" <<'PY'
+          import sys
+          from pathlib import Path
+
+          root = Path(sys.argv[4]).resolve()
+          for raw, label, required in (
+              (sys.argv[1], "tokens-css", True),
+              (sys.argv[2], "override-css", False),
+              (sys.argv[3], "baseline", False),
+          ):
+              if not raw:
+                  if required:
+                      raise SystemExit(f"{label}이 없습니다")
+                  continue
+              path = Path(raw)
+              if path.is_absolute() or "\\" in raw or any(part in {"", ".", ".."} for part in raw.split("/")):
+                  raise SystemExit(f"{label} 경로가 안전하지 않습니다")
+              resolved = (root / path).resolve()
+              if root not in resolved.parents or not resolved.is_file():
+                  raise SystemExit(f"{label} 파일이 없습니다: {raw}")
+          PY
+
+      - name: 대비 report 실행
+        env:
+          TOKENS_CSS: ${{ inputs.tokens-css }}
+          OVERRIDE_CSS: ${{ inputs.override-css }}
+          BASELINE: ${{ inputs.baseline }}
+          DARK: ${{ inputs.dark }}
+          COMMON_REF: ${{ inputs.common-ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=("$TOKENS_CSS")
+          if [[ -n "$OVERRIDE_CSS" ]]; then args+=("$OVERRIDE_CSS"); fi
+          args+=(--json --step-summary "$GITHUB_STEP_SUMMARY")
+          if [[ -n "$BASELINE" ]]; then args+=(--baseline "$BASELINE"); fi
+          if [[ "$DARK" == "true" ]]; then args+=(--dark); fi
+          python -B -X utf8 .kor-travel-common/tools/kt_contrast.py "${args[@]}"
+          printf '검사 source: `%s`\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          printf 'common ref: `%s`\n' "$COMMON_REF" >> "$GITHUB_STEP_SUMMARY"
