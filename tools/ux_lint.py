@@ -423,9 +423,9 @@ def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
 
     line_start = _markdown_line_start(text, start)
     line_prefix = text[line_start:start]
-    leading = line_prefix.lstrip()
+    leading = line_prefix.lstrip(" \t")
     if leading.startswith(">"):
-        leading = leading[1:].lstrip()
+        leading = leading[1:].lstrip(" \t")
         if not re.search(r"(?:[A-Za-z_$][\w$-]*\s*=\s*\{|<[A-Za-z])", leading):
             return False
     prefix = leading.rstrip()
@@ -452,9 +452,9 @@ def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
         if text[previous_line_end] == "\n" and previous_line_end > 0 and text[previous_line_end - 1] == "\r":
             previous_line_end -= 1
     previous_line_start = _markdown_line_start(text, previous_line_end) if line_start else 0
-    previous_line = text[previous_line_start:previous_line_end].rstrip() if line_start else ""
+    previous_line = text[previous_line_start:previous_line_end].rstrip(" \t") if line_start else ""
     declaration = bool(re.search(r"\b(?:export\s+)?(?:const|let|var)\b", statement)) and "=" in statement
-    if declaration and (line_prefix != line_prefix.lstrip() or re.search(r"(?:=|=>|[([{,:])\s*$", previous_line)):
+    if declaration and (line_prefix != line_prefix.lstrip(" \t") or re.search(r"(?:=|=>|[([{,:])\s*$", previous_line)):
         return True
 
     # MDX ESM/JavaScript 선언의 값 template과 return/template tag도 실행
@@ -505,7 +505,7 @@ def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
     """MDX의 줄 단위 backtick/tilde fence 전체를 공백으로 가린다."""
 
     line_start = _markdown_line_start(text, start)
-    if text[line_start:start].strip():
+    if text[line_start:start].strip(" \t"):
         return "", start
     opener_end = _find_markdown_line_terminator(text, start, len(text))
     opener_run = 0
@@ -517,11 +517,11 @@ def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
     closing = len(text)
     while cursor < len(text):
         next_end = _find_markdown_line_terminator(text, cursor, len(text))
-        candidate = text[cursor:next_end].lstrip()
+        candidate = text[cursor:next_end].lstrip(" \t")
         closing_run = 0
         while closing_run < len(candidate) and candidate[closing_run] == marker:
             closing_run += 1
-        if closing_run >= opener_run and not candidate[closing_run:].strip():
+        if closing_run >= opener_run and not candidate[closing_run:].strip(" \t"):
             closing = _markdown_line_terminator_end(text, next_end)
             break
         cursor = _markdown_line_terminator_end(text, next_end)

@@ -390,6 +390,26 @@ window.confirm('확인');
                     expected,
                 )
 
+    def test_mdx_fence_closing_line_rejects_unicode_nonspace_suffix(self):
+        for suffix, expected in (("\u2028", []), ("\u2029", []), (" ", ["P6"]), ("\t", ["P6"])):
+            with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                root = Path(directory)
+                fixture = root / "fence.mdx"
+                fixture.write_bytes(
+                    (
+                        "~~~tsx\nquoted\n"
+                        f"~~~{suffix}\n"
+                        "<div className=\"outline-none\"/>\n"
+                        "~~~\n"
+                    ).encode("utf-8")
+                )
+                result = self.run_tool(root, "--root", root, "--json")
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(
+                    [item["pattern"] for item in json.loads(result.stdout)["findings"]],
+                    expected,
+                )
+
     def test_escaped_template_text_remains_scannable(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
