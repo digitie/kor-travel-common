@@ -17,7 +17,7 @@ common 안에서 결정·요청 문서만 완료했으며 실제 소비자 저�
 ## 다음 한 작업
 
 - 작업: [T-103](tasks/T-103-kt-contrast-ux-lint.md), IN_PROGRESS(P1). `kt_contrast`·`ux_lint` 구현·회귀 시험·4앱 조사 예제를 작성했고, 두 적대적 reviewer의 독립 검토와 PR/CI/merge gate가 남아 있다.
-- 반복 post-36 이후 [근본 원인 분석](reviews/adversarial/2026-09-08-t103-root-cause.md)에 따라 MDX 문맥 추정 경로를 상태 스택으로 교체하고, 저장소 안 누적 자료·실제 MDX 참조 파서 대조를 추가했다. 최종 불변 후보 검증과 독립 review closure가 다음 단계다.
+- 반복 post-36 이후 상태 스택 교체에서도 정상 MDX 누락·오탐이 남았다. [ADR-016](adr/016-mdx-parser-for-ux-lint.md)에 따라 수동 MDX 파서를 제거하고 실제 MDX 구문 분석에 위임했다. MDX 검사 전에 common 루트에서 `npm ci --ignore-scripts`가 필요하다. 최종 불변 후보 검증과 두 독립 reviewer의 누적 finding 재확인이 다음 단계다.
 - 사용자 재개 지시로 common 구현을 순차 진행한다. npm/PyPI 미게시·다른 저장소 수정 금지와 독립 두 리뷰·PR·CI·병합 경계를 유지한다.
 - T-101은 PR #12로 병합했고, T-102는 PR #15 final2 PASS·candidate CI 성공 후 `4cde7e83910fba08f5b92a3c2f08274297e94223`로 squash merge했다. 초기 draft PR #14의 source와 evidence는 보존했다. 외부 소비자 gate와 실제 release 게시를 수행하지 않는다.
 

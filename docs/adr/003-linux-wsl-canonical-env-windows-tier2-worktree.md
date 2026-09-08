@@ -1,6 +1,6 @@
 # ADR-003: 개발 환경 정본(Linux/WSL)·Windows Tier 2·임시 worktree
 
-- 상태: accepted
+- 상태: partially superseded by ADR-016 — UX의 MDX 검사 실행 의존만 변경
 - 날짜: 2026-09-06
 - 근거 문서: `docs/plan/design-brief.md` D-03·O-17, `docs/survey/cross/docs-conventions.md` §1.11·§1.12·§2 C1·C2·C12, `docs/survey/cross/canview-structure-checklist.md` Q4·Q6·R6.10, `docs/survey/commonality-matrix.md` §1.5(개발 환경 정본 행), canview `docs/adr/003-windows-development-and-ephemeral-worktrees.md`(`1f93b8a`)
 

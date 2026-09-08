@@ -1,6 +1,6 @@
 # tools — 문서·계획 검증 도구
 
-이 디렉터리에는 저장소 문서의 정합성을 파일 변경 없이 검사하는 스크립트만 둔다. 제품 코드 빌드·테스트는 각 `packages/*`의 도구를 따른다.
+이 디렉터리는 문서·계획·소스 규칙과 대비를 입력 파일 변경 없이 검사한다. 제품 코드 빌드·테스트는 각 `packages/*`의 도구를 따른다.
 
 | 스크립트 | 검사 내용 | 실행 |
 |---|---|---|
@@ -17,9 +17,12 @@
 
 `validate_document_links.py`·`validate_plan.py`는 canview 저장소의 동명 도구를 kor-travel-common 경로에 맞게 적응한 것이다. 검사 규칙은 [tasks-rule](../docs/tasks-rule.md)과 [documentation maintenance](../docs/runbooks/documentation-maintenance.md)가 정본이며, 도구가 통과했다는 사실은 제품 gate 통과를 뜻하지 않는다.
 
+MDX UX 검사는 `mdx_mask.mjs`와 잠긴 Node 의존을 함께 사용한다. 파서 미설치·잘못된 MDX는 exit 2이며 원문을 출력하거나 fallback으로 PASS 처리하지 않는다. 분석만 수행하며 사용자 import·표현식·플러그인을 실행하지 않는다. 설치 환경은 [개발 환경](../docs/dev-environment.md#6-검증-명령-사다리), 기존 MDX 호환 동작의 변경은 [ADR-016](../docs/adr/016-mdx-parser-for-ux-lint.md)이 정본이다.
+
 회귀 시험(Linux/WSL; Git Bash·PowerShell에서는 `python`/`py -3`):
 
 ```bash
+npm ci --ignore-scripts
 python3 -B -X utf8 -m unittest discover -s tests -p "test_*.py" -v
 ```
 

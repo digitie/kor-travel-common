@@ -14,7 +14,7 @@
 - [설계 브리프](../plan/design-brief.md) D-12 대비 절(light 쌍 필수·dark는 dark 활성 앱만·report 기본·`contrast-baseline.json` 미달 쌍 + `until`·신규 미달만 fail), D-13(금지 패턴 7종: raw hex/oklch·`text-[Npx]`·`rounded-2xl+`·팔레트 alpha·`outline-none`·`transition-all/colors`·`aria-disabled:opacity-` + `window.confirm`; 전체 report + `--base <sha>` diff fail; baseline 7건), D-30, D-19(매니페스트 `contrast{baseline,dark}`·`ux_gate{baseline}`).
 - ADR-006 — [docs/adr/README.md](../adr/README.md). 규칙 정본은 [design-tokens.md](../standards/design-tokens.md)·[ux-guide.md](../standards/ux-guide.md).
 - [디자인 토큰 조사](../survey/cross/design-tokens.md) §3.4.1(운용 규칙)·§3.4.2(대비 재검증: map 통과, geo 2.29/2.41·concierge 2.06/1.93·ktdm brand 3.59·airport line 1.15 미달)·§3.6.3(`kt-contrast` 역할), [ux 조사](../survey/cross/ux-patterns.md) §2 G0.3(grep 가능한 금지 목록·백틱 인용 제외)·G9.1·G9.4·G9.6·§4 C7(`window.confirm` 잔존 map 2·ktdm 3·kta 1·wx 1), [map 인벤토리](../survey/inventory/kor-travel-map.md) §9(금지 패턴 게이트 미자동화 — common이 제공하면 map이 첫 소비자).
-- stdlib만, Windows 동작(D-03). OKLCH→sRGB 변환은 CSS Color 4 공식 수식을 구현하고 map 문서의 실측 수치와 대조한다.
+- Python 패키지 의존 없이 Windows에서 동작한다. MDX 문법 해석의 Node 의존은 [ADR-016](../adr/016-mdx-parser-for-ux-lint.md)에 따른다(ADR-003의 해당 요구 대체). OKLCH→sRGB 변환은 CSS Color 4 공식 수식을 구현하고 map 문서의 실측 수치와 대조한다.
 
 ## 구현 범위
 
@@ -36,29 +36,26 @@
 
 ### MDX 문맥 검사 기준
 
-반복 리뷰의 문법 추정을 대체하는 실행 기준이다. 제품은 stdlib 패턴 검사기이며 MDX 컴파일 성공을 보증하는 구문 검사기가 아니다. 정상 문서·코드의 검사 제외 범위를 다음처럼 고정한다.
+[ADR-016](../adr/016-mdx-parser-for-ux-lint.md)에 따라 MDX 마스킹은 고정 파서의 code·inlineCode·JavaScript comment 범위를 사용한다. 수동 MDX lexer·fallback은 두지 않는다.
 
-| 입력 문맥 | 진입·종료와 기대 동작 |
+| 입력·실행 | 기대 동작 |
 |---|---|
-| Markdown 본문 | URL, `src/*`, 아포스트로피, `for example,` 등은 JS 주석·문자열을 열지 않는다. 뒤의 JSX·표현식을 계속 검사한다 |
-| fenced code·정상 inline code | 블록 fence의 container·marker·길이·들여쓰기를 먼저 판정한다. 정상 닫힌 문서 인용만 제외하며 미종결 inline delimiter 뒤 본문을 통째로 가리지 않는다 |
-| MDX 표현식·JSX 속성 | escape되지 않은 중괄호에서 JS 문맥에 들어가고 해당 닫힘에서 복귀한다. 주석 앞 공백·Unicode 식별자·중첩·빈 줄이 이 문맥을 초기화하지 않는다 |
-| ESM | 최상위 줄의 `import`·`export`에서 시작한다. default/named export와 여러 줄 import를 포함하고 열린 괄호가 닫히기 전 빈 줄을 문단 종료로 쓰지 않는다 |
-| JS 내부 | 문자열·template·보간식·주석·정규식·JSX 태그의 수명을 구분한다. 주석만 제외하고 실제 패턴 문자열과 template 내용은 검사한다 |
-| 좌표·CLI | 마스킹 전후 길이와 줄 종결자 위치가 같고 `--base`는 기존 finding을 보고하되 추가 행의 finding만 실패시킨다 |
+| 본문·fence·inline code | 실제 MDX AST의 문서 코드만 제외한다. URL·아포스트로피·wildcard로 JS 주석 상태를 추정하지 않는다 |
+| 표현식·ESM·JSX·template·정규식 | 파서가 문맥을 소유한다. JS 주석만 제외하고 문자열·template의 실제 패턴은 검사한다 |
+| 좌표·CLI | Unicode 문자 수와 줄 종결자 위치를 보존한다. `--base`는 기존 finding을 보고하고 추가 행만 실패시킨다 |
+| 실패 | 문법 오류·Node/파서 미설치·실행 실패·시간 초과는 exit 2이며 빈 finding PASS나 부분 성공을 출력하지 않는다. 원문·로컬 경로·stack은 예외에 노출하지 않는다 |
+| 실행 제한 | 구문 분석만 하고 사용자 import·표현식·플러그인을 실행하지 않는다. MDX가 없으면 Node를 호출하지 않는다 |
 
-기존 도구의 최상위 `const/let/var 식별자 =` 예제와 줄 전체 JS 주석은 호환 동작으로 유지한다. 표준 MDX 문법과 동일하다고 주장하지 않는다. 임의의 잘못된 MDX를 복구하거나 MDX 플러그인 문법 전체를 해석하는 것은 이 도구의 역할이 아니며 소비자 컴파일을 대체하지 않는다.
+누적 자료는 `tests/fixtures/ux/mdx-contexts.json`, 문맥·좌표·CLI 시험은 `tests/test_ux_mdx_context.py`다. `tests/verify_mdx_reference.mjs`는 고정 파서의 AST와 저장소 기대값을 대조한다. 이제 제품도 같은 문법 파서를 쓰므로 이 명령을 서로 다른 두 파서의 독립 일치 증거로 표현하지 않는다. 별도 reviewer가 입력과 기대값·adapter 구현을 독립적으로 확인한다. 실제 소비자 compile/render/e2e를 이 검사로 대신하지 않는다.
 
-누적 실행 자료는 `tests/fixtures/ux/mdx-contexts.json`, 시험은 `tests/test_ux_mdx_context.py`다. 기대값을 고정 버전 `@mdx-js/mdx` 3.1.1과 별도 대조하는 `tests/verify_mdx_reference.mjs`는 개발 검증 전용이며 제품 외부 의존 0 조건에 포함되지 않는다. 정상 MDX 대조, 호환 시험, 실행하지 못한 검증은 각각 기록한다. 실제 누락·오탐을 시험 범위에서 제거하는 방법으로 통과시키지 않는다.
-
-문법 근거: [MDX 공식 설명](https://mdxjs.com/docs/what-is-mdx/)(문서 수정 2025-01-27, 조회 2026-09-08)의 표현식·ESM·Markdown 구분과 [CommonMark 0.31.2](https://spec.commonmark.org/0.31.2/)의 block/inline 우선순위를 사용한다. 참조 파서 재현은 공통 저장소에서 `npm install --prefix .git/codex-audit/mdx-oracle --ignore-scripts --no-audit --no-fund @mdx-js/mdx@3.1.1` 후 `node tests/verify_mdx_reference.mjs .git/codex-audit/mdx-oracle/node_modules/@mdx-js/mdx/index.js`로 실행한다. 설치 경로는 검증용 Git 내부 임시 자료이며 배포·커밋 대상이 아니다.
+과거의 본문 `const`·행 `//` 호환 추정과 CommonMark indented code 가정은 제거했다. 여러 줄 JSX fixture는 ESM 뒤 빈 줄과 blockquote continuation을 올바르게 명시한다. 변경된 시험의 기대는 [ADR-016의 문법·이관 근거](../adr/016-mdx-parser-for-ux-lint.md)에 따르며 실제 미달을 제거하거나 문법이 잘못된 파일을 통과시키지 않는다. 설치·Windows/WSL 실행은 [개발 환경 §6](../dev-environment.md#6-검증-명령-사다리)를 따른다.
 
 ### 최종 확인
 
 - map 기본값(`tokens.css` 단독)에서 `kt_contrast` 전 쌍 통과(exit 0), 변환값이 map 문서 실측과 ±0.05 이내.
-- 4앱 예제에서 조사 문서의 미달(ktdm brand 3.59, concierge 2.06/1.93, geo 2.29/2.41)이 재현되고 baseline 등록 시 `--fail-new`가 exit 0, baseline `until` 만료 fixture는 exit 1. Airport line은 기존 조사 스냅샷의 선형 합성 값 1.15를 보존하되, 현재 결정된 CSS sRGB source-over 계산의 수용 기준을 1.32(실측 1.320934, 오차 ±0.05)로 둔다.
+- 4앱 light 예제에서 조사 문서의 미달(ktdm brand 3.59, concierge 2.06/1.93, geo 2.29/2.41)이 재현되고 baseline 등록 시 `--fail-new`가 exit 0, baseline `until` 만료 fixture는 exit 1. Airport line은 기존 조사 스냅샷의 선형 합성 값 1.15를 보존하되, 현재 결정된 CSS sRGB source-over 계산의 수용 기준을 1.32(실측 1.320934, 오차 ±0.05)로 둔다.
 - `ux_lint` fixture에서 7 패턴 + `window.confirm` 각각 양성 1·음성(백틱 인용) 1이 기대대로 판정되고, `--base`는 추가 행만 fail한다.
-- 두 도구 모두 `--json`·step summary 출력, Linux·Windows 결과 동일, 외부 의존 0.
+- 두 도구 모두 `--json`·step summary 출력, Linux·Windows 결과 동일. 대비와 비-MDX UX 경로는 stdlib 단독이며 MDX 실행 의존은 ADR-016에 따른다.
 - 검사기 정상·대비 미달 fixture가 재사용 워크플로에서 호출 가능한 CLI 계약을 검증한다. 워크플로 자체 selftest는 후행 T-010이 소유하며 이 task의 완료 선행이 아니다.
 
 ## 검증 명령
@@ -76,6 +73,10 @@ Git Bash에서 동일.
 ## evidence
 
 - 테스트 수·exit code·4앱 결과 표·변환 검증 표를 이 절과 `docs/journal.md`에 남긴다. 실제 앱 저장소에서의 실행은 각 이관 task evidence이며 여기서는 `NOT_RUN(앱 task)`.
+
+## 외부 선행
+
+- 실제 소비자 build/e2e·baseline 등록은 해당 이관 task 소유다. Airport dark 예제는 현재 10미달·예외 후 신규 6건으로 FAIL이며 [정정 evidence](../evidence/t103-kt-contrast-ux-lint.md)를 유지한다. 실제 dark 토큰·baseline 확정과 배포 gate는 T-431에서 검증하며 common 도구 완료로 닫지 않는다.
 
 ## rollback 또는 release 차단 조건
 

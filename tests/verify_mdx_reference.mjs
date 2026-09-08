@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
-// 고정 참조 파서로 회귀 자료의 기대값을 검증한다. 제품 런타임 의존은 아니다.
+// 고정 MDX 파서로 회귀 자료의 기대값을 검증한다. 제품도 같은 문법 파서를 쓴다.
 import {readFileSync} from 'node:fs';
 import {resolve, dirname} from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -12,10 +12,6 @@ const {createProcessor} = await import(pathToFileURL(entry));
 const corpus = JSON.parse(readFileSync(new URL('./fixtures/ux/mdx-contexts.json', import.meta.url), 'utf8'));
 const results = [];
 for (const item of corpus.cases) {
-  if (item.reference === 'compatibility') {
-    results.push({id: item.id, status: 'NOT_RUN', reason: '표준 MDX 밖의 기존 호환 동작'});
-    continue;
-  }
   for (const prefix of item.prefixes ?? ['', '> ', '>> ']) {
     for (const separator of ['\n', '\r\n', '\r']) {
       const source = item.source.split('\n').map(line => prefix + line).join(separator);
@@ -55,4 +51,4 @@ for (const item of corpus.cases) {
   }
 }
 console.log(JSON.stringify({version, total: results.length, passed: results.filter(r => r.status === 'PASS').length, other: results.filter(r => r.status !== 'PASS')}, null, 2));
-process.exitCode = results.some(r => !['PASS', 'NOT_RUN'].includes(r.status)) ? 1 : 0;
+process.exitCode = results.some(r => r.status !== 'PASS') ? 1 : 0;

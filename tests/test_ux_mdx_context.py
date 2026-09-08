@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from tools import ux_lint
 
@@ -59,25 +60,29 @@ class MdxContextTests(unittest.TestCase):
 
     def test_context_corpus_and_coordinate_preservation(self):
         cases = json.loads(CORPUS.read_text(encoding="utf-8"))["cases"]
+        variants = []
         for case in cases:
             for separator in ("\n", "\r\n", "\r"):
                 for prefix in case.get("prefixes", ("", "> ", ">> ")):
                     source = separator.join(prefix + line for line in case["source"].split("\n"))
-                    with self.subTest(case=case["id"], separator=repr(separator), prefix=prefix):
-                        masked = ux_lint._mask_comments_and_backticks(source, True)
-                        self.assertEqual(len(masked), len(source))
-                        for offset, char in enumerate(source):
-                            if char in "\r\n\u2028\u2029":
-                                self.assertEqual(masked[offset], char)
-                        findings = sorted(
-                            (match.start(), name)
-                            for name, _, pattern in ux_lint.COMPILED_PATTERNS
-                            if name != "P4b"
-                            for match in pattern.finditer(masked)
-                        )
-                        self.assertEqual([name for _, name in findings], case["expected"])
+                    variants.append((case, separator, prefix, source))
+        masks = ux_lint.mask_mdx_sources([source for _, _, _, source in variants])
+        for (case, separator, prefix, source), masked in zip(variants, masks):
+            with self.subTest(case=case["id"], separator=repr(separator), prefix=prefix):
+                self.assertEqual(len(masked), len(source))
+                for offset, char in enumerate(source):
+                    if char in "\r\n\u2028\u2029":
+                        self.assertEqual(masked[offset], char)
+                findings = sorted(
+                    (match.start(), name)
+                    for name, _, pattern in ux_lint.COMPILED_PATTERNS
+                    if name != "P4b"
+                    for match in pattern.finditer(masked)
+                )
+                self.assertEqual([name for _, name in findings], case["expected"])
 
     def test_inline_delimiter_lengths_and_document_punctuation(self):
+        sources = []
         for run in range(1, 5):
             for separator in ("\n", "\r\n", "\r"):
                 for word in ("for example,", "don't", '"문장', "https://example.invalid", "src/*"):
@@ -91,9 +96,51 @@ class MdxContextTests(unittest.TestCase):
                             marker,
                             "{ /* window.confirm('주석') */ }",
                         ])
-                        with self.subTest(run=run, word=word, marker=marker, separator=repr(separator)):
-                            masked = ux_lint._mask_comments_and_backticks(source, True)
-                            self.assertEqual(masked.count("window.confirm"), 1)
+                        sources.append(source)
+        for source, masked in zip(sources, ux_lint.mask_mdx_sources(sources)):
+            self.assertEqual(masked.count("window.confirm"), 1, source)
+
+    def test_invalid_mdx_is_input_error_without_partial_success_or_source(self):
+        with tempfile.TemporaryDirectory(prefix="kt-mdx-invalid-") as directory:
+            root = Path(directory)
+            (root / "valid.mdx").write_text('{window.confirm("실행")}\n', encoding="utf-8")
+            (root / "invalid.mdx").write_text("export const PRIVATE_SOURCE_MARKER =", encoding="utf-8")
+            result = subprocess.run(
+                [sys.executable, "-B", "-X", "utf8", str(Path(ux_lint.__file__).resolve()), "--root", str(root), "--json"],
+                capture_output=True, text=True, encoding="utf-8",
+            )
+            self.assertEqual(result.returncode, 2)
+            self.assertEqual(result.stdout, "")
+            self.assertNotIn("PRIVATE_SOURCE_MARKER", result.stderr)
+            self.assertNotIn(directory, result.stderr)
+            self.assertNotIn("Traceback", result.stderr)
+
+    def test_node_is_only_required_when_mdx_is_present(self):
+        with patch.object(ux_lint.shutil, "which", return_value=None):
+            self.assertEqual(ux_lint.mask_mdx_sources([]), [])
+            self.assertIn("outline-none", ux_lint._mask_comments_and_backticks('const value = "outline-none";', False))
+            with self.assertRaisesRegex(ux_lint.UxLintError, "Node.js"):
+                ux_lint.mask_mdx_sources(['{window.confirm("실행")}'])
+
+    def test_parser_failure_and_coordinate_drift_cannot_report_success(self):
+        source = "문서\n😀"
+        for stdout, returncode in (
+            ('[]', 0),
+            ('[{"masked": "문서 😀"}]', 0),
+            ('[{"masked": "문서\\n  "}]', 0),
+            ('[{"error": "INVALID_MDX"}]', 0),
+            ('원문이 섞인 잘못된 출력', 0),
+            ('[]', 2),
+        ):
+            with self.subTest(stdout=stdout, returncode=returncode):
+                result = subprocess.CompletedProcess([], returncode, stdout, "PRIVATE_SOURCE_MARKER")
+                with patch.object(ux_lint.subprocess, "run", return_value=result):
+                    with self.assertRaises(ux_lint.UxLintError) as error:
+                        ux_lint.mask_mdx_sources([source])
+                    self.assertNotIn("PRIVATE_SOURCE_MARKER", str(error.exception))
+        with patch.object(ux_lint.subprocess, "run", side_effect=subprocess.TimeoutExpired("node", 30)):
+            with self.assertRaises(ux_lint.UxLintError):
+                ux_lint.mask_mdx_sources([source])
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@
 ## 1. 실행 원칙
 
 - common의 정본 개발 환경은 Linux/WSL bash다. CI는 GitHub Actions ubuntu이며 러너는 `ubuntu-24.04`다. `.github/workflows/docs.yml`은 Python 3.11·고정 액션 SHA·읽기 권한으로 실행하며, `tools`는 `windows-2025`도 검증한다(T-009). 실제 CI 결과는 상세 task evidence를 따른다.
-- Windows 지원은 Tier 2다 — 열림(사용자 확인 필요, O-17; 기본값 Tier 2). `tools/*.py`(문서 validator 2종·`check_versions`·`kt_contrast`·`ux_lint`·`check_spdx`)는 Windows Python 3.11+ 표준 라이브러리에서 동작해야 하고, CI `tools` job이 ubuntu+windows 매트릭스로 보증한다(T-009). 패키지 빌드·`consumer-smoke`는 ubuntu에서만 실행한다.
+- Windows 지원은 Tier 2다 — 열림(사용자 확인 필요, O-17; 기본값 Tier 2). `tools/*.py`는 Windows Python 3.11+ 표준 라이브러리에서 동작하며 `ux_lint`의 MDX 검사만 [ADR-016](adr/016-mdx-parser-for-ux-lint.md)에 따라 Node와 잠긴 파서를 추가로 요구한다. CI `tools` job이 ubuntu+windows 매트릭스로 보증한다(T-009). 패키지 빌드·`consumer-smoke`는 ubuntu에서만 실행한다.
 - runbook·task·journal의 명령은 bash 표기 한 벌(`python3 -B -X utf8 …`, `uv run …`, `npm …`)로 쓰고 "Git Bash에서 동일" 한 줄만 덧붙인다. PowerShell 블록은 두지 않는다. Windows 전용 표기는 이 문서 §5에만 둔다.
 - 근거: 소비자 7개 중 6개가 Linux/WSL을 정본으로 선언하고(`docs/survey/cross/docs-conventions.md` §1.11·§2 C1), 전 앱 CI가 ubuntu이며(`docs/survey/cross/version-matrix.md` §3.2), 현재 유지자 환경은 Windows다(`docs/survey/cross/canview-structure-checklist.md` §5 Q4). canview는 Windows PowerShell 정본이지만 그 논거 중 OS와 무관한 부분(임시 worktree 정리)만 §3에서 채택한다.
 
@@ -64,6 +64,8 @@ Windows에서 통과한 결과는 §6의 1·2층(문서·도구)에만 유효하
 ## 6. 검증 명령 사다리
 
 변경 범위에 맞는 층만 실행한다. 실제로 실행한 층만 통과로 기록하고 하위 층을 상위 층 결과로 대체하지 않는다(`AGENTS.md` §8). 검증 도구가 통과했다는 사실은 제품 gate 통과를 뜻하지 않는다([tools](../tools/README.md)).
+
+전체 unittest와 MDX UX 검사는 common 루트에서 `npm ci --ignore-scripts`로 잠긴 개발 의존을 먼저 설치한다. 새 detached review worktree에서도 동일하다. 검사 대상 소비자 안에서는 설치하지 않는다. MDX를 검사할 때 Node·파서가 없거나 문법 분석에 실패하면 exit 2이며 stdlib fallback은 없다. MDX가 없는 UX 검사와 나머지 Python 도구는 Node 없이 실행할 수 있다([ADR-016](adr/016-mdx-parser-for-ux-lint.md)).
 
 | 층 | 대상 | 명령(bash; Git Bash 동일) | CI job(D-18) |
 |---|---|---|---|

@@ -121,10 +121,10 @@ window.confirm('확인');
                 "      `outline-none`\n"
                 "    }\n"
                 "  />\n"
-                ");\n"
+                ");\n\n"
                 "> <div className={\n"
-                "  classes`outline-none`\n"
-                "} />\n",
+                ">   classes`outline-none`\n"
+                "> } />\n",
                 encoding="utf-8",
             )
             result = self.run_tool(root, "--root", root, "--json")
@@ -410,8 +410,9 @@ window.confirm('확인');
                     expected,
                 )
 
-    def test_mdx_fence_closing_line_allows_at_most_three_indent_columns(self):
-        for indent, expected in (("", ["P6"]), (" ", ["P6"]), ("   ", ["P6"]), ("    ", []), ("\t", []), (" \t", [])):
+    def test_mdx_fence_closing_line_allows_indent_without_indented_code(self):
+        # MDX는 CommonMark의 indented code를 비활성화한다(ADR-016).
+        for indent, expected in (("", ["P6"]), (" ", ["P6"]), ("   ", ["P6"]), ("    ", ["P6"]), ("\t", ["P6"]), (" \t", ["P6"])):
             with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
                 root = Path(directory)
                 fixture = root / "fence.mdx"
@@ -533,8 +534,8 @@ window.confirm('확인');
                             ).encode("utf-8")
                         )
                         result = self.run_tool(root, "--root", root, "--fail-new", "--json")
-                        self.assertEqual(result.returncode, 0, result.stderr)
-                        self.assertEqual(json.loads(result.stdout)["findings"], [])
+                        self.assertEqual(result.returncode, 1, result.stderr)
+                        self.assertEqual([item["pattern"] for item in json.loads(result.stdout)["findings"]], ["P8"])
 
     def test_mdx_invalid_backtick_info_stops_before_an_intermediate_fence(self):
         for prefix in ("", "> ", ">> "):
@@ -584,8 +585,8 @@ window.confirm('확인');
                 result = self.run_tool(root, "--root", root, "--fail-new", "--json")
                 self.assertEqual(result.returncode, 1, result.stderr)
                 findings = json.loads(result.stdout)["findings"]
-                self.assertEqual([item["file"] for item in findings], ["prose.mdx"])
-                self.assertEqual([item["pattern"] for item in findings], ["P8"])
+                self.assertEqual([item["file"] for item in findings], ["prose.mdx", "short-run.mdx"])
+                self.assertEqual([item["pattern"] for item in findings], ["P8", "P8"])
 
     def test_mdx_inline_runs_stop_at_intermediate_block_fence(self):
         for prefix in ("", "> ", ">> "):
@@ -639,8 +640,8 @@ window.confirm('확인');
                 result = self.run_tool(root, "--root", root, "--fail-new", "--json")
                 self.assertEqual(result.returncode, 1, result.stderr)
                 findings = json.loads(result.stdout)["findings"]
-                self.assertEqual([item["file"] for item in findings], ["normal-inline.mdx"])
-                self.assertEqual([item["pattern"] for item in findings], ["P8"])
+                self.assertEqual([item["file"] for item in findings], ["normal-inline.mdx", "short-inline.mdx"])
+                self.assertEqual([item["pattern"] for item in findings], ["P8", "P8"])
 
     def test_mdx_inline_opener_preserves_same_line_patterns_before_fence(self):
         for prefix in ("", "> ", ">> "):
@@ -856,9 +857,9 @@ window.confirm('확인');
                 ("    ", ["P6"]),
                 ("\t", ["P6"]),
                 (" \t", ["P6"]),
-                ("     ", []),
-                ("\t\t", []),
-                (" \t\t", []),
+                ("     ", ["P6"]),
+                ("\t\t", ["P6"]),
+                (" \t\t", ["P6"]),
             ):
                 fixture = root / "indent.mdx"
                 fixture.write_bytes(
@@ -887,12 +888,11 @@ window.confirm('확인');
                 encoding="utf-8",
             )
             result = self.run_tool(root, "--root", root, "--fail-new", "--json")
-            self.assertEqual(result.returncode, 1, result.stderr)
-            self.assertEqual([item["pattern"] for item in json.loads(result.stdout)["findings"]], ["P6"])
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["findings"], [])
 
     def test_mdx_blockquote_fence_padding_keeps_p8_after_valid_closing(self):
-        valid_padding = ("", " ", "   ", "    ", "\t", " \t")
-        invalid_padding = ("     ", "\t\t", " \t\t")
+        valid_padding = ("", " ", "   ", "    ", "\t", " \t", "     ", "\t\t", " \t\t")
         for marker in ("~~~", "```"):
             for padding in valid_padding:
                 with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
@@ -908,21 +908,7 @@ window.confirm('확인');
                     self.assertEqual(result.returncode, 1, result.stderr)
                     findings = json.loads(result.stdout)["findings"]
                     self.assertEqual([item["pattern"] for item in findings], ["P8"])
-            for padding in invalid_padding:
-                with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
-                    root = Path(directory)
-                    fixture = root / "padding.mdx"
-                    fixture.write_bytes(
-                        (
-                            f"> {marker}tsx\n> quoted\n>{padding}{marker}\n"
-                            "> {window.confirm(\"inside\")}\n"
-                        ).encode("utf-8")
-                    )
-                    result = self.run_tool(root, "--root", root, "--fail-new", "--json")
-                    self.assertEqual(result.returncode, 0, result.stderr)
-                    self.assertEqual(json.loads(result.stdout)["findings"], [])
-
-    def test_mdx_blockquote_fence_rejects_overindented_nested_marker(self):
+    def test_mdx_blockquote_fence_keeps_indented_nested_marker_in_container(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
             fixture = root / "nested.mdx"
@@ -931,9 +917,9 @@ window.confirm('확인');
                 encoding="utf-8",
             )
             result = self.run_tool(root, "--root", root, "--fail-new", "--json")
-            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertEqual(result.returncode, 0, result.stderr)
             findings = json.loads(result.stdout)["findings"]
-            self.assertEqual([item["pattern"] for item in findings], ["P8"])
+            self.assertEqual(findings, [])
 
     def test_escaped_template_text_remains_scannable(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:

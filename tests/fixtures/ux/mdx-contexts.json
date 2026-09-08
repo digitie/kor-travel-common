@@ -379,7 +379,9 @@
     },
     {
       "id": "ESM-32",
-      "prefixes": [""],
+      "prefixes": [
+        ""
+      ],
       "source": "export default Layout // window.confirm(\"주석\")\n\n{window.confirm(\"x\")}\n",
       "expected": [
         "P8"
@@ -390,7 +392,9 @@
     },
     {
       "id": "ESM-33",
-      "prefixes": [""],
+      "prefixes": [
+        ""
+      ],
       "source": "export default () => null // window.confirm(\"주석\")\n\n{window.confirm(\"x\")}\n",
       "expected": [
         "P8"
@@ -401,7 +405,9 @@
     },
     {
       "id": "ESM-34",
-      "prefixes": [""],
+      "prefixes": [
+        ""
+      ],
       "source": "export { value } from \"./module.js\"; // window.confirm(\"주석\")\n\n{window.confirm(\"x\")}\n",
       "expected": [
         "P8"
@@ -412,7 +418,9 @@
     },
     {
       "id": "ESM-35",
-      "prefixes": [""],
+      "prefixes": [
+        ""
+      ],
       "source": "export const value = 1; // window.confirm(\"주석\")\n\n{window.confirm(\"x\")}\n",
       "expected": [
         "P8"
@@ -433,7 +441,9 @@
     },
     {
       "id": "빈줄-37",
-      "prefixes": [""],
+      "prefixes": [
+        ""
+      ],
       "source": "import {\n\nvalue // window.confirm(\"주석\")\n} from \"./module.js\";\n\n{window.confirm(\"x\")}",
       "expected": [
         "P8"
@@ -515,20 +525,19 @@
       "findings": []
     },
     {
-      "id": "선언-호환",
-      "prefixes": [""],
-      "reference": "compatibility",
-      "source": "const value = `outline-none ${ /* window.confirm(\"주석\") */ value }`;\n",
-      "expected": [
-        "P6"
+      "id": "선언처럼-보이는-본문",
+      "prefixes": [
+        ""
       ],
+      "source": "const value = `outline-none ${ /* window.confirm(\"주석\") */ value }`;\n",
+      "expected": [],
       "findings": []
     },
     {
-      "id": "행주석-호환",
-      "reference": "compatibility",
+      "id": "slash-행은-본문",
       "source": "// window.confirm(\"주석\")\n{window.confirm(\"x\")}",
       "expected": [
+        "P8",
         "P8"
       ],
       "findings": []
@@ -536,9 +545,169 @@
     {
       "id": "인용-ESM은-본문",
       "source": "> export default Layout // window.confirm(\"문장\")\n\n{window.confirm(\"실행\")}\n",
-      "prefixes": [""],
-      "expected": ["P8", "P8"],
-      "findings": ["A-P2-33"]
+      "prefixes": [
+        ""
+      ],
+      "expected": [
+        "P8",
+        "P8"
+      ],
+      "findings": [
+        "A-P2-33"
+      ]
+    },
+    {
+      "id": "ESM-다음줄-삼항",
+      "source": "export const a = true\n? `window.confirm(\"문자열\")`\n: null\n\n본문",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "A-P1-35"
+      ],
+      "prefixes": [
+        ""
+      ]
+    },
+    {
+      "id": "ESM-다음줄-chain",
+      "source": "export const a = value\n.map(() => `window.confirm(\"문자열\")`)\n\n본문",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "A-P1-35"
+      ],
+      "prefixes": [
+        ""
+      ]
+    },
+    {
+      "id": "ESM-다음줄-instanceof",
+      "source": "export const a = value instanceof\nString.raw`window.confirm(\"문자열\")`\n\n본문",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "A-P1-35"
+      ],
+      "prefixes": [
+        ""
+      ]
+    },
+    {
+      "id": "ESM-함수-빈줄",
+      "source": "export function a\n\n(/* window.confirm(\"주석\") */ x = `outline-none`) {return x}\n\n본문",
+      "expected": [
+        "P6"
+      ],
+      "findings": [
+        "A-P1-35"
+      ],
+      "prefixes": [
+        ""
+      ]
+    },
+    {
+      "id": "ESM-클래스-빈줄",
+      "source": "export class A extends B\n\n{method() { return `window.confirm(\"문자열\")` }}\n\n본문",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "A-P1-35"
+      ],
+      "prefixes": [
+        ""
+      ]
+    },
+    {
+      "id": "비교-뒤-주석-fence",
+      "source": "{a<b /* window.confirm(\"주석\") */}\n\n~~~js\nwindow.confirm(\"문서\")\n~~~",
+      "expected": [],
+      "findings": [
+        "A-P2-36",
+        "B-P2-31"
+      ]
+    },
+    {
+      "id": "비교-삼항",
+      "source": "{1<a ? null : null}\n\n~~~js\nwindow.confirm(\"문서\")\n~~~",
+      "expected": [],
+      "findings": [
+        "A-P2-36",
+        "B-P2-31"
+      ]
+    },
+    {
+      "id": "in-뒤-정규식",
+      "source": "{\"test\" in /}/ && `outline-none`}",
+      "expected": [
+        "P6"
+      ],
+      "findings": [
+        "B-P1-30"
+      ]
+    },
+    {
+      "id": "instanceof-뒤-정규식",
+      "source": "{value instanceof /}/ && `outline-none`}",
+      "expected": [
+        "P6"
+      ],
+      "findings": [
+        "B-P1-30"
+      ]
+    },
+    {
+      "id": "제어문-뒤-정규식",
+      "source": "{(() => {if (value) /}/.test(`outline-none`); return null})()}",
+      "expected": [
+        "P6"
+      ],
+      "findings": [
+        "B-P1-30"
+      ]
+    },
+    {
+      "id": "postfix-나눗셈-정규식",
+      "source": "{value++ / /}/.source.length && `outline-none`}",
+      "expected": [
+        "P6"
+      ],
+      "findings": [
+        "B-P1-30"
+      ]
+    },
+    {
+      "id": "emoji-마스킹-좌표",
+      "source": "`😀 outline-none` {/* 😀 window.confirm(\"주석\") */} {window.confirm(\"실행\")}",
+      "expected": [
+        "P8"
+      ],
+      "findings": []
+    },
+    {
+      "id": "본문-복귀-인용",
+      "source": "export const value = 1\n\n`window.confirm(\"인용\")`\n\n{window.confirm(\"실행\")}",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "A-P1-35"
+      ],
+      "prefixes": [
+        ""
+      ]
+    },
+    {
+      "id": "구문분석-실행금지",
+      "source": "export const value = (() => { throw new Error(\"실행 금지\"); })()\n\n`outline-none`",
+      "expected": [],
+      "findings": [],
+      "prefixes": [
+        ""
+      ]
     }
   ]
 }
