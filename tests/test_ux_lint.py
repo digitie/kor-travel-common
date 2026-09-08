@@ -449,6 +449,26 @@ window.confirm('확인');
                     ["P8"],
                 )
 
+    def test_mdx_invalid_backtick_info_does_not_hide_next_fence_paragraph(self):
+        for prefix in ("", "> ", ">> "):
+            for separator in ("\n", "\r\n", "\r"):
+                with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                    root = Path(directory)
+                    fixture = root / "invalid-info.mdx"
+                    fixture.write_bytes(
+                        (
+                            f"{prefix}```bad`info{separator}"
+                            f"{prefix}{{window.confirm(\"x\")}}{separator}"
+                            f"{prefix}```{separator}"
+                        ).encode("utf-8")
+                    )
+                    result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                    self.assertEqual(result.returncode, 1, result.stderr)
+                    self.assertEqual(
+                        [item["pattern"] for item in json.loads(result.stdout)["findings"]],
+                        ["P8"],
+                    )
+
     def test_mdx_tilde_info_string_allows_backtick(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
