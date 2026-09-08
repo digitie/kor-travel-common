@@ -34,6 +34,27 @@
 
 ## 수용 기준
 
+### MDX 문맥 검사 기준
+
+반복 리뷰의 문법 추정을 대체하는 실행 기준이다. 제품은 stdlib 패턴 검사기이며 MDX 컴파일 성공을 보증하는 구문 검사기가 아니다. 정상 문서·코드의 검사 제외 범위를 다음처럼 고정한다.
+
+| 입력 문맥 | 진입·종료와 기대 동작 |
+|---|---|
+| Markdown 본문 | URL, `src/*`, 아포스트로피, `for example,` 등은 JS 주석·문자열을 열지 않는다. 뒤의 JSX·표현식을 계속 검사한다 |
+| fenced code·정상 inline code | 블록 fence의 container·marker·길이·들여쓰기를 먼저 판정한다. 정상 닫힌 문서 인용만 제외하며 미종결 inline delimiter 뒤 본문을 통째로 가리지 않는다 |
+| MDX 표현식·JSX 속성 | escape되지 않은 중괄호에서 JS 문맥에 들어가고 해당 닫힘에서 복귀한다. 주석 앞 공백·Unicode 식별자·중첩·빈 줄이 이 문맥을 초기화하지 않는다 |
+| ESM | 최상위 줄의 `import`·`export`에서 시작한다. default/named export와 여러 줄 import를 포함하고 열린 괄호가 닫히기 전 빈 줄을 문단 종료로 쓰지 않는다 |
+| JS 내부 | 문자열·template·보간식·주석·정규식·JSX 태그의 수명을 구분한다. 주석만 제외하고 실제 패턴 문자열과 template 내용은 검사한다 |
+| 좌표·CLI | 마스킹 전후 길이와 줄 종결자 위치가 같고 `--base`는 기존 finding을 보고하되 추가 행의 finding만 실패시킨다 |
+
+기존 도구의 최상위 `const/let/var 식별자 =` 예제와 줄 전체 JS 주석은 호환 동작으로 유지한다. 표준 MDX 문법과 동일하다고 주장하지 않는다. 임의의 잘못된 MDX를 복구하거나 MDX 플러그인 문법 전체를 해석하는 것은 이 도구의 역할이 아니며 소비자 컴파일을 대체하지 않는다.
+
+누적 실행 자료는 `tests/fixtures/ux/mdx-contexts.json`, 시험은 `tests/test_ux_mdx_context.py`다. 기대값을 고정 버전 `@mdx-js/mdx` 3.1.1과 별도 대조하는 `tests/verify_mdx_reference.mjs`는 개발 검증 전용이며 제품 외부 의존 0 조건에 포함되지 않는다. 정상 MDX 대조, 호환 시험, 실행하지 못한 검증은 각각 기록한다. 실제 누락·오탐을 시험 범위에서 제거하는 방법으로 통과시키지 않는다.
+
+문법 근거: [MDX 공식 설명](https://mdxjs.com/docs/what-is-mdx/)(문서 수정 2025-01-27, 조회 2026-09-08)의 표현식·ESM·Markdown 구분과 [CommonMark 0.31.2](https://spec.commonmark.org/0.31.2/)의 block/inline 우선순위를 사용한다. 참조 파서 재현은 공통 저장소에서 `npm install --prefix .git/codex-audit/mdx-oracle --ignore-scripts --no-audit --no-fund @mdx-js/mdx@3.1.1` 후 `node tests/verify_mdx_reference.mjs .git/codex-audit/mdx-oracle/node_modules/@mdx-js/mdx/index.js`로 실행한다. 설치 경로는 검증용 Git 내부 임시 자료이며 배포·커밋 대상이 아니다.
+
+### 최종 확인
+
 - map 기본값(`tokens.css` 단독)에서 `kt_contrast` 전 쌍 통과(exit 0), 변환값이 map 문서 실측과 ±0.05 이내.
 - 4앱 예제에서 조사 문서의 미달(ktdm brand 3.59, concierge 2.06/1.93, geo 2.29/2.41)이 재현되고 baseline 등록 시 `--fail-new`가 exit 0, baseline `until` 만료 fixture는 exit 1. Airport line은 기존 조사 스냅샷의 선형 합성 값 1.15를 보존하되, 현재 결정된 CSS sRGB source-over 계산의 수용 기준을 1.32(실측 1.320934, 오차 ±0.05)로 둔다.
 - `ux_lint` fixture에서 7 패턴 + `window.confirm` 각각 양성 1·음성(백틱 인용) 1이 기대대로 판정되고, `--base`는 추가 행만 fail한다.

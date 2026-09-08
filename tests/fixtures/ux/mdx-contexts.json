@@ -1,0 +1,544 @@
+{
+  "description": "T-103 문맥 전환 회귀 자료. expected는 소스 순서의 규칙 ID이며, findings 필드는 최초 원본 finding과 연결한다.",
+  "cases": [
+    {
+      "id": "본문-0",
+      "source": "Example `literal https://example.invalid <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-1",
+      "source": "Example `literal // 문장 <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-2",
+      "source": "Example `literal src/* <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-3",
+      "source": "Example `literal don't <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-4",
+      "source": "Example `literal \"문장 <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-5",
+      "source": "for example, `literal https://example.invalid <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-6",
+      "source": "for example, `literal // 문장 <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-7",
+      "source": "for example, `literal src/* <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-8",
+      "source": "for example, `literal don't <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-9",
+      "source": "for example, `literal \"문장 <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-10",
+      "source": "if needed, `literal https://example.invalid <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-11",
+      "source": "if needed, `literal // 문장 <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-12",
+      "source": "if needed, `literal src/* <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-13",
+      "source": "if needed, `literal don't <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-14",
+      "source": "if needed, `literal \"문장 <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-15",
+      "source": "return policy: `literal https://example.invalid <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-16",
+      "source": "return policy: `literal // 문장 <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-17",
+      "source": "return policy: `literal src/* <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-18",
+      "source": "return policy: `literal don't <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "본문-19",
+      "source": "return policy: `literal \"문장 <div className=\"outline-none\"/> {window.confirm(\"x\")}\n~~~js\nclose `\n~~~\n",
+      "expected": [
+        "P6",
+        "P8"
+      ],
+      "findings": [
+        "A-P1-31",
+        "A-P1-32",
+        "B-P1-28"
+      ]
+    },
+    {
+      "id": "fence-20",
+      "source": "for example, `don't\n~~~js\n{window.confirm(\"x\")}\nclose `\n~~~\n",
+      "expected": [],
+      "findings": [
+        "B-P2-27"
+      ]
+    },
+    {
+      "id": "fence-21",
+      "source": "for example, `\"문장\n~~~js\n{window.confirm(\"x\")}\nclose `\n~~~\n",
+      "expected": [],
+      "findings": [
+        "B-P2-27"
+      ]
+    },
+    {
+      "id": "주석-22",
+      "source": "Example `don't\n{/* <div className=\"outline-none\"/> {window.confirm(\"x\")} */}\n~~~js\nclose `\n~~~\n",
+      "expected": [],
+      "findings": [
+        "A-P2-29",
+        "A-P2-30",
+        "B-P2-29"
+      ]
+    },
+    {
+      "id": "주석후실행-23",
+      "source": "Example `literal\n{/* <div className=\"outline-none\"/> {window.confirm(\"x\")} */ window.confirm(\"x\") }\n",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "B-P2-29"
+      ]
+    },
+    {
+      "id": "주석-24",
+      "source": "Example `don't\n{ /* <div className=\"outline-none\"/> {window.confirm(\"x\")} */}\n~~~js\nclose `\n~~~\n",
+      "expected": [],
+      "findings": [
+        "A-P2-29",
+        "A-P2-30",
+        "B-P2-29"
+      ]
+    },
+    {
+      "id": "주석후실행-25",
+      "source": "Example `literal\n{ /* <div className=\"outline-none\"/> {window.confirm(\"x\")} */ window.confirm(\"x\") }\n",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "B-P2-29"
+      ]
+    },
+    {
+      "id": "주석-26",
+      "source": "Example `don't\n{\t/* <div className=\"outline-none\"/> {window.confirm(\"x\")} */}\n~~~js\nclose `\n~~~\n",
+      "expected": [],
+      "findings": [
+        "A-P2-29",
+        "A-P2-30",
+        "B-P2-29"
+      ]
+    },
+    {
+      "id": "주석후실행-27",
+      "source": "Example `literal\n{\t/* <div className=\"outline-none\"/> {window.confirm(\"x\")} */ window.confirm(\"x\") }\n",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "B-P2-29"
+      ]
+    },
+    {
+      "id": "주석-28",
+      "source": "Example `don't\n{\n/* <div className=\"outline-none\"/> {window.confirm(\"x\")} */}\n~~~js\nclose `\n~~~\n",
+      "expected": [],
+      "findings": [
+        "A-P2-29",
+        "A-P2-30",
+        "B-P2-29"
+      ]
+    },
+    {
+      "id": "주석후실행-29",
+      "source": "Example `literal\n{\n/* <div className=\"outline-none\"/> {window.confirm(\"x\")} */ window.confirm(\"x\") }\n",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "B-P2-29"
+      ]
+    },
+    {
+      "id": "주석-30",
+      "source": "Example `don't\n{\n\n/* <div className=\"outline-none\"/> {window.confirm(\"x\")} */}\n~~~js\nclose `\n~~~\n",
+      "expected": [],
+      "findings": [
+        "A-P2-29",
+        "A-P2-30",
+        "B-P2-29"
+      ]
+    },
+    {
+      "id": "주석후실행-31",
+      "source": "Example `literal\n{\n\n/* <div className=\"outline-none\"/> {window.confirm(\"x\")} */ window.confirm(\"x\") }\n",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "B-P2-29"
+      ]
+    },
+    {
+      "id": "ESM-32",
+      "prefixes": [""],
+      "source": "export default Layout // window.confirm(\"주석\")\n\n{window.confirm(\"x\")}\n",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "A-P2-33"
+      ]
+    },
+    {
+      "id": "ESM-33",
+      "prefixes": [""],
+      "source": "export default () => null // window.confirm(\"주석\")\n\n{window.confirm(\"x\")}\n",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "A-P2-33"
+      ]
+    },
+    {
+      "id": "ESM-34",
+      "prefixes": [""],
+      "source": "export { value } from \"./module.js\"; // window.confirm(\"주석\")\n\n{window.confirm(\"x\")}\n",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "A-P2-33"
+      ]
+    },
+    {
+      "id": "ESM-35",
+      "prefixes": [""],
+      "source": "export const value = 1; // window.confirm(\"주석\")\n\n{window.confirm(\"x\")}\n",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "A-P2-33"
+      ]
+    },
+    {
+      "id": "빈줄-36",
+      "source": "{(\n\nvalue // window.confirm(\"주석\")\n)}\n\n{window.confirm(\"x\")}",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "A-P2-34"
+      ]
+    },
+    {
+      "id": "빈줄-37",
+      "prefixes": [""],
+      "source": "import {\n\nvalue // window.confirm(\"주석\")\n} from \"./module.js\";\n\n{window.confirm(\"x\")}",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "A-P2-34"
+      ]
+    },
+    {
+      "id": "빈줄-38",
+      "source": "<Widget value={\n\nvalue // window.confirm(\"주석\")\n} />\n\n{window.confirm(\"x\")}",
+      "expected": [
+        "P8"
+      ],
+      "findings": [
+        "A-P2-34"
+      ]
+    },
+    {
+      "id": "중첩-template",
+      "source": "{`문자열 ${`중첩 ${ /* window.confirm(\"주석\") */ value}`}`}\n{window.confirm(\"x\")}",
+      "expected": [
+        "P8"
+      ],
+      "findings": []
+    },
+    {
+      "id": "정규식",
+      "source": "{/[}/*]/.test(value) /* window.confirm(\"주석\") */}\n{window.confirm(\"x\")}",
+      "expected": [
+        "P8"
+      ],
+      "findings": []
+    },
+    {
+      "id": "JSX-본문-복귀",
+      "source": "export const X = <div>don't { /* window.confirm(\"주석\") */ }</div>\n\n`outline-none`\n{window.confirm(\"x\")}",
+      "expected": [
+        "P8"
+      ],
+      "findings": []
+    },
+    {
+      "id": "인용-문맥-격리",
+      "source": "`<Widget prop={`\n\n`outline-none`\n{window.confirm(\"x\")}",
+      "expected": [
+        "P8"
+      ],
+      "findings": []
+    },
+    {
+      "id": "정상-inline",
+      "source": "Example `` `outline-none window.confirm(\"예시\")` ``\n{window.confirm(\"x\")}",
+      "expected": [
+        "P8"
+      ],
+      "findings": []
+    },
+    {
+      "id": "식별자-범위",
+      "source": "Example `literal {Ⅳ && window.confirm(\"x\")}\n",
+      "expected": [
+        "P8"
+      ],
+      "findings": []
+    },
+    {
+      "id": "빈표현식-주석",
+      "source": "{ \n /* window.confirm(\"주석\") */ \n }\n",
+      "expected": [],
+      "findings": []
+    },
+    {
+      "id": "닫힌표현식-본문",
+      "source": "{value} don't src/* {window.confirm(\"x\")}",
+      "expected": [
+        "P8"
+      ],
+      "findings": []
+    },
+    {
+      "id": "선언-호환",
+      "prefixes": [""],
+      "reference": "compatibility",
+      "source": "const value = `outline-none ${ /* window.confirm(\"주석\") */ value }`;\n",
+      "expected": [
+        "P6"
+      ],
+      "findings": []
+    },
+    {
+      "id": "행주석-호환",
+      "reference": "compatibility",
+      "source": "// window.confirm(\"주석\")\n{window.confirm(\"x\")}",
+      "expected": [
+        "P8"
+      ],
+      "findings": []
+    },
+    {
+      "id": "인용-ESM은-본문",
+      "source": "> export default Layout // window.confirm(\"문장\")\n\n{window.confirm(\"실행\")}\n",
+      "prefixes": [""],
+      "expected": ["P8", "P8"],
+      "findings": ["A-P2-33"]
+    }
+  ]
+}

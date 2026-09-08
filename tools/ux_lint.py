@@ -12,7 +12,6 @@ from pathlib import Path
 import re
 import subprocess
 import sys
-import unicodedata
 from typing import Iterable, Mapping, Sequence
 
 
@@ -23,36 +22,8 @@ _MDX_PARAGRAPH_BOUNDARY = re.compile(
     rf"{_MARKDOWN_LINE_BREAK_PATTERN}"
     rf"(?:[ \t]*{_MARKDOWN_LINE_BREAK_PATTERN}|[ \t]*>(?:[ \t]*>)*[ \t]*{_MARKDOWN_LINE_BREAK_PATTERN})"
 )
-_MDX_EXPRESSION_KEYWORDS = {
-    "await",
-    "class",
-    "delete",
-    "do",
-    "false",
-    "function",
-    "new",
-    "null",
-    "return",
-    "this",
-    "true",
-    "typeof",
-    "undefined",
-    "void",
-    "yield",
-}
-_MDX_EXPRESSION_START_CHARS = frozenset(".!~+-([{</\"'`")
-_MDX_EXPRESSION_FOLLOWING_CHARS = frozenset(".([{:?,=+*%|&!<>)}`-^/")
-_MDX_EXPRESSION_BINARY_WORDS = {"as", "in", "instanceof"}
 _MDX_LINE_TERMINATORS = frozenset("\r\n\u2028\u2029")
 _MARKDOWN_LINE_TERMINATORS = frozenset("\r\n")
-# ECMAScript의 Unicode ID_Start/ID_Continue에 포함되지만 Python의
-# XID 판정이나 일반 범주만으로는 보존되지 않는 예외 문자다.
-_MDX_OTHER_ID_START = frozenset("\u2118\u212e\u309b\u309c")
-_MDX_OTHER_ID_CONTINUE = (
-    frozenset("\u00b7\u0387")
-    | frozenset(chr(code) for code in range(0x1369, 0x1372))
-    | {"\u19da"}
-)
 
 
 class UxLintError(ValueError):
@@ -134,42 +105,11 @@ def _find_backtick_run_end(text: str, start: int, run_length: int) -> int:
     return len(text)
 
 
-def _paragraph_start(text: str, index: int) -> int:
-    """현재 위치가 속한 Markdown 문단의 시작 위치를 반환한다."""
-
-    boundaries = list(_MDX_PARAGRAPH_BOUNDARY.finditer(text[:index]))
-    return boundaries[-1].end() if boundaries else 0
-
-
 def _paragraph_end(text: str, start: int) -> int:
     """현재 Markdown 문단의 끝 위치를 반환한다."""
 
     boundary = _MDX_PARAGRAPH_BOUNDARY.search(text, start)
     return boundary.start() if boundary else len(text)
-
-
-def _skip_mdx_expression_leading(text: str, start: int, boundary: int) -> int:
-    """MDX 표현식 시작부의 공백과 JavaScript 주석을 건너뛴다."""
-
-    index = start
-    while index < boundary:
-        if _is_mdx_whitespace(text[index]):
-            index += 1
-            continue
-        if text.startswith("/*", index):
-            closing = text.find("*/", index + 2, boundary)
-            if closing < 0:
-                return boundary
-            index = closing + 2
-            continue
-        if text.startswith("//", index):
-            newline = _find_mdx_line_terminator(text, index + 2, boundary)
-            if newline >= boundary:
-                return boundary
-            index = newline + 1
-            continue
-        break
-    return index
 
 
 def _is_mdx_whitespace(char: str) -> bool:
@@ -225,20 +165,6 @@ def _markdown_line_start(text: str, index: int) -> int:
     if latest < 0:
         return 0
     return _markdown_line_terminator_end(text, latest, index)
-
-
-def _markdown_indent_columns(prefix: str) -> int | None:
-    """Markdown 들여쓰기의 열 수를 계산한다(탭은 다음 4열 경계로 확장)."""
-
-    columns = 0
-    for char in prefix:
-        if char == " ":
-            columns += 1
-        elif char == "\t":
-            columns = ((columns // 4) + 1) * 4
-        else:
-            return None
-    return columns
 
 
 def _markdown_advance_column(column: int, char: str) -> int:
@@ -333,103 +259,6 @@ def _markdown_fence_candidate(raw_line: str, container: tuple[str, int]) -> tupl
     return raw_line[index:], content_indent
 
 
-def _consume_mdx_unicode_escape(text: str, start: int, boundary: int) -> int | None:
-    """JavaScript 식별자 안의 Unicode escape 끝 위치를 반환한다."""
-
-    if not text.startswith("\\u", start):
-        return None
-    index = start + 2
-    if index < boundary and text[index] == "{":
-        closing = text.find("}", index + 1, boundary)
-        if closing < 0 or closing == index + 1 or closing - index - 1 > 6:
-            return None
-        if any(char not in "0123456789abcdefABCDEF" for char in text[index + 1 : closing]):
-            return None
-        return closing + 1
-    if index + 4 > boundary or any(char not in "0123456789abcdefABCDEF" for char in text[index : index + 4]):
-        return None
-    return index + 4
-
-
-def _is_mdx_identifier_start(char: str) -> bool:
-    """JavaScript IdentifierStart에 해당하는 단일 문자인지 확인한다."""
-
-    category = unicodedata.category(char)
-    return (
-        char in "_$"
-        or char in _MDX_OTHER_ID_START
-        or char.isidentifier()
-        or category[0] == "L"
-        or category == "Nl"
-        # 구버전 Python의 unicodedata가 아직 이름을 모르는 최신
-        # ECMAScript 문자도 미종결 span 뒤 실행식으로 보존한다.
-        or (category == "Cn" and ord(char) > 0x7F)
-    )
-
-
-def _is_mdx_identifier_continue(char: str) -> bool:
-    """JavaScript IdentifierPart에 해당하는 단일 문자인지 확인한다."""
-
-    return (
-        _is_mdx_identifier_start(char)
-        or unicodedata.category(char) in {"Mn", "Mc", "Nd", "Pc"}
-        or char in _MDX_OTHER_ID_CONTINUE
-        or char in "\u200c\u200d"
-    )
-
-
-def _consume_mdx_identifier(text: str, start: int, boundary: int) -> int | None:
-    """Unicode 문자와 escape를 포함한 JavaScript 식별자의 끝을 반환한다."""
-
-    index = start
-    first = True
-    while index < boundary:
-        escaped_end = _consume_mdx_unicode_escape(text, index, boundary)
-        if escaped_end is not None:
-            index = escaped_end
-            first = False
-            continue
-        char = text[index]
-        if (first and not _is_mdx_identifier_start(char)) or (not first and not _is_mdx_identifier_continue(char)):
-            break
-        index += 1
-        first = False
-    return index if not first else None
-
-
-def _looks_like_mdx_expression_start(text: str, start: int, boundary: int) -> bool:
-    """중괄호 뒤가 실행 가능한 MDX 표현식인지 보수적으로 판정한다."""
-
-    index = _skip_mdx_expression_leading(text, start + 1, boundary)
-    if index >= boundary:
-        return False
-    char = text[index]
-    if char.isdigit() or char in _MDX_EXPRESSION_START_CHARS:
-        return True
-    if _is_mdx_identifier_start(char) or text.startswith("\\u", index):
-        identifier_end = _consume_mdx_identifier(text, index, boundary)
-        if identifier_end is None:
-            return False
-        word = text[index:identifier_end]
-        if word in _MDX_EXPRESSION_KEYWORDS:
-            return True
-        following = _skip_mdx_expression_leading(text, identifier_end, boundary)
-        if following >= boundary:
-            return False
-        if text[following] in _MDX_EXPRESSION_FOLLOWING_CHARS:
-            return True
-        binary_end = _consume_mdx_identifier(text, following, boundary)
-        if binary_end is None:
-            return False
-        if text[following:binary_end] in _MDX_EXPRESSION_BINARY_WORDS:
-            return True
-        # `async x => ...`처럼 첫 식별자 뒤에 매개변수 식별자가 오는
-        # arrow expression도 실행 코드로 보존한다.
-        arrow = _skip_mdx_expression_leading(text, binary_end, boundary)
-        return arrow < boundary and text.startswith("=>", arrow)
-    return False
-
-
 def _find_inline_span_end(text: str, start: int, run_length: int) -> int | None:
     """Markdown inline span의 닫힘을 같은 문단 안에서만 찾는다."""
 
@@ -520,278 +349,10 @@ def _mask_inline_opener_delimiter(text: str, start: int, run_length: int) -> tup
     return " " * (stop - start), stop
 
 
-def _mask_mdx_resume_comments(text: str, start: int, boundary: int) -> str:
-    """닫히지 않은 Markdown span 뒤에서 주석만 가린다.
-
-    이 구간은 Markdown 본문일 수 있으므로 JavaScript의 문자열·line comment
-    상태를 이어받지 않는다. 다만 MDX 표현식 안의 주석은 재개 후보를 가릴
-    필요가 있어 block comment와 확인된 JS line comment만 공백으로 치환한다.
-    """
-
-    output = list(text[start:boundary])
-    index = start
-    quote: str | None = None
-    while index < boundary:
-        offset = index - start
-        next_char = text[index + 1] if index + 1 < boundary else ""
-        if quote:
-            if text[index] == "\\":
-                index += 2
-                continue
-            if text[index] == quote:
-                quote = None
-            index += 1
-            continue
-        if text[index] in "\"'" and _is_mdx_lexical_code(text, index):
-            quote = text[index]
-            index += 1
-            continue
-        if (
-            text[index] == "/"
-            and next_char == "*"
-            and _is_mdx_lexical_code(text, index)
-        ):
-            output[offset] = output[offset + 1] = " "
-            index += 2
-            while index < boundary:
-                offset = index - start
-                if text[index] == "*" and index + 1 < boundary and text[index + 1] == "/":
-                    output[offset] = output[offset + 1] = " "
-                    index += 2
-                    break
-                if not _is_mdx_line_terminator(text[index]):
-                    output[offset] = " "
-                index += 1
-            continue
-        if (
-            text[index] == "/"
-            and next_char == "/"
-            and _is_mdx_lexical_code(text, index)
-        ):
-            output[offset] = output[offset + 1] = " "
-            index += 2
-            while index < boundary and not _is_mdx_line_terminator(text[index]):
-                output[index - start] = " "
-                index += 1
-            continue
-        index += 1
-    return "".join(output)
-
-
-def _mask_unclosed_inline_span(output: list[str], text: str, start: int, run_length: int) -> int:
-    """닫히지 않은 문서 span을 가리되 뒤의 실행 가능한 태그는 계속 검사한다."""
-
-    boundary = _paragraph_end(text, start)
-    fence_start = _markdown_fence_before(text, start, boundary)
-    scan_boundary = fence_start if fence_start is not None else boundary
-    content_start = start + run_length
-    resume_candidates: list[int] = []
-    remainder = _mask_mdx_resume_comments(text, content_start, scan_boundary)
-    for pattern in (
-        r"<(?:[A-Za-z]|>)|(?:^|(?<=[\r\n]))[ \t]*(?:export\s+)?(?:const|let|var|return)\b",
-    ):
-        match = re.search(pattern, remainder, re.MULTILINE)
-        if match:
-            resume_candidates.append(match.start())
-    for match in re.finditer(r"\{", remainder):
-        if _looks_like_mdx_expression_start(remainder, match.start(), len(remainder)):
-            resume_candidates.append(match.start())
-            break
-    resume = content_start + min(resume_candidates) if resume_candidates else scan_boundary
-    for offset in range(start, resume):
-        if not _is_markdown_line_terminator(text[offset]):
-            output[offset] = " "
-    return resume
-
-
 def _find_template_end(text: str, start: int) -> int:
     """단일 backtick template의 끝을 찾아 닫히지 않으면 끝을 반환한다."""
 
     return _find_backtick_run_end(text, start, 1)
-
-
-def _has_open_jsx_expression(text: str, start: int) -> bool:
-    """JSX 속성의 중첩 중괄호가 현재 위치까지 열려 있는지 확인한다."""
-
-    before = text[:start]
-    matches = list(re.finditer(r"[A-Za-z_$][\w$-]*\s*=\s*\{", before))
-    for match in reversed(matches):
-        if _has_open_inline_span(text, match.start()):
-            continue
-        scope_start = max(
-            before.rfind(";", 0, match.start()) + 1,
-            _paragraph_start(before, match.start()),
-        )
-        if not re.search(r"<[A-Za-z]", before[scope_start : match.start()]):
-            continue
-        balance = 0
-        quote: str | None = None
-        index = match.end() - 1
-        while index < len(before):
-            char = before[index]
-            if quote:
-                if char == "\\":
-                    index += 2
-                    continue
-                if char == quote:
-                    quote = None
-            elif char == "/" and index + 1 < len(before) and before[index + 1] == "/":
-                newline = _find_mdx_line_terminator(before, index + 2, len(before))
-                index = len(before) if newline >= len(before) else newline
-                continue
-            elif char == "/" and index + 1 < len(before) and before[index + 1] == "*":
-                closing = before.find("*/", index + 2)
-                index = len(before) if closing < 0 else closing + 2
-                continue
-            elif char in "\"'`":
-                quote = char
-            elif char == "{":
-                balance += 1
-            elif char == "}":
-                balance -= 1
-            index += 1
-        if balance > 0:
-            return True
-    return False
-
-
-def _has_open_mdx_expression(text: str, start: int) -> bool:
-    """현재 위치가 Markdown 본문 안의 열린 MDX 표현식인지 확인한다."""
-
-    scope_start = _paragraph_start(text, start)
-    depth = 0
-    quote: str | None = None
-    index = scope_start
-    while index < start:
-        char = text[index]
-        next_char = text[index + 1] if index + 1 < start else ""
-        if depth == 0:
-            if char == "`" and not _is_escaped(text, index):
-                run = 0
-                while index + run < start and text[index + run] == "`":
-                    run += 1
-                end = _find_inline_span_end(text, index, run)
-                if end is not None and end < start:
-                    index = end + run
-                    continue
-            if (
-                char == "{"
-                and not _is_escaped(text, index)
-                and (
-                    text.startswith("{/*", index)
-                    or _looks_like_mdx_expression_start(text, index, len(text))
-                )
-            ):
-                depth = 1
-            index += 1
-            continue
-        if quote:
-            if char == "\\":
-                index += 2
-                continue
-            if char == quote:
-                quote = None
-            index += 1
-            continue
-        if char == "/" and next_char == "/":
-            newline = _find_mdx_line_terminator(text, index + 2, start)
-            index = start if newline >= start else newline
-            continue
-        if char == "/" and next_char == "*":
-            closing = text.find("*/", index + 2, start)
-            if closing < 0:
-                return True
-            index = closing + 2
-            continue
-        if char in "\"'`":
-            quote = char
-        elif char == "{":
-            depth += 1
-        elif char == "}":
-            depth -= 1
-        index += 1
-    return depth > 0
-
-
-def _mdx_line_content(text: str, index: int) -> str:
-    """현재 줄에서 block quote marker와 선행 공백을 제거한 내용을 반환한다."""
-
-    line_start = _markdown_line_start(text, index)
-    content = text[line_start:index]
-    while True:
-        stripped = content.lstrip(" \t")
-        if not stripped.startswith(">"):
-            return stripped
-        content = stripped[1:]
-
-
-def _is_mdx_lexical_code(text: str, index: int) -> bool:
-    """MDX 본문에서 현재 위치가 JavaScript/JSX 문맥인지 보수적으로 판정한다."""
-
-    content = _mdx_line_content(text, index)
-    if not content:
-        return False
-    if content.startswith(("//", "/*")):
-        return True
-    if re.match(
-        r"(?:export\s+)?(?:const|let|var|return|import|function|class|if|for|while|switch|try|catch|throw)\b",
-        content,
-    ):
-        return True
-    if _has_open_mdx_expression(text, index) or _has_open_jsx_expression(text, index):
-        return True
-    return bool(re.search(r"<[A-Za-z][\w.-]*(?:\s+[^<>]*)?$", content))
-
-
-def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
-    """MDX의 Markdown code span과 JSX/JavaScript template을 구분한다."""
-
-    line_start = _markdown_line_start(text, start)
-    line_prefix = text[line_start:start]
-    leading = line_prefix.lstrip(" \t")
-    if leading.startswith(">"):
-        leading = leading[1:].lstrip(" \t")
-        if not re.search(r"(?:[A-Za-z_$][\w$-]*\s*=\s*\{|<[A-Za-z])", leading):
-            return False
-    prefix = leading.rstrip()
-
-    # JSX 속성의 `{...}` 안에서는 tag 이름·배열·삼항식·computed tag를
-    # 구분하지 않고 모두 JavaScript template으로 취급한다. Markdown 본문은
-    # 해당 중괄호 문맥을 갖지 않으므로 inline code를 계속 제외한다.
-    if re.search(r"[A-Za-z_$][\w$-]*\s*=\s*\{[^{}]*$", prefix):
-        return True
-    if re.search(r"<(?:[A-Za-z][\w.-]*|[A-Z][\w.-]*)[^>]*\{[^{}]*$", prefix):
-        return True
-
-    # JSX/ESM 식이 여러 줄로 끊겨도 파일 앞부분의 열린 expression과
-    # 선언 문맥을 유지한다. 마지막 중괄호가 열린 속성보다 뒤에 있으면
-    # Markdown 본문의 일반적인 `{...}` 인용은 실행 코드로 바꾸지 않는다.
-    before = text[:start]
-    if _has_open_jsx_expression(text, start):
-        return True
-    statement_start = max(before.rfind(";") + 1, _paragraph_start(before, len(before)))
-    statement = before[statement_start:]
-    previous_line_end = line_start
-    if previous_line_end:
-        previous_line_end -= 1
-        if text[previous_line_end] == "\n" and previous_line_end > 0 and text[previous_line_end - 1] == "\r":
-            previous_line_end -= 1
-    previous_line_start = _markdown_line_start(text, previous_line_end) if line_start else 0
-    previous_line = text[previous_line_start:previous_line_end].rstrip(" \t") if line_start else ""
-    declaration = bool(re.search(r"\b(?:export\s+)?(?:const|let|var)\b", statement)) and "=" in statement
-    if declaration and (line_prefix != line_prefix.lstrip(" \t") or re.search(r"(?:=|=>|[([{,:])\s*$", previous_line)):
-        return True
-
-    # MDX ESM/JavaScript 선언의 값 template과 return/template tag도 실행
-    # 문맥이다. 선언의 오른쪽에 이미 식이 시작됐는지 확인해 `Example: `...
-    # `` 같은 문장형 Markdown을 실행 코드로 오인하지 않는다.
-    if re.match(r"\s*(?:export\s+)?(?:const|let|var)\b", prefix) and "=" in prefix:
-        return True
-    if re.search(r"(?:\breturn|=>)\s+[^\n]*$", prefix):
-        return True
-    if prefix and prefix[-1] in "={([,?:":
-        return bool(re.search(r"(?:className|style|\b(?:const|let|var|return|export)\b|=>|<[A-Za-z])", prefix))
-    return False
 
 
 def _is_escaped(text: str, index: int) -> bool:
@@ -803,27 +364,6 @@ def _is_escaped(text: str, index: int) -> bool:
         backslashes += 1
         index -= 1
     return bool(backslashes % 2)
-
-
-def _has_open_inline_span(text: str, index: int) -> bool:
-    """현재 위치가 빈 줄 안에서 닫히지 않은 Markdown span 안인지 확인한다."""
-
-    scope_start = _paragraph_start(text, index)
-    opener: int | None = None
-    cursor = scope_start
-    while cursor < index:
-        if text[cursor] != "`" or _is_escaped(text, cursor):
-            cursor += 1
-            continue
-        run = 0
-        while cursor + run < index and text[cursor + run] == "`":
-            run += 1
-        if opener is None:
-            opener = run
-        elif opener == run:
-            opener = None
-        cursor += run
-    return opener is not None
 
 
 def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
@@ -943,121 +483,253 @@ def _mask_template_interpolation_comments(text: str) -> str:
     return "".join(output)
 
 
-def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
-    """주석과 Markdown 인용만 공백으로 가리고 실행 template은 보존한다."""
+def _mask_script_comments(text: str) -> str:
+    """TS·TSX·CSS의 기존 문자열 보존과 주석 제외 동작을 유지한다."""
 
     output = list(text)
-    state = "code"
-    quote: str | None = None
     index = 0
     while index < len(text):
         char = text[index]
-        next_char = text[index + 1] if index + 1 < len(text) else ""
-        if state == "line-comment":
-            if _is_mdx_line_terminator(char):
-                state = "code"
-            else:
-                output[index] = " "
-            index += 1
-            continue
-        if state == "block-comment":
-            if char == "*" and next_char == "/":
-                output[index] = output[index + 1] = " "
-                index += 2
-                state = "code"
-                continue
-            if not _is_mdx_line_terminator(char):
-                output[index] = " "
-            index += 1
-            continue
-        if quote:
-            if char == "\\":
-                index += 2
-                continue
-            if char == quote:
-                quote = None
-            index += 1
-            continue
-        if char in "\"'" and (
-            not ignore_backticks or _is_mdx_lexical_code(text, index)
-        ):
+        if char in "\"'":
             quote = char
             index += 1
+            while index < len(text):
+                if text[index] == "\\":
+                    index += 2
+                elif text[index] == quote:
+                    index += 1
+                    break
+                else:
+                    index += 1
             continue
-        if ignore_backticks and char == "~" and text.startswith("~~~", index):
-            segment, stop = _mask_mdx_fence(text, index, "~")
-            if stop != index:
-                output[index:stop] = list(segment)
-                index = stop
-                continue
         if char == "`":
-            run_length = 0
-            while index + run_length < len(text) and text[index + run_length] == "`":
-                run_length += 1
-            if ignore_backticks and run_length >= 3:
-                segment, stop = _mask_mdx_fence(text, index, "`")
-                if stop != index:
-                    output[index:stop] = list(segment)
-                    index = stop
-                    continue
-            if ignore_backticks and run_length >= 2:
-                end = _find_inline_span_end(text, index, run_length)
-                if end is None:
-                    index = _mask_unclosed_inline_span(output, text, index, run_length)
-                    continue
-                if _markdown_has_fence_before(text, index, end):
-                    segment, stop = _mask_inline_opener_delimiter(text, index, run_length)
-                    output[index:stop] = list(segment)
-                    index = stop
-                    continue
-                stop = min(end + run_length, len(text))
-                for offset in range(index, stop):
-                    if not _is_markdown_line_terminator(text[offset]):
-                        output[offset] = " "
-                index = stop
-                continue
-            analysis_text = "".join(output)
-            executable = not ignore_backticks or _is_executable_mdx_template(analysis_text, index, len(text))
-            if ignore_backticks and not executable:
-                end = _find_inline_span_end(text, index, 1)
-                if end is None:
-                    index = _mask_unclosed_inline_span(output, text, index, 1)
-                    continue
-                if _markdown_has_fence_before(text, index, end):
-                    segment, stop = _mask_inline_opener_delimiter(text, index, 1)
-                    output[index:stop] = list(segment)
-                    index = stop
-                    continue
-                stop = min(end + 1, len(text))
-                for offset in range(index, stop):
-                    if not _is_markdown_line_terminator(text[offset]):
-                        output[offset] = " "
-                index = stop
-                continue
-            end = _find_template_end(text, index)
-            if ignore_backticks and end >= len(text):
-                output[index] = " "
-                index += 1
-                continue
-            stop = min(end + 1, len(text))
-            segment = _mask_template_interpolation_comments(text[index:stop])
-            output[index:stop] = list(segment)
+            stop = min(_find_template_end(text, index) + 1, len(text))
+            output[index:stop] = _mask_template_interpolation_comments(text[index:stop])
             index = stop
             continue
-        if char == "/" and next_char == "/" and (
-            not ignore_backticks or _is_mdx_lexical_code(text, index)
-        ):
-            output[index] = output[index + 1] = " "
-            state = "line-comment"
-            index += 2
-            continue
-        if char == "/" and next_char == "*":
-            output[index] = output[index + 1] = " "
-            state = "block-comment"
-            index += 2
+        if text[index:index + 2] in {"//", "/*"}:
+            if text[index:index + 2] == "//":
+                stop = _find_mdx_line_terminator(text, index + 2, len(text))
+            else:
+                closing = text.find("*/", index + 2)
+                stop = len(text) if closing < 0 else closing + 2
+            for offset in range(index, stop):
+                if not _is_mdx_line_terminator(text[offset]):
+                    output[offset] = " "
+            index = stop
             continue
         index += 1
     return "".join(output)
+
+
+def _mask_mdx_source(text: str) -> str:
+    """문서·태그·JS·template의 수명을 스택으로 추적해 인용과 주석을 가린다.
+
+    문서에서 JS로 들어가는 입구는 중괄호, JSX 속성, 줄 시작 선언뿐이다.
+    JS 안의 빈 줄은 문맥을 닫지 않는다. 닫힘 delimiter를 소비한 후에만
+    이전 문맥으로 돌아가므로 본문 URL·문장부호가 JS 상태에 섞이지 않는다.
+    """
+
+    output = list(text)
+    # (문맥, 닫힘 괄호 스택, 마지막 토큰): 재귀 호출 없이 중첩을 처리한다.
+    frames: list[dict[str, object]] = [{"kind": "prose"}]
+    index = 0
+
+    def mask(start: int, stop: int) -> None:
+        for offset in range(start, stop):
+            if not _is_mdx_line_terminator(text[offset]):
+                output[offset] = " "
+
+    def code(kind: str, closes: list[str]) -> dict[str, object]:
+        return {"kind": kind, "closes": closes, "last": "", "operand": True}
+
+    while index < len(text):
+        frame = frames[-1]
+        kind = frame["kind"]
+        char = text[index]
+        following = text[index:index + 2]
+
+        if kind == "template":
+            if char == "\\":
+                index += 2
+            elif following == "${":
+                frames.append(code("expression", ["}"]))
+                index += 2
+            elif char == "`":
+                frames.pop()
+                index += 1
+            else:
+                index += 1
+            continue
+
+        if kind in {"prose", "jsx-text"}:
+            # 유효한 block fence가 inline delimiter보다 우선한다.
+            if kind == "prose" and char in "`~" and text.startswith(char * 3, index):
+                segment, stop = _mask_mdx_fence(text, index, char)
+                if stop > index:
+                    output[index:stop] = segment
+                    index = stop
+                    continue
+            if kind == "prose" and char == "`" and not _is_escaped(text, index):
+                run = 1
+                while index + run < len(text) and text[index + run] == "`":
+                    run += 1
+                end = _find_inline_span_end(text, index, run)
+                if end is not None and not _markdown_has_fence_before(text, index, end):
+                    mask(index, end + run)
+                    index = end + run
+                else:
+                    # 닫히지 않은 delimiter는 본문 문자다. 뒤의 표현식·태그를
+                    # 찾기 위해 별도 lexer를 실행하거나 문단을 건너뛰지 않는다.
+                    index += run
+                continue
+            if char == "{" and not _is_escaped(text, index):
+                frames.append(code("expression", ["}"]))
+                index += 1
+                continue
+            if char == "<" and not _is_escaped(text, index) and re.match(r"</?(?:[A-Za-z]|>)", text[index:]):
+                frames.append({"kind": "tag", "script": kind == "jsx-text", "closing": following == "</"})
+                index += 1
+                continue
+            if kind == "prose":
+                prefix = text[_markdown_line_start(text, index):index]
+                at_start = bool(re.fullmatch(r"[ \t]*(?:>[ \t]*)*", prefix))
+                if at_start and ">" not in prefix and (
+                    re.match(r"(?:import|export)(?=\s|\{)", text[index:])
+                    # 기존 도구의 선언형 문서 예제 지원. 제어문 단어만으로는
+                    # JS를 시작하지 않고 선언 식별자와 대입 구문을 요구한다.
+                    or re.match(r"(?:const|let|var)\s+[\w$]+\s*=", text[index:])
+                ):
+                    frames.append(code("esm", []))
+                    continue
+                if at_start and following in {"//", "/*"}:
+                    # 줄 전체 주석 예제에 대한 기존 검사 계약을 유지한다.
+                    frames.append(code("esm", []))
+                    continue
+            index += 1
+            continue
+
+        if kind == "tag":
+            if char in "\"'":
+                quote = char
+                index += 1
+                while index < len(text) and text[index] != quote:
+                    index += 1
+                index += index < len(text)
+            elif char == "{":
+                frames.append(code("expression", ["}"]))
+                index += 1
+            elif char == ">":
+                tag = frames.pop()
+                if tag["script"]:
+                    if tag["closing"]:
+                        if frames[-1]["kind"] == "jsx-text":
+                            frames.pop()
+                    elif index == 0 or text[index - 1] != "/":
+                        frames.append({"kind": "jsx-text"})
+                index += 1
+            else:
+                index += 1
+            continue
+
+        # 이하에서는 JS 표현식 또는 ESM이 현재 문맥이다.
+        closes = frame["closes"]
+        if following in {"//", "/*"}:
+            if following == "//":
+                stop = _find_mdx_line_terminator(text, index + 2, len(text))
+            else:
+                end = text.find("*/", index + 2)
+                stop = len(text) if end < 0 else end + 2
+            mask(index, stop)
+            index = stop
+            continue
+        if char in "\"'":
+            quote = char
+            index += 1
+            while index < len(text):
+                if text[index] == "\\":
+                    index += 2
+                elif text[index] == quote:
+                    index += 1
+                    break
+                else:
+                    index += 1
+            frame["last"] = "value"
+            frame["operand"] = False
+            continue
+        if char == "`":
+            frame["last"] = "value"
+            frame["operand"] = False
+            frames.append({"kind": "template"})
+            index += 1
+            continue
+        if char == "/" and frame["operand"]:
+            # 정규식 내부의 slash·괄호는 JS 주석이나 표현식 닫힘이 아니다.
+            cursor = index + 1
+            in_class = False
+            while cursor < len(text) and not _is_mdx_line_terminator(text[cursor]):
+                if text[cursor] == "\\":
+                    cursor += 2
+                    continue
+                if text[cursor] == "[":
+                    in_class = True
+                elif text[cursor] == "]":
+                    in_class = False
+                elif text[cursor] == "/" and not in_class:
+                    index = cursor + 1
+                    frame["last"] = "value"
+                    frame["operand"] = False
+                    break
+                cursor += 1
+            else:
+                index += 1
+            continue
+        if char == "<" and re.match(r"<(?:[A-Za-z]|>)", text[index:]):
+            frame["last"] = "value"
+            frame["operand"] = False
+            frames.append({"kind": "tag", "script": True, "closing": False})
+            index += 1
+            continue
+        if char in "({[":
+            closes.append({"(": ")", "{": "}", "[": "]"}[char])
+            frame["last"] = char
+            frame["operand"] = True
+        elif char in ")}]":
+            if closes and closes[-1] == char:
+                closes.pop()
+                if kind == "expression" and not closes:
+                    frames.pop()
+            frame["last"] = char
+            frame["operand"] = False
+        elif _is_mdx_line_terminator(char):
+            if kind == "esm" and not closes and frame["last"] not in {
+                "=", "=>", ",", ".", "+", "-", "*", "/", "?", ":", "&", "|",
+                "import", "export", "default", "from", "const", "let", "var", "return",
+            }:
+                frames.pop()
+        elif char.isalpha() or char in "_$" or char.isdigit():
+            end = index + 1
+            while end < len(text) and (text[end].isalnum() or text[end] in "_$"):
+                end += 1
+            word = text[index:end]
+            frame["last"] = word
+            frame["operand"] = word in {"return", "throw", "case", "typeof", "void", "delete", "new", "yield", "await"}
+            index = end
+            continue
+        elif not _is_mdx_whitespace(char):
+            frame["last"] = "=>" if following == "=>" else char
+            frame["operand"] = char not in "."
+            if following == "=>":
+                index += 2
+                continue
+        index += 1
+    return "".join(output)
+
+
+def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
+    """확장자별 문법 처리기를 선택하며 결과의 원본 위치를 유지한다."""
+
+    return _mask_mdx_source(text) if ignore_backticks else _mask_script_comments(text)
 
 
 def _relative(path: Path, root: Path) -> str:
