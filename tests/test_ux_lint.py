@@ -536,6 +536,31 @@ window.confirm('확인');
                         self.assertEqual(result.returncode, 0, result.stderr)
                         self.assertEqual(json.loads(result.stdout)["findings"], [])
 
+    def test_mdx_invalid_backtick_info_stops_before_an_intermediate_fence(self):
+        for prefix in ("", "> ", ">> "):
+            for run in (3, 4):
+                for separator in ("\n", "\r\n", "\r"):
+                    with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                        root = Path(directory)
+                        fixture = root / "intermediate-fence.mdx"
+                        delimiter = "`" * run
+                        fixture.write_bytes(
+                            (
+                                f"{prefix}{delimiter}bad`info{separator}"
+                                f"{prefix}<div className=\"outline-none\"/> "
+                                f"{{window.confirm(\"outside\")}}{separator}"
+                                f"{prefix}~~~js{separator}"
+                                f"{prefix}text {delimiter}{separator}"
+                                f"{prefix}~~~{separator}"
+                            ).encode("utf-8")
+                        )
+                        result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                        self.assertEqual(result.returncode, 1, result.stderr)
+                        self.assertEqual(
+                            [item["pattern"] for item in json.loads(result.stdout)["findings"]],
+                            ["P6", "P8"],
+                        )
+
     def test_mdx_tilde_info_string_allows_backtick(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
