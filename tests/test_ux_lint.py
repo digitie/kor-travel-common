@@ -211,8 +211,10 @@ window.confirm('확인');
                 "blockquote.mdx": "> Example ` unmatched\n>\n> <div className=\"outline-none\" />\n",
                 "backslash.mdx": "Example `path\\`<span className=\"outline-none\" />\n",
                 "expression-comment.mdx": "Example ` unmatched {/* note */ window.confirm('x')}\n",
+                "expression-combining.mdx": "Example ` unmatched {e\u0301 && window.confirm('x')}\n",
                 "expression-decimal.mdx": "Example ` unmatched {.5 && window.confirm('x')}\n",
                 "expression-division.mdx": "const n = 1;\nExample ` unmatched {n / window.confirm('x')}\n",
+                "expression-escape.mdx": "Example ` unmatched {\\u006e && window.confirm('x')}\n",
                 "expression-one.mdx": "Example ` unmatched {window.confirm('x')}\n",
                 "expression-double.mdx": "Example `` unmatched {window.confirm('x')}\n",
                 "expression-keyword.mdx": "Example ` unmatched {void window.confirm('x')}\n",
@@ -222,6 +224,7 @@ window.confirm('확인');
                 "expression-unicode.mdx": "Example ` unmatched {값 && window.confirm('x')}\n",
                 "expression-unary.mdx": "Example ` unmatched {!window.confirm('x')}\n",
                 "expression-xor.mdx": "const n = 1;\nExample ` unmatched {n ^ window.confirm('x')}\n",
+                "expression-zwnj.mdx": "Example ` unmatched {a\u200c && window.confirm('x')}\n",
                 "multiline-expression.mdx": (
                     "Example `` unmatched\n"
                     "<div className={\n"
@@ -241,10 +244,12 @@ window.confirm('확인');
                 [
                     ("backslash.mdx", "P6"),
                     ("blockquote.mdx", "P6"),
+                    ("expression-combining.mdx", "P8"),
                     ("expression-comment.mdx", "P8"),
                     ("expression-decimal.mdx", "P8"),
                     ("expression-division.mdx", "P8"),
                     ("expression-double.mdx", "P8"),
+                    ("expression-escape.mdx", "P8"),
                     ("expression-keyword.mdx", "P8"),
                     ("expression-logical.mdx", "P8"),
                     ("expression-number.mdx", "P8"),
@@ -253,6 +258,7 @@ window.confirm('확인');
                     ("expression-unary.mdx", "P8"),
                     ("expression-unicode.mdx", "P8"),
                     ("expression-xor.mdx", "P8"),
+                    ("expression-zwnj.mdx", "P8"),
                     ("multiline-expression.mdx", "P6"),
                     ("paragraphs.mdx", "P6"),
                     ("same-paragraph-double.mdx", "P6"),

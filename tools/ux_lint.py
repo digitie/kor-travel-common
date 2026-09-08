@@ -12,6 +12,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import unicodedata
 from typing import Iterable, Mapping, Sequence
 
 
@@ -38,7 +39,6 @@ _MDX_EXPRESSION_KEYWORDS = {
 _MDX_EXPRESSION_START_CHARS = frozenset(".!~+-([{</\"'`")
 _MDX_EXPRESSION_FOLLOWING_CHARS = frozenset(".([{:?,=+*%|&!<>)}`-^/")
 _MDX_EXPRESSION_BINARY_WORDS = {"as", "in", "instanceof"}
-_MDX_IDENTIFIER = re.compile(r"(?:[^\W\d]|[$_])[\w$]*")
 
 
 class UxLintError(ValueError):
@@ -151,6 +151,60 @@ def _skip_mdx_expression_leading(text: str, start: int, boundary: int) -> int:
     return index
 
 
+def _consume_mdx_unicode_escape(text: str, start: int, boundary: int) -> int | None:
+    """JavaScript 식별자 안의 Unicode escape 끝 위치를 반환한다."""
+
+    if not text.startswith("\\u", start):
+        return None
+    index = start + 2
+    if index < boundary and text[index] == "{":
+        closing = text.find("}", index + 1, boundary)
+        if closing < 0 or closing == index + 1 or closing - index - 1 > 6:
+            return None
+        if any(char not in "0123456789abcdefABCDEF" for char in text[index + 1 : closing]):
+            return None
+        return closing + 1
+    if index + 4 > boundary or any(char not in "0123456789abcdefABCDEF" for char in text[index : index + 4]):
+        return None
+    return index + 4
+
+
+def _is_mdx_identifier_start(char: str) -> bool:
+    """JavaScript IdentifierStart에 해당하는 단일 문자인지 확인한다."""
+
+    return char in "_$" or char.isidentifier()
+
+
+def _is_mdx_identifier_continue(char: str) -> bool:
+    """JavaScript IdentifierPart에 해당하는 단일 문자인지 확인한다."""
+
+    return (
+        _is_mdx_identifier_start(char)
+        or char.isdigit()
+        or unicodedata.category(char) in {"Mn", "Mc", "Nd", "Pc"}
+        or char in "\u200c\u200d"
+    )
+
+
+def _consume_mdx_identifier(text: str, start: int, boundary: int) -> int | None:
+    """Unicode 문자와 escape를 포함한 JavaScript 식별자의 끝을 반환한다."""
+
+    index = start
+    first = True
+    while index < boundary:
+        escaped_end = _consume_mdx_unicode_escape(text, index, boundary)
+        if escaped_end is not None:
+            index = escaped_end
+            first = False
+            continue
+        char = text[index]
+        if (first and not _is_mdx_identifier_start(char)) or (not first and not _is_mdx_identifier_continue(char)):
+            break
+        index += 1
+        first = False
+    return index if not first else None
+
+
 def _looks_like_mdx_expression_start(text: str, start: int, boundary: int) -> bool:
     """중괄호 뒤가 실행 가능한 MDX 표현식인지 보수적으로 판정한다."""
 
@@ -160,20 +214,20 @@ def _looks_like_mdx_expression_start(text: str, start: int, boundary: int) -> bo
     char = text[index]
     if char.isdigit() or char in _MDX_EXPRESSION_START_CHARS:
         return True
-    if char.isalpha() or char in "_$":
-        match = _MDX_IDENTIFIER.match(text[index:boundary])
-        if match is None:
+    if char.isalpha() or char in "_$" or text.startswith("\\u", index):
+        identifier_end = _consume_mdx_identifier(text, index, boundary)
+        if identifier_end is None:
             return False
-        word = match.group(0)
+        word = text[index:identifier_end]
         if word in _MDX_EXPRESSION_KEYWORDS:
             return True
-        following = _skip_mdx_expression_leading(text, index + len(word), boundary)
+        following = _skip_mdx_expression_leading(text, identifier_end, boundary)
         if following >= boundary:
             return False
         if text[following] in _MDX_EXPRESSION_FOLLOWING_CHARS:
             return True
-        binary_word = _MDX_IDENTIFIER.match(text[following:boundary])
-        return binary_word is not None and binary_word.group(0) in _MDX_EXPRESSION_BINARY_WORDS
+        binary_end = _consume_mdx_identifier(text, following, boundary)
+        return binary_end is not None and text[following:binary_end] in _MDX_EXPRESSION_BINARY_WORDS
     return False
 
 
