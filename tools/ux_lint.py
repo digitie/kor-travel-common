@@ -101,6 +101,13 @@ def _public_path(value: str) -> str:
     return _PRIVATE_ADDRESS_PART.sub("<redacted>", redacted)
 
 
+def _read_text_preserving_newlines(path: Path) -> str:
+    """소스의 CR/LF/Unicode 줄 종결자를 변환하지 않고 읽는다."""
+
+    with path.open("r", encoding="utf-8", newline="") as stream:
+        return stream.read()
+
+
 def _find_backtick_run_end(text: str, start: int, run_length: int) -> int:
     """같은 길이의 backtick delimiter 끝을 찾아 닫히지 않으면 끝을 반환한다."""
 
@@ -670,7 +677,7 @@ def collect_files(inputs: Sequence[Path], root: Path) -> list[tuple[Path, str]]:
 
 def scan_file(path: Path, relative: str, token_files: set[str]) -> list[dict[str, object]]:
     try:
-        text = path.read_text(encoding="utf-8")
+        text = _read_text_preserving_newlines(path)
     except (OSError, UnicodeError) as error:
         raise UxLintError("검사 파일을 읽을 수 없습니다") from error
     masked = _mask_comments_and_backticks(text, ignore_backticks=path.suffix.lower() == ".mdx")
@@ -696,12 +703,15 @@ def scan_file(path: Path, relative: str, token_files: set[str]) -> list[dict[str
 
 def _git_output(root: Path, args: Sequence[str]) -> str:
     try:
-        completed = subprocess.run(["git", "-C", str(root), *args], check=False, capture_output=True, text=True, encoding="utf-8")
+        completed = subprocess.run(["git", "-C", str(root), *args], check=False, capture_output=True)
     except (OSError, UnicodeError) as error:
         raise UxLintError("git diff를 실행할 수 없습니다") from error
     if completed.returncode != 0:
         raise UxLintError("Git 명령을 실행할 수 없습니다")
-    return completed.stdout
+    try:
+        return completed.stdout.decode("utf-8")
+    except UnicodeError as error:
+        raise UxLintError("Git 출력이 UTF-8이 아닙니다") from error
 
 
 def git_root(path: Path) -> Path:
@@ -732,8 +742,6 @@ def _is_tracked(root: Path, relative: str) -> bool:
             ["git", "-C", str(root), "ls-files", "--error-unmatch", "--", relative],
             check=False,
             capture_output=True,
-            text=True,
-            encoding="utf-8",
         )
     except (OSError, UnicodeError) as error:
         raise UxLintError("Git 파일 상태를 확인할 수 없습니다") from error
@@ -749,7 +757,7 @@ def added_lines(root: Path, base: str, files: Mapping[str, Path]) -> dict[str, s
     for relative, path in files.items():
         if not _is_tracked(root, relative):
             try:
-                source = path.read_text(encoding="utf-8")
+                source = _read_text_preserving_newlines(path)
                 line_count = source.count("\n") + (1 if source and not source.endswith("\n") else 0)
             except (OSError, UnicodeError) as error:
                 raise UxLintError("검사 파일을 읽을 수 없습니다") from error
@@ -774,7 +782,7 @@ def added_lines(root: Path, base: str, files: Mapping[str, Path]) -> dict[str, s
 
 def load_baseline(path: Path) -> list[dict[str, object]]:
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(_read_text_preserving_newlines(path))
     except (OSError, UnicodeError, ValueError, RecursionError, json.JSONDecodeError) as error:
         raise UxLintError("baseline JSON을 읽을 수 없습니다") from error
     if not isinstance(data, dict) or data.get("schema") != "kor-travel-common.ux-baseline.v1":
