@@ -110,6 +110,37 @@ window.confirm('확인');
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout)["findings"], [])
 
+    def test_mdx_multiline_jsx_and_blockquote_jsx_templates_are_checked(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "fixture.mdx"
+            fixture.write_text(
+                "export const X = () => (\n"
+                "  <div\n"
+                "    className={\n"
+                "      `outline-none`\n"
+                "    }\n"
+                "  />\n"
+                ");\n"
+                "> <div className={\n"
+                "  classes`outline-none`\n"
+                "} />\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            findings = json.loads(result.stdout)["findings"]
+            self.assertEqual(sum(item["pattern"] == "P6" for item in findings), 2)
+
+    def test_mdx_two_backtick_inline_code_span_is_ignored(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "fixture.mdx"
+            fixture.write_text("Example: `` `outline-none window.confirm()` ``\n", encoding="utf-8")
+            result = self.run_tool(root, "--root", root, "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["findings"], [])
+
     def test_escaped_template_text_remains_scannable(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)

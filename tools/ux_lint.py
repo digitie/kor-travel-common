@@ -70,27 +70,44 @@ def _public_path(value: str) -> str:
     return _PRIVATE_ADDRESS_PART.sub("<redacted>", redacted)
 
 
-def _find_template_end(text: str, start: int) -> int:
-    """backtick 문자열의 끝을 찾아 닫히지 않은 경우 입력 끝을 반환한다."""
+def _find_backtick_run_end(text: str, start: int, run_length: int) -> int:
+    """같은 길이의 backtick delimiter 끝을 찾아 닫히지 않으면 끝을 반환한다."""
 
-    index = start + 1
+    delimiter = "`" * run_length
+    index = start + run_length
     while index < len(text):
-        if text[index] == "\\":
+        if text[index] == "\\" and run_length == 1:
             index += 2
             continue
-        if text[index] == "`":
-            return index
+        if text.startswith(delimiter, index):
+            run = 0
+            while index + run < len(text) and text[index + run] == "`":
+                run += 1
+            if run == run_length:
+                return index
+            index += run
+            continue
         index += 1
     return len(text)
+
+
+def _find_template_end(text: str, start: int) -> int:
+    """단일 backtick template의 끝을 찾아 닫히지 않으면 끝을 반환한다."""
+
+    return _find_backtick_run_end(text, start, 1)
 
 
 def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
     """MDX의 Markdown code span과 JSX/JavaScript template을 구분한다."""
 
     line_start = text.rfind("\n", 0, start) + 1
-    prefix = text[line_start:start].rstrip()
-    if not prefix or prefix.lstrip().startswith(">"):
-        return False
+    line_prefix = text[line_start:start]
+    leading = line_prefix.lstrip()
+    if leading.startswith(">"):
+        leading = leading[1:].lstrip()
+        if not re.search(r"(?:[A-Za-z_$][\w$-]*\s*=\s*\{|<[A-Za-z])", leading):
+            return False
+    prefix = leading.rstrip()
 
     # JSX 속성의 `{...}` 안에서는 tag 이름·배열·삼항식·computed tag를
     # 구분하지 않고 모두 JavaScript template으로 취급한다. Markdown 본문은
@@ -100,6 +117,16 @@ def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
     if re.search(r"<(?:[A-Za-z][\w.-]*|[A-Z][\w.-]*)[^>]*\{[^{}]*$", prefix):
         return True
 
+    # JSX/ESM 식이 여러 줄로 끊겨도 파일 앞부분의 열린 expression과
+    # 선언 문맥을 유지한다. 마지막 중괄호가 열린 속성보다 뒤에 있으면
+    # Markdown 본문의 일반적인 `{...}` 인용은 실행 코드로 바꾸지 않는다.
+    before = text[:start]
+    if re.search(r"[A-Za-z_$][\w$-]*\s*=\s*\{[^{}]*$", before, re.S):
+        return True
+    statement = before[max(before.rfind(";"), before.rfind("\n\n")) + 1 :]
+    if line_prefix != line_prefix.lstrip() and re.search(r"\b(?:export\s+)?(?:const|let|var)\b", statement) and "=" in statement:
+        return True
+
     # MDX ESM/JavaScript 선언의 값 template과 return/template tag도 실행
     # 문맥이다. 선언의 오른쪽에 이미 식이 시작됐는지 확인해 `Example: `...
     # `` 같은 문장형 Markdown을 실행 코드로 오인하지 않는다.
@@ -107,7 +134,7 @@ def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
         return True
     if re.search(r"(?:\breturn|=>)\s+[^\n]*$", prefix):
         return True
-    if prefix[-1] in "={([,?:":
+    if prefix and prefix[-1] in "={([,?:":
         return bool(re.search(r"(?:className|style|\b(?:const|let|var|return|export)\b|=>|<[A-Za-z])", prefix))
     return False
 
@@ -260,12 +287,23 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                 index = stop
                 continue
         if char == "`":
-            if ignore_backticks and text.startswith("```", index):
+            run_length = 0
+            while index + run_length < len(text) and text[index + run_length] == "`":
+                run_length += 1
+            if ignore_backticks and run_length >= 3:
                 segment, stop = _mask_mdx_fence(text, index, "`")
                 if stop != index:
                     output[index:stop] = list(segment)
                     index = stop
                     continue
+            if ignore_backticks and run_length >= 2:
+                end = _find_backtick_run_end(text, index, run_length)
+                stop = min(end + run_length, len(text)) if end < len(text) else len(text)
+                for offset in range(index, stop):
+                    if text[offset] != "\n":
+                        output[offset] = " "
+                index = stop
+                continue
             end = _find_template_end(text, index)
             executable = not ignore_backticks or _is_executable_mdx_template(text, index, end)
             stop = min(end + 1, len(text))

@@ -105,6 +105,18 @@ class ContrastTests(unittest.TestCase):
             result = self.run_tool(TOKENS, override, "--json")
             self.assertEqual(result.returncode, 2)
 
+    def test_selector_values_keep_case_and_quoted_spaces(self):
+        with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
+            for index, selector in enumerate((":root:where( .dark )", ".DARK", "[data-theme='d ark']")):
+                with self.subTest(selector=selector):
+                    override = Path(directory) / f"unsupported-{index}.css"
+                    override.write_text(
+                        f":root {{ --kt-brand: #fff; --kt-brand-foreground: #fff; }}\n{selector} {{ --kt-brand: #000; }}\n",
+                        encoding="utf-8",
+                    )
+                    result = self.run_tool(TOKENS, override, "--dark", "--json")
+                    self.assertEqual(result.returncode, 2)
+
     def test_css_scope_and_media_boundaries_are_explicit(self):
         with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
             override = Path(directory) / "override.css"

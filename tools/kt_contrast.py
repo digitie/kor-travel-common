@@ -163,37 +163,59 @@ def _split_selectors(selector: str) -> list[str]:
     return parts
 
 
+def _selector_has_compound_space(selector: str) -> bool:
+    """selector compound 밖의 공백이 하위 요소 결합자인지 확인한다."""
+
+    depth = 0
+    quote: str | None = None
+    for char in selector:
+        if quote:
+            if char == quote:
+                quote = None
+            continue
+        if char in "\"'":
+            quote = char
+        elif char in "([":
+            depth += 1
+        elif char in ")]" and depth:
+            depth -= 1
+        elif char.isspace() and depth == 0:
+            return True
+    return False
+
+
+def _compact_selector(selector: str) -> str:
+    """문법 공백만 제거하고 속성 값 안의 공백은 보존한다."""
+
+    output: list[str] = []
+    quote: str | None = None
+    for char in selector:
+        if quote:
+            output.append(char)
+            if char == quote:
+                quote = None
+        elif char in "\"'":
+            quote = char
+            output.append(char)
+        elif not char.isspace():
+            output.append(char)
+    return "".join(output).replace('"', "'")
+
+
 def _selector_rules(selector: str, parent_mode: str | None) -> list[tuple[str, int]]:
     """지원하는 전역 선택자와 specificity를 반환한다."""
 
     rules: list[tuple[str, int]] = []
     for raw_part in _split_selectors(selector):
-        normalized = re.sub(r"\s+", " ", raw_part.strip().lower())
+        normalized = re.sub(r"\s+", " ", raw_part.strip())
         if not normalized:
             continue
         # 공백이 compound selector 내부에 있으면 하위 요소 선택자이므로
         # 전역 토큰 규칙으로 승격하지 않는다. 속성 선택자와 :not() 안의
         # 공백은 CSS 문법상 허용되므로 괄호·대괄호 밖에서만 검사한다.
-        depth = 0
-        has_compound_space = False
-        quote: str | None = None
-        for char in normalized:
-            if quote:
-                if char == quote:
-                    quote = None
-                continue
-            if char in "\"'":
-                quote = char
-            elif char in "([":
-                depth += 1
-            elif char in ")]" and depth:
-                depth -= 1
-            elif char.isspace() and depth == 0:
-                has_compound_space = True
-                break
-        if has_compound_space:
+        if _selector_has_compound_space(normalized):
             continue
-        compact = re.sub(r"\s+", "", normalized).replace('"', "'")
+        compact = _compact_selector(normalized)
         # 토큰 계약은 전역 루트와 명시적 다크 루트만 허용한다. `.dark .button`처럼
         # 하위 요소에만 적용되는 고 specificity 선언을 전역 토큰으로 승격하지 않는다.
         if compact in {":root", ":root:root"}:
@@ -302,13 +324,14 @@ def _parse_blocks(text: str, parent_mode: str | None = None) -> Iterable[tuple[s
         else:
             direct_body = _mask_nested_blocks(body)
             rules = _selector_rules(selector, parent_mode)
-            if (
-                not rules
-                and re.search(r"--kt-[\w-]+\s*:", _strip_css_strings(direct_body), re.ASCII)
-                and not re.search(r"\s", selector.strip())
-                and not _selector_rules(selector, None)
-            ):
-                raise ContrastError("지원하지 않는 토큰 선택자입니다")
+            if re.search(r"--kt-[\w-]+\s*:", _strip_css_strings(direct_body), re.ASCII):
+                for raw_part in _split_selectors(selector):
+                    if (
+                        raw_part.strip()
+                        and not _selector_has_compound_space(raw_part.strip())
+                        and not _selector_rules(raw_part, None)
+                    ):
+                        raise ContrastError("지원하지 않는 토큰 선택자입니다")
             for mode, specificity in rules:
                 yield mode, direct_body, specificity
         index = cursor
