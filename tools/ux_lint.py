@@ -513,15 +513,11 @@ def _markdown_has_fence_before(text: str, start: int, boundary: int) -> bool:
     return _markdown_fence_before(text, start, boundary) is not None
 
 
-def _mask_inline_opener_line(text: str, start: int, run_length: int) -> tuple[str, int]:
-    """block fence 앞 inline span의 delimiter만 가리고 다음 줄에서 재개한다."""
+def _mask_inline_opener_delimiter(text: str, start: int, run_length: int) -> tuple[str, int]:
+    """block fence 앞 inline span의 delimiter 뒤에서 즉시 lexer를 재개한다."""
 
-    line_end = _find_markdown_line_terminator(text, start, len(text))
-    line_stop = _markdown_line_terminator_end(text, line_end)
-    segment = list(text[start:line_stop])
-    for offset in range(min(run_length, len(segment))):
-        segment[offset] = " "
-    return "".join(segment), line_stop
+    stop = min(start + run_length, len(text))
+    return " " * (stop - start), stop
 
 
 def _mask_unclosed_inline_span(output: list[str], text: str, start: int, run_length: int) -> int:
@@ -532,7 +528,9 @@ def _mask_unclosed_inline_span(output: list[str], text: str, start: int, run_len
     scan_boundary = fence_start if fence_start is not None else boundary
     content_start = start + run_length
     resume_candidates: list[int] = []
-    remainder = text[content_start:scan_boundary]
+    remainder = _mask_comments_and_backticks(
+        text[content_start:scan_boundary], ignore_backticks=False
+    )
     for pattern in (
         r"<(?:[A-Za-z]|>)|(?:^|(?<=[\r\n]))[ \t]*(?:export\s+)?(?:const|let|var|return)\b",
     ):
@@ -717,12 +715,7 @@ def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
                 if not _is_markdown_line_terminator(char):
                     segment[offset] = " "
             return "".join(segment), stop
-        line_stop = _markdown_line_terminator_end(text, opener_end)
-        segment = list(text[start:line_stop])
-        for offset, char in enumerate(segment):
-            if char == "`":
-                segment[offset] = " "
-        return "".join(segment), line_stop
+        return _mask_inline_opener_delimiter(text, start, opener_run)
     cursor = _markdown_line_terminator_end(text, opener_end)
     closing = len(text)
     while cursor < len(text):
@@ -867,7 +860,7 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                     index = _mask_unclosed_inline_span(output, text, index, run_length)
                     continue
                 if _markdown_has_fence_before(text, index, end):
-                    segment, stop = _mask_inline_opener_line(text, index, run_length)
+                    segment, stop = _mask_inline_opener_delimiter(text, index, run_length)
                     output[index:stop] = list(segment)
                     index = stop
                     continue
@@ -885,7 +878,7 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                     index = _mask_unclosed_inline_span(output, text, index, 1)
                     continue
                 if _markdown_has_fence_before(text, index, end):
-                    segment, stop = _mask_inline_opener_line(text, index, 1)
+                    segment, stop = _mask_inline_opener_delimiter(text, index, 1)
                     output[index:stop] = list(segment)
                     index = stop
                     continue

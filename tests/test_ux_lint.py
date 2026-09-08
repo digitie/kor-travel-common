@@ -693,6 +693,27 @@ window.confirm('확인');
             self.assertEqual([item["file"] for item in findings], ["before-fence.mdx"])
             self.assertEqual([item["pattern"] for item in findings], ["P8"])
 
+    def test_mdx_inline_fence_boundary_masks_comments_on_opener_and_unclosed_lines(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            opener_comment = root / "opener-comment.mdx"
+            opener_comment.write_text(
+                "Example `literal {/* window.confirm(\"opener\") */}\n"
+                "~~~js\nclose `\n~~~\n",
+                encoding="utf-8",
+            )
+            unclosed_comment = root / "unclosed-comment.mdx"
+            unclosed_comment.write_text(
+                "Example `literal\n"
+                "{/* <div className=\"outline-none\"/> "
+                "{window.confirm(\"unclosed\")} */}\n"
+                "~~~js\ncode\n~~~\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["findings"], [])
+
     def test_mdx_tilde_info_string_allows_backtick(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
