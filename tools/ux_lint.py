@@ -507,6 +507,18 @@ def _markdown_has_fence_before(text: str, start: int, boundary: int) -> bool:
     return False
 
 
+def _mask_inline_opener_line(text: str, start: int) -> tuple[str, int]:
+    """block fence 앞 inline span의 opener 줄만 가리고 다음 줄에서 재개한다."""
+
+    line_end = _find_markdown_line_terminator(text, start, len(text))
+    line_stop = _markdown_line_terminator_end(text, line_end)
+    segment = list(text[start:line_stop])
+    for offset, char in enumerate(segment):
+        if not _is_markdown_line_terminator(char):
+            segment[offset] = " "
+    return "".join(segment), line_stop
+
+
 def _mask_unclosed_inline_span(output: list[str], text: str, start: int, run_length: int) -> int:
     """닫히지 않은 문서 span을 가리되 뒤의 실행 가능한 태그는 계속 검사한다."""
 
@@ -847,6 +859,11 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                 if end is None:
                     index = _mask_unclosed_inline_span(output, text, index, run_length)
                     continue
+                if _markdown_has_fence_before(text, index, end):
+                    segment, stop = _mask_inline_opener_line(text, index)
+                    output[index:stop] = list(segment)
+                    index = stop
+                    continue
                 stop = min(end + run_length, len(text))
                 for offset in range(index, stop):
                     if not _is_markdown_line_terminator(text[offset]):
@@ -859,6 +876,11 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                 end = _find_inline_span_end(text, index, 1)
                 if end is None:
                     index = _mask_unclosed_inline_span(output, text, index, 1)
+                    continue
+                if _markdown_has_fence_before(text, index, end):
+                    segment, stop = _mask_inline_opener_line(text, index)
+                    output[index:stop] = list(segment)
+                    index = stop
                     continue
                 stop = min(end + 1, len(text))
                 for offset in range(index, stop):

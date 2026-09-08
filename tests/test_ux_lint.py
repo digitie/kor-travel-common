@@ -587,6 +587,61 @@ window.confirm('확인');
                 self.assertEqual([item["file"] for item in findings], ["prose.mdx"])
                 self.assertEqual([item["pattern"] for item in findings], ["P8"])
 
+    def test_mdx_inline_runs_stop_at_intermediate_block_fence(self):
+        for prefix in ("", "> ", ">> "):
+            for run in (1, 2, 3, 4):
+                for fence in ("~~~js", "`" * max(3, run + 1) + "js"):
+                    for separator in ("\n", "\r\n", "\r"):
+                        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                            root = Path(directory)
+                            fixture = root / "short-inline.mdx"
+                            delimiter = "`" * run
+                            fixture.write_bytes(
+                                (
+                                    f"{prefix}Example {delimiter}literal{separator}"
+                                    f"{prefix}{{window.confirm(\"outside\")}}{separator}"
+                                    f"{prefix}{fence}{separator}"
+                                    f"{prefix}close {delimiter}{separator}"
+                                    f"{prefix}{'~~~'}{separator}"
+                                ).encode("utf-8")
+                            )
+                            result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                            self.assertEqual(
+                                result.returncode,
+                                1,
+                                f"{prefix=!r} {run=} {fence=!r} {separator=!r} {result.stderr}",
+                            )
+                            self.assertEqual(
+                                [item["pattern"] for item in json.loads(result.stdout)["findings"]],
+                                ["P8"],
+                            )
+
+    def test_mdx_inline_short_runs_keep_normal_closing_and_indent_boundaries(self):
+        for run in (1, 2):
+            with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                root = Path(directory)
+                fixture = root / "short-inline.mdx"
+                delimiter = "`" * run
+                fixture.write_text(
+                    f"Example {delimiter}literal\n"
+                    f"{{window.confirm(\"hidden\")}}\n"
+                    f"    ~~~js\n"
+                    f"close {delimiter}\n"
+                    f"    ~~~\n",
+                    encoding="utf-8",
+                )
+                normal = root / "normal-inline.mdx"
+                normal.write_text(
+                    f"Example {delimiter}literal {delimiter}\n"
+                    f"{{window.confirm(\"outside\")}}\n",
+                    encoding="utf-8",
+                )
+                result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                self.assertEqual(result.returncode, 1, result.stderr)
+                findings = json.loads(result.stdout)["findings"]
+                self.assertEqual([item["file"] for item in findings], ["normal-inline.mdx"])
+                self.assertEqual([item["pattern"] for item in findings], ["P8"])
+
     def test_mdx_tilde_info_string_allows_backtick(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
