@@ -714,6 +714,84 @@ window.confirm('확인');
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout)["findings"], [])
 
+    def test_mdx_prose_url_does_not_start_javascript_line_comment(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "url.mdx"
+            fixture.write_text(
+                "Example `literal https://example.invalid {window.confirm(\"x\")}\n"
+                "~~~js\nclose `\n~~~\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertEqual(
+                [item["pattern"] for item in json.loads(result.stdout)["findings"]],
+                ["P8"],
+            )
+
+    def test_mdx_prose_apostrophe_does_not_disable_fence_masking(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "apostrophe.mdx"
+            fixture.write_text(
+                "Example `don't\n"
+                "~~~js\n{window.confirm(\"x\")}\nclose `\n~~~\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["findings"], [])
+
+    def test_mdx_prose_apostrophe_keeps_block_comment_masking(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "comment.mdx"
+            fixture.write_text(
+                "Example `literal don't {/* <div className=\"outline-none\"/> "
+                "{window.confirm(\"x\")} */}\n"
+                "~~~js\nclose `\n~~~\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["findings"], [])
+
+    def test_mdx_prose_boundaries_cover_containers_runs_and_line_endings(self):
+        for prefix in ("", "> ", ">> "):
+            for run in (1, 2):
+                for separator in ("\n", "\r\n", "\r"):
+                    with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                        root = Path(directory)
+                        delimiter = "`" * run
+                        url = root / "url.mdx"
+                        url.write_bytes(
+                            (
+                                f"{prefix}Example {delimiter}literal https://example.invalid "
+                                f"{{window.confirm(\"x\")}}{separator}"
+                                f"{prefix}~~~js{separator}"
+                                f"{prefix}close {delimiter}{separator}"
+                                f"{prefix}~~~{separator}"
+                            ).encode("utf-8")
+                        )
+                        apostrophe = root / "apostrophe.mdx"
+                        apostrophe.write_bytes(
+                            (
+                                f"{prefix}Example {delimiter}don't{separator}"
+                                f"{prefix}~~~js{separator}"
+                                f"{prefix}{{window.confirm(\"x\")}}{separator}"
+                                f"{prefix}close {delimiter}{separator}"
+                                f"{prefix}~~~{separator}"
+                            ).encode("utf-8")
+                        )
+                        result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                        self.assertEqual(result.returncode, 1, result.stderr)
+                        findings = json.loads(result.stdout)["findings"]
+                        self.assertEqual(
+                            [(item["file"], item["pattern"]) for item in findings],
+                            [("url.mdx", "P8")],
+                        )
+
     def test_mdx_tilde_info_string_allows_backtick(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
