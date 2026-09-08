@@ -1,6 +1,6 @@
 # T-010 재사용 워크플로 1단계(`versions-check`·`contrast-check`·`docs-check`) + `workflows-selftest` fixture + `consumers.pins.json` + consumer-smoke
 
-- 상태: IN_REVIEW
+- 상태: IN_PROGRESS
 - 우선순위: P1
 - Gate: selftest
 - 선행: T-005, T-009, T-101, T-103
