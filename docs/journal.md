@@ -2,6 +2,22 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-09 (Codex, T-010 최종 PASS·PR #21 merge 대기)
+
+T-010의 반복 no-go 원인은 consumer checkout pin과 common package artifact 원천을 하나의 repository 계약으로 취급한 점, GPL tarball 고지를 metadata 문자열만으로 신뢰한 점, 미등록 versions repo를 report로 낮춘 점, 그리고 closure evidence를 immutable candidate와 분리하지 않은 점이었다. 구현은 checkout pin과 common artifact URL을 분리하고 canonical GPL `LICENSE` 본문·`NOTICE`·`THIRD_PARTY_NOTICES.md`·repository provenance를 실제 tarball에서 검증하며, unknown repo와 fixture base/caller/common 저장소 조건을 fail-closed로 고정했다. 소비자 저장소는 수정하지 않았다.
+
+기능 후보 `f220bb5aeae860972b80d4c07fe9104f8e69c968`(tree `68c8a8f19517dacf0a53d86e1efb5d85e22f464f`) 이후 문서-only closure `5b77390c28e117386195fd8f37161665e5f77daa`(tree `9764ae596592c76474245d4f28ed1a3ff5c04443`)에서 A 실행 `A-T010-final-a-5b77390`, B 실행 `T010-B-20260909-final-5b77390`가 동일 최종 manifest SHA `c9a726502eb465bdd14e352d69b23f085b94a24d00b481d4a8010da487a2e38e`를 기준으로 독립 재검토해 모두 PASS했다. 신규·잔여 P0/P1/P2는 0건이다. A가 재현한 task evidence 수치 stale(P1)와 B가 지적한 closure CI·candidate 표기(P2)는 `0bc375d`와 `5b77390`에서 정정했다.
+
+로컬 최종 closure tree 검증은 전체 unittest 337건, consumer 10건, versions 88건, 문서 링크 524/2576, plan 106, SPDX 68, redaction 673/0, `git diff --check` 모두 성공했다. reviewer 실행 당시 수치 522/2570·671은 각 원본 evidence에 보존했다. closure CI [34289912536](https://github.com/digitie/kor-travel-common/actions/runs/34289912536)와 [34289912727](https://github.com/digitie/kor-travel-common/actions/runs/34289912727)도 모두 성공했다. 실제 소비자 dispatch/build/e2e·주간 smoke, npm/PyPI·GitHub Release 게시, actionlint는 `NOT_RUN`이며 T-010a 또는 사용자 범위로 남겼다. PR #21은 ready 전환과 merge 후 main CI 확인 뒤 대기한다.
+
+## 2026-09-09 (Codex, T-010 재사용 workflow·consumer-smoke 구현 중)
+
+사용자 재개 지시에 따라 `codex/t010-reusable-workflows`에서 T-010을 시작했다. common만 수정했으며 소비자 저장소 checkout은 읽지 않았다. 실제 도구 CLI를 다시 읽어 `versions-check`는 registry 소유 report 기본을 유지하고, `docs-check` redaction은 caller Git root의 `--scope`, `contrast-check`는 `kt_contrast.py` report를 사용하도록 연결했다. 세 workflow는 caller head SHA와 `common-ref` 태그/SHA를 별도로 checkout하고 permissions·concurrency·timeout·`ubuntu-24.04`·액션 SHA pin을 갖는다.
+
+`consumers.pins.json`에는 조사 기준의 map(`c494e227e010565be295de3f9670b2f7c8c20944`)·weather(`6003da995fa4b35799f9dadc406c6ba2878bfbae`)·airport(`2bb1111fc322843de40a35276613feb4d67bac5b`) source만 등록했다. pinvi는 L6 외부 LICENSE 반영 전이라 제외했다. `tests/test_consumer_pins.py`는 정상 tarball의 실제 npm 설치, digest mismatch, 승인 거부, 누락 파일, `--engine-strict` 설치 실패를 모두 재현한다. node fixture는 React 18.3.1, Python fixture는 Python 3.10/FastAPI 0.114.0으로 `BELOW_FLOOR` report(exit 0)를 확인했다. 대비 override는 의도적 미달을 report로 남긴다.
+
+로컬 결과: `python -B -X utf8 -m unittest discover -s tests -p 'test_*.py'` 329 tests OK, `validate_document_links.py` 516/2564 오류 0, `validate_plan.py` 106 오류 0, `check_spdx.py` 68 오류 0, `check_prod_redaction.py --all` 발견 0, `git diff --check` OK. GitHub Actions `workflows-selftest`와 consumer-smoke 실제 dispatch는 candidate push 뒤 실행하며, map·weather 실제 consumer build/e2e·npm/PyPI 게시·주간 실행은 `NOT_RUN(외부 선행; T-010a)`이다.
+
 ## 2026-09-08 (Codex, T-103 반복 리뷰 근본 수정·최종 PASS·병합 후 대기)
 
 수동 MDX lexer에 반례별 조건을 추가한 것이 36회 반복의 중심 원인이었다. 상태 스택 교체도 정상 ESM·정규식·비교 연산자를 모두 소유하지 못해 BLOCK이었다. ADR-016으로 MDX 검사에만 Node 의존을 허용하고 직접 문법 해석을 제거했다. 고정 파서가 구문 트리를 제공하며 입력 오류는 exit2, 사용자 소스는 실행하지 않는다. 마지막 BOM offset 차이는 모든 AST 범위를 원문 좌표로 변환해 해결했다. 누적 자료·변형·Git CLI·정확한 원문 마스킹과 실패 주입을 저장소 시험에 남겼다. 실제 파서와 다른 기존 시험 기대값도 문법 근거로 정정했다.

@@ -1,6 +1,6 @@
 # kor-travel-common CI·배포·운영 규약
 
-이 문서는 [규칙 문서 색인](README.md)에 속한 재사용 워크플로 계약·CI 하드닝·포트·명명·컨테이너 최소 규약·redaction·common 자체 CI의 정본이다. 정본 지위: **확정 초안** — [브리프](../plan/design-brief.md) D-18·D-03·D-06·D-07을 규칙 ID `CI-n`으로 옮긴 것이며, 워크플로 실물(T-009 하드닝·T-010 1단계·T-309 2단계·T-401 3단계)과 포트 확정(T-014)에서 대조해 확정하는 task가 남아 있다. 마지막 갱신: 2026-09-07, T-009 구현 대조 중.
+이 문서는 [규칙 문서 색인](README.md)에 속한 재사용 워크플로 계약·CI 하드닝·포트·명명·컨테이너 최소 규약·redaction·common 자체 CI의 정본이다. 정본 지위: **확정 초안** — [브리프](../plan/design-brief.md) D-18·D-03·D-06·D-07을 규칙 ID `CI-n`으로 옮긴 것이며, 2·3단계 워크플로 실물(T-309·T-401)과 포트 확정(T-014)에서 대조해 확정하는 task가 남아 있다. 1단계 실물은 T-010에서 대조했다. 마지막 갱신: 2026-09-09, T-010 구현 대조.
 
 릴리스 절차(태그·rc·CHANGELOG)는 [release](../runbooks/release.md), 소비자 도입 절차는 [consumer adoption](../runbooks/consumer-adoption.md), 버전 값은 [versions](versions.md)·`versions.json`이 정본이다. 이 문서는 계약과 기본값만 정한다.
 
@@ -35,7 +35,7 @@
 | ID | 규칙 | 근거 |
 |---|---|---|
 | CI-1 | 호출 형식은 `uses: digitie/kor-travel-common/.github/workflows/<name>.yml@<tag \| sha>`이다. `@main` 등 이동 참조는 금지한다(선행 보고서 §8, D-07 `FLOATING_REF`). 태그 이름은 [release](../runbooks/release.md)가 정한다(후보 `ci-vX.Y.Z`) | `ci` §2.3; D-11 |
-| CI-2 | 모든 재사용 워크플로는 `job-name` input을 열어 둔다. 앱은 branch protection·ruleset의 required check 문자열(map 8개·pinvi 5개)과 같은 이름을 넘겨 보전한다 | `ci` §1.1·§2.3; D-18 |
+| CI-2 | 모든 재사용 워크플로는 `name` input을 열어 둔다. 앱은 branch protection·ruleset의 required check 문자열(map 8개·pinvi 5개)과 같은 값을 넘겨 보전한다 | `ci` §1.1·§2.3; D-18 |
 | CI-3 | 도입은 앱 기존 워크플로에 job 추가 방식이다. 앱 고유 job(map `ci.yml` matrix·integration·fixture, pinvi provenance·contract-pin·staleness·e2e·mobile·codex, weather `promtool`, airport `live-e2e`)은 유지한다 | `ci` §2.2 |
 | CI-4 | 운영 시스템을 호출하는 job(airport `live-e2e`가 prod 도메인 호출)은 required check로 두지 않기를 권고하고, `workflow_dispatch` 또는 스케줄로 분리한다 | `ci` §1.1·§2.2·열린 질문 10 |
 | CI-5 | cross-repo 호출은 common 저장소가 공개(O-15 기본값)라는 전제다. 비공개일 때의 fallback은 `actions/checkout`으로 `repository: digitie/kor-travel-common`, `ref: <tag>`, `path: .kor-travel-common`을 체크아웃하고 `tools/*.py`를 직접 실행하는 방식이며 [consumer adoption](../runbooks/consumer-adoption.md)에 절차를 둔다 | `ci` §2.3 미확인 항목 |
@@ -45,9 +45,9 @@
 
 | 단계 | 워크플로 | 주요 inputs(기본값) | steps | task |
 |---|---|---|---|---|
-| Phase 1 | `versions-check.yml` | `manifest-path`(`kor-travel-common.lock.json`), `working-directory`, `common-ref`, `job-name` | checkout(head SHA) → common 도구 체크아웃 → `tools/check_versions.py` → Markdown 표 + JSON + `$GITHUB_STEP_SUMMARY`. 모드(report/warn/fail)는 input이 아니라 common `versions.json` `consumers.<repo>.enforce`가 소유(D-07·D-30) | T-010 |
-| Phase 1 | `contrast-check.yml` | `tokens-css`, `override-css`, `baseline`(`contrast-baseline.json`), `dark`(bool, 기본 false), `job-name` | `tools/kt_contrast.py` report; 신규 미달만 fail(D-12). `ux_lint`(`tools/ux_lint.py --base <sha>`) 옵션 step은 T-103에서 확정(후보) | T-010 |
-| Phase 1 | `docs-check.yml` | `link-check`(true), `redaction-scope`(`docs/`), `redaction-patterns-file`(`.prod-redaction-patterns`), `task-ledger`(false), `job-name` | `tools/validate_document_links.py` → redaction guard(패턴 파일 입력) → `tools/validate_plan.py`(조건) | T-010 |
+| Phase 1 | `versions-check.yml` | `name`, `repo`, `lockfiles`(JSON 경로 배열), `common-ref`(40자 SHA 또는 `vX.Y.Z`/`ci-vX.Y.Z` release tag), `common-repository`(기본 common) | caller head SHA checkout → common 고정 ref checkout → lockfile 목록의 정확한 파일만 검사 → `tools/check_versions.py` report + JSON + `$GITHUB_STEP_SUMMARY`. 등록 소비자는 `versions.json` key/alias를 확인하고, 미등록 `common-ci-report-fixture` 식별자는 `common-repository`와 호출자 저장소가 같은 workflows-selftest에서만 명시적 flag로 허용한다(D-07·D-30) | T-010 |
+| Phase 1 | `contrast-check.yml` | `name`, `common-ref`, `common-repository`(기본 common), `tokens-css`(`.kor-travel-common/packages/tokens/tokens.css`), `override-css`, `baseline`, `dark`(bool, 기본 false) | caller/common 고정 checkout → 입력 경로 검증 → `tools/kt_contrast.py` report. `--fail-new`를 주지 않아 baseline 신규 미달도 report로 남기며 승격은 소비자 task가 소유 | T-010 |
+| Phase 1 | `docs-check.yml` | `name`, `common-ref`, `common-repository`(기본 common), `link-check`(true), `redaction-scope`(`.`), `redaction-patterns-file`(`.prod-redaction-patterns`), `task-ledger`(false) | caller/common 고정 checkout → 경로 검증 → `tools/validate_document_links.py` → `check_prod_redaction.py --all` → `validate_plan.py`(조건) | T-010 |
 | Phase 3 | `openapi-drift.yml` | `python-version`, `installer`(`uv`), `install-args`, `export-command`, `spec-paths`(list), `mode`(`check` \| `git-diff`), `job-name` | install → export → `--check` 또는 `git diff --exit-code -- <spec-paths>` | T-309 |
 | Phase 3 | `typegen-drift.yml` | `node-version`(22), `npm-version`(빈값=동봉), `working-directory`, `check-command`(`npm run gen:types:check`), `job-name` | setup-node → `npm ci --no-audit --no-fund` → check-command | T-309 |
 | Phase 4 | `node-quality.yml` | `node-version`(22), `npm-version`, `working-directory`, `workspaces`(bool), `lockfile-integrity`(bool), `audit-level`(`high`), `ignore-scripts`(bool), `lint-max-warnings`(0), `typegen-check-command`, `test`(bool), `build-env`(JSON), `pre-lint-command`, `job-name` | checkout → setup-node(cache) → npm 핀(조건) → lockfile integrity(설치 전) → `npm ci` → `npm audit --audit-level=high --omit=dev`(차단) + dev 포함(비차단) → typegen(조건) → pre-lint 훅 → lint → type-check → test → build | T-401 |
@@ -57,7 +57,7 @@
 
 ### 3.3 호출 예시
 
-앱 워크플로에 job을 추가하는 형태다. `uses:`는 태그(또는 SHA)로 고정하고 `job-name`으로 required check 이름을 보전한다.
+앱 워크플로에 job을 추가하는 형태다. `uses:`는 태그(또는 SHA)로 고정하고 `name`으로 required check 이름을 보전한다. common이 비공개인 환경에서는 같은 입력을 유지한 채 `actions/checkout`으로 `digitie/kor-travel-common`을 `path: .kor-travel-common`에 고정 checkout하는 fallback을 소비자 workflow에 둔다.
 
 ```yaml
 jobs:
@@ -66,8 +66,23 @@ jobs:
   versions-check:
     uses: digitie/kor-travel-common/.github/workflows/versions-check.yml@ci-v0.1.0
     with:
-      manifest-path: kor-travel-common.lock.json
-      job-name: versions-check
+      name: versions-check
+      repo: kor-travel-map
+      lockfiles: '["package-lock.json"]'
+      common-ref: ci-v0.1.0
+  docs-check:
+    uses: digitie/kor-travel-common/.github/workflows/docs-check.yml@ci-v0.1.0
+    with:
+      name: docs-check
+      common-ref: ci-v0.1.0
+      redaction-scope: docs/
+  contrast-check:
+    uses: digitie/kor-travel-common/.github/workflows/contrast-check.yml@ci-v0.1.0
+    with:
+      name: contrast-check
+      common-ref: ci-v0.1.0
+      override-css: packages/kor-travel-map-admin/frontend/src/app/globals.css
+      baseline: packages/kor-travel-map-admin/frontend/contrast-baseline.json
   openapi-drift:
     uses: digitie/kor-travel-common/.github/workflows/openapi-drift.yml@ci-v0.1.0
     with:
@@ -234,7 +249,7 @@ exit 0은 선택 범위의 패턴 일치가 없거나 명시적 예외로 처리
 | `python-package` | PR, push `main`·`codex/release-*` | `uv build` → wheel 설치 → import 스모크 → starlette 0.4x/1.6 매트릭스 | ubuntu-24.04 | T-302 |
 | `consumer-smoke` | `workflow_dispatch`; 주간은 T-010a 검증 뒤 활성화 | `consumers.pins.json`(role·url·revision, ktdm runtime pin 형식) 패키지별 승인 소비자의 pinned SHA 체크아웃 → tarball 설치 → type-check + `next build` | ubuntu-24.04 | 실행기 T-010, 외부 dispatch T-010a |
 | `secret-scan` | PR, push `main`·`codex/release-*` | CI-42 패턴 | ubuntu-24.04 | T-009 |
-| `check-versions` | PR, push `main`·`codex/release-*` | `tools/check_versions.py` report 모드(`FLOATING_REF`·`BLOCKED`·`EXEMPT_EXPIRED`는 `::error::`) | ubuntu-24.04 | T-005·T-009 |
+| `check-versions` | PR, push `main`·`codex/release-*` | `tools/check_versions.py` report 모드(`FLOATING_REF`·`BLOCKED`·`EXEMPT_EXPIRED`는 `::error::`); workflow 입력 repo·lockfiles는 별도 fail-close | ubuntu-24.04 | T-005·T-009 |
 
 **릴리스 후보에도 필요한 실행 경로(ADR-014)**: `docs`·`tools`·`secret-scan`·`check-versions` 및 존재하는 `packages`·`python-package`는 PR 외에 `main`과 `codex/release-*` push에서도 실행한다. release push에서는 path filter나 PR 전용 조건으로 필수 job을 생략하지 않고 `github.sha`의 실제 merge commit을 checkout한다. run의 head SHA와 build/artifact source SHA가 릴리스 evidence의 `RELEASE_SHA`와 같아야 한다. PR head 성공은 다른 merge SHA의 실행으로 세지 않는다. 아래 구현 task가 이를 적용하고, 후보 보존 전에 실행 경로를 확인해야 과거 후보에서 분기한 release branch에서도 사용할 수 있다. 현재 packages/python-package의 미구현은 NOT_RUN이며 해당 발행을 차단한다. T-009의 기반 job은 실제 PR·release push run으로 검증한다.
 
@@ -244,22 +259,30 @@ exit 0은 선택 범위의 패턴 일치가 없거나 명시적 예외로 처리
 
 branch protection의 실제 check 이름과 설정 절차는 [branch protection](../runbooks/branch-protection.md)에 있다. T-009는 설정 문서만 작성하며 원격 ruleset을 적용하지 않는다. check-versions의 표는 [고정 fixture](../../tests/fixtures/version-report/README.md)이며 소비자 실측으로 세지 않는다. 모든 job summary에는 실제 checkout source SHA가 기록된다.
 
-### 9.1 `consumers.pins.json` 형식(후보, T-010)
+### 9.1 `consumers.pins.json` 형식(T-010 확정)
 
-ktdm runtime pin 레지스트리(`kor-travel-docker-manager.runtime-pin-registry.v1`)의 `sources[]{role,url,revision}` 형식을 따른다(`vm` §7.3). 갱신은 PR로만 하고 `revision`은 40자 SHA다.
+ktdm runtime pin 레지스트리(`kor-travel-docker-manager.runtime-pin-registry.v1`)의 `sources[]{role,url,revision}` 형식을 확장한다(`vm` §7.3). 여기서 `url`은 고정 SHA로 checkout할 **소비자 저장소**다. 갱신은 PR로만 하고 `revision`은 40자 소문자 SHA다. `package`는 후보 npm 패키지, `approval.status`는 `approved`, `approval.license`는 `GPL-3.0-or-later`, `approval.task`는 근거 task여야 한다. L6가 닫히지 않은 pinvi source는 등록하지 않는다.
 
 ```json
 {
   "schema": "kor-travel-common.consumer-pins.v1",
-  "updated": "2026-09-06",
+  "updated": "2026-09-09",
   "sources": [
-    { "role": "map-admin", "url": "https://github.com/digitie/kor-travel-map", "revision": "<40-hex>", "path": "packages/kor-travel-map-admin/frontend" },
-    { "role": "pinvi-web", "url": "<pinvi 저장소 URL>", "revision": "<40-hex>", "path": "apps/web" }
+    {
+      "role": "map-tokens",
+      "url": "https://github.com/digitie/kor-travel-map",
+      "revision": "c494e227e010565be295de3f9670b2f7c8c20944",
+      "path": "packages/kor-travel-map-admin/frontend",
+      "package": "@kor-travel/tokens",
+      "approval": { "status": "approved", "task": "T-010", "license": "GPL-3.0-or-later" }
+    }
   ]
 }
 ```
 
 `tools/collect_manifests.py`(T-012)가 같은 파일을 읽어 [integration map](../integration-map.md)을 생성한다(D-19).
+
+`consumer-smoke.yml`은 `workflow_dispatch`만 활성화한다. `role`, candidate tarball `asset-url`·`asset-sha256`, `common-ref`를 받고 `tools/consumer_smoke.py`로 핀·승인·digest·package metadata를 검증한 뒤 pinned SHA checkout → `npm ci` → 후보 tarball 설치 → `type-check` → `next build --webpack`·`next build --turbopack` 순서로 실행한다. 핀의 `url`은 소비자 checkout 원천이고, `asset-url`과 tarball `package.repository`는 `https://github.com/digitie/kor-travel-common`의 패키지 Release에 고정한다. tarball은 common 정본 GPL `LICENSE`, 비어 있지 않은 `NOTICE`·`THIRD_PARTY_NOTICES.md`를 포함해야 한다. 주간 실행과 실제 map·weather dispatch는 T-010a에서 처음 성공한 뒤 별도 PR로 활성화하며, common fixture 성공은 소비자 성공으로 집계하지 않는다.
 
 ## 10. 릴리스 참조
 

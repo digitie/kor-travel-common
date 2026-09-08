@@ -1,0 +1,143 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+name: common versions check
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: "호출 저장소에서 보일 job 이름"
+        required: true
+        type: string
+      repo:
+        description: "versions.json consumers key 또는 alias"
+        required: true
+        type: string
+      lockfiles:
+        description: "호출 저장소 루트 기준 lockfile 경로 JSON 배열"
+        required: true
+        type: string
+      common-ref:
+        description: "검사기에 사용할 불변 commit SHA 또는 semver release tag"
+        required: true
+        type: string
+      common-repository:
+        description: "common source 저장소(owner/name; fork selftest 지원)"
+        required: false
+        default: digitie/kor-travel-common
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: common-versions-${{ github.repository }}-${{ github.ref }}-${{ inputs.name }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: ${{ inputs.name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: 호출 저장소 checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: common checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ inputs.common-repository }}
+          ref: ${{ inputs.common-ref }}
+          path: .kor-travel-common
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Python 설치
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: immutable ref와 lockfile 확인
+        env:
+          COMMON_REF: ${{ inputs.common-ref }}
+          COMMON_REPOSITORY: ${{ inputs.common-repository }}
+          CALLER_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          BASE_REPOSITORY: ${{ github.repository }}
+          REPO: ${{ inputs.repo }}
+          LOCKFILES: ${{ inputs.lockfiles }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$COMMON_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]
+          [[ "$COMMON_REF" =~ ^[0-9a-f]{40}$ || "$COMMON_REF" =~ ^(ci-)?v[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.-]+)?$ ]]
+          python - "$LOCKFILES" "$GITHUB_WORKSPACE" "$REPO" \
+            "$COMMON_REPOSITORY" "$CALLER_REPOSITORY" "$BASE_REPOSITORY" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          try:
+              entries = json.loads(sys.argv[1])
+          except json.JSONDecodeError as exc:
+              raise SystemExit(f"lockfiles JSON 오류: {exc}")
+          if not isinstance(entries, list) or not entries:
+              raise SystemExit("lockfiles는 비어 있지 않은 JSON 배열이어야 합니다")
+          root = Path(sys.argv[2]).resolve()
+          repo = sys.argv[3]
+          common_repository = sys.argv[4]
+          caller_repository = sys.argv[5]
+          base_repository = sys.argv[6]
+          allow_unregistered = (
+              repo == "common-ci-report-fixture"
+              and common_repository.casefold() == caller_repository.casefold()
+              and base_repository.casefold() == "digitie/kor-travel-common"
+          )
+          registry = json.loads((root / ".kor-travel-common" / "versions.json").read_text(encoding="utf-8"))
+          consumers = registry.get("consumers", {})
+          known = set(consumers)
+          for value in consumers.values():
+              known.update(value.get("aliases", []))
+          if not allow_unregistered and repo.lower() not in {value.lower() for value in known}:
+              raise SystemExit("repo가 versions.json consumers key 또는 alias가 아님")
+          for entry in entries:
+              if not isinstance(entry, str) or not entry.strip():
+                  raise SystemExit("lockfiles 항목은 문자열이어야 합니다")
+              path = Path(entry)
+              if path.is_absolute() or "\\" in entry or any(part in {"", ".", ".."} for part in entry.split("/")):
+                  raise SystemExit(f"lockfile 경로가 안전하지 않습니다: {entry}")
+              resolved = (root / path).resolve()
+              if root not in resolved.parents or not resolved.is_file():
+                  raise SystemExit(f"lockfile이 없습니다: {entry}")
+          PY
+
+      - name: 버전 report 실행
+        env:
+          REPO: ${{ inputs.repo }}
+          LOCKFILES: ${{ inputs.lockfiles }}
+          COMMON_REF: ${{ inputs.common-ref }}
+          COMMON_REPOSITORY: ${{ inputs.common-repository }}
+          CALLER_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          BASE_REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .kor-travel-common-ci/versions
+          extra=()
+          if [[ "$REPO" == "common-ci-report-fixture" \
+                && "${COMMON_REPOSITORY,,}" == "${CALLER_REPOSITORY,,}" \
+                && "${BASE_REPOSITORY,,}" == "digitie/kor-travel-common" ]]; then
+            extra+=(--allow-unregistered-fixture)
+          fi
+          python -B -X utf8 .kor-travel-common/tools/check_versions.py \
+            "$GITHUB_WORKSPACE" \
+            --lockfiles "$LOCKFILES" \
+            --registry .kor-travel-common/versions.json \
+            --repo "$REPO" \
+            "${extra[@]}" \
+            --json ".kor-travel-common-ci/versions/report.json"
+          printf '검사 source: `%s`\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          printf 'common ref: `%s`\n' "$COMMON_REF" >> "$GITHUB_STEP_SUMMARY"

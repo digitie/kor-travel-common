@@ -134,6 +134,18 @@ class CheckVersionsTests(unittest.TestCase):
                                str(self.registry_path), "--today", "2026-09-06", *args],
                               capture_output=True, text=True, encoding="utf-8")
 
+    def test_selected_lockfiles_use_exact_declared_paths(self):
+        root = self.root / "selected"
+        root.mkdir()
+        npm_fixture(root, deps={}, engines={"node": ">=22.12"}, installed={})
+        (root / "README.md").write_text("fixture\n", encoding="utf-8")
+        scopes = CV.discover_selected_lockfiles(root, ["package-lock.json"])
+        self.assertEqual([scope.lock_kind for scope in scopes], ["package-lock"])
+        with self.assertRaises(ValueError):
+            CV.discover_selected_lockfiles(root, ["README.md"])
+        with self.assertRaises(ValueError):
+            CV.discover_selected_lockfiles(root, ["package-lock.json", "package-lock.json"])
+
     # --- 버전 파싱·범위 도우미
     def test_blocked_only_unknown_versions_fail_closed(self):
         data = json.loads(json.dumps(REGISTRY))
@@ -1375,7 +1387,8 @@ class CheckVersionsTests(unittest.TestCase):
                        locked={})
         before = snapshot(self.root)
         out_json = self.root / "out" / "report.json"
-        result = self.cli(str(self.repo), "--repo", "a", "--today", "2026-09-06", "--json", str(out_json))
+        result = self.cli(str(self.repo), "--repo", "a", "--mode", "report",
+                          "--today", "2026-09-06", "--json", str(out_json))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("::error title=check_versions::FLOATING_REF", result.stdout)
         self.assertIn("mode=report", result.stdout)
@@ -1384,6 +1397,25 @@ class CheckVersionsTests(unittest.TestCase):
         self.assertEqual(report["schema"], CV.REPORT_SCHEMA)
         self.assertEqual(report["repo"], "app-a")
         self.assertEqual(report["summary"]["FLOATING_REF"], 1)
+
+    def test_unknown_repo_fails_closed_without_explicit_mode(self):
+        python_fixture(self.repo, requires=">=3.12",
+                       deps=["python-kasi-api @ git+https://github.com/digitie/python-kasi-api.git@main"],
+                       locked={})
+        result = self.cli(str(self.repo), "--repo", "unregistered-consumer")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("repo가 versions.json consumers key 또는 alias가 아님", result.stdout)
+
+    def test_common_fixture_requires_explicit_flag(self):
+        python_fixture(self.repo, requires=">=3.12",
+                       deps=["python-kasi-api @ git+https://github.com/digitie/python-kasi-api.git@main"],
+                       locked={})
+        without_flag = self.cli(str(self.repo), "--repo", "common-ci-report-fixture")
+        self.assertEqual(without_flag.returncode, 2)
+        with_flag = self.cli(str(self.repo), "--repo", "common-ci-report-fixture",
+                             "--allow-unregistered-fixture")
+        self.assertEqual(with_flag.returncode, 0)
+        self.assertIn("mode=report", with_flag.stdout)
 
     def test_mode_override_and_warn_annotation(self):
         npm_fixture(self.repo, deps={"next": "^15.2.0"}, engines={"node": ">=22.12"},

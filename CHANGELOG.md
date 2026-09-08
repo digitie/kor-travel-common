@@ -64,6 +64,7 @@
 #### Added
 
 - 규칙 문서 초안(`docs/standards/`: design-tokens·ux-guide·responsive-web·frontend-stack·ui-contract·openapi·backend-stack·ci-deploy·licensing·versions·agent-conventions)과 예외 레지스트리 `openapi-exceptions.yaml`.
+- T-010에서 `versions-check`·`contrast-check`·`docs-check` 재사용 workflow와 두 fixture `workflows-selftest`, 고정 SHA 소비자 핀 레지스트리, GPL 승인·digest·tarball metadata를 닫힌 입력으로 검사하는 `consumer_smoke.py`를 추가했다. 실제 소비자 dispatch와 주간 실행은 T-010a 외부 gate다.
 - 버전 레지스트리 `versions.json` v1(floor/recommended/exceptions/blocked/enforce)과 `tools/check_versions.py` report 모드, 소비자 매니페스트 규약 `kor-travel-common.consumer-manifest.v1`.
 - 소비자 배포 템플릿 `templates/`(AGENTS 공통 절·CLAUDE 포인터·consumer PR·채택 체크리스트·dependabot·ESLint 조각).
 - 배포 채널·태그·SemVer 0.x 규칙, 소비자 채택·릴리스 runbook, 2인 독립 적대적 리뷰 gate, PR 본문 6항목 템플릿.
