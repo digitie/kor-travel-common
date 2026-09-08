@@ -210,6 +210,14 @@ window.confirm('확인');
                 "same-paragraph-double.mdx": "Example `` unmatched <div className=\"outline-none\"/>\n",
                 "blockquote.mdx": "> Example ` unmatched\n>\n> <div className=\"outline-none\" />\n",
                 "backslash.mdx": "Example `path\\`<span className=\"outline-none\" />\n",
+                "expression-one.mdx": "Example ` unmatched {window.confirm('x')}\n",
+                "expression-double.mdx": "Example `` unmatched {window.confirm('x')}\n",
+                "multiline-expression.mdx": (
+                    "Example `` unmatched\n"
+                    "<div className={\n"
+                    " [`outline-none`].join(\" \")\n"
+                    "}/>\n"
+                ),
                 "start.mdx": "`<div className={`\n\n다른 인용: `outline-none`\n",
                 "triple.mdx": "문법 예시: ```<div className={```\n\n다른 인용: `outline-none`\n",
             }
@@ -223,6 +231,9 @@ window.confirm('확인');
                 [
                     ("backslash.mdx", "P6"),
                     ("blockquote.mdx", "P6"),
+                    ("expression-double.mdx", "P8"),
+                    ("expression-one.mdx", "P8"),
+                    ("multiline-expression.mdx", "P6"),
                     ("paragraphs.mdx", "P6"),
                     ("same-paragraph-double.mdx", "P6"),
                     ("same-paragraph.mdx", "P6"),

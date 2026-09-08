@@ -130,8 +130,16 @@ def _mask_unclosed_inline_span(output: list[str], text: str, start: int, run_len
 
     boundary = _paragraph_end(text, start)
     content_start = start + run_length
-    resume_match = re.search(r"<(?:[A-Za-z]|>)|^[ \t]*(?:export\s+)?(?:const|let|var|return)\b", text[content_start:boundary], re.MULTILINE)
-    resume = content_start + resume_match.start() if resume_match else boundary
+    resume_candidates: list[int] = []
+    remainder = text[content_start:boundary]
+    for pattern in (
+        r"<(?:[A-Za-z]|>)|^[ \t]*(?:export\s+)?(?:const|let|var|return)\b",
+        r"\{\s*(?:[A-Za-z_$][\w$]*\s*(?:[.`(=?:,]|=>|$)|[\[(<])",
+    ):
+        match = re.search(pattern, remainder, re.MULTILINE)
+        if match:
+            resume_candidates.append(match.start())
+    resume = content_start + min(resume_candidates) if resume_candidates else boundary
     for offset in range(start, resume):
         if text[offset] != "\n":
             output[offset] = " "
@@ -419,7 +427,8 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                         output[offset] = " "
                 index = stop
                 continue
-            executable = not ignore_backticks or _is_executable_mdx_template(text, index, len(text))
+            analysis_text = "".join(output)
+            executable = not ignore_backticks or _is_executable_mdx_template(analysis_text, index, len(text))
             if ignore_backticks and not executable:
                 end = _find_inline_span_end(text, index, 1)
                 if end is None:
