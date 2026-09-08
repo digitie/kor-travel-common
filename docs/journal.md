@@ -2,6 +2,14 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-09 (Codex, T-010 최종 PASS·PR #21 merge 대기)
+
+T-010의 반복 no-go 원인은 consumer checkout pin과 common package artifact 원천을 하나의 repository 계약으로 취급한 점, GPL tarball 고지를 metadata 문자열만으로 신뢰한 점, 미등록 versions repo를 report로 낮춘 점, 그리고 closure evidence를 immutable candidate와 분리하지 않은 점이었다. 구현은 checkout pin과 common artifact URL을 분리하고 canonical GPL `LICENSE` 본문·`NOTICE`·`THIRD_PARTY_NOTICES.md`·repository provenance를 실제 tarball에서 검증하며, unknown repo와 fixture base/caller/common 저장소 조건을 fail-closed로 고정했다. 소비자 저장소는 수정하지 않았다.
+
+기능 후보 `f220bb5aeae860972b80d4c07fe9104f8e69c968`(tree `68c8a8f19517dacf0a53d86e1efb5d85e22f464f`) 이후 문서-only closure `5b77390c28e117386195fd8f37161665e5f77daa`(tree `9764ae596592c76474245d4f28ed1a3ff5c04443`)에서 A 실행 `A-T010-final-a-5b77390`, B 실행 `T010-B-20260909-final-5b77390`가 동일 최종 manifest SHA `c9a726502eb465bdd14e352d69b23f085b94a24d00b481d4a8010da487a2e38e`를 기준으로 독립 재검토해 모두 PASS했다. 신규·잔여 P0/P1/P2는 0건이다. A가 재현한 task evidence 수치 stale(P1)와 B가 지적한 closure CI·candidate 표기(P2)는 `0bc375d`와 `5b77390`에서 정정했다.
+
+로컬 최종 closure tree 검증은 전체 unittest 337건, consumer 10건, versions 88건, 문서 링크 524/2576, plan 106, SPDX 68, redaction 673/0, `git diff --check` 모두 성공했다. reviewer 실행 당시 수치 522/2570·671은 각 원본 evidence에 보존했다. closure CI [34289912536](https://github.com/digitie/kor-travel-common/actions/runs/34289912536)와 [34289912727](https://github.com/digitie/kor-travel-common/actions/runs/34289912727)도 모두 성공했다. 실제 소비자 dispatch/build/e2e·주간 smoke, npm/PyPI·GitHub Release 게시, actionlint는 `NOT_RUN`이며 T-010a 또는 사용자 범위로 남겼다. PR #21은 ready 전환과 merge 후 main CI 확인 뒤 대기한다.
+
 ## 2026-09-09 (Codex, T-010 재사용 workflow·consumer-smoke 구현 중)
 
 사용자 재개 지시에 따라 `codex/t010-reusable-workflows`에서 T-010을 시작했다. common만 수정했으며 소비자 저장소 checkout은 읽지 않았다. 실제 도구 CLI를 다시 읽어 `versions-check`는 registry 소유 report 기본을 유지하고, `docs-check` redaction은 caller Git root의 `--scope`, `contrast-check`는 `kt_contrast.py` report를 사용하도록 연결했다. 세 workflow는 caller head SHA와 `common-ref` 태그/SHA를 별도로 checkout하고 permissions·concurrency·timeout·`ubuntu-24.04`·액션 SHA pin을 갖는다.
