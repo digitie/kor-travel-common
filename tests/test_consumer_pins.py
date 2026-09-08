@@ -16,6 +16,7 @@ import sys
 import tarfile
 import tempfile
 import unittest
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -120,6 +121,27 @@ class ConsumerPinsTests(unittest.TestCase):
                                  "https://github.com/digitie/kor-travel-map")
         with self.assertRaises(SMOKE.SmokeInputError):
             SMOKE.validate_asset(self.root / "missing.tgz", "0" * 64, package,
+                                 "https://github.com/digitie/kor-travel-map")
+
+    def test_asset_file_and_metadata_limits_are_enforced(self):
+        package = "@kor-travel/tokens"
+        tarball = self.make_tgz(package)
+        digest = self.digest(tarball)
+        with mock.patch.object(SMOKE, "MAX_ASSET_BYTES", 1):
+            with self.assertRaises(SMOKE.SmokeInputError):
+                SMOKE.validate_asset(tarball, digest, package,
+                                     "https://github.com/digitie/kor-travel-map")
+        with mock.patch.object(SMOKE, "MAX_METADATA_BYTES", 1):
+            with self.assertRaises(SMOKE.SmokeInputError):
+                SMOKE.validate_asset(tarball, digest, package,
+                                     "https://github.com/digitie/kor-travel-map")
+        link = self.root / "asset-link.tgz"
+        try:
+            link.symlink_to(tarball)
+        except OSError:
+            return
+        with self.assertRaises(SMOKE.SmokeInputError):
+            SMOKE.validate_asset(link, digest, package,
                                  "https://github.com/digitie/kor-travel-map")
 
     def test_invalid_tarball_install_is_a_real_failure(self):

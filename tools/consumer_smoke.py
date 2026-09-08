@@ -34,6 +34,8 @@ ASSET_RE = re.compile(
 EXPECTED_LICENSE = "GPL-3.0-or-later"
 MAX_ARCHIVE_MEMBERS = 4096
 MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
+MAX_ASSET_BYTES = 128 * 1024 * 1024
+MAX_METADATA_BYTES = 1024 * 1024
 
 
 class SmokeInputError(ValueError):
@@ -153,11 +155,22 @@ def validate_asset_url(value: object, expected_repository: str | None = None) ->
 def validate_asset(path: Path, expected_sha256: str, expected_package: str,
                    expected_repository: str) -> str:
     """tarball digest·GPL metadata·안전한 npm archive 구조를 검사한다."""
-    if not path.is_file():
+    if path.is_symlink() or not path.is_file():
         raise SmokeInputError("asset: 파일이 없음")
-    digest = hashlib.sha256(path.read_bytes()).hexdigest()
     if not re.fullmatch(r"[0-9a-f]{64}", expected_sha256):
         raise SmokeInputError("asset-sha256: 64자 소문자 SHA256이어야 함")
+    hasher = hashlib.sha256()
+    total_asset_size = 0
+    try:
+        with path.open("rb") as stream:
+            while chunk := stream.read(1024 * 1024):
+                total_asset_size += len(chunk)
+                if total_asset_size > MAX_ASSET_BYTES:
+                    raise SmokeInputError("asset: 압축 파일 크기가 허용 범위를 초과함")
+                hasher.update(chunk)
+    except OSError as exc:
+        raise SmokeInputError("asset: 파일을 읽을 수 없음") from exc
+    digest = hasher.hexdigest()
     if digest != expected_sha256:
         raise SmokeInputError("asset: SHA256 digest 불일치")
     try:
@@ -197,7 +210,10 @@ def validate_asset(path: Path, expected_sha256: str, expected_package: str,
             raw = archive.extractfile(package_member)
             if raw is None:
                 raise SmokeInputError("asset: package metadata를 읽을 수 없음")
-            metadata = json.loads(raw.read().decode("utf-8"))
+            metadata_bytes = raw.read(MAX_METADATA_BYTES + 1)
+            if len(metadata_bytes) > MAX_METADATA_BYTES:
+                raise SmokeInputError("asset: package metadata 크기가 허용 범위를 초과함")
+            metadata = json.loads(metadata_bytes.decode("utf-8"))
     except (OSError, tarfile.TarError, UnicodeError, json.JSONDecodeError) as exc:
         raise SmokeInputError("asset: 유효한 gzip tarball이 아님") from exc
     if not isinstance(metadata, dict) or metadata.get("name") != expected_package:
