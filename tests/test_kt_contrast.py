@@ -81,12 +81,46 @@ class ContrastTests(unittest.TestCase):
             finding = next(item for item in payload["findings"] if item["pair"] == "brand-foreground/brand")
             self.assertFalse(finding["pass"])
 
+    def test_css_scope_and_media_boundaries_are_explicit(self):
+        with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
+            override = Path(directory) / "override.css"
+            override.write_text(
+                ':root { --kt-brand: #fff; --kt-brand-foreground: #fff; content: "/* --kt-brand: #000; */"; }\n'
+                '.dark .button { --kt-brand: #000; --kt-brand-foreground: #fff; }\n'
+                '@media   ( prefers-color-scheme : dark ) { :root { --kt-brand: #000; --kt-brand-foreground: #fff; } }\n',
+                encoding="utf-8",
+            )
+            light = self.run_tool(TOKENS, override, "--fail-new", "--json")
+            dark = self.run_tool(TOKENS, override, "--dark", "--fail-new", "--json")
+            self.assertEqual(light.returncode, 1)
+            self.assertEqual(dark.returncode, 1, dark.stderr)
+            light_payload = json.loads(light.stdout)
+            dark_payload = json.loads(dark.stdout)
+            light_brand = next(item for item in light_payload["findings"] if item["pair"] == "brand-foreground/brand")
+            dark_brand = next(item for item in dark_payload["findings"] if item["pair"] == "brand-foreground/brand")
+            self.assertFalse(light_brand["pass"])
+            self.assertTrue(dark_brand["pass"])
+
     def test_unsupported_condition_is_input_error(self):
         with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
             override = Path(directory) / "override.css"
             override.write_text("@media (max-width: 1px) { :root { --kt-brand: #fff; } }\n", encoding="utf-8")
             result = self.run_tool(TOKENS, override)
             self.assertEqual(result.returncode, 2)
+
+    def test_media_negation_and_nested_blocks_are_input_errors(self):
+        with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
+            directory_path = Path(directory)
+            negated = directory_path / "negated.css"
+            negated.write_text("@media not all and (prefers-color-scheme: dark) { :root { --kt-brand: #fff; } }\n", encoding="utf-8")
+            compound = directory_path / "compound.css"
+            compound.write_text("@media (prefers-color-scheme: dark) and (min-width: 1px) { :root { --kt-brand: #fff; } }\n", encoding="utf-8")
+            nested = directory_path / "nested.css"
+            nested.write_text(":root { .child { --kt-brand: #fff; } }\n", encoding="utf-8")
+            for path in (negated, compound, nested):
+                with self.subTest(path=path.name):
+                    result = self.run_tool(TOKENS, path)
+                    self.assertEqual(result.returncode, 2, result.stderr)
 
     def test_muted_read_surface_is_explicit(self):
         with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
@@ -155,6 +189,27 @@ class ContrastTests(unittest.TestCase):
             result = self.run_tool(TOKENS, "--baseline", baseline, "--json")
             self.assertEqual(result.returncode, 2)
             self.assertNotIn("Traceback", result.stderr)
+
+    def test_huge_integer_baseline_is_input_error_without_traceback(self):
+        with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
+            baseline = Path(directory) / "invalid.json"
+            baseline.write_text(
+                '{"version":1,"entries":[{"pair":"brand-foreground/brand","surface":"brand","measured":'
+                + "9" * 5000
+                + ',"required":4.5,"until":"2099-01-01"}]}',
+                encoding="utf-8",
+            )
+            result = self.run_tool(TOKENS, "--baseline", baseline, "--json")
+            self.assertEqual(result.returncode, 2)
+            self.assertNotIn("Traceback", result.stderr)
+
+    def test_invalid_surface_and_missing_input_are_generic_errors(self):
+        invalid_surface = self.run_tool(TOKENS, "--read-surface", "REVIEW_INPUT_MARKER", "--json")
+        self.assertEqual(invalid_surface.returncode, 2)
+        self.assertNotIn("REVIEW_INPUT_MARKER", invalid_surface.stderr)
+        missing = self.run_tool(Path("REVIEW_INPUT_MARKER.css"), "--json")
+        self.assertEqual(missing.returncode, 2)
+        self.assertNotIn("REVIEW_INPUT_MARKER", missing.stderr)
 
 
 if __name__ == "__main__":

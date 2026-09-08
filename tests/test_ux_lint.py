@@ -46,6 +46,22 @@ window.confirm('확인');
             self.assertEqual(patterns, {"P1", "P2", "P3", "P4a", "P4b", "P5", "P6", "P7", "P8"})
             self.assertEqual(sum(item["pattern"] == "P8" for item in payload["findings"]), 2)
 
+    def test_mdx_inline_code_is_ignored_but_executable_templates_are_checked(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "fixture.mdx"
+            fixture.write_text(
+                "`outline-none window.confirm()`\n"
+                "const value = <div className={`outline-none ${window.confirm('확인')}`} />;\n"
+                "const safe = `${/* window.confirm('주석') */ value}`;\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual({item["pattern"] for item in payload["findings"]}, {"P6", "P8"})
+            self.assertEqual(sum(item["pattern"] == "P8" for item in payload["findings"]), 1)
+
     def test_baseline_and_added_lines(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
@@ -167,6 +183,37 @@ window.confirm('확인');
             self.assertEqual(result.returncode, 2)
             self.assertNotIn("Traceback", result.stderr)
 
+    def test_huge_integer_baseline_is_input_error_without_traceback(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "fixture.tsx"
+            fixture.write_text("const value = 'outline-none';\n", encoding="utf-8")
+            baseline = root / "baseline.json"
+            baseline.write_text(
+                '{"schema":"kor-travel-common.ux-baseline.v1","entries":[{"rule":"P6","path":"fixture.tsx","count":'
+                + "9" * 5000
+                + ',"reason":"이관 전","until":"2099-12-31","task":"T-103"}]}',
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--baseline", baseline, "--json")
+            self.assertEqual(result.returncode, 2)
+            self.assertNotIn("Traceback", result.stderr)
+
+    def test_diff_added_line_starting_with_triple_plus_is_checked(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            self.git(root, "init", "-q")
+            fixture = root / "fixture.tsx"
+            fixture.write_text("const value = 1;\n", encoding="utf-8")
+            self.git(root, "add", "fixture.tsx")
+            self.git(root, "-c", "user.name=테스트", "-c", "user.email=test@example.invalid", "commit", "-q", "-m", "base")
+            fixture.write_text("const value = 1;\n+++counter; window.confirm('확인');\n", encoding="utf-8")
+            result = self.run_tool(root, "--root", root, "--base", "HEAD", "--json")
+            self.assertEqual(result.returncode, 1, result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["fail_count"], 1)
+            self.assertEqual(payload["findings"][0]["line"], 2)
+
     def test_base_option_like_ref_is_rejected(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
@@ -181,6 +228,18 @@ window.confirm('확인');
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
             fixture = root / ("ghp_" + "Z" * 36 + ".tsx")
+            fixture.write_text("const value = 'outline-none';\n", encoding="utf-8")
+            summary = root / "summary.md"
+            result = self.run_tool(root, "--root", root, "--fail-new", "--step-summary", summary, "--json")
+            self.assertEqual(result.returncode, 1)
+            raw = result.stdout + summary.read_text(encoding="utf-8")
+            self.assertNotIn(fixture.name, raw)
+            self.assertIn("<redacted>", raw)
+
+    def test_private_address_like_path_is_redacted_in_outputs(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "10.23.45.67.tsx"
             fixture.write_text("const value = 'outline-none';\n", encoding="utf-8")
             summary = root / "summary.md"
             result = self.run_tool(root, "--root", root, "--fail-new", "--step-summary", summary, "--json")

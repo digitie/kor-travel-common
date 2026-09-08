@@ -53,16 +53,98 @@ PATTERNS: tuple[tuple[str, str, str], ...] = (
 COMPILED_PATTERNS = tuple((name, description, re.compile(expression)) for name, description, expression in PATTERNS)
 KNOWN_RULES = {name for name, _, _ in PATTERNS}
 _SECRET_PATH_PART = re.compile(r"(?:gh[pousr]_[A-Za-z0-9_-]{16,}|github_pat_[A-Za-z0-9_\-]{16,}|sk-[A-Za-z0-9_-]{16,}|AKIA[0-9A-Z]{12,})")
+_PRIVATE_ADDRESS_PART = re.compile(r"(?<![\w])(?:\d{1,3}\.){3}\d{1,3}(?![\w])")
 
 
 def _public_path(value: str) -> str:
     """경로에 우연히 포함된 자격증명 형태를 출력에서 가린다."""
 
-    return _SECRET_PATH_PART.sub("<redacted>", value)
+    redacted = _SECRET_PATH_PART.sub("<redacted>", value)
+    return _PRIVATE_ADDRESS_PART.sub("<redacted>", redacted)
+
+
+def _find_template_end(text: str, start: int) -> int:
+    """backtick 문자열의 끝을 찾아 닫히지 않은 경우 입력 끝을 반환한다."""
+
+    index = start + 1
+    while index < len(text):
+        if text[index] == "\\":
+            index += 2
+            continue
+        if text[index] == "`":
+            return index
+        index += 1
+    return len(text)
+
+
+def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
+    """MDX의 Markdown code span과 JSX/JavaScript template을 구분한다."""
+
+    if "${" in text[start + 1 : end]:
+        return True
+    prefix = text[:start].rstrip()
+    if not prefix:
+        return False
+    if prefix[-1] in "={([,:>":
+        return True
+    return bool(re.search(r"(?:const|let|var|return|className|style)\s*=\s*$", prefix))
+
+
+def _mask_template_interpolation_comments(text: str) -> str:
+    """template 보간식 안의 JavaScript 주석만 공백으로 치환한다."""
+
+    output = list(text)
+    index = 0
+    while index + 1 < len(text):
+        if text[index : index + 2] != "${":
+            index += 1
+            continue
+        index += 2
+        depth = 1
+        quote: str | None = None
+        while index < len(text) and depth:
+            char = text[index]
+            next_char = text[index + 1] if index + 1 < len(text) else ""
+            if quote:
+                if char == "\\":
+                    index += 2
+                    continue
+                if char == quote:
+                    quote = None
+                index += 1
+                continue
+            if char in "\"'`":
+                quote = char
+                index += 1
+                continue
+            if char == "/" and next_char == "/":
+                output[index] = output[index + 1] = " "
+                index += 2
+                while index < len(text) and text[index] != "\n":
+                    output[index] = " "
+                    index += 1
+                continue
+            if char == "/" and next_char == "*":
+                output[index] = output[index + 1] = " "
+                index += 2
+                while index < len(text):
+                    if text[index] == "*" and index + 1 < len(text) and text[index + 1] == "/":
+                        output[index] = output[index + 1] = " "
+                        index += 2
+                        break
+                    output[index] = "\n" if text[index] == "\n" else " "
+                    index += 1
+                continue
+            if char == "{":
+                depth += 1
+            elif char == "}":
+                depth -= 1
+            index += 1
+    return "".join(output)
 
 
 def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
-    """주석과 문서 인용만 공백으로 가려 줄 번호와 열 번호를 유지한다."""
+    """주석과 Markdown 인용만 공백으로 가리고 실행 template은 보존한다."""
 
     output = list(text)
     state = "code"
@@ -88,20 +170,6 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                 output[index] = " "
             index += 1
             continue
-        if state == "backtick":
-            if char == "\\":
-                output[index] = " "
-                if index + 1 < len(text):
-                    output[index + 1] = "\n" if text[index + 1] == "\n" else " "
-                index += 2
-                continue
-            if char == "`":
-                output[index] = " "
-                state = "code"
-            elif char != "\n":
-                output[index] = " "
-            index += 1
-            continue
         if quote:
             if char == "\\":
                 index += 2
@@ -115,12 +183,17 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
             index += 1
             continue
         if char == "`":
-            if ignore_backticks:
-                output[index] = " "
-                state = "backtick"
+            end = _find_template_end(text, index)
+            executable = not ignore_backticks or _is_executable_mdx_template(text, index, end)
+            stop = min(end + 1, len(text))
+            if executable:
+                segment = _mask_template_interpolation_comments(text[index:stop])
+                output[index:stop] = list(segment)
             else:
-                quote = "`"
-            index += 1
+                for offset in range(index, stop):
+                    if text[offset] != "\n":
+                        output[offset] = " "
+            index = stop
             continue
         if char == "/" and next_char == "/":
             output[index] = output[index + 1] = " "
@@ -139,7 +212,7 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
 def _relative(path: Path, root: Path) -> str:
     try:
         return path.resolve().relative_to(root.resolve()).as_posix()
-    except ValueError:
+    except (OSError, RuntimeError, ValueError):
         raise UxLintError("검사 경로가 작업 root 밖에 있습니다")
 
 
@@ -258,7 +331,7 @@ def added_lines(root: Path, base: str, files: Mapping[str, Path]) -> dict[str, s
                 continue
             if current_line is None:
                 continue
-            if raw_line.startswith("+") and not raw_line.startswith("+++"):
+            if raw_line.startswith("+"):
                 result[relative].add(current_line)
                 current_line += 1
             elif raw_line.startswith(" "):
@@ -269,7 +342,7 @@ def added_lines(root: Path, base: str, files: Mapping[str, Path]) -> dict[str, s
 def load_baseline(path: Path) -> list[dict[str, object]]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+    except (OSError, UnicodeError, ValueError, json.JSONDecodeError) as error:
         raise UxLintError("baseline JSON을 읽을 수 없습니다") from error
     if not isinstance(data, dict) or data.get("schema") != "kor-travel-common.ux-baseline.v1":
         raise UxLintError("UX baseline schema가 kor-travel-common.ux-baseline.v1이 아닙니다")
@@ -402,7 +475,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     workspace = Path.cwd().resolve()
     try:
-        scan_root = (args.root or workspace).resolve()
+        try:
+            scan_root = (args.root or workspace).resolve()
+        except (OSError, RuntimeError) as error:
+            raise UxLintError("검사 root를 확인할 수 없습니다") from error
         if args.root and not scan_root.exists():
             raise UxLintError("검사 root를 찾을 수 없습니다")
         inputs = ([scan_root] if args.root else []) + list(args.paths)

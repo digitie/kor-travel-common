@@ -89,7 +89,37 @@ _HEX = re.compile(r"^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$", re.IGNORECASE)
 def _strip_css_comments(text: str) -> str:
     """CSS 주석을 공백으로 치환해 줄 위치와 블록을 보존한다."""
 
-    return re.sub(r"/\*.*?\*/", lambda match: "".join("\n" if char == "\n" else " " for char in match.group()), text, flags=re.DOTALL)
+    output = list(text)
+    quote: str | None = None
+    index = 0
+    while index < len(text):
+        char = text[index]
+        next_char = text[index + 1] if index + 1 < len(text) else ""
+        if quote:
+            if char == "\\":
+                index += 2
+                continue
+            if char == quote:
+                quote = None
+            index += 1
+            continue
+        if char in "\"'":
+            quote = char
+            index += 1
+            continue
+        if char == "/" and next_char == "*":
+            output[index] = output[index + 1] = " "
+            index += 2
+            while index < len(text):
+                if text[index] == "*" and index + 1 < len(text) and text[index + 1] == "/":
+                    output[index] = output[index + 1] = " "
+                    index += 2
+                    break
+                output[index] = "\n" if text[index] == "\n" else " "
+                index += 1
+            continue
+        index += 1
+    return "".join(output)
 
 
 def _split_selectors(selector: str) -> list[str]:
@@ -129,30 +159,44 @@ def _selector_modes(selector: str, parent_mode: str | None) -> frozenset[str]:
     for raw_part in _split_selectors(selector):
         normalized = re.sub(r"\s+", " ", raw_part.strip().lower())
         if not normalized:
-            if parent_mode:
-                modes.add(parent_mode)
             continue
-        negative_dark = bool(re.search(r":not\([^)]*(?:\.dark|data-theme\s*=\s*[\"']dark[\"'])", normalized))
-        positive_part = re.sub(r":not\([^)]*\)", "", normalized)
-        explicit_dark = (
-            "prefers-color-scheme: dark" in positive_part
-            or bool(re.search(r"(?<![\w-])\.dark(?![\w-])", positive_part))
-            or bool(re.search(r"data-theme\s*=\s*[\"']dark[\"']", positive_part))
-        )
-        explicit_light_media = "prefers-color-scheme: light" in positive_part
-        has_light_selector = ":root" in positive_part or bool(re.search(r"data-theme\s*=\s*[\"']light[\"']", positive_part))
-        if explicit_dark:
+        # 토큰 계약은 전역 루트와 명시적 다크 루트만 허용한다. `.dark .button`처럼
+        # 하위 요소에만 적용되는 고 specificity 선언을 전역 토큰으로 승격하지 않는다.
+        if normalized in {":root", ":root:root"}:
+            modes.update((parent_mode,) if parent_mode else ("light", "dark"))
+        elif normalized in {":root:not(.dark)", ':root:not([data-theme="dark"])', ":root:not([data-theme='dark'])", '[data-theme="light"]', ':root[data-theme="light"]', ":root[data-theme='light']"}:
+            modes.add(parent_mode or "light")
+        elif normalized in {".dark", '[data-theme="dark"]', "[data-theme='dark']", ":root[data-theme=\"dark\"]", ":root[data-theme='dark']"}:
             modes.add("dark")
-        if explicit_light_media:
-            modes.add("light")
-        if has_light_selector:
-            if negative_dark:
-                modes.add("light")
-            elif parent_mode:
-                modes.add(parent_mode)
-            else:
-                modes.update(("light", "dark"))
     return frozenset(modes)
+
+
+def _mask_nested_blocks(text: str) -> str:
+    """현재 선언 블록의 중첩 CSS를 거부하고 직접 선언만 반환한다."""
+
+    output = list(text)
+    quote: str | None = None
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if quote:
+            if char == "\\":
+                index += 2
+                continue
+            if char == quote:
+                quote = None
+            index += 1
+            continue
+        if char in "\"'":
+            quote = char
+            index += 1
+            continue
+        if char == "{":
+            raise ContrastError("지원하지 않는 중첩 CSS 블록입니다")
+        elif char == "}":
+            raise ContrastError("CSS 블록 닫힘이 열림보다 많습니다")
+        index += 1
+    return "".join(output)
 
 
 def _parse_blocks(text: str, parent_mode: str | None = None) -> Iterable[tuple[str, str]]:
@@ -190,19 +234,17 @@ def _parse_blocks(text: str, parent_mode: str | None = None) -> Iterable[tuple[s
         if depth:
             raise ContrastError("CSS 블록이 닫히지 않았습니다")
         body = text[opening + 1 : cursor - 1]
-        selector_text = selector.strip().lower()
-        if selector_text.startswith("@") and (
-            not selector_text.startswith("@media")
-            or "prefers-color-scheme" not in selector_text
-            or not re.search(r"prefers-color-scheme\s*:\s*(?:dark|light)", selector_text)
-        ):
-            raise ContrastError("지원하지 않는 CSS 조건 블록입니다")
-        modes = _selector_modes(selector, parent_mode)
-        for mode in modes:
-            yield mode, body
-        if "@" in selector.strip() or not modes:
-            nested_parent = next(iter(modes)) if selector_text.startswith("@media") and len(modes) == 1 else parent_mode
-            yield from _parse_blocks(body, parent_mode=nested_parent)
+        selector_text = re.sub(r"\s+", " ", selector.strip().lower())
+        if selector_text.startswith("@"):
+            media_match = re.fullmatch(r"@media\s*\(\s*prefers-color-scheme\s*:\s*(dark|light)\s*\)", selector_text)
+            if not media_match:
+                raise ContrastError("지원하지 않는 CSS 조건 블록입니다")
+            yield from _parse_blocks(body, parent_mode=media_match.group(1))
+        else:
+            modes = _selector_modes(selector, parent_mode)
+            direct_body = _mask_nested_blocks(body)
+            for mode in modes:
+                yield mode, direct_body
         index = cursor
 
 
@@ -243,7 +285,7 @@ def parse_css(paths: Sequence[Path], dark: bool) -> dict[str, str]:
         try:
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeError) as error:
-            raise ContrastError(f"CSS 입력을 읽을 수 없습니다: {path.name}") from error
+            raise ContrastError("CSS 입력을 읽을 수 없습니다") from error
         cleaned = _strip_css_comments(text)
         for mode, body in _parse_blocks(cleaned):
             if (mode == "dark") != dark:
@@ -344,9 +386,9 @@ def resolve_colors(values: Mapping[str, str], targets: Iterable[str] | None = No
         if name in resolved:
             return resolved[name]
         if name in visiting:
-            raise ContrastError(f"색 변수 순환 참조: {name}")
+            raise ContrastError("색 변수 순환 참조가 있습니다")
         if name not in values:
-            raise ContrastError(f"필수 색 변수가 없습니다: {name}")
+            raise ContrastError("필수 색 변수가 없습니다")
         visiting.add(name)
         raw = values[name].strip()
         var_match = _VAR.fullmatch(raw)
@@ -357,7 +399,7 @@ def resolve_colors(values: Mapping[str, str], targets: Iterable[str] | None = No
             elif var_match.group(2):
                 color = parse_color(var_match.group(2).strip())
             else:
-                raise ContrastError(f"색 변수 참조를 찾지 못했습니다: {reference}")
+                raise ContrastError("색 변수 참조를 찾지 못했습니다")
         else:
             color = parse_color(raw)
         visiting.remove(name)
@@ -395,7 +437,7 @@ def pairs_for(read_surfaces: Sequence[str] = ()) -> tuple[Pair, ...]:
     pairs = list(PAIRS)
     for surface in read_surfaces:
         if surface not in {"page", "subtle", "muted", "card"}:
-            raise ContrastError(f"지원하지 않는 읽기 표면: {surface}")
+            raise ContrastError("지원하지 않는 읽기 표면입니다")
         for text in ("primary", "secondary", "strong", "tertiary"):
             pair = Pair(f"text-{text}/surface-{surface}", f"text-{text}", f"surface-{surface}", 4.5)
             if pair.name not in {item.name for item in pairs}:
@@ -412,7 +454,7 @@ def inspect(values: Mapping[str, str], pairs: Sequence[Pair] = PAIRS) -> list[di
         background = resolved.get(f"--kt-{pair.background}")
         if foreground is None or background is None:
             missing = pair.foreground if foreground is None else pair.background
-            raise ContrastError(f"필수 색 변수가 없습니다: --kt-{missing}")
+            raise ContrastError("필수 색 변수가 없습니다")
         underlay = resolved.get("--kt-surface-page") if background.alpha < 1.0 and pair.background != "surface-page" else None
         measured = contrast_ratio(foreground, background, underlay)
         findings.append(
@@ -431,7 +473,7 @@ def inspect(values: Mapping[str, str], pairs: Sequence[Pair] = PAIRS) -> list[di
 def _load_json(path: Path) -> object:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+    except (OSError, UnicodeError, ValueError, json.JSONDecodeError) as error:
         raise ContrastError("JSON 입력을 읽을 수 없습니다") from error
 
 
@@ -561,7 +603,6 @@ def build_parser() -> argparse.ArgumentParser:
         "--read-surfaces",
         dest="read_surfaces",
         action="append",
-        choices=("page", "subtle", "muted", "card"),
         help="text 쌍에 추가할 읽기 표면(반복 가능)",
     )
     parser.add_argument("--baseline", type=Path, help="미달 예외 JSON")

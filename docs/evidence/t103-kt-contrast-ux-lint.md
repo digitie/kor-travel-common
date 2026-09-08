@@ -12,7 +12,7 @@
 | geo 예제 | 미달 8건 | — | exit 0 | control-line/page 2.29, card 2.41, tertiary/page 3.66 |
 | airport 예제 | 미달 4건 | 미달 4건 | exit 0 | sRGB alpha line/page·card 1.32; dark line/page 1.54 재현 범위 확인 |
 
-OKLCH 수식은 CSS Color 4의 OKLab→선형 sRGB 행렬을 표준 라이브러리로 구현했다. hex와 OKLCH alpha는 CSS sRGB source-over로 합성한 뒤 휘도를 계산하고, 투명한 배경은 `surface-page`를 밑바탕으로 사용한다. 기준 미만 수치를 반올림해 통과시키지 않으며, 조사 대조 오차는 테스트에서 ±0.05로만 확인한다. `--read-surface muted`를 주면 text×muted 4쌍을 추가한다. baseline `until`이 2000-01-01인 fixture는 `EXEMPT_EXPIRED`, exit 1을 반환한다.
+OKLCH 수식은 CSS Color 4의 OKLab→선형 sRGB 행렬을 표준 라이브러리로 구현했다. hex와 OKLCH alpha는 CSS sRGB source-over로 합성한 뒤 휘도를 계산하고, 투명한 배경은 `surface-page`를 밑바탕으로 사용한다. 기준 미만 수치를 반올림해 통과시키지 않으며, 조사 대조 오차는 테스트에서 ±0.05로만 확인한다. Airport 조사 스냅샷의 1.15는 선형 합성 당시의 역사 값이고, 현재 계약은 CSS source-over 실측 1.320934(표의 1.32)를 사용한다. `--read-surface muted`를 주면 text×muted 4쌍을 추가한다. baseline `until`이 2000-01-01인 fixture는 `EXEMPT_EXPIRED`, exit 1을 반환한다.
 
 ## UX 검사
 
