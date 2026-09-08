@@ -227,6 +227,20 @@ def _markdown_line_start(text: str, index: int) -> int:
     return _markdown_line_terminator_end(text, latest, index)
 
 
+def _markdown_indent_columns(prefix: str) -> int | None:
+    """Markdown 들여쓰기의 열 수를 계산한다(탭은 다음 4열 경계로 확장)."""
+
+    columns = 0
+    for char in prefix:
+        if char == " ":
+            columns += 1
+        elif char == "\t":
+            columns = ((columns // 4) + 1) * 4
+        else:
+            return None
+    return columns
+
+
 def _consume_mdx_unicode_escape(text: str, start: int, boundary: int) -> int | None:
     """JavaScript 식별자 안의 Unicode escape 끝 위치를 반환한다."""
 
@@ -505,7 +519,8 @@ def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
     """MDX의 줄 단위 backtick/tilde fence 전체를 공백으로 가린다."""
 
     line_start = _markdown_line_start(text, start)
-    if text[line_start:start].strip(" \t"):
+    opener_indent = _markdown_indent_columns(text[line_start:start])
+    if opener_indent is None or opener_indent > 3:
         return "", start
     opener_end = _find_markdown_line_terminator(text, start, len(text))
     opener_run = 0
@@ -517,7 +532,16 @@ def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
     closing = len(text)
     while cursor < len(text):
         next_end = _find_markdown_line_terminator(text, cursor, len(text))
-        candidate = text[cursor:next_end].lstrip(" \t")
+        raw_line = text[cursor:next_end]
+        indent_end = 0
+        while indent_end < len(raw_line) and raw_line[indent_end] in " \t":
+            indent_end += 1
+        indent = raw_line[:indent_end]
+        indent_columns = _markdown_indent_columns(indent)
+        if indent_columns is None or indent_columns > 3:
+            cursor = _markdown_line_terminator_end(text, next_end)
+            continue
+        candidate = raw_line[indent_end:]
         closing_run = 0
         while closing_run < len(candidate) and candidate[closing_run] == marker:
             closing_run += 1
