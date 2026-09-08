@@ -10,7 +10,10 @@
 - 마지막 완료 raw 기준선(post-fix-08) B commit: `0da67bb82a1044c524bafbf413425850bcc61021`
 - 마지막 완료 raw 기준선(post-fix-08) A SHA256: `554DDEA89F9B6EAF923294CE4A527CC8FF741A61E64DBDC410EE56B1611EE230`
 - 마지막 완료 raw 기준선(post-fix-08) B SHA256: `6eedbb4e8a9169d08b6688bfa1b325e9bac27324578436bb763dc9977d68f1ba`
-- post-fix-09 진행 기록: 후보가 변경되기 전에 raw commit이 생성되지 않아 증거로 채택하지 않고 중단했다.
+- post-fix-09 A 원본 report commit: `39d131fe5a3df1b56a0477a73519e8d1818ed393`
+- post-fix-09 A 원본 report SHA256: `89D7FEC2A466B660F88707D26DE963358BB07BE8D7427A7AA09215469C379792`
+- post-fix-09 B 원본 report: 후보 변경 전에 최종 raw commit이 생성되지 않아 채택하지 않았다.
+- post-fix-09 진행 기록: A raw는 e4b8fe3 기준으로 보존했고, 추가 P2 반례를 반영한 f6ea446 후보를 새 기준선으로 고정했다.
 - 이번 수정: 닫히지 않은 Markdown span이 같은 문단의 HTML/JSX·ESM을 가리지 않도록 실행 시작점을 보존하고, 일반·blockquote 빈 문단을 동일한 경계로 처리하며, backslash가 있는 inline span delimiter를 Markdown 규칙대로 닫는다.
 
 ## 재검토 범위
