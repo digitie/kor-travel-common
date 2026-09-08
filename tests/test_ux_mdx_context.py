@@ -18,6 +18,65 @@ CORPUS = Path(__file__).parent / "fixtures" / "ux" / "mdx-contexts.json"
 
 
 class MdxContextTests(unittest.TestCase):
+    def test_bom_ast_ranges_preserve_exact_source_masks(self):
+        sources = []
+        expected = []
+        for prefix in ("", "\ufeff", "\ufeff\ufeff", "😀 ", "문장 \ufeff "):
+            for separator in ("\n", "\r\n", "\r"):
+                for hidden in ("/* 숨김 😀 */", "// 숨김 😀" + separator):
+                    before = prefix + "{window.confirm"
+                    after = '("실행")}'
+                    sources.append(before + hidden + after)
+                    expected.append(before + "".join(char if char in "\r\n" else " " for char in hidden) + after)
+                before = prefix + "문장 "
+                hidden = "`outline-none 😀`"
+                after = ' {window.confirm("실행")}'
+                sources.append(before + hidden + after)
+                expected.append(before + " " * len(hidden) + after)
+        for prefix in ("", "\ufeff", "\ufeff\ufeff"):
+            for separator in ("\n", "\r\n", "\r"):
+                hidden = separator.join(("~~~js", 'window.confirm("문서 😀")', "~~~"))
+                after = separator + separator + '{window.confirm("실행")}'
+                sources.append(prefix + separator + hidden + after)
+                expected.append(prefix + separator + "".join(char if char in "\r\n" else " " for char in hidden) + after)
+        self.assertEqual(ux_lint.mask_mdx_sources(sources), expected)
+
+    def test_bom_patterns_through_cli_and_added_lines(self):
+        env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+        env.pop("GITHUB_STEP_SUMMARY", None)
+        with tempfile.TemporaryDirectory(prefix="kt-mdx-bom-") as directory:
+            root = Path(directory)
+
+            def git(*args):
+                return subprocess.check_output(["git", *args], cwd=root, env=env, text=True).strip()
+
+            git("init", "-q")
+            variants = [
+                (prefix, separator, comment)
+                for prefix in ("", "\ufeff", "\ufeff\ufeff")
+                for separator in ("\n", "\r\n", "\r")
+                for comment in ("/* 숨김 */", "// 숨김" + separator)
+            ]
+            names = [f"case-{index}.mdx" for index in range(len(variants))]
+            for name in names:
+                (root / name).write_bytes(b"\n")
+            git("add", "--", *names)
+            git("-c", "user.name=회귀 시험", "-c", "user.email=test@example.invalid", "commit", "-qm", "BOM 기준선")
+            base = git("rev-parse", "HEAD")
+            for name, (prefix, separator, comment) in zip(names, variants):
+                source = prefix + "{window.confirm" + comment + '("실행")}' + separator
+                (root / name).write_bytes(source.encode("utf-8"))
+            for options in ([], ["--base", base]):
+                result = subprocess.run(
+                    [sys.executable, "-B", "-X", "utf8", str(Path(ux_lint.__file__).resolve()), "--root", str(root), "--fail-new", "--json", *options],
+                    cwd=root, env=env, capture_output=True, text=True, encoding="utf-8",
+                )
+                self.assertEqual(result.returncode, 1, result.stderr)
+                payload = json.loads(result.stdout)
+                self.assertEqual(payload["fail_count"], len(variants))
+                self.assertEqual({item["file"] for item in payload["findings"]}, set(names))
+                self.assertTrue(all(item["pattern"] == "P8" and item["line"] == 1 for item in payload["findings"]))
+
     def test_context_corpus_through_cli_and_added_lines(self):
         cases = json.loads(CORPUS.read_text(encoding="utf-8"))["cases"]
         env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}

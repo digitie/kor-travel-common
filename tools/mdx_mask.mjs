@@ -22,6 +22,13 @@ function maskSource(source) {
       }
     }
   }
+  // MDX 전처리는 파일 첫 BOM 한 문자를 제외한 좌표를 반환한다.
+  // code·inlineCode·JS comment 모두 같은 원문 좌표로 되돌린다.
+  const bomOffset = source.startsWith('\ufeff') ? 1 : 0;
+  for (const range of ranges) {
+    range[0] += bomOffset;
+    range[1] += bomOffset;
+  }
   ranges.sort((a, b) => a[0] - b[0]);
   const merged = [];
   for (const range of ranges) {

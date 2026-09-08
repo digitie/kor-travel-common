@@ -701,6 +701,20 @@
       ]
     },
     {
+      "id": "BOM-주석-인접",
+      "source": "\ufeff{window.confirm/* 숨김 */(\"실행\")}",
+      "expected": ["P8"],
+      "findings": ["A-P1-38"],
+      "prefixes": [""]
+    },
+    {
+      "id": "BOM-둘-inline",
+      "source": "\ufeff\ufeff`outline-none` {window.confirm(\"실행\")}",
+      "expected": ["P8"],
+      "findings": ["A-P1-38"],
+      "prefixes": [""]
+    },
+    {
       "id": "구문분석-실행금지",
       "source": "export const value = (() => { throw new Error(\"실행 금지\"); })()\n\n`outline-none`",
       "expected": [],

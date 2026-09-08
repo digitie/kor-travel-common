@@ -19,7 +19,9 @@ for (const item of corpus.cases) {
         const tree = createProcessor().parse(source);
         const chars = source.split('');
         function mask(start, end) {
-          for (let i = start; i < end; i++) if (!/[\r\n\u2028\u2029]/.test(chars[i])) chars[i] = ' ';
+          // 파서가 제외한 첫 BOM 한 문자를 원문 좌표에 반영한다.
+          const offset = source.startsWith('\ufeff') ? 1 : 0;
+          for (let i = start + offset; i < end + offset; i++) if (!/[\r\n\u2028\u2029]/.test(chars[i])) chars[i] = ' ';
         }
         function visit(value) {
           if (!value || typeof value !== 'object') return;
