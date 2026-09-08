@@ -92,18 +92,70 @@ def _strip_css_comments(text: str) -> str:
     return re.sub(r"/\*.*?\*/", lambda match: "".join("\n" if char == "\n" else " " for char in match.group()), text, flags=re.DOTALL)
 
 
-def _selector_mode(selector: str, parent_dark: bool) -> str | None:
-    normalized = re.sub(r"\s+", " ", selector.strip().lower())
-    if not normalized:
-        return "dark" if parent_dark else "light"
-    if "prefers-color-scheme: dark" in normalized or ".dark" in normalized or "[data-theme=\"dark\"]" in normalized:
-        return "dark"
-    if ":root" in normalized or "[data-theme=\"light\"]" in normalized:
-        return "dark" if parent_dark else "light"
-    return "dark" if parent_dark else None
+def _split_selectors(selector: str) -> list[str]:
+    """쉼표로 나뉜 선택자를 괄호·문자열 경계를 보존하며 분리한다."""
+
+    parts: list[str] = []
+    start = 0
+    depth = 0
+    quote: str | None = None
+    index = 0
+    while index < len(selector):
+        char = selector[index]
+        if quote:
+            if char == "\\":
+                index += 2
+                continue
+            if char == quote:
+                quote = None
+        elif char in "\"'":
+            quote = char
+        elif char == "(":
+            depth += 1
+        elif char == ")":
+            depth = max(0, depth - 1)
+        elif char == "," and depth == 0:
+            parts.append(selector[start:index])
+            start = index + 1
+        index += 1
+    parts.append(selector[start:])
+    return parts
 
 
-def _parse_blocks(text: str, parent_dark: bool = False) -> Iterable[tuple[str, str]]:
+def _selector_modes(selector: str, parent_mode: str | None) -> frozenset[str]:
+    """선택자에서 실제 light/dark 적용 모드를 판정한다."""
+
+    modes: set[str] = set()
+    for raw_part in _split_selectors(selector):
+        normalized = re.sub(r"\s+", " ", raw_part.strip().lower())
+        if not normalized:
+            if parent_mode:
+                modes.add(parent_mode)
+            continue
+        negative_dark = bool(re.search(r":not\([^)]*(?:\.dark|data-theme\s*=\s*[\"']dark[\"'])", normalized))
+        positive_part = re.sub(r":not\([^)]*\)", "", normalized)
+        explicit_dark = (
+            "prefers-color-scheme: dark" in positive_part
+            or bool(re.search(r"(?<![\w-])\.dark(?![\w-])", positive_part))
+            or bool(re.search(r"data-theme\s*=\s*[\"']dark[\"']", positive_part))
+        )
+        explicit_light_media = "prefers-color-scheme: light" in positive_part
+        has_light_selector = ":root" in positive_part or bool(re.search(r"data-theme\s*=\s*[\"']light[\"']", positive_part))
+        if explicit_dark:
+            modes.add("dark")
+        if explicit_light_media:
+            modes.add("light")
+        if has_light_selector:
+            if negative_dark:
+                modes.add("light")
+            elif parent_mode:
+                modes.add(parent_mode)
+            else:
+                modes.update(("light", "dark"))
+    return frozenset(modes)
+
+
+def _parse_blocks(text: str, parent_mode: str | None = None) -> Iterable[tuple[str, str]]:
     """중첩된 at-rule을 포함해 선언 블록과 적용 모드를 반환한다."""
 
     index = 0
@@ -111,8 +163,12 @@ def _parse_blocks(text: str, parent_dark: bool = False) -> Iterable[tuple[str, s
     while index < length:
         opening = text.find("{", index)
         if opening < 0:
+            if "}" in text[index:]:
+                raise ContrastError("CSS 블록 닫힘이 열림보다 많습니다")
             break
         selector = text[index:opening]
+        if "}" in selector:
+            raise ContrastError("CSS 블록 닫힘이 열림보다 많습니다")
         depth = 1
         cursor = opening + 1
         quote: str | None = None
@@ -134,12 +190,49 @@ def _parse_blocks(text: str, parent_dark: bool = False) -> Iterable[tuple[str, s
         if depth:
             raise ContrastError("CSS 블록이 닫히지 않았습니다")
         body = text[opening + 1 : cursor - 1]
-        mode = _selector_mode(selector, parent_dark)
-        if mode is not None:
+        selector_text = selector.strip().lower()
+        if selector_text.startswith("@") and (
+            not selector_text.startswith("@media")
+            or "prefers-color-scheme" not in selector_text
+            or not re.search(r"prefers-color-scheme\s*:\s*(?:dark|light)", selector_text)
+        ):
+            raise ContrastError("지원하지 않는 CSS 조건 블록입니다")
+        modes = _selector_modes(selector, parent_mode)
+        for mode in modes:
             yield mode, body
-        if "@" in selector.strip() or mode is None:
-            yield from _parse_blocks(body, parent_dark=(mode == "dark" or parent_dark))
+        if "@" in selector.strip() or not modes:
+            nested_parent = next(iter(modes)) if selector_text.startswith("@media") and len(modes) == 1 else parent_mode
+            yield from _parse_blocks(body, parent_mode=nested_parent)
         index = cursor
+
+
+def _strip_css_strings(text: str) -> str:
+    """CSS 문자열 안의 위조 `--kt-*:` 선언을 공백으로 치환한다."""
+
+    output = list(text)
+    quote: str | None = None
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if quote:
+            if char == "\\":
+                output[index] = " "
+                if index + 1 < len(text):
+                    output[index + 1] = "\n" if text[index + 1] == "\n" else " "
+                index += 2
+                continue
+            if char == quote:
+                output[index] = " "
+                quote = None
+            elif char != "\n":
+                output[index] = " "
+            index += 1
+            continue
+        if char in "\"'":
+            output[index] = " "
+            quote = char
+        index += 1
+    return "".join(output)
 
 
 def parse_css(paths: Sequence[Path], dark: bool) -> dict[str, str]:
@@ -155,7 +248,7 @@ def parse_css(paths: Sequence[Path], dark: bool) -> dict[str, str]:
         for mode, body in _parse_blocks(cleaned):
             if (mode == "dark") != dark:
                 continue
-            for name, value in _DECLARATION.findall(body):
+            for name, value in _DECLARATION.findall(_strip_css_strings(body)):
                 values[name] = value.strip()
     if not values:
         raise ContrastError("선택한 모드에서 --kt-* 선언을 찾지 못했습니다")
@@ -186,20 +279,36 @@ def _srgb_to_linear(value: float) -> float:
     return value / 12.92 if value <= 0.04045 else ((value + 0.055) / 1.055) ** 2.4
 
 
+def _linear_to_srgb(value: float) -> float:
+    value = max(0.0, min(1.0, value))
+    return 12.92 * value if value <= 0.0031308 else 1.055 * (value ** (1.0 / 2.4)) - 0.055
+
+
 def _oklch(value: str) -> Color:
     match = _OKLCH.fullmatch(value)
     if not match:
-        raise ContrastError(f"지원하지 않는 색 형식: {value[:40]}")
-    lightness = _parse_number(match.group(1), 1.0 if not match.group(1).endswith("%") else 1.0)
-    chroma = _parse_number(match.group(2), 0.01 if match.group(2).endswith("%") else 1.0)
-    hue = math.radians(_angle(match.group(3)))
-    alpha = _parse_number(match.group(4), 1.0) if match.group(4) else 1.0
+        raise ContrastError("지원하지 않는 색 형식")
+    try:
+        lightness = _parse_number(match.group(1), 1.0)
+        # CSS Color 4에서 OKLCH chroma 100%는 절대 C=0.4에 해당한다.
+        chroma = _parse_number(match.group(2), 0.4 if match.group(2).endswith("%") else 1.0)
+        hue = math.radians(_angle(match.group(3)))
+        alpha = _parse_number(match.group(4), 1.0) if match.group(4) else 1.0
+    except (TypeError, ValueError, OverflowError) as error:
+        raise ContrastError("지원하지 않는 색 형식") from error
+    if not all(math.isfinite(number) for number in (lightness, chroma, hue, alpha)):
+        raise ContrastError("지원하지 않는 색 형식")
+    if abs(lightness) > 2 or abs(chroma) > 2:
+        raise ContrastError("지원하지 않는 색 형식")
     a = chroma * math.cos(hue)
     b = chroma * math.sin(hue)
     l_value = lightness + 0.3963377774 * a + 0.2158037573 * b
     m_value = lightness - 0.1055613458 * a - 0.0638541728 * b
     s_value = lightness - 0.0894841775 * a - 1.2914855480 * b
-    l_value, m_value, s_value = l_value**3, m_value**3, s_value**3
+    try:
+        l_value, m_value, s_value = l_value**3, m_value**3, s_value**3
+    except OverflowError as error:
+        raise ContrastError("지원하지 않는 색 형식") from error
     return Color(
         4.0767416621 * l_value - 3.3077115913 * m_value + 0.2309699292 * s_value,
         -1.2684380046 * l_value + 2.6097574011 * m_value - 0.3413193965 * s_value,
@@ -222,7 +331,7 @@ def parse_color(value: str) -> Color:
         return Color(*(_srgb_to_linear(channel) for channel in channels), alpha)
     if normalized.startswith("oklch("):
         return _oklch(normalized)
-    raise ContrastError(f"지원하지 않는 색 형식: {value[:40]}")
+    raise ContrastError("지원하지 않는 색 형식")
 
 
 def resolve_colors(values: Mapping[str, str], targets: Iterable[str] | None = None) -> dict[str, Color]:
@@ -261,37 +370,51 @@ def resolve_colors(values: Mapping[str, str], targets: Iterable[str] | None = No
     return resolved
 
 
-def contrast_ratio(foreground: Color, background: Color) -> float:
-    """알파 색을 배경에 합성한 뒤 WCAG 대비를 반환한다."""
+def contrast_ratio(foreground: Color, background: Color, background_underlay: Color | None = None) -> float:
+    """CSS sRGB source-over 합성 뒤 WCAG 상대 휘도를 반환한다."""
 
     white = Color(1.0, 1.0, 1.0)
 
     def composite(source: Color, under: Color) -> Color:
         alpha = max(0.0, min(1.0, source.alpha))
-        return Color(
-            source.red * alpha + under.red * (1.0 - alpha),
-            source.green * alpha + under.green * (1.0 - alpha),
-            source.blue * alpha + under.blue * (1.0 - alpha),
-        )
+        source_srgb = tuple(_linear_to_srgb(channel) for channel in (source.red, source.green, source.blue))
+        under_srgb = tuple(_linear_to_srgb(channel) for channel in (under.red, under.green, under.blue))
+        mixed = tuple(source_channel * alpha + under_channel * (1.0 - alpha) for source_channel, under_channel in zip(source_srgb, under_srgb))
+        return Color(*(_srgb_to_linear(channel) for channel in mixed))
 
-    opaque_background = composite(background, white)
+    opaque_background = composite(background, background_underlay or white)
     opaque_foreground = composite(foreground, opaque_background)
     first, second = opaque_foreground.luminance(), opaque_background.luminance()
     lighter, darker = max(first, second), min(first, second)
     return (lighter + 0.05) / (darker + 0.05)
 
 
-def inspect(values: Mapping[str, str]) -> list[dict[str, object]]:
-    targets = {f"--kt-{name}" for pair in PAIRS for name in (pair.foreground, pair.background)}
+def pairs_for(read_surfaces: Sequence[str] = ()) -> tuple[Pair, ...]:
+    """기본 쌍에 앱이 읽기 표면으로 선언한 추가 표면을 더한다."""
+
+    pairs = list(PAIRS)
+    for surface in read_surfaces:
+        if surface not in {"page", "subtle", "muted", "card"}:
+            raise ContrastError(f"지원하지 않는 읽기 표면: {surface}")
+        for text in ("primary", "secondary", "strong", "tertiary"):
+            pair = Pair(f"text-{text}/surface-{surface}", f"text-{text}", f"surface-{surface}", 4.5)
+            if pair.name not in {item.name for item in pairs}:
+                pairs.append(pair)
+    return tuple(pairs)
+
+
+def inspect(values: Mapping[str, str], pairs: Sequence[Pair] = PAIRS) -> list[dict[str, object]]:
+    targets = {f"--kt-{name}" for pair in pairs for name in (pair.foreground, pair.background)}
     resolved = resolve_colors(values, targets)
     findings: list[dict[str, object]] = []
-    for pair in PAIRS:
+    for pair in pairs:
         foreground = resolved.get(f"--kt-{pair.foreground}")
         background = resolved.get(f"--kt-{pair.background}")
         if foreground is None or background is None:
             missing = pair.foreground if foreground is None else pair.background
             raise ContrastError(f"필수 색 변수가 없습니다: --kt-{missing}")
-        measured = contrast_ratio(foreground, background)
+        underlay = resolved.get("--kt-surface-page") if background.alpha < 1.0 and pair.background != "surface-page" else None
+        measured = contrast_ratio(foreground, background, underlay)
         findings.append(
             {
                 "pair": pair.name,
@@ -309,33 +432,59 @@ def _load_json(path: Path) -> object:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
-        raise ContrastError(f"JSON 입력을 읽을 수 없습니다: {path.name}") from error
+        raise ContrastError("JSON 입력을 읽을 수 없습니다") from error
 
 
 def load_baseline(path: Path) -> list[dict[str, object]]:
     """baseline의 entries 목록을 검증해 반환한다."""
 
     data = _load_json(path)
-    if isinstance(data, dict):
-        entries = data.get("entries", data.get("baseline"))
-    else:
-        entries = data
+    if not isinstance(data, dict):
+        raise ContrastError("대비 baseline은 version과 entries를 가진 객체여야 합니다")
+    version = data.get("version")
+    if isinstance(version, bool) or not isinstance(version, int) or version != 1:
+        raise ContrastError("대비 baseline version은 1이어야 합니다")
+    entries = data.get("entries", data.get("baseline"))
     if not isinstance(entries, list):
         raise ContrastError("대비 baseline은 entries 배열이어야 합니다")
     result: list[dict[str, object]] = []
+    seen: set[tuple[str, str]] = set()
     for entry in entries:
         if not isinstance(entry, dict) or not all(key in entry for key in ("pair", "surface", "measured", "required", "until")):
             raise ContrastError("대비 baseline 항목 필드가 부족합니다")
         if not isinstance(entry["pair"], str) or not isinstance(entry["surface"], str):
             raise ContrastError("대비 baseline pair/surface 형식이 잘못되었습니다")
+        key = (entry["pair"], entry["surface"])
+        if key in seen:
+            raise ContrastError("대비 baseline에 중복된 쌍이 있습니다")
+        seen.add(key)
+        if isinstance(entry["measured"], bool) or not isinstance(entry["measured"], (int, float)):
+            raise ContrastError("대비 baseline measured 형식이 잘못되었습니다")
+        if isinstance(entry["required"], bool) or not isinstance(entry["required"], (int, float)):
+            raise ContrastError("대비 baseline required 형식이 잘못되었습니다")
+        if not isinstance(entry["until"], str):
+            raise ContrastError("대비 baseline until 형식이 잘못되었습니다")
         try:
             measured = float(entry["measured"])
             required = float(entry["required"])
-            _datetime.date.fromisoformat(str(entry["until"]))
-        except (TypeError, ValueError) as error:
+            _datetime.date.fromisoformat(entry["until"])
+        except (TypeError, ValueError, OverflowError) as error:
             raise ContrastError("대비 baseline 수치 또는 until 형식이 잘못되었습니다") from error
-        result.append({"pair": entry["pair"], "surface": entry["surface"], "measured": measured, "required": required, "until": str(entry["until"])})
+        if not math.isfinite(measured) or not math.isfinite(required) or measured < 0 or required <= 0:
+            raise ContrastError("대비 baseline 수치는 유한한 범위여야 합니다")
+        result.append({"pair": entry["pair"], "surface": entry["surface"], "measured": measured, "required": required, "until": entry["until"]})
     return result
+
+
+def validate_baseline_scope(entries: Sequence[Mapping[str, object]], pairs: Sequence[Pair]) -> None:
+    """baseline 식별자가 현재 검사 쌍의 alias인지 확인한다."""
+
+    pair_aliases = {pair.name for pair in pairs} | {pair.foreground for pair in pairs}
+    surface_aliases = {pair.background for pair in pairs}
+    surface_aliases.update(background.removeprefix("surface-") for background in tuple(surface_aliases))
+    for entry in entries:
+        if str(entry["pair"]) not in pair_aliases or str(entry["surface"]) not in surface_aliases:
+            raise ContrastError("대비 baseline 쌍이 현재 검사 범위에 없습니다")
 
 
 def apply_baseline(findings: Sequence[Mapping[str, object]], entries: Sequence[Mapping[str, object]]) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
@@ -407,6 +556,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="--kt-* 토큰의 WCAG 대비를 검사합니다.")
     parser.add_argument("paths", nargs="*", type=Path, help="canonical tokens.css 뒤에 적용할 오버라이드 CSS")
     parser.add_argument("--dark", action="store_true", help="dark 모드 선언을 검사합니다")
+    parser.add_argument(
+        "--read-surface",
+        "--read-surfaces",
+        dest="read_surfaces",
+        action="append",
+        choices=("page", "subtle", "muted", "card"),
+        help="text 쌍에 추가할 읽기 표면(반복 가능)",
+    )
     parser.add_argument("--baseline", type=Path, help="미달 예외 JSON")
     parser.add_argument("--fail-new", action="store_true", help="baseline에 없는 미달 또는 만료를 실패 처리합니다")
     parser.add_argument("--json", action="store_true", dest="as_json", help="JSON으로 출력합니다")
@@ -419,9 +576,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     paths = args.paths or [DEFAULT_TOKENS]
     try:
+        pairs = pairs_for(args.read_surfaces or ())
         values = parse_css(paths, args.dark)
-        findings = inspect(values)
+        findings = inspect(values, pairs)
         baseline = load_baseline(args.baseline) if args.baseline else []
+        validate_baseline_scope(baseline, pairs)
         findings, expired = apply_baseline(findings, baseline)
         misses = [finding for finding in findings if not bool(finding["pass"])]
         new_misses = [finding for finding in misses if not bool(finding.get("exempt", False))]

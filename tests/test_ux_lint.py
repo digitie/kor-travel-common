@@ -26,7 +26,7 @@ class UxLintTests(unittest.TestCase):
             encoding="utf-8",
         )
 
-    def test_all_patterns_report_and_comments_backticks_are_ignored(self):
+    def test_all_patterns_report_and_executable_templates_are_checked(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
             fixture = root / "fixture.tsx"
@@ -44,7 +44,7 @@ window.confirm('확인');
             payload = json.loads(result.stdout)
             patterns = {item["pattern"] for item in payload["findings"]}
             self.assertEqual(patterns, {"P1", "P2", "P3", "P4a", "P4b", "P5", "P6", "P7", "P8"})
-            self.assertEqual(sum(item["pattern"] == "P8" for item in payload["findings"]), 1)
+            self.assertEqual(sum(item["pattern"] == "P8" for item in payload["findings"]), 2)
 
     def test_baseline_and_added_lines(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
@@ -59,6 +59,30 @@ window.confirm('확인');
             self.assertEqual(result.returncode, 1)
             payload = json.loads(result.stdout)
             self.assertEqual([item["line"] for item in payload["findings"] if item["fail"]], [2])
+
+    def test_front_insertion_cannot_consume_baseline_budget(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            self.git(root, "init", "-q")
+            fixture = root / "fixture.tsx"
+            fixture.write_text("const old = 'outline-none';\n", encoding="utf-8")
+            self.git(root, "add", "fixture.tsx")
+            self.git(root, "-c", "user.name=테스트", "-c", "user.email=test@example.invalid", "commit", "-q", "-m", "base")
+            fixture.write_text("const added = 'outline-none';\nconst old = 'outline-none';\n", encoding="utf-8")
+            baseline = root / "baseline.json"
+            baseline.write_text(
+                json.dumps(
+                    {
+                        "schema": "kor-travel-common.ux-baseline.v1",
+                        "entries": [{"rule": "P6", "path": "fixture.tsx", "count": 1, "reason": "이관 전", "until": "2099-12-31", "task": "T-103"}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--baseline", baseline, "--base", "HEAD", "--json")
+            self.assertEqual(result.returncode, 1)
+            payload = json.loads(result.stdout)
+            self.assertEqual([item["line"] for item in payload["findings"] if item["fail"]], [1])
 
     def test_baseline_schema_exempts_count_and_expiry_fails(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
@@ -109,6 +133,61 @@ window.confirm('확인');
             self.assertEqual(result.returncode, 0, result.stderr)
             files = {item["file"] for item in json.loads(result.stdout)["findings"]}
             self.assertEqual(files, {"src/keep.tsx"})
+
+    def test_external_root_uses_its_own_git_repository(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory) / "frontend"
+            root.mkdir()
+            self.git(root, "init", "-q")
+            fixture = root / "page.tsx"
+            fixture.write_text("const value = 1;\n", encoding="utf-8")
+            self.git(root, "add", "page.tsx")
+            self.git(root, "-c", "user.name=테스트", "-c", "user.email=test@example.invalid", "commit", "-q", "-m", "base")
+            fixture.write_text("const value = 'outline-none';\n", encoding="utf-8")
+            result = self.run_tool(ROOT, "--root", root, "--base", "HEAD", "--json")
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["fail_count"], 1)
+
+    def test_invalid_baseline_numbers_are_input_errors(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "fixture.tsx"
+            fixture.write_text("const value = 'outline-none';\n", encoding="utf-8")
+            baseline = root / "baseline.json"
+            baseline.write_text(
+                json.dumps(
+                    {
+                        "schema": "kor-travel-common.ux-baseline.v1",
+                        "entries": [{"rule": "P6", "path": "fixture.tsx", "count": 1e309, "reason": "이관 전", "until": "2099-12-31", "task": "T-103"}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--baseline", baseline, "--json")
+            self.assertEqual(result.returncode, 2)
+            self.assertNotIn("Traceback", result.stderr)
+
+    def test_base_option_like_ref_is_rejected(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            self.git(root, "init", "-q")
+            fixture = root / "fixture.tsx"
+            fixture.write_text("const value = 'outline-none';\n", encoding="utf-8")
+            result = self.run_tool(root, "--root", root, "--base=--name-only", "--json")
+            self.assertEqual(result.returncode, 2)
+            self.assertNotIn("Traceback", result.stderr)
+
+    def test_secret_like_path_is_redacted_in_outputs(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / ("ghp_" + "Z" * 36 + ".tsx")
+            fixture.write_text("const value = 'outline-none';\n", encoding="utf-8")
+            summary = root / "summary.md"
+            result = self.run_tool(root, "--root", root, "--fail-new", "--step-summary", summary, "--json")
+            self.assertEqual(result.returncode, 1)
+            raw = result.stdout + summary.read_text(encoding="utf-8")
+            self.assertNotIn(fixture.name, raw)
+            self.assertIn("<redacted>", raw)
 
     @staticmethod
     def git(root: Path, *args: str) -> None:

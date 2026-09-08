@@ -52,10 +52,17 @@ PATTERNS: tuple[tuple[str, str, str], ...] = (
 )
 COMPILED_PATTERNS = tuple((name, description, re.compile(expression)) for name, description, expression in PATTERNS)
 KNOWN_RULES = {name for name, _, _ in PATTERNS}
+_SECRET_PATH_PART = re.compile(r"(?:gh[pousr]_[A-Za-z0-9_-]{16,}|github_pat_[A-Za-z0-9_\-]{16,}|sk-[A-Za-z0-9_-]{16,}|AKIA[0-9A-Z]{12,})")
 
 
-def _mask_comments_and_backticks(text: str) -> str:
-    """주석·백틱 영역을 공백으로 가려 줄 번호와 열 번호를 유지한다."""
+def _public_path(value: str) -> str:
+    """경로에 우연히 포함된 자격증명 형태를 출력에서 가린다."""
+
+    return _SECRET_PATH_PART.sub("<redacted>", value)
+
+
+def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
+    """주석과 문서 인용만 공백으로 가려 줄 번호와 열 번호를 유지한다."""
 
     output = list(text)
     state = "code"
@@ -108,8 +115,11 @@ def _mask_comments_and_backticks(text: str) -> str:
             index += 1
             continue
         if char == "`":
-            output[index] = " "
-            state = "backtick"
+            if ignore_backticks:
+                output[index] = " "
+                state = "backtick"
+            else:
+                quote = "`"
             index += 1
             continue
         if char == "/" and next_char == "/":
@@ -130,7 +140,7 @@ def _relative(path: Path, root: Path) -> str:
     try:
         return path.resolve().relative_to(root.resolve()).as_posix()
     except ValueError:
-        return path.name
+        raise UxLintError("검사 경로가 작업 root 밖에 있습니다")
 
 
 def collect_files(inputs: Sequence[Path], root: Path) -> list[tuple[Path, str]]:
@@ -139,7 +149,7 @@ def collect_files(inputs: Sequence[Path], root: Path) -> list[tuple[Path, str]]:
     result: dict[str, Path] = {}
     for item in inputs:
         if not item.exists():
-            raise UxLintError(f"대상을 찾을 수 없습니다: {item.name}")
+            raise UxLintError("검사 대상을 찾을 수 없습니다")
         base = item if item.is_dir() else None
         candidates = [item] if item.is_file() else [path for path in item.rglob("*") if path.is_file()]
         for path in candidates:
@@ -157,8 +167,8 @@ def scan_file(path: Path, relative: str, token_files: set[str]) -> list[dict[str
     try:
         text = path.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as error:
-        raise UxLintError(f"파일을 읽을 수 없습니다: {relative}") from error
-    masked = _mask_comments_and_backticks(text)
+        raise UxLintError("검사 파일을 읽을 수 없습니다") from error
+    masked = _mask_comments_and_backticks(text, ignore_backticks=path.suffix.lower() == ".mdx")
     findings: list[dict[str, object]] = []
     for name, description, pattern in COMPILED_PATTERNS:
         if name == "P4b" and (path.suffix.lower() != ".css" or relative in token_files):
@@ -185,37 +195,74 @@ def _git_output(root: Path, args: Sequence[str]) -> str:
     except (OSError, UnicodeError) as error:
         raise UxLintError("git diff를 실행할 수 없습니다") from error
     if completed.returncode != 0:
-        raise UxLintError("--base 커밋을 확인할 수 없습니다")
+        raise UxLintError("Git 명령을 실행할 수 없습니다")
     return completed.stdout
 
 
-def added_lines(root: Path, base: str, files: Sequence[str]) -> dict[str, set[int]]:
-    """git diff -U0에서 추가된 파일·행을 추출한다."""
+def git_root(path: Path) -> Path:
+    """검사 대상이 속한 Git top-level을 반환한다."""
+
+    probe = path if path.is_dir() else path.parent
+    try:
+        output = _git_output(probe, ["rev-parse", "--show-toplevel"]).strip()
+    except UxLintError as error:
+        raise UxLintError("검사 root의 Git 저장소를 찾을 수 없습니다") from error
+    if not output:
+        raise UxLintError("검사 root의 Git 저장소를 찾을 수 없습니다")
+    return Path(output).resolve()
+
+
+def resolve_base(root: Path, base: str) -> str:
+    """옵션으로 해석되지 않도록 기준 ref를 commit SHA로 고정한다."""
+
+    try:
+        return _git_output(root, ["rev-parse", "--verify", "--end-of-options", f"{base}^{{commit}}"]).strip()
+    except UxLintError as error:
+        raise UxLintError("--base 커밋을 확인할 수 없습니다") from error
+
+
+def _is_tracked(root: Path, relative: str) -> bool:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "--error-unmatch", "--", relative],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+    except (OSError, UnicodeError) as error:
+        raise UxLintError("Git 파일 상태를 확인할 수 없습니다") from error
+    return completed.returncode == 0 and bool(completed.stdout.strip())
+
+
+def added_lines(root: Path, base: str, files: Mapping[str, Path]) -> dict[str, set[int]]:
+    """파일별 git diff -U0에서 추가 행을 추출한다(인용 경로도 보존)."""
 
     if not files:
         raise UxLintError("--base에는 검사할 파일이 필요합니다")
-    output = _git_output(root, ["-c", "core.quotePath=false", "diff", "--no-ext-diff", "--unified=0", base, "--", *files])
     result: dict[str, set[int]] = defaultdict(set)
-    current: str | None = None
-    current_line: int | None = None
-    for raw_line in output.splitlines():
-        if raw_line.startswith("+++ b/"):
-            current = raw_line[6:]
-            current_line = None
+    for relative, path in files.items():
+        if not _is_tracked(root, relative):
+            try:
+                line_count = len(path.read_text(encoding="utf-8").splitlines())
+            except (OSError, UnicodeError) as error:
+                raise UxLintError("검사 파일을 읽을 수 없습니다") from error
+            result[relative].update(range(1, line_count + 1))
             continue
-        if raw_line.startswith("@@"):
-            match = re.search(r"\+(\d+)(?:,(\d+))?", raw_line)
-            if match:
-                current_line = int(match.group(1))
-            continue
-        if current is None or current_line is None:
-            continue
-        if raw_line.startswith("+"):
-            if not raw_line.startswith("+++"):
-                result[current].add(current_line)
-            current_line += 1
-        elif raw_line.startswith(" "):
-            current_line += 1
+        output = _git_output(root, ["diff", "--no-ext-diff", "--unified=0", base, "--", relative])
+        current_line: int | None = None
+        for raw_line in output.splitlines():
+            if raw_line.startswith("@@"):
+                match = re.search(r"\+(\d+)(?:,(\d+))?", raw_line)
+                current_line = int(match.group(1)) if match else None
+                continue
+            if current_line is None:
+                continue
+            if raw_line.startswith("+") and not raw_line.startswith("+++"):
+                result[relative].add(current_line)
+                current_line += 1
+            elif raw_line.startswith(" "):
+                current_line += 1
     return result
 
 
@@ -223,7 +270,7 @@ def load_baseline(path: Path) -> list[dict[str, object]]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
-        raise UxLintError(f"baseline JSON을 읽을 수 없습니다: {path.name}") from error
+        raise UxLintError("baseline JSON을 읽을 수 없습니다") from error
     if not isinstance(data, dict) or data.get("schema") != "kor-travel-common.ux-baseline.v1":
         raise UxLintError("UX baseline schema가 kor-travel-common.ux-baseline.v1이 아닙니다")
     entries = data.get("entries")
@@ -238,13 +285,17 @@ def load_baseline(path: Path) -> list[dict[str, object]]:
             raise UxLintError("UX baseline rule 형식이 잘못되었습니다")
         if not isinstance(entry["path"], str) or not entry["path"] or Path(entry["path"]).is_absolute() or "\\" in entry["path"]:
             raise UxLintError("UX baseline path 형식이 잘못되었습니다")
+        if isinstance(entry["count"], bool) or not isinstance(entry["count"], int):
+            raise UxLintError("UX baseline count 형식이 잘못되었습니다")
+        if not isinstance(entry["until"], str):
+            raise UxLintError("UX baseline until 형식이 잘못되었습니다")
         try:
-            count = int(entry["count"])
-            until = str(entry["until"])
+            count = entry["count"]
+            until = entry["until"]
             from datetime import date
 
             date.fromisoformat(until)
-        except (TypeError, ValueError) as error:
+        except (TypeError, ValueError, OverflowError) as error:
             raise UxLintError("UX baseline count/until 형식이 잘못되었습니다") from error
         if count < 0:
             raise UxLintError("UX baseline count는 0 이상이어야 합니다")
@@ -254,7 +305,12 @@ def load_baseline(path: Path) -> list[dict[str, object]]:
     return result
 
 
-def apply_baseline(findings: Sequence[Mapping[str, object]], entries: Sequence[Mapping[str, object]], root_prefix: str = "") -> list[dict[str, object]]:
+def apply_baseline(
+    findings: Sequence[Mapping[str, object]],
+    entries: Sequence[Mapping[str, object]],
+    root_prefix: str = "",
+    added: Mapping[str, set[int]] | None = None,
+) -> list[dict[str, object]]:
     from datetime import date
 
     today = date.today()
@@ -263,20 +319,39 @@ def apply_baseline(findings: Sequence[Mapping[str, object]], entries: Sequence[M
         for entry in entries
         if date.fromisoformat(str(entry["until"])) >= today
     }
-    seen: defaultdict[tuple[str, str], int] = defaultdict(int)
-    result: list[dict[str, object]] = []
-    for finding in findings:
+    grouped: defaultdict[tuple[str, str], list[int]] = defaultdict(list)
+    for index, finding in enumerate(findings):
         finding_path = str(finding["file"])
         relative_to_root = finding_path
         if root_prefix and finding_path.startswith(root_prefix.rstrip("/") + "/"):
             relative_to_root = finding_path[len(root_prefix.rstrip("/")) + 1 :]
         candidates = [(finding_path, str(finding["pattern"])), (relative_to_root, str(finding["pattern"]))]
         key = next((candidate for candidate in candidates if candidate in limits), candidates[0])
-        index = seen[key]
-        seen[key] += 1
+        grouped[key].append(index)
+    result: list[dict[str, object]] = []
+    exemptions: dict[int, bool] = {}
+    for key, indices in grouped.items():
+        ordered = sorted(
+            indices,
+            key=lambda index: (
+                1 if added is not None and int(findings[index]["line"]) in added.get(str(findings[index]["file"]), set()) else 0,
+                int(findings[index]["line"]),
+                int(findings[index]["column"]),
+            ),
+        )
+        limit = limits.get(key, 0)
+        for rank, index in enumerate(ordered):
+            exemptions[index] = rank < limit
+    for index, finding in enumerate(findings):
         item = dict(finding)
+        finding_path = str(finding["file"])
+        relative_to_root = finding_path
+        if root_prefix and finding_path.startswith(root_prefix.rstrip("/") + "/"):
+            relative_to_root = finding_path[len(root_prefix.rstrip("/")) + 1 :]
+        candidates = [(finding_path, str(finding["pattern"])), (relative_to_root, str(finding["pattern"]))]
+        key = next((candidate for candidate in candidates if candidate in limits), candidates[0])
         item["baseline"] = limits.get(key, 0)
-        item["exempt"] = index < limits.get(key, 0)
+        item["exempt"] = exemptions.get(index, False)
         result.append(item)
     return result
 
@@ -295,7 +370,7 @@ def render_markdown(findings: Sequence[Mapping[str, object]], fail_count: int, m
         lines.extend(["", "| 파일 | 행 | 패턴 | 판정 |", "|---|---:|---|---|"])
         for finding in findings:
             state = "EXEMPT" if finding.get("exempt") else ("FAIL" if finding.get("fail") else "REPORT")
-            lines.append(f"| `{finding['file']}` | {finding['line']} | `{finding['pattern']}` | {state} |")
+            lines.append(f"| `{_public_path(str(finding['file']))}` | {finding['line']} | `{finding['pattern']}` | {state} |")
     return "\n".join(lines) + "\n"
 
 
@@ -325,28 +400,43 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    root = Path.cwd().resolve()
+    workspace = Path.cwd().resolve()
     try:
-        inputs = ([args.root] if args.root else []) + list(args.paths)
+        scan_root = (args.root or workspace).resolve()
+        if args.root and not scan_root.exists():
+            raise UxLintError("검사 root를 찾을 수 없습니다")
+        inputs = ([scan_root] if args.root else []) + list(args.paths)
         if not inputs:
             raise UxLintError("검사할 파일 또는 --root가 필요합니다")
-        files = collect_files(inputs, root)
+        files = collect_files(inputs, scan_root)
         token_files = set()
         if args.token_files:
             for item in args.token_files.split(","):
                 candidate = item.strip()
                 if candidate:
                     candidate_path = Path(candidate)
-                    if not candidate_path.is_absolute() and args.root and (args.root / candidate_path).is_file():
-                        candidate_path = args.root / candidate_path
-                    token_files.add(_relative(candidate_path, root))
+                    if not candidate_path.is_absolute():
+                        candidate_path = scan_root / candidate_path
+                    token_files.add(_relative(candidate_path, scan_root))
         findings = [finding for path, relative in files for finding in scan_file(path, relative, token_files)]
         baseline = load_baseline(args.baseline) if args.baseline else []
-        root_prefix = _relative(args.root, root) if args.root else ""
-        if root_prefix == ".":
-            root_prefix = ""
-        findings = apply_baseline(findings, baseline, root_prefix)
-        added = added_lines(root, args.base, [relative for _, relative in files]) if args.base else {}
+        base_sha: str | None = None
+        added: dict[str, set[int]] = {}
+        if args.base:
+            repository = git_root(scan_root)
+            base_sha = resolve_base(repository, args.base)
+            git_files: dict[str, Path] = {}
+            scan_to_git: dict[str, str] = {}
+            for path, relative in files:
+                try:
+                    git_relative = path.resolve().relative_to(repository).as_posix()
+                except ValueError as error:
+                    raise UxLintError("검사 파일이 Git 저장소 밖에 있습니다") from error
+                git_files[git_relative] = path
+                scan_to_git[relative] = git_relative
+            raw_added = added_lines(repository, base_sha, git_files)
+            added = {relative: raw_added.get(git_relative, set()) for relative, git_relative in scan_to_git.items()}
+        findings = apply_baseline(findings, baseline, added=added if args.base else None)
         should_fail = bool(args.base or args.fail_new)
         for finding in findings:
             is_added = not args.base or int(finding["line"]) in added.get(str(finding["file"]), set())
@@ -355,9 +445,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         fail_count = sum(1 for finding in findings if finding.get("fail"))
         from datetime import date
 
-        expired = [entry for entry in baseline if date.fromisoformat(str(entry["until"])) < date.today()]
+        expired = [
+            {"rule": entry["rule"], "path": _public_path(str(entry["path"])), "count": entry["count"], "until": entry["until"]}
+            for entry in baseline
+            if date.fromisoformat(str(entry["until"])) < date.today()
+        ]
         status = "EXEMPT_EXPIRED" if expired else ("PASS" if fail_count == 0 else "FAIL")
-        payload = {"tool": "ux_lint", "status": status, "findings": findings, "fail_count": fail_count, "base": args.base, "expired": expired}
+        public_findings = []
+        for finding in findings:
+            public_finding = dict(finding)
+            public_finding["file"] = _public_path(str(finding["file"]))
+            public_findings.append(public_finding)
+        payload = {"tool": "ux_lint", "status": status, "findings": public_findings, "fail_count": fail_count, "base": base_sha, "expired": expired}
         markdown = render_markdown(findings, fail_count, "diff" if args.base else "report", expired)
         write_step_summary(markdown, args.step_summary)
         if args.as_json:

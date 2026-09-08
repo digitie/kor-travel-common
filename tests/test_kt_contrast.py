@@ -35,6 +35,16 @@ class ContrastTests(unittest.TestCase):
         tertiary = parse_color("oklch(54% 0.012 154)")
         self.assertAlmostEqual(contrast_ratio(tertiary, page), 4.73, delta=0.05)
 
+    def test_oklch_chroma_percent_matches_numeric(self):
+        self.assertAlmostEqual(
+            contrast_ratio(parse_color("oklch(56% 25% 135)"), parse_color("#fff")),
+            contrast_ratio(parse_color("oklch(56% 0.1 135)"), parse_color("#fff")),
+            delta=1e-9,
+        )
+
+    def test_alpha_uses_srgb_source_over(self):
+        self.assertAlmostEqual(contrast_ratio(parse_color("#ffffff33"), parse_color("#000")), 1.6621, delta=0.01)
+
     def test_canonical_light_and_dark_pass(self):
         for mode in ((), ("--dark",)):
             with self.subTest(mode=mode):
@@ -57,6 +67,39 @@ class ContrastTests(unittest.TestCase):
             finding = next(item for item in payload["findings"] if item["pair"] == "control-line/surface-card")
             self.assertFalse(finding["pass"])
             self.assertAlmostEqual(finding["measured"], 2.06, delta=0.05)
+
+    def test_light_selector_and_quoted_text_do_not_override_tokens(self):
+        with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
+            override = Path(directory) / "override.css"
+            override.write_text(
+                ':root:not(.dark) { --kt-brand: #fff; --kt-brand-foreground: #fff; content: "--kt-brand: #000;"; }\n',
+                encoding="utf-8",
+            )
+            result = self.run_tool(TOKENS, override, "--fail-new", "--json")
+            self.assertEqual(result.returncode, 1)
+            payload = json.loads(result.stdout)
+            finding = next(item for item in payload["findings"] if item["pair"] == "brand-foreground/brand")
+            self.assertFalse(finding["pass"])
+
+    def test_unsupported_condition_is_input_error(self):
+        with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
+            override = Path(directory) / "override.css"
+            override.write_text("@media (max-width: 1px) { :root { --kt-brand: #fff; } }\n", encoding="utf-8")
+            result = self.run_tool(TOKENS, override)
+            self.assertEqual(result.returncode, 2)
+
+    def test_muted_read_surface_is_explicit(self):
+        with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
+            override = Path(directory) / "override.css"
+            override.write_text(
+                ":root { --kt-surface-muted: #111; --kt-text-primary: #111; }\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(TOKENS, override, "--read-surface", "muted", "--fail-new", "--json")
+            self.assertEqual(result.returncode, 1)
+            payload = json.loads(result.stdout)
+            finding = next(item for item in payload["findings"] if item["pair"] == "text-primary/surface-muted")
+            self.assertFalse(finding["pass"])
 
     def test_expired_baseline_fails_and_active_baseline_passes(self):
         with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
@@ -86,12 +129,32 @@ class ContrastTests(unittest.TestCase):
             directory_path = Path(directory)
             malformed = directory_path / "malformed.css"
             malformed.write_text(":root { --kt-brand: #fff;\n", encoding="utf-8")
+            extra_close = directory_path / "extra-close.css"
+            extra_close.write_text(":root { --kt-brand: #fff; } }\n", encoding="utf-8")
             cycle = directory_path / "cycle.css"
             cycle.write_text(":root { --kt-brand: var(--kt-brand-foreground); --kt-brand-foreground: var(--kt-brand); }\n", encoding="utf-8")
-            for path in (malformed, cycle):
+            for path in (malformed, extra_close, cycle):
                 with self.subTest(path=path.name):
                     result = self.run_tool(TOKENS, path)
                     self.assertEqual(result.returncode, 2)
+
+    def test_invalid_baseline_is_input_error_without_traceback(self):
+        with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
+            baseline = Path(directory) / "invalid.json"
+            baseline.write_text(
+                json.dumps(
+                    {
+                        "version": 999,
+                        "entries": [
+                            {"pair": "brand-foreground", "surface": "brand", "measured": "NaN", "required": -9, "until": "2099-01-01"}
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            result = self.run_tool(TOKENS, "--baseline", baseline, "--json")
+            self.assertEqual(result.returncode, 2)
+            self.assertNotIn("Traceback", result.stderr)
 
 
 if __name__ == "__main__":
