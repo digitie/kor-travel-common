@@ -80,14 +80,12 @@ def _find_template_end(text: str, start: int) -> int:
 def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
     """MDX의 Markdown code span과 JSX/JavaScript template을 구분한다."""
 
-    if "${" in text[start + 1 : end]:
-        return True
     prefix = text[:start].rstrip()
     if not prefix:
         return False
     if prefix[-1] in "={([,:>":
         return True
-    return bool(re.search(r"(?:const|let|var|return|className|style)\s*=\s*$", prefix))
+    return bool(re.search(r"(?:const|let|var|className|style)\s*=\s*$|return\s*$", prefix))
 
 
 def _mask_template_interpolation_comments(text: str) -> str:

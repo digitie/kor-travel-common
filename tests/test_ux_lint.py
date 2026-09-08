@@ -52,6 +52,7 @@ window.confirm('확인');
             fixture = root / "fixture.mdx"
             fixture.write_text(
                 "`outline-none window.confirm()`\n"
+                "`${window.confirm('문서 예시')}`\n"
                 "const value = <div className={`outline-none ${window.confirm('확인')}`} />;\n"
                 "const safe = `${/* window.confirm('주석') */ value}`;\n",
                 encoding="utf-8",

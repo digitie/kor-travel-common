@@ -110,13 +110,17 @@ def _strip_css_comments(text: str) -> str:
         if char == "/" and next_char == "*":
             output[index] = output[index + 1] = " "
             index += 2
+            closed = False
             while index < len(text):
                 if text[index] == "*" and index + 1 < len(text) and text[index + 1] == "/":
                     output[index] = output[index + 1] = " "
                     index += 2
+                    closed = True
                     break
                 output[index] = "\n" if text[index] == "\n" else " "
                 index += 1
+            if not closed:
+                raise ContrastError("CSS 주석이 닫히지 않았습니다")
             continue
         index += 1
     return "".join(output)
@@ -152,10 +156,10 @@ def _split_selectors(selector: str) -> list[str]:
     return parts
 
 
-def _selector_modes(selector: str, parent_mode: str | None) -> frozenset[str]:
-    """선택자에서 실제 light/dark 적용 모드를 판정한다."""
+def _selector_rules(selector: str, parent_mode: str | None) -> list[tuple[str, int]]:
+    """지원하는 전역 선택자와 specificity를 반환한다."""
 
-    modes: set[str] = set()
+    rules: list[tuple[str, int]] = []
     for raw_part in _split_selectors(selector):
         normalized = re.sub(r"\s+", " ", raw_part.strip().lower())
         if not normalized:
@@ -163,12 +167,20 @@ def _selector_modes(selector: str, parent_mode: str | None) -> frozenset[str]:
         # 토큰 계약은 전역 루트와 명시적 다크 루트만 허용한다. `.dark .button`처럼
         # 하위 요소에만 적용되는 고 specificity 선언을 전역 토큰으로 승격하지 않는다.
         if normalized in {":root", ":root:root"}:
-            modes.update((parent_mode,) if parent_mode else ("light", "dark"))
+            modes = (parent_mode,) if parent_mode else ("light", "dark")
+            specificity = normalized.count(":root")
+            rules.extend((mode, specificity) for mode in modes)
         elif normalized in {":root:not(.dark)", ':root:not([data-theme="dark"])', ":root:not([data-theme='dark'])", '[data-theme="light"]', ':root[data-theme="light"]', ":root[data-theme='light']"}:
-            modes.add(parent_mode or "light")
+            rules.append(("light", 2 if normalized.startswith(":root") else 1))
         elif normalized in {".dark", '[data-theme="dark"]', "[data-theme='dark']", ":root[data-theme=\"dark\"]", ":root[data-theme='dark']"}:
-            modes.add("dark")
-    return frozenset(modes)
+            rules.append(("dark", 2 if normalized.startswith(":root") else 1))
+    return rules
+
+
+def _selector_modes(selector: str, parent_mode: str | None) -> frozenset[str]:
+    """선택자에서 실제 light/dark 적용 모드를 판정한다."""
+
+    return frozenset(mode for mode, _ in _selector_rules(selector, parent_mode))
 
 
 def _mask_nested_blocks(text: str) -> str:
@@ -199,7 +211,7 @@ def _mask_nested_blocks(text: str) -> str:
     return "".join(output)
 
 
-def _parse_blocks(text: str, parent_mode: str | None = None) -> Iterable[tuple[str, str]]:
+def _parse_blocks(text: str, parent_mode: str | None = None) -> Iterable[tuple[str, str, int]]:
     """중첩된 at-rule을 포함해 선언 블록과 적용 모드를 반환한다."""
 
     index = 0
@@ -241,10 +253,9 @@ def _parse_blocks(text: str, parent_mode: str | None = None) -> Iterable[tuple[s
                 raise ContrastError("지원하지 않는 CSS 조건 블록입니다")
             yield from _parse_blocks(body, parent_mode=media_match.group(1))
         else:
-            modes = _selector_modes(selector, parent_mode)
             direct_body = _mask_nested_blocks(body)
-            for mode in modes:
-                yield mode, direct_body
+            for mode, specificity in _selector_rules(selector, parent_mode):
+                yield mode, direct_body, specificity
         index = cursor
 
 
@@ -274,27 +285,34 @@ def _strip_css_strings(text: str) -> str:
             output[index] = " "
             quote = char
         index += 1
+    if quote:
+        raise ContrastError("CSS 문자열이 닫히지 않았습니다")
     return "".join(output)
 
 
 def parse_css(paths: Sequence[Path], dark: bool) -> dict[str, str]:
     """CSS 파일을 순서대로 읽어 선택된 모드의 `--kt-*` 선언을 병합한다."""
 
-    values: dict[str, str] = {}
+    declarations: dict[str, tuple[int, int, str]] = {}
+    source_order = 0
     for path in paths:
         try:
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeError) as error:
             raise ContrastError("CSS 입력을 읽을 수 없습니다") from error
         cleaned = _strip_css_comments(text)
-        for mode, body in _parse_blocks(cleaned):
+        for mode, body, specificity in _parse_blocks(cleaned):
             if (mode == "dark") != dark:
                 continue
             for name, value in _DECLARATION.findall(_strip_css_strings(body)):
-                values[name] = value.strip()
-    if not values:
+                source_order += 1
+                candidate = (specificity, source_order, value.strip())
+                previous = declarations.get(name)
+                if previous is None or candidate[:2] >= previous[:2]:
+                    declarations[name] = candidate
+    if not declarations:
         raise ContrastError("선택한 모드에서 --kt-* 선언을 찾지 못했습니다")
-    return values
+    return {name: candidate[2] for name, candidate in declarations.items()}
 
 
 def _parse_number(value: str, percent_scale: float = 1.0) -> float:
