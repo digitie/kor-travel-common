@@ -63,6 +63,33 @@ window.confirm('확인');
             self.assertEqual({item["pattern"] for item in payload["findings"]}, {"P6", "P8"})
             self.assertEqual(sum(item["pattern"] == "P8" for item in payload["findings"]), 1)
 
+    def test_mdx_tagged_templates_fences_and_colon_examples(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "fixture.mdx"
+            fixture.write_text(
+                "Example: `outline-none window.confirm()`\n"
+                "```tsx\nconst ignored = `outline-none`; window.confirm('문서');\n```\n"
+                "~~~tsx\nconst alsoIgnored = `outline-none`; window.confirm('문서');\n~~~\n"
+                "export const X = () => <div className={String.raw`outline-none`} />;\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            findings = json.loads(result.stdout)["findings"]
+            self.assertEqual({item["pattern"] for item in findings}, {"P6"})
+            self.assertEqual(len(findings), 1)
+
+    def test_escaped_template_text_remains_scannable(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "fixture.tsx"
+            fixture.write_text("const X = () => <div className={`\\${/* outline-none */}`} />;\n", encoding="utf-8")
+            result = self.run_tool(root, "--root", root, "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            findings = json.loads(result.stdout)["findings"]
+            self.assertEqual({item["pattern"] for item in findings}, {"P6"})
+
     def test_baseline_and_added_lines(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
@@ -199,6 +226,26 @@ window.confirm('확인');
             result = self.run_tool(root, "--root", root, "--baseline", baseline, "--json")
             self.assertEqual(result.returncode, 2)
             self.assertNotIn("Traceback", result.stderr)
+
+    def test_deep_json_baseline_is_input_error_without_traceback(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "fixture.tsx"
+            fixture.write_text("const value = 1;\n", encoding="utf-8")
+            baseline = root / "deep.json"
+            baseline.write_text("[" * 2000 + "0" + "]" * 2000, encoding="utf-8")
+            result = self.run_tool(root, "--root", root, "--baseline", baseline, "--json")
+            self.assertEqual(result.returncode, 2)
+            self.assertNotIn("Traceback", result.stderr)
+
+    def test_invalid_option_value_is_generic(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "fixture.tsx"
+            fixture.write_text("const value = 1;\n", encoding="utf-8")
+            result = self.run_tool(root, "--root", root, "--json=REVIEW_INPUT_MARKER")
+            self.assertEqual(result.returncode, 2)
+            self.assertNotIn("REVIEW_INPUT_MARKER", result.stderr)
 
     def test_diff_added_line_starting_with_triple_plus_is_checked(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:

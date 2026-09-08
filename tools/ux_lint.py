@@ -23,6 +23,13 @@ class UxLintError(ValueError):
     """입력·git diff·baseline이 잘못된 경우의 오류."""
 
 
+class _UxArgumentParser(argparse.ArgumentParser):
+    """argparse가 입력 원문을 오류 채널에 되풀이하지 않게 한다."""
+
+    def error(self, message: str) -> None:
+        raise UxLintError("명령 인자가 잘못되었습니다")
+
+
 PATTERNS: tuple[tuple[str, str, str], ...] = (
     (
         "P1",
@@ -83,9 +90,46 @@ def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
     prefix = text[:start].rstrip()
     if not prefix:
         return False
-    if prefix[-1] in "={([,:>":
+    if prefix[-1] in "={([>":
         return True
-    return bool(re.search(r"(?:const|let|var|className|style)\s*=\s*$|return\s*$", prefix))
+    return bool(re.search(r"(?:const|let|var|className|style)\s*=\s*$|return\s*$|String\.raw\s*$", prefix))
+
+
+def _is_escaped(text: str, index: int) -> bool:
+    """문자 앞의 연속 역슬래시 개수가 홀수인지 확인한다."""
+
+    backslashes = 0
+    index -= 1
+    while index >= 0 and text[index] == "\\":
+        backslashes += 1
+        index -= 1
+    return bool(backslashes % 2)
+
+
+def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
+    """MDX의 줄 단위 backtick/tilde fence 전체를 공백으로 가린다."""
+
+    line_start = text.rfind("\n", 0, start) + 1
+    if text[line_start:start].strip():
+        return "", start
+    line_end = text.find("\n", start)
+    if line_end < 0:
+        line_end = len(text)
+    cursor = line_end + 1
+    closing = len(text)
+    while cursor < len(text):
+        next_end = text.find("\n", cursor)
+        if next_end < 0:
+            next_end = len(text)
+        if text[cursor:next_end].lstrip().startswith(marker * 3):
+            closing = next_end + (1 if next_end < len(text) else 0)
+            break
+        cursor = next_end + 1
+    output = list(text[start:closing])
+    for offset, char in enumerate(text[start:closing]):
+        if char != "\n":
+            output[offset] = " "
+    return "".join(output), closing
 
 
 def _mask_template_interpolation_comments(text: str) -> str:
@@ -94,7 +138,7 @@ def _mask_template_interpolation_comments(text: str) -> str:
     output = list(text)
     index = 0
     while index + 1 < len(text):
-        if text[index : index + 2] != "${":
+        if text[index : index + 2] != "${" or _is_escaped(text, index):
             index += 1
             continue
         index += 2
@@ -180,7 +224,19 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
             quote = char
             index += 1
             continue
+        if ignore_backticks and char == "~" and text.startswith("~~~", index):
+            segment, stop = _mask_mdx_fence(text, index, "~")
+            if stop != index:
+                output[index:stop] = list(segment)
+                index = stop
+                continue
         if char == "`":
+            if ignore_backticks and text.startswith("```", index):
+                segment, stop = _mask_mdx_fence(text, index, "`")
+                if stop != index:
+                    output[index:stop] = list(segment)
+                    index = stop
+                    continue
             end = _find_template_end(text, index)
             executable = not ignore_backticks or _is_executable_mdx_template(text, index, end)
             stop = min(end + 1, len(text))
@@ -340,7 +396,7 @@ def added_lines(root: Path, base: str, files: Mapping[str, Path]) -> dict[str, s
 def load_baseline(path: Path) -> list[dict[str, object]]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, ValueError, json.JSONDecodeError) as error:
+    except (OSError, UnicodeError, ValueError, RecursionError, json.JSONDecodeError) as error:
         raise UxLintError("baseline JSON을 읽을 수 없습니다") from error
     if not isinstance(data, dict) or data.get("schema") != "kor-travel-common.ux-baseline.v1":
         raise UxLintError("UX baseline schema가 kor-travel-common.ux-baseline.v1이 아닙니다")
@@ -457,7 +513,7 @@ def write_step_summary(content: str, explicit: str | None) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="공통 UX 금지 패턴을 검사합니다.")
+    parser = _UxArgumentParser(description="공통 UX 금지 패턴을 검사합니다.")
     parser.add_argument("paths", nargs="*", type=Path, help="파일 또는 디렉터리")
     parser.add_argument("--root", type=Path, help="검사할 프런트엔드 루트")
     parser.add_argument("--token-files", help="P4b raw 색상을 허용할 토큰 파일 목록(쉼표 구분)")
@@ -470,9 +526,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
     workspace = Path.cwd().resolve()
     try:
+        args = parser.parse_args(argv)
         try:
             scan_root = (args.root or workspace).resolve()
         except (OSError, RuntimeError) as error:

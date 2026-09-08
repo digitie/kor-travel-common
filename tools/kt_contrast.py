@@ -24,6 +24,13 @@ class ContrastError(ValueError):
     """입력 CSS 또는 baseline이 계약을 위반했을 때 발생한다."""
 
 
+class _ContrastArgumentParser(argparse.ArgumentParser):
+    """argparse가 입력 원문을 오류 채널에 되풀이하지 않게 한다."""
+
+    def error(self, message: str) -> None:
+        raise ContrastError("명령 인자가 잘못되었습니다")
+
+
 @dataclass(frozen=True)
 class Color:
     """선형 sRGB 색과 불투명도를 보관한다."""
@@ -171,9 +178,11 @@ def _selector_rules(selector: str, parent_mode: str | None) -> list[tuple[str, i
             specificity = normalized.count(":root")
             rules.extend((mode, specificity) for mode in modes)
         elif normalized in {":root:not(.dark)", ':root:not([data-theme="dark"])', ":root:not([data-theme='dark'])", '[data-theme="light"]', ':root[data-theme="light"]', ":root[data-theme='light']"}:
-            rules.append(("light", 2 if normalized.startswith(":root") else 1))
-        elif normalized in {".dark", '[data-theme="dark"]', "[data-theme='dark']", ":root[data-theme=\"dark\"]", ":root[data-theme='dark']"}:
-            rules.append(("dark", 2 if normalized.startswith(":root") else 1))
+            if parent_mode in (None, "light"):
+                rules.append(("light", 2 if normalized.startswith(":root") else 1))
+        elif normalized in {".dark", ":root.dark", '[data-theme="dark"]', "[data-theme='dark']", ":root[data-theme=\"dark\"]", ":root[data-theme='dark']"}:
+            if parent_mode in (None, "dark"):
+                rules.append(("dark", 2 if normalized.startswith(":root") else 1))
     return rules
 
 
@@ -251,7 +260,9 @@ def _parse_blocks(text: str, parent_mode: str | None = None) -> Iterable[tuple[s
             media_match = re.fullmatch(r"@media\s*\(\s*prefers-color-scheme\s*:\s*(dark|light)\s*\)", selector_text)
             if not media_match:
                 raise ContrastError("지원하지 않는 CSS 조건 블록입니다")
-            yield from _parse_blocks(body, parent_mode=media_match.group(1))
+            media_mode = media_match.group(1)
+            if parent_mode is None or parent_mode == media_mode:
+                yield from _parse_blocks(body, parent_mode=media_mode)
         else:
             direct_body = _mask_nested_blocks(body)
             for mode, specificity in _selector_rules(selector, parent_mode):
@@ -491,7 +502,7 @@ def inspect(values: Mapping[str, str], pairs: Sequence[Pair] = PAIRS) -> list[di
 def _load_json(path: Path) -> object:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, ValueError, json.JSONDecodeError) as error:
+    except (OSError, UnicodeError, ValueError, RecursionError, json.JSONDecodeError) as error:
         raise ContrastError("JSON 입력을 읽을 수 없습니다") from error
 
 
@@ -613,7 +624,7 @@ def write_step_summary(content: str, explicit: str | None) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="--kt-* 토큰의 WCAG 대비를 검사합니다.")
+    parser = _ContrastArgumentParser(description="--kt-* 토큰의 WCAG 대비를 검사합니다.")
     parser.add_argument("paths", nargs="*", type=Path, help="canonical tokens.css 뒤에 적용할 오버라이드 CSS")
     parser.add_argument("--dark", action="store_true", help="dark 모드 선언을 검사합니다")
     parser.add_argument(
@@ -632,9 +643,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
-    args = parser.parse_args(argv)
-    paths = args.paths or [DEFAULT_TOKENS]
     try:
+        args = parser.parse_args(argv)
+        paths = args.paths or [DEFAULT_TOKENS]
         pairs = pairs_for(args.read_surfaces or ())
         values = parse_css(paths, args.dark)
         findings = inspect(values, pairs)

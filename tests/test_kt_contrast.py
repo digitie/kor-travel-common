@@ -122,6 +122,33 @@ class ContrastTests(unittest.TestCase):
                     result = self.run_tool(TOKENS, path)
                     self.assertEqual(result.returncode, 2, result.stderr)
 
+    def test_media_and_selector_modes_intersect(self):
+        with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
+            directory_path = Path(directory)
+            contradictory = directory_path / "contradictory.css"
+            contradictory.write_text(
+                ":root { --kt-brand: #fff; --kt-brand-foreground: #fff; }\n"
+                "@media (prefers-color-scheme: dark) { :root:not(.dark) { --kt-brand: #000; } }\n",
+                encoding="utf-8",
+            )
+            nested = directory_path / "nested-media.css"
+            nested.write_text(
+                "@media (prefers-color-scheme: light) { @media (prefers-color-scheme: dark) { :root { --kt-brand: #fff; --kt-brand-foreground: #fff; } } }\n",
+                encoding="utf-8",
+            )
+            for mode in ((), ("--dark",)):
+                with self.subTest(mode=mode):
+                    result = self.run_tool(TOKENS, contradictory, "--fail-new", "--json", *mode)
+                    self.assertEqual(result.returncode, 1)
+                    nested_result = self.run_tool(TOKENS, nested, "--fail-new", "--json", *mode)
+                    self.assertEqual(nested_result.returncode, 0, nested_result.stderr)
+            root_dark = directory_path / "root-dark.css"
+            root_dark.write_text(":root.dark { --kt-brand: #fff; --kt-brand-foreground: #fff; }\n", encoding="utf-8")
+            result = self.run_tool(TOKENS, root_dark, "--dark", "--fail-new", "--json")
+            self.assertEqual(result.returncode, 1)
+            finding = next(item for item in json.loads(result.stdout)["findings"] if item["pair"] == "brand-foreground/brand")
+            self.assertFalse(finding["pass"])
+
     def test_muted_read_surface_is_explicit(self):
         with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
             override = Path(directory) / "override.css"
@@ -202,6 +229,19 @@ class ContrastTests(unittest.TestCase):
             result = self.run_tool(TOKENS, "--baseline", baseline, "--json")
             self.assertEqual(result.returncode, 2)
             self.assertNotIn("Traceback", result.stderr)
+
+    def test_deep_json_baseline_is_input_error_without_traceback(self):
+        with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
+            baseline = Path(directory) / "deep.json"
+            baseline.write_text("[" * 2000 + "0" + "]" * 2000, encoding="utf-8")
+            result = self.run_tool(TOKENS, "--baseline", baseline, "--json")
+            self.assertEqual(result.returncode, 2)
+            self.assertNotIn("Traceback", result.stderr)
+
+    def test_invalid_option_value_is_generic(self):
+        result = self.run_tool(TOKENS, "--json=REVIEW_INPUT_MARKER")
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn("REVIEW_INPUT_MARKER", result.stderr)
 
     def test_invalid_surface_and_missing_input_are_generic_errors(self):
         invalid_surface = self.run_tool(TOKENS, "--read-surface", "REVIEW_INPUT_MARKER", "--json")
