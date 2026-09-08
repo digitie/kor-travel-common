@@ -35,8 +35,10 @@ _MDX_EXPRESSION_KEYWORDS = {
     "void",
     "yield",
 }
-_MDX_EXPRESSION_START_CHARS = frozenset("!~+-([{<\"'`")
-_MDX_EXPRESSION_FOLLOWING_CHARS = frozenset(".([{:?,=+*%|&!<>)}`-")
+_MDX_EXPRESSION_START_CHARS = frozenset(".!~+-([{</\"'`")
+_MDX_EXPRESSION_FOLLOWING_CHARS = frozenset(".([{:?,=+*%|&!<>)}`-^/")
+_MDX_EXPRESSION_BINARY_WORDS = {"as", "in", "instanceof"}
+_MDX_IDENTIFIER = re.compile(r"(?:[^\W\d]|[$_])[\w$]*")
 
 
 class UxLintError(ValueError):
@@ -159,14 +161,19 @@ def _looks_like_mdx_expression_start(text: str, start: int, boundary: int) -> bo
     if char.isdigit() or char in _MDX_EXPRESSION_START_CHARS:
         return True
     if char.isalpha() or char in "_$":
-        match = re.match(r"[A-Za-z_$][\w$]*", text[index:boundary])
+        match = _MDX_IDENTIFIER.match(text[index:boundary])
         if match is None:
             return False
         word = match.group(0)
         if word in _MDX_EXPRESSION_KEYWORDS:
             return True
         following = _skip_mdx_expression_leading(text, index + len(word), boundary)
-        return following < boundary and text[following] in _MDX_EXPRESSION_FOLLOWING_CHARS
+        if following >= boundary:
+            return False
+        if text[following] in _MDX_EXPRESSION_FOLLOWING_CHARS:
+            return True
+        binary_word = _MDX_IDENTIFIER.match(text[following:boundary])
+        return binary_word is not None and binary_word.group(0) in _MDX_EXPRESSION_BINARY_WORDS
     return False
 
 
