@@ -210,8 +210,13 @@ window.confirm('확인');
                 "same-paragraph-double.mdx": "Example `` unmatched <div className=\"outline-none\"/>\n",
                 "blockquote.mdx": "> Example ` unmatched\n>\n> <div className=\"outline-none\" />\n",
                 "backslash.mdx": "Example `path\\`<span className=\"outline-none\" />\n",
+                "expression-comment.mdx": "Example ` unmatched {/* note */ window.confirm('x')}\n",
                 "expression-one.mdx": "Example ` unmatched {window.confirm('x')}\n",
                 "expression-double.mdx": "Example `` unmatched {window.confirm('x')}\n",
+                "expression-keyword.mdx": "Example ` unmatched {void window.confirm('x')}\n",
+                "expression-logical.mdx": "Example ` unmatched {true && window.confirm('x')}\n",
+                "expression-number.mdx": "Example ` unmatched {1 && window.confirm('x')}\n",
+                "expression-unary.mdx": "Example ` unmatched {!window.confirm('x')}\n",
                 "multiline-expression.mdx": (
                     "Example `` unmatched\n"
                     "<div className={\n"
@@ -231,8 +236,13 @@ window.confirm('확인');
                 [
                     ("backslash.mdx", "P6"),
                     ("blockquote.mdx", "P6"),
+                    ("expression-comment.mdx", "P8"),
                     ("expression-double.mdx", "P8"),
+                    ("expression-keyword.mdx", "P8"),
+                    ("expression-logical.mdx", "P8"),
+                    ("expression-number.mdx", "P8"),
                     ("expression-one.mdx", "P8"),
+                    ("expression-unary.mdx", "P8"),
                     ("multiline-expression.mdx", "P6"),
                     ("paragraphs.mdx", "P6"),
                     ("same-paragraph-double.mdx", "P6"),

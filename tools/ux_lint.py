@@ -18,6 +18,25 @@ from typing import Iterable, Mapping, Sequence
 TARGET_EXTENSIONS = {".tsx", ".ts", ".css", ".mdx"}
 SKIP_DIRECTORIES = {".git", "node_modules", ".next", "dist", "build", "coverage", "__pycache__", "e2e", "tests", "vendor"}
 _MDX_PARAGRAPH_BOUNDARY = re.compile(r"\r?\n(?:[ \t]*\r?\n|[ \t]*>(?:[ \t]*>)*[ \t]*\r?\n)")
+_MDX_EXPRESSION_KEYWORDS = {
+    "await",
+    "class",
+    "delete",
+    "do",
+    "false",
+    "function",
+    "new",
+    "null",
+    "return",
+    "this",
+    "true",
+    "typeof",
+    "undefined",
+    "void",
+    "yield",
+}
+_MDX_EXPRESSION_START_CHARS = frozenset("!~+-([{<\"'`")
+_MDX_EXPRESSION_FOLLOWING_CHARS = frozenset(".([{:?,=+*%|&!<>)}`-")
 
 
 class UxLintError(ValueError):
@@ -106,6 +125,51 @@ def _paragraph_end(text: str, start: int) -> int:
     return boundary.start() if boundary else len(text)
 
 
+def _skip_mdx_expression_leading(text: str, start: int, boundary: int) -> int:
+    """MDX 표현식 시작부의 공백과 JavaScript 주석을 건너뛴다."""
+
+    index = start
+    while index < boundary:
+        if text[index].isspace():
+            index += 1
+            continue
+        if text.startswith("/*", index):
+            closing = text.find("*/", index + 2, boundary)
+            if closing < 0:
+                return boundary
+            index = closing + 2
+            continue
+        if text.startswith("//", index):
+            newline = text.find("\n", index + 2, boundary)
+            if newline < 0:
+                return boundary
+            index = newline + 1
+            continue
+        break
+    return index
+
+
+def _looks_like_mdx_expression_start(text: str, start: int, boundary: int) -> bool:
+    """중괄호 뒤가 실행 가능한 MDX 표현식인지 보수적으로 판정한다."""
+
+    index = _skip_mdx_expression_leading(text, start + 1, boundary)
+    if index >= boundary:
+        return False
+    char = text[index]
+    if char.isdigit() or char in _MDX_EXPRESSION_START_CHARS:
+        return True
+    if char.isalpha() or char in "_$":
+        match = re.match(r"[A-Za-z_$][\w$]*", text[index:boundary])
+        if match is None:
+            return False
+        word = match.group(0)
+        if word in _MDX_EXPRESSION_KEYWORDS:
+            return True
+        following = _skip_mdx_expression_leading(text, index + len(word), boundary)
+        return following < boundary and text[following] in _MDX_EXPRESSION_FOLLOWING_CHARS
+    return False
+
+
 def _find_inline_span_end(text: str, start: int, run_length: int) -> int | None:
     """Markdown inline span의 닫힘을 같은 문단 안에서만 찾는다."""
 
@@ -134,11 +198,14 @@ def _mask_unclosed_inline_span(output: list[str], text: str, start: int, run_len
     remainder = text[content_start:boundary]
     for pattern in (
         r"<(?:[A-Za-z]|>)|^[ \t]*(?:export\s+)?(?:const|let|var|return)\b",
-        r"\{\s*(?:[A-Za-z_$][\w$]*\s*(?:[.`(=?:,]|=>|$)|[\[(<])",
     ):
         match = re.search(pattern, remainder, re.MULTILINE)
         if match:
             resume_candidates.append(match.start())
+    for match in re.finditer(r"\{", remainder):
+        if _looks_like_mdx_expression_start(remainder, match.start(), len(remainder)):
+            resume_candidates.append(match.start())
+            break
     resume = content_start + min(resume_candidates) if resume_candidates else boundary
     for offset in range(start, resume):
         if text[offset] != "\n":
