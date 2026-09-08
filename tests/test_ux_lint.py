@@ -469,6 +469,28 @@ window.confirm('확인');
                         ["P8"],
                     )
 
+    def test_mdx_invalid_backtick_info_distinguishes_inline_and_block_boundaries(self):
+        for prefix in ("", "> ", ">> "):
+            for separator in ("\n", "\r\n", "\r"):
+                with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                    root = Path(directory)
+                    fixture = root / "invalid-info-boundary.mdx"
+                    fixture.write_bytes(
+                        (
+                            f"{prefix}```<div className=\"outline-none\"/> "
+                            f"{{window.confirm(\"inline\")}}```{separator}"
+                            f"{prefix}```bad`info{separator}"
+                            f"{prefix}{{window.confirm(\"same paragraph\")}} ```{separator}"
+                            f"{prefix}```bad`info{separator}"
+                            f"{prefix}{{window.confirm(\"block fence\")}}{separator}"
+                            f"{prefix}```{separator}"
+                        ).encode("utf-8")
+                    )
+                    result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                    self.assertEqual(result.returncode, 1, result.stderr)
+                    findings = json.loads(result.stdout)["findings"]
+                    self.assertEqual([item["pattern"] for item in findings], ["P8"])
+
     def test_mdx_tilde_info_string_allows_backtick(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)

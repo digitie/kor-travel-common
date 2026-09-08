@@ -449,6 +449,33 @@ def _find_inline_span_end(text: str, start: int, run_length: int) -> int | None:
     return None
 
 
+def _markdown_is_fence_start(
+    text: str,
+    index: int,
+    marker: str,
+    container: tuple[str, int],
+) -> bool:
+    """같은 위치가 실제 Markdown block fence의 시작인지 확인한다."""
+
+    line_start = _markdown_line_start(text, index)
+    line_end = _find_markdown_line_terminator(text, line_start, len(text))
+    raw_line = text[line_start:line_end]
+    candidate_info = _markdown_fence_candidate(raw_line, container)
+    if candidate_info is None:
+        return False
+    candidate, _ = candidate_info
+    candidate_start = line_start + len(raw_line) - len(candidate)
+    if candidate_start != index:
+        return False
+    run = 0
+    while run < len(candidate) and candidate[run] == marker:
+        run += 1
+    if run < 3:
+        return False
+    # CommonMark는 backtick fence의 info string에 backtick을 허용하지 않는다.
+    return not (marker == "`" and "`" in candidate[run:])
+
+
 def _mask_unclosed_inline_span(output: list[str], text: str, start: int, run_length: int) -> int:
     """닫히지 않은 문서 span을 가리되 뒤의 실행 가능한 태그는 계속 검사한다."""
 
@@ -623,9 +650,17 @@ def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
     # CommonMark backtick fence의 info string에는 backtick을 넣을 수 없다.
     # 이 경계가 없으면 파일 첫 inline code span을 unclosed fence로 가린다.
     if marker == "`" and "`" in text[start + opener_run : opener_end]:
-        # 무효한 fence의 delimiter를 inline span opener로 재해석하지 않는다.
-        # 그렇지 않으면 다음 줄의 실행식이 같은 문단의 닫힘 delimiter까지
-        # 함께 가려져 실제 P6/P8 위반이 누락된다.
+        # 무효한 fence는 같은 문단의 정상 inline span으로 되돌린다. 다만
+        # 닫힘 delimiter가 줄 시작의 유효한 block fence라면 inline span의
+        # 닫힘으로 취급하지 않고 현재 줄만 격리해 다음 실행식을 검사한다.
+        closing = _find_inline_span_end(text, start, opener_run)
+        if closing is not None and not _markdown_is_fence_start(text, closing, marker, container):
+            stop = min(closing + opener_run, len(text))
+            segment = list(text[start:stop])
+            for offset, char in enumerate(segment):
+                if not _is_markdown_line_terminator(char):
+                    segment[offset] = " "
+            return "".join(segment), stop
         line_stop = _markdown_line_terminator_end(text, opener_end)
         segment = list(text[start:line_stop])
         for offset, char in enumerate(segment):
