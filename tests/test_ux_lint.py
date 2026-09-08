@@ -206,6 +206,10 @@ window.confirm('확인');
                     "export const X=()=> <div className=\"outline-none\"/>;\n\n"
                     "Later `` delimiter\n"
                 ),
+                "same-paragraph.mdx": "Example ` unmatched <span className=\"outline-none\" />\n",
+                "same-paragraph-double.mdx": "Example `` unmatched <div className=\"outline-none\"/>\n",
+                "blockquote.mdx": "> Example ` unmatched\n>\n> <div className=\"outline-none\" />\n",
+                "backslash.mdx": "Example `path\\`<span className=\"outline-none\" />\n",
                 "start.mdx": "`<div className={`\n\n다른 인용: `outline-none`\n",
                 "triple.mdx": "문법 예시: ```<div className={```\n\n다른 인용: `outline-none`\n",
             }
@@ -216,7 +220,13 @@ window.confirm('확인');
             findings = json.loads(result.stdout)["findings"]
             self.assertEqual(
                 [(item["file"], item["pattern"]) for item in findings],
-                [("paragraphs.mdx", "P6")],
+                [
+                    ("backslash.mdx", "P6"),
+                    ("blockquote.mdx", "P6"),
+                    ("paragraphs.mdx", "P6"),
+                    ("same-paragraph-double.mdx", "P6"),
+                    ("same-paragraph.mdx", "P6"),
+                ],
             )
 
     def test_escaped_template_text_remains_scannable(self):

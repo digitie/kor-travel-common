@@ -17,6 +17,7 @@ from typing import Iterable, Mapping, Sequence
 
 TARGET_EXTENSIONS = {".tsx", ".ts", ".css", ".mdx"}
 SKIP_DIRECTORIES = {".git", "node_modules", ".next", "dist", "build", "coverage", "__pycache__", "e2e", "tests", "vendor"}
+_MDX_PARAGRAPH_BOUNDARY = re.compile(r"\r?\n(?:[ \t]*\r?\n|[ \t]*>(?:[ \t]*>)*[ \t]*\r?\n)")
 
 
 class UxLintError(ValueError):
@@ -94,15 +95,15 @@ def _find_backtick_run_end(text: str, start: int, run_length: int) -> int:
 def _paragraph_start(text: str, index: int) -> int:
     """현재 위치가 속한 Markdown 문단의 시작 위치를 반환한다."""
 
-    boundaries = list(re.finditer(r"\r?\n[ \t]*\r?\n", text[:index]))
+    boundaries = list(_MDX_PARAGRAPH_BOUNDARY.finditer(text[:index]))
     return boundaries[-1].end() if boundaries else 0
 
 
 def _paragraph_end(text: str, start: int) -> int:
     """현재 Markdown 문단의 끝 위치를 반환한다."""
 
-    boundary = re.search(r"\r?\n[ \t]*\r?\n", text[start:])
-    return start + boundary.start() if boundary else len(text)
+    boundary = _MDX_PARAGRAPH_BOUNDARY.search(text, start)
+    return boundary.start() if boundary else len(text)
 
 
 def _find_inline_span_end(text: str, start: int, run_length: int) -> int | None:
@@ -112,9 +113,6 @@ def _find_inline_span_end(text: str, start: int, run_length: int) -> int | None:
     boundary = _paragraph_end(text, start)
     index = start + run_length
     while index < boundary:
-        if text[index] == "\\" and run_length == 1:
-            index += 2
-            continue
         if text.startswith(delimiter, index):
             run = 0
             while index + run < boundary and text[index + run] == "`":
@@ -125,6 +123,19 @@ def _find_inline_span_end(text: str, start: int, run_length: int) -> int | None:
             continue
         index += 1
     return None
+
+
+def _mask_unclosed_inline_span(output: list[str], text: str, start: int, run_length: int) -> int:
+    """닫히지 않은 문서 span을 가리되 뒤의 실행 가능한 태그는 계속 검사한다."""
+
+    boundary = _paragraph_end(text, start)
+    content_start = start + run_length
+    resume_match = re.search(r"<(?:[A-Za-z]|>)|^[ \t]*(?:export\s+)?(?:const|let|var|return)\b", text[content_start:boundary], re.MULTILINE)
+    resume = content_start + resume_match.start() if resume_match else boundary
+    for offset in range(start, resume):
+        if text[offset] != "\n":
+            output[offset] = " "
+    return resume
 
 
 def _find_template_end(text: str, start: int) -> int:
@@ -400,11 +411,7 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
             if ignore_backticks and run_length >= 2:
                 end = _find_inline_span_end(text, index, run_length)
                 if end is None:
-                    boundary = _paragraph_end(text, index)
-                    for offset in range(index, boundary):
-                        if text[offset] != "\n":
-                            output[offset] = " "
-                    index = boundary
+                    index = _mask_unclosed_inline_span(output, text, index, run_length)
                     continue
                 stop = min(end + run_length, len(text))
                 for offset in range(index, stop):
@@ -416,11 +423,7 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
             if ignore_backticks and not executable:
                 end = _find_inline_span_end(text, index, 1)
                 if end is None:
-                    boundary = _paragraph_end(text, index)
-                    for offset in range(index, boundary):
-                        if text[offset] != "\n":
-                            output[offset] = " "
-                    index = boundary
+                    index = _mask_unclosed_inline_span(output, text, index, 1)
                     continue
                 stop = min(end + 1, len(text))
                 for offset in range(index, stop):
