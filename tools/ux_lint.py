@@ -87,12 +87,29 @@ def _find_template_end(text: str, start: int) -> int:
 def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
     """MDX의 Markdown code span과 JSX/JavaScript template을 구분한다."""
 
-    prefix = text[:start].rstrip()
-    if not prefix:
+    line_start = text.rfind("\n", 0, start) + 1
+    prefix = text[line_start:start].rstrip()
+    if not prefix or prefix.lstrip().startswith(">"):
         return False
-    if prefix[-1] in "={([>":
+
+    # JSX 속성의 `{...}` 안에서는 tag 이름·배열·삼항식·computed tag를
+    # 구분하지 않고 모두 JavaScript template으로 취급한다. Markdown 본문은
+    # 해당 중괄호 문맥을 갖지 않으므로 inline code를 계속 제외한다.
+    if re.search(r"[A-Za-z_$][\w$-]*\s*=\s*\{[^{}]*$", prefix):
         return True
-    return bool(re.search(r"(?:const|let|var|className|style)\s*=\s*$|return\s*$|String\.raw\s*$", prefix))
+    if re.search(r"<(?:[A-Za-z][\w.-]*|[A-Z][\w.-]*)[^>]*\{[^{}]*$", prefix):
+        return True
+
+    # MDX ESM/JavaScript 선언의 값 template과 return/template tag도 실행
+    # 문맥이다. 선언의 오른쪽에 이미 식이 시작됐는지 확인해 `Example: `...
+    # `` 같은 문장형 Markdown을 실행 코드로 오인하지 않는다.
+    if re.match(r"\s*(?:export\s+)?(?:const|let|var)\b", prefix) and "=" in prefix:
+        return True
+    if re.search(r"(?:\breturn|=>)\s+[^\n]*$", prefix):
+        return True
+    if prefix[-1] in "={([,?:":
+        return bool(re.search(r"(?:className|style|\b(?:const|let|var|return|export)\b|=>|<[A-Za-z])", prefix))
+    return False
 
 
 def _is_escaped(text: str, index: int) -> bool:
@@ -112,7 +129,15 @@ def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
     line_start = text.rfind("\n", 0, start) + 1
     if text[line_start:start].strip():
         return "", start
-    line_end = text.find("\n", start)
+    opener_end = text.find("\n", start)
+    if opener_end < 0:
+        opener_end = len(text)
+    opener_run = 0
+    while start + opener_run < opener_end and text[start + opener_run] == marker:
+        opener_run += 1
+    if opener_run < 3:
+        return "", start
+    line_end = opener_end
     if line_end < 0:
         line_end = len(text)
     cursor = line_end + 1
@@ -121,7 +146,11 @@ def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
         next_end = text.find("\n", cursor)
         if next_end < 0:
             next_end = len(text)
-        if text[cursor:next_end].lstrip().startswith(marker * 3):
+        candidate = text[cursor:next_end].lstrip()
+        closing_run = 0
+        while closing_run < len(candidate) and candidate[closing_run] == marker:
+            closing_run += 1
+        if closing_run >= opener_run and not candidate[closing_run:].strip():
             closing = next_end + (1 if next_end < len(text) else 0)
             break
         cursor = next_end + 1

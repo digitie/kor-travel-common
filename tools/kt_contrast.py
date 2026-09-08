@@ -171,18 +171,54 @@ def _selector_rules(selector: str, parent_mode: str | None) -> list[tuple[str, i
         normalized = re.sub(r"\s+", " ", raw_part.strip().lower())
         if not normalized:
             continue
+        # 공백이 compound selector 내부에 있으면 하위 요소 선택자이므로
+        # 전역 토큰 규칙으로 승격하지 않는다. 속성 선택자와 :not() 안의
+        # 공백은 CSS 문법상 허용되므로 괄호·대괄호 밖에서만 검사한다.
+        depth = 0
+        has_compound_space = False
+        quote: str | None = None
+        for char in normalized:
+            if quote:
+                if char == quote:
+                    quote = None
+                continue
+            if char in "\"'":
+                quote = char
+            elif char in "([":
+                depth += 1
+            elif char in ")]" and depth:
+                depth -= 1
+            elif char.isspace() and depth == 0:
+                has_compound_space = True
+                break
+        if has_compound_space:
+            continue
+        compact = re.sub(r"\s+", "", normalized).replace('"', "'")
         # 토큰 계약은 전역 루트와 명시적 다크 루트만 허용한다. `.dark .button`처럼
         # 하위 요소에만 적용되는 고 specificity 선언을 전역 토큰으로 승격하지 않는다.
-        if normalized in {":root", ":root:root"}:
+        if compact in {":root", ":root:root"}:
             modes = (parent_mode,) if parent_mode else ("light", "dark")
-            specificity = normalized.count(":root")
+            specificity = compact.count(":root")
             rules.extend((mode, specificity) for mode in modes)
-        elif normalized in {":root:not(.dark)", ':root:not([data-theme="dark"])', ":root:not([data-theme='dark'])", '[data-theme="light"]', ':root[data-theme="light"]', ":root[data-theme='light']"}:
+        elif compact in {
+            ":root:not(.dark)",
+            ":root:not([data-theme='dark'])",
+            "[data-theme='light']",
+            ":root[data-theme='light']",
+            "[data-theme='light']:root",
+        }:
             if parent_mode in (None, "light"):
-                rules.append(("light", 2 if normalized.startswith(":root") else 1))
-        elif normalized in {".dark", ":root.dark", '[data-theme="dark"]', "[data-theme='dark']", ":root[data-theme=\"dark\"]", ":root[data-theme='dark']"}:
+                rules.append(("light", 2 if compact.startswith(":root") or compact.endswith(":root") else 1))
+        elif compact in {
+            ".dark",
+            ":root.dark",
+            ".dark:root",
+            "[data-theme='dark']",
+            ":root[data-theme='dark']",
+            "[data-theme='dark']:root",
+        }:
             if parent_mode in (None, "dark"):
-                rules.append(("dark", 2 if normalized.startswith(":root") else 1))
+                rules.append(("dark", 2 if ":root" in compact else 1))
     return rules
 
 
@@ -265,7 +301,15 @@ def _parse_blocks(text: str, parent_mode: str | None = None) -> Iterable[tuple[s
                 yield from _parse_blocks(body, parent_mode=media_mode)
         else:
             direct_body = _mask_nested_blocks(body)
-            for mode, specificity in _selector_rules(selector, parent_mode):
+            rules = _selector_rules(selector, parent_mode)
+            if (
+                not rules
+                and re.search(r"--kt-[\w-]+\s*:", _strip_css_strings(direct_body), re.ASCII)
+                and not re.search(r"\s", selector.strip())
+                and not _selector_rules(selector, None)
+            ):
+                raise ContrastError("지원하지 않는 토큰 선택자입니다")
+            for mode, specificity in rules:
                 yield mode, direct_body, specificity
         index = cursor
 

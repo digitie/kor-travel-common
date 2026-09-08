@@ -81,6 +81,30 @@ class ContrastTests(unittest.TestCase):
             finding = next(item for item in payload["findings"] if item["pair"] == "brand-foreground/brand")
             self.assertFalse(finding["pass"])
 
+    def test_equivalent_root_selector_order_and_attribute_quotes_are_applied(self):
+        cases = (
+            (".dark:root { --kt-brand: #fff; --kt-brand-foreground: #fff; }\n", ("--dark",)),
+            ("[data-theme='light'] { --kt-brand: #fff; --kt-brand-foreground: #fff; }\n", ()),
+        )
+        with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
+            for index, (source, mode) in enumerate(cases):
+                with self.subTest(index=index):
+                    override = Path(directory) / f"equivalent-{index}.css"
+                    override.write_text(source, encoding="utf-8")
+                    result = self.run_tool(TOKENS, override, *mode, "--fail-new", "--json")
+                    self.assertEqual(result.returncode, 1, result.stderr)
+                    finding = next(
+                        item for item in json.loads(result.stdout)["findings"] if item["pair"] == "brand-foreground/brand"
+                    )
+                    self.assertFalse(finding["pass"])
+
+    def test_unsupported_token_selector_is_an_input_error(self):
+        with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
+            override = Path(directory) / "unsupported.css"
+            override.write_text(".theme-root { --kt-brand: #fff; --kt-brand-foreground: #fff; }\n", encoding="utf-8")
+            result = self.run_tool(TOKENS, override, "--json")
+            self.assertEqual(result.returncode, 2)
+
     def test_css_scope_and_media_boundaries_are_explicit(self):
         with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
             override = Path(directory) / "override.css"

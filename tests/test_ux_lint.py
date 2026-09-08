@@ -80,6 +80,36 @@ window.confirm('확인');
             self.assertEqual({item["pattern"] for item in findings}, {"P6"})
             self.assertEqual(len(findings), 1)
 
+    def test_mdx_js_templates_inside_array_ternary_and_arbitrary_tags_are_checked(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "fixture.mdx"
+            fixture.write_text(
+                "export const A = () => <div className={[\"kt\", `outline-none`].join(\" \" )} />;\n"
+                "export const B = () => <div className={true ? `outline-none` : \"kt\"} />;\n"
+                "export const C = () => <div className={classes`outline-none`} />;\n"
+                "export const D = () => <div className={String['raw']`outline-none`} />;\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            findings = json.loads(result.stdout)["findings"]
+            self.assertEqual(sum(item["pattern"] == "P6" for item in findings), 4)
+
+    def test_mdx_fence_length_and_suffix_are_preserved_and_blockquote_code_is_ignored(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "fixture.mdx"
+            fixture.write_text(
+                "````tsx\n``\nwindow.confirm(\"문서 예시\");\n````\n"
+                "```tsx\n```not-a-closing-fence\nwindow.confirm(\"문서 예시\");\n```\n"
+                "> `outline-none window.confirm()`\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["findings"], [])
+
     def test_escaped_template_text_remains_scannable(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
