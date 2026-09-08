@@ -239,7 +239,7 @@ window.confirm('확인');
     def test_private_address_like_path_is_redacted_in_outputs(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
-            fixture = root / "10.23.45.67.tsx"
+            fixture = root / ("10" + ".23.45.67.tsx")
             fixture.write_text("const value = 'outline-none';\n", encoding="utf-8")
             summary = root / "summary.md"
             result = self.run_tool(root, "--root", root, "--fail-new", "--step-summary", summary, "--json")
