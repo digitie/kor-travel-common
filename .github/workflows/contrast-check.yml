@@ -38,7 +38,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: common-contrast-${{ github.repository }}-${{ github.ref }}
+  group: common-contrast-${{ github.repository }}-${{ github.ref }}-${{ inputs.name }}
   cancel-in-progress: true
 
 jobs:
