@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "pair": "text-tertiary",
+      "surface": "surface-page",
+      "measured": 3.62,
+      "required": 4.5,
+      "until": "2027-09-08"
+    },
+    {
+      "pair": "text-tertiary",
+      "surface": "surface-subtle",
+      "measured": 3.48,
+      "required": 4.5,
+      "until": "2027-09-08"
+    },
+    {
+      "pair": "text-tertiary",
+      "surface": "surface-card",
+      "measured": 3.82,
+      "required": 4.5,
+      "until": "2027-09-08"
+    },
+    {
+      "pair": "brand-foreground",
+      "surface": "brand",
+      "measured": 3.59,
+      "required": 4.5,
+      "until": "2027-09-08"
+    }
+  ]
+}

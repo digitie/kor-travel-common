@@ -2,6 +2,20 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-08 (Codex, T-103 반복 리뷰 근본 수정·최종 PASS·병합 후 대기)
+
+수동 MDX lexer에 반례별 조건을 추가한 것이 36회 반복의 중심 원인이었다. 상태 스택 교체도 정상 ESM·정규식·비교 연산자를 모두 소유하지 못해 BLOCK이었다. ADR-016으로 MDX 검사에만 Node 의존을 허용하고 직접 문법 해석을 제거했다. 고정 파서가 구문 트리를 제공하며 입력 오류는 exit2, 사용자 소스는 실행하지 않는다. 마지막 BOM offset 차이는 모든 AST 범위를 원문 좌표로 변환해 해결했다. 누적 자료·변형·Git CLI·정확한 원문 마스킹과 실패 주입을 저장소 시험에 남겼다. 실제 파서와 다른 기존 시험 기대값도 문법 근거로 정정했다.
+
+최종 코드 `49d3867fd8fb941fde260966d2b4b3296c0f3d77`에서 Windows 전체322개 성공·skip0, 두 독립 reviewer PASS·신규 finding0, 기록 source `ef91306`의 CI34218404453 6job 성공이다. 각 원본·digest·명령·이전 실패와 중단된 WSL 실행·공유 절차 오류는 [최종 통합 리뷰](reviews/adversarial/2026-09-08-t103-parser-post-fix.md)에 보존했다. Airport dark의 과거 성공 표기는 실제10미달·신규6·exit1로 정정했고 소비자 T-431을 완료로 바꾸지 않았다. CodeGraph 없이 코드·rg·시험으로 확인했으며 다른 저장소를 수정하지 않았다.
+
+T-103을 완료 원장으로 옮겼고 선행을 충족한 T-010은 READY로만 갱신했다. 사용자 최신 지시에 따라 PR #20의 완료 기록 CI 확인·병합 후 대기하며 다음 task는 시작하지 않는다. 실제 소비자 build/e2e·MDX compile/render·npm/PyPI·Release 게시를 수행하지 않았다.
+
+## 2026-09-08 (Codex, T-103 구현 시작)
+
+T-103을 `codex/t103-kt-contrast-ux-lint`에서 시작했다. 조사 원문과 현재 `packages/tokens/tokens.css`를 다시 대조해 `tools/kt_contrast.py`(OKLCH·hex·`var()`·alpha 합성·TK-8 27쌍·light/dark·baseline)와 `tools/ux_lint.py`(UX-G9 P1~P8·`--root`·`--token-files`·baseline·diff)를 common 안에 작성했다. ktdm·concierge·geo·airport 조사 스냅샷 오버라이드와 baseline 예제, 회귀 fixture/evidence도 common에만 추가했다.
+
+현재 Windows Python 전체 247 tests, focused T-103 11 tests, 문서 link 394/2410, plan 106, SPDX 56, secret/redaction 526, `git diff --check`가 통과했다. canonical 대비는 light/dark 27쌍 모두 PASS이며 4앱 미달 수치는 [T-103 evidence](evidence/t103-kt-contrast-ux-lint.md)에 기록했다. 소비자 저장소 build/e2e·재사용 workflow selftest는 `NOT_RUN(T-010 및 소비자 task)`. 다음은 동일 immutable candidate에 대한 reviewer A/B 독립 적대적 리뷰다.
+
 ## 2026-09-08 (Codex, T-104·T-020·T-021 최종 PASS·PR #17 merge·main CI 완료)
 
 T-104 디자인 토큰 표준과 T-020 pinvi·T-021 concierge·docker-manager GPL-3.0-or-later 결정·요청 문서를 최종 정리했다. 반복 no-go의 근본 원인은 WCAG 일반 텍스트/비텍스트 기준, 조사 재현 오차/검사기 합격 판정, 소비자 license-only PR/후속 코드 채택 evidence, common 완료/외부 gate 완료, chart palette 소유권을 한 gate에 섞은 문서 계약이었다. TK-8·T-103·style-delivery의 4.5:1/3:1 기준과 `±0.03` 재현 오차를 분리하고 반올림 합격을 금지했으며, chart 슬롯은 앱 소유로 전환하고 Breaking/Migration·회귀 시험을 기록했다. T-020/T-021의 DONE은 common 결정·요청 문서 gate만 닫고 외부 LICENSE PR과 소비자 채택은 `OPEN/NOT_RUN`으로 유지한다.

@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "pair": "control-line",
+      "surface": "surface-page",
+      "measured": 1.32,
+      "required": 3.0,
+      "until": "2027-09-08"
+    },
+    {
+      "pair": "control-line",
+      "surface": "surface-subtle",
+      "measured": 1.32,
+      "required": 3.0,
+      "until": "2027-09-08"
+    },
+    {
+      "pair": "control-line",
+      "surface": "surface-muted",
+      "measured": 1.32,
+      "required": 3.0,
+      "until": "2027-09-08"
+    },
+    {
+      "pair": "control-line",
+      "surface": "surface-card",
+      "measured": 1.32,
+      "required": 3.0,
+      "until": "2027-09-08"
+    }
+  ]
+}

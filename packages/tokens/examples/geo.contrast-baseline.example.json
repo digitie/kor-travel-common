@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "pair": "text-tertiary",
+      "surface": "surface-page",
+      "measured": 3.66,
+      "required": 4.5,
+      "until": "2027-09-08"
+    },
+    {
+      "pair": "text-tertiary",
+      "surface": "surface-subtle",
+      "measured": 3.4,
+      "required": 4.5,
+      "until": "2027-09-08"
+    },
+    {
+      "pair": "text-tertiary",
+      "surface": "surface-card",
+      "measured": 3.85,
+      "required": 4.5,
+      "until": "2027-09-08"
+    },
+    {
+      "pair": "control-line",
+      "surface": "surface-page",
+      "measured": 2.29,
+      "required": 3.0,
+      "until": "2027-09-08"
+    },
+    {
+      "pair": "control-line",
+      "surface": "surface-subtle",
+      "measured": 2.13,
+      "required": 3.0,
+      "until": "2027-09-08"
+    },
+    {
+      "pair": "control-line",
+      "surface": "surface-muted",
+      "measured": 1.92,
+      "required": 3.0,
+      "until": "2027-09-08"
+    },
+    {
+      "pair": "control-line",
+      "surface": "surface-card",
+      "measured": 2.41,
+      "required": 3.0,
+      "until": "2027-09-08"
+    },
+    {
+      "pair": "warning",
+      "surface": "warning-tint",
+      "measured": 4.31,
+      "required": 4.5,
+      "until": "2027-09-08"
+    }
+  ]
+}

@@ -13,5 +13,8 @@
     "build": "npm run build --workspace packages/tokens",
     "check": "npm run check --workspace packages/tokens",
     "test": "npm test --workspace packages/tokens"
+  },
+  "devDependencies": {
+    "@mdx-js/mdx": "3.1.1"
   }
 }

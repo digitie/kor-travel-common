@@ -39,7 +39,14 @@
 
 ### standards
 
+#### Added
+
+- T-103에서 `kt_contrast.py`의 대비·baseline 검사와 `ux_lint.py`의 UX 금지 패턴·Git 추가행 검사, 4앱 조사 예제·빈 baseline 템플릿을 추가했다([도구](tools/README.md)).
 - common CI의 고정 액션·읽기 권한·두 OS 검증과 source SHA 확인을 구현했다. 비밀·운영 주소 guard의 스냅샷/예외/실패 계약 및 branch protection 절차를 추가하고 조사 문서의 민감 값을 치환했다(T-009).
+
+#### Breaking
+
+- MDX UX 검사는 Python 단독 실행 대신 Node와 common 루트의 잠긴 파서를 요구한다. 실행 전에 `npm ci --ignore-scripts`를 수행하고 `tools/mdx_mask.mjs`를 포함한 checkout을 사용한다. 잘못된 MDX·파서 미설치는 exit 2이며 수동 해석 fallback은 없다. 기존 본문 `const`·`//`·들여쓰기 추정 대신 실제 MDX 문법을 적용한다. 실행 코드는 ESM·표현식·JSX에, 문서 인용은 fence/inline code에 두는 이관 예와 근거는 [ADR-016](docs/adr/016-mdx-parser-for-ux-lint.md)에 있다.
 
 #### Changed
 

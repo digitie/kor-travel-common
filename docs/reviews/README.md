@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-09-08 | full MDX 파서 전환·post-fix | [T-103 근본 수정 최종 판정](adversarial/2026-09-08-t103-parser-post-fix.md), `49d3867` | A AST·Unicode·계약 / B 의존·CLI·실패·CI | **A PASS / B PASS, 신규·잔여 finding 0** |
 | 2026-09-08 | full post-fix 04 | [T-104·T-020·T-021 최종 통합 판정](adversarial/2026-09-08-t104-t020-t021.md), `2ca6b0c` | A 토큰/WCAG/CSS / B GPL/evidence/DAG | **A PASS / B PASS, 누적 finding 모두 FIXED** |
 | 2026-09-08 | full post-fix 01 | [T-102 최종 통합 판정](adversarial/2026-09-08-t102-post-fix-01.md), `ded1631` | A 토큰 의미·CSS 적용 범위 / B parser·경로·redaction·CI | **A PASS / B PASS, 신규 finding 0** |
 | 2026-09-07 | docs post-fix | [T-101 CI 표준 문서 후속 판정](adversarial/2026-09-07-t101-ci-docs-post-fix.md), `6ab650d` | A 표준·workflow / B CI 순서·소유 경계 | **A PASS / B PASS, 신규 finding 0** |
