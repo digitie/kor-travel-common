@@ -642,6 +642,57 @@ window.confirm('확인');
                 self.assertEqual([item["file"] for item in findings], ["normal-inline.mdx"])
                 self.assertEqual([item["pattern"] for item in findings], ["P8"])
 
+    def test_mdx_inline_opener_preserves_same_line_patterns_before_fence(self):
+        for prefix in ("", "> ", ">> "):
+            for run in (1, 2):
+                for separator in ("\n", "\r\n", "\r"):
+                    with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                        root = Path(directory)
+                        fixture = root / "same-line.mdx"
+                        delimiter = "`" * run
+                        fixture.write_bytes(
+                            (
+                                f"{prefix}Example {delimiter}literal "
+                                f"<div className=\"outline-none\"/> "
+                                f"{{window.confirm(\"same\")}}{separator}"
+                                f"{prefix}~~~js{separator}"
+                                f"{prefix}close {delimiter}{separator}"
+                                f"{prefix}~~~{separator}"
+                            ).encode("utf-8")
+                        )
+                        result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                        self.assertEqual(result.returncode, 1, result.stderr)
+                        self.assertEqual(
+                            [item["pattern"] for item in json.loads(result.stdout)["findings"]],
+                            ["P6", "P8"],
+                        )
+
+    def test_mdx_unclosed_inline_span_stops_before_fence(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            before = root / "before-fence.mdx"
+            before.write_text(
+                "Example `literal\n"
+                "{window.confirm(\"before\")}\n"
+                "~~~js\n"
+                "{window.confirm(\"inside\")}\n"
+                "~~~\n",
+                encoding="utf-8",
+            )
+            after = root / "after-fence.mdx"
+            after.write_text(
+                "Example `literal\n"
+                "~~~js\n"
+                "{window.confirm(\"inside\")}\n"
+                "~~~\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+            self.assertEqual(result.returncode, 1, result.stderr)
+            findings = json.loads(result.stdout)["findings"]
+            self.assertEqual([item["file"] for item in findings], ["before-fence.mdx"])
+            self.assertEqual([item["pattern"] for item in findings], ["P8"])
+
     def test_mdx_tilde_info_string_allows_backtick(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)

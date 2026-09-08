@@ -492,8 +492,8 @@ def _markdown_is_fence_start(text: str, index: int, marker: str) -> bool:
     return candidate == (index, marker)
 
 
-def _markdown_has_fence_before(text: str, start: int, boundary: int) -> bool:
-    """범위 안에서 inline 닫힘보다 먼저 시작한 block fence를 찾는다."""
+def _markdown_fence_before(text: str, start: int, boundary: int) -> int | None:
+    """범위 안에서 inline 닫힘보다 먼저 시작한 block fence 위치를 찾는다."""
 
     line_start = _markdown_line_start(text, start)
     line_end = _find_markdown_line_terminator(text, line_start, len(text))
@@ -501,21 +501,26 @@ def _markdown_has_fence_before(text: str, start: int, boundary: int) -> bool:
     while cursor < boundary:
         candidate = _markdown_fence_start_at_line(text, cursor)
         if candidate is not None and candidate[0] < boundary:
-            return True
+            return candidate[0]
         next_end = _find_markdown_line_terminator(text, cursor, len(text))
         cursor = _markdown_line_terminator_end(text, next_end)
-    return False
+    return None
 
 
-def _mask_inline_opener_line(text: str, start: int) -> tuple[str, int]:
-    """block fence 앞 inline span의 opener 줄만 가리고 다음 줄에서 재개한다."""
+def _markdown_has_fence_before(text: str, start: int, boundary: int) -> bool:
+    """범위 안에서 inline 닫힘보다 먼저 시작한 block fence를 찾는다."""
+
+    return _markdown_fence_before(text, start, boundary) is not None
+
+
+def _mask_inline_opener_line(text: str, start: int, run_length: int) -> tuple[str, int]:
+    """block fence 앞 inline span의 delimiter만 가리고 다음 줄에서 재개한다."""
 
     line_end = _find_markdown_line_terminator(text, start, len(text))
     line_stop = _markdown_line_terminator_end(text, line_end)
     segment = list(text[start:line_stop])
-    for offset, char in enumerate(segment):
-        if not _is_markdown_line_terminator(char):
-            segment[offset] = " "
+    for offset in range(min(run_length, len(segment))):
+        segment[offset] = " "
     return "".join(segment), line_stop
 
 
@@ -523,9 +528,11 @@ def _mask_unclosed_inline_span(output: list[str], text: str, start: int, run_len
     """닫히지 않은 문서 span을 가리되 뒤의 실행 가능한 태그는 계속 검사한다."""
 
     boundary = _paragraph_end(text, start)
+    fence_start = _markdown_fence_before(text, start, boundary)
+    scan_boundary = fence_start if fence_start is not None else boundary
     content_start = start + run_length
     resume_candidates: list[int] = []
-    remainder = text[content_start:boundary]
+    remainder = text[content_start:scan_boundary]
     for pattern in (
         r"<(?:[A-Za-z]|>)|(?:^|(?<=[\r\n]))[ \t]*(?:export\s+)?(?:const|let|var|return)\b",
     ):
@@ -536,7 +543,7 @@ def _mask_unclosed_inline_span(output: list[str], text: str, start: int, run_len
         if _looks_like_mdx_expression_start(remainder, match.start(), len(remainder)):
             resume_candidates.append(match.start())
             break
-    resume = content_start + min(resume_candidates) if resume_candidates else boundary
+    resume = content_start + min(resume_candidates) if resume_candidates else scan_boundary
     for offset in range(start, resume):
         if not _is_markdown_line_terminator(text[offset]):
             output[offset] = " "
@@ -860,7 +867,7 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                     index = _mask_unclosed_inline_span(output, text, index, run_length)
                     continue
                 if _markdown_has_fence_before(text, index, end):
-                    segment, stop = _mask_inline_opener_line(text, index)
+                    segment, stop = _mask_inline_opener_line(text, index, run_length)
                     output[index:stop] = list(segment)
                     index = stop
                     continue
@@ -878,7 +885,7 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                     index = _mask_unclosed_inline_span(output, text, index, 1)
                     continue
                 if _markdown_has_fence_before(text, index, end):
-                    segment, stop = _mask_inline_opener_line(text, index)
+                    segment, stop = _mask_inline_opener_line(text, index, 1)
                     output[index:stop] = list(segment)
                     index = stop
                     continue
