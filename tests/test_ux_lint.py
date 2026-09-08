@@ -431,6 +431,36 @@ window.confirm('확인');
                     expected,
                 )
 
+    def test_mdx_backtick_info_string_rejects_backtick_fence_and_scans_next_paragraph(self):
+        for separator in ("\n", "\r\n", "\r"):
+            with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                root = Path(directory)
+                fixture = root / "inline.mdx"
+                fixture.write_bytes(
+                    (
+                        f"```a`b```{separator}{separator}"
+                        f"{{window.confirm(\"x\")}}{separator}"
+                    ).encode("utf-8")
+                )
+                result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertEqual(
+                    [item["pattern"] for item in json.loads(result.stdout)["findings"]],
+                    ["P8"],
+                )
+
+    def test_mdx_tilde_info_string_allows_backtick(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "tilde.mdx"
+            fixture.write_text(
+                "~~~a`b\n<div className=\"outline-none\"/>\n~~~\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["findings"], [])
+
     def test_escaped_template_text_remains_scannable(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)

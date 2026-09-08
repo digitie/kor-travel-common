@@ -528,6 +528,10 @@ def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
         opener_run += 1
     if opener_run < 3:
         return "", start
+    # CommonMark backtick fence의 info string에는 backtick을 넣을 수 없다.
+    # 이 경계가 없으면 파일 첫 inline code span을 unclosed fence로 가린다.
+    if marker == "`" and "`" in text[start + opener_run : opener_end]:
+        return "", start
     cursor = _markdown_line_terminator_end(text, opener_end)
     closing = len(text)
     while cursor < len(text):
