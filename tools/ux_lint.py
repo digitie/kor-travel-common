@@ -476,7 +476,7 @@ def _markdown_fence_start_at_line(text: str, line_start: int) -> tuple[int, str]
         while run < len(candidate) and candidate[run] == marker:
             run += 1
         if run < 3:
-            return False
+            continue
         # CommonMark는 backtick fence의 info string에 backtick을 허용하지 않는다.
         if marker == "`" and "`" in candidate[run:]:
             continue
@@ -670,17 +670,19 @@ def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
 
     line_start = _markdown_line_start(text, start)
     container = _markdown_fence_container(text[line_start:start])
-    if container is None:
-        return "", start
     opener_end = _find_markdown_line_terminator(text, start, len(text))
     opener_run = 0
     while start + opener_run < opener_end and text[start + opener_run] == marker:
         opener_run += 1
     if opener_run < 3:
         return "", start
+    if container is None and marker != "`":
+        return "", start
     # CommonMark backtick fence의 info string에는 backtick을 넣을 수 없다.
     # 이 경계가 없으면 파일 첫 inline code span을 unclosed fence로 가린다.
-    if marker == "`" and "`" in text[start + opener_run : opener_end]:
+    if marker == "`" and (
+        container is None or "`" in text[start + opener_run : opener_end]
+    ):
         # 무효한 fence는 같은 문단의 정상 inline span으로 되돌린다. 다만
         # 닫힘 delimiter가 줄 시작의 유효한 block fence라면 inline span의
         # 닫힘으로 취급하지 않고 현재 줄만 격리해 다음 실행식을 검사한다.

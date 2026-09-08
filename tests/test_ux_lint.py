@@ -561,6 +561,32 @@ window.confirm('확인');
                             ["P6", "P8"],
                         )
 
+    def test_mdx_prose_triple_backtick_and_short_runs_keep_inline_context(self):
+        for separator in ("\n", "\r\n", "\r"):
+            with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                root = Path(directory)
+                prose = root / "prose.mdx"
+                prose.write_bytes(
+                    (
+                        f"Example ```literal{separator}"
+                        f"{{window.confirm(\"outside\")}}{separator}"
+                        f"```{separator}"
+                    ).encode("utf-8")
+                )
+                short = root / "short-run.mdx"
+                short.write_bytes(
+                    (
+                        f"```bad`info{separator}`{separator}"
+                        f"{{window.confirm(\"quoted\")}}{separator}"
+                        f"close ```{separator}"
+                    ).encode("utf-8")
+                )
+                result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                self.assertEqual(result.returncode, 1, result.stderr)
+                findings = json.loads(result.stdout)["findings"]
+                self.assertEqual([item["file"] for item in findings], ["prose.mdx"])
+                self.assertEqual([item["pattern"] for item in findings], ["P8"])
+
     def test_mdx_tilde_info_string_allows_backtick(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
