@@ -97,6 +97,38 @@ def _find_template_end(text: str, start: int) -> int:
     return _find_backtick_run_end(text, start, 1)
 
 
+def _has_open_jsx_expression(text: str, start: int) -> bool:
+    """JSX 속성의 중첩 중괄호가 현재 위치까지 열려 있는지 확인한다."""
+
+    before = text[:start]
+    matches = list(re.finditer(r"[A-Za-z_$][\w$-]*\s*=\s*\{", before))
+    for match in reversed(matches):
+        scope_start = max(before.rfind(";", 0, match.start()), before.rfind("\n\n", 0, match.start())) + 1
+        if not re.search(r"<[A-Za-z]", before[scope_start : match.start()]):
+            continue
+        balance = 0
+        quote: str | None = None
+        index = match.end() - 1
+        while index < len(before):
+            char = before[index]
+            if quote:
+                if char == "\\":
+                    index += 2
+                    continue
+                if char == quote:
+                    quote = None
+            elif char in "\"'`":
+                quote = char
+            elif char == "{":
+                balance += 1
+            elif char == "}":
+                balance -= 1
+            index += 1
+        if balance > 0:
+            return True
+    return False
+
+
 def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
     """MDX의 Markdown code span과 JSX/JavaScript template을 구분한다."""
 
@@ -121,10 +153,12 @@ def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
     # 선언 문맥을 유지한다. 마지막 중괄호가 열린 속성보다 뒤에 있으면
     # Markdown 본문의 일반적인 `{...}` 인용은 실행 코드로 바꾸지 않는다.
     before = text[:start]
-    if re.search(r"[A-Za-z_$][\w$-]*\s*=\s*\{[^{}]*$", before, re.S):
+    if _has_open_jsx_expression(text, start):
         return True
     statement = before[max(before.rfind(";"), before.rfind("\n\n")) + 1 :]
-    if line_prefix != line_prefix.lstrip() and re.search(r"\b(?:export\s+)?(?:const|let|var)\b", statement) and "=" in statement:
+    previous_line = text[:line_start].splitlines()[-1].rstrip() if line_start else ""
+    declaration = bool(re.search(r"\b(?:export\s+)?(?:const|let|var)\b", statement)) and "=" in statement
+    if declaration and (line_prefix != line_prefix.lstrip() or re.search(r"(?:=|=>|[([{,:])\s*$", previous_line)):
         return True
 
     # MDX ESM/JavaScript 선언의 값 template과 return/template tag도 실행
@@ -298,6 +332,11 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                     continue
             if ignore_backticks and run_length >= 2:
                 end = _find_backtick_run_end(text, index, run_length)
+                if end >= len(text):
+                    for offset in range(index, min(index + run_length, len(text))):
+                        output[offset] = " "
+                    index += run_length
+                    continue
                 stop = min(end + run_length, len(text)) if end < len(text) else len(text)
                 for offset in range(index, stop):
                     if text[offset] != "\n":

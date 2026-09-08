@@ -325,10 +325,14 @@ def _parse_blocks(text: str, parent_mode: str | None = None) -> Iterable[tuple[s
             direct_body = _mask_nested_blocks(body)
             rules = _selector_rules(selector, parent_mode)
             if re.search(r"--kt-[\w-]+\s*:", _strip_css_strings(direct_body), re.ASCII):
-                for raw_part in _split_selectors(selector):
+                selector_parts = _split_selectors(selector)
+                if any(not raw_part.strip() for raw_part in selector_parts):
+                    raise ContrastError("CSS selector 목록에 빈 항목이 있습니다")
+                for raw_part in selector_parts:
+                    if _selector_has_compound_space(raw_part.strip()) and re.search(r":root(?:\W|$)", raw_part):
+                        raise ContrastError("지원하지 않는 토큰 선택자입니다")
                     if (
-                        raw_part.strip()
-                        and not _selector_has_compound_space(raw_part.strip())
+                        not _selector_has_compound_space(raw_part.strip())
                         and not _selector_rules(raw_part, None)
                     ):
                         raise ContrastError("지원하지 않는 토큰 선택자입니다")

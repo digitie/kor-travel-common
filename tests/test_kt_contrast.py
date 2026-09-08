@@ -117,6 +117,15 @@ class ContrastTests(unittest.TestCase):
                     result = self.run_tool(TOKENS, override, "--dark", "--json")
                     self.assertEqual(result.returncode, 2)
 
+    def test_invalid_selector_list_and_root_descendant_are_input_errors(self):
+        with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
+            for index, selector in enumerate((":root,", ",:root", ":root,,.dark", ":root .dark")):
+                with self.subTest(selector=selector):
+                    override = Path(directory) / f"invalid-{index}.css"
+                    override.write_text(f"{selector} {{ --kt-control-line: #fff; }}\n", encoding="utf-8")
+                    result = self.run_tool(TOKENS, override, "--dark", "--json")
+                    self.assertEqual(result.returncode, 2)
+
     def test_css_scope_and_media_boundaries_are_explicit(self):
         with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
             override = Path(directory) / "override.css"

@@ -141,6 +141,43 @@ window.confirm('확인');
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout)["findings"], [])
 
+    def test_mdx_nested_jsx_expression_and_unindented_esm_are_checked(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            nested = root / "nested.mdx"
+            nested.write_text(
+                "export function classes(a,b){return b;}\n\n"
+                "export function X() {\n"
+                "  return <div className={classes(\n"
+                "    {},\n"
+                "    `outline-none`\n"
+                "  )} />;\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            esm = root / "esm.mdx"
+            esm.write_text("export const classes =\n`outline-none`;\n", encoding="utf-8")
+            result = self.run_tool(root, "--root", root, "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            findings = json.loads(result.stdout)["findings"]
+            self.assertEqual(sum(item["pattern"] == "P6" for item in findings), 2)
+
+    def test_mdx_unclosed_span_does_not_hide_later_jsx_and_docs_do_not_leak_context(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "fixture.mdx"
+            fixture.write_text(
+                "Example `` unmatched\n\n"
+                "export const X = () => <div className=\"outline-none\" />;\n",
+                encoding="utf-8",
+            )
+            docs = root / "docs.mdx"
+            docs.write_text("문법 예시: `className={`\n\n다른 인용: `outline-none`\n", encoding="utf-8")
+            result = self.run_tool(root, "--root", root, "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            findings = json.loads(result.stdout)["findings"]
+            self.assertEqual(sum(item["pattern"] == "P6" for item in findings), 1)
+
     def test_escaped_template_text_remains_scannable(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
