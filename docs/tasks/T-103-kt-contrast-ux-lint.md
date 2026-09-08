@@ -1,6 +1,6 @@
-# T-103 tools/kt_contrast.py(report·`contrast-baseline.json`) + `tools/ux_lint.py`(금지 7종+window.confirm, 전체 report·diff fail) + 4앱 오버라이드 예제 보고
+# T-103 tools/kt_contrast.py(report·`contrast-baseline.json`) + `tools/ux_lint.py`(금지 7종+window.confirm, 전체 report·diff fail) + 4앱 오버라이드 예제 보고 (2026-09-08, PR #20)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P1
 - Gate: 도구 테스트
 - 선행: T-101
@@ -72,7 +72,7 @@ Git Bash에서 동일.
 
 ## evidence
 
-- 테스트 수·exit code·4앱 결과 표·변환 검증 표를 이 절과 `docs/journal.md`에 남긴다. 실제 앱 저장소에서의 실행은 각 이관 task evidence이며 여기서는 `NOT_RUN(앱 task)`.
+- 구현·검증 완료: [최종 통합 리뷰](../reviews/adversarial/2026-09-08-t103-parser-post-fix.md)에 최종 후보 `49d3867`, Windows 전체 322개 성공·skip0, 두 독립 reviewer PASS·신규 finding 0 및 CI `34218404453`의 6 job 성공을 기록했다. [도구 evidence](../evidence/t103-kt-contrast-ux-lint.md)는 4앱 실행값과 실패를 보존한다. 실제 앱 실행은 `NOT_RUN(외부 이관 task)`이며 common 완료로 닫지 않는다.
 
 ## 외부 선행
 
