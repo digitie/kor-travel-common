@@ -461,6 +461,37 @@ window.confirm('확인');
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout)["findings"], [])
 
+    def test_mdx_blockquote_fences_are_ignored_and_stop_at_container_boundary(self):
+        for separator in ("\n", "\r\n", "\r"):
+            with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                root = Path(directory)
+                fixture = root / "blockquote.mdx"
+                fixture.write_bytes(
+                    (
+                        f"> ~~~tsx{separator}"
+                        f"> <div className=\"outline-none\"/>{separator}"
+                        f"> {{window.confirm(\"quoted\")}}{separator}"
+                        f"> ~~~{separator}{separator}"
+                        f"{{window.confirm(\"outside\")}}{separator}"
+                    ).encode("utf-8")
+                )
+                result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                self.assertEqual(result.returncode, 1, result.stderr)
+                findings = json.loads(result.stdout)["findings"]
+                self.assertEqual([item["pattern"] for item in findings], ["P8"])
+
+    def test_mdx_blockquote_backtick_fence_masks_blank_quoted_line(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "blockquote.mdx"
+            fixture.write_text(
+                "> ```tsx\n>\n> <div className=\"outline-none\"/>\n> ```\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["findings"], [])
+
     def test_escaped_template_text_remains_scannable(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)

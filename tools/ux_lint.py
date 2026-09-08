@@ -241,6 +241,60 @@ def _markdown_indent_columns(prefix: str) -> int | None:
     return columns
 
 
+def _markdown_fence_container(prefix: str) -> tuple[str, int] | None:
+    """fence 앞의 일반 들여쓰기 또는 blockquote 깊이를 반환한다."""
+
+    leading_end = 0
+    while leading_end < len(prefix) and prefix[leading_end] in " \t":
+        leading_end += 1
+    leading_columns = _markdown_indent_columns(prefix[:leading_end])
+    if leading_columns is None or leading_columns > 3:
+        return None
+    if leading_end == len(prefix):
+        return ("plain", 0)
+    depth = 0
+    index = leading_end
+    while index < len(prefix) and prefix[index] == ">":
+        depth += 1
+        index += 1
+        while index < len(prefix) and prefix[index] in " \t":
+            index += 1
+    if index != len(prefix) or depth == 0:
+        return None
+    return ("blockquote", depth)
+
+
+def _markdown_fence_candidate(raw_line: str, container: tuple[str, int]) -> str | None:
+    """컨테이너에 맞는 fence 후보 줄에서 marker 뒤 문자열을 반환한다."""
+
+    kind, expected_depth = container
+    if kind == "plain":
+        indent_end = 0
+        while indent_end < len(raw_line) and raw_line[indent_end] in " \t":
+            indent_end += 1
+        indent_columns = _markdown_indent_columns(raw_line[:indent_end])
+        if indent_columns is None or indent_columns > 3:
+            return None
+        return raw_line[indent_end:]
+
+    leading_end = 0
+    while leading_end < len(raw_line) and raw_line[leading_end] in " \t":
+        leading_end += 1
+    leading_columns = _markdown_indent_columns(raw_line[:leading_end])
+    if leading_columns is None or leading_columns > 3:
+        return None
+    depth = 0
+    index = leading_end
+    while index < len(raw_line) and raw_line[index] == ">":
+        depth += 1
+        index += 1
+        while index < len(raw_line) and raw_line[index] in " \t":
+            index += 1
+    if depth != expected_depth:
+        return None
+    return raw_line[index:]
+
+
 def _consume_mdx_unicode_escape(text: str, start: int, boundary: int) -> int | None:
     """JavaScript 식별자 안의 Unicode escape 끝 위치를 반환한다."""
 
@@ -519,8 +573,8 @@ def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
     """MDX의 줄 단위 backtick/tilde fence 전체를 공백으로 가린다."""
 
     line_start = _markdown_line_start(text, start)
-    opener_indent = _markdown_indent_columns(text[line_start:start])
-    if opener_indent is None or opener_indent > 3:
+    container = _markdown_fence_container(text[line_start:start])
+    if container is None:
         return "", start
     opener_end = _find_markdown_line_terminator(text, start, len(text))
     opener_run = 0
@@ -537,15 +591,15 @@ def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
     while cursor < len(text):
         next_end = _find_markdown_line_terminator(text, cursor, len(text))
         raw_line = text[cursor:next_end]
-        indent_end = 0
-        while indent_end < len(raw_line) and raw_line[indent_end] in " \t":
-            indent_end += 1
-        indent = raw_line[:indent_end]
-        indent_columns = _markdown_indent_columns(indent)
-        if indent_columns is None or indent_columns > 3:
+        candidate = _markdown_fence_candidate(raw_line, container)
+        if candidate is None:
+            if container[0] == "blockquote":
+                non_space = raw_line.lstrip(" \t")
+                if non_space and not non_space.startswith(">"):
+                    closing = cursor
+                    break
             cursor = _markdown_line_terminator_end(text, next_end)
             continue
-        candidate = raw_line[indent_end:]
         closing_run = 0
         while closing_run < len(candidate) and candidate[closing_run] == marker:
             closing_run += 1
