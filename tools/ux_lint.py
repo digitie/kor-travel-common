@@ -18,7 +18,11 @@ from typing import Iterable, Mapping, Sequence
 
 TARGET_EXTENSIONS = {".tsx", ".ts", ".css", ".mdx"}
 SKIP_DIRECTORIES = {".git", "node_modules", ".next", "dist", "build", "coverage", "__pycache__", "e2e", "tests", "vendor"}
-_MDX_PARAGRAPH_BOUNDARY = re.compile(r"\r?\n(?:[ \t]*\r?\n|[ \t]*>(?:[ \t]*>)*[ \t]*\r?\n)")
+_MDX_LINE_BREAK_PATTERN = r"(?:\r\n|[\n\u2028\u2029]|\r(?!\n))"
+_MDX_PARAGRAPH_BOUNDARY = re.compile(
+    rf"{_MDX_LINE_BREAK_PATTERN}"
+    rf"(?:[ \t]*{_MDX_LINE_BREAK_PATTERN}|[ \t]*>(?:[ \t]*>)*[ \t]*{_MDX_LINE_BREAK_PATTERN})"
+)
 _MDX_EXPRESSION_KEYWORDS = {
     "await",
     "class",
@@ -187,6 +191,27 @@ def _find_mdx_line_terminator(text: str, start: int, boundary: int) -> int:
     return min(found, default=boundary)
 
 
+def _line_terminator_end(text: str, start: int, boundary: int | None = None) -> int:
+    """한 줄 종결자의 다음 위치를 반환한다(CRLF는 한 줄로 소비한다)."""
+
+    limit = len(text) if boundary is None else boundary
+    if start >= limit:
+        return start
+    if text.startswith("\r\n", start) and start + 1 < limit:
+        return start + 2
+    return start + 1 if _is_mdx_line_terminator(text[start]) else start
+
+
+def _line_start(text: str, index: int) -> int:
+    """네 가지 줄 종결자를 보존하면서 현재 줄의 시작 위치를 찾는다."""
+
+    positions = [text.rfind(char, 0, index) for char in _MDX_LINE_TERMINATORS]
+    latest = max(positions, default=-1)
+    if latest < 0:
+        return 0
+    return _line_terminator_end(text, latest, index)
+
+
 def _consume_mdx_unicode_escape(text: str, start: int, boundary: int) -> int | None:
     """JavaScript 식별자 안의 Unicode escape 끝 위치를 반환한다."""
 
@@ -322,7 +347,7 @@ def _mask_unclosed_inline_span(output: list[str], text: str, start: int, run_len
             break
     resume = content_start + min(resume_candidates) if resume_candidates else boundary
     for offset in range(start, resume):
-        if text[offset] != "\n":
+        if not _is_mdx_line_terminator(text[offset]):
             output[offset] = " "
     return resume
 
@@ -341,7 +366,10 @@ def _has_open_jsx_expression(text: str, start: int) -> bool:
     for match in reversed(matches):
         if _has_open_inline_span(text, match.start()):
             continue
-        scope_start = max(before.rfind(";", 0, match.start()), before.rfind("\n\n", 0, match.start())) + 1
+        scope_start = max(
+            before.rfind(";", 0, match.start()) + 1,
+            _paragraph_start(before, match.start()),
+        )
         if not re.search(r"<[A-Za-z]", before[scope_start : match.start()]):
             continue
         balance = 0
@@ -378,7 +406,7 @@ def _has_open_jsx_expression(text: str, start: int) -> bool:
 def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
     """MDX의 Markdown code span과 JSX/JavaScript template을 구분한다."""
 
-    line_start = text.rfind("\n", 0, start) + 1
+    line_start = _line_start(text, start)
     line_prefix = text[line_start:start]
     leading = line_prefix.lstrip()
     if leading.startswith(">"):
@@ -401,11 +429,15 @@ def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
     before = text[:start]
     if _has_open_jsx_expression(text, start):
         return True
-    statement = before[max(before.rfind(";"), before.rfind("\n\n")) + 1 :]
-    previous_source = text[:line_start]
-    if previous_source.endswith("\n"):
-        previous_source = previous_source[:-1]
-    previous_line = previous_source.split("\n")[-1].rstrip() if line_start else ""
+    statement_start = max(before.rfind(";") + 1, _paragraph_start(before, len(before)))
+    statement = before[statement_start:]
+    previous_line_end = line_start
+    if previous_line_end:
+        previous_line_end -= 1
+        if text[previous_line_end] == "\n" and previous_line_end > 0 and text[previous_line_end - 1] == "\r":
+            previous_line_end -= 1
+    previous_line_start = _line_start(text, previous_line_end) if line_start else 0
+    previous_line = text[previous_line_start:previous_line_end].rstrip() if line_start else ""
     declaration = bool(re.search(r"\b(?:export\s+)?(?:const|let|var)\b", statement)) and "=" in statement
     if declaration and (line_prefix != line_prefix.lstrip() or re.search(r"(?:=|=>|[([{,:])\s*$", previous_line)):
         return True
@@ -457,37 +489,30 @@ def _has_open_inline_span(text: str, index: int) -> bool:
 def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
     """MDX의 줄 단위 backtick/tilde fence 전체를 공백으로 가린다."""
 
-    line_start = text.rfind("\n", 0, start) + 1
+    line_start = _line_start(text, start)
     if text[line_start:start].strip():
         return "", start
-    opener_end = text.find("\n", start)
-    if opener_end < 0:
-        opener_end = len(text)
+    opener_end = _find_mdx_line_terminator(text, start, len(text))
     opener_run = 0
     while start + opener_run < opener_end and text[start + opener_run] == marker:
         opener_run += 1
     if opener_run < 3:
         return "", start
-    line_end = opener_end
-    if line_end < 0:
-        line_end = len(text)
-    cursor = line_end + 1
+    cursor = _line_terminator_end(text, opener_end)
     closing = len(text)
     while cursor < len(text):
-        next_end = text.find("\n", cursor)
-        if next_end < 0:
-            next_end = len(text)
+        next_end = _find_mdx_line_terminator(text, cursor, len(text))
         candidate = text[cursor:next_end].lstrip()
         closing_run = 0
         while closing_run < len(candidate) and candidate[closing_run] == marker:
             closing_run += 1
         if closing_run >= opener_run and not candidate[closing_run:].strip():
-            closing = next_end + (1 if next_end < len(text) else 0)
+            closing = _line_terminator_end(text, next_end)
             break
-        cursor = next_end + 1
+        cursor = _line_terminator_end(text, next_end)
     output = list(text[start:closing])
     for offset, char in enumerate(text[start:closing]):
-        if char != "\n":
+        if not _is_mdx_line_terminator(char):
             output[offset] = " "
     return "".join(output), closing
 
@@ -607,7 +632,7 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                     continue
                 stop = min(end + run_length, len(text))
                 for offset in range(index, stop):
-                    if text[offset] != "\n":
+                    if not _is_mdx_line_terminator(text[offset]):
                         output[offset] = " "
                 index = stop
                 continue
@@ -620,7 +645,7 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                     continue
                 stop = min(end + 1, len(text))
                 for offset in range(index, stop):
-                    if text[offset] != "\n":
+                    if not _is_mdx_line_terminator(text[offset]):
                         output[offset] = " "
                 index = stop
                 continue
