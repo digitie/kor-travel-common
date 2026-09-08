@@ -241,34 +241,69 @@ def _markdown_indent_columns(prefix: str) -> int | None:
     return columns
 
 
+def _markdown_advance_column(column: int, char: str) -> int:
+    """문자 하나를 소비한 뒤 Markdown의 실제 열 위치를 반환한다."""
+
+    if char == " ":
+        return column + 1
+    if char == "\t":
+        return ((column // 4) + 1) * 4
+    return column
+
+
+def _markdown_leading_indent(text: str, start: int = 0) -> tuple[int, int] | None:
+    """공백/탭 선행부의 끝과 절대 열을 반환한다."""
+
+    index = start
+    column = 0
+    while index < len(text) and text[index] in " \t":
+        column = _markdown_advance_column(column, text[index])
+        index += 1
+    if column > 3:
+        return None
+    return index, column
+
+
+def _markdown_consume_marker_padding(text: str, index: int, column: int) -> tuple[int, int, int]:
+    """`>` 뒤 선택 공백 한 열과 콘텐츠 들여쓰기를 분리한다.
+
+    CommonMark의 block quote marker는 `>`와 뒤따르는 공백 한 열을 함께
+    소비한다. 탭은 문자 단위로 잘라낼 수 없으므로 실제 tab-stop을 전개한
+    절대 열에서 delimiter 한 열을 제외하고 나머지를 콘텐츠로 계산한다.
+    """
+
+    content_start = column
+    if index >= len(text) or text[index] not in " \t":
+        return index, column, 0
+    column = _markdown_advance_column(column, text[index])
+    index += 1
+    content_start += 1
+    while index < len(text) and text[index] in " \t":
+        column = _markdown_advance_column(column, text[index])
+        index += 1
+    return index, column, column - content_start
+
+
 def _markdown_fence_container(prefix: str) -> tuple[str, int] | None:
     """fence 앞의 일반 들여쓰기 또는 blockquote 깊이를 반환한다."""
 
-    leading_end = 0
-    while leading_end < len(prefix) and prefix[leading_end] in " \t":
-        leading_end += 1
-    leading_columns = _markdown_indent_columns(prefix[:leading_end])
-    if leading_columns is None or leading_columns > 3:
+    leading = _markdown_leading_indent(prefix)
+    if leading is None:
         return None
-    if leading_end == len(prefix):
+    index, column = leading
+    if index == len(prefix):
         return ("plain", 0)
     depth = 0
-    index = leading_end
-    last_post_indent = 0
-    while index < len(prefix) and prefix[index] == ">":
-        depth += 1
-        index += 1
-        post_indent_start = index
-        while index < len(prefix) and prefix[index] in " \t":
-            index += 1
-        post_indent = _markdown_indent_columns(prefix[post_indent_start:index])
-        if post_indent is None:
+    while index < len(prefix):
+        if prefix[index] != ">":
             return None
-        last_post_indent = post_indent
-    if index != len(prefix) or depth == 0:
-        return None
-    if last_post_indent > 3:
-        return None
+        depth += 1
+        column += 1
+        index, column, content_indent = _markdown_consume_marker_padding(prefix, index + 1, column)
+        if content_indent > 3:
+            return None
+        if index < len(prefix) and prefix[index] != ">":
+            return None
     return ("blockquote", depth)
 
 
@@ -277,35 +312,25 @@ def _markdown_fence_candidate(raw_line: str, container: tuple[str, int]) -> tupl
 
     kind, expected_depth = container
     if kind == "plain":
-        indent_end = 0
-        while indent_end < len(raw_line) and raw_line[indent_end] in " \t":
-            indent_end += 1
-        indent_columns = _markdown_indent_columns(raw_line[:indent_end])
-        if indent_columns is None or indent_columns > 3:
+        leading = _markdown_leading_indent(raw_line)
+        if leading is None:
             return None
+        indent_end, indent_columns = leading
         return raw_line[indent_end:], indent_columns
 
-    leading_end = 0
-    while leading_end < len(raw_line) and raw_line[leading_end] in " \t":
-        leading_end += 1
-    leading_columns = _markdown_indent_columns(raw_line[:leading_end])
-    if leading_columns is None or leading_columns > 3:
+    leading = _markdown_leading_indent(raw_line)
+    if leading is None:
         return None
-    index = leading_end
+    index, column = leading
     for depth in range(expected_depth):
         if index >= len(raw_line) or raw_line[index] != ">":
             return None
-        index += 1
+        column += 1
+        index, column, content_indent = _markdown_consume_marker_padding(raw_line, index + 1, column)
         if depth + 1 < expected_depth:
-            while index < len(raw_line) and raw_line[index] in " \t":
-                index += 1
-    post_indent_start = index
-    while index < len(raw_line) and raw_line[index] in " \t":
-        index += 1
-    post_indent = _markdown_indent_columns(raw_line[post_indent_start:index])
-    if post_indent is None:
-        return None
-    return raw_line[index:], post_indent
+            if content_indent > 3 or index >= len(raw_line) or raw_line[index] != ">":
+                return None
+    return raw_line[index:], content_indent
 
 
 def _consume_mdx_unicode_escape(text: str, start: int, boundary: int) -> int | None:

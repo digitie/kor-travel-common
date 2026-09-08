@@ -506,7 +506,17 @@ window.confirm('확인');
             self.assertEqual([item["pattern"] for item in json.loads(result.stdout)["findings"]], ["P8"])
 
             nested.unlink()
-            for indent in ("    ", "\t", " \t"):
+            for indent, expected in (
+                ("", ["P6"]),
+                (" ", ["P6"]),
+                ("   ", ["P6"]),
+                ("    ", ["P6"]),
+                ("\t", ["P6"]),
+                (" \t", ["P6"]),
+                ("     ", []),
+                ("\t\t", []),
+                (" \t\t", []),
+            ):
                 fixture = root / "indent.mdx"
                 fixture.write_bytes(
                     (
@@ -517,16 +527,70 @@ window.confirm('확인');
                     ).encode("utf-8")
                 )
                 result = self.run_tool(root, "--root", root, "--fail-new", "--json")
-                self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertEqual(json.loads(result.stdout)["findings"], [])
+                findings = json.loads(result.stdout)["findings"]
+                self.assertEqual(result.returncode, 1 if expected else 0, result.stderr)
+                self.assertEqual([item["pattern"] for item in findings], expected)
 
             fixture.write_text(
                 ">    ~~~tsx\n> <div className=\"outline-none\"/>\n> ~~~\n",
                 encoding="utf-8",
             )
             result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["findings"], [])
+
+            fixture.write_text(
+                ">     ~~~tsx\n> <div className=\"outline-none\"/>\n> ~~~\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--fail-new", "--json")
             self.assertEqual(result.returncode, 1, result.stderr)
             self.assertEqual([item["pattern"] for item in json.loads(result.stdout)["findings"]], ["P6"])
+
+    def test_mdx_blockquote_fence_padding_keeps_p8_after_valid_closing(self):
+        valid_padding = ("", " ", "   ", "    ", "\t", " \t")
+        invalid_padding = ("     ", "\t\t", " \t\t")
+        for marker in ("~~~", "```"):
+            for padding in valid_padding:
+                with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                    root = Path(directory)
+                    fixture = root / "padding.mdx"
+                    fixture.write_bytes(
+                        (
+                            f"> {marker}tsx\n> quoted\n>{padding}{marker}\n"
+                            "> {window.confirm(\"after\")}\n"
+                        ).encode("utf-8")
+                    )
+                    result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                    self.assertEqual(result.returncode, 1, result.stderr)
+                    findings = json.loads(result.stdout)["findings"]
+                    self.assertEqual([item["pattern"] for item in findings], ["P8"])
+            for padding in invalid_padding:
+                with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                    root = Path(directory)
+                    fixture = root / "padding.mdx"
+                    fixture.write_bytes(
+                        (
+                            f"> {marker}tsx\n> quoted\n>{padding}{marker}\n"
+                            "> {window.confirm(\"inside\")}\n"
+                        ).encode("utf-8")
+                    )
+                    result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(json.loads(result.stdout)["findings"], [])
+
+    def test_mdx_blockquote_fence_rejects_overindented_nested_marker(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "nested.mdx"
+            fixture.write_text(
+                ">> ~~~\n>> quoted\n>     > literal\n>> {window.confirm(\"outside\")}\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+            self.assertEqual(result.returncode, 1, result.stderr)
+            findings = json.loads(result.stdout)["findings"]
+            self.assertEqual([item["pattern"] for item in findings], ["P8"])
 
     def test_escaped_template_text_remains_scannable(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
