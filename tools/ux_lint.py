@@ -103,6 +103,8 @@ def _has_open_jsx_expression(text: str, start: int) -> bool:
     before = text[:start]
     matches = list(re.finditer(r"[A-Za-z_$][\w$-]*\s*=\s*\{", before))
     for match in reversed(matches):
+        if _has_open_inline_span(text, match.start()):
+            continue
         scope_start = max(before.rfind(";", 0, match.start()), before.rfind("\n\n", 0, match.start())) + 1
         if not re.search(r"<[A-Za-z]", before[scope_start : match.start()]):
             continue
@@ -117,6 +119,14 @@ def _has_open_jsx_expression(text: str, start: int) -> bool:
                     continue
                 if char == quote:
                     quote = None
+            elif char == "/" and index + 1 < len(before) and before[index + 1] == "/":
+                newline = before.find("\n", index + 2)
+                index = len(before) if newline < 0 else newline
+                continue
+            elif char == "/" and index + 1 < len(before) and before[index + 1] == "*":
+                closing = before.find("*/", index + 2)
+                index = len(before) if closing < 0 else closing + 2
+                continue
             elif char in "\"'`":
                 quote = char
             elif char == "{":
@@ -182,6 +192,30 @@ def _is_escaped(text: str, index: int) -> bool:
         backslashes += 1
         index -= 1
     return bool(backslashes % 2)
+
+
+def _has_open_inline_span(text: str, index: int) -> bool:
+    """현재 위치가 빈 줄 안에서 닫히지 않은 Markdown span 안인지 확인한다."""
+
+    scope_start = text.rfind("\n\n", 0, index) + 2
+    opener: int | None = None
+    cursor = scope_start
+    while cursor < index:
+        if text[cursor] != "`" or _is_escaped(text, cursor):
+            cursor += 1
+            continue
+        run = 0
+        while cursor + run < index and text[cursor + run] == "`":
+            run += 1
+        if run >= 3:
+            cursor += run
+            continue
+        if opener is None:
+            opener = run
+        elif opener == run:
+            opener = None
+        cursor += run
+    return opener is not None
 
 
 def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
@@ -344,6 +378,10 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                 index = stop
                 continue
             end = _find_template_end(text, index)
+            if ignore_backticks and end >= len(text):
+                output[index] = " "
+                index += 1
+                continue
             executable = not ignore_backticks or _is_executable_mdx_template(text, index, end)
             stop = min(end + 1, len(text))
             if executable:

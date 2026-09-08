@@ -329,7 +329,10 @@ def _parse_blocks(text: str, parent_mode: str | None = None) -> Iterable[tuple[s
                 if any(not raw_part.strip() for raw_part in selector_parts):
                     raise ContrastError("CSS selector 목록에 빈 항목이 있습니다")
                 for raw_part in selector_parts:
-                    if _selector_has_compound_space(raw_part.strip()) and re.search(r":root(?:\W|$)", raw_part):
+                    global_scopes = re.findall(r":root(?:\W|$)|\.dark(?:\W|$)|\[data-theme\s*=", raw_part)
+                    if _selector_has_compound_space(raw_part.strip()) and (
+                        re.search(r":root(?:\W|$)", raw_part) or len(global_scopes) >= 2
+                    ):
                         raise ContrastError("지원하지 않는 토큰 선택자입니다")
                     if (
                         not _selector_has_compound_space(raw_part.strip())

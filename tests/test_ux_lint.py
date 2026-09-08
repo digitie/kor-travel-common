@@ -178,6 +178,25 @@ window.confirm('확인');
             findings = json.loads(result.stdout)["findings"]
             self.assertEqual(sum(item["pattern"] == "P6" for item in findings), 1)
 
+    def test_mdx_comments_do_not_close_jsx_expression_and_code_examples_do_not_leak(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            fixture = root / "fixture.mdx"
+            fixture.write_text(
+                "export function X() {\n"
+                "  return <div className={\n"
+                "    // }\n"
+                "    `outline-none`\n"
+                "  } />;\n"
+                "}\n\n"
+                "문법 예시: `<div className={`\n\n다른 인용: `outline-none`\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            findings = json.loads(result.stdout)["findings"]
+            self.assertEqual(sum(item["pattern"] == "P6" for item in findings), 1)
+
     def test_escaped_template_text_remains_scannable(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
