@@ -58,8 +58,8 @@ Git Bash에서 동일. selftest·consumer-smoke 결과는 Actions 실행 링크�
   - `versions-check.yml`이 node·Python fixture를 고정 common ref로 검사하고 각각 `BELOW_FLOOR`를 report(exit 0)로 출력한다. node는 React 18.3.1, Python은 Python 3.10/FastAPI 0.114.0을 의도적으로 사용한다.
   - `contrast-check.yml`은 canonical tokens와 정상·의도적 미달 override를 report 모드로 실행한다. `docs-check.yml`은 link·redaction scope·선택 task ledger를 caller checkout에서 실행한다.
   - `consumer_smoke.py`와 `tests/test_consumer_pins.py`가 정상 tarball 실제 npm 설치, digest 불일치, 승인 거부, 누락 자산, engine-strict 설치 실패를 재현한다. `consumers.pins.json`은 map·weather tokens와 map·airport UI의 조사 기준 SHA만 승인하고 L6 미완료 pinvi는 제외한다.
-- 로컬 검증: `python -B -X utf8 -m unittest discover -s tests -p 'test_*.py'` 329 tests OK(2026-09-09), `validate_document_links.py` 516 documents/2564 targets 오류 0, `validate_plan.py` 106 tasks 오류 0, `check_spdx.py` 68 files 오류 0, `check_prod_redaction.py --all` 발견 0, `git diff --check` OK.
-- `workflows-selftest`와 실제 GitHub Actions run 링크는 candidate push 뒤 기록한다. 실제 map·weather consumer dispatch, 주간 활성화, 소비자 build/e2e, npm/PyPI 게시·Release는 `NOT_RUN(외부 소비자·사용자 범위; T-010a)`로 유지한다.
+- 로컬 검증: `python -B -X utf8 -m unittest discover -s tests -p 'test_*.py'` 334 tests OK(2026-09-09), `validate_document_links.py` 520 documents/2568 targets 오류 0, `validate_plan.py` 106 tasks 오류 0, `check_spdx.py` 68 files 오류 0, `check_prod_redaction.py --all` 669 files/발견 0, `git diff --check` OK.
+- candidate `47b228b`의 `workflows-selftest`는 [Actions run 34285369672](https://github.com/digitie/kor-travel-common/actions/runs/34285369672)에서 성공했다. 같은 후보의 docs·tools·packages·check-versions·secret-scan은 [Actions run 34285369327](https://github.com/digitie/kor-travel-common/actions/runs/34285369327)에서 진행 중이며 완료 후 결과를 갱신한다. 실제 map·weather consumer dispatch, 주간 활성화, 소비자 build/e2e, npm/PyPI 게시·Release는 `NOT_RUN(외부 소비자·사용자 범위; T-010a)`로 유지한다.
 
 ## rollback 또는 release 차단 조건
 
