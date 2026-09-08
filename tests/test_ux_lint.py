@@ -492,6 +492,42 @@ window.confirm('확인');
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout)["findings"], [])
 
+    def test_mdx_blockquote_fence_tracks_nested_depth_and_post_marker_indent(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            nested = root / "nested.mdx"
+            nested.write_text(
+                ">> ~~~tsx\n>> <div className=\"outline-none\"/>\n>> ~~~\n"
+                "> {window.confirm(\"outside\")}\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertEqual([item["pattern"] for item in json.loads(result.stdout)["findings"]], ["P8"])
+
+            nested.unlink()
+            for indent in ("    ", "\t", " \t"):
+                fixture = root / "indent.mdx"
+                fixture.write_bytes(
+                    (
+                        "> ~~~tsx\n"
+                        f">{indent}~~~\n"
+                        "> <div className=\"outline-none\"/>\n"
+                        "> ~~~\n"
+                    ).encode("utf-8")
+                )
+                result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(json.loads(result.stdout)["findings"], [])
+
+            fixture.write_text(
+                ">    ~~~tsx\n> <div className=\"outline-none\"/>\n> ~~~\n",
+                encoding="utf-8",
+            )
+            result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertEqual([item["pattern"] for item in json.loads(result.stdout)["findings"]], ["P6"])
+
     def test_escaped_template_text_remains_scannable(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)

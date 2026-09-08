@@ -254,18 +254,26 @@ def _markdown_fence_container(prefix: str) -> tuple[str, int] | None:
         return ("plain", 0)
     depth = 0
     index = leading_end
+    last_post_indent = 0
     while index < len(prefix) and prefix[index] == ">":
         depth += 1
         index += 1
+        post_indent_start = index
         while index < len(prefix) and prefix[index] in " \t":
             index += 1
+        post_indent = _markdown_indent_columns(prefix[post_indent_start:index])
+        if post_indent is None:
+            return None
+        last_post_indent = post_indent
     if index != len(prefix) or depth == 0:
+        return None
+    if last_post_indent > 3:
         return None
     return ("blockquote", depth)
 
 
-def _markdown_fence_candidate(raw_line: str, container: tuple[str, int]) -> str | None:
-    """컨테이너에 맞는 fence 후보 줄에서 marker 뒤 문자열을 반환한다."""
+def _markdown_fence_candidate(raw_line: str, container: tuple[str, int]) -> tuple[str, int] | None:
+    """컨테이너에 맞는 fence 후보와 marker 뒤 들여쓰기 열을 반환한다."""
 
     kind, expected_depth = container
     if kind == "plain":
@@ -275,7 +283,7 @@ def _markdown_fence_candidate(raw_line: str, container: tuple[str, int]) -> str 
         indent_columns = _markdown_indent_columns(raw_line[:indent_end])
         if indent_columns is None or indent_columns > 3:
             return None
-        return raw_line[indent_end:]
+        return raw_line[indent_end:], indent_columns
 
     leading_end = 0
     while leading_end < len(raw_line) and raw_line[leading_end] in " \t":
@@ -283,16 +291,21 @@ def _markdown_fence_candidate(raw_line: str, container: tuple[str, int]) -> str 
     leading_columns = _markdown_indent_columns(raw_line[:leading_end])
     if leading_columns is None or leading_columns > 3:
         return None
-    depth = 0
     index = leading_end
-    while index < len(raw_line) and raw_line[index] == ">":
-        depth += 1
+    for depth in range(expected_depth):
+        if index >= len(raw_line) or raw_line[index] != ">":
+            return None
         index += 1
-        while index < len(raw_line) and raw_line[index] in " \t":
-            index += 1
-    if depth != expected_depth:
+        if depth + 1 < expected_depth:
+            while index < len(raw_line) and raw_line[index] in " \t":
+                index += 1
+    post_indent_start = index
+    while index < len(raw_line) and raw_line[index] in " \t":
+        index += 1
+    post_indent = _markdown_indent_columns(raw_line[post_indent_start:index])
+    if post_indent is None:
         return None
-    return raw_line[index:]
+    return raw_line[index:], post_indent
 
 
 def _consume_mdx_unicode_escape(text: str, start: int, boundary: int) -> int | None:
@@ -591,13 +604,15 @@ def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
     while cursor < len(text):
         next_end = _find_markdown_line_terminator(text, cursor, len(text))
         raw_line = text[cursor:next_end]
-        candidate = _markdown_fence_candidate(raw_line, container)
-        if candidate is None:
+        candidate_info = _markdown_fence_candidate(raw_line, container)
+        if candidate_info is None:
             if container[0] == "blockquote":
-                non_space = raw_line.lstrip(" \t")
-                if non_space and not non_space.startswith(">"):
-                    closing = cursor
-                    break
+                closing = cursor
+                break
+            cursor = _markdown_line_terminator_end(text, next_end)
+            continue
+        candidate, indent_columns = candidate_info
+        if indent_columns > 3:
             cursor = _markdown_line_terminator_end(text, next_end)
             continue
         closing_run = 0
