@@ -10,8 +10,13 @@ on:
         required: true
         type: string
       common-ref:
-        description: "검사기에 사용할 common 태그 또는 40자 commit SHA"
+        description: "검사기에 사용할 불변 commit SHA 또는 semver release tag"
         required: true
+        type: string
+      common-repository:
+        description: "common source 저장소(owner/name; fork selftest 지원)"
+        required: false
+        default: digitie/kor-travel-common
         type: string
       tokens-css:
         description: "canonical tokens.css의 common checkout 기준 상대 경로"
@@ -57,7 +62,7 @@ jobs:
       - name: common checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: digitie/kor-travel-common
+          repository: ${{ inputs.common-repository }}
           ref: ${{ inputs.common-ref }}
           path: .kor-travel-common
           fetch-depth: 1
@@ -71,14 +76,15 @@ jobs:
       - name: 입력 경로와 immutable ref 확인
         env:
           COMMON_REF: ${{ inputs.common-ref }}
+          COMMON_REPOSITORY: ${{ inputs.common-repository }}
           TOKENS_CSS: ${{ inputs.tokens-css }}
           OVERRIDE_CSS: ${{ inputs.override-css }}
           BASELINE: ${{ inputs.baseline }}
         shell: bash
         run: |
           set -euo pipefail
-          [[ "$COMMON_REF" =~ ^[0-9a-f]{40}$ || "$COMMON_REF" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$ ]]
-          [[ "$COMMON_REF" != "main" && "$COMMON_REF" != "master" ]]
+          [[ "$COMMON_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]
+          [[ "$COMMON_REF" =~ ^[0-9a-f]{40}$ || "$COMMON_REF" =~ ^(ci-)?v[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.-]+)?$ ]]
           python - "$TOKENS_CSS" "$OVERRIDE_CSS" "$BASELINE" "$GITHUB_WORKSPACE" <<'PY'
           import sys
           from pathlib import Path

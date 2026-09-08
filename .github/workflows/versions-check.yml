@@ -18,8 +18,13 @@ on:
         required: true
         type: string
       common-ref:
-        description: "검사기에 사용할 common 태그 또는 40자 commit SHA"
+        description: "검사기에 사용할 불변 commit SHA 또는 semver release tag"
         required: true
+        type: string
+      common-repository:
+        description: "common source 저장소(owner/name; fork selftest 지원)"
+        required: false
+        default: digitie/kor-travel-common
         type: string
 
 permissions:
@@ -45,7 +50,7 @@ jobs:
       - name: common checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: digitie/kor-travel-common
+          repository: ${{ inputs.common-repository }}
           ref: ${{ inputs.common-ref }}
           path: .kor-travel-common
           fetch-depth: 1
@@ -59,13 +64,15 @@ jobs:
       - name: immutable ref와 lockfile 확인
         env:
           COMMON_REF: ${{ inputs.common-ref }}
+          COMMON_REPOSITORY: ${{ inputs.common-repository }}
+          REPO: ${{ inputs.repo }}
           LOCKFILES: ${{ inputs.lockfiles }}
         shell: bash
         run: |
           set -euo pipefail
-          [[ "$COMMON_REF" =~ ^[0-9a-f]{40}$ || "$COMMON_REF" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$ ]]
-          [[ "$COMMON_REF" != "main" && "$COMMON_REF" != "master" ]]
-          python - "$LOCKFILES" "$GITHUB_WORKSPACE" <<'PY'
+          [[ "$COMMON_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]
+          [[ "$COMMON_REF" =~ ^[0-9a-f]{40}$ || "$COMMON_REF" =~ ^(ci-)?v[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.-]+)?$ ]]
+          python - "$LOCKFILES" "$GITHUB_WORKSPACE" "$REPO" <<'PY'
           import json
           import sys
           from pathlib import Path
@@ -77,6 +84,15 @@ jobs:
           if not isinstance(entries, list) or not entries:
               raise SystemExit("lockfiles는 비어 있지 않은 JSON 배열이어야 합니다")
           root = Path(sys.argv[2]).resolve()
+          repo = sys.argv[3]
+          allow_unregistered = repo == "common-ci-report-fixture"
+          registry = json.loads((root / ".kor-travel-common" / "versions.json").read_text(encoding="utf-8"))
+          consumers = registry.get("consumers", {})
+          known = set(consumers)
+          for value in consumers.values():
+              known.update(value.get("aliases", []))
+          if not allow_unregistered and repo.lower() not in {value.lower() for value in known}:
+              raise SystemExit("repo가 versions.json consumers key 또는 alias가 아님")
           for entry in entries:
               if not isinstance(entry, str) or not entry.strip():
                   raise SystemExit("lockfiles 항목은 문자열이어야 합니다")
@@ -97,24 +113,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .kor-travel-common-ci/versions
-          mapfile -t lockfile_dirs < <(python - "$LOCKFILES" <<'PY'
-          import json
-          import sys
-          from pathlib import PurePosixPath
-
-          for entry in dict.fromkeys(json.loads(sys.argv[1])):
-              parent = PurePosixPath(entry).parent.as_posix()
-              print("." if parent == "." else parent)
-          PY
-          )
-          index=0
-          for directory in "${lockfile_dirs[@]}"; do
-            python -B -X utf8 .kor-travel-common/tools/check_versions.py \
-              "$GITHUB_WORKSPACE/$directory" \
-              --registry .kor-travel-common/versions.json \
-              --repo "$REPO" \
-              --json ".kor-travel-common-ci/versions/report-${index}.json"
-            index=$((index + 1))
-          done
+          python -B -X utf8 .kor-travel-common/tools/check_versions.py \
+            "$GITHUB_WORKSPACE" \
+            --lockfiles "$LOCKFILES" \
+            --registry .kor-travel-common/versions.json \
+            --repo "$REPO" \
+            --json ".kor-travel-common-ci/versions/report.json"
           printf '검사 source: `%s`\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
           printf 'common ref: `%s`\n' "$COMMON_REF" >> "$GITHUB_STEP_SUMMARY"

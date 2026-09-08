@@ -45,7 +45,7 @@
 
 | 단계 | 워크플로 | 주요 inputs(기본값) | steps | task |
 |---|---|---|---|---|
-| Phase 1 | `versions-check.yml` | `name`, `repo`, `lockfiles`(JSON 경로 배열), `common-ref`(태그 또는 40자 SHA) | caller head SHA checkout → common 고정 ref checkout → lockfile 존재·경로 검증 → `tools/check_versions.py` report + JSON + `$GITHUB_STEP_SUMMARY`. 판정 모드는 common `versions.json`의 `consumers.<repo>.enforce`가 소유하고, 미등록 fixture는 도구 기본 report를 사용한다(D-07·D-30) | T-010 |
+| Phase 1 | `versions-check.yml` | `name`, `repo`, `lockfiles`(JSON 경로 배열), `common-ref`(40자 SHA 또는 `vX.Y.Z`/`ci-vX.Y.Z` release tag), `common-repository`(기본 common) | caller head SHA checkout → common 고정 ref checkout → lockfile 목록의 정확한 파일만 검사 → `tools/check_versions.py` report + JSON + `$GITHUB_STEP_SUMMARY`. 등록 소비자는 `versions.json` key/alias를 확인하고, 미등록 `common-ci-report-fixture` 식별자는 selftest에서만 허용한다(D-07·D-30) | T-010 |
 | Phase 1 | `contrast-check.yml` | `name`, `common-ref`, `tokens-css`(`.kor-travel-common/packages/tokens/tokens.css`), `override-css`, `baseline`, `dark`(bool, 기본 false) | caller/common 고정 checkout → 입력 경로 검증 → `tools/kt_contrast.py` report. `--fail-new`를 주지 않아 baseline 신규 미달도 report로 남기며 승격은 소비자 task가 소유 | T-010 |
 | Phase 1 | `docs-check.yml` | `name`, `common-ref`, `link-check`(true), `redaction-scope`(`.`), `redaction-patterns-file`(`.prod-redaction-patterns`), `task-ledger`(false) | caller/common 고정 checkout → 경로 검증 → `tools/validate_document_links.py` → `check_prod_redaction.py --all` → `validate_plan.py`(조건) | T-010 |
 | Phase 3 | `openapi-drift.yml` | `python-version`, `installer`(`uv`), `install-args`, `export-command`, `spec-paths`(list), `mode`(`check` \| `git-diff`), `job-name` | install → export → `--check` 또는 `git diff --exit-code -- <spec-paths>` | T-309 |
@@ -249,7 +249,7 @@ exit 0은 선택 범위의 패턴 일치가 없거나 명시적 예외로 처리
 | `python-package` | PR, push `main`·`codex/release-*` | `uv build` → wheel 설치 → import 스모크 → starlette 0.4x/1.6 매트릭스 | ubuntu-24.04 | T-302 |
 | `consumer-smoke` | `workflow_dispatch`; 주간은 T-010a 검증 뒤 활성화 | `consumers.pins.json`(role·url·revision, ktdm runtime pin 형식) 패키지별 승인 소비자의 pinned SHA 체크아웃 → tarball 설치 → type-check + `next build` | ubuntu-24.04 | 실행기 T-010, 외부 dispatch T-010a |
 | `secret-scan` | PR, push `main`·`codex/release-*` | CI-42 패턴 | ubuntu-24.04 | T-009 |
-| `check-versions` | PR, push `main`·`codex/release-*` | `tools/check_versions.py` report 모드(`FLOATING_REF`·`BLOCKED`·`EXEMPT_EXPIRED`는 `::error::`) | ubuntu-24.04 | T-005·T-009 |
+| `check-versions` | PR, push `main`·`codex/release-*` | `tools/check_versions.py` report 모드(`FLOATING_REF`·`BLOCKED`·`EXEMPT_EXPIRED`는 `::error::`); workflow 입력 repo·lockfiles는 별도 fail-close | ubuntu-24.04 | T-005·T-009 |
 
 **릴리스 후보에도 필요한 실행 경로(ADR-014)**: `docs`·`tools`·`secret-scan`·`check-versions` 및 존재하는 `packages`·`python-package`는 PR 외에 `main`과 `codex/release-*` push에서도 실행한다. release push에서는 path filter나 PR 전용 조건으로 필수 job을 생략하지 않고 `github.sha`의 실제 merge commit을 checkout한다. run의 head SHA와 build/artifact source SHA가 릴리스 evidence의 `RELEASE_SHA`와 같아야 한다. PR head 성공은 다른 merge SHA의 실행으로 세지 않는다. 아래 구현 task가 이를 적용하고, 후보 보존 전에 실행 경로를 확인해야 과거 후보에서 분기한 release branch에서도 사용할 수 있다. 현재 packages/python-package의 미구현은 NOT_RUN이며 해당 발행을 차단한다. T-009의 기반 job은 실제 PR·release push run으로 검증한다.
 

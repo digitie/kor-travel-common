@@ -34,6 +34,7 @@ jobs:
       repo: common-ci-report-fixture
       lockfiles: '["tests/fixtures/node-app/package-lock.json"]'
       common-ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      common-repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
 
   versions-python:
     uses: ./.github/workflows/versions-check.yml
@@ -42,15 +43,17 @@ jobs:
       repo: common-ci-report-fixture
       lockfiles: '["tests/fixtures/python-app/uv.lock"]'
       common-ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      common-repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
 
   docs-node:
     uses: ./.github/workflows/docs-check.yml
     with:
       name: docs (node fixture)
       common-ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      common-repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
       link-check: true
       redaction-patterns-file: .prod-redaction-patterns
-      redaction-scope: tests/fixtures/node-app
+      redaction-scope: tests/fixtures/node-app/
       task-ledger: false
 
   docs-python:
@@ -58,6 +61,7 @@ jobs:
     with:
       name: docs (python fixture)
       common-ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      common-repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
       link-check: true
       redaction-patterns-file: .prod-redaction-patterns
       redaction-scope: tests/fixtures/python-app
@@ -68,6 +72,7 @@ jobs:
     with:
       name: contrast (node fixture)
       common-ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      common-repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
       tokens-css: .kor-travel-common/packages/tokens/tokens.css
       override-css: tests/fixtures/node-app/contrast-overrides.css
       dark: false
@@ -77,5 +82,6 @@ jobs:
     with:
       name: contrast (python fixture)
       common-ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      common-repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
       tokens-css: .kor-travel-common/packages/tokens/tokens.css
       dark: true

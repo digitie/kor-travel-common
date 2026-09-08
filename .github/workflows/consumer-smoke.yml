@@ -18,7 +18,7 @@ on:
         required: true
         type: string
       common-ref:
-        description: "common workflow와 핀 레지스트리의 태그 또는 40자 commit SHA"
+        description: "common workflow와 핀 레지스트리의 불변 commit SHA 또는 semver release tag"
         required: true
         type: string
 
@@ -55,21 +55,22 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          [[ "$COMMON_REF" =~ ^[0-9a-f]{40}$ || "$COMMON_REF" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$ ]]
-          [[ "$COMMON_REF" != "main" && "$COMMON_REF" != "master" ]]
+          [[ "$COMMON_REF" =~ ^[0-9a-f]{40}$ || "$COMMON_REF" =~ ^(ci-)?v[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.-]+)?$ ]]
 
       - name: 후보 tarball 다운로드
         env:
           ASSET_URL: ${{ inputs.asset-url }}
+          ROLE: ${{ inputs.role }}
         shell: bash
         run: |
           set -euo pipefail
-          python - "$ASSET_URL" <<'PY'
+          python - "$ASSET_URL" "$ROLE" <<'PY'
           import sys
           from pathlib import Path
           sys.path.insert(0, str(Path('.kor-travel-common/tools').resolve()))
-          from consumer_smoke import validate_asset_url
-          validate_asset_url(sys.argv[1])
+          from consumer_smoke import load_pins, select_pin, validate_asset_url
+          selected = select_pin(load_pins(Path('.kor-travel-common/consumers.pins.json')), sys.argv[2])
+          validate_asset_url(sys.argv[1], str(selected['url']))
           PY
           curl --fail --location --proto '=https' --tlsv1.2 --output candidate.tgz "$ASSET_URL"
 
@@ -112,10 +113,22 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
+      - name: Node.js 설치
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22.23.1'
+
+      - name: npm 버전 고정
+        shell: bash
+        run: npm install --global npm@11.19.1
+
       - name: 소비자 npm 설치·type-check·Next 빌드
         env:
           SOURCE_PATH: ${{ steps.pin.outputs.path }}
           ASSET_PACKAGE: ${{ steps.pin.outputs.package }}
+          NPM_CONFIG_AUDIT: 'false'
+          NPM_CONFIG_ENGINE_STRICT: 'true'
+          NPM_CONFIG_FUND: 'false'
         shell: bash
         run: |
           set -euo pipefail
@@ -125,15 +138,20 @@ jobs:
           source_dir="$GITHUB_WORKSPACE/consumer/$SOURCE_PATH"
           test -d "$source_dir"
           if [[ -f "$GITHUB_WORKSPACE/consumer/package-lock.json" ]]; then
-            npm ci --ignore-scripts --prefix "$GITHUB_WORKSPACE/consumer"
+            npm ci --ignore-scripts --engine-strict --no-audit --no-fund --prefix "$GITHUB_WORKSPACE/consumer"
           elif [[ -f "$source_dir/package-lock.json" ]]; then
-            npm ci --ignore-scripts --prefix "$source_dir"
+            npm ci --ignore-scripts --engine-strict --no-audit --no-fund --prefix "$source_dir"
           else
             echo 'npm ci 대상 package-lock.json이 없습니다' >&2
             exit 2
           fi
-          npm install --ignore-scripts --no-save --prefix "$source_dir" "$GITHUB_WORKSPACE/candidate.tgz"
+          npm install --ignore-scripts --engine-strict --no-audit --no-fund --package-lock=false --no-save \
+            --prefix "$source_dir" "$GITHUB_WORKSPACE/candidate.tgz"
           test "$(node -p "require('$source_dir/node_modules/$ASSET_PACKAGE/package.json').name")" = "$ASSET_PACKAGE"
+          {
+            printf 'Node.js: `%s`\n' "$(node --version)"
+            printf 'npm: `%s`\n' "$(npm --version)"
+          } >> "$GITHUB_STEP_SUMMARY"
           npm run type-check --prefix "$source_dir"
           npm run build --prefix "$source_dir" -- --webpack
           npm run build --prefix "$source_dir" -- --turbopack

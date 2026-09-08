@@ -45,9 +45,9 @@
 
 ```bash
 rg -n "workflow_call" .github/workflows/*.yml
-rg -n "@main" .github docs/standards docs/runbooks templates || echo "no @main"
+rg -n "uses:.*@main" .github/workflows docs/standards docs/runbooks templates || echo "no moving workflow ref"
 python3 -B -X utf8 -m unittest discover -s tests -p "test_consumer_pins.py" -v
-python3 -c "import json;d=json.load(open('consumers.pins.json'));print(d['schema'],len(d['consumers']))"
+python3 -B -X utf8 -c "import json;d=json.load(open('consumers.pins.json',encoding='utf-8'));print(d['schema'],len(d['sources']))"
 ```
 
 Git Bash에서 동일. selftest·consumer-smoke 결과는 Actions 실행 링크로 남긴다.

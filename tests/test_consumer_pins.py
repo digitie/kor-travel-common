@@ -37,8 +37,15 @@ class ConsumerPinsTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
 
     def make_tgz(self, name: str, *, engines: dict[str, str] | None = None,
-                 dependencies: dict[str, str] | None = None) -> Path:
-        package = {"name": name, "version": "0.1.0"}
+                 dependencies: dict[str, str] | None = None,
+                 license_name: str = "GPL-3.0-or-later",
+                 repository: str = "https://github.com/digitie/kor-travel-map") -> Path:
+        package = {
+            "name": name,
+            "version": "0.1.0",
+            "license": license_name,
+            "repository": {"type": "git", "url": repository},
+        }
         if engines:
             package["engines"] = engines
         if dependencies:
@@ -53,6 +60,10 @@ class ConsumerPinsTests(unittest.TestCase):
             info = tarfile.TarInfo("package/index.js")
             info.size = len(index)
             archive.addfile(info, io.BytesIO(index))
+            license_body = b"GNU GENERAL PUBLIC LICENSE\nVersion 3\n"
+            info = tarfile.TarInfo("package/LICENSE")
+            info.size = len(license_body)
+            archive.addfile(info, io.BytesIO(license_body))
         return path
 
     def digest(self, path: Path) -> str:
@@ -86,7 +97,8 @@ class ConsumerPinsTests(unittest.TestCase):
         package = "@kor-travel/tokens"
         tarball = self.make_tgz(package)
         digest = self.digest(tarball)
-        self.assertEqual(SMOKE.validate_asset(tarball, digest, package), digest)
+        self.assertEqual(SMOKE.validate_asset(
+            tarball, digest, package, "https://github.com/digitie/kor-travel-map"), digest)
         npm = shutil.which("npm")
         if npm is None:
             self.fail("npm이 없어 정상 tarball 설치 gate를 실행할 수 없음")
@@ -104,15 +116,18 @@ class ConsumerPinsTests(unittest.TestCase):
         package = "@kor-travel/tokens"
         tarball = self.make_tgz(package)
         with self.assertRaises(SMOKE.SmokeInputError):
-            SMOKE.validate_asset(tarball, "0" * 64, package)
+            SMOKE.validate_asset(tarball, "0" * 64, package,
+                                 "https://github.com/digitie/kor-travel-map")
         with self.assertRaises(SMOKE.SmokeInputError):
-            SMOKE.validate_asset(self.root / "missing.tgz", "0" * 64, package)
+            SMOKE.validate_asset(self.root / "missing.tgz", "0" * 64, package,
+                                 "https://github.com/digitie/kor-travel-map")
 
     def test_invalid_tarball_install_is_a_real_failure(self):
         package = "@kor-travel/tokens"
         tarball = self.make_tgz(package, engines={"node": ">=999.0.0"})
         digest = self.digest(tarball)
-        self.assertEqual(SMOKE.validate_asset(tarball, digest, package), digest)
+        self.assertEqual(SMOKE.validate_asset(
+            tarball, digest, package, "https://github.com/digitie/kor-travel-map"), digest)
         npm = shutil.which("npm")
         if npm is None:
             self.fail("npm이 없어 설치 실패 gate를 실행할 수 없음")
@@ -124,6 +139,42 @@ class ConsumerPinsTests(unittest.TestCase):
             "--engine-strict", "--package-lock=false", "--no-save", str(tarball),
         ], cwd=app, capture_output=True, text=True, encoding="utf-8")
         self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_asset_url_repository_license_and_metadata_are_bound_to_pin(self):
+        package = "@kor-travel/tokens"
+        tarball = self.make_tgz(package)
+        digest = self.digest(tarball)
+        self.assertEqual(SMOKE.validate_asset_url(
+            "https://github.com/digitie/kor-travel-map/releases/download/v0.1.0/tokens.tgz",
+            "https://github.com/digitie/kor-travel-map"),
+            "https://github.com/digitie/kor-travel-map/releases/download/v0.1.0/tokens.tgz")
+        with self.assertRaises(SMOKE.SmokeInputError):
+            SMOKE.validate_asset_url(
+                "https://github.com/digitie/other/releases/download/v0.1.0/tokens.tgz",
+                "https://github.com/digitie/kor-travel-map")
+        with self.assertRaises(SMOKE.SmokeInputError):
+            bad_license = self.make_tgz(package, license_name="MIT")
+            SMOKE.validate_asset(bad_license, self.digest(bad_license), package,
+                                 "https://github.com/digitie/kor-travel-map")
+
+    def test_archive_links_are_rejected(self):
+        package = "@kor-travel/tokens"
+        path = self.root / "link.tgz"
+        with tarfile.open(path, "w:gz") as archive:
+            body = b'{"name":"@kor-travel/tokens","version":"0.1.0","license":"GPL-3.0-or-later","repository":{"url":"https://github.com/digitie/kor-travel-map"}}'
+            info = tarfile.TarInfo("package/package.json")
+            info.size = len(body)
+            archive.addfile(info, io.BytesIO(body))
+            info = tarfile.TarInfo("package/LICENSE")
+            info.size = 3
+            archive.addfile(info, io.BytesIO(b"GPL"))
+            link = tarfile.TarInfo("package/link")
+            link.type = tarfile.SYMTYPE
+            link.linkname = "../../outside"
+            archive.addfile(link)
+        with self.assertRaises(SMOKE.SmokeInputError):
+            SMOKE.validate_asset(path, self.digest(path), package,
+                                 "https://github.com/digitie/kor-travel-map")
 
 
 if __name__ == "__main__":

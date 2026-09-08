@@ -134,6 +134,18 @@ class CheckVersionsTests(unittest.TestCase):
                                str(self.registry_path), "--today", "2026-09-06", *args],
                               capture_output=True, text=True, encoding="utf-8")
 
+    def test_selected_lockfiles_use_exact_declared_paths(self):
+        root = self.root / "selected"
+        root.mkdir()
+        npm_fixture(root, deps={}, engines={"node": ">=22.12"}, installed={})
+        (root / "README.md").write_text("fixture\n", encoding="utf-8")
+        scopes = CV.discover_selected_lockfiles(root, ["package-lock.json"])
+        self.assertEqual([scope.lock_kind for scope in scopes], ["package-lock"])
+        with self.assertRaises(ValueError):
+            CV.discover_selected_lockfiles(root, ["README.md"])
+        with self.assertRaises(ValueError):
+            CV.discover_selected_lockfiles(root, ["package-lock.json", "package-lock.json"])
+
     # --- 버전 파싱·범위 도우미
     def test_blocked_only_unknown_versions_fail_closed(self):
         data = json.loads(json.dumps(REGISTRY))

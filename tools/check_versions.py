@@ -1821,6 +1821,40 @@ def discover(root: Path) -> list[Scope]:
     return scopes
 
 
+def discover_selected_lockfiles(root: Path, entries: list[object]) -> list[Scope]:
+    """호출자가 열거한 lockfile만 읽어 검사 범위를 고정한다."""
+    root = _resolve_input_path(root, "소비자 입력 오류")
+    if not entries:
+        raise ValueError("lockfiles는 비어 있지 않은 JSON 배열이어야 함")
+    scopes: list[Scope] = []
+    seen: set[Path] = set()
+    for entry in entries:
+        if not isinstance(entry, str) or not entry.strip() or "\\" in entry:
+            raise ValueError("lockfiles 항목은 안전한 POSIX 경로 문자열이어야 함")
+        declared = root / entry
+        path = _resolve_input_path(declared, "lockfile 입력 구조 오류")
+        if not _path_within(path, root) or not path.is_file() or path in seen:
+            raise ValueError("lockfile 입력 구조 오류")
+        seen.add(path)
+        label = path.parent.relative_to(root).as_posix() or "."
+        manifest: Path | None
+        if path.name == "package-lock.json":
+            manifest = _safe_declared_file(path.parent / "package.json", root)
+            scopes.append(Scope("npm", label, manifest, path, "package-lock", root=root))
+        elif path.name == "uv.lock":
+            manifest = _safe_declared_file(path.parent / "pyproject.toml", root)
+            scopes.append(Scope("python", label, manifest, path, "uv", root=root))
+        elif path.name == "poetry.lock":
+            manifest = _safe_declared_file(path.parent / "pyproject.toml", root)
+            scopes.append(Scope("python", label, manifest, path, "poetry", root=root))
+        elif re.fullmatch(r"requirements[^/]*\.txt", path.name):
+            scopes.append(Scope("python", label, path, None, "requirements",
+                                note=f"{path.name}는 선언만 읽는다(T-005b)", root=root))
+        else:
+            raise ValueError("지원하지 않는 lockfile 경로")
+    return scopes
+
+
 def _safe_declared_file(candidate: Path, root: Path) -> Path | None:
     """동반 선언 파일의 최종 경로를 소비자 root 안으로 제한한다."""
     resolved = _resolve_input_path(candidate, "매니페스트 동반 선언 파일 입력 구조 오류")
@@ -2836,6 +2870,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--manifest", type=Path, help="kor-travel-common.lock.json(consumer-manifest.v1). 위치 인자 root와 함께 주면 strict v1·root workflow를 사용")
     parser.add_argument("--registry", type=Path, default=Path(__file__).resolve().parents[1] / "versions.json")
     parser.add_argument("--repo", help="consumers 키(별칭 허용). 기본: 매니페스트 repo → 디렉터리 이름")
+    parser.add_argument("--lockfiles", help="정확히 검사할 lockfile 경로 JSON 배열")
     parser.add_argument("--mode", choices=MODES, help="로컬 override. 생략하면 versions.json consumers.<repo>.enforce")
     parser.add_argument("--today", type=date.fromisoformat, default=None, help="예외 만료 기준일(YYYY-MM-DD)")
     parser.add_argument("--json", type=Path, help="JSON 보고 출력 경로")
@@ -2870,6 +2905,20 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if not args.paths and args.manifest is None:
         parser.error("소비 저장소 경로 또는 --manifest가 필요")
+    if args.lockfiles is not None and args.manifest is not None:
+        parser.error("--lockfiles와 --manifest는 함께 사용할 수 없음")
+    selected_lockfiles: list[object] | None = None
+    if args.lockfiles is not None:
+        try:
+            selected_lockfiles = json.loads(args.lockfiles)
+        except json.JSONDecodeError:
+            print("::error title=check_versions::lockfiles JSON 오류")
+            return 2
+        if not isinstance(selected_lockfiles, list) or not selected_lockfiles:
+            print("::error title=check_versions::lockfiles는 비어 있지 않은 JSON 배열이어야 함")
+            return 2
+        if len(args.paths) != 1:
+            parser.error("--lockfiles는 소비 저장소 root 경로 하나와 함께 사용해야 함")
 
     scopes: list[Scope] = []
     roots: list[str] = []
@@ -2910,7 +2959,10 @@ def main(argv: list[str] | None = None) -> int:
             continue
         roots.append(root.as_posix())
         try:
-            scopes.extend(discover(root))
+            if selected_lockfiles is not None:
+                scopes.extend(discover_selected_lockfiles(root, selected_lockfiles))
+            else:
+                scopes.extend(discover(root))
         except (OSError, ValueError, TypeError, AttributeError, KeyError) as exc:
             print(f"::error title=check_versions::소비자 입력 오류: {exc}")
             return 2

@@ -31,6 +31,9 @@ ASSET_RE = re.compile(
     r"^https://github\.com/digitie/[A-Za-z0-9][A-Za-z0-9.-]*/releases/download/"
     r"[A-Za-z0-9._-]+/[A-Za-z0-9._-]+\.tgz$"
 )
+EXPECTED_LICENSE = "GPL-3.0-or-later"
+MAX_ARCHIVE_MEMBERS = 4096
+MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
 
 
 class SmokeInputError(ValueError):
@@ -130,19 +133,26 @@ def select_pin(sources: list[dict[str, object]], role: str) -> dict[str, object]
     return selected
 
 
-def validate_asset_url(value: object) -> str:
-    """자산 URL을 공개 GitHub Release 경로로 제한한다."""
+def validate_asset_url(value: object, expected_repository: str | None = None) -> str:
+    """자산 URL을 승인 pin의 GitHub Release 저장소로 제한한다."""
     text = _string(value, "asset-url")
     if ASSET_RE.fullmatch(text) is None:
         raise SmokeInputError("asset-url: digitie GitHub Release의 고정 .tgz URL이어야 함")
     parsed = urlsplit(text)
     if parsed.query or parsed.fragment or parsed.username or parsed.password:
         raise SmokeInputError("asset-url: query·fragment·인증정보를 허용하지 않음")
+    if expected_repository is not None:
+        expected_path = urlsplit(_repository(expected_repository, "pin.url")).path.strip("/")
+        asset_parts = parsed.path.strip("/").split("/")
+        asset_repository = "/".join(asset_parts[:2])
+        if asset_repository != expected_path:
+            raise SmokeInputError("asset-url: 선택한 pin 저장소의 Release URL이 아님")
     return text
 
 
-def validate_asset(path: Path, expected_sha256: str, expected_package: str) -> str:
-    """tarball 존재·SHA256·안전한 package/package.json 이름을 검사한다."""
+def validate_asset(path: Path, expected_sha256: str, expected_package: str,
+                   expected_repository: str) -> str:
+    """tarball digest·GPL metadata·안전한 npm archive 구조를 검사한다."""
     if not path.is_file():
         raise SmokeInputError("asset: 파일이 없음")
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
@@ -153,18 +163,37 @@ def validate_asset(path: Path, expected_sha256: str, expected_package: str) -> s
     try:
         with tarfile.open(path, "r:gz") as archive:
             members = archive.getmembers()
-            names = {member.name for member in members}
-            package_member = next((member for member in members if member.name in {
-                "package/package.json", "package.json"
-            }), None)
-            if package_member is None or not package_member.isfile():
-                raise SmokeInputError("asset: package/package.json이 없음")
-            if any(
-                name.startswith("/") or "\\" in name
-                or any(part in {"", ".", ".."} for part in name.split("/"))
-                for name in names
+            if not members or len(members) > MAX_ARCHIVE_MEMBERS:
+                raise SmokeInputError("asset: tar member 수가 허용 범위를 벗어남")
+            names = [member.name for member in members]
+            if len(names) != len(set(names)):
+                raise SmokeInputError("asset: tar 중복 member가 있음")
+            total_size = 0
+            for member in members:
+                name = member.name
+                normalized = name.rstrip("/")
+                if (not normalized.startswith("package/")
+                        or normalized == "package"
+                        or "\\" in name or name.startswith("/")
+                        or any(part in {"", ".", ".."} for part in normalized.split("/"))):
+                    raise SmokeInputError("asset: tar 경로 traversal이 있거나 package 밖의 member가 있음")
+                if not member.isdir() and not member.isfile():
+                    raise SmokeInputError("asset: symlink·hardlink·특수 member를 허용하지 않음")
+                if member.isfile():
+                    total_size += member.size
+                    if member.size < 0 or total_size > MAX_ARCHIVE_BYTES:
+                        raise SmokeInputError("asset: tar 압축 해제 크기가 허용 범위를 초과함")
+            package_members = [member for member in members if member.name == "package/package.json"]
+            if len(package_members) != 1 or not package_members[0].isfile():
+                raise SmokeInputError("asset: package/package.json이 정확히 하나 필요함")
+            if not any(
+                member.isfile() and PurePosixPath(member.name).name.casefold() in {
+                    "license", "license.md", "license.txt"
+                }
+                for member in members
             ):
-                raise SmokeInputError("asset: tar 경로 traversal이 있음")
+                raise SmokeInputError("asset: GPL LICENSE 파일이 없음")
+            package_member = package_members[0]
             raw = archive.extractfile(package_member)
             if raw is None:
                 raise SmokeInputError("asset: package metadata를 읽을 수 없음")
@@ -173,6 +202,14 @@ def validate_asset(path: Path, expected_sha256: str, expected_package: str) -> s
         raise SmokeInputError("asset: 유효한 gzip tarball이 아님") from exc
     if not isinstance(metadata, dict) or metadata.get("name") != expected_package:
         raise SmokeInputError("asset: package name이 핀과 일치하지 않음")
+    if metadata.get("license") != EXPECTED_LICENSE:
+        raise SmokeInputError("asset: package license가 GPL-3.0-or-later가 아님")
+    repository = metadata.get("repository")
+    if isinstance(repository, dict):
+        repository = repository.get("url")
+    if not isinstance(repository, str) or _repository(repository, "asset.repository") != _repository(
+            expected_repository, "pin.url"):
+        raise SmokeInputError("asset: package repository가 선택한 pin과 일치하지 않음")
     return digest
 
 
@@ -188,8 +225,9 @@ def main(argv: list[str] | None = None) -> int:
         sources = load_pins(args.pins)
         selected = select_pin(sources, args.role)
         if args.asset_url is not None:
-            validate_asset_url(args.asset_url)
-        digest = validate_asset(args.asset, args.asset_sha256, str(selected["package"]))
+            validate_asset_url(args.asset_url, str(selected["url"]))
+        digest = validate_asset(args.asset, args.asset_sha256, str(selected["package"]),
+                                str(selected["url"]))
     except SmokeInputError as exc:
         print(f"consumer_smoke: 입력 오류: {exc}")
         return 2
