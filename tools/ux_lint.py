@@ -39,6 +39,14 @@ _MDX_EXPRESSION_KEYWORDS = {
 _MDX_EXPRESSION_START_CHARS = frozenset(".!~+-([{</\"'`")
 _MDX_EXPRESSION_FOLLOWING_CHARS = frozenset(".([{:?,=+*%|&!<>)}`-^/")
 _MDX_EXPRESSION_BINARY_WORDS = {"as", "in", "instanceof"}
+# ECMAScript의 Unicode ID_Start/ID_Continue에 포함되지만 Python의
+# XID 판정이나 일반 범주만으로는 보존되지 않는 예외 문자다.
+_MDX_OTHER_ID_START = frozenset("\u2118\u212e\u309b\u309c")
+_MDX_OTHER_ID_CONTINUE = (
+    frozenset("\u00b7\u0387")
+    | frozenset(chr(code) for code in range(0x1369, 0x1372))
+    | {"\u19da"}
+)
 
 
 class UxLintError(ValueError):
@@ -172,7 +180,14 @@ def _consume_mdx_unicode_escape(text: str, start: int, boundary: int) -> int | N
 def _is_mdx_identifier_start(char: str) -> bool:
     """JavaScript IdentifierStart에 해당하는 단일 문자인지 확인한다."""
 
-    return char in "_$" or char.isidentifier()
+    category = unicodedata.category(char)
+    return (
+        char in "_$"
+        or char in _MDX_OTHER_ID_START
+        or char.isidentifier()
+        or category[0] == "L"
+        or category == "Nl"
+    )
 
 
 def _is_mdx_identifier_continue(char: str) -> bool:
@@ -180,8 +195,8 @@ def _is_mdx_identifier_continue(char: str) -> bool:
 
     return (
         _is_mdx_identifier_start(char)
-        or char.isdigit()
         or unicodedata.category(char) in {"Mn", "Mc", "Nd", "Pc"}
+        or char in _MDX_OTHER_ID_CONTINUE
         or char in "\u200c\u200d"
     )
 
@@ -214,7 +229,7 @@ def _looks_like_mdx_expression_start(text: str, start: int, boundary: int) -> bo
     char = text[index]
     if char.isdigit() or char in _MDX_EXPRESSION_START_CHARS:
         return True
-    if char.isalpha() or char in "_$" or text.startswith("\\u", index):
+    if _is_mdx_identifier_start(char) or text.startswith("\\u", index):
         identifier_end = _consume_mdx_identifier(text, index, boundary)
         if identifier_end is None:
             return False
@@ -227,7 +242,14 @@ def _looks_like_mdx_expression_start(text: str, start: int, boundary: int) -> bo
         if text[following] in _MDX_EXPRESSION_FOLLOWING_CHARS:
             return True
         binary_end = _consume_mdx_identifier(text, following, boundary)
-        return binary_end is not None and text[following:binary_end] in _MDX_EXPRESSION_BINARY_WORDS
+        if binary_end is None:
+            return False
+        if text[following:binary_end] in _MDX_EXPRESSION_BINARY_WORDS:
+            return True
+        # `async x => ...`처럼 첫 식별자 뒤에 매개변수 식별자가 오는
+        # arrow expression도 실행 코드로 보존한다.
+        arrow = _skip_mdx_expression_leading(text, binary_end, boundary)
+        return arrow < boundary and text.startswith("=>", arrow)
     return False
 
 

@@ -266,6 +266,44 @@ window.confirm('확인');
                 ],
             )
 
+    def test_mdx_expression_resume_uses_ecmascript_identifier_boundaries(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            expressions = {
+                "unicode-iv.mdx": "\u2163 && window.confirm('x')",
+                "unicode-script.mdx": "\u2118 && window.confirm('x')",
+                "unicode-greek.mdx": "\u037a && window.confirm('x')",
+                "unicode-middle-dot.mdx": "a\u00b7 && window.confirm('x')",
+                "unicode-ano-teleia.mdx": "a\u0387 && window.confirm('x')",
+                "async-arrow.mdx": "async x => window.confirm('x')",
+            }
+            for name, expression in expressions.items():
+                (root / name).write_text(
+                    f"Example ` unmatched {{{expression}}}\n"
+                    f"Example `` unmatched {{{expression}}}\n",
+                    encoding="utf-8",
+                )
+            (root / "closed.mdx").write_text(
+                "Example ` {\u2118 && window.confirm('x')} `\n",
+                encoding="utf-8",
+            )
+            (root / "plain.mdx").write_text(
+                "{\u2118 && window.confirm('x')}\n",
+                encoding="utf-8",
+            )
+
+            result = self.run_tool(root, "--root", root, "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            findings = json.loads(result.stdout)["findings"]
+            counts = {name: 0 for name in (*expressions, "closed.mdx", "plain.mdx")}
+            for finding in findings:
+                self.assertEqual(finding["pattern"], "P8")
+                counts[finding["file"]] += 1
+            self.assertEqual(counts["plain.mdx"], 1)
+            self.assertEqual(counts["closed.mdx"], 0)
+            for name in expressions:
+                self.assertEqual(counts[name], 2)
+
     def test_escaped_template_text_remains_scannable(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
