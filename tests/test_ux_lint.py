@@ -519,6 +519,27 @@ window.confirm('확인');
             self.assertEqual(payload["fail_count"], 1)
             self.assertEqual(payload["findings"][0]["line"], 2)
 
+    def test_diff_added_lines_keep_unicode_line_separators_inside_source_rows(self):
+        for separator in ("\u2028", "\u2029"):
+            with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                root = Path(directory)
+                self.git(root, "init", "-q")
+                fixture = root / "fixture.ts"
+                fixture.write_text("const text = 'base';\nconst safe = 1;\n", encoding="utf-8")
+                self.git(root, "add", "fixture.ts")
+                self.git(root, "-c", "user.name=테스트", "-c", "user.email=test@example.invalid", "commit", "-q", "-m", "base")
+                fixture.write_text(
+                    f'const text = "a{separator}@@ -0,0 +99,1 @@";\nwindow.confirm("확인");\n',
+                    encoding="utf-8",
+                )
+
+                result = self.run_tool(root, "--root", root, "--base", "HEAD", "--fail-new", "--json")
+                self.assertEqual(result.returncode, 1, result.stderr)
+                payload = json.loads(result.stdout)
+                self.assertEqual(payload["fail_count"], 1)
+                self.assertEqual(payload["findings"][0]["line"], 2)
+                self.assertTrue(payload["findings"][0]["added"])
+
     def test_base_option_like_ref_is_rejected(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)

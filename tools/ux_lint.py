@@ -395,7 +395,10 @@ def _is_executable_mdx_template(text: str, start: int, end: int) -> bool:
     if _has_open_jsx_expression(text, start):
         return True
     statement = before[max(before.rfind(";"), before.rfind("\n\n")) + 1 :]
-    previous_line = text[:line_start].splitlines()[-1].rstrip() if line_start else ""
+    previous_source = text[:line_start]
+    if previous_source.endswith("\n"):
+        previous_source = previous_source[:-1]
+    previous_line = previous_source.split("\n")[-1].rstrip() if line_start else ""
     declaration = bool(re.search(r"\b(?:export\s+)?(?:const|let|var)\b", statement)) and "=" in statement
     if declaration and (line_prefix != line_prefix.lstrip() or re.search(r"(?:=|=>|[([{,:])\s*$", previous_line)):
         return True
@@ -746,14 +749,15 @@ def added_lines(root: Path, base: str, files: Mapping[str, Path]) -> dict[str, s
     for relative, path in files.items():
         if not _is_tracked(root, relative):
             try:
-                line_count = len(path.read_text(encoding="utf-8").splitlines())
+                source = path.read_text(encoding="utf-8")
+                line_count = source.count("\n") + (1 if source and not source.endswith("\n") else 0)
             except (OSError, UnicodeError) as error:
                 raise UxLintError("검사 파일을 읽을 수 없습니다") from error
             result[relative].update(range(1, line_count + 1))
             continue
         output = _git_output(root, ["diff", "--no-ext-diff", "--unified=0", base, "--", relative])
         current_line: int | None = None
-        for raw_line in output.splitlines():
+        for raw_line in output.split("\n"):
             if raw_line.startswith("@@"):
                 match = re.search(r"\+(\d+)(?:,(\d+))?", raw_line)
                 current_line = int(match.group(1)) if match else None
