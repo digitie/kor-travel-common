@@ -65,6 +65,7 @@ jobs:
         env:
           COMMON_REF: ${{ inputs.common-ref }}
           COMMON_REPOSITORY: ${{ inputs.common-repository }}
+          CALLER_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
           REPO: ${{ inputs.repo }}
           LOCKFILES: ${{ inputs.lockfiles }}
         shell: bash
@@ -72,7 +73,8 @@ jobs:
           set -euo pipefail
           [[ "$COMMON_REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]
           [[ "$COMMON_REF" =~ ^[0-9a-f]{40}$ || "$COMMON_REF" =~ ^(ci-)?v[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.-]+)?$ ]]
-          python - "$LOCKFILES" "$GITHUB_WORKSPACE" "$REPO" <<'PY'
+          python - "$LOCKFILES" "$GITHUB_WORKSPACE" "$REPO" \
+            "$COMMON_REPOSITORY" "$CALLER_REPOSITORY" <<'PY'
           import json
           import sys
           from pathlib import Path
@@ -85,7 +87,12 @@ jobs:
               raise SystemExit("lockfiles는 비어 있지 않은 JSON 배열이어야 합니다")
           root = Path(sys.argv[2]).resolve()
           repo = sys.argv[3]
-          allow_unregistered = repo == "common-ci-report-fixture"
+          common_repository = sys.argv[4]
+          caller_repository = sys.argv[5]
+          allow_unregistered = (
+              repo == "common-ci-report-fixture"
+              and common_repository.casefold() == caller_repository.casefold()
+          )
           registry = json.loads((root / ".kor-travel-common" / "versions.json").read_text(encoding="utf-8"))
           consumers = registry.get("consumers", {})
           known = set(consumers)
@@ -109,15 +116,23 @@ jobs:
           REPO: ${{ inputs.repo }}
           LOCKFILES: ${{ inputs.lockfiles }}
           COMMON_REF: ${{ inputs.common-ref }}
+          COMMON_REPOSITORY: ${{ inputs.common-repository }}
+          CALLER_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p .kor-travel-common-ci/versions
+          extra=()
+          if [[ "$REPO" == "common-ci-report-fixture" \
+                && "${COMMON_REPOSITORY,,}" == "${CALLER_REPOSITORY,,}" ]]; then
+            extra+=(--allow-unregistered-fixture)
+          fi
           python -B -X utf8 .kor-travel-common/tools/check_versions.py \
             "$GITHUB_WORKSPACE" \
             --lockfiles "$LOCKFILES" \
             --registry .kor-travel-common/versions.json \
             --repo "$REPO" \
+            "${extra[@]}" \
             --json ".kor-travel-common-ci/versions/report.json"
           printf '검사 source: `%s`\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
           printf 'common ref: `%s`\n' "$COMMON_REF" >> "$GITHUB_STEP_SUMMARY"

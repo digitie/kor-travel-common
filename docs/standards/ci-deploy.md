@@ -45,9 +45,9 @@
 
 | 단계 | 워크플로 | 주요 inputs(기본값) | steps | task |
 |---|---|---|---|---|
-| Phase 1 | `versions-check.yml` | `name`, `repo`, `lockfiles`(JSON 경로 배열), `common-ref`(40자 SHA 또는 `vX.Y.Z`/`ci-vX.Y.Z` release tag), `common-repository`(기본 common) | caller head SHA checkout → common 고정 ref checkout → lockfile 목록의 정확한 파일만 검사 → `tools/check_versions.py` report + JSON + `$GITHUB_STEP_SUMMARY`. 등록 소비자는 `versions.json` key/alias를 확인하고, 미등록 `common-ci-report-fixture` 식별자는 selftest에서만 허용한다(D-07·D-30) | T-010 |
-| Phase 1 | `contrast-check.yml` | `name`, `common-ref`, `tokens-css`(`.kor-travel-common/packages/tokens/tokens.css`), `override-css`, `baseline`, `dark`(bool, 기본 false) | caller/common 고정 checkout → 입력 경로 검증 → `tools/kt_contrast.py` report. `--fail-new`를 주지 않아 baseline 신규 미달도 report로 남기며 승격은 소비자 task가 소유 | T-010 |
-| Phase 1 | `docs-check.yml` | `name`, `common-ref`, `link-check`(true), `redaction-scope`(`.`), `redaction-patterns-file`(`.prod-redaction-patterns`), `task-ledger`(false) | caller/common 고정 checkout → 경로 검증 → `tools/validate_document_links.py` → `check_prod_redaction.py --all` → `validate_plan.py`(조건) | T-010 |
+| Phase 1 | `versions-check.yml` | `name`, `repo`, `lockfiles`(JSON 경로 배열), `common-ref`(40자 SHA 또는 `vX.Y.Z`/`ci-vX.Y.Z` release tag), `common-repository`(기본 common) | caller head SHA checkout → common 고정 ref checkout → lockfile 목록의 정확한 파일만 검사 → `tools/check_versions.py` report + JSON + `$GITHUB_STEP_SUMMARY`. 등록 소비자는 `versions.json` key/alias를 확인하고, 미등록 `common-ci-report-fixture` 식별자는 `common-repository`와 호출자 저장소가 같은 workflows-selftest에서만 명시적 flag로 허용한다(D-07·D-30) | T-010 |
+| Phase 1 | `contrast-check.yml` | `name`, `common-ref`, `common-repository`(기본 common), `tokens-css`(`.kor-travel-common/packages/tokens/tokens.css`), `override-css`, `baseline`, `dark`(bool, 기본 false) | caller/common 고정 checkout → 입력 경로 검증 → `tools/kt_contrast.py` report. `--fail-new`를 주지 않아 baseline 신규 미달도 report로 남기며 승격은 소비자 task가 소유 | T-010 |
+| Phase 1 | `docs-check.yml` | `name`, `common-ref`, `common-repository`(기본 common), `link-check`(true), `redaction-scope`(`.`), `redaction-patterns-file`(`.prod-redaction-patterns`), `task-ledger`(false) | caller/common 고정 checkout → 경로 검증 → `tools/validate_document_links.py` → `check_prod_redaction.py --all` → `validate_plan.py`(조건) | T-010 |
 | Phase 3 | `openapi-drift.yml` | `python-version`, `installer`(`uv`), `install-args`, `export-command`, `spec-paths`(list), `mode`(`check` \| `git-diff`), `job-name` | install → export → `--check` 또는 `git diff --exit-code -- <spec-paths>` | T-309 |
 | Phase 3 | `typegen-drift.yml` | `node-version`(22), `npm-version`(빈값=동봉), `working-directory`, `check-command`(`npm run gen:types:check`), `job-name` | setup-node → `npm ci --no-audit --no-fund` → check-command | T-309 |
 | Phase 4 | `node-quality.yml` | `node-version`(22), `npm-version`, `working-directory`, `workspaces`(bool), `lockfile-integrity`(bool), `audit-level`(`high`), `ignore-scripts`(bool), `lint-max-warnings`(0), `typegen-check-command`, `test`(bool), `build-env`(JSON), `pre-lint-command`, `job-name` | checkout → setup-node(cache) → npm 핀(조건) → lockfile integrity(설치 전) → `npm ci` → `npm audit --audit-level=high --omit=dev`(차단) + dev 포함(비차단) → typegen(조건) → pre-lint 훅 → lint → type-check → test → build | T-401 |
@@ -261,7 +261,7 @@ branch protection의 실제 check 이름과 설정 절차는 [branch protection]
 
 ### 9.1 `consumers.pins.json` 형식(T-010 확정)
 
-ktdm runtime pin 레지스트리(`kor-travel-docker-manager.runtime-pin-registry.v1`)의 `sources[]{role,url,revision}` 형식을 확장한다(`vm` §7.3). 갱신은 PR로만 하고 `revision`은 40자 소문자 SHA다. `package`는 후보 npm 패키지, `approval.status`는 `approved`, `approval.license`는 `GPL-3.0-or-later`, `approval.task`는 근거 task여야 한다. L6가 닫히지 않은 pinvi source는 등록하지 않는다.
+ktdm runtime pin 레지스트리(`kor-travel-docker-manager.runtime-pin-registry.v1`)의 `sources[]{role,url,revision}` 형식을 확장한다(`vm` §7.3). 여기서 `url`은 고정 SHA로 checkout할 **소비자 저장소**다. 갱신은 PR로만 하고 `revision`은 40자 소문자 SHA다. `package`는 후보 npm 패키지, `approval.status`는 `approved`, `approval.license`는 `GPL-3.0-or-later`, `approval.task`는 근거 task여야 한다. L6가 닫히지 않은 pinvi source는 등록하지 않는다.
 
 ```json
 {
@@ -282,7 +282,7 @@ ktdm runtime pin 레지스트리(`kor-travel-docker-manager.runtime-pin-registry
 
 `tools/collect_manifests.py`(T-012)가 같은 파일을 읽어 [integration map](../integration-map.md)을 생성한다(D-19).
 
-`consumer-smoke.yml`은 `workflow_dispatch`만 활성화한다. `role`, candidate tarball `asset-url`·`asset-sha256`, `common-ref`를 받고 `tools/consumer_smoke.py`로 핀·승인·digest·package metadata를 검증한 뒤 pinned SHA checkout → `npm ci` → 후보 tarball 설치 → `type-check` → `next build --webpack`·`next build --turbopack` 순서로 실행한다. 자산 URL은 `digitie` GitHub Release `.tgz`로 제한한다. 주간 실행과 실제 map·weather dispatch는 T-010a에서 처음 성공한 뒤 별도 PR로 활성화하며, common fixture 성공은 소비자 성공으로 집계하지 않는다.
+`consumer-smoke.yml`은 `workflow_dispatch`만 활성화한다. `role`, candidate tarball `asset-url`·`asset-sha256`, `common-ref`를 받고 `tools/consumer_smoke.py`로 핀·승인·digest·package metadata를 검증한 뒤 pinned SHA checkout → `npm ci` → 후보 tarball 설치 → `type-check` → `next build --webpack`·`next build --turbopack` 순서로 실행한다. 핀의 `url`은 소비자 checkout 원천이고, `asset-url`과 tarball `package.repository`는 `https://github.com/digitie/kor-travel-common`의 패키지 Release에 고정한다. tarball은 common 정본 GPL `LICENSE`, 비어 있지 않은 `NOTICE`·`THIRD_PARTY_NOTICES.md`를 포함해야 한다. 주간 실행과 실제 map·weather dispatch는 T-010a에서 처음 성공한 뒤 별도 PR로 활성화하며, common fixture 성공은 소비자 성공으로 집계하지 않는다.
 
 ## 10. 릴리스 참조
 

@@ -70,9 +70,10 @@ jobs:
           sys.path.insert(0, str(Path('.kor-travel-common/tools').resolve()))
           from consumer_smoke import load_pins, select_pin, validate_asset_url
           selected = select_pin(load_pins(Path('.kor-travel-common/consumers.pins.json')), sys.argv[2])
-          validate_asset_url(sys.argv[1], str(selected['url']))
+          validate_asset_url(sys.argv[1])
           PY
-          curl --fail --location --proto '=https' --tlsv1.2 --output candidate.tgz "$ASSET_URL"
+          curl --fail --location --proto '=https' --tlsv1.2 --max-filesize 134217728 \
+            --output candidate.tgz "$ASSET_URL"
 
       - name: 핀·승인·자산 digest·metadata 검증
         id: pin

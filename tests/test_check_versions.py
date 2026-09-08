@@ -1387,7 +1387,8 @@ class CheckVersionsTests(unittest.TestCase):
                        locked={})
         before = snapshot(self.root)
         out_json = self.root / "out" / "report.json"
-        result = self.cli(str(self.repo), "--repo", "a", "--today", "2026-09-06", "--json", str(out_json))
+        result = self.cli(str(self.repo), "--repo", "a", "--mode", "report",
+                          "--today", "2026-09-06", "--json", str(out_json))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("::error title=check_versions::FLOATING_REF", result.stdout)
         self.assertIn("mode=report", result.stdout)
@@ -1396,6 +1397,25 @@ class CheckVersionsTests(unittest.TestCase):
         self.assertEqual(report["schema"], CV.REPORT_SCHEMA)
         self.assertEqual(report["repo"], "app-a")
         self.assertEqual(report["summary"]["FLOATING_REF"], 1)
+
+    def test_unknown_repo_fails_closed_without_explicit_mode(self):
+        python_fixture(self.repo, requires=">=3.12",
+                       deps=["python-kasi-api @ git+https://github.com/digitie/python-kasi-api.git@main"],
+                       locked={})
+        result = self.cli(str(self.repo), "--repo", "unregistered-consumer")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("repo가 versions.json consumers key 또는 alias가 아님", result.stdout)
+
+    def test_common_fixture_requires_explicit_flag(self):
+        python_fixture(self.repo, requires=">=3.12",
+                       deps=["python-kasi-api @ git+https://github.com/digitie/python-kasi-api.git@main"],
+                       locked={})
+        without_flag = self.cli(str(self.repo), "--repo", "common-ci-report-fixture")
+        self.assertEqual(without_flag.returncode, 2)
+        with_flag = self.cli(str(self.repo), "--repo", "common-ci-report-fixture",
+                             "--allow-unregistered-fixture")
+        self.assertEqual(with_flag.returncode, 0)
+        self.assertIn("mode=report", with_flag.stdout)
 
     def test_mode_override_and_warn_annotation(self):
         npm_fixture(self.repo, deps={"next": "^15.2.0"}, engines={"node": ">=22.12"},

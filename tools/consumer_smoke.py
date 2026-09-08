@@ -32,10 +32,13 @@ ASSET_RE = re.compile(
     r"[A-Za-z0-9._-]+/[A-Za-z0-9._-]+\.tgz$"
 )
 EXPECTED_LICENSE = "GPL-3.0-or-later"
+DEFAULT_ARTIFACT_REPOSITORY = "https://github.com/digitie/kor-travel-common"
 MAX_ARCHIVE_MEMBERS = 4096
 MAX_ARCHIVE_BYTES = 64 * 1024 * 1024
 MAX_ASSET_BYTES = 128 * 1024 * 1024
 MAX_METADATA_BYTES = 1024 * 1024
+MAX_LICENSE_BYTES = 128 * 1024
+REQUIRED_ARCHIVE_FILES = ("package/LICENSE", "package/NOTICE", "package/THIRD_PARTY_NOTICES.md")
 
 
 class SmokeInputError(ValueError):
@@ -63,6 +66,8 @@ def _relative_path(value: object, label: str) -> str:
 
 def _repository(value: object, label: str) -> str:
     text = _string(value, label).rstrip("/")
+    if text.endswith(".git"):
+        text = text[:-4].rstrip("/")
     if REPOSITORY_RE.fullmatch(text) is None:
         raise SmokeInputError(f"{label}: digitie 공개 GitHub 저장소 URL이어야 함")
     return text
@@ -135,8 +140,8 @@ def select_pin(sources: list[dict[str, object]], role: str) -> dict[str, object]
     return selected
 
 
-def validate_asset_url(value: object, expected_repository: str | None = None) -> str:
-    """자산 URL을 승인 pin의 GitHub Release 저장소로 제한한다."""
+def validate_asset_url(value: object, expected_repository: str | None = DEFAULT_ARTIFACT_REPOSITORY) -> str:
+    """자산 URL을 common package의 GitHub Release 저장소로 제한한다."""
     text = _string(value, "asset-url")
     if ASSET_RE.fullmatch(text) is None:
         raise SmokeInputError("asset-url: digitie GitHub Release의 고정 .tgz URL이어야 함")
@@ -148,12 +153,12 @@ def validate_asset_url(value: object, expected_repository: str | None = None) ->
         asset_parts = parsed.path.strip("/").split("/")
         asset_repository = "/".join(asset_parts[:2])
         if asset_repository != expected_path:
-            raise SmokeInputError("asset-url: 선택한 pin 저장소의 Release URL이 아님")
+            raise SmokeInputError("asset-url: common package artifact 저장소의 Release URL이 아님")
     return text
 
 
 def validate_asset(path: Path, expected_sha256: str, expected_package: str,
-                   expected_repository: str) -> str:
+                   expected_repository: str = DEFAULT_ARTIFACT_REPOSITORY) -> str:
     """tarball digest·GPL metadata·안전한 npm archive 구조를 검사한다."""
     if path.is_symlink() or not path.is_file():
         raise SmokeInputError("asset: 파일이 없음")
@@ -199,13 +204,28 @@ def validate_asset(path: Path, expected_sha256: str, expected_package: str,
             package_members = [member for member in members if member.name == "package/package.json"]
             if len(package_members) != 1 or not package_members[0].isfile():
                 raise SmokeInputError("asset: package/package.json이 정확히 하나 필요함")
-            if not any(
-                member.isfile() and PurePosixPath(member.name).name.casefold() in {
-                    "license", "license.md", "license.txt"
-                }
-                for member in members
-            ):
-                raise SmokeInputError("asset: GPL LICENSE 파일이 없음")
+            required: dict[str, bytes] = {}
+            for required_name in REQUIRED_ARCHIVE_FILES:
+                matches = [member for member in members if member.name == required_name]
+                if len(matches) != 1 or not matches[0].isfile():
+                    raise SmokeInputError(f"asset: {required_name} regular file이 필요함")
+                raw = archive.extractfile(matches[0])
+                if raw is None:
+                    raise SmokeInputError(f"asset: {required_name}을 읽을 수 없음")
+                content = raw.read(MAX_LICENSE_BYTES + 1)
+                if len(content) > MAX_LICENSE_BYTES:
+                    raise SmokeInputError(f"asset: {required_name} 크기가 허용 범위를 초과함")
+                if required_name != "package/LICENSE" and not content.strip():
+                    raise SmokeInputError(f"asset: {required_name}이 비어 있음")
+                required[required_name] = content
+            canonical_path = Path(__file__).resolve().parents[1] / "LICENSE"
+            try:
+                canonical_license = canonical_path.read_bytes()
+            except OSError as exc:
+                raise SmokeInputError("asset: common 정본 LICENSE를 읽을 수 없음") from exc
+            if required["package/LICENSE"].replace(b"\r\n", b"\n") != canonical_license.replace(
+                    b"\r\n", b"\n"):
+                raise SmokeInputError("asset: package/LICENSE가 common 정본 GPL 본문과 일치하지 않음")
             package_member = package_members[0]
             raw = archive.extractfile(package_member)
             if raw is None:
@@ -224,8 +244,8 @@ def validate_asset(path: Path, expected_sha256: str, expected_package: str,
     if isinstance(repository, dict):
         repository = repository.get("url")
     if not isinstance(repository, str) or _repository(repository, "asset.repository") != _repository(
-            expected_repository, "pin.url"):
-        raise SmokeInputError("asset: package repository가 선택한 pin과 일치하지 않음")
+            expected_repository, "artifact.repository"):
+        raise SmokeInputError("asset: package repository가 common artifact 저장소와 일치하지 않음")
     return digest
 
 
@@ -236,14 +256,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--asset", type=Path, required=True)
     parser.add_argument("--asset-sha256", required=True)
     parser.add_argument("--asset-url")
+    parser.add_argument("--artifact-repository", default=DEFAULT_ARTIFACT_REPOSITORY,
+                        help="package artifact의 common GitHub 저장소 URL")
     args = parser.parse_args(argv)
     try:
         sources = load_pins(args.pins)
         selected = select_pin(sources, args.role)
         if args.asset_url is not None:
-            validate_asset_url(args.asset_url, str(selected["url"]))
+            validate_asset_url(args.asset_url, args.artifact_repository)
         digest = validate_asset(args.asset, args.asset_sha256, str(selected["package"]),
-                                str(selected["url"]))
+                                args.artifact_repository)
     except SmokeInputError as exc:
         print(f"consumer_smoke: 입력 오류: {exc}")
         return 2
@@ -252,6 +274,7 @@ def main(argv: list[str] | None = None) -> int:
         "role": selected["role"],
         "url": selected["url"],
         "repository": urlsplit(str(selected["url"])).path.lstrip("/"),
+        "artifact_repository": _repository(args.artifact_repository, "artifact-repository"),
         "revision": selected["revision"],
         "path": selected["path"],
         "package": selected["package"],

@@ -2872,6 +2872,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo", help="consumers 키(별칭 허용). 기본: 매니페스트 repo → 디렉터리 이름")
     parser.add_argument("--lockfiles", help="정확히 검사할 lockfile 경로 JSON 배열")
     parser.add_argument("--mode", choices=MODES, help="로컬 override. 생략하면 versions.json consumers.<repo>.enforce")
+    parser.add_argument("--allow-unregistered-fixture", action="store_true",
+                        help="common selftest fixture의 미등록 repo report를 명시적으로 허용")
     parser.add_argument("--today", type=date.fromisoformat, default=None, help="예외 만료 기준일(YYYY-MM-DD)")
     parser.add_argument("--json", type=Path, help="JSON 보고 출력 경로")
     parser.add_argument("--markdown", type=Path, help="Markdown 보고 출력 경로")
@@ -2977,12 +2979,22 @@ def main(argv: list[str] | None = None) -> int:
         else ""
     )
     repo = registry.consumer(repo) or repo
+    consumer_name = registry.consumer(repo)
+    if args.allow_unregistered_fixture and (
+            repo != "common-ci-report-fixture" or consumer_name is not None):
+        print("::error title=check_versions::미등록 fixture 허용 플래그는 common selftest fixture에만 사용해야 함")
+        return 2
+    if consumer_name is None and not args.mode and not args.allow_unregistered_fixture:
+        print("::error title=check_versions::repo가 versions.json consumers key 또는 alias가 아님")
+        return 2
     if args.mode:
         mode, mode_source = args.mode, "--mode 로컬 override"
+    elif args.allow_unregistered_fixture:
+        mode, mode_source = "report", "common selftest fixture 명시 예외"
     else:
         mode, mode_source = (registry.enforce(repo),
                              f"versions.json consumers.{_workflow_display_value(repo, '(소비자 식별자 비공개)')}.enforce"
-                             if registry.consumer(repo) else "미등록 소비자 기본값")
+                             if consumer_name else "미등록 소비자 기본값")
     today = args.today or date.today()
 
     checker = Checker(registry, repo, today)
