@@ -308,6 +308,35 @@ window.confirm('확인');
             for name in expressions:
                 self.assertEqual(counts[name], 2)
 
+    def test_ecmascript_line_terminators_end_line_comments(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            for suffix, terminator in (("ls", "\u2028"), ("ps", "\u2029")):
+                (root / f"line-comment-{suffix}.ts").write_text(
+                    f"// 설명{terminator}window.confirm('x')\n",
+                    encoding="utf-8",
+                )
+                (root / f"line-comment-{suffix}.mdx").write_text(
+                    f"// 설명{terminator}window.confirm('x')\n"
+                    "Example ` unmatched {window.confirm('x')}\n"
+                    "Example `` unmatched {window.confirm('x')}\n",
+                    encoding="utf-8",
+                )
+
+            result = self.run_tool(root, "--root", root, "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            findings = json.loads(result.stdout)["findings"]
+            counts = {finding["file"]: 0 for finding in findings}
+            for finding in findings:
+                self.assertEqual(finding["pattern"], "P8")
+                counts[finding["file"]] += 1
+            self.assertEqual(counts, {
+                "line-comment-ls.mdx": 3,
+                "line-comment-ls.ts": 1,
+                "line-comment-ps.mdx": 3,
+                "line-comment-ps.ts": 1,
+            })
+
     def test_escaped_template_text_remains_scannable(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)

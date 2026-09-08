@@ -39,6 +39,7 @@ _MDX_EXPRESSION_KEYWORDS = {
 _MDX_EXPRESSION_START_CHARS = frozenset(".!~+-([{</\"'`")
 _MDX_EXPRESSION_FOLLOWING_CHARS = frozenset(".([{:?,=+*%|&!<>)}`-^/")
 _MDX_EXPRESSION_BINARY_WORDS = {"as", "in", "instanceof"}
+_MDX_LINE_TERMINATORS = frozenset("\r\n\u2028\u2029")
 # ECMAScript의 Unicode ID_Start/ID_Continue에 포함되지만 Python의
 # XID 판정이나 일반 범주만으로는 보존되지 않는 예외 문자다.
 _MDX_OTHER_ID_START = frozenset("\u2118\u212e\u309b\u309c")
@@ -150,8 +151,8 @@ def _skip_mdx_expression_leading(text: str, start: int, boundary: int) -> int:
             index = closing + 2
             continue
         if text.startswith("//", index):
-            newline = text.find("\n", index + 2, boundary)
-            if newline < 0:
+            newline = _find_mdx_line_terminator(text, index + 2, boundary)
+            if newline >= boundary:
                 return boundary
             index = newline + 1
             continue
@@ -163,6 +164,20 @@ def _is_mdx_whitespace(char: str) -> bool:
     """Python 버전과 무관하게 ECMAScript 공백 문자인지 확인한다."""
 
     return char.isspace() or char == "\ufeff"
+
+
+def _is_mdx_line_terminator(char: str) -> bool:
+    """ECMAScript line comment를 끝내는 네 가지 문자인지 확인한다."""
+
+    return char in _MDX_LINE_TERMINATORS
+
+
+def _find_mdx_line_terminator(text: str, start: int, boundary: int) -> int:
+    """범위 안에서 가장 가까운 ECMAScript 줄 종결자 위치를 반환한다."""
+
+    positions = [text.find(char, start, boundary) for char in _MDX_LINE_TERMINATORS]
+    found = [position for position in positions if position >= 0]
+    return min(found, default=boundary)
 
 
 def _consume_mdx_unicode_escape(text: str, start: int, boundary: int) -> int | None:
@@ -334,8 +349,8 @@ def _has_open_jsx_expression(text: str, start: int) -> bool:
                 if char == quote:
                     quote = None
             elif char == "/" and index + 1 < len(before) and before[index + 1] == "/":
-                newline = before.find("\n", index + 2)
-                index = len(before) if newline < 0 else newline
+                newline = _find_mdx_line_terminator(before, index + 2, len(before))
+                index = len(before) if newline >= len(before) else newline
                 continue
             elif char == "/" and index + 1 < len(before) and before[index + 1] == "*":
                 closing = before.find("*/", index + 2)
@@ -497,7 +512,7 @@ def _mask_template_interpolation_comments(text: str) -> str:
             if char == "/" and next_char == "/":
                 output[index] = output[index + 1] = " "
                 index += 2
-                while index < len(text) and text[index] != "\n":
+                while index < len(text) and not _is_mdx_line_terminator(text[index]):
                     output[index] = " "
                     index += 1
                 continue
@@ -509,7 +524,7 @@ def _mask_template_interpolation_comments(text: str) -> str:
                         output[index] = output[index + 1] = " "
                         index += 2
                         break
-                    output[index] = "\n" if text[index] == "\n" else " "
+                    output[index] = text[index] if _is_mdx_line_terminator(text[index]) else " "
                     index += 1
                 continue
             if char == "{":
@@ -531,7 +546,7 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
         char = text[index]
         next_char = text[index + 1] if index + 1 < len(text) else ""
         if state == "line-comment":
-            if char == "\n":
+            if _is_mdx_line_terminator(char):
                 state = "code"
             else:
                 output[index] = " "
@@ -543,7 +558,7 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                 index += 2
                 state = "code"
                 continue
-            if char != "\n":
+            if not _is_mdx_line_terminator(char):
                 output[index] = " "
             index += 1
             continue
