@@ -197,6 +197,28 @@ window.confirm('확인');
             findings = json.loads(result.stdout)["findings"]
             self.assertEqual(sum(item["pattern"] == "P6" for item in findings), 1)
 
+    def test_mdx_inline_spans_stop_at_blank_lines_and_cover_file_start(self):
+        with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+            root = Path(directory)
+            cases = {
+                "paragraphs.mdx": (
+                    "Example `` unmatched\n\n"
+                    "export const X=()=> <div className=\"outline-none\"/>;\n\n"
+                    "Later `` delimiter\n"
+                ),
+                "start.mdx": "`<div className={`\n\n다른 인용: `outline-none`\n",
+                "triple.mdx": "문법 예시: ```<div className={```\n\n다른 인용: `outline-none`\n",
+            }
+            for name, source in cases.items():
+                (root / name).write_text(source, encoding="utf-8")
+            result = self.run_tool(root, "--root", root, "--json")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            findings = json.loads(result.stdout)["findings"]
+            self.assertEqual(
+                [(item["file"], item["pattern"]) for item in findings],
+                [("paragraphs.mdx", "P6")],
+            )
+
     def test_escaped_template_text_remains_scannable(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)

@@ -119,7 +119,9 @@ class ContrastTests(unittest.TestCase):
 
     def test_invalid_selector_list_and_root_descendant_are_input_errors(self):
         with tempfile.TemporaryDirectory(prefix="kt-contrast-") as directory:
-            for index, selector in enumerate((":root,", ",:root", ":root,,.dark", ":root .dark", ".dark/**/.dark")):
+            for index, selector in enumerate(
+                (":root,", ",:root", ":root,,.dark", ":root .dark", ".dark/**/.dark", ".dark/**/:not(.light)")
+            ):
                 with self.subTest(selector=selector):
                     override = Path(directory) / f"invalid-{index}.css"
                     override.write_text(f"{selector} {{ --kt-control-line: #fff; }}\n", encoding="utf-8")

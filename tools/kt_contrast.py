@@ -91,6 +91,7 @@ _OKLCH = re.compile(
     re.IGNORECASE,
 )
 _HEX = re.compile(r"^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$", re.IGNORECASE)
+_COMMENT_GAP = "\x00"
 
 
 def _strip_css_comments(text: str) -> str:
@@ -115,7 +116,11 @@ def _strip_css_comments(text: str) -> str:
             index += 1
             continue
         if char == "/" and next_char == "*":
-            output[index] = output[index + 1] = " "
+            # selector 안에서 comment가 사라지면 `.dark/**/:not(...)`가
+            # 실제 compound selector가 아니라 descendant처럼 보일 수 있다.
+            # 첫 위치를 별도 표식으로 남겨 selector 검증에서 fail closed 한다.
+            output[index] = _COMMENT_GAP
+            output[index + 1] = " "
             index += 2
             closed = False
             while index < len(text):
@@ -313,6 +318,11 @@ def _parse_blocks(text: str, parent_mode: str | None = None) -> Iterable[tuple[s
         if depth:
             raise ContrastError("CSS 블록이 닫히지 않았습니다")
         body = text[opening + 1 : cursor - 1]
+        selector = selector.strip()
+        while selector.startswith(_COMMENT_GAP):
+            selector = selector[1:].lstrip()
+        while selector.endswith(_COMMENT_GAP):
+            selector = selector[:-1].rstrip()
         selector_text = re.sub(r"\s+", " ", selector.strip().lower())
         if selector_text.startswith("@"):
             media_match = re.fullmatch(r"@media\s*\(\s*prefers-color-scheme\s*:\s*(dark|light)\s*\)", selector_text)
@@ -322,9 +332,11 @@ def _parse_blocks(text: str, parent_mode: str | None = None) -> Iterable[tuple[s
             if parent_mode is None or parent_mode == media_mode:
                 yield from _parse_blocks(body, parent_mode=media_mode)
         else:
-            direct_body = _mask_nested_blocks(body)
+            direct_body = _mask_nested_blocks(body).replace(_COMMENT_GAP, " ")
             rules = _selector_rules(selector, parent_mode)
             if re.search(r"--kt-[\w-]+\s*:", _strip_css_strings(direct_body), re.ASCII):
+                if _COMMENT_GAP in selector:
+                    raise ContrastError("지원하지 않는 토큰 선택자입니다")
                 selector_parts = _split_selectors(selector)
                 if any(not raw_part.strip() for raw_part in selector_parts):
                     raise ContrastError("CSS selector 목록에 빈 항목이 있습니다")

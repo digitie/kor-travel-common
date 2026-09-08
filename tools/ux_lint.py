@@ -91,6 +91,42 @@ def _find_backtick_run_end(text: str, start: int, run_length: int) -> int:
     return len(text)
 
 
+def _paragraph_start(text: str, index: int) -> int:
+    """현재 위치가 속한 Markdown 문단의 시작 위치를 반환한다."""
+
+    boundaries = list(re.finditer(r"\r?\n[ \t]*\r?\n", text[:index]))
+    return boundaries[-1].end() if boundaries else 0
+
+
+def _paragraph_end(text: str, start: int) -> int:
+    """현재 Markdown 문단의 끝 위치를 반환한다."""
+
+    boundary = re.search(r"\r?\n[ \t]*\r?\n", text[start:])
+    return start + boundary.start() if boundary else len(text)
+
+
+def _find_inline_span_end(text: str, start: int, run_length: int) -> int | None:
+    """Markdown inline span의 닫힘을 같은 문단 안에서만 찾는다."""
+
+    delimiter = "`" * run_length
+    boundary = _paragraph_end(text, start)
+    index = start + run_length
+    while index < boundary:
+        if text[index] == "\\" and run_length == 1:
+            index += 2
+            continue
+        if text.startswith(delimiter, index):
+            run = 0
+            while index + run < boundary and text[index + run] == "`":
+                run += 1
+            if run == run_length:
+                return index
+            index += run
+            continue
+        index += 1
+    return None
+
+
 def _find_template_end(text: str, start: int) -> int:
     """단일 backtick template의 끝을 찾아 닫히지 않으면 끝을 반환한다."""
 
@@ -197,7 +233,7 @@ def _is_escaped(text: str, index: int) -> bool:
 def _has_open_inline_span(text: str, index: int) -> bool:
     """현재 위치가 빈 줄 안에서 닫히지 않은 Markdown span 안인지 확인한다."""
 
-    scope_start = text.rfind("\n\n", 0, index) + 2
+    scope_start = _paragraph_start(text, index)
     opener: int | None = None
     cursor = scope_start
     while cursor < index:
@@ -207,9 +243,6 @@ def _has_open_inline_span(text: str, index: int) -> bool:
         run = 0
         while cursor + run < index and text[cursor + run] == "`":
             run += 1
-        if run >= 3:
-            cursor += run
-            continue
         if opener is None:
             opener = run
         elif opener == run:
@@ -365,13 +398,31 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                     index = stop
                     continue
             if ignore_backticks and run_length >= 2:
-                end = _find_backtick_run_end(text, index, run_length)
-                if end >= len(text):
-                    for offset in range(index, min(index + run_length, len(text))):
-                        output[offset] = " "
-                    index += run_length
+                end = _find_inline_span_end(text, index, run_length)
+                if end is None:
+                    boundary = _paragraph_end(text, index)
+                    for offset in range(index, boundary):
+                        if text[offset] != "\n":
+                            output[offset] = " "
+                    index = boundary
                     continue
-                stop = min(end + run_length, len(text)) if end < len(text) else len(text)
+                stop = min(end + run_length, len(text))
+                for offset in range(index, stop):
+                    if text[offset] != "\n":
+                        output[offset] = " "
+                index = stop
+                continue
+            executable = not ignore_backticks or _is_executable_mdx_template(text, index, len(text))
+            if ignore_backticks and not executable:
+                end = _find_inline_span_end(text, index, 1)
+                if end is None:
+                    boundary = _paragraph_end(text, index)
+                    for offset in range(index, boundary):
+                        if text[offset] != "\n":
+                            output[offset] = " "
+                    index = boundary
+                    continue
+                stop = min(end + 1, len(text))
                 for offset in range(index, stop):
                     if text[offset] != "\n":
                         output[offset] = " "
@@ -382,15 +433,9 @@ def _mask_comments_and_backticks(text: str, ignore_backticks: bool) -> str:
                 output[index] = " "
                 index += 1
                 continue
-            executable = not ignore_backticks or _is_executable_mdx_template(text, index, end)
             stop = min(end + 1, len(text))
-            if executable:
-                segment = _mask_template_interpolation_comments(text[index:stop])
-                output[index:stop] = list(segment)
-            else:
-                for offset in range(index, stop):
-                    if text[offset] != "\n":
-                        output[offset] = " "
+            segment = _mask_template_interpolation_comments(text[index:stop])
+            output[index:stop] = list(segment)
             index = stop
             continue
         if char == "/" and next_char == "/":
