@@ -453,27 +453,38 @@ def _markdown_is_fence_start(
     text: str,
     index: int,
     marker: str,
-    container: tuple[str, int],
 ) -> bool:
-    """같은 위치가 실제 Markdown block fence의 시작인지 확인한다."""
+    """같은 위치가 어떤 Markdown container의 실제 block fence인지 확인한다."""
 
     line_start = _markdown_line_start(text, index)
     line_end = _find_markdown_line_terminator(text, line_start, len(text))
     raw_line = text[line_start:line_end]
-    candidate_info = _markdown_fence_candidate(raw_line, container)
-    if candidate_info is None:
-        return False
-    candidate, _ = candidate_info
-    candidate_start = line_start + len(raw_line) - len(candidate)
-    if candidate_start != index:
-        return False
-    run = 0
-    while run < len(candidate) and candidate[run] == marker:
-        run += 1
-    if run < 3:
-        return False
-    # CommonMark는 backtick fence의 info string에 backtick을 허용하지 않는다.
-    return not (marker == "`" and "`" in candidate[run:])
+    # invalid opener의 container와 달라도, 줄 시작의 block fence는 inline
+    # span을 닫지 않는다. 예를 들어 `> ```bad`info` 다음의 plain ` ``` `은
+    # block quote 밖에서 새 block을 시작하므로 실행식을 가리면 안 된다.
+    containers = [("plain", 0)] + [
+        ("blockquote", depth) for depth in range(1, raw_line.count(">") + 1)
+    ]
+    for candidate_container in containers:
+        candidate_info = _markdown_fence_candidate(raw_line, candidate_container)
+        if candidate_info is None:
+            continue
+        candidate, indent_columns = candidate_info
+        candidate_start = line_start + len(raw_line) - len(candidate)
+        if candidate_start != index:
+            continue
+        # marker 뒤 콘텐츠가 4열 이상이면 같은 container의 fence가 아니라
+        # inline code span의 내용이다. tab은 parser가 계산한 실제 열을 쓴다.
+        if indent_columns > 3:
+            return False
+        run = 0
+        while run < len(candidate) and candidate[run] == marker:
+            run += 1
+        if run < 3:
+            return False
+        # CommonMark는 backtick fence의 info string에 backtick을 허용하지 않는다.
+        return not (marker == "`" and "`" in candidate[run:])
+    return False
 
 
 def _mask_unclosed_inline_span(output: list[str], text: str, start: int, run_length: int) -> int:
@@ -654,7 +665,7 @@ def _mask_mdx_fence(text: str, start: int, marker: str) -> tuple[str, int]:
         # 닫힘 delimiter가 줄 시작의 유효한 block fence라면 inline span의
         # 닫힘으로 취급하지 않고 현재 줄만 격리해 다음 실행식을 검사한다.
         closing = _find_inline_span_end(text, start, opener_run)
-        if closing is not None and not _markdown_is_fence_start(text, closing, marker, container):
+        if closing is not None and not _markdown_is_fence_start(text, closing, marker):
             stop = min(closing + opener_run, len(text))
             segment = list(text[start:stop])
             for offset, char in enumerate(segment):

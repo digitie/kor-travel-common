@@ -491,6 +491,51 @@ window.confirm('확인');
                     findings = json.loads(result.stdout)["findings"]
                     self.assertEqual([item["pattern"] for item in findings], ["P8"])
 
+    def test_mdx_invalid_backtick_info_does_not_cross_container_or_indent_boundaries(self):
+        cases = (
+            ("> ", "", "quoted-to-plain"),
+            ("", "> ", "plain-to-quoted"),
+            (">> ", "> ", "nested-to-quoted"),
+        )
+        for opener_prefix, closing_prefix, name in cases:
+            for run in (3, 4):
+                for separator in ("\n", "\r\n", "\r"):
+                    with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                        root = Path(directory)
+                        fixture = root / f"{name}-{run}.mdx"
+                        delimiter = "`" * run
+                        fixture.write_bytes(
+                            (
+                                f"{opener_prefix}{delimiter}bad`info{separator}"
+                                f"{opener_prefix}{{window.confirm(\"outside\")}}{separator}"
+                                f"{closing_prefix}{delimiter}{separator}"
+                            ).encode("utf-8")
+                        )
+                        result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                        self.assertEqual(result.returncode, 1, result.stderr)
+                        self.assertEqual(
+                            [item["pattern"] for item in json.loads(result.stdout)["findings"]],
+                            ["P8"],
+                        )
+
+        for indent in ("     ", "\t\t", " \t\t"):
+            for run in (3, 4):
+                for separator in ("\n", "\r\n", "\r"):
+                    with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
+                        root = Path(directory)
+                        fixture = root / "overindented-closing.mdx"
+                        delimiter = "`" * run
+                        fixture.write_bytes(
+                            (
+                                f"> {delimiter}bad`info{separator}"
+                                f"> {{window.confirm(\"quoted\")}}{separator}"
+                                f">{indent}{delimiter}{separator}"
+                            ).encode("utf-8")
+                        )
+                        result = self.run_tool(root, "--root", root, "--fail-new", "--json")
+                        self.assertEqual(result.returncode, 0, result.stderr)
+                        self.assertEqual(json.loads(result.stdout)["findings"], [])
+
     def test_mdx_tilde_info_string_allows_backtick(self):
         with tempfile.TemporaryDirectory(prefix="kt-ux-") as directory:
             root = Path(directory)
