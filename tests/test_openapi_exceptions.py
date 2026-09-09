@@ -114,6 +114,24 @@ class OpenApiExceptionsTest(unittest.TestCase):
             "소비하는 외부 계약은 아니다. M10 동반 PR T-483",
             "소비하는 외부 계약이 아닌 것으로 확인됐다. M10 동반 PR T-483",
             "소비하는 외부 계약이 없다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 아닙니다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 부정된다. M10 동반 PR T-483",
+            "소비하는 외부 계약이라는 주장은 거짓이다. M10 동반 PR T-483",
+            "소비하는 외부 계약 — isn't one; M10 동반 PR T-483",
+            "소비하는 외부 계약 — it isnt one; M10 동반 PR T-483",
+            "소비하는 외부 계약 — cannot be one; M10 동반 PR T-483",
+            "소비하는 외부 계약 — it can't be one; M10 동반 PR T-483",
+            "소비하는 외부 계약 — a non-contract; M10 동반 PR T-483",
+            "소비하는 외부 계약 — absent; M10 동반 PR T-483",
+            "소비하는 외부 계약 — absence of a contract; M10 동반 PR T-483",
+            "소비하는 외부 계약 — doesn't apply; M10 동반 PR T-483",
+            "소비하는 외부 계약이 미채택이다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 거부됐다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 미사용이다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 비채택이다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 불존재한다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 미제공이다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 무효다. M10 동반 PR T-483",
         ):
             with self.subTest(reason=reason):
                 text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
@@ -126,6 +144,19 @@ class OpenApiExceptionsTest(unittest.TestCase):
             1,
         )
         self._assert_invalid(wildcard, "외부 계약")
+
+    def test_should_exception_requires_exact_evidence_tokens(self) -> None:
+        for evidence in ("M100", "M10X", "미동반 PR", "동반 PRX"):
+            with self.subTest(evidence=evidence):
+                text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
+                    "Pinvi가 직접 소비하는 외부 계약", f"Pinvi가 직접 소비하는 외부 계약. {evidence}", 1
+                )
+                text = text.replace("map M10과 같은 동반 PR 규칙", "map 근거", 1)
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "registry.yaml"
+                    path.write_text(text, encoding="utf-8")
+                    with self.assertRaises(OE.RegistryError):
+                        OE.load_registry(path, as_of=date(2026, 9, 9))
 
     def test_plain_numeric_scalar_is_rejected(self) -> None:
         text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
@@ -154,6 +185,24 @@ class OpenApiExceptionsTest(unittest.TestCase):
             "-1:20",
             "+1:2:3.4",
             "123:45",
+            "0xFF__00",
+            "0xFF_",
+            "0x__FF",
+            "0b1__0",
+            "0b1_",
+            "0b__10",
+            "1__000",
+            "1__",
+            "1._0",
+            "1.0__0",
+            "1.0_",
+            "1__0.0",
+            "1__0:20",
+            "1_:20",
+            "+0x__FF",
+            "-0xFF_",
+            "-1__000",
+            "+1.0_",
         ):
             with self.subTest(value=value):
                 text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
@@ -200,7 +249,7 @@ class OpenApiExceptionsTest(unittest.TestCase):
 
     def test_markdown_cells_escape_markup(self) -> None:
         registry = OE.load_registry(as_of=date(2026, 9, 9))
-        registry["exceptions"][0]["reason"] = "<img src=x onerror=x> [x](https://evil) `code` *em*"
+        registry["exceptions"][0]["reason"] = "<img src=x onerror=x> [x](https://evil) `code` *em* T-483"
         rendered = OE.render_markdown(registry)
         self.assertNotIn("<img", rendered)
         self.assertNotIn("[x](https://evil)", rendered)
@@ -215,13 +264,35 @@ class OpenApiExceptionsTest(unittest.TestCase):
             OE.render_markdown(registry)
         self.assertIn("제어·format", str(context.exception))
 
-    def test_markdown_renderer_escapes_directly_mutated_top_level_fields(self) -> None:
+    def test_markdown_renderer_rejects_semantic_mutation(self) -> None:
         registry = OE.load_registry(as_of=date(2026, 9, 9))
-        registry["schema"] = "safe\n\n## injected"
-        registry["apps"][0] = "bad\n\n## injected"
-        rendered = OE.render_markdown(registry)
-        self.assertNotIn("\n\n## injected", rendered)
-        self.assertNotIn("bad\n", rendered)
+        for mutate in (
+            lambda value: value.update(schema="not-the-canonical-schema"),
+            lambda value: value.update(updated="not-a-date"),
+            lambda value: value.update(apps=["evil"]),
+            lambda value: value["exceptions"].__setitem__(
+                0,
+                {
+                    "app": "evil",
+                    "rule": "BAD",
+                    "surface": "*",
+                    "reason": "fake",
+                    "sunset": None,
+                    "review": "not-date",
+                    "owner": "evil",
+                },
+            ),
+        ):
+            candidate = {
+                "schema": registry["schema"],
+                "updated": registry["updated"],
+                "apps": list(registry["apps"]),
+                "exceptions": [dict(entry) for entry in registry["exceptions"]],
+            }
+            mutate(candidate)
+            with self.subTest(candidate=candidate):
+                with self.assertRaises(OE.RegistryError):
+                    OE.render_markdown(candidate)
 
     def test_write_rejects_input_output_alias_and_preserves_input(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

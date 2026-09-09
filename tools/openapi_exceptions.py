@@ -44,24 +44,35 @@ RULE_RE = re.compile(r"^[MSN]\d+(?:\.\d+)?$|^BE-\d+$")
 TASK_REFERENCE_RE = re.compile(r"(?<![A-Za-z0-9])T-\d{3}[a-z]?(?![A-Za-z0-9])")
 TASK_FILE_RE = re.compile(r"^(T-\d{3}[a-z]?)-.+\.md$")
 PLAIN_NONSTRING_RE = re.compile(
-    r"^(?:"
-    r"[-+]?(?:\d(?:_?\d)*)(?:\.(?:\d(?:_?\d)*))?(?:[eE][-+]?\d(?:_?\d)*)?"
-    r"|[-+]?(?:\d(?:_?\d)*)\.(?:\d(?:_?\d)*)?(?:[eE][-+]?\d(?:_?\d)*)?"
-    r"|[-+]?\.(?:\d(?:_?\d)*)(?:[eE][-+]?\d(?:_?\d)*)?"
-    r"|[-+]?0[xX](?:_?[0-9a-fA-F])+"
-    r"|[-+]?0[oO](?:_?[0-7])+"
-    r"|[-+]?0[bB](?:_?[01])+"
-    r"|[-+]?(?:\.inf|\.nan)"
-    r"|[-+]?\d(?:_?\d)*(?::\d{1,2})+(?:\.\d(?:_?\d)*)?"
-    r"|\d{4}-\d{2}-\d{2}(?:(?:[Tt]|[ \t]+)\d{1,2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[ \t]*[-+]\d{1,2}(?::?\d{2})?)?)?"
-    r")$",
-    re.IGNORECASE,
+    r"""^(?:
+        [-+]?0[bB][0-1_]+
+        |[-+]?0[oO][0-7_]+
+        |[-+]?0[0-7_]+
+        |[-+]?(?:0|[1-9][0-9_]*)
+        |[-+]?[0-9][0-9_]*(?:[eE][-+]?[0-9][0-9_]*)
+        |[-+]?0[xX][0-9a-fA-F_]+
+        |[-+]?[1-9][0-9_]*(?::[0-5]?[0-9])+
+        |[-+]?(?:[0-9][0-9_]*)\.[0-9_]*(?:[eE][-+]?[0-9]+)?
+        |[-+]?\.[0-9][0-9_]*(?:[eE][-+]?[0-9]+)?
+        |[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*
+        |[-+]?\.(?:inf|nan)
+        |[0-9]{4}-[0-9]{2}-[0-9]{2}
+          (?:(?:[Tt]|[ \t]+)[0-9]{1,2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]*)?
+          (?:[Zz]|[ \t]*[-+][0-9]{1,2}(?::[0-9]{2})?)?)?
+    )$""",
+    re.IGNORECASE | re.VERBOSE,
 )
 EXTERNAL_CONTRACT_RE = re.compile(r"소비(?:하는|되는)\s+외부\s+계약")
 NEGATED_EVIDENCE_RE = re.compile(
-    r"(?:아니|아닌|아님|없|않|못|불가|미확인|부재|불가능|\b(?:not|no|without|never)\b)", re.IGNORECASE
+    r"(?:아니|아닙|아닌|아님|없|않|못|불가|미확인|부재|불가능|"
+    r"미채택|거부|미사용|비채택|불존재|미제공|무효|미동반|부정|거짓|"
+    r"\b(?:not|no|without|never|isn't|isnt|can't|cant|cannot|doesn't|doesnt|"
+    r"absent|absence|non-[a-z0-9-]+)\b)",
+    re.IGNORECASE,
 )
 GLOBAL_SURFACE_RE = re.compile(r"^(?:\*|/\*{1,2})$")
+M10_EVIDENCE_RE = re.compile(r"(?<![A-Za-z0-9])M10(?![A-Za-z0-9])")
+COORDINATED_PR_EVIDENCE_RE = re.compile(r"(?<![A-Za-z0-9가-힣])동반\s+PR(?![A-Za-z0-9])")
 
 
 class RegistryError(ValueError):
@@ -427,23 +438,20 @@ def _task_ids() -> set[str]:
     return ids
 
 
-def load_registry(path: Path = DEFAULT_INPUT, *, as_of: date | None = None) -> dict[str, Any]:
-    """YAML을 읽고 레지스트리 계약을 검증한 뒤 plain dict로 반환한다."""
-    try:
-        text = path.read_text(encoding="utf-8")
-    except OSError as exc:
-        raise RegistryError(f"레지스트리를 읽을 수 없음: {path}") from exc
-    try:
-        root = _FlatYamlParser(text).parse()
-    except RegistryError:
-        raise
-    except Exception as exc:  # pragma: no cover - fail closed safety net
-        raise RegistryError("레지스트리 YAML 파싱 실패") from exc
+def _parse_registry_date(value: object, field: str) -> date:
+    """YAML 문자열과 renderer가 받은 정규화 date를 같은 계약으로 검사한다."""
+    if type(value) is date:
+        return value
+    return _parse_date(value, field)
+
+
+def _validate_registry(root: object, *, as_of: date | None = None) -> dict[str, Any]:
+    """파싱 결과 또는 renderer 직접 입력의 구조·의미 계약을 검증한다."""
     if not isinstance(root, dict) or set(root) != TOP_LEVEL_KEYS:
         raise RegistryError(f"최상위 키는 정확히 {sorted(TOP_LEVEL_KEYS)}여야 함")
     if root["schema"] != "kor-travel-common.openapi-exceptions.v1":
         raise RegistryError("지원하지 않는 registry schema")
-    updated = _parse_date(root["updated"], "updated")
+    updated = _parse_registry_date(root["updated"], "updated")
     apps = root["apps"]
     if not isinstance(apps, list) or any(not isinstance(app, str) for app in apps):
         raise RegistryError("apps는 문자열 list여야 함")
@@ -480,7 +488,7 @@ def load_registry(path: Path = DEFAULT_INPUT, *, as_of: date | None = None) -> d
                 raise RegistryError(
                     f"exceptions[{index}] SHOULD 예외는 구체적인 외부 계약 표면만 등록할 수 있음"
                 )
-            if "M10" not in entry["reason"] and "동반 PR" not in entry["reason"]:
+            if not (M10_EVIDENCE_RE.search(entry["reason"]) or COORDINATED_PR_EVIDENCE_RE.search(entry["reason"])):
                 raise RegistryError(f"exceptions[{index}] SHOULD 외부 계약 예외는 동반 PR 근거가 필요함")
         if entry["app"] not in apps or entry["app"] not in ALLOWED_APPS:
             raise RegistryError(f"exceptions[{index}].app가 apps 목록에 없음")
@@ -492,17 +500,32 @@ def load_registry(path: Path = DEFAULT_INPUT, *, as_of: date | None = None) -> d
         seen.add(identity)
         sunset = entry["sunset"]
         if sunset is not None:
-            sunset_date = _parse_date(sunset, f"exceptions[{index}].sunset")
+            sunset_date = _parse_registry_date(sunset, f"exceptions[{index}].sunset")
             if sunset_date < updated:
                 raise RegistryError(f"exceptions[{index}].sunset가 updated보다 빠름")
             if sunset_date < today:
                 raise RegistryError(f"exceptions[{index}].sunset가 지남")
         elif entry["rule"] in IMMEDIATE_MUST:
             raise RegistryError(f"exceptions[{index}] 즉시 MUST는 sunset을 null로 둘 수 없음")
-        review = _parse_date(entry["review"], f"exceptions[{index}].review")
+        review = _parse_registry_date(entry["review"], f"exceptions[{index}].review")
         if review < updated or review > _add_months(updated, 6):
             raise RegistryError(f"exceptions[{index}].review는 updated부터 6개월 안이어야 함")
     return {"schema": root["schema"], "updated": updated, "apps": list(apps), "exceptions": entries}
+
+
+def load_registry(path: Path = DEFAULT_INPUT, *, as_of: date | None = None) -> dict[str, Any]:
+    """YAML을 읽고 레지스트리 계약을 검증한 뒤 plain dict로 반환한다."""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise RegistryError(f"레지스트리를 읽을 수 없음: {path}") from exc
+    try:
+        root = _FlatYamlParser(text).parse()
+    except RegistryError:
+        raise
+    except Exception as exc:  # pragma: no cover - fail closed safety net
+        raise RegistryError("레지스트리 YAML 파싱 실패") from exc
+    return _validate_registry(root, as_of=as_of)
 
 
 def _markdown_cell(value: object) -> str:
@@ -529,18 +552,11 @@ def _markdown_cell(value: object) -> str:
 
 def render_markdown(registry: dict[str, Any]) -> str:
     """검증된 레지스트리의 결정적 Markdown 표현을 만든다."""
-    if not isinstance(registry, dict) or set(registry) != TOP_LEVEL_KEYS:
-        raise RegistryError("Markdown renderer 입력 registry 키가 올바르지 않음")
-    if not isinstance(registry["schema"], str) or not isinstance(registry["updated"], (date, str)):
-        raise RegistryError("Markdown renderer 입력 schema/updated가 올바르지 않음")
-    apps = registry["apps"]
-    entries = registry["exceptions"]
-    if not isinstance(apps, list) or any(not isinstance(app, str) for app in apps):
-        raise RegistryError("Markdown renderer 입력 apps가 올바르지 않음")
-    if not isinstance(entries, list) or any(not isinstance(entry, dict) for entry in entries):
-        raise RegistryError("Markdown renderer 입력 exceptions가 올바르지 않음")
-    schema = _markdown_cell(registry["schema"])
-    updated = _markdown_cell(registry["updated"])
+    validated = _validate_registry(registry)
+    apps = validated["apps"]
+    entries = validated["exceptions"]
+    schema = _markdown_cell(validated["schema"])
+    updated = _markdown_cell(validated["updated"])
     lines = [
         "<!-- SPDX-License-Identifier: GPL-3.0-or-later -->",
         "<!-- SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie) -->",

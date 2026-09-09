@@ -16,7 +16,7 @@
 | geo | N5 | /v1/&#42; | M6 예외와 동일 사유&#40;x/y 혼용은 VWorld 호환 legacy&#41;. geo 이관은 T-483. | null | 2026-12-31 | kor-travel-geo |
 | geo | N2 | /v1/&#42; | VWorld 호환 &#96;?key=&#96; 공개 키 수신&#40;oa §2.4&#41;. 문서화된 legacy 예외. 신규 표면에는 헤더 &#96;X-KTG-API-Key&#96;만. geo 이관은 T-483. | null | 2026-12-31 | kor-travel-geo |
 | geo | M3 | /v2/&#42; | v2 envelope &#96;{status:'ERROR', query&#95;id, error:{code,message,hint,field}}&#96;&#40;oa §2.5&#41;. &#96;query&#95;id&#96;↔&#96;request&#95;id&#96; 대응을 문서화하고 problem+json 채택 여부는 ADR-060 배포 전 breaking 묶음에서 판정&#40;O-14&#41;. T-483. | null | 2026-12-31 | kor-travel-geo |
-| geo | S1 | /v2/&#42; | v2 성공 envelope &#96;{status, query&#95;id, input, ...}&#96;&#40;oa §3.2 S1 비고&#41;는 Pinvi가 직접 소비하는 외부 계약이다. &#96;{data, meta}&#96; 미채택을 M3 v2와 함께 재판정하며 map M10과 같은 동반 PR 규칙을 적용한다. T-483. | null | 2026-12-31 | kor-travel-geo |
+| geo | S1 | /v2/&#42; | v2 성공 envelope &#96;{status, query&#95;id, input, ...}&#96;&#40;oa §3.2 S1 비고&#41;는 Pinvi가 직접 소비하는 외부 계약이다. &#96;{data, meta}&#96; 전환 시 M3 v2와 함께 재판정하며 map M10과 같은 동반 PR 규칙을 적용한다. T-483. | null | 2026-12-31 | kor-travel-geo |
 | geo | M3.1 | &#42; | 검증 오류 400&#40;geo ADR-061 사용자 결정, FastAPI 422 억제; oa §2.5·Q2&#41;. common 기본 422과 다름. T-483. | null | 2026-12-31 | kor-travel-geo |
 | geo | M5 | /v1/healthz, /v1/readyz | health 경로가 &#96;/v1&#96; 아래 &#96;healthz&#96;&#40;oa §2.10&#41;. &#96;/health&#96;·&#96;/readyz&#96; 도입 후에도 별칭 병행. 소비자 probe&#40;pinvi admin/system.py, ktdm healthcheck, Prometheus scrape&#41; 갱신 확인 전까지 무기한&#40;D-14&#41;. T-483. | null | 2026-12-31 | kor-travel-geo |
 | geo | M8 | &#42; | export본 &#96;securitySchemes: None&#96;; 키는 Header&#40;&#41;/Query&#40;&#41; 파라미터로만 노출&#40;oa §2.4&#41;. 선언은 스펙 변경이므로 typegen 재생성과 함께 T-483. | null | 2026-12-31 | kor-travel-geo |

@@ -55,7 +55,7 @@ exceptions:
   - app: geo
     rule: S1
     surface: "/v2/*"
-    reason: "v2 성공 envelope `{status, query_id, input, ...}`(oa §3.2 S1 비고)는 Pinvi가 직접 소비하는 외부 계약이다. `{data, meta}` 미채택을 M3 v2와 함께 재판정하며 map M10과 같은 동반 PR 규칙을 적용한다. T-483."
+    reason: "v2 성공 envelope `{status, query_id, input, ...}`(oa §3.2 S1 비고)는 Pinvi가 직접 소비하는 외부 계약이다. `{data, meta}` 전환 시 M3 v2와 함께 재판정하며 map M10과 같은 동반 PR 규칙을 적용한다. T-483."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-geo
