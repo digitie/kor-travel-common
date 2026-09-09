@@ -203,6 +203,18 @@ class OpenApiExceptionsTest(unittest.TestCase):
                 )
                 self._assert_invalid(text, "외부 계약")
 
+    def test_should_exception_rejects_contract_assertion_substrings(self) -> None:
+        for phrase in (
+            "재소비하는 외부 계약이다.",
+            "소비하는 외부 계약이다.추가",
+            "소비하는 외부 계약이다..",
+        ):
+            with self.subTest(phrase=phrase):
+                text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
+                    "Pinvi가 직접 소비하는 외부 계약이다.", f"Pinvi가 직접 {phrase}", 1
+                )
+                self._assert_invalid(text, "외부 계약")
+
     def test_should_exception_requires_closed_contract_assertion(self) -> None:
         for phrase in (
             "소비하는 외부 계약[",
@@ -229,10 +241,16 @@ class OpenApiExceptionsTest(unittest.TestCase):
             "무의미",
             "아마",
             "검증되지",
+            "검증 필요",
             "확인되지",
+            "확인 필요",
             "존재하지",
             "추정",
             "가능성",
+            "가능",
+            "잠정",
+            "의심",
+            "일 수도",
             "maybe",
             "perhaps",
             "uncertain",

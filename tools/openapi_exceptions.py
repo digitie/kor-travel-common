@@ -67,8 +67,9 @@ NEGATED_EVIDENCE_RE = re.compile(
     r"(?:아니|아닙|아닐|아닌|아님|없|않|못|불가|부재|불가능|"
     r"미채택|거부|미사용|비채택|불존재|미제공|무효|미동반|부정|거짓|"
     r"무관|배제|제외|불채택|미승인|미적용|미지원|미수용|미확정|미존재|미실행|"
-    r"불확실|불승인|부적합|거절|무의미|아마|검증\s*중|검증되지|확인\s*중|확인되지|"
-    r"존재하지|추정|가능성|미검증|미확인|미정|보류|모호|불명|"
+    r"불확실|불승인|부적합|거절|무의미|아마|검증\s*중|검증되지|검증\s*필요|"
+    r"확인\s*중|확인되지|확인\s*필요|존재하지|추정|가능성|가능|미검증|미확인|"
+    r"미정|보류|모호|불명|잠정|의심|가정|가설|일\s*수|일\s*지도|듯|"
     r"(?<![가-힣])미\s*[가-힣]+|"
     r"\b(?:"
     r"(?:not|no|none|neither|false|invalid|unavailable|unsupported|inapplicable|"
@@ -120,6 +121,14 @@ def _task_references(text: str) -> list[str]:
         if _is_exact_token_at(text, match.start(), len(match.group()), allow_terminal_dot=True):
             references.append(match.group())
     return references
+
+
+def _has_external_contract_assertion(text: str) -> bool:
+    """앞뒤에 붙은 식별 문자가 없는 닫힌 외부 계약 assertion만 인정한다."""
+    for match in EXTERNAL_CONTRACT_RE.finditer(text):
+        if _is_exact_token_at(text, match.start(), len(match.group())):
+            return True
+    return False
 
 
 class RegistryError(ValueError):
@@ -533,7 +542,7 @@ def _validate_registry(root: object, *, as_of: date | None = None) -> dict[str, 
         if entry["rule"].startswith("S"):
             if (
                 GLOBAL_SURFACE_RE.fullmatch(entry["surface"])
-                or not EXTERNAL_CONTRACT_RE.search(entry["reason"])
+                or not _has_external_contract_assertion(entry["reason"])
                 or NEGATED_EVIDENCE_RE.search(entry["reason"])
             ):
                 raise RegistryError(
