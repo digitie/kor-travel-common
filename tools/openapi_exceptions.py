@@ -52,8 +52,8 @@ PLAIN_NONSTRING_RE = re.compile(
     r"|[-+]?0[oO][0-7](?:_?[0-7])*"
     r"|[-+]?0[bB][01](?:_?[01])*"
     r"|[-+]?(?:\.inf|\.nan)"
-    r"|\d{4}-\d{2}-\d{2}(?:(?:[Tt]|[ \t]+)\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[ \t]+[-+]\d{2}(?::?\d{2})?)?)?"
-    r"|\d{2}:\d{2}(?::\d{2})?"
+    r"|\d{4}-\d{2}-\d{2}(?:(?:[Tt]|[ \t]+)\d{1,2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[ \t]*[-+]\d{2}(?::?\d{2})?)?)?"
+    r"|\d{1,2}:\d{2}(?::\d{2}(?:\.\d+)?)?"
     r")$",
     re.IGNORECASE,
 )
@@ -127,8 +127,10 @@ class _FlatYamlParser:
 
     def __init__(self, text: str):
         self.lines: list[_YamlLine] = []
-        for character in text:
+        for index, character in enumerate(text):
             if character not in {"\n", "\r"}:
+                if index == 0 and character == "\ufeff":
+                    continue
                 _validate_text(character, "registry")
         for number, raw in enumerate(text.splitlines(), 1):
             if number == 1 and raw.startswith("\ufeff"):

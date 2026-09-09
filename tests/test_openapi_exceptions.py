@@ -118,7 +118,19 @@ class OpenApiExceptionsTest(unittest.TestCase):
         self._assert_invalid(text, "plain scalar")
 
     def test_all_yaml_numeric_and_timestamp_plain_scalars_are_rejected(self) -> None:
-        for value in ("0x10", "0o10", "0b10", "0123", "1_000", ".5", "1.", "2026-09-06", "2026-09-06T00:00:00Z"):
+        for value in (
+            "0x10",
+            "0o10",
+            "0b10",
+            "0123",
+            "1_000",
+            ".5",
+            "1.",
+            "2026-09-06",
+            "2026-09-06T00:00:00Z",
+            "2026-09-06T00:00:00+09:00",
+            "1:20:30.15",
+        ):
             with self.subTest(value=value):
                 text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
                     "    owner: kor-travel-geo", f"    owner: {value}", 1
@@ -144,6 +156,13 @@ class OpenApiExceptionsTest(unittest.TestCase):
                     f'    reason: "bad{escaped}value T-483"',
                 )
                 self._assert_invalid(text, "제어·format")
+
+    def test_utf8_bom_is_allowed_only_at_document_start(self) -> None:
+        text = "\ufeff" + OE.DEFAULT_INPUT.read_text(encoding="utf-8")
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "registry.yaml"
+            path.write_text(text, encoding="utf-8")
+            self.assertEqual(OE.load_registry(path, as_of=date(2026, 9, 9))["schema"], "kor-travel-common.openapi-exceptions.v1")
 
     def test_single_quote_escape_is_supported(self) -> None:
         text = self._replace_first_line(
