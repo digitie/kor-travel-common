@@ -63,8 +63,8 @@ class OpenApiExceptionsTest(unittest.TestCase):
     def test_immediate_must_cannot_have_indefinite_sunset(self) -> None:
         text = OE.DEFAULT_INPUT.read_text(encoding="utf-8")
         text = text.replace(
-            "  - app: airport\n    rule: M4\n    surface: \"*\"\n    reason: \"요청 ID 미구현(oa §2.5). 계층 1 규칙이므로 기한부. T-482에서 additive 추가.\"\n    sunset: \"2026-12-31\"",
-            "  - app: airport\n    rule: M4\n    surface: \"*\"\n    reason: \"요청 ID 미구현(oa §2.5). 계층 1 규칙이므로 기한부. T-482에서 additive 추가.\"\n    sunset: null",
+            "  - app: airport\n    rule: M4\n    surface: \"*\"\n    reason: \"요청 ID 미구현(oa §2.5). 계층 1 규칙이므로 기한부. T-482. additive 추가.\"\n    sunset: \"2026-12-31\"",
+            "  - app: airport\n    rule: M4\n    surface: \"*\"\n    reason: \"요청 ID 미구현(oa §2.5). 계층 1 규칙이므로 기한부. T-482. additive 추가.\"\n    sunset: null",
             1,
         )
         self._assert_invalid(text, "sunset을 null")
@@ -132,6 +132,25 @@ class OpenApiExceptionsTest(unittest.TestCase):
             "소비하는 외부 계약이 불존재한다. M10 동반 PR T-483",
             "소비하는 외부 계약이 미제공이다. M10 동반 PR T-483",
             "소비하는 외부 계약이 무효다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 미승인이다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 미적용이다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 미지원이다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 미수용이다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 미확정이다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 미존재한다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 미실행이다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 아닐까요? M10 동반 PR T-483",
+            "소비하는 외부 계약이 무관하다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 배제된다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 제외된다. M10 동반 PR T-483",
+            "소비하는 외부 계약 — noncontract 이다. M10 동반 PR T-483",
+            "소비하는 외부 계약 — non_contract 이다. M10 동반 PR T-483",
+            "소비하는 외부 계약 — non‑contract 이다. M10 동반 PR T-483",
+            "소비하는 외부 계약 — neither 이다. M10 동반 PR T-483",
+            "소비하는 외부 계약 — none 이다. M10 동반 PR T-483",
+            "소비하는 외부 계약 — false 이다. M10 동반 PR T-483",
+            "소비하는 외부 계약 — invalid 이다. M10 동반 PR T-483",
+            "소비하는 외부 계약 — unsupported 이다. M10 동반 PR T-483",
         ):
             with self.subTest(reason=reason):
                 text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
@@ -146,23 +165,65 @@ class OpenApiExceptionsTest(unittest.TestCase):
         self._assert_invalid(wildcard, "외부 계약")
 
     def test_should_exception_requires_exact_evidence_tokens(self) -> None:
-        for evidence in ("M100", "M10X", "미동반 PR", "동반 PRX"):
+        for evidence in (
+            "M100",
+            "M10X",
+            "M10_foo",
+            "M10_",
+            "M10가",
+            "M10.1",
+            "미동반 PR",
+            "동반 PRX",
+            "동반 PR_foo",
+            "동반 PR_",
+            "동반 PR가",
+            "동반 PR.1",
+        ):
             with self.subTest(evidence=evidence):
                 text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
                     "Pinvi가 직접 소비하는 외부 계약", f"Pinvi가 직접 소비하는 외부 계약. {evidence}", 1
                 )
-                text = text.replace("map M10과 같은 동반 PR 규칙", "map 근거", 1)
+                text = text.replace("map M10 기준 동반 PR 규칙", "map 근거", 1)
                 with tempfile.TemporaryDirectory() as directory:
                     path = Path(directory) / "registry.yaml"
                     path.write_text(text, encoding="utf-8")
                     with self.assertRaises(OE.RegistryError):
                         OE.load_registry(path, as_of=date(2026, 9, 9))
 
+    def test_should_exception_requires_exact_contract_assertion(self) -> None:
+        for phrase in (
+            "소비하는 외부 계약자",
+            "소비하는 외부 계약서",
+            "소비하는 외부 계약주의",
+            "소비되는 외부 계약자",
+        ):
+            with self.subTest(phrase=phrase):
+                text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
+                    "Pinvi가 직접 소비하는 외부 계약", phrase, 1
+                )
+                self._assert_invalid(text, "외부 계약")
+
+    def test_task_reference_requires_exact_id_boundary(self) -> None:
+        for suffix in ("_foo", "가", ".1", "-foo", "/extra", ":extra"):
+            with self.subTest(suffix=suffix):
+                text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
+                    "T-483.", f"T-483{suffix}.", 1
+                )
+                self._assert_invalid(text, "정합 task ID")
+
     def test_plain_numeric_scalar_is_rejected(self) -> None:
         text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
             "    owner: kor-travel-geo", "    owner: 123", 1
         )
         self._assert_invalid(text, "plain scalar")
+
+    def test_yaml_reserved_plain_scalar_is_rejected(self) -> None:
+        for value in ("@", "`", "-", "?"):
+            with self.subTest(value=value):
+                text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
+                    "    owner: kor-travel-geo", f"    owner: {value}", 1
+                )
+                self._assert_invalid(text, "scalar")
 
     def test_all_yaml_numeric_and_timestamp_plain_scalars_are_rejected(self) -> None:
         for value in (

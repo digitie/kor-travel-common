@@ -55,7 +55,7 @@ exceptions:
   - app: geo
     rule: S1
     surface: "/v2/*"
-    reason: "v2 성공 envelope `{status, query_id, input, ...}`(oa §3.2 S1 비고)는 Pinvi가 직접 소비하는 외부 계약이다. `{data, meta}` 전환 시 M3 v2와 함께 재판정하며 map M10과 같은 동반 PR 규칙을 적용한다. T-483."
+    reason: "v2 성공 envelope `{status, query_id, input, ...}`(oa §3.2 S1 비고)는 Pinvi가 직접 소비하는 외부 계약이다. `{data, meta}` 전환 시 M3 v2와 함께 재판정하며 map M10 기준 동반 PR 규칙을 적용한다. T-483."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-geo
@@ -98,14 +98,14 @@ exceptions:
   - app: pinvi
     rule: M1
     surface: "*"
-    reason: "자체 export 산출물·drift CI 없음(map 스펙 3종 소비자 검증만; oa §2.11). T-484에서 export 파이프라인·drift CI 신설."
+    reason: "자체 export 산출물·drift CI 없음(map 스펙 3종 소비자 검증만; oa §2.11). T-484. export 파이프라인·drift CI 신설."
     sunset: null
     review: "2026-12-31"
     owner: pinvi
   - app: pinvi
     rule: M8
     surface: "*"
-    reason: "export 없음으로 securitySchemes 선언 미확인(Cookie()/Header() 파라미터 방식, oa §2.4·Q12). T-484에서 `apiKey in=cookie` 선언."
+    reason: "export 없음으로 securitySchemes 선언 미확인(Cookie()/Header() 파라미터 방식, oa §2.4·Q12). T-484. `apiKey in=cookie` 선언."
     sunset: null
     review: "2026-12-31"
     owner: pinvi
@@ -134,35 +134,35 @@ exceptions:
   - app: concierge
     rule: S1
     surface: "GET /api/v1/features/snapshot, GET /api/v1/features/changes"
-    reason: "map `kor-travel-concierge-youtube` provider가 소비하는 외부 계약(docs/feature-export-api.md; oa §4). 변경 시 map provider 동시 수정 PR 동반(M10과 같은 취급). T-485."
+    reason: "map `kor-travel-concierge-youtube` provider가 소비하는 외부 계약(docs/feature-export-api.md; oa §4). 변경 시 map provider 동시 수정 PR 동반(M10 기준 취급). T-485."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-concierge
   - app: concierge
     rule: S2
     surface: "GET /api/v1/features/snapshot, GET /api/v1/features/changes"
-    reason: "list envelope `{items, next_cursor, has_more, total, newest_id, newer_than}`(oa §2.6). features export는 `{items,next_cursor,has_more}`로 map provider가 소비하는 외부 계약이다. 변경 시 M10과 같은 동반 PR을 적용한다. T-485."
+    reason: "list envelope `{items, next_cursor, has_more, total, newest_id, newer_than}`(oa §2.6). features export는 `{items,next_cursor,has_more}`로 map provider가 소비하는 외부 계약이다. 변경 시 M10 기준 동반 PR 근거를 적용한다. T-485."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-concierge
   - app: concierge
     rule: M1
     surface: "*"
-    reason: "export 스크립트·산출물·`.github` 없음(oa §2.11). T-451 CI 신설 후 T-485에서 export·drift."
+    reason: "export 스크립트·산출물·`.github` 없음(oa §2.11). T-451 CI 신설 후 T-485. export·drift."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-concierge
   - app: concierge
     rule: M4
     surface: "*"
-    reason: "요청 ID 미구현(oa §2.5). 계층 1 규칙이므로 기한부. T-485에서 additive 추가."
+    reason: "요청 ID 미구현(oa §2.5). 계층 1 규칙이므로 기한부. T-485. additive 추가."
     sunset: "2026-12-31"
     review: "2026-12-31"
     owner: kor-travel-concierge
   - app: concierge
     rule: M8
     surface: "*"
-    reason: "`APIKeyHeader`+`Security` 자동 선언이나 scheme 이름은 기본값(미확인; oa §2.4). T-485에서 확인·정정."
+    reason: "`APIKeyHeader`+`Security` 자동 선언이나 scheme 이름은 기본값(미확인; oa §2.4). T-485. 확인·정정."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-concierge
@@ -242,21 +242,21 @@ exceptions:
   - app: airport
     rule: M4
     surface: "*"
-    reason: "요청 ID 미구현(oa §2.5). 계층 1 규칙이므로 기한부. T-482에서 additive 추가."
+    reason: "요청 ID 미구현(oa §2.5). 계층 1 규칙이므로 기한부. T-482. additive 추가."
     sunset: "2026-12-31"
     review: "2026-12-31"
     owner: kor-travel-airport
   - app: airport
     rule: M1
     surface: "*"
-    reason: "export만 있고 `--check`·CI drift 없음(ADR-005 후속 과제; oa §2.11). T-482에서 `--check` CI."
+    reason: "export만 있고 `--check`·CI drift 없음(ADR-005 후속 과제; oa §2.11). T-482. `--check` CI."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-airport
   - app: airport
     rule: N8
     surface: "/health"
-    reason: "`/health`가 DB `count(*)` 질의 + `release_sha`(be §2.5). T-482에서 `/readyz`로 분리하고 `/health`는 무의존 liveness로."
+    reason: "`/health`가 DB `count(*)` 질의 + `release_sha`(be §2.5). T-482. `/readyz`로 분리하고 `/health`는 무의존 liveness로."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-airport

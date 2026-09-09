@@ -41,7 +41,7 @@ CORE_RULE_IDS = frozenset(
 )
 ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 RULE_RE = re.compile(r"^[MSN]\d+(?:\.\d+)?$|^BE-\d+$")
-TASK_REFERENCE_RE = re.compile(r"(?<![A-Za-z0-9])T-\d{3}[a-z]?(?![A-Za-z0-9])")
+TASK_REFERENCE_RE = re.compile(r"(?<![\w/:-])T-\d{3}[a-z]?(?![\w/:-]|\.(?=\w))")
 TASK_FILE_RE = re.compile(r"^(T-\d{3}[a-z]?)-.+\.md$")
 PLAIN_NONSTRING_RE = re.compile(
     r"""^(?:
@@ -62,17 +62,25 @@ PLAIN_NONSTRING_RE = re.compile(
     )$""",
     re.IGNORECASE | re.VERBOSE,
 )
-EXTERNAL_CONTRACT_RE = re.compile(r"소비(?:하는|되는)\s+외부\s+계약")
+EXTERNAL_CONTRACT_RE = re.compile(
+    r"소비(?:하는|되는)\s+외부\s+계약(?:"
+    r"(?=[([<{`])"
+    r"|(?:이다|임)(?=[.!?。；;,:)\]}]|$)"
+    r")"
+)
 NEGATED_EVIDENCE_RE = re.compile(
-    r"(?:아니|아닙|아닌|아님|없|않|못|불가|미확인|부재|불가능|"
+    r"(?:아니|아닙|아닐|아닌|아님|없|않|못|불가|부재|불가능|"
     r"미채택|거부|미사용|비채택|불존재|미제공|무효|미동반|부정|거짓|"
+    r"무관|배제|제외|불채택|미승인|미적용|미지원|미수용|미확정|미존재|미실행|"
+    r"(?<![가-힣])미[가-힣]+|"
     r"\b(?:not|no|without|never|isn't|isnt|can't|cant|cannot|doesn't|doesnt|"
-    r"absent|absence|non-[a-z0-9-]+)\b)",
+    r"absent|absence|none|neither|false|invalid|unavailable|unsupported|"
+    r"inapplicable|rejected|disallowed|noncontract|non[-_‑][a-z0-9-]+)\b)",
     re.IGNORECASE,
 )
 GLOBAL_SURFACE_RE = re.compile(r"^(?:\*|/\*{1,2})$")
-M10_EVIDENCE_RE = re.compile(r"(?<![A-Za-z0-9])M10(?![A-Za-z0-9])")
-COORDINATED_PR_EVIDENCE_RE = re.compile(r"(?<![A-Za-z0-9가-힣])동반\s+PR(?![A-Za-z0-9])")
+M10_EVIDENCE_RE = re.compile(r"(?<![\w.-])M10(?![\w.-])")
+COORDINATED_PR_EVIDENCE_RE = re.compile(r"(?<![\w.-])동반\s+PR(?![\w.-])")
 
 
 class RegistryError(ValueError):
@@ -275,7 +283,7 @@ class _FlatYamlParser:
                 raise _error("flow sequence 끝 항목이 비어 있음", number)
             parts.append(part)
             return [self._scalar(part, number) for part in parts]
-        if value.startswith(("{", "|", ">", "!", "&", "*", "%")):
+        if value.startswith(("{", "|", ">", "!", "&", "*", "%", "@", "`")):
             raise _error("지원하지 않는 YAML scalar 문법", number)
         if value.startswith("---") or value.startswith("..."):
             raise _error("YAML document marker는 허용하지 않음", number)
@@ -287,7 +295,7 @@ class _FlatYamlParser:
             return None
         if re.search(r":(?:\s|$)", value):
             raise _error("plain scalar 안의 mapping colon은 허용하지 않음", number)
-        if value[:1] in {",", "]", "}"}:
+        if value in {"-", "?"} or value[:1] in {",", "]", "}"}:
             raise _error("잘못된 flow scalar", number)
         if value.lower() in {"true", "false", "yes", "no", "on", "off"} or PLAIN_NONSTRING_RE.fullmatch(value):
             raise _error("plain scalar는 문자열로 해석되는 값만 허용함", number)
