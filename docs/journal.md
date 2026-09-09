@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-09 (Codex, T-301 post-fix-05 수정 준비)
+
+post-fix-04 A/B가 새 표기와 문서 candidate를 독립적으로 공격했으며 모두 BLOCK했다. 반복 no-go의 공통 원인은 자연어 substring을 증거로 사용한 것과 candidate·문서·CI SHA를 한 immutable 기준선으로 묶지 않은 것이었다. A는 `0x_FF`·`0o_10`·`0b_10`·short timezone, 부정 활용형, renderer top-level 개행을 재현했고 B는 signed/short sexagesimal, `/**` wildcard, 부정문 변형과 candidate CI 취소를 재현했다.
+
+이번 수정은 YAML base prefix 직후 underscore, 부호가 붙은 1~2자리 sexagesimal, fractional/short timezone timestamp를 reject grammar에 포함하고, S surface의 `*`·`/*`·`/**`를 전역 wildcard로 차단한다. `아니`·`아닌`·`없`·`않`·`못`·`불가`·`미확인`·`부재`·`불가능` 및 영어 부정어를 SHOULD 근거에서 거부하며, renderer는 top-level schema/updated/apps/exceptions를 타입 확인하고 모든 동적 top-level 값을 Markdown cell escape한다. focused 시험은 27개, full unittest는 364개다. 현재 root의 post-fix-04 원본 evidence까지 포함한 gate는 문서 536/2583, plan 106, SPDX 70, redaction/secret 687/0이다. 다음 review candidate는 이 수치를 포함한 docs commit과 외부 manifest로 고정하고, candidate SHA의 CI가 취소되지 않고 완료된 뒤 A/B 재검토를 진행한다.
+
 ## 2026-09-09 (Codex, T-301 post-fix-02 수정 준비)
 
 post-fix-01을 immutable candidate `fedf7f8cbad55302183708aa4c9dd514ffba466d` 기준으로 두 reviewer에게 독립 검토시킨 결과 A/B 모두 BLOCK했다. 공통된 stale evidence는 당시 candidate commit에 문서 갱신이 포함되지 않았던 것이 원인이었고, 기능 경계에도 세 가지 실질 결함이 남았다. YAML plain scalar 정규식이 `0x10`·`0o10`·`0b10`·`0123`·timezone timestamp를 문자열로 통과시켰고, `_task_ids()`가 task 파일명뿐 아니라 `docs/tasks.md`와 상세 task 본문에서 ID를 모아 존재하지 않는 `T-034` 같은 참조를 허용했다. SHOULD 예외는 `surface == "*"`와 `외부 계약`·`동반 PR` 부분 문자열만 검사해 끝 공백과 부정 문장을 우회시켰으며, Unicode C1/bidi/line-separator/zero-width 문자가 생성 표에 남았다.

@@ -8,7 +8,7 @@ T-103 대비·UX 검사기 구현과 반복 리뷰의 근본 수정을 완료했
 
 ## 다음 한 작업
 
-**T-301 post-fix-03 후보 준비 중.** `openapi.md`의 core 규칙 30개에 계층·검사 수단·예외 여부를 명시하고, M10은 ADR-009에 맞게 교차 저장소 MUST로 분리했다. `openapi-exceptions.yaml` 39건을 7키·실재 task 파일명·규칙 ID·날짜·sunset으로 검증하며 `openapi-exceptions.md`를 생성하는 stdlib 도구와 26개 회귀 시험을 유지한다. 첫 post-fix 후보는 두 독립 reviewer가 모두 BLOCK했다. 원인은 stale 실행 evidence, YAML 숫자·timestamp plain scalar 우회, 본문에만 언급된 task ID 허용, SHOULD 표면·근거 문자열 우회, Unicode 제어·format 문자 누락이었다. 이를 코드·시험·문서에서 수정했고 전체 로컬 unittest 362개와 새 PR CI도 통과했다. 이제 새 immutable 후보 두 reviewer 재검토, 통합 evidence·task closure, draft PR merge와 main CI 확인을 순서대로 진행한다. T-010a의 실제 소비자 dispatch는 외부 선행으로 계속 BLOCKED다.
+**T-301 post-fix-05 후보 준비 중.** `openapi.md`의 core 규칙 30개에 계층·검사 수단·예외 여부를 명시하고, M10은 ADR-009에 맞게 교차 저장소 MUST로 분리했다. `openapi-exceptions.yaml` 39건을 7키·실재 task 파일명·규칙 ID·날짜·sunset으로 검증하며 `openapi-exceptions.md`를 생성하는 stdlib 도구와 27개 회귀 시험을 유지한다. 앞선 post-fix 리뷰에서 반복된 원인은 stale 실행 evidence와 YAML/SHOULD 문자열 경계의 부분 검증이었다. 이번 수정은 base prefix 직후 underscore·부호·short sexagesimal·timezone timestamp, `*`·`/*`·`/**` 전역 wildcard, 한국어·영어 부정 근거, renderer 직접 입력의 top-level Markdown 주입을 모두 닫았다. 현재 로컬 full unittest는 364개이며, 이 기록을 포함한 review candidate와 같은 SHA의 CI를 완료한 뒤 두 reviewer 재검토, 통합 evidence·task closure, draft PR merge와 main CI 확인을 순서대로 진행한다. T-010a의 실제 소비자 dispatch는 외부 선행으로 계속 BLOCKED다.
 
 ## 시작 파일과 검증
 

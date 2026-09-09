@@ -6,7 +6,7 @@
 # - 항목 형식: {app, rule, surface, reason, sunset, review, owner} 7개 필드 고정.
 #   sunset: ISO 날짜 또는 null(무기한). 즉시 MUST(M2·M4·M9·N6·N7)는 null 금지.
 #   review: ISO 날짜(등록일 + 6개월 이내). 분기 감사(T-506)에서 재판정한다.
-# - S1~S13은 외부 계약 표면만 등록하며 reason에 외부 계약·정합 task·M10 동반 PR 근거를 적는다.
+# - S1~S13은 외부 계약 표면만 등록하며 reason에 긍정형 `소비하는 외부 계약` 또는 `소비되는 외부 계약`·정합 task·M10 동반 PR 근거를 적는다. `*`·`/*`·`/**` 전역 표면과 부정 근거는 거부한다.
 # - 사람이 읽는 표(docs/standards/openapi-exceptions.md)는 tools/openapi_exceptions.py가 이 파일로부터 생성한다. 수기 편집 금지.
 # - 근거 약칭 oa = docs/survey/cross/openapi.md, be = docs/survey/cross/backend.md (기준 커밋은 docs/survey/README.md §2.1).
 # - 초기 등록: 브리프 D-14(2026-09-06). 실행 검증은 하지 않았고 조사 파일 기준 사실만 등록했다.
