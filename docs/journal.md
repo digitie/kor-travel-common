@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-09 (Codex, T-301 post-fix-07 수정 준비)
+
+post-fix-06 A/B가 같은 immutable 후보 `d88f2a0446e114541f52de169630cd09e27f429a`를 독립 검토해 모두 BLOCK했다. 숫자·timestamp·BOM·Unicode·renderer 의미 검증은 닫혔지만, `소비하는 외부 계약` substring이 계약자·계약서와 부정·불확정 문장을 통과시키고, M10·동반 PR·task ID가 underscore·한국어·점·접미사 경계를 우회했다. custom YAML parser도 `@`, backtick, 단독 `-`·`?`를 표준 YAML 예약 indicator와 다르게 수용했다. 두 reviewer는 resume·task·journal의 post-fix-05 수치가 현재 후보 evidence로 남은 stale 문서도 P1로 판정했다.
+
+이번 수정은 자유 substring을 허용하지 않고 긍정 assertion을 `이다`·`임`·여는 괄호로 닫는 문법으로 제한했다. M10·동반 PR·task ID는 Unicode identifier·underscore·점/접미사 경계를 포함한 exact token으로 검사하며, 부정·불확정 어휘와 YAML 예약 indicator는 fail-closed로 거부한다. 기능 commit `465ac00`의 focused 31개·full 368개 unittest와 현재 gate 문서 542/2583·plan 106·SPDX 70·redaction/secret 693/0을 확인했다. docs closure와 immutable manifest를 같은 후보 기준으로 고정한 뒤 두 reviewer에게 재검토를 요청한다. 소비자 build/e2e·npm/PyPI·Release·actionlint는 common 범위 밖 `NOT_RUN`이다.
+
 ## 2026-09-09 (Codex, T-301 post-fix-05 수정 준비)
 
 post-fix-04 A/B가 새 표기와 문서 candidate를 독립적으로 공격했으며 모두 BLOCK했다. 반복 no-go의 공통 원인은 자연어 substring을 증거로 사용한 것과 candidate·문서·CI SHA를 한 immutable 기준선으로 묶지 않은 것이었다. A는 `0x_FF`·`0o_10`·`0b_10`·short timezone, 부정 활용형, renderer top-level 개행을 재현했고 B는 signed/short sexagesimal, `/**` wildcard, 부정문 변형과 candidate CI 취소를 재현했다.
