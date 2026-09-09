@@ -48,17 +48,20 @@ PLAIN_NONSTRING_RE = re.compile(
     r"[-+]?(?:\d(?:_?\d)*)(?:\.(?:\d(?:_?\d)*))?(?:[eE][-+]?\d(?:_?\d)*)?"
     r"|[-+]?(?:\d(?:_?\d)*)\.(?:\d(?:_?\d)*)?(?:[eE][-+]?\d(?:_?\d)*)?"
     r"|[-+]?\.(?:\d(?:_?\d)*)(?:[eE][-+]?\d(?:_?\d)*)?"
-    r"|[-+]?0[xX][0-9a-fA-F](?:_?[0-9a-fA-F])*"
-    r"|[-+]?0[oO][0-7](?:_?[0-7])*"
-    r"|[-+]?0[bB][01](?:_?[01])*"
+    r"|[-+]?0[xX](?:_?[0-9a-fA-F])+"
+    r"|[-+]?0[oO](?:_?[0-7])+"
+    r"|[-+]?0[bB](?:_?[01])+"
     r"|[-+]?(?:\.inf|\.nan)"
-    r"|\d{4}-\d{2}-\d{2}(?:(?:[Tt]|[ \t]+)\d{1,2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[ \t]*[-+]\d{2}(?::?\d{2})?)?)?"
-    r"|\d{1,2}:\d{2}(?::\d{2}(?:\.\d+)?)?"
+    r"|[-+]?\d(?:_?\d)*(?::\d{1,2})+(?:\.\d(?:_?\d)*)?"
+    r"|\d{4}-\d{2}-\d{2}(?:(?:[Tt]|[ \t]+)\d{1,2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[ \t]*[-+]\d{1,2}(?::?\d{2})?)?)?"
     r")$",
     re.IGNORECASE,
 )
 EXTERNAL_CONTRACT_RE = re.compile(r"소비(?:하는|되는)\s+외부\s+계약")
-NEGATED_EVIDENCE_RE = re.compile(r"(?:외부\s+계약|M10|동반\s+PR)[^。.!?\n]{0,20}(?:없음|아님|미확인|불가)")
+NEGATED_EVIDENCE_RE = re.compile(
+    r"(?:아니|아닌|아님|없|않|못|불가|미확인|부재|불가능|\b(?:not|no|without|never)\b)", re.IGNORECASE
+)
+GLOBAL_SURFACE_RE = re.compile(r"^(?:\*|/\*{1,2})$")
 
 
 class RegistryError(ValueError):
@@ -470,7 +473,7 @@ def load_registry(path: Path = DEFAULT_INPUT, *, as_of: date | None = None) -> d
             raise RegistryError(f"exceptions[{index}].reason에 정의되지 않은 task ID가 있음")
         if entry["rule"].startswith("S"):
             if (
-                entry["surface"] == "*"
+                GLOBAL_SURFACE_RE.fullmatch(entry["surface"])
                 or not EXTERNAL_CONTRACT_RE.search(entry["reason"])
                 or NEGATED_EVIDENCE_RE.search(entry["reason"])
             ):
@@ -526,7 +529,18 @@ def _markdown_cell(value: object) -> str:
 
 def render_markdown(registry: dict[str, Any]) -> str:
     """검증된 레지스트리의 결정적 Markdown 표현을 만든다."""
+    if not isinstance(registry, dict) or set(registry) != TOP_LEVEL_KEYS:
+        raise RegistryError("Markdown renderer 입력 registry 키가 올바르지 않음")
+    if not isinstance(registry["schema"], str) or not isinstance(registry["updated"], (date, str)):
+        raise RegistryError("Markdown renderer 입력 schema/updated가 올바르지 않음")
+    apps = registry["apps"]
     entries = registry["exceptions"]
+    if not isinstance(apps, list) or any(not isinstance(app, str) for app in apps):
+        raise RegistryError("Markdown renderer 입력 apps가 올바르지 않음")
+    if not isinstance(entries, list) or any(not isinstance(entry, dict) for entry in entries):
+        raise RegistryError("Markdown renderer 입력 exceptions가 올바르지 않음")
+    schema = _markdown_cell(registry["schema"])
+    updated = _markdown_cell(registry["updated"])
     lines = [
         "<!-- SPDX-License-Identifier: GPL-3.0-or-later -->",
         "<!-- SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie) -->",
@@ -534,9 +548,9 @@ def render_markdown(registry: dict[str, Any]) -> str:
         "",
         "> 이 문서는 [정본 YAML](openapi-exceptions.yaml)에서 생성한 읽기 전용 표다. 수기 편집하지 않는다.",
         "",
-        f"- schema: `{registry['schema']}`",
-        f"- updated: `{registry['updated'].isoformat()}`",
-        f"- apps: {', '.join(f'`{app}`' for app in registry['apps'])}",
+        f"- schema: `{schema}`",
+        f"- updated: `{updated}`",
+        f"- apps: {', '.join(f'`{_markdown_cell(app)}`' for app in apps)}",
         f"- exceptions: **{len(entries)}건**",
         "",
         "| 앱 | 규칙 | 표면 | 사유 | sunset | review | owner |",

@@ -110,6 +110,22 @@ class OpenApiExceptionsTest(unittest.TestCase):
             "Pinvi가 직접 소비하는 외부 계약", "외부 계약 동반 PR 근거 없음", 1
         )
         self._assert_invalid(text, "외부 계약")
+        for reason in (
+            "소비하는 외부 계약은 아니다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 아닌 것으로 확인됐다. M10 동반 PR T-483",
+            "소비하는 외부 계약이 없다. M10 동반 PR T-483",
+        ):
+            with self.subTest(reason=reason):
+                text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
+                    "Pinvi가 직접 소비하는 외부 계약", reason, 1
+                )
+                self._assert_invalid(text, "외부 계약")
+        wildcard = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
+            '    surface: "/v2/*"\n    reason: "v2 성공 envelope',
+            '    surface: "/**"\n    reason: "v2 성공 envelope',
+            1,
+        )
+        self._assert_invalid(wildcard, "외부 계약")
 
     def test_plain_numeric_scalar_is_rejected(self) -> None:
         text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
@@ -120,8 +136,11 @@ class OpenApiExceptionsTest(unittest.TestCase):
     def test_all_yaml_numeric_and_timestamp_plain_scalars_are_rejected(self) -> None:
         for value in (
             "0x10",
+            "0x_FF",
             "0o10",
+            "0o_10",
             "0b10",
+            "0b_10",
             "0123",
             "1_000",
             ".5",
@@ -129,7 +148,12 @@ class OpenApiExceptionsTest(unittest.TestCase):
             "2026-09-06",
             "2026-09-06T00:00:00Z",
             "2026-09-06T00:00:00+09:00",
+            "2026-09-06T00:00:00.123+9:00",
+            "1:2",
             "1:20:30.15",
+            "-1:20",
+            "+1:2:3.4",
+            "123:45",
         ):
             with self.subTest(value=value):
                 text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
@@ -190,6 +214,14 @@ class OpenApiExceptionsTest(unittest.TestCase):
         with self.assertRaises(OE.RegistryError) as context:
             OE.render_markdown(registry)
         self.assertIn("제어·format", str(context.exception))
+
+    def test_markdown_renderer_escapes_directly_mutated_top_level_fields(self) -> None:
+        registry = OE.load_registry(as_of=date(2026, 9, 9))
+        registry["schema"] = "safe\n\n## injected"
+        registry["apps"][0] = "bad\n\n## injected"
+        rendered = OE.render_markdown(registry)
+        self.assertNotIn("\n\n## injected", rendered)
+        self.assertNotIn("bad\n", rendered)
 
     def test_write_rejects_input_output_alias_and_preserves_input(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
