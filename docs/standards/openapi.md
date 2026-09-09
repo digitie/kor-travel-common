@@ -66,15 +66,15 @@
 | ID | 계층 | 규칙 | 현행 근거 | 검사 수단 | 예외 여부 | 비고 |
 |---|---|---|---|---|---|---|
 | S1 | SHOULD | 성공 응답은 `{data, meta}` envelope. `meta = {request_id, duration_ms, page?}`, `data`는 payload만(목록은 `{items:[...]}`) | map·weather `Meta`, pinvi `EnvelopeWithMeta`(`oa` §3.2) | envelope 계약 테스트 | 미채택은 예외가 아니라 매니페스트에 기록 | geo v2 `{status, query_id, ...}`는 예외(`query_id`↔`request_id` 대응만 문서화). airport는 ADR-005로 유보 |
-| S2 | SHOULD | 목록은 cursor 페이지네이션: 요청 `page_size`+opaque `cursor`, 응답 `meta.page{page_size, next_cursor(null=끝), total?}`, `total`은 `include_total=true` opt-in. 관리자 표의 페이지 점프에는 `limit`+`offset` 변형(`meta.page{limit,offset,returned,total}`)을 허용한다. `has_more`는 additive 옵션으로만 | map 표준, weather offset, pinvi·concierge cursor(`oa` §2.6) | 페이지네이션 계약 테스트 | 형식 차이는 비고·매니페스트에 기록 | 이름 충돌(`limit`/`page_size`, `has_more`/`next_cursor`)은 pinvi·concierge 예외 |
-| S3 | SHOULD | cursor는 opaque + 버전 + query fingerprint + HMAC 서명. 위조·재사용은 요청 처리 전 4xx이며 common 기본은 422(`CURSOR_TAMPERED`) | map §1.6.1, concierge fingerprint(`oa` §2.6) | cursor 위조·재사용 회귀 테스트 | 앱별 미채택은 비고에 기록 | concierge 400 `invalid_cursor` 예외 |
+| S2 | SHOULD | 목록은 cursor 페이지네이션: 요청 `page_size`+opaque `cursor`, 응답 `meta.page{page_size, next_cursor(null=끝), total?}`, `total`은 `include_total=true` opt-in. 관리자 표의 페이지 점프에는 `limit`+`offset` 변형(`meta.page{limit,offset,returned,total}`)을 허용한다. `has_more`는 additive 옵션으로만 | map 표준, weather offset, pinvi·concierge cursor(`oa` §2.6) | 페이지네이션 계약 테스트 | 형식 차이는 비고·매니페스트에 기록 | 이름 충돌은 소비자 매니페스트에 기록하며, concierge features export만 외부 계약 예외 |
+| S3 | SHOULD | cursor는 opaque + 버전 + query fingerprint + HMAC 서명. 위조·재사용은 요청 처리 전 4xx이며 common 기본은 422(`CURSOR_TAMPERED`) | map §1.6.1, concierge fingerprint(`oa` §2.6) | cursor 위조·재사용 회귀 테스트 | 앱별 미채택은 비고에 기록 | concierge 400 `invalid_cursor`는 매니페스트 미채택 |
 | S4 | SHOULD | 정렬은 `sort`(enum) + `order`(`asc\|desc`), 다중값은 단수 반복 파라미터, 자유 검색 `q`, lifecycle `status`, 범위 `min_*/max_*`, 시각 `*_from/*_to` | map §1.9 | query parameter 계약 검사 | 앱별 미채택은 비고에 기록 | geo `order_by`, concierge `sort` 값 체계 상이 |
-| S5 | SHOULD | 낙관적 동시성은 strong ETag `"<revision>"` + `If-Match`(누락 428, 불일치 412, 형식 오류 422). 조건부 GET은 `If-None-Match`/304. CORS는 `ETag`, `Retry-After`, `X-Request-ID`를 expose | map(`oa` §2.8) | ETag·If-Match 계약 테스트 | pinvi legacy는 YAML 예외 등록 | pinvi 정수 `If-Match`+409는 무기한 예외(모바일 배포 주기) |
+| S5 | SHOULD | 낙관적 동시성은 strong ETag `"<revision>"` + `If-Match`(누락 428, 불일치 412, 형식 오류 422). 조건부 GET은 `If-None-Match`/304. CORS는 `ETag`, `Retry-After`, `X-Request-ID`를 expose | map(`oa` §2.8) | ETag·If-Match 계약 테스트 | pinvi legacy는 소비자 매니페스트 미채택 | pinvi 정수 `If-Match`+409는 모바일 배포 주기와 함께 재평가 |
 | S6 | SHOULD | 재시도 가능한 비멱등 POST는 UUID `Idempotency-Key`, 재생 시 `Idempotency-Replayed: true`, 본문 불일치 409 | map | idempotency replay 계약 테스트 | 미채택은 비고에 기록 | 다른 앱은 공통 모듈 제공 후 opt-in |
 | S7 | SHOULD | 429는 `Retry-After` 필수 | geo·map·pinvi·ktdm(`oa` §2.9) | 429 `Retry-After` 응답 테스트 | 미채택은 비고에 기록 | — |
-| S7.1 | SHOULD | 상태→코드 사전은 common이 기본값을 소유하고 앱이 덮어쓴다. 429 기본 코드는 `TOO_MANY_REQUESTS`(O-14 기본값). 사전 항목: 400 `BAD_REQUEST`, 401 `UNAUTHORIZED`, 403 `FORBIDDEN`, 404 `NOT_FOUND`, 409 `CONFLICT`, 412 `PRECONDITION_FAILED`, 422 `VALIDATION_ERROR`, 428 `PRECONDITION_REQUIRED`, 429 `TOO_MANY_REQUESTS`, 500 `INTERNAL_ERROR`, 503 `SERVICE_UNAVAILABLE` | map `_ERROR_CODE_BY_STATUS`, pinvi 사전(`oa` §2.5·Q3) | 상태→코드 사전 계약 테스트 | 앱 코드 사전 덮어쓰기는 YAML 예외 등록 | pinvi `RATE_LIMITED`·geo `E0200`은 덮어쓰기(예외 등록) |
+| S7.1 | SHOULD | 상태→코드 사전은 common이 기본값을 소유하고 앱이 덮어쓴다. 429 기본 코드는 `TOO_MANY_REQUESTS`(O-14 기본값). 사전 항목: 400 `BAD_REQUEST`, 401 `UNAUTHORIZED`, 403 `FORBIDDEN`, 404 `NOT_FOUND`, 409 `CONFLICT`, 412 `PRECONDITION_FAILED`, 422 `VALIDATION_ERROR`, 428 `PRECONDITION_REQUIRED`, 429 `TOO_MANY_REQUESTS`, 500 `INTERNAL_ERROR`, 503 `SERVICE_UNAVAILABLE` | map `_ERROR_CODE_BY_STATUS`, pinvi 사전(`oa` §2.5·Q3) | 상태→코드 사전 계약 테스트 | 앱 코드 사전 덮어쓰기는 소비자 매니페스트 미채택 | pinvi `RATE_LIMITED`·geo `E0200`은 매니페스트에 기록 |
 | S8 | SHOULD | operationId는 `generate_unique_id_function`으로 `{tag}_{함수명}`(태그 없으면 함수명)으로 안정화한다 | 7개 앱 FastAPI 기본, 외부 소비처 없음(`oa` §2.3) | operationId export 검사 | 미채택은 비고에 기록 | weather 내부 `split("_")[0]` 판별은 함수명 접두 유지 시 무영향 |
-| S9 | SHOULD | 태그는 kebab-case 라우터 단위, 최상위 `openapi_tags`로 설명 제공 | map 32종 | tag·openapi_tags 검사 | 태그 누락은 YAML 예외 등록 | airport 태그 없음(예외) |
+| S9 | SHOULD | 태그는 kebab-case 라우터 단위, 최상위 `openapi_tags`로 설명 제공 | map 32종 | tag·openapi_tags 검사 | 태그 누락은 소비자 매니페스트 미채택 | airport 태그 없음 |
 | S10 | SHOULD | 프론트 타입은 `openapi-typescript` 7.x 단일 버전(값은 `versions.json`)으로 생성한다. 스크립트 이름 `gen:types`/`gen:types:check`, 출력 경로는 `src/api/types.ts` 또는 `types/api.gen.ts` 하나, CI에서 `gen:types:check`(생성 후 `git diff --exit-code`와 동치) | map 두 패키지, geo(`oa` §2.11) | `gen:types:check` drift 검사 | 수기 타입은 이관 task에 기록 | weather·airport·concierge·ktdm 수기 타입은 생성본과의 호환 assert부터 점진 전환 |
 | S10.1 | SHOULD | pinvi의 Pydantic↔Zod 이중 유지는 "OpenAPI 산출물↔Zod 스키마 일치 테스트"로 검증한다(O-14 기본값). `openapi-typescript` 도입은 강제하지 않는다 | pinvi `packages/schemas`(`oa` Q5) | OpenAPI↔Zod 일치 테스트 | pinvi는 일치 테스트로 대체 | T-484 |
 | S11 | SHOULD | CORS는 브라우저 노출 표면에만 적용하고 service/operator/metrics 표면은 CORS를 광고하지 않는다 | map `SurfaceScopedCORSMiddleware` | 표면별 CORS 회귀 테스트 | 전역 CORS는 비고에 기록 | pinvi·ktdm·concierge 전역 `*` |
@@ -153,10 +153,10 @@
 |---|---|---|---|---|
 | map | M1·M2·M3·M4·M5·M6·M7·M8·M9·S1~S6·S8~S13 | M3.2 `type` URI, BE-3 `starlette<1.0` | T-480(`type`·429 정렬, N4 검토, pin 갱신 동반) | 낮음 |
 | weather | M1(export)·M2·M3·M4·M5·S1·S2(offset 변형) | M6 body 이름, M8.1 소문자 헤더, M9 development 강제 | T-481(`--check` 전환, `HTTP_ERROR` 1종 → S7.1 사전) | 낮음~중간 |
-| airport | M2·M6(좌표 없음)·M7 | M1·M3·M4·N1·N8·S9 | T-482(`code`/`request_id` additive, 스펙 422 정합, `--check` CI, `/readyz` 분리) | 중간 |
-| geo | M1·M2·M9·S8 무영향 | v1: M3·M6·N2·N5 / v2: M3·S1 / M3.1·M5·M8·S7.1 | T-483(health alias 병행, securitySchemes+typegen, admin problem+json opt-in, request-id) | 높음(v1 외부 계약) / 중간(v2·admin) |
-| pinvi | M2·M4·M7(문서상 KST 해석 완화) | M1·M3·M5.1·M8·N5·S2·S5·S7.1·S10.1 | T-484(export·drift 신설, request-id additive, Zod 일치 테스트) | 높음(모바일까지 고정) |
-| concierge | M2 | M1·M3·M4·M5.1·M8·N2·N5·S1·S2(features export)·S3 | T-451(CI 신설)·T-485(export·request-id, features export 계약 문서화) | 중간~높음(map provider 외부 계약) |
+| airport | M2·M6(좌표 없음)·M7 | M1·M3·M4·N1·N8 | T-482(`code`/`request_id` additive, 스펙 422 정합, `--check` CI, `/readyz` 분리) | 중간 |
+| geo | M1·M2·M9·S8 무영향 | v1: M3·M6·N2·N5 / v2: M3·S1 / M3.1·M5·M8 | T-483(health alias 병행, securitySchemes+typegen, admin problem+json opt-in, request-id) | 높음(v1 외부 계약) / 중간(v2·admin) |
+| pinvi | M2·M4·M7(문서상 KST 해석 완화) | M1·M3·M5.1·M8·N5 | T-484(export·drift 신설, request-id additive, Zod 일치 테스트) | 높음(모바일까지 고정) |
+| concierge | M2 | M1·M3·M4·M5.1·M8·N2·N5·S1·S2(features export) | T-451(CI 신설)·T-485(export·request-id, features export 계약 문서화) | 중간~높음(map provider 외부 계약) |
 | ktdm | M2·M4(서버 발급 = `trust_incoming=False`) | M1·M3·M5.1·M7·M8·N2 | T-486(request-id 옵션, quality) | 중간 |
 
 ### 5.1 신규 표면 체크리스트
@@ -183,7 +183,7 @@
 - app: geo                       # airport | concierge | ktdm | geo | map | weather | pinvi
   rule: M3                       # 이 문서의 ID(M/S/N, 점 번호 포함) 또는 backend-stack.md의 BE-n
   surface: "/v1/*"               # 경로 접두, profile 이름, 또는 "*"(앱 전체)
-  reason: "…"                    # 사실 근거(조사 절)와 정합 task ID를 반드시 포함
+  reason: "…"                    # 사실 근거와 실제 원장에 정의된 정합 task ID(T-NNN)를 반드시 포함
   sunset: null                   # ISO 날짜 또는 null(무기한). 계층 1 규칙은 null 금지
   review: 2026-12-31             # ISO 날짜. 등록일 + 6개월 이내, 분기 감사(T-506) 주기에 맞춤
   owner: kor-travel-geo          # 예외를 닫을 저장소
@@ -195,7 +195,7 @@
 2. `sunset`이 지난 항목은 `check-versions`의 `EXEMPT_EXPIRED`와 같은 취급으로 CI가 `::error::`를 낸다(report 모드에서도). 연장은 새 `review`와 사유를 적은 common PR로만 한다.
 3. `review`가 지난 항목은 분기 감사(T-506)에서 재판정한다. 재판정 결과는 유지(새 `review`)·축소(`surface` 좁힘)·삭제 중 하나다.
 4. 소비 저장소 매니페스트 `kor-travel-common.lock.json`의 `openapi.exceptions`는 이 레지스트리에서 자기 앱 항목의 `rule`·`surface` 목록을 그대로 복사한다(D-19). 매니페스트에만 있고 레지스트리에 없는 예외는 무효다.
-5. 계층 3(S1~S13) 미채택은 예외가 아니라 "미채택"이며 등록하지 않는다. 단 외부 계약(concierge features export)처럼 변경이 타 저장소를 깨뜨리는 경우는 계층 3이라도 등록해 M10과 같은 동반 PR 규칙을 적용한다.
+5. 계층 3(S1~S13) 미채택은 예외가 아니라 "미채택"이며 소비자 매니페스트에만 기록한다. 단 geo v2처럼 타 저장소가 직접 소비하거나 concierge features export처럼 변경이 타 저장소를 깨뜨리는 **외부 계약**은 구체적인 `surface`로 등록할 수 있다. 이때 `reason`에는 `외부 계약`, 정합 task ID, `M10` 또는 동반 PR 근거를 모두 적고 validator가 이를 강제한다. 앱 전체(`*`) SHOULD 예외는 허용하지 않는다.
 6. 초기 등록(D-14)은 geo v1·geo v2 envelope·pinvi `{error:{}}`·정수 `If-Match`+409·비버저닝 경로·concierge `/api/v1`·`{detail}`·features export·ktdm `/api/v1`·`{detail}`·airport 스펙 422 불일치·map `starlette<1.0`이며, 조사에서 확인된 나머지 미준수 항목도 같은 형식으로 함께 등록했다.
 
 ### 6.3 소비자 매니페스트 발췌

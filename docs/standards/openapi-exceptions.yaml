@@ -6,6 +6,7 @@
 # - 항목 형식: {app, rule, surface, reason, sunset, review, owner} 7개 필드 고정.
 #   sunset: ISO 날짜 또는 null(무기한). 즉시 MUST(M2·M4·M9·N6·N7)는 null 금지.
 #   review: ISO 날짜(등록일 + 6개월 이내). 분기 감사(T-506)에서 재판정한다.
+# - S1~S13은 외부 계약 표면만 등록하며 reason에 외부 계약·정합 task·M10 동반 PR 근거를 적는다.
 # - 사람이 읽는 표(docs/standards/openapi-exceptions.md)는 tools/openapi_exceptions.py가 이 파일로부터 생성한다. 수기 편집 금지.
 # - 근거 약칭 oa = docs/survey/cross/openapi.md, be = docs/survey/cross/backend.md (기준 커밋은 docs/survey/README.md §2.1).
 # - 초기 등록: 브리프 D-14(2026-09-06). 실행 검증은 하지 않았고 조사 파일 기준 사실만 등록했다.
@@ -19,49 +20,49 @@ exceptions:
   - app: geo
     rule: M3
     surface: "/v1/*"
-    reason: "VWorld 호환 오류 객체(VWorldErrorEnvelope)·legacy `{response:{status,errorCode}}`는 외부 계약(oa §2.5). problem+json 적용 불가."
+    reason: "VWorld 호환 오류 객체(VWorldErrorEnvelope)·legacy `{response:{status,errorCode}}`는 외부 계약(oa §2.5). problem+json 적용 불가. geo 이관은 T-483."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-geo
   - app: geo
     rule: M6
     surface: "/v1/*"
-    reason: "v1 `Point{x=lon,y=lat}`는 VWorld 호환 계약(oa §2.7, geo ADR-060 §7). v2는 lon/lat 준수."
+    reason: "v1 `Point{x=lon,y=lat}`는 VWorld 호환 계약(oa §2.7, geo ADR-060 §7). v2는 lon/lat 준수. geo 이관은 T-483."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-geo
   - app: geo
     rule: N5
     surface: "/v1/*"
-    reason: "M6 예외와 동일 사유(x/y 혼용은 VWorld 호환 legacy)."
+    reason: "M6 예외와 동일 사유(x/y 혼용은 VWorld 호환 legacy). geo 이관은 T-483."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-geo
   - app: geo
     rule: N2
     surface: "/v1/*"
-    reason: "VWorld 호환 `?key=` 공개 키 수신(oa §2.4). 문서화된 legacy 예외. 신규 표면에는 헤더 `X-KTG-API-Key`만."
+    reason: "VWorld 호환 `?key=` 공개 키 수신(oa §2.4). 문서화된 legacy 예외. 신규 표면에는 헤더 `X-KTG-API-Key`만. geo 이관은 T-483."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-geo
   - app: geo
     rule: M3
     surface: "/v2/*"
-    reason: "v2 envelope `{status:'ERROR', query_id, error:{code,message,hint,field}}`(oa §2.5). `query_id`↔`request_id` 대응을 문서화하고 problem+json 채택 여부는 ADR-060 배포 전 breaking 묶음에서 판정(O-14)."
+    reason: "v2 envelope `{status:'ERROR', query_id, error:{code,message,hint,field}}`(oa §2.5). `query_id`↔`request_id` 대응을 문서화하고 problem+json 채택 여부는 ADR-060 배포 전 breaking 묶음에서 판정(O-14). T-483."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-geo
   - app: geo
     rule: S1
     surface: "/v2/*"
-    reason: "v2 성공 envelope `{status, query_id, input, ...}`(oa §3.2 S1 비고). `{data, meta}` 미채택. M3 v2 항목과 같은 시점에 재판정."
+    reason: "v2 성공 envelope `{status, query_id, input, ...}`(oa §3.2 S1 비고)는 Pinvi가 직접 소비하는 외부 계약이다. `{data, meta}` 미채택을 M3 v2와 함께 재판정하며 map M10과 같은 동반 PR 규칙을 적용한다. T-483."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-geo
   - app: geo
     rule: M3.1
     surface: "*"
-    reason: "검증 오류 400(geo ADR-061 사용자 결정, FastAPI 422 억제; oa §2.5·Q2). common 기본 422과 다름."
+    reason: "검증 오류 400(geo ADR-061 사용자 결정, FastAPI 422 억제; oa §2.5·Q2). common 기본 422과 다름. T-483."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-geo
@@ -79,14 +80,6 @@ exceptions:
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-geo
-  - app: geo
-    rule: S7.1
-    surface: "*"
-    reason: "429 코드 `E0200`(admission control, oa §2.9). 앱 사전 덮어쓰기 유지."
-    sunset: null
-    review: "2026-12-31"
-    owner: kor-travel-geo
-
   # ---------------------------------------------------------------- pinvi
   - app: pinvi
     rule: M3
@@ -96,16 +89,9 @@ exceptions:
     review: "2026-12-31"
     owner: pinvi
   - app: pinvi
-    rule: S5
-    surface: "/trips/*, /trips/{trip_id}/pois/*"
-    reason: "정수 `If-Match`(따옴표 없음) 불일치 시 409 `VERSION_CONFLICT`(oa §2.8). 문서·클라이언트·모바일까지 고정, 모바일 배포 주기 종속(oa Q4)."
-    sunset: null
-    review: "2026-12-31"
-    owner: pinvi
-  - app: pinvi
     rule: M5.1
     surface: "*"
-    reason: "전 경로 비버저닝(`api_router = APIRouter()`, docs/api/common.md §13 'v1.0 단계 prefix /'; oa §2.2). BFF 뒤 표면이라 sunset null 허용."
+    reason: "전 경로 비버저닝(`api_router = APIRouter()`, docs/api/common.md §13 'v1.0 단계 prefix /'; oa §2.2). BFF 뒤 표면이라 sunset null 허용. T-484."
     sunset: null
     review: "2026-12-31"
     owner: pinvi
@@ -124,39 +110,17 @@ exceptions:
     review: "2026-12-31"
     owner: pinvi
   - app: pinvi
-    rule: S2
-    surface: "*"
-    reason: "`meta{cursor, has_more, total?, page?, limit?}`와 admin `page`+`limit`(oa §2.6); admin 일부 스키마 `next_cursor` 필드로 문서와 이름 불일치. 이름 전환은 M3 v2 시점에 묶음."
-    sunset: null
-    review: "2026-12-31"
-    owner: pinvi
-  - app: pinvi
     rule: N5
     surface: "docs/api/common.md §4.2 bbox"
-    reason: "bbox 문서 예시 `sw_lng,sw_lat,ne_lng,ne_lat`(oa §2.7). 코드 표면은 (lon, lat) 준수. 문서 정정은 pinvi 소유."
+    reason: "bbox 문서 예시 `sw_lng,sw_lat,ne_lng,ne_lat`(oa §2.7). 코드 표면은 (lon, lat) 준수. 문서 정정은 pinvi 소유. T-484."
     sunset: null
     review: "2026-12-31"
     owner: pinvi
-  - app: pinvi
-    rule: S7.1
-    surface: "*"
-    reason: "429 코드 `RATE_LIMITED`·`RATE_LIMIT_BLOCKED`(RateLimitMiddleware, oa §2.9). 앱 사전 덮어쓰기 유지."
-    sunset: null
-    review: "2026-12-31"
-    owner: pinvi
-  - app: pinvi
-    rule: S10.1
-    surface: "apps/web, apps/mobile"
-    reason: "Pydantic↔Zod 이중 유지 정책(oa Q5). `openapi-typescript` 대신 OpenAPI 산출물↔Zod 일치 테스트로 검증(O-14 기본값). T-484."
-    sunset: null
-    review: "2026-12-31"
-    owner: pinvi
-
   # ---------------------------------------------------------------- concierge
   - app: concierge
     rule: M5.1
     surface: "*"
-    reason: "버전 prefix `/api/v1`(routes.py:82-84; oa §2.2). Next BFF 뒤 표면이라 sunset null 허용."
+    reason: "버전 prefix `/api/v1`(routes.py:82-84; oa §2.2). Next BFF 뒤 표면이라 sunset null 허용. T-485."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-concierge
@@ -176,8 +140,8 @@ exceptions:
     owner: kor-travel-concierge
   - app: concierge
     rule: S2
-    surface: "*"
-    reason: "list envelope `{items, next_cursor, has_more, total, newest_id, newer_than}`(oa §2.6). features export는 `{items,next_cursor,has_more}`로 외부 계약."
+    surface: "GET /api/v1/features/snapshot, GET /api/v1/features/changes"
+    reason: "list envelope `{items, next_cursor, has_more, total, newest_id, newer_than}`(oa §2.6). features export는 `{items,next_cursor,has_more}`로 map provider가 소비하는 외부 계약이다. 변경 시 M10과 같은 동반 PR을 적용한다. T-485."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-concierge
@@ -205,30 +169,22 @@ exceptions:
   - app: concierge
     rule: N2
     surface: "*"
-    reason: "DB 발급 read 키 `?key=` 허용(oa §2.4). 신규 표면에는 `X-API-Key`만."
+    reason: "DB 발급 read 키 `?key=` 허용(oa §2.4). 신규 표면에는 `X-API-Key`만. T-485."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-concierge
   - app: concierge
     rule: N5
     surface: "*"
-    reason: "`latitude`/`longitude` 필드(routes.py:176-197; oa §2.7). Next BFF 동시 수정 필요."
+    reason: "`latitude`/`longitude` 필드(routes.py:176-197; oa §2.7). Next BFF 동시 수정 필요. T-485."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-concierge
-  - app: concierge
-    rule: S3
-    surface: "*"
-    reason: "cursor 훼손 시 400 `invalid_cursor`(docs/list-api-contract.md; oa §2.6). common 기본 422과 다름."
-    sunset: null
-    review: "2026-12-31"
-    owner: kor-travel-concierge
-
   # ---------------------------------------------------------------- ktdm
   - app: ktdm
     rule: M5.1
     surface: "*"
-    reason: "버전 prefix `/api/v1`(main.py:264-267; oa §2.2). 자체 Next 프론트 단일 소비자."
+    reason: "버전 prefix `/api/v1`(main.py:264-267; oa §2.2). 자체 Next 프론트 단일 소비자. T-486."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-docker-manager
@@ -256,14 +212,14 @@ exceptions:
   - app: ktdm
     rule: N2
     surface: "/metrics"
-    reason: "`KTDM_METRICS_REQUIRE_KEY=1`일 때 `?key=` 게이트(oa §2.4·Q11). Prometheus scrape 설정 종속."
+    reason: "`KTDM_METRICS_REQUIRE_KEY=1`일 때 `?key=` 게이트(oa §2.4·Q11). Prometheus scrape 설정 종속. T-486."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-docker-manager
   - app: ktdm
     rule: M7
     surface: "*"
-    reason: "DB naive UTC(`_time.py`, SQLite DateTime 호환 목적; be §2.12). 응답 직렬화 시 offset 부여 필요, 전환은 명시 결정."
+    reason: "DB naive UTC(`_time.py`, SQLite DateTime 호환 목적; be §2.12). 응답 직렬화 시 offset 부여 필요, 전환은 명시 결정. T-486."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-docker-manager
@@ -304,14 +260,6 @@ exceptions:
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-airport
-  - app: airport
-    rule: S9
-    surface: "*"
-    reason: "태그 없음(export본 `tags` 전부 null), `info.version` 미지정(oa §2.1·§2.2). T-482에서 정합."
-    sunset: null
-    review: "2026-12-31"
-    owner: kor-travel-airport
-
   # ---------------------------------------------------------------- weather
   - app: weather
     rule: M9
@@ -323,14 +271,14 @@ exceptions:
   - app: weather
     rule: M8.1
     surface: "/v1/admin/*"
-    reason: "admin 토큰 헤더가 소문자 `x-admin-token`으로 `X-<AppId>-<Purpose>` 형식 밖(oa §2.4). BFF `route.ts`가 주입하므로 이름 변경은 프론트 동반."
+    reason: "admin 토큰 헤더가 소문자 `x-admin-token`으로 `X-<AppId>-<Purpose>` 형식 밖(oa §2.4). BFF `route.ts`가 주입하므로 이름 변경은 프론트 동반. T-481."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-weather
   - app: weather
     rule: M6
     surface: "POST body (routers/weather.py:493-494)"
-    reason: "query는 `lat`/`lon` 준수, body는 `latitude`/`longitude`(oa §2.7). admin UI 수기 타입 동반 수정."
+    reason: "query는 `lat`/`lon` 준수, body는 `latitude`/`longitude`(oa §2.7). admin UI 수기 타입 동반 수정. T-481."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-weather

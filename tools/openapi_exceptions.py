@@ -13,9 +13,12 @@ from __future__ import annotations
 
 import argparse
 import calendar
+import html
 import json
+import os
 import re
 import sys
+import tempfile
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -37,6 +40,12 @@ CORE_RULE_IDS = frozenset(
 )
 ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 RULE_RE = re.compile(r"^[MSN]\d+(?:\.\d+)?$|^BE-\d+$")
+TASK_REFERENCE_RE = re.compile(r"(?<![A-Za-z0-9])T-\d{3}[a-z]?(?![A-Za-z0-9])")
+PLAIN_NONSTRING_RE = re.compile(
+    r"^(?:[-+]?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][-+]?\d+)?|[-+]?\.inf|\.nan|"
+    r"\d{4}-\d{2}-\d{2}|\d{2}:\d{2}:\d{2})$",
+    re.IGNORECASE,
+)
 
 
 class RegistryError(ValueError):
@@ -56,25 +65,44 @@ def _error(message: str, line: int | None = None) -> RegistryError:
     return RegistryError(f"{message} (line {line})")
 
 
+def _validate_text(value: str, context: str) -> str:
+    """출력·키·값을 오염시키는 제어 문자와 lone surrogate를 거부한다."""
+    for character in value:
+        codepoint = ord(character)
+        if codepoint < 0x20 or codepoint == 0x7F:
+            raise RegistryError(f"{context}에 제어 문자가 있음")
+        if 0xD800 <= codepoint <= 0xDFFF:
+            raise RegistryError(f"{context}에 유효하지 않은 surrogate가 있음")
+    return value
+
+
 def _strip_comment(raw: str, number: int) -> str:
     """인용 문자열 밖의 공백 뒤 `#`를 주석으로 제거한다."""
     quote = ""
     escaped = False
-    for index, char in enumerate(raw):
+    index = 0
+    while index < len(raw):
+        char = raw[index]
         if quote:
-            if quote == '"' and escaped:
-                escaped = False
-            elif quote == '"' and char == "\\":
-                escaped = True
-            elif quote == "'" and char == "'" and index + 1 < len(raw) and raw[index + 1] == "'":
-                escaped = True
-            elif char == quote:
-                quote = ""
+            if quote == '"':
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == '"':
+                    quote = ""
+            elif char == "'":
+                if index + 1 < len(raw) and raw[index + 1] == "'":
+                    index += 1
+                else:
+                    quote = ""
+            index += 1
             continue
         if char in {"'", '"'}:
             quote = char
         elif char == "#" and (index == 0 or raw[index - 1].isspace()):
             return raw[:index].rstrip()
+        index += 1
     if quote:
         raise _error("인용 문자열이 닫히지 않음", number)
     return raw.rstrip()
@@ -90,6 +118,7 @@ class _FlatYamlParser:
                 raw = raw[1:]
             if "\t" in raw or "\x00" in raw:
                 raise _error("탭·NUL은 허용하지 않음", number)
+            _validate_text(raw, f"line {number}")
             clean = _strip_comment(raw, number)
             if not clean.strip():
                 continue
@@ -103,16 +132,23 @@ class _FlatYamlParser:
     def _split_pair(content: str, number: int) -> tuple[str, str] | None:
         quote = ""
         escaped = False
-        for index, char in enumerate(content):
+        index = 0
+        while index < len(content):
+            char = content[index]
             if quote:
-                if quote == '"' and escaped:
-                    escaped = False
-                elif quote == '"' and char == "\\":
-                    escaped = True
-                elif quote == "'" and char == "'" and index + 1 < len(content) and content[index + 1] == "'":
-                    escaped = True
-                elif char == quote:
-                    quote = ""
+                if quote == '"':
+                    if escaped:
+                        escaped = False
+                    elif char == "\\":
+                        escaped = True
+                    elif char == '"':
+                        quote = ""
+                elif char == "'":
+                    if index + 1 < len(content) and content[index + 1] == "'":
+                        index += 1
+                    else:
+                        quote = ""
+                index += 1
                 continue
             if char in {"'", '"'}:
                 quote = char
@@ -121,6 +157,7 @@ class _FlatYamlParser:
                 if not key:
                     raise _error("빈 YAML 키", number)
                 return key, content[index + 1 :].strip()
+            index += 1
         if quote:
             raise _error("인용 문자열이 닫히지 않음", number)
         return None
@@ -141,7 +178,7 @@ class _FlatYamlParser:
                 raise _error("single quote escape 오류", number)
             result.append("'")
             index += 2
-        return "".join(result)
+        return _validate_text("".join(result), f"line {number} scalar")
 
     @staticmethod
     def _decode_double(value: str, number: int) -> str:
@@ -153,7 +190,7 @@ class _FlatYamlParser:
             raise _error("double quote escape 오류", number) from exc
         if not isinstance(decoded, str):
             raise _error("문자열이 아닌 scalar", number)
-        return decoded
+        return _validate_text(decoded, f"line {number} scalar")
 
     def _scalar(self, raw: str, number: int) -> object:
         value = raw.strip()
@@ -169,16 +206,23 @@ class _FlatYamlParser:
             start = 0
             quote = ""
             escaped = False
-            for index, char in enumerate(inner):
+            index = 0
+            while index < len(inner):
+                char = inner[index]
                 if quote:
-                    if quote == '"' and escaped:
-                        escaped = False
-                    elif quote == '"' and char == "\\":
-                        escaped = True
-                    elif quote == "'" and char == "'" and index + 1 < len(inner) and inner[index + 1] == "'":
-                        escaped = True
-                    elif char == quote:
-                        quote = ""
+                    if quote == '"':
+                        if escaped:
+                            escaped = False
+                        elif char == "\\":
+                            escaped = True
+                        elif char == '"':
+                            quote = ""
+                    elif char == "'":
+                        if index + 1 < len(inner) and inner[index + 1] == "'":
+                            index += 1
+                        else:
+                            quote = ""
+                    index += 1
                     continue
                 if char in {"'", '"'}:
                     quote = char
@@ -190,6 +234,7 @@ class _FlatYamlParser:
                         raise _error("flow sequence 항목이 비어 있음", number)
                     parts.append(part)
                     start = index + 1
+                index += 1
             if quote:
                 raise _error("flow sequence 인용 문자열이 닫히지 않음", number)
             part = inner[start:].strip()
@@ -211,7 +256,9 @@ class _FlatYamlParser:
             raise _error("plain scalar 안의 mapping colon은 허용하지 않음", number)
         if value[:1] in {",", "]", "}"}:
             raise _error("잘못된 flow scalar", number)
-        return value
+        if value.lower() in {"true", "false", "yes", "no", "on", "off"} or PLAIN_NONSTRING_RE.fullmatch(value):
+            raise _error("plain scalar는 문자열로 해석되는 값만 허용함", number)
+        return _validate_text(value, f"line {number} scalar")
 
     def _key(self, raw: str, number: int) -> str:
         value = self._scalar(raw, number)
@@ -339,6 +386,19 @@ def _rule_ids() -> set[str]:
     return ids
 
 
+def _task_ids() -> set[str]:
+    """common task 원장에서 실제로 정의된 task ID를 수집한다."""
+    paths = [ROOT / "docs" / "tasks.md", *(ROOT / "docs" / "tasks").glob("T-*.md")]
+    ids: set[str] = set()
+    for path in paths:
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            raise RegistryError(f"task 원장을 읽을 수 없음: {path}") from exc
+        ids.update(TASK_REFERENCE_RE.findall(text))
+    return ids
+
+
 def load_registry(path: Path = DEFAULT_INPUT, *, as_of: date | None = None) -> dict[str, Any]:
     """YAML을 읽고 레지스트리 계약을 검증한 뒤 plain dict로 반환한다."""
     try:
@@ -365,14 +425,29 @@ def load_registry(path: Path = DEFAULT_INPUT, *, as_of: date | None = None) -> d
     if not isinstance(entries, list) or not entries:
         raise RegistryError("exceptions는 비어 있지 않은 list여야 함")
     valid_rules = _rule_ids()
+    valid_tasks = _task_ids()
     seen: set[tuple[str, str, str]] = set()
     today = as_of or date.today()
+    if updated > today:
+        raise RegistryError("updated가 검사 기준일보다 미래일 수 없음")
     for index, entry in enumerate(entries, 1):
         if not isinstance(entry, dict) or set(entry) != ENTRY_KEYS:
             raise RegistryError(f"exceptions[{index}] 키는 정확히 {sorted(ENTRY_KEYS)}여야 함")
         for key in ("app", "rule", "surface", "reason", "owner"):
             if not isinstance(entry[key], str) or not entry[key].strip():
                 raise RegistryError(f"exceptions[{index}].{key}는 비어 있지 않은 문자열이어야 함")
+        task_references = TASK_REFERENCE_RE.findall(entry["reason"])
+        if not task_references:
+            raise RegistryError(f"exceptions[{index}].reason에 정합 task ID가 없음")
+        if any(task_id not in valid_tasks for task_id in task_references):
+            raise RegistryError(f"exceptions[{index}].reason에 정의되지 않은 task ID가 있음")
+        if entry["rule"].startswith("S"):
+            if entry["surface"] == "*" or "외부 계약" not in entry["reason"]:
+                raise RegistryError(
+                    f"exceptions[{index}] SHOULD 예외는 구체적인 외부 계약 표면만 등록할 수 있음"
+                )
+            if "M10" not in entry["reason"] and "동반 PR" not in entry["reason"]:
+                raise RegistryError(f"exceptions[{index}] SHOULD 외부 계약 예외는 동반 PR 근거가 필요함")
         if entry["app"] not in apps or entry["app"] not in ALLOWED_APPS:
             raise RegistryError(f"exceptions[{index}].app가 apps 목록에 없음")
         if not RULE_RE.fullmatch(entry["rule"]) or entry["rule"] not in valid_rules:
@@ -399,7 +474,22 @@ def load_registry(path: Path = DEFAULT_INPUT, *, as_of: date | None = None) -> d
 def _markdown_cell(value: object) -> str:
     if value is None:
         return "null"
-    return str(value).replace("|", "\\|").replace("\r", " ").replace("\n", " ")
+    text = html.escape(str(value).replace("\r", " ").replace("\n", " "), quote=False)
+    for character, entity in {
+        "\\": "&#92;",
+        "|": "&#124;",
+        "[": "&#91;",
+        "]": "&#93;",
+        "(": "&#40;",
+        ")": "&#41;",
+        "`": "&#96;",
+        "*": "&#42;",
+        "_": "&#95;",
+        "~": "&#126;",
+        "!": "&#33;",
+    }.items():
+        text = text.replace(character, entity)
+    return text
 
 
 def render_markdown(registry: dict[str, Any]) -> str:
@@ -446,15 +536,55 @@ def _display_path(path: Path) -> str:
         return str(path)
 
 
+def _ensure_distinct_paths(input_path: Path, output_path: Path) -> None:
+    """input 정본과 생성물 alias를 차단한다."""
+    try:
+        if input_path.resolve(strict=False) == output_path.resolve(strict=False):
+            raise RegistryError("input과 output은 같은 파일일 수 없음")
+    except OSError as exc:
+        raise RegistryError("input/output 경로를 확인할 수 없음") from exc
+    if input_path.exists() and output_path.exists():
+        try:
+            if os.path.samefile(input_path, output_path):
+                raise RegistryError("input과 output은 같은 파일일 수 없음")
+        except OSError:
+            # 서로 다른 파일이거나 아직 samefile을 지원하지 않는 파일 시스템이다.
+            pass
+
+
 def generate(input_path: Path = DEFAULT_INPUT, output_path: Path = DEFAULT_OUTPUT) -> tuple[int, int]:
+    _ensure_distinct_paths(input_path, output_path)
     registry = load_registry(input_path)
     rendered = render_markdown(registry)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(rendered, encoding="utf-8", newline="\n")
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            newline="\n",
+            dir=output_path.parent,
+            prefix=f".{output_path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary_path = Path(handle.name)
+            handle.write(rendered)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary_path, output_path)
+    except Exception:
+        if temporary_path is not None:
+            try:
+                temporary_path.unlink(missing_ok=True)
+            except OSError:
+                pass
+        raise
     return len(registry["exceptions"]), len(rendered.splitlines())
 
 
 def check(input_path: Path = DEFAULT_INPUT, output_path: Path = DEFAULT_OUTPUT) -> tuple[bool, str]:
+    _ensure_distinct_paths(input_path, output_path)
     registry = load_registry(input_path)
     expected = render_markdown(registry)
     try:
