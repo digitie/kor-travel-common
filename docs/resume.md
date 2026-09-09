@@ -8,7 +8,7 @@ T-103 대비·UX 검사기 구현과 반복 리뷰의 근본 수정을 완료했
 
 ## 다음 한 작업
 
-**T-301 post-fix-07 후보 준비 중.** `openapi.md`의 core 규칙 30개에 계층·검사 수단·예외 여부를 명시하고, M10은 ADR-009에 맞게 교차 저장소 MUST로 분리했다. `openapi-exceptions.yaml` 39건을 7키·실재 task 파일명·규칙 ID·날짜·sunset으로 검증하며 `openapi-exceptions.md`를 생성하는 stdlib 도구를 유지한다. 반복 no-go의 근본 원인은 자유 자연어 substring을 계약·증명으로 해석하고, 후보 SHA와 현재 문서 evidence를 한 immutable 기준선으로 묶지 않은 것이었다. 기능 commit `465ac00`은 긍정 assertion 종결·M10/동반 PR·task ID의 Unicode/underscore/접미사 경계, YAML 예약 indicator와 부정·불확정 reason을 fail-closed로 닫았고 focused 31개·full 368개 unittest를 통과했다. 현재 gate는 문서 542/2584·plan 106·SPDX 70·redaction/secret 693/0이며, docs closure commit과 새 manifest를 고정한 같은 SHA를 두 reviewer가 재검토한 뒤 통합 evidence·task closure·draft PR merge·main CI 확인을 순서대로 진행한다. T-010a의 실제 소비자 dispatch는 외부 선행으로 계속 BLOCKED다.
+**T-301 post-fix-08 후보 준비 중.** `openapi.md`의 core 규칙 30개에 계층·검사 수단·예외 여부를 명시하고, M10은 ADR-009에 맞게 교차 저장소 MUST로 분리했다. `openapi-exceptions.yaml` 39건을 7키·실재 task 파일명·규칙 ID·날짜·sunset으로 검증하며 `openapi-exceptions.md`를 생성하는 stdlib 도구를 유지한다. 반복 no-go의 근본 원인은 자유 자연어 substring·열린 delimiter·ASCII 정규식 경계로 증명 여부를 판정하고, 회귀 시험이 앞 predicate에서 조기 거부되어 실제 경계를 검증하지 못한 것이었다. 기능 commit `8959af9`는 긍정 assertion을 닫힌 `계약이다.`·`계약임.`으로 제한하고, 부정·불확정 어휘의 공백·underscore·Unicode 하이픈 변형을 fail-closed로 검사하며, M10·동반 PR·task ID를 결합문자까지 포함하는 공통 Unicode scanner로 검증한다. YAML `- foo`·`? foo` 예약 indicator도 parser 단계에서 거부하고, focused 36개·full 373개 unittest와 문서 545/2584·plan 106·SPDX 70·redaction/secret 696/0 gate를 통과했다. 현재 문서 closure와 immutable manifest를 같은 후보 SHA로 고정한 뒤 두 reviewer가 재검토하고, PASS 때만 통합 evidence·task closure·draft PR merge·main CI 확인을 순서대로 진행한다. T-010a의 실제 소비자 dispatch는 외부 선행으로 계속 BLOCKED다.
 
 ## 시작 파일과 검증
 

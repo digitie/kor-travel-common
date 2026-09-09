@@ -8,6 +8,12 @@ post-fix-06 A/B가 같은 immutable 후보 `d88f2a0446e114541f52de169630cd09e27f
 
 이번 수정은 자유 substring을 허용하지 않고 긍정 assertion을 `이다`·`임`·여는 괄호로 닫는 문법으로 제한했다. M10·동반 PR·task ID는 Unicode identifier·underscore·점/접미사 경계를 포함한 exact token으로 검사하며, 부정·불확정 어휘와 YAML 예약 indicator는 fail-closed로 거부한다. 기능 commit `465ac00`의 focused 31개·full 368개 unittest와 현재 gate 문서 542/2584·plan 106·SPDX 70·redaction/secret 693/0을 확인했다. docs closure와 immutable manifest를 같은 후보 기준으로 고정한 뒤 두 reviewer에게 재검토를 요청한다. 소비자 build/e2e·npm/PyPI·Release·actionlint는 common 범위 밖 `NOT_RUN`이다.
 
+## 2026-09-09 (Codex, T-301 post-fix-08 수정 준비)
+
+post-fix-07 A는 opener·부정/불확정 문장·combining mark·YAML 예약 indicator를 P1로, B는 질문형 assertion·불확정 어휘·Unicode token 경계를 P2로 재현했다. 공통 원인은 자유 reason을 부분 정규식으로 판정하면서 opener의 종결과 Unicode 경계를 구조적으로 검사하지 않았고, 회귀 시험의 corpus가 assertion predicate에서 먼저 거부되어 실제 negative/token 경계를 확인하지 못한 것이었다.
+
+`8959af9`는 외부 계약 assertion을 닫힌 `계약이다.`·`계약임.` 문법으로 좁히고, 부정·불확정 한국어·영어 표현을 공백·underscore·Unicode hyphen 변형까지 검사한다. M10·동반 PR·task ID는 `L/N/M` 범주의 유니코드 문자와 결합문자를 continuation으로 처리하는 scanner로 통합했으며, `- foo`·`? foo` 형태의 YAML 예약 indicator는 scalar parser에서 거부한다. concierge S1 사유도 닫힌 assertion 문법으로 정본을 맞췄다. 접두·접미 substring assertion과 이중 종결 회귀도 추가했다. focused 36개·full 373개 unittest, 문서 링크 545/2584, plan 106, SPDX 70, redaction/secret 696/0, `openapi_exceptions.py --check`를 통과했다. 소비자 build/e2e·npm/PyPI·Release·actionlint는 `NOT_RUN(범위 밖)`이다. 문서 closure와 candidate SHA/manifest를 고정한 뒤 A/B post-fix-08 재검토를 진행한다.
+
 ## 2026-09-09 (Codex, T-301 post-fix-05 수정 준비)
 
 post-fix-04 A/B가 새 표기와 문서 candidate를 독립적으로 공격했으며 모두 BLOCK했다. 반복 no-go의 공통 원인은 자연어 substring을 증거로 사용한 것과 candidate·문서·CI SHA를 한 immutable 기준선으로 묶지 않은 것이었다. A는 `0x_FF`·`0o_10`·`0b_10`·short timezone, 부정 활용형, renderer top-level 개행을 재현했고 B는 signed/short sexagesimal, `/**` wildcard, 부정문 변형과 candidate CI 취소를 재현했다.
