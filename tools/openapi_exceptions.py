@@ -70,13 +70,17 @@ NEGATED_EVIDENCE_RE = re.compile(
     r"불확실|불승인|부적합|거절|무의미|아마|검증\s*중|검증되지|검증\s*필요|"
     r"확인\s*중|확인되지|확인\s*필요|존재하지|추정|가능성|가능|미검증|미확인|"
     r"미정|보류|모호|불명|잠정|의심|가정|가설|일\s*수|일\s*지도|듯|"
-    r"(?<![가-힣])미\s*[가-힣]+|"
+    r"(?<![가-힣])미[-\s]*[가-힣]+|"
     r"\b(?:"
     r"(?:not|no|none|neither|false|invalid|unavailable|unsupported|inapplicable|"
     r"unverified|uncertain|unknown|pending|maybe|perhaps|possibly|probabl(?:y|e)|"
     r"rejected|disallowed|without|never|absent|absence|non)"
     r"(?:[-_\s\u2010-\u2015\u2212\ufe58\ufe63\uff0d]*[a-z0-9]+)*|"
-    r"isn['’]?t|can['’]?t|cannot|doesn['’]?t|"
+    r"isn['’]?t|isnt|can['’]?t|cant|cannot|doesn['’]?t|doesnt|"
+    r"don['’]?t|dont|didn['’]?t|didnt|won['’]?t|wont|"
+    r"shouldn['’]?t|shouldnt|couldn['’]?t|couldnt|wouldn['’]?t|wouldnt|"
+    r"aren['’]?t|arent|wasn['’]?t|wasnt|weren['’]?t|werent|"
+    r"haven['’]?t|havent|hasn['’]?t|hasnt|hadn['’]?t|hadnt|"
     r"might|could|may|"
     r"non(?:[-_\s\u2010-\u2015\u2212\ufe58\ufe63\uff0d]*[a-z0-9]+)+"
     r")\b)",
@@ -121,6 +125,12 @@ def _task_references(text: str) -> list[str]:
         if _is_exact_token_at(text, match.start(), len(match.group()), allow_terminal_dot=True):
             references.append(match.group())
     return references
+
+
+def _has_negated_evidence(text: str) -> bool:
+    """모든 Unicode dash를 같은 separator로 정규화해 부정·불확정을 검사한다."""
+    normalized = "".join("-" if unicodedata.category(character) == "Pd" else character for character in text)
+    return NEGATED_EVIDENCE_RE.search(normalized) is not None
 
 
 def _has_external_contract_assertion(text: str) -> bool:
@@ -543,7 +553,7 @@ def _validate_registry(root: object, *, as_of: date | None = None) -> dict[str, 
             if (
                 GLOBAL_SURFACE_RE.fullmatch(entry["surface"])
                 or not _has_external_contract_assertion(entry["reason"])
-                or NEGATED_EVIDENCE_RE.search(entry["reason"])
+                or _has_negated_evidence(entry["reason"])
             ):
                 raise RegistryError(
                     f"exceptions[{index}] SHOULD 예외는 구체적인 외부 계약 표면만 등록할 수 있음"

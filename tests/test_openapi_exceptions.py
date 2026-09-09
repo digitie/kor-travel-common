@@ -267,6 +267,20 @@ class OpenApiExceptionsTest(unittest.TestCase):
             "falsehood",
             "neither_one",
             "unsupported_status",
+            "dont",
+            "didnt",
+            "wont",
+            "shouldnt",
+            "couldnt",
+            "wouldnt",
+            "wasnt",
+            "werent",
+            "arent",
+            "havent",
+            "hasnt",
+            "hadnt",
+            "미-승인",
+            "non⸺contract",
         ):
             with self.subTest(evidence=evidence):
                 text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
