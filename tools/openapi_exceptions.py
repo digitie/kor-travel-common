@@ -19,6 +19,7 @@ import os
 import re
 import sys
 import tempfile
+import unicodedata
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -41,11 +42,23 @@ CORE_RULE_IDS = frozenset(
 ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 RULE_RE = re.compile(r"^[MSN]\d+(?:\.\d+)?$|^BE-\d+$")
 TASK_REFERENCE_RE = re.compile(r"(?<![A-Za-z0-9])T-\d{3}[a-z]?(?![A-Za-z0-9])")
+TASK_FILE_RE = re.compile(r"^(T-\d{3}[a-z]?)-.+\.md$")
 PLAIN_NONSTRING_RE = re.compile(
-    r"^(?:[-+]?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][-+]?\d+)?|[-+]?\.inf|\.nan|"
-    r"\d{4}-\d{2}-\d{2}|\d{2}:\d{2}:\d{2})$",
+    r"^(?:"
+    r"[-+]?(?:\d(?:_?\d)*)(?:\.(?:\d(?:_?\d)*))?(?:[eE][-+]?\d(?:_?\d)*)?"
+    r"|[-+]?(?:\d(?:_?\d)*)\.(?:\d(?:_?\d)*)?(?:[eE][-+]?\d(?:_?\d)*)?"
+    r"|[-+]?\.(?:\d(?:_?\d)*)(?:[eE][-+]?\d(?:_?\d)*)?"
+    r"|[-+]?0[xX][0-9a-fA-F](?:_?[0-9a-fA-F])*"
+    r"|[-+]?0[oO][0-7](?:_?[0-7])*"
+    r"|[-+]?0[bB][01](?:_?[01])*"
+    r"|[-+]?(?:\.inf|\.nan)"
+    r"|\d{4}-\d{2}-\d{2}(?:(?:[Tt]|[ \t]+)\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[ \t]+[-+]\d{2}(?::?\d{2})?)?)?"
+    r"|\d{2}:\d{2}(?::\d{2})?"
+    r")$",
     re.IGNORECASE,
 )
+EXTERNAL_CONTRACT_RE = re.compile(r"소비(?:하는|되는)\s+외부\s+계약")
+NEGATED_EVIDENCE_RE = re.compile(r"(?:외부\s+계약|M10|동반\s+PR)[^。.!?\n]{0,20}(?:없음|아님|미확인|불가)")
 
 
 class RegistryError(ValueError):
@@ -66,11 +79,12 @@ def _error(message: str, line: int | None = None) -> RegistryError:
 
 
 def _validate_text(value: str, context: str) -> str:
-    """출력·키·값을 오염시키는 제어 문자와 lone surrogate를 거부한다."""
+    """출력·키·값을 오염시키는 제어·format 문자와 lone surrogate를 거부한다."""
     for character in value:
         codepoint = ord(character)
-        if codepoint < 0x20 or codepoint == 0x7F:
-            raise RegistryError(f"{context}에 제어 문자가 있음")
+        category = unicodedata.category(character)
+        if category in {"Cc", "Cf", "Zl", "Zp"}:
+            raise RegistryError(f"{context}에 제어·format 문자가 있음")
         if 0xD800 <= codepoint <= 0xDFFF:
             raise RegistryError(f"{context}에 유효하지 않은 surrogate가 있음")
     return value
@@ -113,6 +127,9 @@ class _FlatYamlParser:
 
     def __init__(self, text: str):
         self.lines: list[_YamlLine] = []
+        for character in text:
+            if character not in {"\n", "\r"}:
+                _validate_text(character, "registry")
         for number, raw in enumerate(text.splitlines(), 1):
             if number == 1 and raw.startswith("\ufeff"):
                 raw = raw[1:]
@@ -387,15 +404,21 @@ def _rule_ids() -> set[str]:
 
 
 def _task_ids() -> set[str]:
-    """common task 원장에서 실제로 정의된 task ID를 수집한다."""
-    paths = [ROOT / "docs" / "tasks.md", *(ROOT / "docs" / "tasks").glob("T-*.md")]
+    """common 상세 task 파일명에서 실제로 정의된 task ID만 수집한다."""
+    tasks_dir = ROOT / "docs" / "tasks"
+    if not tasks_dir.is_dir():
+        raise RegistryError(f"상세 task 디렉터리를 찾을 수 없음: {tasks_dir}")
     ids: set[str] = set()
-    for path in paths:
-        try:
-            text = path.read_text(encoding="utf-8")
-        except OSError as exc:
-            raise RegistryError(f"task 원장을 읽을 수 없음: {path}") from exc
-        ids.update(TASK_REFERENCE_RE.findall(text))
+    try:
+        paths = tasks_dir.glob("T-*.md")
+        for path in paths:
+            match = TASK_FILE_RE.fullmatch(path.name)
+            if match:
+                ids.add(match.group(1))
+    except OSError as exc:
+        raise RegistryError(f"상세 task 디렉터리를 읽을 수 없음: {tasks_dir}") from exc
+    if not ids:
+        raise RegistryError("상세 task 파일에서 task ID를 찾을 수 없음")
     return ids
 
 
@@ -436,13 +459,19 @@ def load_registry(path: Path = DEFAULT_INPUT, *, as_of: date | None = None) -> d
         for key in ("app", "rule", "surface", "reason", "owner"):
             if not isinstance(entry[key], str) or not entry[key].strip():
                 raise RegistryError(f"exceptions[{index}].{key}는 비어 있지 않은 문자열이어야 함")
+            if entry[key] != entry[key].strip():
+                raise RegistryError(f"exceptions[{index}].{key} 양끝 공백은 허용하지 않음")
         task_references = TASK_REFERENCE_RE.findall(entry["reason"])
         if not task_references:
             raise RegistryError(f"exceptions[{index}].reason에 정합 task ID가 없음")
         if any(task_id not in valid_tasks for task_id in task_references):
             raise RegistryError(f"exceptions[{index}].reason에 정의되지 않은 task ID가 있음")
         if entry["rule"].startswith("S"):
-            if entry["surface"] == "*" or "외부 계약" not in entry["reason"]:
+            if (
+                entry["surface"] == "*"
+                or not EXTERNAL_CONTRACT_RE.search(entry["reason"])
+                or NEGATED_EVIDENCE_RE.search(entry["reason"])
+            ):
                 raise RegistryError(
                     f"exceptions[{index}] SHOULD 예외는 구체적인 외부 계약 표면만 등록할 수 있음"
                 )
@@ -474,7 +503,8 @@ def load_registry(path: Path = DEFAULT_INPUT, *, as_of: date | None = None) -> d
 def _markdown_cell(value: object) -> str:
     if value is None:
         return "null"
-    text = html.escape(str(value).replace("\r", " ").replace("\n", " "), quote=False)
+    text = _validate_text(str(value).replace("\r", " ").replace("\n", " "), "Markdown cell")
+    text = html.escape(text, quote=False)
     for character, entity in {
         "\\": "&#92;",
         "|": "&#124;",

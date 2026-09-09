@@ -8,7 +8,7 @@ T-103 대비·UX 검사기 구현과 반복 리뷰의 근본 수정을 완료했
 
 ## 다음 한 작업
 
-**T-301 구현·리뷰 준비.** `openapi.md`의 core 규칙 30개에 계층·검사 수단·예외 여부를 명시하고, M10은 ADR-009에 맞게 교차 저장소 MUST로 분리했다. `openapi-exceptions.yaml` 46건을 7키·규칙 ID·날짜·sunset으로 검증하며 `openapi-exceptions.md`를 생성하는 stdlib 도구와 8개 회귀 시험을 추가했다. 다음은 문서 gate와 두 독립 적대적 리뷰, finding 반영, candidate CI, draft PR이다. T-010a의 실제 소비자 dispatch는 외부 선행으로 계속 BLOCKED다.
+**T-301 post-fix-02 후보 준비 중.** `openapi.md`의 core 규칙 30개에 계층·검사 수단·예외 여부를 명시하고, M10은 ADR-009에 맞게 교차 저장소 MUST로 분리했다. `openapi-exceptions.yaml` 39건을 7키·실재 task 파일명·규칙 ID·날짜·sunset으로 검증하며 `openapi-exceptions.md`를 생성하는 stdlib 도구와 25개 회귀 시험을 유지한다. 첫 post-fix 후보는 두 독립 reviewer가 모두 BLOCK했다. 원인은 stale 실행 evidence, YAML 숫자·timestamp plain scalar 우회, 본문에만 언급된 task ID 허용, SHOULD 표면·근거 문자열 우회, Unicode 제어·format 문자 누락이다. 이를 코드·시험·문서에서 수정한 새 immutable 후보를 만든 뒤 두 reviewer 재검토, 통합 evidence·task closure, draft PR merge와 main CI 확인을 순서대로 진행한다. T-010a의 실제 소비자 dispatch는 외부 선행으로 계속 BLOCKED다.
 
 ## 시작 파일과 검증
 

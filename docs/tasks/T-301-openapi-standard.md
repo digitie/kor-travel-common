@@ -13,7 +13,7 @@
 
 - [design-brief](../plan/design-brief.md) D-14(3계층·예외 레지스트리·`X-Request-ID` 형식·헤더 형식 규칙·map 산출물 pin 동반), D-22(AppId·메트릭 접두는 앱 소유), D-25(NOT_RUN). ADR-009 — [ADR 색인](../adr/README.md).
 - 3계층 배치: 즉시 MUST(additive, 응답 본문 불변) = M2·M4·M9·N6·N7. 신규 표면 MUST / 기존 표면 SHOULD + 예외 등록 = M1·M3·M5·M6·M7·M8·N1~N5·N8. SHOULD = S1~S13. 규칙 ID는 조사 번호를 유지한다.
-- 예외 레지스트리 항목 스키마 `{app, rule, surface, reason, sunset|null, review, owner}`. 초기 등록: geo v1(VWorld 호환)·geo v2 envelope(`query_id`↔`request_id`)·geo `/v1/healthz` 별칭(무기한)·geo 검증 오류 400·pinvi `{error:{}}`·정수 `If-Match`+409·비버저닝 경로·concierge `/api/v1`·`{detail}`·features export(map provider 외부 계약)·ktdm `/api/v1`·`{detail}`·airport 스펙 422 불일치·map `starlette<1.0`(근거: [oa §2.5·§2.10·§4](../survey/cross/openapi.md)).
+- 예외 레지스트리 항목 스키마 `{app, rule, surface, reason, sunset|null, review, owner}`. 초기 등록: geo v1(VWorld 호환)·geo v2 envelope(`query_id`↔`request_id`)·geo `/v1/healthz` 별칭(무기한)·geo 검증 오류 400·pinvi `{error:{}}`·비버저닝 경로·concierge `/api/v1`·`{detail}`·features export(map provider 외부 계약)·ktdm `/api/v1`·`{detail}`·airport 스펙 422 불일치·map `starlette<1.0`(근거: [oa §2.5·§2.10·§4](../survey/cross/openapi.md)). SHOULD는 소비자 매니페스트에 기록하고 외부 계약 표면만 레지스트리에 둔다.
 - 검증 오류 422 기본·geo 400 예외. 429 코드 사전은 common 기본 `TOO_MANY_REQUESTS` + 앱 덮어쓰기 — **열림(O-14, 사용자 확인 필요)**, 기본값으로 진행.
 - `X-Request-ID`: UUID v4/v7 또는 ULID, ≤128자 ASCII, 검증 실패 시 서버 발급, `trust_incoming=False`는 앱 옵션(ktdm 근거 [be §2.3](../survey/cross/backend.md)). 헤더 이름은 형식 규칙만 `X-<AppId>-Api-Key|Service-Token|Actor|Admin-Proxy-Secret|Ops-Token|Ops-Scope`, AppId(풀네임/약어)는 앱 소유([inv/map §8-18](../survey/inventory/kor-travel-map.md)).
 - 프론트 typegen: `openapi-typescript` 7.x 단일 버전, `gen:types`/`gen:types:check`; pinvi Zod 이중 유지는 "OpenAPI↔Zod 일치 테스트"(O-14 기본값). 재사용 워크플로는 T-309.
@@ -46,7 +46,7 @@ docs/standards/README.md                    # 색인 행(standards-fe 소유자�
 
 - [ ] `openapi.md`의 규칙 표에 M1~M9·S1~S13·N1~N8 30개 전부가 있고, 각 행에 계층(즉시 MUST / 신규 MUST·기존 SHOULD / SHOULD / MUST NOT)·근거 앱·검사 수단·예외 여부 열이 채워져 있다.
 - [ ] 즉시 MUST 5개(M2·M4·M9·N6·N7)는 "응답 본문 불변(additive)"임이 규칙 문장에서 확인된다.
-- [ ] `openapi-exceptions.yaml`의 모든 항목이 `{app, rule, surface, reason, sunset, review, owner}` 7키를 갖고, `rule`이 규칙 표의 ID와 일치하며, 초기 등록 12건(위 고정 결정 목록)이 모두 있다.
+- [ ] `openapi-exceptions.yaml`의 모든 항목이 `{app, rule, surface, reason, sunset, review, owner}` 7키를 갖고, `reason`이 실제 task 원장의 `T-NNN`을 포함하며, `rule`이 규칙 표의 ID와 일치하고, 외부 계약 SHOULD만 구체 surface로 등록되어 있다.
 - [ ] `X-Request-ID` 절에 형식(UUID v4/v7·ULID·≤128자 ASCII)·실패 시 서버 발급·`trust_incoming` 옵션이 있고, 헤더 형식 절에 6종 접미와 "AppId는 앱 소유"가 있다.
 - [ ] 429 코드 사전과 pinvi Zod 항목이 "열림(O-14, 사용자 확인 필요)·기본값"으로 표기돼 있다.
 - [ ] `python3 -B -X utf8 tools/validate_document_links.py`가 이 문서군에서 0 오류(절대 경로 링크 없음).
@@ -70,10 +70,11 @@ grep -c '^| \(M[1-9]\|S[0-9]\+\|N[1-8]\) |' docs/standards/openapi.md   # 30이�
 
 ### 실행 기록
 
-- 2026-09-09 시작: `openapi.md`·ADR-009·D-14와 기존 YAML을 직접 대조했다. YAML은 초기 결정 항목에 더해 조사에서 확인된 항목을 포함한 46건이며, 각 항목의 7키를 유지한다. 공통 정본과 ADR에 없는 `M10`을 즉시 MUST에 섞지 않고 교차 저장소 MUST로 분리했다.
-- 2026-09-09 구현: `tools/openapi_exceptions.py --write` exit 0(예외 46건·Markdown 61줄), `--check` exit 0. PyYAML 의존 없이 중복 키·미지원 YAML 문법을 fail-closed로 처리한다.
-- 2026-09-09 구현: `python -B -X utf8 -m unittest discover -s tests -p "test_openapi_exceptions.py" -v` exit 0(8 tests). 규칙 core ID 30개·헤더 6종·요청 ID UUID/ULID·O-14 문구를 회귀 검사한다.
-- 문서 링크·전체 unittest·SPDX·secret/redaction·plan 검증과 2인 적대적 리뷰는 candidate commit 뒤 실행하며, 소비자 build/e2e·외부 저장소 수정·npm/PyPI 게시·Release 업로드는 `NOT_RUN(범위 밖)`이다.
+- 2026-09-09 시작(초기 후보의 역사 기록): `openapi.md`·ADR-009·D-14와 기존 YAML을 직접 대조했다. YAML은 초기 결정 항목에 더해 조사에서 확인된 항목을 포함한 46건이며, 각 항목의 7키를 유지한다. 공통 정본과 ADR에 없는 `M10`을 즉시 MUST에 섞지 않고 교차 저장소 MUST로 분리했다. 이 문단의 46건은 초기 후보 수치이며 현재 후보 수치가 아니다.
+- 2026-09-09 구현: `tools/openapi_exceptions.py --write` exit 0(예외 39건·Markdown 54줄), `--check` exit 0. PyYAML 의존 없이 중복 키·미지원 YAML 문법을 fail-closed로 처리하며 실제 task ID와 SHOULD 외부 계약 표면을 검증한다.
+- 2026-09-09 post-fix-01(역사 기록): focused 시험 20개, 전체 `test_*.py` 357개, 문서 링크(529/2582)·plan(106)·SPDX(70)·redaction/secret(680/0)을 통과했다. `fedf7f8cbad55302183708aa4c9dd514ffba466d`(tree `e40c59e99eb367fb79893587e7dbd7489a7d2ff8`)와 [post-fix-01 manifest](../reviews/adversarial/evidence/2026-09-09-t301-post-fix-manifest.md)(SHA-256 `b04e93badcd6cb8b7aa0312e2eb998980aea02e6de3a35d582a424eb78d90c6e`)를 기준으로 두 reviewer를 실행했으며 A/B 모두 BLOCK했다. 보고서에는 당시 candidate가 보지 못한 working-tree 문서와 실행 수치를 남겼다.
+- 2026-09-09 post-fix-02 수정: 첫 post-fix finding의 근본 원인인 YAML 숫자·timestamp 표기 우회, task 본문 기반 provenance, SHOULD surface/reason 문자열 우회를 닫았다. parser와 Markdown renderer가 Cc/Cf/Zl/Zp를 거부하고, task ID는 `docs/tasks/T-*.md` 파일명에서만 수집하며, S 예외는 정규 surface·긍정적인 `소비하는 외부 계약` 근거·M10/동반 PR을 검증한다. focused 시험은 25개이며 전체·문서·SPDX·redaction/secret·PR CI 결과와 새 candidate SHA/tree를 다음 post-fix-02 manifest에 기록한다.
+- 소비자 build/e2e·외부 저장소 수정·npm/PyPI 게시·Release 업로드는 `NOT_RUN(범위 밖)`이다.
 
 ## rollback·release 차단 조건
 

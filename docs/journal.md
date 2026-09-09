@@ -2,11 +2,17 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-09 (Codex, T-301 post-fix-02 수정 준비)
+
+post-fix-01을 immutable candidate `fedf7f8cbad55302183708aa4c9dd514ffba466d` 기준으로 두 reviewer에게 독립 검토시킨 결과 A/B 모두 BLOCK했다. 공통된 stale evidence는 당시 candidate commit에 문서 갱신이 포함되지 않았던 것이 원인이었고, 기능 경계에도 세 가지 실질 결함이 남았다. YAML plain scalar 정규식이 `0x10`·`0o10`·`0b10`·`0123`·timezone timestamp를 문자열로 통과시켰고, `_task_ids()`가 task 파일명뿐 아니라 `docs/tasks.md`와 상세 task 본문에서 ID를 모아 존재하지 않는 `T-034` 같은 참조를 허용했다. SHOULD 예외는 `surface == "*"`와 `외부 계약`·`동반 PR` 부분 문자열만 검사해 끝 공백과 부정 문장을 우회시켰으며, Unicode C1/bidi/line-separator/zero-width 문자가 생성 표에 남았다.
+
+이번 수정은 숫자·timestamp·underscore·base 표기를 모두 fail-closed로 확장하고, 상세 task 파일명(`T-NNN[-a-z].md`)만 provenance 정본으로 사용하며, surface 양끝 공백·긍정적인 `소비하는 외부 계약` 근거·부정 근거를 검사한다. parser 입력과 Markdown cell 양쪽에서 Unicode Cc/Cf/Zl/Zp를 거부하고 회귀 시험을 25개로 늘렸다. 새 candidate와 manifest를 만든 뒤 두 reviewer가 같은 immutable 기준선을 다시 검사한다. post-fix-01의 46건·61줄·8 tests 기록은 초기 후보의 역사 수치로 보존하고 현재 정본 수치로 사용하지 않는다.
+
 ## 2026-09-09 (Codex, T-301 OpenAPI 정본·예외 레지스트리 구현 시작)
 
 PR #21 병합과 main CI 성공을 확인한 뒤 원장 순서의 다음 P0인 T-301을 시작했다. 기존 `openapi.md`·ADR-009·D-14·예외 YAML을 다시 대조한 결과 YAML은 결정 목록 12개 범주 외 조사에서 확인한 항목까지 포함한 46건이었다. ADR에 없는 `M10`을 즉시 MUST에 섞으면 T-301 수용 기준과 충돌하므로, 문서에서 core 즉시 MUST를 M2·M4·M9·N6·N7로 복원하고 M10은 pin 동반 절차인 교차 저장소 MUST로 분리했다. 헤더 Purpose도 결정문에 적힌 여섯 접미(`Api-Key`, `Service-Token`, `Actor`, `Admin-Proxy-Secret`, `Ops-Token`, `Ops-Scope`)로 맞췄다.
 
-`tools/openapi_exceptions.py`는 PyYAML 없이 flat mapping/list 부분집합을 fail-closed로 파싱하고, 정확한 7키·규칙 문서 ID·review/sunset 날짜·즉시 MUST의 유한 sunset·중복 항목을 검증한다. `docs/standards/openapi-exceptions.md`는 이 도구가 생성하며 2026-09-09 현재 46건·61줄이다. focused 시험 8개는 canonical schema·core ID·생성물 drift·중복 키·미지 키/규칙·sunset·헤더/요청 ID/O-14 문구를 확인했고 모두 통과했다. 소비자 저장소·OpenAPI 구현·npm/PyPI·Release는 이 task 범위 밖이라 `NOT_RUN`이다.
+`tools/openapi_exceptions.py`는 PyYAML 없이 flat mapping/list 부분집합을 fail-closed로 파싱하고, 정확한 7키·규칙 문서 ID·review/sunset 날짜·즉시 MUST의 유한 sunset·중복 항목을 검증한다. `docs/standards/openapi-exceptions.md`는 이 도구가 생성하며 이 초기 후보는 46건·61줄이었다. focused 시험 8개도 초기 후보의 기록이다. 이후 예외 정리로 현재 정본은 39건·54줄이며, 이전 수치는 현재 evidence로 사용하지 않는다. 소비자 저장소·OpenAPI 구현·npm/PyPI·Release는 이 task 범위 밖이라 `NOT_RUN`이다.
 
 ## 2026-09-09 (Codex, T-010 최종 PASS·PR #21 merge 대기)
 

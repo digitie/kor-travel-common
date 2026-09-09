@@ -85,11 +85,29 @@ class OpenApiExceptionsTest(unittest.TestCase):
         )
         self._assert_invalid(text, "정의되지 않은 task ID")
 
+    def test_reason_requires_task_file_not_body_reference(self) -> None:
+        text = self._replace_first_line(
+            OE.DEFAULT_INPUT.read_text(encoding="utf-8"), "reason:", '    reason: "근거와 T-034 정합 task"'
+        )
+        self._assert_invalid(text, "정의되지 않은 task ID")
+
     def test_should_exception_requires_external_contract_surface(self) -> None:
         text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
             '    surface: "/v2/*"\n    reason: "v2 성공 envelope',
             '    surface: "*"\n    reason: "v2 성공 envelope',
             1,
+        )
+        self._assert_invalid(text, "외부 계약")
+
+    def test_should_exception_requires_canonical_surface_and_positive_contract_evidence(self) -> None:
+        text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
+            '    surface: "/v2/*"\n    reason: "v2 성공 envelope',
+            '    surface: "/v2/* "\n    reason: "v2 성공 envelope',
+            1,
+        )
+        self._assert_invalid(text, "양끝 공백")
+        text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
+            "Pinvi가 직접 소비하는 외부 계약", "외부 계약 동반 PR 근거 없음", 1
         )
         self._assert_invalid(text, "외부 계약")
 
@@ -99,15 +117,33 @@ class OpenApiExceptionsTest(unittest.TestCase):
         )
         self._assert_invalid(text, "plain scalar")
 
+    def test_all_yaml_numeric_and_timestamp_plain_scalars_are_rejected(self) -> None:
+        for value in ("0x10", "0o10", "0b10", "0123", "1_000", ".5", "1.", "2026-09-06", "2026-09-06T00:00:00Z"):
+            with self.subTest(value=value):
+                text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
+                    "    owner: kor-travel-geo", f"    owner: {value}", 1
+                )
+                self._assert_invalid(text, "plain scalar")
+
     def test_control_and_surrogate_scalars_are_rejected(self) -> None:
         control = self._replace_first_line(
             OE.DEFAULT_INPUT.read_text(encoding="utf-8"), "reason:", '    reason: "bad\\u0000value"'
         )
-        self._assert_invalid(control, "제어 문자")
+        self._assert_invalid(control, "제어·format")
         surrogate = self._replace_first_line(
             OE.DEFAULT_INPUT.read_text(encoding="utf-8"), "reason:", '    reason: "bad\\ud800value"'
         )
         self._assert_invalid(surrogate, "surrogate")
+
+    def test_unicode_control_format_and_line_separator_scalars_are_rejected(self) -> None:
+        for escaped in (r"\u0080", r"\u2028", r"\u2029", r"\u202e", r"\u200b", r"\ufeff"):
+            with self.subTest(escaped=escaped):
+                text = self._replace_first_line(
+                    OE.DEFAULT_INPUT.read_text(encoding="utf-8"),
+                    "reason:",
+                    f'    reason: "bad{escaped}value T-483"',
+                )
+                self._assert_invalid(text, "제어·format")
 
     def test_single_quote_escape_is_supported(self) -> None:
         text = self._replace_first_line(
@@ -128,6 +164,13 @@ class OpenApiExceptionsTest(unittest.TestCase):
         self.assertNotIn("`code`", rendered)
         self.assertIn("&lt;img", rendered)
         self.assertIn("&#91;x&#93;&#40;https://evil&#41;", rendered)
+
+    def test_markdown_cells_reject_unicode_format_controls_after_load(self) -> None:
+        registry = OE.load_registry(as_of=date(2026, 9, 9))
+        registry["exceptions"][0]["reason"] = "bad\u202evalue T-483"
+        with self.assertRaises(OE.RegistryError) as context:
+            OE.render_markdown(registry)
+        self.assertIn("제어·format", str(context.exception))
 
     def test_write_rejects_input_output_alias_and_preserves_input(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
