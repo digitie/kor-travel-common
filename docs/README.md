@@ -28,7 +28,7 @@ AGENTS.md                     모든 작업의 규칙·금지선
 ```
 
 - architecture는 현재 구현이 따라야 할 설계(배포 단위·의존 방향·계약 위치)를 설명한다.
-- standards는 소비 저장소 전체가 따르는 규칙을 규칙 ID와 MUST/SHOULD로 정의한다. 값이 machine-readable 파일(`packages/tokens/tokens.css`, `versions.json`, `standards/openapi-exceptions.yaml`)에 있으면 그 파일이 정본이고 문서는 의미와 불변 조건만 둔다.
+- standards는 소비 저장소 전체가 따르는 규칙을 규칙 ID와 MUST/SHOULD로 정의한다. 값이 machine-readable 파일(`packages/tokens/tokens.css`, `versions.json`, `standards/openapi-exceptions.yaml`)에 있으면 그 파일이 정본이고 문서는 의미와 불변 조건만 둔다. `openapi-exceptions.md`는 YAML에서 생성한 읽기 전용 검토 표다.
 - ADR은 왜 그 설계를 선택했는지 기록하며, 뒤집을 때 이전 ADR을 삭제하지 않는다.
 - task는 architecture·standards를 구현하는 원자 범위와 acceptance를 정의한다. task가 architecture를 재정의하지 않는다.
 - review는 특정 commit/diff에 대한 역사 기록이다. finding을 반영해 architecture·standards·ADR·task를 갱신하되 과거 report를 현재 정본처럼 사용하지 않는다.

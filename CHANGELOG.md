@@ -63,6 +63,7 @@
 
 #### Added
 
+- T-301 OpenAPI 정본 초안에 규칙별 적용 계층·검사 수단·예외 여부와 헤더·`X-Request-ID` 계약을 명시하고, 7키 예외 레지스트리 및 `openapi_exceptions.py` 생성·drift 검사를 추가했다. 사람이 읽는 표는 YAML에서 생성하며 소비자 구현·빌드는 후속 이관 task로 남긴다([OpenAPI 표준](docs/standards/openapi.md)).
 - 규칙 문서 초안(`docs/standards/`: design-tokens·ux-guide·responsive-web·frontend-stack·ui-contract·openapi·backend-stack·ci-deploy·licensing·versions·agent-conventions)과 예외 레지스트리 `openapi-exceptions.yaml`.
 - T-010에서 `versions-check`·`contrast-check`·`docs-check` 재사용 workflow와 두 fixture `workflows-selftest`, 고정 SHA 소비자 핀 레지스트리, GPL 승인·digest·tarball metadata를 닫힌 입력으로 검사하는 `consumer_smoke.py`를 추가했다. 실제 소비자 dispatch와 주간 실행은 T-010a 외부 gate다.
 - 버전 레지스트리 `versions.json` v1(floor/recommended/exceptions/blocked/enforce)과 `tools/check_versions.py` report 모드, 소비자 매니페스트 규약 `kor-travel-common.consumer-manifest.v1`.

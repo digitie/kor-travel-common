@@ -144,7 +144,7 @@
 | 1 | 컴포넌트 | `inventory/pinvi.md` §3.1 "`components/admin/ui/*` 26개"(같은 문서 §1은 "프리미티브 28종") | `cross/ui-components.md` §2.1·§2.3, `cross/licensing.md` §2.3 P1 "28파일" | `ls apps/web/components/admin/ui \| wc -l` = **28** | 28. 인벤토리 §3.1 오기 |
 | 2 | 컴포넌트 | `inventory/kor-travel-weather.md` §3.1 `admin-shell.tsx` "158(추정, 5,463B)" | `cross/ui-components.md` §2.2, `cross/ux-patterns.md` §1.1 "152" | `wc -l` = **152** | 152 |
 | 3 | 컴포넌트 | `cross/ux-patterns.md` §1.13 pinvi Hallmark 스탬프 "38" | `cross/ui-components.md` §2.3 "39" | `git grep -l "Hallmark ·"` = **39**(map은 양쪽 88로 일치) | 39 |
-| 4 | OpenAPI | `inventory/kor-travel-airport.md` §4.1 "`docs/openapi.json` 22 paths … 코드 라우트 22개와 일치" | `cross/openapi.md` §2.1 "경로 수 21" | `docs/openapi.json` paths=**21**, schemas=37; `main.py` 라우트 데코레이터는 22(동일 경로 다중 메서드 포함) | 21 paths. 인벤토리의 "22 paths" 오기, 스키마 37은 일치 |
+| 4 | OpenAPI | `inventory/kor-travel-airport.md` §4.1 "`docs/openapi.json` 22 paths … 코드 라우트 22개와 일치" | `cross/openapi.md` §2.1 "경로 수 21" | `docs/openapi.json` paths=**21**, schemas=37; `main.py` 라우트 데코레이터는 22(동일 경로 다중 메서드 포함). readiness 공통 경로는 `/readyz`로 분리한다 | 21 paths. 인벤토리의 "22 paths" 오기, 스키마 37은 일치; readiness는 `/readyz` |
 | 5 | 인증 | `inventory/pinvi.md` §3.1 "`pinvi_access`(HS256 JWT **15분**)" | `cross/backend.md` §2.8 "JWT HS256 access(**10분**, `token_version`)" | `apps/api/app/core/config.py:656` `pinvi_access_token_minutes: int = 10` | 10분 |
 | 6 | 문서 | `inventory/kor-travel-concierge.md` §5 README "약 130줄" | `cross/docs-conventions.md` §1.1 "205" | `wc -l README.md` = **205** | 205 |
 | 7 | 문서 | `inventory/kor-travel-docker-manager.md` §5 `CLAUDE.md` "135" | `cross/docs-conventions.md` §1.1 "134" | `wc -l` = **134** | 134 |

@@ -1,6 +1,6 @@
 # T-301 docs/standards/openapi.md 확정 + `openapi-exceptions.yaml` 초기 등록 + 헤더·X-Request-ID 형식 규칙
 
-- 상태: READY
+- 상태: IN_PROGRESS
 - 우선순위: P0
 - Gate: 2인 리뷰
 - 선행: 없음
@@ -66,7 +66,14 @@ grep -c '^| \(M[1-9]\|S[0-9]\+\|N[1-8]\) |' docs/standards/openapi.md   # 30이�
 
 2026-09-06 T-013 인계: OpenAPI 규칙·예외 초안은 존재한다. 이 task가 tools/openapi_exceptions.py와 tests/test_openapi_exceptions.py의 규칙 ID·필수 필드·생성 문서 drift 검증을 함께 소유한다. 아직 없는 도구를 실행한 것으로 세지 않으며 표의 실제 규칙 ID 집합을 대조한 뒤 수용 기준을 확정한다.
 
-이 파일 하단 "실행 기록"에 명령·exit code·날짜와 규칙 수(30)·예외 수(12)를 남긴다. 리뷰 report 경로(`docs/reviews/adversarial/YYYY-MM-DD-openapi-standard.md`)와 reviewer evidence 2파일을 링크한다. 도구를 만들지 않고 md를 수기 유지하기로 결정하면 그 결정을 여기와 `docs/journal.md`에 적는다.
+이 파일 하단 "실행 기록"에 명령·exit code·날짜와 core 규칙 수(30)·초기 결정 범주(12)·실제 예외 항목 수를 남긴다. 리뷰 report 경로(`docs/reviews/adversarial/YYYY-MM-DD-openapi-standard.md`)와 reviewer evidence 2파일을 링크한다. 도구를 만들지 않고 md를 수기 유지하기로 결정하면 그 결정을 여기와 `docs/journal.md`에 적는다.
+
+### 실행 기록
+
+- 2026-09-09 시작: `openapi.md`·ADR-009·D-14와 기존 YAML을 직접 대조했다. YAML은 초기 결정 항목에 더해 조사에서 확인된 항목을 포함한 46건이며, 각 항목의 7키를 유지한다. 공통 정본과 ADR에 없는 `M10`을 즉시 MUST에 섞지 않고 교차 저장소 MUST로 분리했다.
+- 2026-09-09 구현: `tools/openapi_exceptions.py --write` exit 0(예외 46건·Markdown 61줄), `--check` exit 0. PyYAML 의존 없이 중복 키·미지원 YAML 문법을 fail-closed로 처리한다.
+- 2026-09-09 구현: `python -B -X utf8 -m unittest discover -s tests -p "test_openapi_exceptions.py" -v` exit 0(8 tests). 규칙 core ID 30개·헤더 6종·요청 ID UUID/ULID·O-14 문구를 회귀 검사한다.
+- 문서 링크·전체 unittest·SPDX·secret/redaction·plan 검증과 2인 적대적 리뷰는 candidate commit 뒤 실행하며, 소비자 build/e2e·외부 저장소 수정·npm/PyPI 게시·Release 업로드는 `NOT_RUN(범위 밖)`이다.
 
 ## rollback·release 차단 조건
 

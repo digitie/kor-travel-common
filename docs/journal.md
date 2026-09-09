@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-09 (Codex, T-301 OpenAPI 정본·예외 레지스트리 구현 시작)
+
+PR #21 병합과 main CI 성공을 확인한 뒤 원장 순서의 다음 P0인 T-301을 시작했다. 기존 `openapi.md`·ADR-009·D-14·예외 YAML을 다시 대조한 결과 YAML은 결정 목록 12개 범주 외 조사에서 확인한 항목까지 포함한 46건이었다. ADR에 없는 `M10`을 즉시 MUST에 섞으면 T-301 수용 기준과 충돌하므로, 문서에서 core 즉시 MUST를 M2·M4·M9·N6·N7로 복원하고 M10은 pin 동반 절차인 교차 저장소 MUST로 분리했다. 헤더 Purpose도 결정문에 적힌 여섯 접미(`Api-Key`, `Service-Token`, `Actor`, `Admin-Proxy-Secret`, `Ops-Token`, `Ops-Scope`)로 맞췄다.
+
+`tools/openapi_exceptions.py`는 PyYAML 없이 flat mapping/list 부분집합을 fail-closed로 파싱하고, 정확한 7키·규칙 문서 ID·review/sunset 날짜·즉시 MUST의 유한 sunset·중복 항목을 검증한다. `docs/standards/openapi-exceptions.md`는 이 도구가 생성하며 2026-09-09 현재 46건·61줄이다. focused 시험 8개는 canonical schema·core ID·생성물 drift·중복 키·미지 키/규칙·sunset·헤더/요청 ID/O-14 문구를 확인했고 모두 통과했다. 소비자 저장소·OpenAPI 구현·npm/PyPI·Release는 이 task 범위 밖이라 `NOT_RUN`이다.
+
 ## 2026-09-09 (Codex, T-010 최종 PASS·PR #21 merge 대기)
 
 T-010의 반복 no-go 원인은 consumer checkout pin과 common package artifact 원천을 하나의 repository 계약으로 취급한 점, GPL tarball 고지를 metadata 문자열만으로 신뢰한 점, 미등록 versions repo를 report로 낮춘 점, 그리고 closure evidence를 immutable candidate와 분리하지 않은 점이었다. 구현은 checkout pin과 common artifact URL을 분리하고 canonical GPL `LICENSE` 본문·`NOTICE`·`THIRD_PARTY_NOTICES.md`·repository provenance를 실제 tarball에서 검증하며, unknown repo와 fixture base/caller/common 저장소 조건을 fail-closed로 고정했다. 소비자 저장소는 수정하지 않았다.
