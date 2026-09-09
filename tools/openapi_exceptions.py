@@ -41,7 +41,7 @@ CORE_RULE_IDS = frozenset(
 )
 ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 RULE_RE = re.compile(r"^[MSN]\d+(?:\.\d+)?$|^BE-\d+$")
-TASK_REFERENCE_RE = re.compile(r"(?<![\w/:-])T-\d{3}[a-z]?(?![\w/:-]|\.(?=\w))")
+TASK_REFERENCE_RE = re.compile(r"T-\d{3}[a-z]?")
 TASK_FILE_RE = re.compile(r"^(T-\d{3}[a-z]?)-.+\.md$")
 PLAIN_NONSTRING_RE = re.compile(
     r"""^(?:
@@ -62,25 +62,64 @@ PLAIN_NONSTRING_RE = re.compile(
     )$""",
     re.IGNORECASE | re.VERBOSE,
 )
-EXTERNAL_CONTRACT_RE = re.compile(
-    r"소비(?:하는|되는)\s+외부\s+계약(?:"
-    r"(?=[([<{`])"
-    r"|(?:이다|임)(?=[.!?。；;,:)\]}]|$)"
-    r")"
-)
+EXTERNAL_CONTRACT_RE = re.compile(r"소비(?:하는|되는)\s+외부\s+계약(?:이다|임)\.")
 NEGATED_EVIDENCE_RE = re.compile(
     r"(?:아니|아닙|아닐|아닌|아님|없|않|못|불가|부재|불가능|"
     r"미채택|거부|미사용|비채택|불존재|미제공|무효|미동반|부정|거짓|"
     r"무관|배제|제외|불채택|미승인|미적용|미지원|미수용|미확정|미존재|미실행|"
-    r"(?<![가-힣])미[가-힣]+|"
-    r"\b(?:not|no|without|never|isn't|isnt|can't|cant|cannot|doesn't|doesnt|"
-    r"absent|absence|none|neither|false|invalid|unavailable|unsupported|"
-    r"inapplicable|rejected|disallowed|noncontract|non[-_‑][a-z0-9-]+)\b)",
+    r"불확실|불승인|부적합|거절|무의미|아마|검증\s*중|검증되지|확인\s*중|확인되지|"
+    r"존재하지|추정|가능성|미검증|미확인|미정|보류|모호|불명|"
+    r"(?<![가-힣])미\s*[가-힣]+|"
+    r"\b(?:"
+    r"(?:not|no|none|neither|false|invalid|unavailable|unsupported|inapplicable|"
+    r"unverified|uncertain|unknown|pending|maybe|perhaps|possibly|probabl(?:y|e)|"
+    r"rejected|disallowed|without|never|absent|absence|non)"
+    r"(?:[-_\s\u2010-\u2015\u2212\ufe58\ufe63\uff0d]*[a-z0-9]+)*|"
+    r"isn['’]?t|can['’]?t|cannot|doesn['’]?t|"
+    r"might|could|may|"
+    r"non(?:[-_\s\u2010-\u2015\u2212\ufe58\ufe63\uff0d]*[a-z0-9]+)+"
+    r")\b)",
     re.IGNORECASE,
 )
 GLOBAL_SURFACE_RE = re.compile(r"^(?:\*|/\*{1,2})$")
-M10_EVIDENCE_RE = re.compile(r"(?<![\w.-])M10(?![\w.-])")
-COORDINATED_PR_EVIDENCE_RE = re.compile(r"(?<![\w.-])동반\s+PR(?![\w.-])")
+
+
+def _is_token_continuation(character: str) -> bool:
+    """토큰 뒤에 붙으면 standalone 증명을 깨는 문자를 판정한다."""
+    if character in {"_", ".", "/", ":", "-"}:
+        return True
+    return unicodedata.category(character)[0] in {"L", "N", "M"}
+
+
+def _has_exact_token(text: str, token: str, *, allow_terminal_dot: bool = False) -> bool:
+    """유니코드 문자·결합문자까지 포함해 standalone token만 찾는다."""
+    start = 0
+    while True:
+        index = text.find(token, start)
+        if index < 0:
+            return False
+        if _is_exact_token_at(text, index, len(token), allow_terminal_dot=allow_terminal_dot):
+            return True
+        start = index + 1
+
+
+def _is_exact_token_at(text: str, start: int, length: int, *, allow_terminal_dot: bool = False) -> bool:
+    end = start + length
+    before_ok = start == 0 or not _is_token_continuation(text[start - 1])
+    after_ok = end == len(text) or not _is_token_continuation(text[end])
+    if allow_terminal_dot and end < len(text) and text[end] == ".":
+        following = text[end + 1] if end + 1 < len(text) else ""
+        after_ok = not following or not _is_token_continuation(following)
+    return before_ok and after_ok
+
+
+def _task_references(text: str) -> list[str]:
+    """task 후보 중 standalone 경계를 만족하는 ID만 반환한다."""
+    references: list[str] = []
+    for match in TASK_REFERENCE_RE.finditer(text):
+        if _is_exact_token_at(text, match.start(), len(match.group()), allow_terminal_dot=True):
+            references.append(match.group())
+    return references
 
 
 class RegistryError(ValueError):
@@ -295,7 +334,11 @@ class _FlatYamlParser:
             return None
         if re.search(r":(?:\s|$)", value):
             raise _error("plain scalar 안의 mapping colon은 허용하지 않음", number)
-        if value in {"-", "?"} or value[:1] in {",", "]", "}"}:
+        if (
+            value in {"-", "?"}
+            or (value[:1] in {"-", "?"} and len(value) > 1 and value[1].isspace())
+            or value[:1] in {",", "]", "}"}
+        ):
             raise _error("잘못된 flow scalar", number)
         if value.lower() in {"true", "false", "yes", "no", "on", "off"} or PLAIN_NONSTRING_RE.fullmatch(value):
             raise _error("plain scalar는 문자열로 해석되는 값만 허용함", number)
@@ -482,7 +525,7 @@ def _validate_registry(root: object, *, as_of: date | None = None) -> dict[str, 
                 raise RegistryError(f"exceptions[{index}].{key}는 비어 있지 않은 문자열이어야 함")
             if entry[key] != entry[key].strip():
                 raise RegistryError(f"exceptions[{index}].{key} 양끝 공백은 허용하지 않음")
-        task_references = TASK_REFERENCE_RE.findall(entry["reason"])
+        task_references = _task_references(entry["reason"])
         if not task_references:
             raise RegistryError(f"exceptions[{index}].reason에 정합 task ID가 없음")
         if any(task_id not in valid_tasks for task_id in task_references):
@@ -496,7 +539,10 @@ def _validate_registry(root: object, *, as_of: date | None = None) -> dict[str, 
                 raise RegistryError(
                     f"exceptions[{index}] SHOULD 예외는 구체적인 외부 계약 표면만 등록할 수 있음"
                 )
-            if not (M10_EVIDENCE_RE.search(entry["reason"]) or COORDINATED_PR_EVIDENCE_RE.search(entry["reason"])):
+            if not (
+                _has_exact_token(entry["reason"], "M10")
+                or _has_exact_token(entry["reason"], "동반 PR")
+            ):
                 raise RegistryError(f"exceptions[{index}] SHOULD 외부 계약 예외는 동반 PR 근거가 필요함")
         if entry["app"] not in apps or entry["app"] not in ALLOWED_APPS:
             raise RegistryError(f"exceptions[{index}].app가 apps 목록에 없음")

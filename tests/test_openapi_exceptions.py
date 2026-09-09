@@ -203,6 +203,80 @@ class OpenApiExceptionsTest(unittest.TestCase):
                 )
                 self._assert_invalid(text, "외부 계약")
 
+    def test_should_exception_requires_closed_contract_assertion(self) -> None:
+        for phrase in (
+            "소비하는 외부 계약[",
+            "소비하는 외부 계약(foo)",
+            "소비하는 외부 계약{foo}",
+            "소비하는 외부 계약<foo>",
+            "소비하는 외부 계약`검증 중`",
+            "소비하는 외부 계약이다?",
+            "소비하는 외부 계약임?",
+        ):
+            with self.subTest(phrase=phrase):
+                text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
+                    "Pinvi가 직접 소비하는 외부 계약이다", f"Pinvi가 직접 {phrase}", 1
+                )
+                self._assert_invalid(text, "외부 계약")
+
+    def test_should_exception_rejects_negative_or_uncertain_text_after_positive_assertion(self) -> None:
+        for evidence in (
+            "미 승인",
+            "불확실",
+            "불승인",
+            "부적합",
+            "거절",
+            "무의미",
+            "아마",
+            "검증되지",
+            "확인되지",
+            "존재하지",
+            "추정",
+            "가능성",
+            "maybe",
+            "perhaps",
+            "uncertain",
+            "unknown",
+            "unverified",
+            "pending",
+            "notapplicable",
+            "not_applicable",
+            "no_contract",
+            "none_value",
+            "noncompliant",
+            "non compliant",
+            "non‐contract",
+            "falsehood",
+            "neither_one",
+            "unsupported_status",
+        ):
+            with self.subTest(evidence=evidence):
+                text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
+                    "Pinvi가 직접 소비하는 외부 계약이다.",
+                    f"Pinvi가 직접 소비하는 외부 계약이다. {evidence}.",
+                    1,
+                )
+                self._assert_invalid(text, "외부 계약")
+
+    def test_exact_evidence_tokens_reject_combining_marks(self) -> None:
+        for evidence in ("M10\u0301foo", "M10\ufe0ffoo", "동반 PR\u0301foo", "동반 PR\ufe0ffoo"):
+            with self.subTest(evidence=evidence):
+                text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
+                    "Pinvi가 직접 소비하는 외부 계약이다.",
+                    f"Pinvi가 직접 소비하는 외부 계약이다. {evidence}.",
+                    1,
+                )
+                text = text.replace("map M10 기준 동반 PR 규칙", "map 근거", 1)
+                self._assert_invalid(text, "외부 계약")
+
+    def test_task_reference_rejects_combining_marks(self) -> None:
+        for suffix in ("\u0301foo", "\ufe0ffoo"):
+            with self.subTest(suffix=suffix):
+                text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
+                    "T-483.", f"T-483{suffix}.", 1
+                )
+                self._assert_invalid(text, "정합 task ID")
+
     def test_task_reference_requires_exact_id_boundary(self) -> None:
         for suffix in ("_foo", "가", ".1", "-foo", "/extra", ":extra"):
             with self.subTest(suffix=suffix):
@@ -218,7 +292,7 @@ class OpenApiExceptionsTest(unittest.TestCase):
         self._assert_invalid(text, "plain scalar")
 
     def test_yaml_reserved_plain_scalar_is_rejected(self) -> None:
-        for value in ("@", "`", "-", "?"):
+        for value in ("@", "`", "-", "?", "- foo", "? foo", "-  foo", "?  foo"):
             with self.subTest(value=value):
                 text = OE.DEFAULT_INPUT.read_text(encoding="utf-8").replace(
                     "    owner: kor-travel-geo", f"    owner: {value}", 1
