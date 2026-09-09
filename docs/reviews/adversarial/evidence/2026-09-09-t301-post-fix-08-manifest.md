@@ -1,0 +1,23 @@
+# T-301 post-fix-08 적대적 리뷰 입력 manifest
+
+- Review ID: `T301-20260909-post-fix-08`
+- 기준선(base): `afc8d1bf166d0ddcbee059252eb5cee245157dcd`
+- 최초 후보(candidate): `0c0c189017989065fd8ced9e6e84ad9c6e7b7756`
+- post-fix-01 후보: `fedf7f8cbad55302183708aa4c9dd514ffba466d`
+- post-fix-02 후보: `bf51790b87e578516d1c7f3ef741aa8a63ccc72c`
+- post-fix-03 기능 후보: `36509d3835a459993ad13b5a10a0340e48178b86`
+- post-fix-04 후보: `59a0fbc3ae426ec7a166ac34cbacbf2f9d6eaec5`
+- post-fix-05 후보: `62d3107967e5f7875024472fc91ded1ac5f7ba50`
+- post-fix-06 후보: `d88f2a0446e114541f52de169630cd09e27f429a`
+- post-fix-07 후보: `1705a6a10954120b74e59d8611a520e7d9970605`
+- post-fix-08 후보: `26569c827c414b4e062e8b97715d77a8a38b3327`
+- post-fix-08 tree: `babeb7a71306012a23e050e3513eea7f4ccf4566`
+- PR: `#22` (draft)
+- 작성일: 2026-09-09
+- 공통 범위: `tools/openapi_exceptions.py`, `tests/test_openapi_exceptions.py`, `docs/standards/openapi.md`, `docs/standards/openapi-exceptions.yaml`, 생성물 `docs/standards/openapi-exceptions.md`, T-301 상태·journal·resume·CHANGELOG evidence
+- 리뷰 범위: 후보 전체 diff와 OpenAPI 정본·ADR-009/D-14·T-301 계약, YAML resolver와 plain scalar fail-closed 경계, BOM·Unicode·task 파일명 provenance, SHOULD 외부 계약 assertion·surface 정규화·부정/불확정 문장·M10/동반 PR token·task token 경계, renderer 직접 입력·Markdown 안전성, 날짜·원자 출력·alias, 회귀 시험, candidate SHA CI와 실행 evidence
+- 기준 명령: `python -B -X utf8 tools/openapi_exceptions.py --check`; `python -B -X utf8 -m unittest discover -s tests -p 'test_openapi_exceptions.py' -v`; `python -B -X utf8 -m unittest discover -s tests -p 'test_*.py' -v`; 문서 link/plan/SPDX/redaction/secret scan; `git diff --check`; `gh run list --commit 26569c827c414b4e062e8b97715d77a8a38b3327`; PR CI checks
+- 현재 candidate evidence: focused 36 tests, full 373 tests, document links 545/2584, plan 106, SPDX 70, redaction/secret 696/0, OpenAPI 39건·Markdown 54줄. focused/full은 기능·문서 기준선에 대해 실행했으며 reviewer가 candidate detached worktree에서 다시 실행한다.
+- candidate CI: docs run `34311672764`, workflows selftest `34311672874`; 두 run 모두 candidate SHA를 가리키며 완료·성공했다.
+- 입력 고정: reviewer A/B는 이 manifest와 `post-fix-08 후보` SHA/tree를 사용하고 서로의 결과·통합 report를 읽지 않는다. reviewer는 후보 파일을 수정하지 않고 별도 detached worktree에서 검토한다. post-fix-07의 P1/P2인 열린 delimiter·질문형/불확정 assertion·부정 어휘 변형·M10/동반 PR/task Unicode 경계·YAML 예약 indicator·회귀 시험 조기 거부가 실제로 닫혔는지 새 기준선에서 재현한다.
+- 외부 선행: 7개 소비자 저장소 export/build/e2e, npm pack/publish, PyPI build/publish, GitHub Release, actionlint는 이 common task 범위 밖이며 `NOT_RUN(사유)`로 기록한다.

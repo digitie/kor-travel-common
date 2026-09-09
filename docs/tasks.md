@@ -56,7 +56,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
-| [T-301](tasks/T-301-openapi-standard.md) | READY | P0 | docs/standards/openapi.md 확정 + `openapi-exceptions.yaml` 초기 등록 + 헤더·X-Request-ID 형식 규칙 | 없음 |
+| [T-301](tasks/T-301-openapi-standard.md) | IN_PROGRESS | P0 | docs/standards/openapi.md 확정 + `openapi-exceptions.yaml` 초기 등록 + 헤더·X-Request-ID 형식 규칙 | 없음 |
 | [T-302](tasks/T-302-python-package-skeleton.md) | READY | P0 | packages/py/kor-travel-common 골격(hatchling·extras·3.11 문법 검사·uv.lock·starlette 0.4x/1.6 CI 매트릭스) + `docs/standards/backend-stack.md` 확정 | T-003 |
 | [T-303](tasks/T-303-openapi-export-cli.md) | BLOCKED | P0 | C12 openapi export CLI(`--check`·profile 콜백·결정적 직렬화) + typegen 규약 템플릿 | T-302 |
 | [T-304](tasks/T-304-health-and-time.md) | BLOCKED | P1 | C4 health(`/health`·`/readyz`·`/version`·alias 옵션) + C13 time | T-302 |

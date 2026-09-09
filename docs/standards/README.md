@@ -20,6 +20,7 @@
 | [ui-contract.md](ui-contract.md) | `@kor-travel/ui` 공개 계약: data-slot·testid·heading·sr-only·prop 기본값·geo/pinvi 대응·SemVer 0.x | ui 소비 앱(React 19) | `packages/ui` 단위 테스트, consumer-smoke, `tools/ui_drift.py` | `UC-n` | T-204(선행 T-203) |
 | [openapi.md](openapi.md) | OpenAPI/REST 규약 3계층(MUST/SHOULD/MUST NOT)·헤더·`X-Request-ID`·health·export | 7개 FastAPI 백엔드 | `openapi-drift.yml`·`typegen-drift.yml`, 예외 레지스트리 | `M-n`/`S-n`/`N-n` | T-301 |
 | [openapi-exceptions.yaml](openapi-exceptions.yaml) | OpenAPI 규약 예외 레지스트리(`{app, rule, surface, reason, sunset, review, owner}`) | 예외 보유 앱 | drift 워크플로가 읽음 | — | T-301 |
+| [openapi-exceptions.md](openapi-exceptions.md) | 예외 YAML에서 생성한 사람이 읽는 검토 표 | 유지자·리뷰어 | `tools/openapi_exceptions.py --check` | — | T-301 |
 | [backend-stack.md](backend-stack.md) | Python 공통 패키지 구조·extras·3.11 호환·품질 도구 베이스·메트릭 접두 | 7개 백엔드 | `python-quality.yml`, `python-package` job | 문서 정의 | T-302 |
 | [ci-deploy.md](ci-deploy.md) | common CI job·재사용 워크플로·릴리스·포트·명명·Dockerfile/compose 규약 | 전 저장소 | selftest·consumer-smoke | 문서 정의 | T-009·T-010 |
 | [licensing.md](licensing.md) | GPL-3.0-or-later·고지 파일·SPDX 헤더·추출 gate | common + 이식 파일 전부 | `tools/check_spdx.py` | 문서 정의 | T-003 |
