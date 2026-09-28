@@ -1,0 +1,7 @@
+kor-travel-common / @kor-travel/ui
+Copyright (C) 2026 Youn-sok Choi (digitie)
+SPDX-License-Identifier: GPL-3.0-or-later
+
+자체 작성 UI 패키지는 GNU GPL 버전 3 또는 수령자가 선택한 이후 버전으로 제공한다.
+GPLv3 제7조 추가 허가는 없다. 전문은 동봉 LICENSE에 있으며 외부 의존 고지는
+THIRD_PARTY_NOTICES.md를 따른다. 문의: https://github.com/digitie/kor-travel-common

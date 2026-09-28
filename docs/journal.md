@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-09-29 (Codex, T-215 WSL 검증·post-fix PASS)
+
+사용자 로컬 권한 변경 후 WSL Ubuntu-26.04에서 설치·Git 쓰기·최신 React/Next 실행을 확인했다. 원 main에서 별도 branch로 T-215만 분리하고 사용자 T-301 변경과 PR #22를 보존했다. 로그인·실제 리모트 메뉴20/8/7/15/12/9개·프로젝트 색상 예시를 최신 런타임으로 다시 촬영했다. 소스 import·Tailwind 해석·문서 title을 실제 빌드와 브라우저에서 수정했다.
+
+최초 CI는 생성 tarball의 로컬 고정 integrity가 checkout 환경과 달라 실패했다. 두 로컬 file 산출물만 갱신하고 registry lock은 유지하는 준비 스크립트로 수정했고 실제 npm ci·후속 packages CI가 통과했다. Python은337개 중336성공·Windows전용1skip이며 wrapper 종료문 오류를 별도 보존했다. 두 독립 post-fix 코드 PASS·새 finding0 및 전체 후보 CI 성공은 [최종 리뷰](reviews/adversarial/2026-09-29-t215-wsl-post-fix.md)에 기록했다. [PR #23](https://github.com/digitie/kor-travel-common/pull/23)의 최종 closure CI 성공 후 머지한다. 소비자 수정·배포·registry 발행은 수행하지 않았다.
+
 ## 2026-09-09 (Codex, T-010 최종 PASS·PR #21 merge 대기)
 
 T-010의 반복 no-go 원인은 consumer checkout pin과 common package artifact 원천을 하나의 repository 계약으로 취급한 점, GPL tarball 고지를 metadata 문자열만으로 신뢰한 점, 미등록 versions repo를 report로 낮춘 점, 그리고 closure evidence를 immutable candidate와 분리하지 않은 점이었다. 구현은 checkout pin과 common artifact URL을 분리하고 canonical GPL `LICENSE` 본문·`NOTICE`·`THIRD_PARTY_NOTICES.md`·repository provenance를 실제 tarball에서 검증하며, unknown repo와 fixture base/caller/common 저장소 조건을 fail-closed로 고정했다. 소비자 저장소는 수정하지 않았다.

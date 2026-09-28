@@ -1,0 +1,111 @@
+{
+  "runtime": {
+    "react": "19.3.0",
+    "next": "16.3.6"
+  },
+  "checks": [
+    {
+      "project": "map",
+      "menuItems": 20,
+      "menuOrder": "PASS",
+      "keyboardFocus": "PASS",
+      "axe": "PASS",
+      "controlContrast": 3.5429526866686536,
+      "loginErrorRetry": "PASS",
+      "widths": [
+        320,
+        390,
+        768,
+        1024,
+        1440
+      ]
+    },
+    {
+      "project": "weather",
+      "menuItems": 8,
+      "menuOrder": "PASS",
+      "keyboardFocus": "PASS",
+      "axe": "PASS",
+      "controlContrast": 3.544777503059275,
+      "loginErrorRetry": "PASS",
+      "widths": [
+        320,
+        390,
+        768,
+        1024,
+        1440
+      ]
+    },
+    {
+      "project": "concierge",
+      "menuItems": 7,
+      "menuOrder": "PASS",
+      "keyboardFocus": "PASS",
+      "axe": "PASS",
+      "controlContrast": 5.084008581020064,
+      "loginErrorRetry": "PASS",
+      "widths": [
+        320,
+        390,
+        768,
+        1024,
+        1440
+      ]
+    },
+    {
+      "project": "geo",
+      "menuItems": 15,
+      "menuOrder": "PASS",
+      "keyboardFocus": "PASS",
+      "axe": "PASS",
+      "controlContrast": 5.357957958715466,
+      "loginErrorRetry": "PASS",
+      "widths": [
+        320,
+        390,
+        768,
+        1024,
+        1440
+      ]
+    },
+    {
+      "project": "transport",
+      "menuItems": 12,
+      "menuOrder": "PASS",
+      "keyboardFocus": "PASS",
+      "axe": "PASS",
+      "controlContrast": 3.544777503059275,
+      "loginErrorRetry": "PASS",
+      "widths": [
+        320,
+        390,
+        768,
+        1024,
+        1440
+      ]
+    },
+    {
+      "project": "docker-manager",
+      "menuItems": 9,
+      "menuOrder": "PASS",
+      "keyboardFocus": "PASS",
+      "axe": "PASS",
+      "controlContrast": 6.029516658041014,
+      "loginErrorRetry": "PASS",
+      "widths": [
+        320,
+        390,
+        768,
+        1024,
+        1440
+      ]
+    },
+    {
+      "project": "packed-next",
+      "nextLink": "PASS",
+      "login": "PASS",
+      "commonDarkAxe": "PASS"
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,8 @@
+{
+  "name": "kor-travel-ui-next-smoke",
+  "private": true,
+  "type": "module",
+  "scripts": {"dev": "next dev --hostname 127.0.0.1", "build": "next build", "build:webpack": "next build --webpack"},
+  "dependencies": {"next": "16.3.6", "react": "19.3.0", "react-dom": "19.3.0", "lucide-react": "1.41.0"},
+  "devDependencies": {"typescript": "5.9.3", "@types/react": "19.2.18", "@types/react-dom": "19.2.4", "@types/node": "22.19.0", "@tailwindcss/postcss": "4.3.3", "tailwindcss": "4.3.3"}
+}

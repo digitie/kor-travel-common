@@ -1,0 +1,56 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ */
+@import "tailwindcss";
+@import "../../tokens/theme.css";
+@import "../../tokens/base.css";
+@source "../src";
+@source "./Preview.tsx";
+
+.preview-root { min-height: 100vh; color: var(--kt-text-primary); background: var(--kt-surface-page); font-family: "Malgun Gothic", system-ui, sans-serif; }
+.preview-banner { min-height: 42px; display: flex; justify-content: space-between; gap: 12px; padding: 10px 24px; border-bottom: 1px solid var(--kt-border); color: var(--kt-text-secondary); font-size: 12px; }
+.preview-banner a { font-weight: 600; }
+.preview-layout { display: grid; grid-template-columns: 276px minmax(0, 1fr); min-height: calc(100vh - 42px); }
+.preview-rail { min-width: 0; background: var(--kt-surface-card); border-right: 1px solid var(--kt-border); display: flex; flex-direction: column; }
+.preview-wordmark { display: flex; gap: 8px; align-items: baseline; padding: 22px 18px; border-bottom: 1px solid var(--kt-border); }
+.preview-wordmark strong { font-size: 14px; letter-spacing: -.3px; overflow-wrap: anywhere; }
+.preview-wordmark span { font-size: 12px; }
+.preview-navigation { padding: 18px 10px; }
+.preview-logout { display: flex; align-items: center; gap: 10px; margin: auto 16px 16px; min-height: 44px; padding: 10px 12px; font-size: 14px; }
+.preview-main { min-width: 0; display: flex; flex-direction: column; }
+.preview-header { padding: 28px 40px 24px; border-bottom: 1px solid var(--kt-border); }
+.preview-header p { font-size: 13px; color: var(--kt-text-secondary); }
+.preview-header > div { display: flex; gap: 16px; align-items: center; margin: 8px 0; }
+.preview-header h1 { font-size: 26px; font-weight: 650; letter-spacing: -1px; }
+.preview-version { font-size: 12px; color: var(--kt-text-secondary); }
+.preview-switcher { display: flex; gap: 22px; margin: 0 40px; border-bottom: 1px solid var(--kt-border); }
+.preview-switcher button { min-height: 52px; font-size: 13px; color: var(--kt-text-secondary); border-bottom: 2px solid transparent; }
+.preview-switcher [aria-pressed=true] { color: var(--kt-text-primary); border-bottom-color: var(--kt-brand); font-weight: 600; }
+.preview-login { padding: 60px 24px 20px; }
+.preview-login [data-slot=login-form] { max-width: 392px; }
+.preview-scenario { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 18px; font-size: 12px; color: var(--kt-text-secondary); }
+.preview-scenario select { border: 1px solid var(--kt-control-line); border-radius: var(--kt-radius-control); min-height: 36px; padding: 4px 8px; background: var(--kt-surface-card); }
+.preview-content { margin: 48px 40px; max-width: 680px; }
+.preview-content h2 { font-size: 24px; font-weight: 600; margin: 8px 0 32px; }
+.preview-kicker { font-size: 12px; color: var(--kt-text-secondary); }
+.preview-content dl { display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 20px; font-size: 14px; padding-bottom: 32px; }
+.preview-content dt { color: var(--kt-text-secondary); }
+.preview-content dd { overflow-wrap: anywhere; }
+.preview-notice { margin: 20px 40px; font-size: 14px; min-height: 24px; }
+.preview-footer { display: flex; flex-wrap: wrap; gap: 12px; margin: auto 40px 0; padding: 24px 0; border-top: 1px solid var(--kt-border); font-size: 12px; color: var(--kt-text-secondary); }
+.preview-footer a { text-decoration: underline; text-underline-offset: 3px; }
+.preview-skip { position: absolute; left: -10000px; }
+.preview-skip:focus { left: 12px; top: 12px; padding: 12px; background: var(--kt-surface-card); z-index: 10; }
+@media (max-width: 1023px) {
+  .preview-layout { display: block; }
+  .preview-rail { border-right: 0; border-bottom: 1px solid var(--kt-border); }
+  .preview-wordmark { padding: 14px 16px; }
+  .preview-navigation { padding: 8px; }
+  .preview-logout { display: none; }
+  .preview-header { padding: 24px 20px; }
+  .preview-switcher { margin: 0 20px; }
+  .preview-login { padding: 20px 8px; }
+  .preview-footer { margin: 24px 20px 0; }
+  .preview-content { margin: 32px 20px; }
+  .preview-banner { padding: 10px 16px; flex-wrap: wrap; }
+}
