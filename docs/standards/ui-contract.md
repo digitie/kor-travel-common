@@ -143,6 +143,24 @@
 
 앱별 셸 골격(nav·접힘·로그아웃·RBAC 구성)과 `ConfirmDialog` 엔진 선택은 앱 소유다. 공용 `LoginForm`·로그인 오류/상태 슬롯의 마크업 계약은 T-214에서 패키지로 제공하며, endpoint·IdP·redirect·세션 왕복은 앱이 주입한다([ADR-015](../adr/015-common-shared-systems-scope.md), T-214·T-312). 셸·기준선 템플릿 채널은 T-211에서 별도로 다룬다.
 
+### 4.7 로그인·탐색 메뉴(T-215 개발 후보)
+
+사용자 요청에 따른 선행 구현이며 정식 릴리스 gate는 [T-215](../tasks/T-215-shared-login-menu.md)와 T-214를 따른다. T-201의 전체 프리미티브 계획을 완료로 바꾸지 않는다.
+
+| export/subpath | 공개 계약 |
+|---|---|
+| `LoginForm` / `login-form` | `onSubmit({credentials:{username,password},nextPath})` 필수. `nextPath` 기본 `/`, `pending` 기본 false, `error`·`onClearError`·`defaultUsername`·`usernameLabel`(아이디)·`brand`(kor travel)·`description`·`footer`·`testId` 선택. username 앞뒤 공백만 제거하며 password는 변형하지 않는다. form은 `aria-busy`, 입력은 required/자동완성/명시 label, 대기 시 readOnly. CTA는 native disabled 없이 `aria-disabled`+`aria-busy`, 동일 틱 중복 제출 차단. 완료·실패 뒤 password DOM 값을 지운다. 위젯은 네트워크·저장소를 사용하지 않는다. |
+| `LoginError` / `login-error` | `error`·`id` 선택. 항상 존재하는 `p[role=alert][aria-atomic=true]`, 빈 오류도 슬롯 유지. |
+| `LoginStatus` / `login-status` | `status` 필수: checking / authenticated / unauthenticated. `userLabel` 선택. `p[role=status]`에 `data-state`를 표시한다. 인증 판정은 소비자 책임. |
+| `AppMenu` / `app-menu` | `groups[{id,label?,items}]` 필수. 항목은 `{id,label,href,exact?}` 또는 `{id,label,onSelect}`, 공통 `icon?`·`hint?`·`disabled?`. `pathname` 기본 `/`, `activeItemId` 미지정이면 경계가 맞는 최장 경로 하나, null이면 비활성. `label` 기본 `주 메뉴`, `testId`, `linkComponent` 선택. native nav/ul/a/button, 활성 링크 `aria-current=page`+tint+2px mark, 버튼 type=button. disabled 링크는 href 없는 `span[role=link][aria-disabled=true]`, 버튼은 native disabled. `hint`·icon은 접근성 이름에서 제외. 라벨만 접근성 이름이다. |
+| `sanitizeLocalPath` / `navigation` | 루트 기준 로컬 경로만 허용하고 외부·역슬래시·제어문자·경계 문자 인코딩·중첩 인코딩을 `/`로 치환한다. 안전한 pathname/query/hash는 URL 정규화 후 유지. 소비자가 성공 이동에 반환된 경로를 사용한다. |
+| `getActiveMenuItemId` / `navigation` | query/hash 없는 로컬 href만 자동 판정한다. 루트는 정확 일치, exact=true 항목은 하위 경로에 활성화하지 않는다. 동률은 첫 항목. hash/query 상태는 앱이 `activeItemId`로 주입. |
+| `getLoginErrorMessage` / `login-messages` | 503=설정 확인, 429=시도 제한, 403=허용되지 않은 요청, 기타=자격 증명 확인의 한국어 기본 사전. 서버 원문 오류를 자동 출력하지 않는다. |
+
+슬롯은 `login-form`, `login-brand`, `login-username`, `login-password`, `login-error`, `login-submit`, `login-footer`, `login-status`, `app-menu`, `app-menu-group`, `app-menu-group-label`, `app-menu-item`, `app-menu-link`, `app-menu-action`이다. 로그인은 페이지 h1 아래 h2 `로그인`을 만든다. CTA는 `로그인` / `로그인 중…`, 상태는 `로그인 상태 확인 중…` / `로그인됨`(사용자 이름이 있으면 `{userLabel}님, 로그인됨`) / `로그인이 필요합니다.`다. 콜백 예외는 `로그인하지 못했습니다. 잠시 후 다시 시도해 주세요.`로 표시한다.
+
+메뉴 ID는 그룹 내 및 항목 전체에서 유일해야 한다. 그룹/항목/권한/경로/로그아웃 정책은 소비자 소유다. 반응형 메뉴는 lg 미만에서 가로 strip, lg 이상에서 세로 rail이며 전체 셸·drawer를 대체하지 않는다. 최신 Next App Router에서는 client adapter가 Link와 콜백을 주입하고 서버는 `navigation` subpath만 직접 import할 수 있다. 스타일·통합 사용법은 [패키지 안내](../../packages/ui/README.md)를 따른다.
+
 ## 5. 문구 사전
 
 **UC-4 (MUST)** 아래 문자열은 계약이며 변경은 파괴 항목이다. 소비자 e2e는 이 문구를 그대로 단언할 수 있다.

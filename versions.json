@@ -1,7 +1,7 @@
 {
   "schema": "kor-travel-common.version-registry.v1",
   "baseline": "2026-09",
-  "updated": "2026-09-07",
+  "updated": "2026-09-29",
   "next_review": "2026-12",
   "policy": "docs/standards/versions.md",
   "source": "docs/plan/design-brief.md D-06·D-07·D-30; docs/survey/cross/version-matrix.md §4·§5.1",
@@ -33,17 +33,17 @@
     "next": {
       "ecosystem": "npm",
       "floor": "16.2",
-      "recommended": "16.3.4",
+      "recommended": "16.3.6",
       "note": "map 16.2.12 exact 허용(예외). wx 15·ktdm 14는 Phase 4.",
-      "source": "vm §1.2"
+      "source": "https://registry.npmjs.org/next/latest (2026-09-29 조회; 16.3.6)"
     },
     "react": {
       "ecosystem": "npm",
       "packages": ["react", "react-dom"],
       "floor": "19.0",
-      "recommended": "19.2.8",
+      "recommended": "19.3.0",
       "note": "geo·ktdm 18.3.1은 Phase 4 전 예외(tokens만 채택).",
-      "source": "vm §1.2·§5.3"
+      "source": "https://registry.npmjs.org/react/latest (2026-09-29 조회; 19.3.0), https://react.dev/versions"
     },
     "typescript": {
       "ecosystem": "npm",

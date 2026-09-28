@@ -202,6 +202,20 @@ jobs:
           npm run check --workspace packages/tokens
           git diff --exit-code -- packages/tokens/dist packages/tokens/dark-media.css
           npm test --workspace packages/tokens
+      - name: UI 라이브러리·설치 산출물 Next 검증
+        run: |
+          npm run build --workspace packages/ui
+          npm run check --workspace packages/ui
+          npm run check:examples --workspace packages/ui
+          npm test --workspace packages/ui
+          mkdir -p test-results/ui-pack
+          npm pack --workspace packages/tokens --pack-destination test-results/ui-pack
+          npm pack --workspace packages/ui --pack-destination test-results/ui-pack
+          npm ci --prefix packages/ui/smoke/next-app --no-audit --no-fund
+          npm run build:webpack --prefix packages/ui/smoke/next-app
+          npm run build --prefix packages/ui/smoke/next-app
+          npm ci --prefix packages/ui/examples/next-app --no-audit --no-fund
+          npm run build --prefix packages/ui/examples/next-app
       - name: tarball 설치 스모크
         run: |
           package_dir="$(mktemp -d)"

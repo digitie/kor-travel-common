@@ -1,0 +1,705 @@
+[
+  {
+    "id": "map",
+    "name": "kor-travel-map",
+    "sha": "f5d60f61f7634f9ede2aeb7b58912100cf10820b",
+    "menu": "https://github.com/digitie/kor-travel-map/blob/f5d60f61f7634f9ede2aeb7b58912100cf10820b/packages/kor-travel-map-admin/frontend/src/components/admin-shell.tsx",
+    "theme": {
+      "--kt-surface-page": "oklch(97.8% 0.003 128)",
+      "--kt-surface-card": "oklch(99.2% 0.002 140)",
+      "--kt-surface-subtle": "oklch(96.7% 0.006 138)",
+      "--kt-surface-muted": "oklch(92.5% 0.01 141)",
+      "--kt-text-primary": "oklch(30% 0.006 157)",
+      "--kt-text-secondary": "oklch(48% 0.012 159)",
+      "--kt-text-disabled": "oklch(79% 0.012 154)",
+      "--kt-brand": "oklch(51.4% 0.081 169)",
+      "--kt-brand-hover": "oklch(46% 0.085 169)",
+      "--kt-brand-tint": "oklch(95.2% 0.013 172)",
+      "--kt-brand-foreground": "oklch(99% 0.002 140)",
+      "--kt-control-line": "oklch(61% 0.012 145)",
+      "--kt-focus": "oklch(45% 0.09 169)",
+      "--kt-border": "oklch(92.5% 0.01 141)",
+      "--kt-destructive": "oklch(51.4% 0.167 27)"
+    },
+    "groups": [
+      {
+        "id": "group-0",
+        "items": [
+          {
+            "id": "item-0-0",
+            "label": "홈",
+            "href": "/",
+            "icon": "HomeIcon"
+          }
+        ]
+      },
+      {
+        "id": "group-1",
+        "label": "Feature 관리",
+        "items": [
+          {
+            "id": "item-1-0",
+            "label": "Feature 지도",
+            "href": "/features",
+            "icon": "MapIcon"
+          },
+          {
+            "id": "item-1-1",
+            "label": "Feature 목록",
+            "href": "/admin/features",
+            "icon": "DatabaseIcon"
+          },
+          {
+            "id": "item-1-2",
+            "label": "중복 검토",
+            "href": "/admin/features/dedup-reviews",
+            "icon": "GitCompareArrowsIcon"
+          },
+          {
+            "id": "item-1-3",
+            "label": "수동/provider 판정",
+            "href": "/admin/manual-provider-dedup",
+            "icon": "GitCompareArrowsIcon"
+          },
+          {
+            "id": "item-1-4",
+            "label": "보강 검토",
+            "href": "/admin/features/enrichment-reviews",
+            "icon": "LinkIcon"
+          },
+          {
+            "id": "item-1-5",
+            "label": "이슈",
+            "href": "/admin/issues",
+            "icon": "AlertTriangleIcon"
+          },
+          {
+            "id": "item-1-6",
+            "label": "큐레이션 관리",
+            "href": "/admin/features/curated",
+            "icon": "SparklesIcon"
+          },
+          {
+            "id": "item-1-7",
+            "label": "큐레이션 후보",
+            "href": "/admin/curations/candidates",
+            "icon": "ListChecksIcon"
+          },
+          {
+            "id": "item-1-8",
+            "label": "큐레이션 지도",
+            "href": "/curated-features",
+            "icon": "MapPinnedIcon"
+          }
+        ]
+      },
+      {
+        "id": "group-2",
+        "label": "수집 파이프라인",
+        "items": [
+          {
+            "id": "item-2-0",
+            "label": "파이프라인",
+            "href": "/ops/pipeline",
+            "icon": "WorkflowIcon"
+          },
+          {
+            "id": "item-2-1",
+            "label": "데이터셋",
+            "href": "/ops/datasets",
+            "icon": "LayersIcon"
+          },
+          {
+            "id": "item-2-2",
+            "label": "오프라인 업로드",
+            "href": "/admin/offline-uploads",
+            "icon": "UploadCloudIcon"
+          },
+          {
+            "id": "item-2-3",
+            "label": "POI 캐시 대상",
+            "href": "/admin/poi-cache-targets",
+            "icon": "RouteIcon"
+          },
+          {
+            "id": "item-2-4",
+            "label": "캐시 전파",
+            "href": "/ops/cache-target-streams",
+            "icon": "ActivityIcon"
+          }
+        ]
+      },
+      {
+        "id": "group-3",
+        "label": "모니터링",
+        "items": [
+          {
+            "id": "item-3-0",
+            "label": "운영 로그",
+            "href": "/ops/logs",
+            "icon": "ActivityIcon"
+          },
+          {
+            "id": "item-3-1",
+            "label": "정합성 점검",
+            "href": "/ops/consistency",
+            "icon": "RadarIcon"
+          }
+        ]
+      },
+      {
+        "id": "group-4",
+        "label": "시스템",
+        "items": [
+          {
+            "id": "item-4-0",
+            "label": "파일 관리",
+            "href": "/admin/files",
+            "icon": "FolderTreeIcon"
+          },
+          {
+            "id": "item-4-1",
+            "label": "백업",
+            "href": "/admin/backups",
+            "icon": "ArchiveIcon"
+          },
+          {
+            "id": "item-4-2",
+            "label": "설정",
+            "href": "/admin/settings",
+            "icon": "SettingsIcon"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "weather",
+    "name": "kor-travel-weather",
+    "sha": "fbb52e8a505113d80fcb77f2dfb7cb67350c59ef",
+    "menu": "https://github.com/digitie/kor-travel-weather/blob/fbb52e8a505113d80fcb77f2dfb7cb67350c59ef/packages/kor-travel-weather-admin/frontend/components/admin-shell.tsx",
+    "theme": {
+      "--kt-surface-page": "oklch(97.8% 0.003 250)",
+      "--kt-surface-card": "oklch(99.2% 0.002 250)",
+      "--kt-surface-subtle": "oklch(96.7% 0.006 250)",
+      "--kt-surface-muted": "oklch(92.5% 0.01 250)",
+      "--kt-text-primary": "oklch(30% 0.025 255)",
+      "--kt-text-secondary": "oklch(48% 0.04 255)",
+      "--kt-text-disabled": "oklch(79% 0.025 255)",
+      "--kt-brand": "oklch(47% 0.14 255)",
+      "--kt-brand-hover": "oklch(41% 0.15 255)",
+      "--kt-brand-tint": "oklch(95% 0.025 250)",
+      "--kt-brand-foreground": "oklch(99% 0.002 250)",
+      "--kt-control-line": "oklch(61% 0.035 255)",
+      "--kt-focus": "oklch(43% 0.13 255)",
+      "--kt-border": "oklch(92.5% 0.01 250)",
+      "--kt-destructive": "oklch(51.4% 0.167 27)"
+    },
+    "groups": [
+      {
+        "id": "group-0",
+        "items": [
+          {
+            "id": "item-0-0",
+            "label": "홈",
+            "href": "/",
+            "icon": "Home"
+          },
+          {
+            "id": "item-0-1",
+            "label": "날씨 지도",
+            "href": "/weather",
+            "icon": "CloudSun"
+          },
+          {
+            "id": "item-0-2",
+            "label": "위치 카탈로그",
+            "href": "/locations",
+            "icon": "MapPin"
+          },
+          {
+            "id": "item-0-3",
+            "label": "데이터셋",
+            "href": "/datasets",
+            "icon": "Database"
+          },
+          {
+            "id": "item-0-4",
+            "label": "수집 실행",
+            "href": "/sync-runs",
+            "icon": "Activity"
+          },
+          {
+            "id": "item-0-5",
+            "label": "API 키 설정",
+            "href": "/settings/providers",
+            "icon": "KeyRound"
+          },
+          {
+            "id": "item-0-6",
+            "label": "Dagster",
+            "href": "/admin/dagster",
+            "icon": "Workflow"
+          },
+          {
+            "id": "item-0-7",
+            "label": "API 테스트",
+            "href": "/api-test",
+            "icon": "Code2"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "concierge",
+    "name": "kor-travel-concierge",
+    "sha": "ab23bf2a85df61746a154ae89fc4530cb089c5da",
+    "menu": "https://github.com/digitie/kor-travel-concierge/blob/ab23bf2a85df61746a154ae89fc4530cb089c5da/frontend/src/components/AppShell.tsx",
+    "theme": {
+      "--kt-surface-page": "#f4f5f0",
+      "--kt-surface-card": "#fcfcf9",
+      "--kt-surface-subtle": "#edf0e9",
+      "--kt-surface-muted": "#dce3d9",
+      "--kt-text-primary": "#29342e",
+      "--kt-text-secondary": "#5f6b63",
+      "--kt-text-disabled": "#a8b0aa",
+      "--kt-brand": "#7c3aed",
+      "--kt-brand-hover": "#6d28d9",
+      "--kt-brand-tint": "#ede9fe",
+      "--kt-brand-foreground": "#ffffff",
+      "--kt-control-line": "#5f6b63",
+      "--kt-focus": "#6d28d9",
+      "--kt-border": "#d5ddd3",
+      "--kt-destructive": "#b23c36"
+    },
+    "groups": [
+      {
+        "id": "group-0",
+        "label": "개요",
+        "items": [
+          {
+            "id": "item-0-0",
+            "label": "결과",
+            "href": "/",
+            "icon": "MapIcon"
+          }
+        ]
+      },
+      {
+        "id": "group-1",
+        "label": "수집 파이프라인",
+        "items": [
+          {
+            "id": "item-1-0",
+            "label": "수집",
+            "href": "/collect",
+            "icon": "DownloadCloudIcon"
+          },
+          {
+            "id": "item-1-1",
+            "label": "작업",
+            "href": "/jobs",
+            "icon": "ListChecksIcon"
+          }
+        ]
+      },
+      {
+        "id": "group-2",
+        "label": "검수",
+        "items": [
+          {
+            "id": "item-2-0",
+            "label": "검수",
+            "href": "/review",
+            "icon": "ClipboardCheckIcon"
+          }
+        ]
+      },
+      {
+        "id": "group-3",
+        "label": "시스템",
+        "items": [
+          {
+            "id": "item-3-0",
+            "label": "설정",
+            "href": "/settings",
+            "icon": "SettingsIcon"
+          },
+          {
+            "id": "item-3-1",
+            "label": "상태",
+            "href": "/status",
+            "icon": "ActivityIcon"
+          },
+          {
+            "id": "item-3-2",
+            "label": "API 테스트",
+            "href": "/api-test",
+            "icon": "PlugIcon"
+          }
+        ]
+      }
+    ],
+    "rail": {
+      "background": "#2e1065",
+      "foreground": "#f5f3ff",
+      "muted": "#c4b5fd"
+    }
+  },
+  {
+    "id": "geo",
+    "name": "kor-travel-geo",
+    "sha": "b36c9d0ab9a708d7611ec29e65ea688053543d53",
+    "menu": "https://github.com/digitie/kor-travel-geo/blob/b36c9d0ab9a708d7611ec29e65ea688053543d53/kor-travel-geo-ui/lib/admin-pages.ts",
+    "theme": {
+      "--kt-surface-page": "oklch(0.975 0.008 262.9)",
+      "--kt-surface-card": "oklch(0.992 0.004 262.9)",
+      "--kt-surface-subtle": "oklch(0.95 0.014 262.9)",
+      "--kt-surface-muted": "oklch(0.916 0.021 262.9)",
+      "--kt-text-primary": "oklch(0.35 0.025 244)",
+      "--kt-text-secondary": "oklch(0.51 0.018 244)",
+      "--kt-text-disabled": "oklch(0.67 0.012 244)",
+      "--kt-brand": "oklch(0.546 0.215 262.9)",
+      "--kt-brand-hover": "oklch(0.488 0.217 264.4)",
+      "--kt-brand-tint": "oklch(0.932 0.032 255.6)",
+      "--kt-brand-foreground": "oklch(0.992 0.004 262.9)",
+      "--kt-control-line": "oklch(0.51 0.018 244)",
+      "--kt-focus": "oklch(0.546 0.215 262.9)",
+      "--kt-border": "oklch(0.916 0.021 262.9)",
+      "--kt-destructive": "oklch(0.51 0.175 28)"
+    },
+    "groups": [
+      {
+        "id": "group-0",
+        "label": "조회·진단",
+        "items": [
+          {
+            "id": "item-0-0",
+            "label": "Geocode",
+            "href": "/debug/geocode",
+            "icon": "Search"
+          },
+          {
+            "id": "item-0-1",
+            "label": "Reverse",
+            "href": "/debug/reverse",
+            "icon": "MapPinned"
+          },
+          {
+            "id": "item-0-2",
+            "label": "Normalize",
+            "href": "/debug/normalize",
+            "icon": "Braces"
+          },
+          {
+            "id": "item-0-3",
+            "label": "Explain",
+            "href": "/debug/explain",
+            "icon": "TerminalSquare"
+          }
+        ]
+      },
+      {
+        "id": "group-1",
+        "label": "개요",
+        "items": [
+          {
+            "id": "item-1-0",
+            "label": "관리 홈",
+            "href": "/admin",
+            "icon": "LayoutDashboard"
+          }
+        ]
+      },
+      {
+        "id": "group-2",
+        "label": "데이터 관리",
+        "items": [
+          {
+            "id": "item-2-0",
+            "label": "원천 파일",
+            "href": "/admin/source-files",
+            "icon": "FolderUp"
+          },
+          {
+            "id": "item-2-1",
+            "label": "파일 관리",
+            "href": "/admin/files",
+            "icon": "Files"
+          },
+          {
+            "id": "item-2-2",
+            "label": "정합성 검증",
+            "href": "/admin/consistency",
+            "icon": "ListChecks"
+          }
+        ]
+      },
+      {
+        "id": "group-3",
+        "label": "수집 파이프라인",
+        "items": [
+          {
+            "id": "item-3-0",
+            "label": "Dagster",
+            "href": "/admin/dagster",
+            "icon": "Workflow"
+          },
+          {
+            "id": "item-3-1",
+            "label": "운영 이력",
+            "href": "/admin/ops",
+            "icon": "ShieldCheck"
+          }
+        ]
+      },
+      {
+        "id": "group-4",
+        "label": "모니터링",
+        "items": [
+          {
+            "id": "item-4-0",
+            "label": "로그",
+            "href": "/admin/logs",
+            "icon": "FileText"
+          },
+          {
+            "id": "item-4-1",
+            "label": "테이블 통계",
+            "href": "/admin/tables",
+            "icon": "Database"
+          },
+          {
+            "id": "item-4-2",
+            "label": "캐시",
+            "href": "/admin/cache",
+            "icon": "BarChart3"
+          }
+        ]
+      },
+      {
+        "id": "group-5",
+        "label": "시스템",
+        "items": [
+          {
+            "id": "item-5-0",
+            "label": "백업/복원",
+            "href": "/admin/backups",
+            "icon": "Archive"
+          },
+          {
+            "id": "item-5-1",
+            "label": "설정",
+            "href": "/admin/settings",
+            "icon": "Settings"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "transport",
+    "name": "kor-travel-transport",
+    "sha": "7960785b78fc2177b2eff5488534591bc616d834",
+    "menu": "https://github.com/digitie/kor-travel-transport/blob/7960785b78fc2177b2eff5488534591bc616d834/packages/kor-travel-transport-admin/frontend/components/admin-shell.tsx",
+    "theme": {
+      "--kt-surface-page": "oklch(97.8% .003 250)",
+      "--kt-surface-card": "oklch(99.2% .002 250)",
+      "--kt-surface-subtle": "oklch(96.7% .006 250)",
+      "--kt-surface-muted": "oklch(92.5% .01 250)",
+      "--kt-text-primary": "oklch(30% .025 255)",
+      "--kt-text-secondary": "oklch(48% .04 255)",
+      "--kt-brand": "oklch(47% .14 255)",
+      "--kt-brand-hover": "oklch(41% .15 255)",
+      "--kt-brand-tint": "oklch(95% .025 250)",
+      "--kt-brand-foreground": "oklch(99% .002 250)",
+      "--kt-control-line": "oklch(61% .035 255)",
+      "--kt-focus": "oklch(43% .13 255)",
+      "--kt-border": "oklch(92.5% .01 250)",
+      "--kt-destructive": "oklch(51.4% .167 27)"
+    },
+    "groups": [
+      {
+        "id": "group-0",
+        "items": [
+          {
+            "id": "item-0-0",
+            "label": "현황",
+            "href": "/",
+            "icon": "Activity"
+          },
+          {
+            "id": "item-0-1",
+            "label": "지도",
+            "href": "/map",
+            "icon": "Map"
+          },
+          {
+            "id": "item-0-2",
+            "label": "교통·유가",
+            "href": "/transport",
+            "icon": "Route"
+          },
+          {
+            "id": "item-0-3",
+            "label": "열차·도시철도",
+            "href": "/rail",
+            "icon": "TrainFront"
+          },
+          {
+            "id": "item-0-4",
+            "label": "배편",
+            "href": "/ferry",
+            "icon": "ShipWheel"
+          },
+          {
+            "id": "item-0-5",
+            "label": "고속버스",
+            "href": "/bus/express",
+            "icon": "Bus"
+          },
+          {
+            "id": "item-0-6",
+            "label": "시외버스",
+            "href": "/bus/intercity",
+            "icon": "Bus"
+          },
+          {
+            "id": "item-0-7",
+            "label": "비행·공항",
+            "href": "/flights",
+            "icon": "Plane"
+          },
+          {
+            "id": "item-0-8",
+            "label": "고속도로",
+            "href": "/highways",
+            "icon": "Route"
+          },
+          {
+            "id": "item-0-9",
+            "label": "수집 상태",
+            "href": "/collections",
+            "icon": "Activity"
+          },
+          {
+            "id": "item-0-10",
+            "label": "Dagster",
+            "href": "/admin/dagster",
+            "icon": "Database"
+          },
+          {
+            "id": "item-0-11",
+            "label": "API 점검",
+            "href": "/api-test",
+            "icon": "ChartNoAxesCombined"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "docker-manager",
+    "name": "kor-travel-docker-manager",
+    "sha": "6af5dd147d8e697d4335e351f5d49df83bd325f6",
+    "menu": "https://github.com/digitie/kor-travel-docker-manager/blob/6af5dd147d8e697d4335e351f5d49df83bd325f6/frontend/src/components/layout/AppShell.tsx",
+    "theme": {
+      "--kt-surface-page": "oklch(98.2% 0.006 41)",
+      "--kt-surface-card": "oklch(100% 0 0)",
+      "--kt-surface-subtle": "oklch(95.9% 0.012 41)",
+      "--kt-surface-muted": "oklch(92.8% 0.018 41)",
+      "--kt-text-primary": "oklch(35% 0.025 41)",
+      "--kt-text-secondary": "oklch(49% 0.023 41)",
+      "--kt-text-disabled": "oklch(70% 0.015 41)",
+      "--kt-brand": "oklch(55.3% 0.195 38.4)",
+      "--kt-brand-hover": "oklch(55.3% 0.195 38.4)",
+      "--kt-brand-tint": "oklch(95.4% 0.038 75.2)",
+      "--kt-brand-foreground": "oklch(100% 0 0)",
+      "--kt-control-line": "oklch(49% 0.023 41)",
+      "--kt-focus": "oklch(55.3% 0.195 38.4)",
+      "--kt-border": "oklch(87.4% 0.018 41)",
+      "--kt-destructive": "oklch(53% 0.2 28)"
+    },
+    "groups": [
+      {
+        "id": "group-0",
+        "items": [
+          {
+            "id": "item-0-0",
+            "label": "대시보드",
+            "href": "/",
+            "icon": "LayoutDashboard"
+          }
+        ]
+      },
+      {
+        "id": "group-1",
+        "label": "서비스 관리",
+        "items": [
+          {
+            "id": "item-1-0",
+            "label": "서비스 원장",
+            "href": "#service-ledger",
+            "icon": "Database"
+          },
+          {
+            "id": "item-1-1",
+            "label": "앱별 상태",
+            "href": "#service-groups",
+            "icon": "Activity"
+          }
+        ]
+      },
+      {
+        "id": "group-2",
+        "label": "운영 도구",
+        "items": [
+          {
+            "id": "item-2-0",
+            "label": "빠른 명령",
+            "action": "onOpenCommandPalette",
+            "icon": "Command",
+            "hint": "⌘K"
+          },
+          {
+            "id": "item-2-1",
+            "label": "백업 이력",
+            "action": "onOpenBackupHistory",
+            "icon": "Database"
+          },
+          {
+            "id": "item-2-2",
+            "label": "배포 버전 고정",
+            "action": "onOpenRuntimePins",
+            "icon": "Pin"
+          },
+          {
+            "id": "item-2-3",
+            "label": "배포 상태 확인",
+            "action": "onOpenSourceStatus",
+            "icon": "GitCompare"
+          }
+        ]
+      },
+      {
+        "id": "group-3",
+        "label": "시스템",
+        "items": [
+          {
+            "id": "item-3-0",
+            "label": "인증 설정",
+            "action": "onOpenAdminSettings",
+            "icon": "KeyRound"
+          },
+          {
+            "id": "item-3-1",
+            "label": "로그아웃",
+            "action": "onLogout",
+            "icon": "LogOut"
+          }
+        ]
+      }
+    ]
+  }
+]

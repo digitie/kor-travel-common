@@ -1,0 +1,74 @@
+{
+  "name": "@kor-travel/ui",
+  "version": "0.1.0-dev.0",
+  "description": "kor-travel 공용 로그인과 탐색 메뉴",
+  "license": "GPL-3.0-or-later",
+  "author": "Youn-sok Choi (digitie)",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./login-form": {
+      "types": "./dist/login-form.d.ts",
+      "import": "./dist/login-form.js"
+    },
+    "./login-error": {
+      "types": "./dist/login-error.d.ts",
+      "import": "./dist/login-error.js"
+    },
+    "./login-status": {
+      "types": "./dist/login-status.d.ts",
+      "import": "./dist/login-status.js"
+    },
+    "./app-menu": {
+      "types": "./dist/app-menu.d.ts",
+      "import": "./dist/app-menu.js"
+    },
+    "./navigation": {
+      "types": "./dist/navigation.d.ts",
+      "import": "./dist/navigation.js"
+    },
+    "./login-messages": {
+      "types": "./dist/login-messages.d.ts",
+      "import": "./dist/login-messages.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "@kor-travel/tokens": "~0.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.2",
+    "@testing-library/user-event": "14.6.5",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "axe-core": "4.12.0",
+    "jsdom": "30.0.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11",
+    "lucide-react": "1.41.0",
+    "tailwindcss": "4.3.3"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/check-package.mjs",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "prepack": "npm run build",
+    "check:examples": "tsc -p tsconfig.examples.json",
+    "pretest": "npm run build"
+  }
+}

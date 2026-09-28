@@ -2,7 +2,7 @@
 
 이 원장은 열린 task의 요약·선행 관계를 관리한다. 수용 기준·외부 선행·검증·evidence는 상세 파일, 현재 다음 한 작업은 [resume](resume.md), 실행 선택과 단계별 출구는 [통합 계획](plan/integration-plan.md)이 정본이다. 작성 문법은 [task 규칙](tasks-rule.md)을 따른다.
 
-총 106개의 상세 작업이 있다. 완료 23개는 완료 원장에 보존하고 열린 83개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
+총 107개의 상세 작업이 있다. 완료 23개는 완료 원장에 보존하고 열린 84개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
 
 ## 실행 대기열
 
@@ -51,6 +51,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 | [T-213a](tasks/T-213a-ui-v0-2-common-candidate.md) | BLOCKED | P1 | UI `v0.2.0` common 검증 후보 보존 | T-208, T-209, T-210, T-212a |
 | [T-213](tasks/T-213-ui-v0-2-0-release.md) | BLOCKED | P1 | ui `v0.2.0`(Button·overlay·Table·DataTable·Pager·Copy/Json/Detail·Header/Form) rc → 정식 | T-212, T-213a |
 | [T-214](tasks/T-214-ui-login-widget-contract.md) | BLOCKED | P1 | 공용 로그인 위젯·상태 계약 | T-210, T-213a |
+| [T-215](tasks/T-215-shared-login-menu.md) | IN_PROGRESS | P1 | 공용 로그인·탐색 메뉴 구현 | 없음 |
 
 ## Python 공통
 

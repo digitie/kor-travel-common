@@ -69,6 +69,8 @@ tarball에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 동봉, `package.json` 
 - 테스트 하네스: vitest + RTL + jsdom, axe opt-in, showcase 없음(consumer-smoke 대체, D-33).
 - base-ui 미확인 3건(Button `type` 기본, Checkbox hidden input, Toast API)은 T-201에서 소스 확인 전 릴리스 금지.
 
+T-215는 사용자 요청에 따라 로그인·메뉴 native 부품만 먼저 구현한 개발 후보다. 현재 exports·의존은 패키지 실물을 따른다. `cn`·Base UI 합성·전체 소형 부품은 위 T-201 이후 계획으로 남으며 개발 후보는 정식 UI 0.1의 완료를 의미하지 않는다. 예시의 실제 메뉴·색상은 소비자 설정이며 common의 기본 메뉴·브랜드로 승격하지 않는다.
+
 ### 3.2 공개 계약(SemVer 대상)
 
 | 항목 | 내용 | 파괴 판정 |

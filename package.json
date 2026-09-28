@@ -10,9 +10,9 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspace packages/tokens",
-    "check": "npm run check --workspace packages/tokens",
-    "test": "npm test --workspace packages/tokens"
+    "build": "npm run build --workspace packages/tokens && npm run build --workspace packages/ui",
+    "check": "npm run check --workspace packages/tokens && npm run check --workspace packages/ui",
+    "test": "npm test --workspace packages/tokens && npm test --workspace packages/ui"
   },
   "devDependencies": {
     "@mdx-js/mdx": "3.1.1"

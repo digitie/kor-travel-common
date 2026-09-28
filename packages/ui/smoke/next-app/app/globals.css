@@ -1,0 +1,7 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ */
+@import "tailwindcss";
+@import "@kor-travel/tokens/theme.css";
+@import "@kor-travel/tokens/base.css";
+@source "../node_modules/@kor-travel/ui/dist";

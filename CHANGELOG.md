@@ -29,6 +29,8 @@
 
 #### Added
 
+- T-215 개발 후보: `LoginForm`·`LoginError`·`LoginStatus`, 주입형 `AppMenu`, 안전한 로컬 경로·활성 경로·로그인 오류 함수와 여섯 프로젝트 예시를 추가했다. 신규 API이므로 기존 계약의 파괴 변경은 없다. 정식 릴리스·소비자 채택은 미완료다.
+
 - `@kor-travel/ui` 계약 초안: React 19 전용(peer `^19.0.0`), overlay만 `@base-ui/react`·비-overlay는 native + `useRender`, `kt-` 접두 유틸리티만 사용, Button·DataTable 계약(`manualSorting` 기본 `true`), 마크업 계약(`data-slot`·`data-testid`·heading·sr-only), `@kor-travel/ui/cn`. 패키지 실물은 T-201([ui contract](docs/standards/ui-contract.md)).
 
 ### py
