@@ -1,10 +1,10 @@
-# T-215 공용 로그인·탐색 메뉴 구현
+# T-215 공용 로그인·탐색 메뉴 구현 (2026-09-29, PR #23)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P1
 - Gate: 타입·단위·접근성·tarball·Next 빌드·2인 적대적 리뷰
 - 선행: 없음
-- 외부 선행: Linux/Node 정본 환경, 의존 설치, Git 쓰기, 소비자 채택 PR
+- 외부 선행: 이 common 개발 후보의 외부 차단 없음. 실제 소비자 채택·릴리스는 후속 task 범위.
 
 ## 목표
 
@@ -51,17 +51,11 @@ python3 -B -X utf8 tools/validate_document_links.py
 python3 -B -X utf8 tools/validate_plan.py
 ```
 
-## WSL 검증 후보의 현재 상태
+## 최종 WSL 검증 evidence
 
-2026-09-29 로컬 권한 변경 후 Ubuntu-26.04에서 npm 네트워크·Git 쓰기가 정상화됐다. 원격 main 기준 독립 브랜치로 UI 변경만 분리했으며 T-301 작업은 포함하지 않았다. 아래 최초 제한 환경 기록은 당시의 이력이며 현재 판정은 이 절과 후속 immutable commit 리뷰를 따른다.
+2026-09-29 로컬 권한 변경 후 WSL에서 설치·Git·빌드가 정상화됐다. [최종 독립 리뷰·검증 기록](../reviews/adversarial/2026-09-29-t215-wsl-post-fix.md)에 기준선, 두 reviewer 원본, 실제 브라우저·단위·tarball·Next 두 빌드·Python 회귀와 성공 CI를 보존했다. 로컬 체크섬을 고정한 첫 CI 실패는 생성한 두 개발 tarball만 갱신하는 준비 스크립트로 해결했고 원격 CI에서 재검증했다.
 
-- Node 22.22.2·npm 11.19.1에서 최신 React·Next 의존성을 실제 설치하고 root·예시·tarball fixture lockfile을 생성했다.
-- root `npm run build`, `npm run check`, UI 예시 타입 검사 통과. tokens 7개·UI 29개 단위 시험이 통과했다.
-- 실제 tarball 설치 fixture의 webpack·Turbopack 빌드와 시각 예시의 Turbopack 빌드를 통과했다. 문서 title 보완 후 최종 빌드·브라우저6테마·다크·packed Next Link까지 통과했다.
-- 실제 빌드에서 발견한 시각 예시 source `.js` 경로·Tailwind 해석 실패를 수정했다. 예시는 공통 UI의 공개 export를 소비하고 공통 패키지 개발 의존에 Tailwind를 명시한다.
-- CI packages job에 UI 빌드·타입·단위·tarball 설치와 두 Next 빌드 방식·시각 예시 빌드를 추가했다. 생성 next-env는 ignore하며 예시 tsconfig는 strict·noUncheckedIndexedAccess로 고정했다.
-- 소비자 저장소 수정·배포·npm 게시는 범위 밖이다. 실제 소비자 이관 build/e2e는 후속 채택 task의 외부 선행이며 이 개발 후보의 common 검증과 구분한다.
-- 최종 immutable commit 2인 리뷰·CI 확인 전 머지하지 않는다. [WSL 정식 리뷰](../reviews/adversarial/2026-09-29-t215-wsl.md)의 두 코드 판정은 PASS이나 첫 CI packages의 로컬 tarball integrity 불일치를 수정 중이다. Python 전체는337개 중336개 성공·Windows 전용1개 skip이며 shell wrapper의 빈 exit 인수 오류는 별도 실패로 보존한다.
+T-215의 공통 개발 후보 범위는 완료했다. 실제 소비자 저장소 수정·인증 연동·이관 build/e2e·배포·registry 게시는 수행하지 않았으며 후속 채택 task의 범위다. T-201/T-214 전체 완료나 공용 UI 정식 릴리스 가능을 의미하지 않는다. 아래 제한 환경 기록은 당시 실패 이력이며 현재 gate 판정과 구분한다.
 
 ## 최초 제한 환경 evidence
 

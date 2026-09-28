@@ -1,18 +1,18 @@
 # 현재 상태와 다음 한 작업
 
-현재 상태의 정본이다. 정책은 [AGENTS](../AGENTS.md), 문서 선택은 [문서 지도](README.md), 상세 상태·선행은 [task 원장](tasks.md)을 따른다. 마지막 갱신: 2026-09-09, Codex.
+현재 상태의 정본이다. 정책은 [AGENTS](../AGENTS.md), 문서 선택은 [문서 지도](README.md), 상세 상태·선행은 [task 원장](tasks.md)을 따른다. 마지막 갱신: 2026-09-29, Codex.
 
 ## 현재 상태
 
-T-103 대비·UX 검사기 구현과 반복 리뷰의 근본 수정을 완료했다. 수동 MDX 파서를 제거하고 [ADR-016](adr/016-mdx-parser-for-ux-lint.md)의 실제 파서로 전환했으며 원문 BOM 좌표도 보정했다. [최종 통합 리뷰](reviews/adversarial/2026-09-08-t103-parser-post-fix.md)에 후보·두 독립 PASS·CI·실패 및 미실행 기록을 보존한다. T-010 재사용 워크플로 1단계도 실제 tarball·fixture 경계와 두 독립 최종 PASS, candidate CI까지 완료했으며 [최종 통합 리뷰](reviews/adversarial/2026-09-09-t010-post-fix.md)와 [PR #21](https://github.com/digitie/kor-travel-common/pull/21)에 기록했다. 앞선 완료 작업은 [완료 원장](tasks-done.md), 재현 이력은 [journal](journal.md)에 있다.
+사용자 요청 T-215 공용 로그인·메뉴·6개 실제 프로젝트 테마 예시를 구현했다. 최신 React/Next의 WSL 빌드·단위·tarball 설치·브라우저 검증, 두 독립 post-fix 리뷰와 후보 CI가 통과했다. [최종 리뷰](reviews/adversarial/2026-09-29-t215-wsl-post-fix.md)와 [PR #23](https://github.com/digitie/kor-travel-common/pull/23)이 evidence다. 기존 T-301 작업 checkout과 PR #22는 보존했다.
 
 ## 다음 한 작업
 
-**T-010 최종 검토 완료·PR #21 merge 대기.** 재사용 `versions-check`·`contrast-check`·`docs-check`, `workflows-selftest` fixture, 승인 핀 레지스트리와 consumer-smoke 실행기를 common 안에 작성했다. 두 reviewer가 동일 manifest 기준으로 post-fix `PASS`했고 candidate closure CI도 통과했다. 사용자는 merge 후 대기를 지시했으며 T-010a의 실제 소비자 dispatch는 외부 선행으로 계속 BLOCKED다.
+T-215 PR의 최종 closure CI·merge 결과를 확인한 뒤 후속 요청을 기다린다. 소비자 채택과 별도 T-301 PR을 자동으로 진행하지 않는다.
 
 ## 시작 파일과 검증
 
-현재 작업 확인은 [T-010](tasks/T-010-reusable-workflows-stage1.md)과 [CI 표준](standards/ci-deploy.md)에서 시작한다. workflow selftest는 GitHub Actions에서 candidate SHA로 확인해야 하며, 로컬에서는 두 fixture 도구 명령과 전체 unittest를 실행한다. 설치·검증 명령은 [개발 환경](dev-environment.md#6-검증-명령-사다리), 리뷰·병합은 [agent workflow](runbooks/agent-workflow.md)가 정본이다.
+[T-215](tasks/T-215-shared-login-menu.md), [예시 실행 안내](../packages/ui/examples/README.md), [최종 리뷰](reviews/adversarial/2026-09-29-t215-wsl-post-fix.md)를 확인한다. 일반 명령은 [개발 환경](dev-environment.md#6-검증-명령-사다리), branch·리뷰·merge는 [agent workflow](runbooks/agent-workflow.md)를 따른다.
 
 ## 유지할 제한과 외부 선행
 

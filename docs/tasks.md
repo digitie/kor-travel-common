@@ -2,11 +2,11 @@
 
 이 원장은 열린 task의 요약·선행 관계를 관리한다. 수용 기준·외부 선행·검증·evidence는 상세 파일, 현재 다음 한 작업은 [resume](resume.md), 실행 선택과 단계별 출구는 [통합 계획](plan/integration-plan.md)이 정본이다. 작성 문법은 [task 규칙](tasks-rule.md)을 따른다.
 
-총 107개의 상세 작업이 있다. 완료 23개는 완료 원장에 보존하고 열린 84개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
+총 107개의 상세 작업이 있다. 완료 24개는 완료 원장에 보존하고 열린 83개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
 
 ## 실행 대기열
 
-T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-005 버전 검사·고정 보고와 T-005a uv.lock 파서를 완료했다. T-005b Poetry·requirements 파서와 `NO_LOCK`·`BLOCKED` 보고를 완료했다. T-015와 T-006의 범위 변경 기록을 마쳤다. T-009(CI 하드닝)의 구현·두 리뷰·실제 CI를 완료했다. T-005c workflow 고정 참조·CI Node 선언 정적 보고와 두 reviewer PASS·PR CI를 완료했다. T-016 공용 시스템 범위 재정의·두 reviewer PASS·PR #9 candidate CI를 완료했다. T-011 소비자 매니페스트 validator·경계 회귀·두 reviewer 최종 PASS·PR #10 candidate CI를 완료했다. T-101 토큰 패키지·생성물·tarball gate와 두 reviewer post-fix·main/release push CI를 완료했다. T-102 별칭 shim·weather 예제·충돌 검사기와 두 reviewer final2 PASS·PR #15 candidate CI를 완료했다. T-104 디자인 토큰 표준·T-020/T-021 GPL 결정 문서·두 reviewer 최종 PASS·PR #17 merge·main CI를 완료했다. T-103 대비·UX 검사기와 MDX 파서 전환·두 reviewer 최종 PASS·후보 CI를 완료했다. T-010 재사용 workflow 1단계 구현·실제 tarball 경계·두 reviewer 최종 PASS·PR #21 candidate CI를 완료했다. 사용자는 현재 PR 병합 후 대기를 지시했으므로 다음 task는 재개 요청 전 시작하지 않는다. 각 task의 선행·외부 선행 충족이 우선이며, 충족되지 않으면 BLOCKED 이유를 기록하고 독립적인 다음 항목으로 넘어간다.
+T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-005 버전 검사·고정 보고와 T-005a uv.lock 파서를 완료했다. T-005b Poetry·requirements 파서와 `NO_LOCK`·`BLOCKED` 보고를 완료했다. T-015와 T-006의 범위 변경 기록을 마쳤다. T-009(CI 하드닝)의 구현·두 리뷰·실제 CI를 완료했다. T-005c workflow 고정 참조·CI Node 선언 정적 보고와 두 reviewer PASS·PR CI를 완료했다. T-016 공용 시스템 범위 재정의·두 reviewer PASS·PR #9 candidate CI를 완료했다. T-011 소비자 매니페스트 validator·경계 회귀·두 reviewer 최종 PASS·PR #10 candidate CI를 완료했다. T-101 토큰 패키지·생성물·tarball gate와 두 reviewer post-fix·main/release push CI를 완료했다. T-102 별칭 shim·weather 예제·충돌 검사기와 두 reviewer final2 PASS·PR #15 candidate CI를 완료했다. T-104 디자인 토큰 표준·T-020/T-021 GPL 결정 문서·두 reviewer 최종 PASS·PR #17 merge·main CI를 완료했다. T-103 대비·UX 검사기와 MDX 파서 전환·두 reviewer 최종 PASS·후보 CI를 완료했다. T-010 재사용 workflow 1단계 구현·실제 tarball 경계·두 reviewer 최종 PASS·PR #21 candidate CI를 완료했다. 사용자 후속 요청으로 T-215 공용 로그인·메뉴의 구현·WSL 검증·2인 리뷰·후보 CI를 완료했다. 이후 새 구현 task는 후속 요청 전 시작하지 않는다. 각 task의 선행·외부 선행 충족이 우선이며, 충족되지 않으면 BLOCKED 이유를 기록하고 독립적인 다음 항목으로 넘어간다.
 
 그 이후 아래 표에서 모든 선행이 DONE인 항목만 선택한다. 현재 범위의 common 작업만 기반 → 토큰 → UI → Python → 공통 운영/도구 분류 안에서 P0~P3 우선, 동순위는 ID 순이다. T-006의 계정 확보는 사용자 지시로 철회했다. T-010a·T-109·T-212·T-213·T-310·T-311 및 소비자 이관/미래 시점 task는 외부 evidence를 기다리고 독립적인 common READY 항목을 진행한다. 후보 보존 T-109a·T-212a·T-213a·T-310a가 후속 common 구현을 연다(ADR-014). rc 검증·정식 채택 경계는 [통합 계획 §4](plan/integration-plan.md#4-rc-검증과-정식-채택)를 따른다.
 
@@ -51,7 +51,6 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 | [T-213a](tasks/T-213a-ui-v0-2-common-candidate.md) | BLOCKED | P1 | UI `v0.2.0` common 검증 후보 보존 | T-208, T-209, T-210, T-212a |
 | [T-213](tasks/T-213-ui-v0-2-0-release.md) | BLOCKED | P1 | ui `v0.2.0`(Button·overlay·Table·DataTable·Pager·Copy/Json/Detail·Header/Form) rc → 정식 | T-212, T-213a |
 | [T-214](tasks/T-214-ui-login-widget-contract.md) | BLOCKED | P1 | 공용 로그인 위젯·상태 계약 | T-210, T-213a |
-| [T-215](tasks/T-215-shared-login-menu.md) | IN_PROGRESS | P1 | 공용 로그인·탐색 메뉴 구현 | 없음 |
 
 ## Python 공통
 
