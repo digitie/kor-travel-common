@@ -57,11 +57,11 @@ python3 -B -X utf8 tools/validate_plan.py
 
 - Node 22.22.2·npm 11.19.1에서 최신 React·Next 의존성을 실제 설치하고 root·예시·tarball fixture lockfile을 생성했다.
 - root `npm run build`, `npm run check`, UI 예시 타입 검사 통과. tokens 7개·UI 29개 단위 시험이 통과했다.
-- 실제 tarball 설치 fixture의 webpack·Turbopack 빌드와 시각 예시의 Turbopack 빌드를 통과했다. 문서 title 보완 후 최종 빌드·브라우저 검증은 진행 중이다.
+- 실제 tarball 설치 fixture의 webpack·Turbopack 빌드와 시각 예시의 Turbopack 빌드를 통과했다. 문서 title 보완 후 최종 빌드·브라우저6테마·다크·packed Next Link까지 통과했다.
 - 실제 빌드에서 발견한 시각 예시 source `.js` 경로·Tailwind 해석 실패를 수정했다. 예시는 공통 UI의 공개 export를 소비하고 공통 패키지 개발 의존에 Tailwind를 명시한다.
 - CI packages job에 UI 빌드·타입·단위·tarball 설치와 두 Next 빌드 방식·시각 예시 빌드를 추가했다. 생성 next-env는 ignore하며 예시 tsconfig는 strict·noUncheckedIndexedAccess로 고정했다.
 - 소비자 저장소 수정·배포·npm 게시는 범위 밖이다. 실제 소비자 이관 build/e2e는 후속 채택 task의 외부 선행이며 이 개발 후보의 common 검증과 구분한다.
-- 최종 immutable commit 2인 리뷰·CI 확인 전 머지하지 않는다. 후속 검증 결과는 이 절에 기록한다.
+- 최종 immutable commit 2인 리뷰·CI 확인 전 머지하지 않는다. [WSL 정식 리뷰](../reviews/adversarial/2026-09-29-t215-wsl.md)의 두 코드 판정은 PASS이나 첫 CI packages의 로컬 tarball integrity 불일치를 수정 중이다. Python 전체는337개 중336개 성공·Windows 전용1개 skip이며 shell wrapper의 빈 exit 인수 오류는 별도 실패로 보존한다.
 
 ## 최초 제한 환경 evidence
 

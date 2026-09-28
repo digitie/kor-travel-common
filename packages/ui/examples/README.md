@@ -38,11 +38,14 @@ npm run dev --prefix packages/ui/examples/next-app
 mkdir -p test-results/ui-pack
 npm pack -w packages/tokens --pack-destination test-results/ui-pack
 npm pack -w packages/ui --pack-destination test-results/ui-pack
-npm install --prefix packages/ui/smoke/next-app
+node packages/ui/smoke/prepare-lock.mjs
+npm ci --prefix packages/ui/smoke/next-app
 npm run build:webpack --prefix packages/ui/smoke/next-app
 npm run build --prefix packages/ui/smoke/next-app
 ```
 
 이 fixture는 `src` 대신 tarball의 `@kor-travel/ui`·tokens를 설치하고 실제 `next/link`·`usePathname`을 사용한다. 소비자 저장소의 실제 build/e2e를 대체하지 않는다.
+
+매 실행에서 생성하는 두 로컬 tarball은 checkout의 줄바꿈·파일 모드에 따라 digest가 달라질 수 있다. 준비 스크립트는 명시한 두 `file:` 경로의 integrity만 실제 생성물에서 갱신한다. registry 의존의 버전·URL·integrity는 고정 lockfile 그대로 `npm ci`가 검증한다. 이 개발 fixture의 갱신 방식은 발행된 패키지의 digest 검증을 대체하지 않는다.
 
 Geo 입력 경계도 원천의 text-secondary 색을 사용해 3:1 비텍스트 대비를 확보한다. axe의 텍스트 대비 검사와 입력 경계 대비 실측은 별개로 검증한다.
