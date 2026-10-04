@@ -4,6 +4,7 @@
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from time import monotonic
 from types import SimpleNamespace
 from typing import Any
 
@@ -168,7 +169,15 @@ def infrastructure_retry_sensor(
             or origin.job_name != job.name
         ):
             return SkipReason("다른 repository/job origin은 재시도하지 않습니다.")
-        if run.op_selection or run.asset_selection or run.asset_check_selection:
+        if (
+            run.op_selection is not None
+            or run.asset_selection is not None
+            or run.asset_check_selection is not None
+            or (
+                run.resolved_op_selection is not None
+                and run.resolved_op_selection != set(job.graph.node_names())
+            )
+        ):
             return SkipReason("부분 선택 실행은 전체 job으로 확대하지 않습니다.")
         reason = getattr(context.failure_event.event_specific_data, "failure_reason", None)
         if getattr(reason, "value", None) not in {
@@ -177,6 +186,14 @@ def infrastructure_retry_sensor(
             "RUN_WORKER_RESTART",
         }:
             return SkipReason("명시적인 worker 인프라 장애만 재시도합니다.")
+        if run.step_keys_to_execute is not None:
+            plan = (
+                instance.get_execution_plan_snapshot(run.execution_plan_snapshot_id)
+                if run.execution_plan_snapshot_id is not None
+                else None
+            )
+            if plan is None or set(run.step_keys_to_execute) != {step.key for step in plan.steps}:
+                return SkipReason("부분 실행 계획은 전체 job으로 확대하지 않습니다.")
         # 인프라 종료 전에 provider/step 실패가 있었으면 같은 호출을 반복하지 않는다.
         if instance.get_records_for_run(
             run_id=run.run_id, of_type=DagsterEventType.STEP_FAILURE, limit=1
@@ -193,16 +210,28 @@ def infrastructure_retry_sensor(
         next_attempt = sum(int(value) for value in attempts) + 1
         if next_attempt > policy.infrastructure_retries:
             return SkipReason("인프라 재시도 상한에 도달했습니다.")
+        native_child_id = run.tags.get("dagster/auto_retry_run_id")
+        if native_child_id:
+            native_child = instance.get_run_by_id(native_child_id)
+            if native_child is not None and native_child.parent_run_id == run.run_id:
+                return SkipReason("native 재시도 실행이 이미 발급되었습니다.")
+        if any(
+            instance.get_runs(
+                filters=RunsFilter(
+                    job_name=job.name,
+                    tags={parent_tag: run.run_id},
+                ),
+                limit=1,
+            )
+            for parent_tag in ("dagster/parent_run_id", INFRA_RETRY_PARENT_TAG)
+        ):
+            return SkipReason("이미 발급된 재시도 실행이 있습니다.")
         if has_active_run(
             instance, job_name=job.name, project=project, location_name=location_name
         ):
             return SkipReason("같은 job의 실행이 남아 있어 재시도를 합칩니다.")
         # 이전 run의 native 상태 태그는 전달하지 않는다. job 정의의 실행 설정만 다시 적용한다.
-        tags = {
-            key: value
-            for key, value in run.tags.items()
-            if not key.startswith("dagster/")
-        }
+        tags = {key: value for key, value in run.tags.items() if not key.startswith("dagster/")}
         tags.update(job.tags)
         tags.update(policy.tags(project=project, job_name=job.name))
         tags["dagster/max_retries"] = str(policy.infrastructure_retries - next_attempt)
@@ -213,6 +242,12 @@ def infrastructure_retry_sensor(
                 INFRA_RETRY_PARENT_TAG: run.run_id,
             }
         )
+        # child의 잔여 예산만 줄이면 native OFF→ON에서 원 parent가 다시 재시도된다.
+        # 요청 반환 전에 parent의 native 예산도 닫는다. 제출 실패 시 fallback은 결정적
+        # run key로 같은 요청을 다시 준비할 수 있다. instance 전환은 daemon drain 후 수행한다.
+        instance.add_run_tags(
+            run.run_id, {"dagster/max_retries": "0", "dagster/will_retry": "false"}
+        )
         return RunRequest(
             run_key=f"{project}/infra/{run.run_id}/{next_attempt}",
             run_config=run.run_config,
@@ -220,6 +255,7 @@ def infrastructure_retry_sensor(
         )
 
     def evaluate_failures(context):
+        started = monotonic()
         instance = context.instance
         if instance.run_retries_enabled:
             return SkipReason("native run retry에 위임합니다.")
@@ -234,7 +270,11 @@ def infrastructure_retry_sensor(
             cursor=cursor,
         )
         requests = []
-        for run in runs:
+        for index, run in enumerate(runs):
+            # 느리지만 정상인 metadata에서도 완료한 행을 checkpoint한다. 전체 페이지가
+            # 10초를 넘는다는 이유로 같은 100행을 영구 반복하지 않는다.
+            if index and monotonic() - started >= 5:
+                return SensorResult(cursor=runs[index - 1].run_id)
             records = instance.get_records_for_run(
                 run_id=run.run_id,
                 of_type=DagsterEventType.RUN_FAILURE,

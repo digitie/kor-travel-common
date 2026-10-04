@@ -197,13 +197,18 @@ project/location을 함께 검증하고, 실행 중인 같은 job은 합친다. 
 전체 멱등 job을 다시 실행한다. repository origin도 기본 `__repository__`와 일치해야 하며,
 다른 이름은 factory의 `repository_name`에 주입한다. origin 없는 실행은 project/location 태그를
 함께 요구한다. partition job과 부분 op/asset 선택 실행은 지원하지 않는다. native retry 횟수도
-같은 예산에 합산하고 fallback child에는 잔여 native retry 예산만 전달한다.
+같은 예산에 합산하고 이미 발급된 native/fallback child를 확인한다. fallback child뿐 아니라
+원 parent의 native 예산도 요청 반환 전에 닫는다. 제출 실패에는 같은 run key로 다시 준비한다.
+실행 계획의 일부 step 또는 resolved op subset도 전체 job으로 확대하지 않는다.
 
 일반 polling sensor가 실패 실행 100건씩 확인하고 한 tick에 한 실행만 재예약한다. batch 끝에서
 새 실패부터 다시 확인하며, metadata 장애·10초 timeout에는 cursor를 전진시키지 않는다.
+느리지만 정상인 조회에서는 5초 작업 예산 뒤 마지막 완료 행을 저장해 다음 tick에서 이어간다.
 run failure callback 예외도 이벤트를 소비하는 Dagster 동작을 피하기 위한 경계다. 전체 조회는
 10초/동시 4개 상한이며 metadata 장애는 sensor tick 실패로 전달한다. native retry 활성화 시
 fallback은 위임한다. 오래된 실패가 많으면 한 순회만큼 복구가 지연될 수 있다.
+native retry 설정 전환은 기존 daemon/code-server를 drain한 뒤 수행하여 서로 다른 설정의
+daemon을 동시에 두지 않는다. fresh sensor의 최초 순회는 기존 scope의 미재시도 실패도 대상이다.
 
 sensor 확인과 다른 수동/예약 발화는 원자적이지 않다. shared coordinator의 job limit과 소비자
 DB lease를 함께 적용한다. DB lease는 중복 provider 호출을 막지만 queued run의 메모리 제한을

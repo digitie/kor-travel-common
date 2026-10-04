@@ -158,12 +158,12 @@ def test_consumer_predicate_is_preserved():
         assert schedule.evaluate_tick(build_schedule_context(instance=instance)).skip_message
 
 
-def retry_definition():
+def retry_definition(job_definition=sample):
     return infrastructure_retry_sensor(
         name="test_infra_retry",
         project="test",
         location_name="test",
-        job=sample,
+        job=job_definition,
         policy=RecoveryPolicy(300, idempotent=True, infrastructure_retries=1),
     )
 
@@ -211,6 +211,9 @@ def test_infra_retry_preserves_config_and_deduplicates_event_with_one_attempt(re
         assert request.tags[INFRA_RETRY_PARENT_TAG] == context.dagster_run.run_id
         assert "dagster/schedule_name" not in request.tags
         assert request.tags["dagster/max_retries"] == "0"
+        parent = instance.get_run_by_id(context.dagster_run.run_id)
+        assert parent.tags["dagster/max_retries"] == "0"
+        assert parent.tags["dagster/will_retry"] == "false"
         assert evaluate_retry(retry, context).run_key == request.run_key
 
 
@@ -436,3 +439,94 @@ def test_retry_does_not_copy_native_parent_bookkeeping_tags():
         assert request.tags["source"] == "preserved"
         child = instance.create_run_for_job(sample, tags=request.tags)
         assert not child.is_resume_retry
+
+
+@job
+def two_steps():
+    noop.alias("first")()
+    noop.alias("second")()
+
+
+@pytest.mark.parametrize(
+    "selection",
+    [
+        {"resolved_op_selection": {"first"}},
+        {"partial_plan": True},
+    ],
+)
+def test_resolved_or_plan_subset_is_not_expanded(selection):
+    from dagster._core.execution.api import create_execution_plan
+
+    with DagsterInstance.local_temp() as instance:
+        if selection.get("partial_plan"):
+            selection = {
+                "execution_plan": create_execution_plan(two_steps, step_keys_to_execute=["first"])
+            }
+        run = instance.create_run_for_job(
+            two_steps,
+            status=DagsterRunStatus.FAILURE,
+            **selection,
+            tags={
+                **RecoveryPolicy(300, idempotent=True, infrastructure_retries=1).tags(
+                    project="test", job_name=two_steps.name
+                ),
+                "dagster/code_location": "test",
+            },
+        )
+        instance.report_dagster_event(
+            DagsterEvent(
+                event_type_value=DagsterEventType.RUN_FAILURE.value,
+                job_name=two_steps.name,
+                event_specific_data=JobFailureData(
+                    None, failure_reason=RunFailureReason.UNEXPECTED_TERMINATION
+                ),
+            ),
+            run.run_id,
+        )
+        assert (
+            not retry_definition(two_steps)
+            .evaluate_tick(build_sensor_context(instance=instance))
+            .run_requests
+        )
+
+
+def test_slow_healthy_metadata_checkpoints_completed_rows_before_outer_deadline(monkeypatch):
+    import kortravelcommon.dagster as dagster_module
+
+    with DagsterInstance.local_temp() as instance:
+        target = failure_context(instance)
+        failure_context(instance, RunFailureReason.STEP_FAILURE)
+        newest = failure_context(instance, RunFailureReason.STEP_FAILURE)
+        clock = iter([0, 6])
+        monkeypatch.setattr(dagster_module, "monotonic", lambda: next(clock))
+        first = retry_definition().evaluate_tick(build_sensor_context(instance=instance))
+        assert not first.run_requests
+        assert first.cursor == newest.dagster_run.run_id
+        monkeypatch.setattr(dagster_module, "monotonic", lambda: 0)
+        resumed = retry_definition().evaluate_tick(
+            build_sensor_context(instance=instance, cursor=first.cursor)
+        )
+        assert resumed.run_requests[0].tags[INFRA_RETRY_PARENT_TAG] == target.dagster_run.run_id
+
+
+def test_completed_native_child_consumes_the_parent_retry_budget():
+    with DagsterInstance.local_temp() as instance:
+        context = failure_context(instance)
+        parent = context.dagster_run
+        child = instance.create_run_for_job(
+            sample,
+            status=DagsterRunStatus.SUCCESS,
+            root_run_id=parent.run_id,
+            parent_run_id=parent.run_id,
+            tags={**parent.tags, "dagster/retry_number": "1"},
+        )
+        instance.add_run_tags(parent.run_id, {"dagster/auto_retry_run_id": child.run_id})
+        assert isinstance(evaluate_retry(retry_definition(), context), SkipReason)
+
+
+def test_completed_fallback_child_is_not_issued_again():
+    with DagsterInstance.local_temp() as instance:
+        context = failure_context(instance)
+        request = evaluate_retry(retry_definition(), context)
+        instance.create_run_for_job(sample, status=DagsterRunStatus.SUCCESS, tags=request.tags)
+        assert isinstance(evaluate_retry(retry_definition(), context), SkipReason)

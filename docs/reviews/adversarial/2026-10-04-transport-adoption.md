@@ -28,6 +28,23 @@ Python 포함 후보 `b324b0afdc27f268e6e6aaee1f6d7d2f42e4743b`의 두 원문을
 | A-P2-02 이벤트 조회가 boundedcall 밖 | 전체 실패 조회·event·검사·결과 생성에 10초/4개 상한 | 수정·재리뷰 대기 |
 | A-P2-03 이전 native 실행 상태 태그 전파 | 앱 custom 태그와 job 정의 설정만 전달 | 수정·재리뷰 대기 |
 
-공통 Python 49 tests와 ruff, 기존 UI 42 tests·build·pack·소비자 lock 검증은 PASS다.
+공통 Python 54 tests와 ruff, 기존 UI 42 tests·build·pack·소비자 lock 검증은 PASS다.
 수정 SHA의 CI와 두 독립 post-fix verdict, transport live UI를 완료한 뒤 최종 판정을 갱신한다.
 운영 shared coordinator 적용·실제 worker kill/retry child·운영 RSS는 NOT_RUN이다.
+
+## 두 번째 수정
+
+`7ee00152c2f7b3877ff3bedcd61a58ec15122d89` 재리뷰 원문도 보존한다.
+
+- [James 재리뷰](../evidence/2026-10-04-transport-common-james-python-postfix.md): CONDITIONAL,
+  SHA256 `9c364927d8c3b8911567e1beab19f86ce41f97ceacb63e7ab243306124d339ed`.
+- [Popper 재리뷰](../evidence/2026-10-04-transport-common-popper-python-postfix.md): BLOCK,
+  SHA256 `A52530F97EDF7ADFB3A08097BD295D325D5A69A5B466C9D09E3FECD8D1BB4342`.
+
+| finding | 추가 보강 | 상태 |
+|---|---|---|
+| B-P1-02 native 체인/원 parent 예산 잔여 | 기존 child 조회·원 parent native 예산 0·will_retry false | 수정·재리뷰 대기 |
+| B-P2-01 resolved subset | 전체 graph 및 전체 실행 계획과 비교 | 수정·재리뷰 대기 |
+| A-P2-04 / B-P2-02 정상 느린 페이지가 반복 timeout | 5초 작업 예산 뒤 완료 cursor를 저장, 다음 tick 재개 테스트 | 수정·재리뷰 대기 |
+
+원문 verdict를 임의로 낮추지 않는다. 새로운 후보의 두 리뷰와 CI가 끝나기 전에는 머지하지 않는다.
