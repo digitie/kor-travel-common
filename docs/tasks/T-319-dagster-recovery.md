@@ -44,3 +44,7 @@ Python 공통 코드를 요청했다. 문서의 단계별 Python task 순서보�
 [PR #24](https://github.com/digitie/kor-travel-common/pull/24),
 [weather PR #72](https://github.com/digitie/kor-travel-weather/pull/72)에 증거를 보존한다.
 IN_PROGRESS는 외부 운영 배포/채택까지 완료로 세지 않기 위해 유지한다.
+
+## 2026-10-05 Geo 채택·최종 코드 검증
+
+[최종 판정](../reviews/adversarial/2026-10-05-geo-common.md)에 fixed73e3ff8/Geo4c59efe, 두 독립 최종 PASS, 최초 BLOCK와 전체 수정 원문·SHA256, Python69/UI48·Geo UI231·실제 PostgreSQL17·Linux Chromium/Firefox13항목씩의 증거를 보존했다. 메모리는 유한 page·응답·동시성 구조를 적용했고 운영 RSS 실측은 NOT_RUN이다. 운영 설정/다른 앱 채택은 완료로 세지 않는다. 가이드를 포함한 common PR26·Geo PR570의 최종 checks PASS 후 merge한다.

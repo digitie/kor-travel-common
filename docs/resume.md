@@ -1,6 +1,6 @@
 # 현재 상태와 다음 한 작업
 
-현재 상태의 정본이다. 정책은 [AGENTS](../AGENTS.md), 문서 선택은 [문서 지도](README.md), 상세 상태·선행은 [task 원장](tasks.md)을 따른다. 마지막 갱신: 2026-10-04, Codex.
+현재 상태의 정본이다. 정책은 [AGENTS](../AGENTS.md), 문서 선택은 [문서 지도](README.md), 상세 상태·선행은 [task 원장](tasks.md)을 따른다. 마지막 갱신: 2026-10-05, Codex.
 
 ## 현재 상태
 
@@ -10,7 +10,7 @@
 
 ## 다음 한 작업
 
-common #24·weather #72는 main에 머지되었다. transport 채택을 위한 Python `430a9e9`와 UI `0.1.0-dev.2`의 두 독립 리뷰·CI·격리 소비자 live UI가 통과했다. [common PR #25](https://github.com/digitie/kor-travel-common/pull/25)와 [최종 코드 판정](reviews/adversarial/2026-10-04-transport-adoption-closure.md)에 증거를 보존했다. transport PR #67의 최종 후보 재리뷰·CI가 끝난 뒤 두 PR을 머지한다. 운영 shared coordinator 전환·worker kill·RSS 측정은 NOT_RUN이다. T-301 원본 변경은 보존한다.
+common #24·weather #72는 main에 머지되었다. transport 채택을 위한 Python `430a9e9`와 UI `0.1.0-dev.2`의 두 독립 리뷰·CI·격리 소비자 live UI가 통과했다. [common PR #25](https://github.com/digitie/kor-travel-common/pull/25)와 [최종 코드 판정](reviews/adversarial/2026-10-04-transport-adoption-closure.md)에 증거를 보존했다. transport PR #67은 머지 완료했다. 운영 shared coordinator 전환·worker kill·RSS 측정은 NOT_RUN이다. T-301 원본 변경은 보존한다.
 
 ## 시작 파일과 검증
 
@@ -29,4 +29,4 @@ common #24·weather #72는 main에 머지되었다. transport 채택을 위한 P
 
 ## 2026-10-05 geo 대시보드 후속
 
-[T-216](tasks/T-216-dagster-operations.md)의 `dev.3` 후보: 목록/상세·tick·검색·50행 pagination. 기존 작업 branch를 보존한다. 소비자 live와 2인 리뷰 전 merge 완료로 표시하지 않는다.
+[T-216](tasks/T-216-dagster-operations.md)의 `dev.3` 후보: 목록/상세·tick·검색·50행 pagination. 기존 작업 branch를 보존한다. [최종 판정](reviews/adversarial/2026-10-05-geo-common.md)에 두 코드 PASS·69 Python/48 UI·소비자 live와 실패 수정 원문을 보존했다. common PR26·Geo PR570의 문서 포함 최종 checks가 통과한 뒤 순서대로 merge한다. 운영 배포·RSS 측정·다른 소비자 확산은 후속이며 완료로 세지 않는다.

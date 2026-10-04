@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-10-05 | FULL·반복 post-fix | [Geo 시각 구성·복구](adversarial/2026-10-05-geo-common.md), `73e3ff8` | A UI·계약 / B 정합·예산 | 두 최종 PASS·열린0·69 Python/48 UI·Geo 실환경13항목×2브라우저 |
 | 2026-10-04 | full·반복 post-fix·handoff | [Transport 공통 채택](adversarial/2026-10-04-transport-adoption-closure.md), `430a9e9` | James 공개 계약 / Popper 복구·예산 | 두 판정 PASS·기존 finding FIXED·56 tests 양 버전·CI·격리 live PASS |
 | 2026-10-04 | full·post-fix·final delta | [Dagster 복구·메모리·공용 UI](adversarial/2026-10-04-dagster-recovery.md), common ed47e9a/weather74882e1 | A UI·artifact / B recovery·memory | 8 finding FIXED·최종 코드 PASS·live/회귀/코드 CI PASS |
 | 2026-09-29 | full WSL post-fix | [T-215 최종 판정](adversarial/2026-09-29-t215-wsl-post-fix.md), `b4a3a77` | A 인증·신뢰 경계 / B UI·패키징·CI | **A/B 코드 PASS, 설치·후보 CI 통과, 열린 finding 0** |
