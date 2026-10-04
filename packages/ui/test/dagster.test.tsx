@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, test, vi } from "vitest";
 import { DagsterOperations } from "../src/dagster-operations.js";
@@ -81,4 +81,81 @@ test("운영 CSS의 모든 공용 토큰이 배포 토큰에 존재한다", () =
   for (const [, name] of css.matchAll(/var\((--kt-[\w-]+)\)/g)) {
     expect(tokens).toContain(`${name}:`);
   }
+});
+
+test("120개 실행의 집계를 유지하며 행은 50개씩 검색·탐색한다", async () => {
+  const runs = Array.from({ length: 120 }, (_, index) => ({ ...snapshot.runs[0]!,
+    runId: `run-${index}`, jobName: `collect-${index}`, status: index === 119 ? "FAILURE" : "SUCCESS" }));
+  const { container } = render(<DagsterOperations snapshot={{ ...snapshot, runs }}
+    onRefresh={vi.fn()} runUrl={() => "#"} scheduleUrl={() => "#"} />);
+  const table = container.querySelector('[data-slot="dagster-operations-run-table"]')!;
+  expect(table.querySelectorAll("tbody tr")).toHaveLength(50);
+  expect(screen.getByRole("status")).toHaveTextContent("조회 120건 · 검색 120건 · 1/3 페이지");
+  await userEvent.click(screen.getByRole("button", { name: "다음 실행 페이지" }));
+  await userEvent.click(screen.getByRole("button", { name: "다음 실행 페이지" }));
+  expect(table.querySelectorAll("tbody tr")).toHaveLength(20);
+  expect(screen.getByRole("button", { name: "다음 실행 페이지" })).toBeDisabled();
+  await userEvent.selectOptions(screen.getByLabelText("상태 필터"), "FAILURE");
+  expect(table.querySelectorAll("tbody tr")).toHaveLength(1);
+  expect(within(table as HTMLElement).getByText("collect-119")).toBeVisible();
+  expect(screen.getByRole("status")).toHaveTextContent("1/1 페이지");
+  await userEvent.type(screen.getByLabelText("실행 검색"), "missing");
+  expect(screen.getByText("검색 조건에 맞는 실행이 없습니다.")).toBeVisible();
+});
+
+test("선택한 실행 상세와 마지막 조회 오류를 숨기지 않는다", async () => {
+  const selected = vi.fn();
+  const { container } = render(<DagsterOperations snapshot={snapshot} showRunDetails showRepositories
+    error="metadata 연결 실패" onSelectRun={selected} onRefresh={vi.fn()} runUrl={() => "#"} scheduleUrl={() => "#"} />);
+  await userEvent.click(screen.getByRole("button", { name: "실행 상세: collect, test-run" }));
+  expect(selected).toHaveBeenCalledWith("test-run");
+  const detail = screen.getByRole("region", { name: "선택한 실행 상세" });
+  expect(within(detail).getByText("test-run")).toBeVisible();
+  expect(within(detail).getByText("<script>failure</script>")).toBeVisible();
+  expect(container.querySelector("script")).toBeNull();
+  expect(screen.getByRole("alert")).toHaveTextContent("마지막 조회 결과");
+  expect(screen.getByText("코드 위치")).toBeVisible();
+});
+
+test("센서와 스케줄의 실패 tick 및 시간대를 표시한다", async () => {
+  const repository = snapshot.repositories[0]!;
+  render(<DagsterOperations snapshot={{ ...snapshot, repositories: [{ ...repository,
+    schedules: [{ ...repository.schedules[0]!, timezone: "Asia/Seoul", overdue: true,
+      lastTick: { status: "FAILURE", timestamp: 1, errorMessage: "schedule tick 실패" } }],
+    sensors: [{ name: "recovery", status: "RUNNING", lastTick: { status: "FAILURE", timestamp: 2, errorMessage: "sensor tick 실패" } }]
+  }] }} onRefresh={vi.fn()} runUrl={() => "#"} scheduleUrl={() => "#"} />);
+  expect(screen.getByRole("region", { name: "Dagster 센서 표" })).toHaveTextContent("sensor tick 실패");
+  await userEvent.click(screen.getByRole("button", { name: "collect" }));
+  expect(screen.getByText("Asia/Seoul")).toBeVisible();
+  expect(screen.getByText("schedule tick 실패")).toBeVisible();
+  expect(screen.getByText("조회 시점에 예정된 tick이 지연되었습니다.")).toBeVisible();
+});
+
+test("refresh 후 0건이 된 상태 필터도 화면과 내부 조건을 일치시킨다", async () => {
+  const props = { onRefresh: vi.fn(), runUrl: () => "#", scheduleUrl: () => "#" };
+  const { rerender } = render(<DagsterOperations {...props} snapshot={snapshot} />);
+  await userEvent.selectOptions(screen.getByLabelText("상태 필터"), "FAILURE");
+  rerender(<DagsterOperations {...props} snapshot={{ ...snapshot,
+    runs: [{ ...snapshot.runs[0]!, status: "SUCCESS" }] }} />);
+  expect(screen.getByLabelText("상태 필터")).toHaveValue("FAILURE");
+  expect(screen.getByRole("option", { name: "실패 · 현재 0건" })).toBeInTheDocument();
+  await userEvent.selectOptions(screen.getByLabelText("상태 필터"), "");
+  expect(screen.getByRole("status")).toHaveTextContent("검색 1건");
+  expect(screen.getByRole("link", { name: /Dagster에서 열기/ })).toBeVisible();
+});
+
+test("미제공 센서 목록을 확인된 0개로 표시하지 않는다", () => {
+  render(<DagsterOperations snapshot={snapshot} showRepositories onRefresh={vi.fn()}
+    runUrl={() => "#"} scheduleUrl={() => "#"} />);
+  expect(screen.getByText(/센서 미확인/)).toBeVisible();
+});
+
+test("job 정보가 없는 스케줄은 이름을 작업으로 단정하지 않는다", async () => {
+  const repository = snapshot.repositories[0]!;
+  render(<DagsterOperations snapshot={{ ...snapshot, repositories: [{ ...repository,
+    schedules: [{ ...repository.schedules[0]!, jobName: null }] }] }}
+    onRefresh={vi.fn()} runUrl={() => "#"} scheduleUrl={() => "#"} />);
+  await userEvent.click(screen.getByRole("button", { name: "스케줄 · hourly (작업 미확인)" }));
+  const detail = screen.getByText("실행되는 작업").parentElement!;
+  expect(detail).toHaveTextContent("미확인");
 });

@@ -1,0 +1,128 @@
+[
+  {
+    "file": "2026-10-05-common-geo-review-recovery.md",
+    "sha256": "23da7deef88d503dba507825d2d69be3bfb06fb3fe9f1632d3ccd1e9429152c2",
+    "source_original": "common-geo-review-recovery.md",
+    "display_sha256": "23da7deef88d503dba507825d2d69be3bfb06fb3fe9f1632d3ccd1e9429152c2",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-geo-postfix-recovery.md",
+    "sha256": "a5c997955045d34cd6ab2c68f14ebec2461a4fda1727d510cb9a8fdeb9d516dd",
+    "source_original": "common-geo-postfix-recovery.md",
+    "display_sha256": "a5c997955045d34cd6ab2c68f14ebec2461a4fda1727d510cb9a8fdeb9d516dd",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-geo-final-delta-recovery.md",
+    "sha256": "5eb61338ed6c1e2bdb7b1a01c8cd05d56e0424d9b1310bbc0cef4744bea02ca0",
+    "source_original": "common-geo-final-delta-recovery.md",
+    "display_sha256": "5eb61338ed6c1e2bdb7b1a01c8cd05d56e0424d9b1310bbc0cef4744bea02ca0",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-geo-final-postfix-recovery.md",
+    "sha256": "51fa9d0d40d2955b0f6e53be2c80bcbaf647ca843d3b4ab938c260e22c11ca5f",
+    "source_original": "common-geo-final-postfix-recovery.md",
+    "display_sha256": "51fa9d0d40d2955b0f6e53be2c80bcbaf647ca843d3b4ab938c260e22c11ca5f",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-geo-review-ui.md",
+    "sha256": "26b978a4f31632668fef9bd62323d6fbfdffebd915ff6d7232534f3ee417647e",
+    "source_original": "common-geo-review-ui.md",
+    "display_sha256": "68c7836d3ee80fc02dc7487793b3cf68ecce91a512fb3c0d44d647714fd3de94",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-geo-postfix-ui.md",
+    "sha256": "7322b7ad44d1fe971d9a31222e745c75ee252f210c06e7e40ef7029af65aa90a",
+    "source_original": "common-geo-postfix-ui.md",
+    "display_sha256": "bb413d974628ae581a7906da8cbd95619791fb5933beeaaab9d72c2742dc4a79",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-geo-final-delta-ui.md",
+    "sha256": "a26c951d004c0cb8d6cfeb35e25647b59b1cdee336a43c853c1df9abc5cc35eb",
+    "source_original": "common-geo-final-delta-ui.md",
+    "display_sha256": "0d6979bc97f75274bb5a9e0dbc76409a476a7287e7e179e95c50c3196f48e287",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-geo-final-postfix-ui.md",
+    "sha256": "02d902230b434c3bdf383920dfdddda1334d46fa7501d0ea3388dd4b1d990363",
+    "source_original": "common-geo-final-postfix-ui.md",
+    "display_sha256": "a86018c5001ec1c4a949a6f8f4cdd94a378933e628f933dcd6be8eaac878b592",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-child-postfix-recovery.md",
+    "sha256": "4a11dd5f4aa430194f34a91b5c67e6c42f2ec2062a5713fc984ae2079ed7537b",
+    "source_original": "common-child-postfix-recovery.md",
+    "display_sha256": "4a11dd5f4aa430194f34a91b5c67e6c42f2ec2062a5713fc984ae2079ed7537b",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-child-postfix-ui.md",
+    "sha256": "ba68d33751e28878d3cb0223fdc74db2d7ffb9f7fc14be0e46dc0d1e2563ee67",
+    "source_original": "common-child-postfix-ui.md",
+    "display_sha256": "431a61f7930deae8c36e5c846debfb812df7587261df4e0d705c9162c4bee287",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-checkpoint-postfix-ui.md",
+    "sha256": "f70fd8e3bed89c844b90b296855645e2ef8a78136df4501f50f24085a9b89a20",
+    "source_original": "common-checkpoint-postfix-ui.md",
+    "display_sha256": "901259a867403348b4bd2a7a36d6106c7f7a0ff474ba9ad76557687c99b1f15c",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-checkpoint-postfix-recovery.md",
+    "sha256": "8e573c9adc51611b8e63ceaaeab9ec37a95089a1b82af5b51ffd56cbe0c38675",
+    "source_original": "common-checkpoint-postfix-recovery.md",
+    "display_sha256": "8e573c9adc51611b8e63ceaaeab9ec37a95089a1b82af5b51ffd56cbe0c38675",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-phase-postfix-ui.md",
+    "sha256": "5c34dfc34a9c23b20c492d32c2147ecc38cbfec849c35ba4ac77f115114524a1",
+    "source_original": "common-phase-postfix-ui.md",
+    "display_sha256": "b088c89ed6b11156b04126b5ded6c4aa507389c785c4f64c58850bcb515c3264",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-final-independent-recovery.md",
+    "sha256": "ad0bd1c87ab204b524e47ae2267cf37f6f955d656a1fa284fdca6177cfa9a790",
+    "source_original": "common-final-independent-recovery.md",
+    "display_sha256": "ad0bd1c87ab204b524e47ae2267cf37f6f955d656a1fa284fdca6177cfa9a790",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-merge-postfix-ui.md",
+    "sha256": "e10e2da791f5d34c77917495a7cd414d08895b50631c800a32000c928e9ebbf8",
+    "source_original": "common-merge-postfix-ui.md",
+    "display_sha256": "45abf76d81bdda37e3bd6af5840a5afe4bf5a75192a0dac48e160fcfad103f83",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-merge-postfix-recovery.md",
+    "sha256": "d3c86230c706c50c927476c9794f38cbcf1723cb1eedf704e8480ccbbfb0605e",
+    "source_original": "common-merge-postfix-recovery.md",
+    "display_sha256": "d3c86230c706c50c927476c9794f38cbcf1723cb1eedf704e8480ccbbfb0605e",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-final-evidence-ui.md",
+    "sha256": "98aabafc5e523f9c28bb0b03a6f2f249625f1c4e9821160d8951e405c4ca5386",
+    "source_original": "common-final-evidence-ui.md",
+    "display_sha256": "e15918b2751d6c3c8c356b8033a5f4f46c27ba61b227e139150c223da5d2322f",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  },
+  {
+    "file": "2026-10-05-common-final-evidence-recovery.md",
+    "sha256": "10cba8506316d4b0e7866ee02656e7fbea7db3b3e30e79ec0ac3a71b52e73a5f",
+    "source_original": "common-final-evidence-recovery.md",
+    "display_sha256": "10cba8506316d4b0e7866ee02656e7fbea7db3b3e30e79ec0ac3a71b52e73a5f",
+    "canonical_archive": "2026-10-05-review-originals.json"
+  }
+]

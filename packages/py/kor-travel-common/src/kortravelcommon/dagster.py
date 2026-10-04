@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 """앱 도메인/DB를 소유하지 않는 Dagster 예약·장애 복구 계약."""
 
+import json
 from collections.abc import Callable
 from dataclasses import dataclass
 from time import monotonic
@@ -28,6 +29,57 @@ INFRA_RETRY_ATTEMPT_TAG = "kortravelcommon/infra_retry_attempt"
 INFRA_RETRY_PARENT_TAG = "kortravelcommon/infra_retry_parent"
 INFRA_RETRY_PENDING_TAG = "kortravelcommon/infra_retry_pending"
 _RETRY_SCAN_HEAD = "head"
+_STEP_CURSOR_PREFIX = "steps:"
+
+
+@dataclass(frozen=True)
+class _StepCheckpoint:
+    run_id: str
+    cursor: str
+    crashed_steps: int
+    complete: bool = False
+    failure_storage_id: int = 0
+    step_storage_id: int = 0
+
+    def encode(self) -> str:
+        return _STEP_CURSOR_PREFIX + json.dumps(
+            [
+                self.run_id,
+                self.cursor,
+                self.crashed_steps,
+                self.complete,
+                self.failure_storage_id,
+                self.step_storage_id,
+            ],
+            separators=(",", ":"),
+        )
+
+
+def _decode_step_checkpoint(cursor: str | None) -> _StepCheckpoint | None:
+    if not cursor or not cursor.startswith(_STEP_CURSOR_PREFIX):
+        return None
+    value = json.loads(cursor[len(_STEP_CURSOR_PREFIX) :])
+    if not (
+        isinstance(value, list)
+        and len(value) in (3, 5, 6)
+        and isinstance(value[0], str)
+        and value[0]
+        and isinstance(value[1], str)
+        and value[1]
+        and type(value[2]) is int
+        and value[2] > 0
+    ):
+        raise ValueError("step 복구 checkpoint가 유효하지 않습니다.")
+    if len(value) >= 5 and not (type(value[3]) is bool and type(value[4]) is int and value[4] > 0):
+        raise ValueError("step 복구 완료 phase가 유효하지 않습니다.")
+    if len(value) == 6 and not (type(value[5]) is int and value[5] >= 0):
+        raise ValueError("step 복구 증거 ID가 유효하지 않습니다.")
+    if len(value) < 6:
+        # 이전 형식은 마지막 STEP 증거를 갖지 않는다. terminal ID부터 다시 검증한다.
+        return _StepCheckpoint(*value[:3])
+    return _StepCheckpoint(*value)
+
+
 ACTIVE_STATUSES = [
     DagsterRunStatus.QUEUED,
     DagsterRunStatus.STARTING,
@@ -140,8 +192,9 @@ def infrastructure_retry_sensor(
 ):
     """native retry가 꺼진 instance에서 멱등 job의 worker 장애만 제한적으로 재예약한다.
 
-    실행 종료 이벤트의 명시적 인프라 사유만 허용한다. step/provider 실패, timeout에
-    의한 취소, 원인 불명은 제외한다. native retry가 켜지면 미완료 인계만 마무리한다.
+    실행 종료 이벤트의 명시적 인프라 사유와 증명된 자식 프로세스 종료만 허용한다.
+    provider 실패, timeout에 의한 취소, 원인 불명은 제외한다.
+    native retry가 켜지면 미완료 인계만 마무리한다.
     run key는 이벤트 재평가를 중복 제거하며, 동시 수동 실행은 JOB_TAG queue limit과
     소비자 DB lease가 별도로 보호해야 한다. partition job은 이 factory의 대상이 아니다.
     """
@@ -181,12 +234,33 @@ def infrastructure_retry_sensor(
             )
         ):
             return SkipReason("부분 선택 실행은 전체 job으로 확대하지 않습니다.")
-        reason = getattr(context.failure_event.event_specific_data, "failure_reason", None)
-        if getattr(reason, "value", None) not in {
-            "UNEXPECTED_TERMINATION",
-            "START_TIMEOUT",
-            "RUN_WORKER_RESTART",
-        }:
+        checkpoint = context.step_checkpoint
+        failure_data = context.failure_event.event_specific_data
+        completed_step = (
+            checkpoint is not None
+            and checkpoint.complete
+            and context.failure_event.event_type_value == DagsterEventType.STEP_FAILURE.value
+            and getattr(getattr(failure_data, "error_source", None), "value", None)
+            == "FRAMEWORK_ERROR"
+            and getattr(getattr(failure_data, "error", None), "cls_name", None)
+            == "ChildProcessCrashException"
+            and getattr(failure_data, "user_failure_data", None) is None
+        )
+        reason = getattr(failure_data, "failure_reason", None)
+        subprocess_failure = completed_step or (
+            getattr(reason, "value", None) == "RUN_EXCEPTION"
+            and getattr(getattr(failure_data, "error", None), "cls_name", None)
+            == "DagsterSubprocessError"
+        )
+        if (
+            getattr(reason, "value", None)
+            not in {
+                "UNEXPECTED_TERMINATION",
+                "START_TIMEOUT",
+                "RUN_WORKER_RESTART",
+            }
+            and not subprocess_failure
+        ):
             return SkipReason("명시적인 worker 인프라 장애만 재시도합니다.")
         if run.step_keys_to_execute is not None:
             plan = (
@@ -197,10 +271,61 @@ def infrastructure_retry_sensor(
             if plan is None or set(run.step_keys_to_execute) != {step.key for step in plan.steps}:
                 return SkipReason("부분 실행 계획은 전체 job으로 확대하지 않습니다.")
         # 인프라 종료 전에 provider/step 실패가 있었으면 같은 호출을 반복하지 않는다.
-        if instance.get_records_for_run(
-            run_id=run.run_id, of_type=DagsterEventType.STEP_FAILURE, limit=1
-        ).records:
-            return SkipReason("step 실패가 기록되어 자동 재시도하지 않습니다.")
+        if checkpoint is not None and checkpoint.failure_storage_id != context.failure_storage_id:
+            checkpoint = None
+        step_cursor = checkpoint.cursor if checkpoint is not None else None
+        crashed_steps = checkpoint.crashed_steps if checkpoint is not None else 0
+        step_storage_id = checkpoint.step_storage_id if checkpoint is not None else 0
+        while not (checkpoint is not None and checkpoint.complete):
+            failures = instance.get_records_for_run(
+                run_id=run.run_id,
+                of_type=DagsterEventType.STEP_FAILURE,
+                limit=100,
+                cursor=step_cursor,
+            )
+            for record in failures.records:
+                event = getattr(getattr(record, "event_log_entry", None), "dagster_event", None)
+                data = getattr(event, "event_specific_data", None)
+                if not (
+                    subprocess_failure
+                    and getattr(getattr(data, "error_source", None), "value", None)
+                    == "FRAMEWORK_ERROR"
+                    and getattr(getattr(data, "error", None), "cls_name", None)
+                    == "ChildProcessCrashException"
+                    and getattr(data, "user_failure_data", None) is None
+                ):
+                    return SkipReason("step/provider 실패는 자동 재시도하지 않습니다.")
+                crashed_steps += 1
+                step_storage_id = max(step_storage_id, getattr(record, "storage_id", 0))
+            if not getattr(failures, "has_more", False):
+                step_cursor = getattr(failures, "cursor", None) or step_cursor
+                break
+            next_cursor = getattr(failures, "cursor", None)
+            if not next_cursor or next_cursor == step_cursor:
+                raise RuntimeError("step 실패 이력 cursor가 전진하지 않습니다.")
+            step_cursor = next_cursor
+            if monotonic() - context.started >= 5:
+                return _StepCheckpoint(
+                    run.run_id,
+                    step_cursor,
+                    crashed_steps,
+                    False,
+                    context.failure_storage_id,
+                    step_storage_id,
+                )
+        if subprocess_failure and not crashed_steps:
+            return SkipReason("명시적인 자식 프로세스 종료 기록이 없습니다.")
+        # 느린 STEP 이력을 모두 검증한 즉시 저장한다. 추가 metadata 조회가
+        # deadline을 소진해 완료 지점을 잃는 일을 막는다. 다음 tick은 scope와 중복을 재검증한다.
+        if subprocess_failure and step_cursor and monotonic() - context.started >= 8:
+            return _StepCheckpoint(
+                run.run_id,
+                step_cursor,
+                crashed_steps,
+                True,
+                context.failure_storage_id,
+                step_storage_id,
+            )
         attempts = [
             run.tags.get(INFRA_RETRY_ATTEMPT_TAG, "0"),
             run.tags.get("dagster/retry_number", "0"),
@@ -236,6 +361,20 @@ def infrastructure_retry_sensor(
             instance, job_name=job.name, project=project, location_name=location_name
         ):
             return SkipReason("같은 job의 실행이 남아 있어 재시도를 합칩니다.")
+        # 전체 deadline이 끝난 worker는 metadata를 뒤늦게 변경하지 않는다.
+        # 검증 완료 위치를 저장하고 다음 tick에서 예산·scope를 다시 확인한다.
+        if monotonic() - context.started >= 8:
+            final_cursor = step_cursor
+            if subprocess_failure and final_cursor:
+                return _StepCheckpoint(
+                    run.run_id,
+                    final_cursor,
+                    crashed_steps,
+                    True,
+                    context.failure_storage_id,
+                    step_storage_id,
+                )
+            raise TimeoutError("재시도 인계에 필요한 시간 예산이 부족합니다.")
         # 이전 run의 native 상태 태그는 전달하지 않는다. job 정의의 실행 설정만 다시 적용한다.
         tags = {key: value for key, value in run.tags.items() if not key.startswith("dagster/")}
         tags.update(job.tags)
@@ -272,16 +411,21 @@ def infrastructure_retry_sensor(
         filter_tags = {PROJECT_TAG: project}
         if instance.run_retries_enabled:
             filter_tags[INFRA_RETRY_PENDING_TAG] = "true"
+        checkpoint = _decode_step_checkpoint(context.cursor)
         cursor = None if context.cursor == _RETRY_SCAN_HEAD else context.cursor or None
-        if cursor is not None and instance.get_run_by_id(cursor) is None:
-            cursor = None
-        runs = instance.get_runs(
-            filters=RunsFilter(
-                job_name=job.name, statuses=[DagsterRunStatus.FAILURE], tags=filter_tags
-            ),
-            limit=100,
-            cursor=cursor,
-        )
+        if checkpoint is not None:
+            resumed = instance.get_run_by_id(checkpoint.run_id)
+            runs = [resumed] if resumed is not None else []
+        else:
+            if cursor is not None and instance.get_run_by_id(cursor) is None:
+                cursor = None
+            runs = instance.get_runs(
+                filters=RunsFilter(
+                    job_name=job.name, statuses=[DagsterRunStatus.FAILURE], tags=filter_tags
+                ),
+                limit=100,
+                cursor=cursor,
+            )
         requests = []
         for index, run in enumerate(runs):
             # 느리지만 정상인 metadata에서도 완료한 행을 checkpoint한다. 전체 페이지가
@@ -290,26 +434,63 @@ def infrastructure_retry_sensor(
                 return SensorResult(cursor=runs[index - 1].run_id)
             records = instance.get_records_for_run(
                 run_id=run.run_id,
-                of_type=DagsterEventType.RUN_FAILURE,
+                # 완료 checkpoint 뒤에 추가된 step 실패도 확인한다. terminal 이벤트 ID만
+                # 같다고 step 이력이 불변이라고 가정하지 않는다.
+                of_type=(
+                    {DagsterEventType.RUN_FAILURE, DagsterEventType.STEP_FAILURE}
+                    if checkpoint is not None and checkpoint.complete
+                    else DagsterEventType.RUN_FAILURE
+                ),
                 limit=1,
                 ascending=False,
             ).records
             if not records:
                 continue
+            if (
+                checkpoint is not None
+                and checkpoint.complete
+                and records[0].storage_id
+                != max(checkpoint.failure_storage_id, checkpoint.step_storage_id)
+            ):
+                # 새 실패 기록은 완료 증거를 무효화한다. 다음 tick에서 RUN_FAILURE를
+                # 확인하고 cursor 이후 이력을 읽어 provider 거부와 복구 진행을 함께 지킨다.
+                return SensorResult(
+                    cursor=_StepCheckpoint(
+                        checkpoint.run_id,
+                        checkpoint.cursor,
+                        checkpoint.crashed_steps,
+                        False,
+                        checkpoint.failure_storage_id,
+                        checkpoint.step_storage_id,
+                    ).encode()
+                )
             event = records[0].event_log_entry.dagster_event
             result = retry_failed_run(
                 SimpleNamespace(
                     instance=instance,
                     dagster_run=run,
                     failure_event=event,
+                    started=started,
+                    step_checkpoint=checkpoint,
+                    failure_storage_id=(
+                        checkpoint.failure_storage_id
+                        if checkpoint is not None and checkpoint.complete
+                        else records[0].storage_id
+                    ),
                 )
             )
+            if isinstance(result, _StepCheckpoint):
+                return SensorResult(cursor=result.encode())
             if isinstance(result, RunRequest):
                 requests.append(result)
                 # 같은 job은 한 tick에 하나만 발급한다. 다음 tick에 active 여부를 재확인한다.
                 return SensorResult(run_requests=requests, cursor=run.run_id)
         # 유한한 batch를 모두 확인한 뒤에만 cursor를 전진한다. 끝에서는 새 실패부터 재확인한다.
-        return SensorResult(cursor=runs[-1].run_id if len(runs) == 100 else _RETRY_SCAN_HEAD)
+        return SensorResult(
+            cursor=runs[-1].run_id
+            if runs and (checkpoint is not None or len(runs) == 100)
+            else _RETRY_SCAN_HEAD
+        )
 
     @sensor(
         name=name,

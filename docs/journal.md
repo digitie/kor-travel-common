@@ -307,3 +307,11 @@ Git Bash에서 동일. 다음은 reviewer 원본 보존·finding 수정·post-fi
 **소비 저장소 상태(조사 기준, `docs/survey/README.md` §2.1)**: airport `2bb1111`(clean, WIP `codex/shadcn-ui-foundation` `99b3f98`), concierge `7945305`, docker-manager `862562d`, geo `1d9d74d`, map `c494e227`, weather `6003da9`, pinvi `9af25e5`(shallow clone). 어느 저장소도 수정하지 않았다.
 
 **다음**: [resume](resume.md) "다음 한 작업" — 2인 적대적 리뷰 → task `DONE` → PR #1 본문 갱신·머지.
+
+## 2026-10-05 — geo 운영 대시보드 비교·공용 UI 확장
+
+T-216의 geo 비교 기준과 `dev.3` 수용 기준을 기록했다. 기존 사용자 checkout을 보존하고 별도 branch에서 작업했다. UI 45 tests·타입·빌드·예제 타입 PASS. 리뷰와 소비자 live gate는 진행 중이다.
+
+## 2026-10-05 Geo 채택·최종 코드 검증
+
+[최종 판정](reviews/adversarial/2026-10-05-geo-common.md)에 fixed73e3ff8/Geo4c59efe, 두 독립 최종 PASS, 최초 BLOCK와 전체 수정 원문·SHA256, Python69/UI48·Geo UI231·실제 PostgreSQL17·Linux Chromium/Firefox13항목씩의 증거를 보존했다. 메모리는 유한 page·응답·동시성 구조를 적용했고 운영 RSS 실측은 NOT_RUN이다. 운영 설정/다른 앱 채택은 완료로 세지 않는다. 가이드를 포함한 common PR26·Geo PR570의 최종 checks PASS 후 merge한다.

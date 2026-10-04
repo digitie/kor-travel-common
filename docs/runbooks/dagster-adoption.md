@@ -190,8 +190,21 @@ worker_retry = infrastructure_retry_sensor(
 # 소비자의 Definitions(sensors=[worker_retry, ...])에 등록한다.
 ```
 
-`UNEXPECTED_TERMINATION`, `START_TIMEOUT`, `RUN_WORKER_RESTART` 이벤트만 허용한다.
-같은 run에 step 실패가 있으면 제외하며, provider 실패·취소·원인 불명은 재예약하지 않는다.
+`UNEXPECTED_TERMINATION`, `START_TIMEOUT`, `RUN_WORKER_RESTART` 이벤트를 허용한다.
+멀티프로세스 자식 종료는 `RUN_EXCEPTION` + `DagsterSubprocessError`이고, 모든 step 실패가
+`FRAMEWORK_ERROR` + `ChildProcessCrashException`이며 user failure가 없는 경우에만 허용한다.
+적어도 하나의 자식 종료 기록을 요구한다. 실패 이력은 100건씩 끝까지 검사하므로 뒤 페이지에
+provider 오류가 섞여 있어도 제외한다. 느린 유한 페이지는 5초 작업 예산 뒤 마지막 검사 위치를
+sensor cursor에 저장해 다음 tick에서 이어 읽는다. 부분 검사 중에는 재시도 요청이나 native 억제
+태그를 쓰지 않는다. 전체 sensor의 10초 제한과 인계 전 잔여 시간 검사는 이 검사에도 적용된다.
+검사가 끝났지만 인계 예산이 부족하면 완료 phase도 저장한다. 느린 마지막 STEP 조회 직후에는 추가 중복·활성 실행 조회 전에 완료 위치를 저장해, 전체 deadline이 이 지점을 지우지 않게 한다. 다음 tick에서 RUN_FAILURE와
+STEP_FAILURE 중 최신 이벤트를 함께 조회하고, RUN_FAILURE와 검증한 마지막 STEP의 storage ID 중 최대값이 그대로일 때만 완료 검증을
+재사용한다. 최신 기록이 검증한 STEP이면 저장된 종료 사유와 명시적 child crash 증거를 사용한다.
+새 step 실패가 추가되면 부분 phase로 돌아가 다음 tick에서 종료 사유와 cursor 이후 기록을
+확인한다. 새 provider 오류는 거부하고 늦은 정상 child crash만 있는 이력은 복구를 계속한다.
+기존 3/5필드 checkpoint는 종료 사유부터 다시 검증하며 새 6필드 형식으로 전진한다.
+일반 step/provider 실패·취소·원인 불명은 재예약하지 않는다. 실제 자식 `os._exit(42)`와
+native retry OFF인 격리 SQLite instance로 fallback 요청 1개와 잔여 예산 0을 검증한다.
 project/location을 함께 검증하고, 실행 중인 같은 job은 합친다. 재시도 횟수와 부모 run ID를
 공통 태그에 기록하며 결정적인 run key로 이벤트 재평가를 중복 제거한다. run config를 보존해
 전체 멱등 job을 다시 실행한다. repository origin도 기본 `__repository__`와 일치해야 하며,
@@ -216,3 +229,23 @@ daemon을 동시에 두지 않는다. fresh sensor의 최초 순회는 기존 sc
 sensor 확인과 다른 수동/예약 발화는 원자적이지 않다. shared coordinator의 job limit과 소비자
 DB lease를 함께 적용한다. DB lease는 중복 provider 호출을 막지만 queued run의 메모리 제한을
 대신하지 않는다. 같은 instance에서 운영 daemon과 sensor가 실제 실행되는지도 배포 후 확인한다.
+
+## Geo 구성의 공용 운영 UI 채택
+
+`@kor-travel/ui/dagster-operations`의 `DagsterOperations`에 앱이 범위가 적용된
+`snapshot`, `runUrl`, `scheduleUrl`, `onRefresh`를 제공한다. `showRunDetails`와
+`showRepositories`를 켜면 목록/상세와 코드 위치를 함께 표시한다. `selectedRunId`와
+`onSelectRun`으로 선택을 제어하고 `renderRunDetail`로 앱의 실패 확인·백업 다운로드를
+그대로 연결한다. 선택 실행이 최근 목록 밖에 있으면 콜백에는 `null`이 전달되므로
+앱은 제어 중인 ID로 상세를 조회한다. 외부 작업 실행·재시도 권한은 앱이 소유한다.
+
+repository의 선택 `sensors`, schedule의 `lastTick`, `timezone`, `overdue`는 API가
+확인한 값만 전달한다. 조회 실패 시 `error`와 마지막 성공 snapshot을 함께 넘기면
+마지막 결과임을 명확히 표시한다. 인증 실패를 빈 정상 snapshot으로 바꾸지 않는다.
+`schedule.jobName`은 `string | null`이다. 작업 이름을 모르는 API는 null을 전달하고,
+문자열 함수에 전달하는 소비자는 `jobName !== null`로 좁힌다. 스케줄 이름을 작업 이름으로 추측하지 않는다.
+`scheduleUrl`의 repository 인자를 자체 `jobName: string` 타입으로 좁혀 선언했던 소비자는
+공용 `DagsterRepository` 타입을 사용하고 nullable 값을 좁힌다. 콜백이 실제로 받는 공용 타입을 축소하지 않는다.
+행은 50개씩 렌더링하며 검색·집계는 전달된 전체 실행에 적용한다. 서버는 최근 종료
+실행과 오래된 활성 실행을 모두 포함하되 응답 상한·취소 가능한 요청·polling을 적용한다.
+CSS는 `@kor-travel/ui/dagster.css`, 토큰은 `@kor-travel/tokens/tokens.css`를 로드한다.
