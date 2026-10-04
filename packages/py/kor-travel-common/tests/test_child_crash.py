@@ -1,12 +1,21 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from dagster import DagsterEvent, DagsterEventType, DagsterInstance, RunRequest, SkipReason
+from dagster import (
+    DagsterEvent,
+    DagsterEventType,
+    DagsterInstance,
+    RunRequest,
+    SkipReason,
+    build_sensor_context,
+)
 from dagster._core.events import JobFailureData, RunFailureReason
 from dagster._utils.error import SerializableErrorInfo
 from test_recovery import evaluate_retry, failure_context, retry_definition, sample
@@ -82,3 +91,53 @@ def test_real_multiprocess_crash_produces_one_fallback_request():
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert "actual-child-crash: one bounded fallback request" in result.stdout
+
+
+def test_slow_finite_step_pages_resume_without_late_metadata_write(monkeypatch):
+    with DagsterInstance.local_temp() as instance:
+        context = failure_context(instance, RunFailureReason.RUN_EXCEPTION)
+        instance.report_dagster_event(
+            DagsterEvent(
+                event_type_value=DagsterEventType.RUN_FAILURE.value,
+                job_name=sample.name,
+                event_specific_data=JobFailureData(
+                    SerializableErrorInfo("worker exited", [], "DagsterSubprocessError"),
+                    failure_reason=RunFailureReason.RUN_EXCEPTION,
+                ),
+            ),
+            context.dagster_run.run_id,
+        )
+        original = instance.get_records_for_run
+        pages = []
+        writes = []
+        original_add = instance.add_run_tags
+
+        def events(**kw):
+            if kw["of_type"] != DagsterEventType.STEP_FAILURE:
+                return original(**kw)
+            pages.append(kw.get("cursor"))
+            time.sleep(5.1)
+            more = kw.get("cursor") is None
+            return SimpleNamespace(
+                records=[record() for _ in range(100 if more else 1)],
+                has_more=more,
+                cursor="second" if more else "end",
+            )
+
+        def add_tags(run_id, tags):
+            writes.append(tags)
+            return original_add(run_id, tags)
+
+        monkeypatch.setattr(instance, "get_records_for_run", events)
+        monkeypatch.setattr(instance, "add_run_tags", add_tags)
+        definition = retry_definition()
+        first = definition.evaluate_tick(context.sensor_context)
+        assert first.run_requests == [] and first.cursor.startswith("steps:")
+        assert writes == []
+        second = definition.evaluate_tick(
+            build_sensor_context(instance=instance, cursor=first.cursor)
+        )
+        assert len(second.run_requests) == 1
+        assert second.run_requests[0].tags["dagster/max_retries"] == "0"
+        assert pages == [None, "second"]
+        assert len(writes) == 1

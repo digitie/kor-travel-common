@@ -194,7 +194,9 @@ worker_retry = infrastructure_retry_sensor(
 멀티프로세스 자식 종료는 `RUN_EXCEPTION` + `DagsterSubprocessError`이고, 모든 step 실패가
 `FRAMEWORK_ERROR` + `ChildProcessCrashException`이며 user failure가 없는 경우에만 허용한다.
 적어도 하나의 자식 종료 기록을 요구한다. 실패 이력은 100건씩 끝까지 검사하므로 뒤 페이지에
-provider 오류가 섞여 있어도 제외한다. 전체 sensor의 10초 제한은 이 검사에도 적용된다.
+provider 오류가 섞여 있어도 제외한다. 느린 유한 페이지는 5초 작업 예산 뒤 마지막 검사 위치를
+sensor cursor에 저장해 다음 tick에서 이어 읽는다. 부분 검사 중에는 재시도 요청이나 native 억제
+태그를 쓰지 않는다. 전체 sensor의 10초 제한과 인계 전 잔여 시간 검사는 이 검사에도 적용된다.
 일반 step/provider 실패·취소·원인 불명은 재예약하지 않는다. 실제 자식 `os._exit(42)`와
 native retry OFF인 격리 SQLite instance로 fallback 요청 1개와 잔여 예산 0을 검증한다.
 project/location을 함께 검증하고, 실행 중인 같은 job은 합친다. 재시도 횟수와 부모 run ID를

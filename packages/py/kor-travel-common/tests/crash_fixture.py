@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 """외부 작업 없이 실제 Dagster 자식 프로세스 종료만 재현한다."""
 
 import os

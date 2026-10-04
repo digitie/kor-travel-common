@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 """앱 도메인/DB를 소유하지 않는 Dagster 예약·장애 복구 계약."""
 
+import json
 from collections.abc import Callable
 from dataclasses import dataclass
 from time import monotonic
@@ -28,6 +29,39 @@ INFRA_RETRY_ATTEMPT_TAG = "kortravelcommon/infra_retry_attempt"
 INFRA_RETRY_PARENT_TAG = "kortravelcommon/infra_retry_parent"
 INFRA_RETRY_PENDING_TAG = "kortravelcommon/infra_retry_pending"
 _RETRY_SCAN_HEAD = "head"
+_STEP_CURSOR_PREFIX = "steps:"
+
+
+@dataclass(frozen=True)
+class _StepCheckpoint:
+    run_id: str
+    cursor: str
+    crashed_steps: int
+
+    def encode(self) -> str:
+        return _STEP_CURSOR_PREFIX + json.dumps(
+            [self.run_id, self.cursor, self.crashed_steps], separators=(",", ":")
+        )
+
+
+def _decode_step_checkpoint(cursor: str | None) -> _StepCheckpoint | None:
+    if not cursor or not cursor.startswith(_STEP_CURSOR_PREFIX):
+        return None
+    value = json.loads(cursor[len(_STEP_CURSOR_PREFIX) :])
+    if not (
+        isinstance(value, list)
+        and len(value) == 3
+        and isinstance(value[0], str)
+        and value[0]
+        and isinstance(value[1], str)
+        and value[1]
+        and type(value[2]) is int
+        and value[2] > 0
+    ):
+        raise ValueError("step 복구 checkpoint가 유효하지 않습니다.")
+    return _StepCheckpoint(*value)
+
+
 ACTIVE_STATUSES = [
     DagsterRunStatus.QUEUED,
     DagsterRunStatus.STARTING,
@@ -208,8 +242,9 @@ def infrastructure_retry_sensor(
             if plan is None or set(run.step_keys_to_execute) != {step.key for step in plan.steps}:
                 return SkipReason("부분 실행 계획은 전체 job으로 확대하지 않습니다.")
         # 인프라 종료 전에 provider/step 실패가 있었으면 같은 호출을 반복하지 않는다.
-        step_cursor = None
-        crashed_steps = 0
+        checkpoint = context.step_checkpoint
+        step_cursor = checkpoint.cursor if checkpoint is not None else None
+        crashed_steps = checkpoint.crashed_steps if checkpoint is not None else 0
         while True:
             failures = instance.get_records_for_run(
                 run_id=run.run_id,
@@ -236,6 +271,8 @@ def infrastructure_retry_sensor(
             if not next_cursor or next_cursor == step_cursor:
                 raise RuntimeError("step 실패 이력 cursor가 전진하지 않습니다.")
             step_cursor = next_cursor
+            if monotonic() - context.started >= 5:
+                return _StepCheckpoint(run.run_id, step_cursor, crashed_steps)
         if subprocess_failure and not crashed_steps:
             return SkipReason("명시적인 자식 프로세스 종료 기록이 없습니다.")
         attempts = [
@@ -273,6 +310,13 @@ def infrastructure_retry_sensor(
             instance, job_name=job.name, project=project, location_name=location_name
         ):
             return SkipReason("같은 job의 실행이 남아 있어 재시도를 합칩니다.")
+        # 전체 deadline이 끝난 worker는 metadata를 뒤늦게 변경하지 않는다.
+        # 검증 완료 위치를 저장하고 다음 tick에서 예산·scope를 다시 확인한다.
+        if monotonic() - context.started >= 8:
+            final_cursor = getattr(failures, "cursor", None) or step_cursor
+            if subprocess_failure and final_cursor:
+                return _StepCheckpoint(run.run_id, final_cursor, crashed_steps)
+            raise TimeoutError("재시도 인계에 필요한 시간 예산이 부족합니다.")
         # 이전 run의 native 상태 태그는 전달하지 않는다. job 정의의 실행 설정만 다시 적용한다.
         tags = {key: value for key, value in run.tags.items() if not key.startswith("dagster/")}
         tags.update(job.tags)
@@ -309,16 +353,21 @@ def infrastructure_retry_sensor(
         filter_tags = {PROJECT_TAG: project}
         if instance.run_retries_enabled:
             filter_tags[INFRA_RETRY_PENDING_TAG] = "true"
+        checkpoint = _decode_step_checkpoint(context.cursor)
         cursor = None if context.cursor == _RETRY_SCAN_HEAD else context.cursor or None
-        if cursor is not None and instance.get_run_by_id(cursor) is None:
-            cursor = None
-        runs = instance.get_runs(
-            filters=RunsFilter(
-                job_name=job.name, statuses=[DagsterRunStatus.FAILURE], tags=filter_tags
-            ),
-            limit=100,
-            cursor=cursor,
-        )
+        if checkpoint is not None:
+            resumed = instance.get_run_by_id(checkpoint.run_id)
+            runs = [resumed] if resumed is not None else []
+        else:
+            if cursor is not None and instance.get_run_by_id(cursor) is None:
+                cursor = None
+            runs = instance.get_runs(
+                filters=RunsFilter(
+                    job_name=job.name, statuses=[DagsterRunStatus.FAILURE], tags=filter_tags
+                ),
+                limit=100,
+                cursor=cursor,
+            )
         requests = []
         for index, run in enumerate(runs):
             # 느리지만 정상인 metadata에서도 완료한 행을 checkpoint한다. 전체 페이지가
@@ -339,14 +388,22 @@ def infrastructure_retry_sensor(
                     instance=instance,
                     dagster_run=run,
                     failure_event=event,
+                    started=started,
+                    step_checkpoint=checkpoint,
                 )
             )
+            if isinstance(result, _StepCheckpoint):
+                return SensorResult(cursor=result.encode())
             if isinstance(result, RunRequest):
                 requests.append(result)
                 # 같은 job은 한 tick에 하나만 발급한다. 다음 tick에 active 여부를 재확인한다.
                 return SensorResult(run_requests=requests, cursor=run.run_id)
         # 유한한 batch를 모두 확인한 뒤에만 cursor를 전진한다. 끝에서는 새 실패부터 재확인한다.
-        return SensorResult(cursor=runs[-1].run_id if len(runs) == 100 else _RETRY_SCAN_HEAD)
+        return SensorResult(
+            cursor=runs[-1].run_id
+            if runs and (checkpoint is not None or len(runs) == 100)
+            else _RETRY_SCAN_HEAD
+        )
 
     @sensor(
         name=name,
