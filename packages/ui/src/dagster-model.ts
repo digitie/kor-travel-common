@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 // Origin: kor-travel-weather@5da6e15 packages/kor-travel-weather-admin/frontend/lib/dagster.ts (GPL-3.0-or-later)
-// Modified: 2026-10-04 — 공용 표시 계약과 선택 실행 상한 추출
-export type DagsterSchedule = { name: string; status: string | null; cron: string | null; jobName: string };
-export type DagsterRepository = { name: string; locationName: string; schedules: DagsterSchedule[]; jobs: string[]; assets: string[] };
+// Modified: 2026-10-05 — 공용 표시 계약과 선택 실행 상한 추출
+export type DagsterTick = { status: string; timestamp: number | null; errorMessage?: string | null };
+export type DagsterSchedule = { name: string; status: string | null; cron: string | null; jobName: string; lastTick?: DagsterTick | null; timezone?: string | null; overdue?: boolean };
+export type DagsterSensor = { name: string; status: string | null; lastTick?: DagsterTick | null };
+export type DagsterRepository = { name: string; locationName: string; schedules: DagsterSchedule[]; jobs: string[]; assets: string[]; assetCount?: number; sensors?: DagsterSensor[] };
 export type DagsterRun = { runId: string; status: string; jobName: string; startTime: number | null; endTime: number | null; errorMessage: string | null; maxRuntimeSeconds?: number };
 export type DagsterSnapshot = { repositories: DagsterRepository[]; runs: DagsterRun[]; checkedAt: string };
 

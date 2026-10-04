@@ -216,3 +216,19 @@ daemon을 동시에 두지 않는다. fresh sensor의 최초 순회는 기존 sc
 sensor 확인과 다른 수동/예약 발화는 원자적이지 않다. shared coordinator의 job limit과 소비자
 DB lease를 함께 적용한다. DB lease는 중복 provider 호출을 막지만 queued run의 메모리 제한을
 대신하지 않는다. 같은 instance에서 운영 daemon과 sensor가 실제 실행되는지도 배포 후 확인한다.
+
+## Geo 구성의 공용 운영 UI 채택
+
+`@kor-travel/ui/dagster-operations`의 `DagsterOperations`에 앱이 범위가 적용된
+`snapshot`, `runUrl`, `scheduleUrl`, `onRefresh`를 제공한다. `showRunDetails`와
+`showRepositories`를 켜면 목록/상세와 코드 위치를 함께 표시한다. `selectedRunId`와
+`onSelectRun`으로 선택을 제어하고 `renderRunDetail`로 앱의 실패 확인·백업 다운로드를
+그대로 연결한다. 선택 실행이 최근 목록 밖에 있으면 콜백에는 `null`이 전달되므로
+앱은 제어 중인 ID로 상세를 조회한다. 외부 작업 실행·재시도 권한은 앱이 소유한다.
+
+repository의 선택 `sensors`, schedule의 `lastTick`, `timezone`, `overdue`는 API가
+확인한 값만 전달한다. 조회 실패 시 `error`와 마지막 성공 snapshot을 함께 넘기면
+마지막 결과임을 명확히 표시한다. 인증 실패를 빈 정상 snapshot으로 바꾸지 않는다.
+행은 50개씩 렌더링하며 검색·집계는 전달된 전체 실행에 적용한다. 서버는 최근 종료
+실행과 오래된 활성 실행을 모두 포함하되 응답 상한·취소 가능한 요청·polling을 적용한다.
+CSS는 `@kor-travel/ui/dagster.css`, 토큰은 `@kor-travel/tokens/tokens.css`를 로드한다.

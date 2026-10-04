@@ -26,3 +26,7 @@ common #24·weather #72는 main에 머지되었다. transport 채택을 위한 P
 ## 인계 자료
 
 [통합 계획](plan/integration-plan.md) · [architecture](architecture/README.md) · [standards](standards/README.md) · [ADR](adr/README.md). 역사·survey 전체를 시작할 때 통독하지 않는다.
+
+## 2026-10-05 geo 대시보드 후속
+
+[T-216](tasks/T-216-dagster-operations.md)의 `dev.3` 후보: 목록/상세·tick·검색·50행 pagination. 기존 작업 branch를 보존한다. 소비자 live와 2인 리뷰 전 merge 완료로 표시하지 않는다.
