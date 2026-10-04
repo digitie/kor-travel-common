@@ -76,7 +76,7 @@ function ScheduleRow({ schedule, expanded, onToggle, jobLabel, dagsterScheduleUr
         <td>
           <button className="ghost row-expand-toggle" type="button" onClick={onToggle} aria-expanded={expanded}>
             {expanded ? <span aria-hidden="true">▾</span> : <span aria-hidden="true">▸</span>}
-            {jobLabel(schedule.jobName)}
+            {jobLabel(schedule.jobName ?? schedule.name)}
           </button>
         </td>
         <td>{schedule.cron ? describeCron(schedule.cron) : "수동 실행"}</td>
@@ -86,7 +86,7 @@ function ScheduleRow({ schedule, expanded, onToggle, jobLabel, dagsterScheduleUr
         <tr className="sync-run-detail-row" data-slot="dagster-operations-schedule-detail">
           <td colSpan={3}>
             <div className="sync-run-detail-grid">
-              <div><span>실행되는 작업</span><code>{schedule.jobName}</code></div>
+              <div><span>실행되는 작업</span><code>{schedule.jobName ?? "미확인"}</code></div>
               <div><span>스케줄 이름</span><code>{schedule.name}</code></div>
               {schedule.timezone ? <div><span>시간대</span><code>{schedule.timezone}</code></div> : null}
               {schedule.lastTick ? <div><span>최근 tick</span><span className={`status ${statusClass(schedule.lastTick.status)}`}>{runStatusLabel(schedule.lastTick.status)}</span><small>{dateTime(schedule.lastTick.timestamp)}</small>{schedule.lastTick.errorMessage ? <small className="dagster-run-error">{schedule.lastTick.errorMessage}</small> : null}</div> : null}

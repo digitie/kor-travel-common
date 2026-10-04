@@ -149,3 +149,13 @@ test("미제공 센서 목록을 확인된 0개로 표시하지 않는다", () =
     runUrl={() => "#"} scheduleUrl={() => "#"} />);
   expect(screen.getByText(/센서 미확인/)).toBeVisible();
 });
+
+test("job 정보가 없는 스케줄은 이름을 작업으로 단정하지 않는다", async () => {
+  const repository = snapshot.repositories[0]!;
+  render(<DagsterOperations snapshot={{ ...snapshot, repositories: [{ ...repository,
+    schedules: [{ ...repository.schedules[0]!, jobName: null }] }] }}
+    onRefresh={vi.fn()} runUrl={() => "#"} scheduleUrl={() => "#"} />);
+  await userEvent.click(screen.getByRole("button", { name: "hourly" }));
+  const detail = screen.getByText("실행되는 작업").parentElement!;
+  expect(detail).toHaveTextContent("미확인");
+});
