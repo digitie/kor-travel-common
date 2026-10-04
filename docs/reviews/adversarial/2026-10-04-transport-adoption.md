@@ -48,3 +48,19 @@ Python 포함 후보 `b324b0afdc27f268e6e6aaee1f6d7d2f42e4743b`의 두 원문을
 | A-P2-04 / B-P2-02 정상 느린 페이지가 반복 timeout | 5초 작업 예산 뒤 완료 cursor를 저장, 다음 tick 재개 테스트 | 수정·재리뷰 대기 |
 
 원문 verdict를 임의로 낮추지 않는다. 새로운 후보의 두 리뷰와 CI가 끝나기 전에는 머지하지 않는다.
+
+## 영구 인계 보강
+
+`f0d27b4cca2aae9c2f58e2ed12bbf5495d12fcc0`의 독립 원문:
+
+- [James 최종 재리뷰](../evidence/2026-10-04-transport-common-james-python-final.md): CONDITIONAL,
+  SHA256 `02f05fc3acf22d247c8ab64c057f64e696c42cab44febbe51bd8173fcbfce1b2`.
+- [Popper 최종 재리뷰](../evidence/2026-10-04-transport-common-popper-python-final.md): BLOCK,
+  SHA256 `633354893F25A0F03600C2EDDE0CDFC05EB880819A11F7662C3B028D1C216B1E`.
+
+기존 finding은 두 리뷰에서 모두 FIXED다. 새 A-P2-05 / B-P1-03은 parent 억제 저장 후
+ACK 유실·native ON 전환에서 child가 생성되지 않는 경계다. 억제와 pending 인계 표식을
+함께 저장하고 native ON에서도 미완료 인계를 이어가며 실제 child 확인 뒤 표식을 닫도록
+보강했다. child에는 표식을 상속하지 않는다. 실제 metadata COMMIT 뒤 예외를 주입하고
+설정 전환·동일 run key 복원·성공 child 확인을 검증하는 회귀 두 사례를 추가했다.
+56 tests·ruff PASS. 새 고정 SHA의 CI와 두 reviewer 검증은 대기 중이다.

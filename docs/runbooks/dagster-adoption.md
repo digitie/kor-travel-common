@@ -199,6 +199,9 @@ project/location을 함께 검증하고, 실행 중인 같은 job은 합친다. 
 함께 요구한다. partition job과 부분 op/asset 선택 실행은 지원하지 않는다. native retry 횟수도
 같은 예산에 합산하고 이미 발급된 native/fallback child를 확인한다. fallback child뿐 아니라
 원 parent의 native 예산도 요청 반환 전에 닫는다. 제출 실패에는 같은 run key로 다시 준비한다.
+억제 태그와 `kortravelcommon/infra_retry_pending=true`를 같은 metadata 쓰기에 남긴다.
+저장 응답이 유실되거나 제출 전에 native retry를 켜도 이 표식이 있는 인계는 fallback이
+마무리한다. 발급된 child를 확인하면 표식을 false로 닫고, child에는 표식을 상속하지 않는다.
 실행 계획의 일부 step 또는 resolved op subset도 전체 job으로 확대하지 않는다.
 
 일반 polling sensor가 실패 실행 100건씩 확인하고 한 tick에 한 실행만 재예약한다. batch 끝에서
@@ -206,7 +209,7 @@ project/location을 함께 검증하고, 실행 중인 같은 job은 합친다. 
 느리지만 정상인 조회에서는 5초 작업 예산 뒤 마지막 완료 행을 저장해 다음 tick에서 이어간다.
 run failure callback 예외도 이벤트를 소비하는 Dagster 동작을 피하기 위한 경계다. 전체 조회는
 10초/동시 4개 상한이며 metadata 장애는 sensor tick 실패로 전달한다. native retry 활성화 시
-fallback은 위임한다. 오래된 실패가 많으면 한 순회만큼 복구가 지연될 수 있다.
+미완료 인계만 처리하고 새 실패는 native에 위임한다. 오래된 실패가 많으면 한 순회만큼 복구가 지연될 수 있다.
 native retry 설정 전환은 기존 daemon/code-server를 drain한 뒤 수행하여 서로 다른 설정의
 daemon을 동시에 두지 않는다. fresh sensor의 최초 순회는 기존 scope의 미재시도 실패도 대상이다.
 

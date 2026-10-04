@@ -21,6 +21,7 @@ from dagster._core.events import JobFailureData, RunFailureReason
 from kortravelcommon.dagster import (
     INFRA_RETRY_ATTEMPT_TAG,
     INFRA_RETRY_PARENT_TAG,
+    INFRA_RETRY_PENDING_TAG,
     RecoveryPolicy,
     coalescing_schedule,
     infrastructure_retry_sensor,
@@ -529,4 +530,38 @@ def test_completed_fallback_child_is_not_issued_again():
         context = failure_context(instance)
         request = evaluate_retry(retry_definition(), context)
         instance.create_run_for_job(sample, status=DagsterRunStatus.SUCCESS, tags=request.tags)
+        assert isinstance(evaluate_retry(retry_definition(), context), SkipReason)
+
+
+@pytest.mark.parametrize("ack_lost", [False, True])
+def test_pending_handoff_survives_native_enable_and_clears_after_child(monkeypatch, ack_lost):
+    with DagsterInstance.local_temp() as instance:
+        context = failure_context(instance)
+        parent_id = context.dagster_run.run_id
+        original = instance.add_run_tags
+
+        def commit_then_lose_ack(run_id, tags):
+            original(run_id, tags)
+            raise ConnectionError("committed but acknowledgement lost")
+
+        if ack_lost:
+            monkeypatch.setattr(instance, "add_run_tags", commit_then_lose_ack)
+            with pytest.raises(ConnectionError):
+                retry_definition().evaluate_tick(context.sensor_context)
+            assert context.sensor_context.cursor is None
+            monkeypatch.setattr(instance, "add_run_tags", original)
+        else:
+            assert isinstance(evaluate_retry(retry_definition(), context), RunRequest)
+        stored = instance.get_run_by_id(parent_id)
+        assert stored.tags[INFRA_RETRY_PENDING_TAG] == "true"
+        assert stored.tags["dagster/max_retries"] == "0"
+        assert stored.tags["dagster/will_retry"] == "false"
+        monkeypatch.setattr(DagsterInstance, "run_retries_enabled", property(lambda self: True))
+        request = evaluate_retry(retry_definition(), context)
+        assert isinstance(request, RunRequest)
+        assert request.run_key == f"test/infra/{parent_id}/1"
+        assert INFRA_RETRY_PENDING_TAG not in request.tags
+        instance.create_run_for_job(sample, status=DagsterRunStatus.SUCCESS, tags=request.tags)
+        assert isinstance(evaluate_retry(retry_definition(), context), SkipReason)
+        assert instance.get_run_by_id(parent_id).tags[INFRA_RETRY_PENDING_TAG] == "false"
         assert isinstance(evaluate_retry(retry_definition(), context), SkipReason)

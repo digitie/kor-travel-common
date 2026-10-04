@@ -26,6 +26,7 @@ PROJECT_TAG = "kortravelcommon/project"
 JOB_TAG = "kortravelcommon/job"
 INFRA_RETRY_ATTEMPT_TAG = "kortravelcommon/infra_retry_attempt"
 INFRA_RETRY_PARENT_TAG = "kortravelcommon/infra_retry_parent"
+INFRA_RETRY_PENDING_TAG = "kortravelcommon/infra_retry_pending"
 _RETRY_SCAN_HEAD = "head"
 ACTIVE_STATUSES = [
     DagsterRunStatus.QUEUED,
@@ -140,7 +141,7 @@ def infrastructure_retry_sensor(
     """native retry가 꺼진 instance에서 멱등 job의 worker 장애만 제한적으로 재예약한다.
 
     실행 종료 이벤트의 명시적 인프라 사유만 허용한다. step/provider 실패, timeout에
-    의한 취소, 원인 불명은 제외한다. native retry가 켜지면 이 sensor는 위임한다.
+    의한 취소, 원인 불명은 제외한다. native retry가 켜지면 미완료 인계만 마무리한다.
     run key는 이벤트 재평가를 중복 제거하며, 동시 수동 실행은 JOB_TAG queue limit과
     소비자 DB lease가 별도로 보호해야 한다. partition job은 이 factory의 대상이 아니다.
     """
@@ -151,9 +152,10 @@ def infrastructure_retry_sensor(
 
     def retry_failed_run(context):
         instance = context.instance
-        if instance.run_retries_enabled:
-            return SkipReason("native run retry에 위임합니다.")
         run = context.dagster_run
+        pending = run.tags.get(INFRA_RETRY_PENDING_TAG) == "true"
+        if instance.run_retries_enabled and not pending:
+            return SkipReason("native run retry에 위임합니다.")
         if run.job_name != job.name or run.status != DagsterRunStatus.FAILURE:
             return SkipReason("대상 job의 실패 이벤트가 아닙니다.")
         origin = run.remote_job_origin
@@ -214,6 +216,8 @@ def infrastructure_retry_sensor(
         if native_child_id:
             native_child = instance.get_run_by_id(native_child_id)
             if native_child is not None and native_child.parent_run_id == run.run_id:
+                if pending:
+                    instance.add_run_tags(run.run_id, {INFRA_RETRY_PENDING_TAG: "false"})
                 return SkipReason("native 재시도 실행이 이미 발급되었습니다.")
         if any(
             instance.get_runs(
@@ -225,6 +229,8 @@ def infrastructure_retry_sensor(
             )
             for parent_tag in ("dagster/parent_run_id", INFRA_RETRY_PARENT_TAG)
         ):
+            if pending:
+                instance.add_run_tags(run.run_id, {INFRA_RETRY_PENDING_TAG: "false"})
             return SkipReason("이미 발급된 재시도 실행이 있습니다.")
         if has_active_run(
             instance, job_name=job.name, project=project, location_name=location_name
@@ -234,6 +240,7 @@ def infrastructure_retry_sensor(
         tags = {key: value for key, value in run.tags.items() if not key.startswith("dagster/")}
         tags.update(job.tags)
         tags.update(policy.tags(project=project, job_name=job.name))
+        tags.pop(INFRA_RETRY_PENDING_TAG, None)
         tags["dagster/max_retries"] = str(policy.infrastructure_retries - next_attempt)
         tags.update(
             {
@@ -243,10 +250,15 @@ def infrastructure_retry_sensor(
             }
         )
         # child의 잔여 예산만 줄이면 native OFF→ON에서 원 parent가 다시 재시도된다.
-        # 요청 반환 전에 parent의 native 예산도 닫는다. 제출 실패 시 fallback은 결정적
-        # run key로 같은 요청을 다시 준비할 수 있다. instance 전환은 daemon drain 후 수행한다.
+        # native 억제와 미완료 인계를 같은 metadata 쓰기에 남긴다. 저장 응답 유실 또는
+        # 요청 제출 실패 뒤 native를 켜도 이 sensor가 동일 run key의 인계를 마무리한다.
         instance.add_run_tags(
-            run.run_id, {"dagster/max_retries": "0", "dagster/will_retry": "false"}
+            run.run_id,
+            {
+                "dagster/max_retries": "0",
+                "dagster/will_retry": "false",
+                INFRA_RETRY_PENDING_TAG: "true",
+            },
         )
         return RunRequest(
             run_key=f"{project}/infra/{run.run_id}/{next_attempt}",
@@ -257,14 +269,15 @@ def infrastructure_retry_sensor(
     def evaluate_failures(context):
         started = monotonic()
         instance = context.instance
+        filter_tags = {PROJECT_TAG: project}
         if instance.run_retries_enabled:
-            return SkipReason("native run retry에 위임합니다.")
+            filter_tags[INFRA_RETRY_PENDING_TAG] = "true"
         cursor = None if context.cursor == _RETRY_SCAN_HEAD else context.cursor or None
         if cursor is not None and instance.get_run_by_id(cursor) is None:
             cursor = None
         runs = instance.get_runs(
             filters=RunsFilter(
-                job_name=job.name, statuses=[DagsterRunStatus.FAILURE], tags={PROJECT_TAG: project}
+                job_name=job.name, statuses=[DagsterRunStatus.FAILURE], tags=filter_tags
             ),
             limit=100,
             cursor=cursor,
