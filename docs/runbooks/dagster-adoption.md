@@ -198,8 +198,11 @@ provider 오류가 섞여 있어도 제외한다. 느린 유한 페이지는 5�
 sensor cursor에 저장해 다음 tick에서 이어 읽는다. 부분 검사 중에는 재시도 요청이나 native 억제
 태그를 쓰지 않는다. 전체 sensor의 10초 제한과 인계 전 잔여 시간 검사는 이 검사에도 적용된다.
 검사가 끝났지만 인계 예산이 부족하면 완료 phase도 저장한다. 느린 마지막 STEP 조회 직후에는 추가 중복·활성 실행 조회 전에 완료 위치를 저장해, 전체 deadline이 이 지점을 지우지 않게 한다. 다음 tick에서 RUN_FAILURE와
-STEP_FAILURE 중 최신 이벤트를 함께 조회하고, 같은 RUN_FAILURE storage ID일 때만 완료 검증을
-재사용한다. 뒤늦게 step 실패가 추가되면 완료 phase를 근거로 재시도하지 않는다.
+STEP_FAILURE 중 최신 이벤트를 함께 조회하고, RUN_FAILURE와 검증한 마지막 STEP의 storage ID 중 최대값이 그대로일 때만 완료 검증을
+재사용한다. 최신 기록이 검증한 STEP이면 저장된 종료 사유와 명시적 child crash 증거를 사용한다.
+새 step 실패가 추가되면 부분 phase로 돌아가 다음 tick에서 종료 사유와 cursor 이후 기록을
+확인한다. 새 provider 오류는 거부하고 늦은 정상 child crash만 있는 이력은 복구를 계속한다.
+기존 3/5필드 checkpoint는 종료 사유부터 다시 검증하며 새 6필드 형식으로 전진한다.
 일반 step/provider 실패·취소·원인 불명은 재예약하지 않는다. 실제 자식 `os._exit(42)`와
 native retry OFF인 격리 SQLite instance로 fallback 요청 1개와 잔여 예산 0을 검증한다.
 project/location을 함께 검증하고, 실행 중인 같은 job은 합친다. 재시도 횟수와 부모 run ID를

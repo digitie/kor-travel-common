@@ -208,5 +208,81 @@ def test_completed_checkpoint_rejects_late_provider_step_without_new_run_failure
             build_sensor_context(instance=instance, cursor=first.cursor)
         )
         cold = definition.evaluate_tick(build_sensor_context(instance=instance))
-        assert resumed.run_requests == cold.run_requests == []
+        denied = definition.evaluate_tick(
+            build_sensor_context(instance=instance, cursor=resumed.cursor)
+        )
+        assert resumed.run_requests == denied.run_requests == cold.run_requests == []
         assert "kortravelcommon/infra_retry_pending" not in instance.get_run_by_id(run_id).tags
+
+
+@pytest.mark.parametrize("after_checkpoint", [False, True])
+def test_late_valid_child_step_resumes_with_finite_slow_metadata(monkeypatch, after_checkpoint):
+    with DagsterInstance.local_temp() as instance:
+        context = failure_context(instance, RunFailureReason.RUN_EXCEPTION)
+        run_id = context.dagster_run.run_id
+
+        def crash():
+            instance.report_dagster_event(
+                DagsterEvent(
+                    event_type_value=DagsterEventType.STEP_FAILURE.value,
+                    job_name=sample.name,
+                    step_key="noop",
+                    event_specific_data=StepFailureData(
+                        SerializableErrorInfo("worker", [], "ChildProcessCrashException"),
+                        None,
+                        ErrorSource.FRAMEWORK_ERROR,
+                    ),
+                ),
+                run_id,
+            )
+
+        crash()
+        instance.report_dagster_event(
+            DagsterEvent(
+                event_type_value=DagsterEventType.RUN_FAILURE.value,
+                job_name=sample.name,
+                event_specific_data=JobFailureData(
+                    SerializableErrorInfo("worker", [], "DagsterSubprocessError"),
+                    failure_reason=RunFailureReason.RUN_EXCEPTION,
+                ),
+            ),
+            run_id,
+        )
+        if not after_checkpoint:
+            crash()
+        original = instance.get_records_for_run
+        step_queries = []
+        writes = []
+        original_add = instance.add_run_tags
+
+        def events(**kw):
+            is_step = kw["of_type"] == DagsterEventType.STEP_FAILURE
+            time.sleep(5.1 if is_step else 3.1)
+            if is_step:
+                step_queries.append(kw.get("cursor"))
+            return original(**kw)
+
+        def add_tags(run_id, tags):
+            writes.append(tags)
+            return original_add(run_id, tags)
+
+        monkeypatch.setattr(instance, "get_records_for_run", events)
+        monkeypatch.setattr(instance, "add_run_tags", add_tags)
+        definition = retry_definition()
+        cursor = None
+        requests = []
+        for tick in range(5):
+            outcome = definition.evaluate_tick(
+                build_sensor_context(instance=instance, cursor=cursor)
+            )
+            cursor = outcome.cursor
+            if tick == 0:
+                assert not outcome.run_requests and not writes and "true" in cursor
+                if after_checkpoint:
+                    crash()
+            requests.extend(outcome.run_requests)
+            if requests:
+                break
+        assert len(requests) == len(writes) == 1
+        assert len(step_queries) == (2 if after_checkpoint else 1)
+        assert requests[0].tags["dagster/max_retries"] == "0"
