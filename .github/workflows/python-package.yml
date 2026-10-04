@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+name: python-package
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  recovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install uv==0.11.21
+      - working-directory: packages/py/kor-travel-common
+        run: |
+          uv sync --locked --extra dev --extra dagster --python ${{ matrix.python }}
+          uv run --no-sync ruff check .
+          uv run --no-sync pytest -q
+          uv build
+          python -m venv /tmp/common-core
+          /tmp/common-core/bin/pip install dist/*.whl
+          /tmp/common-core/bin/python -c 'import sys, kortravelcommon; from kortravelcommon.deadline import call_with_deadline; assert "dagster" not in sys.modules'
