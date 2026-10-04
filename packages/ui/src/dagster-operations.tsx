@@ -124,12 +124,12 @@ export function DagsterOperations({ snapshot, error = "", loading = false, onRef
       </section>
       <section className="panel dagster-runs">
         <div className="panel-head"><div><h2>최근 실행 · 마지막 확인 {snapshot ? new Date(snapshot.checkedAt).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul" }) : "불러오는 중…"}</h2></div></div>
-        {snapshot?.runs.length ? <div className="table-wrap"><table data-slot="dagster-operations-run-table"><thead><tr><th scope="col">상태</th><th scope="col">작업</th><th scope="col">시작</th><th scope="col">종료</th><th scope="col">상세</th></tr></thead><tbody>{snapshot.runs.map((run) => <RunRow key={run.runId} run={run} nowSeconds={nowSeconds} jobLabel={jobLabel} dagsterRunUrl={runUrl} />)}</tbody></table></div> : <div className="empty">{snapshot ? "최근 Dagster 실행이 없습니다." : "실행 기록을 불러오는 중…"}</div>}
+        {snapshot?.runs.length ? <div className="table-wrap" role="region" aria-label="최근 Dagster 실행 표" tabIndex={0}><table data-slot="dagster-operations-run-table"><thead><tr><th scope="col">상태</th><th scope="col">작업</th><th scope="col">시작</th><th scope="col">종료</th><th scope="col">상세</th></tr></thead><tbody>{snapshot.runs.map((run) => <RunRow key={run.runId} run={run} nowSeconds={nowSeconds} jobLabel={jobLabel} dagsterRunUrl={runUrl} />)}</tbody></table></div> : <div className="empty">{snapshot ? "최근 Dagster 실행이 없습니다." : "실행 기록을 불러오는 중…"}</div>}
       </section>
       <section className="panel">
         <div className="panel-head"><div><h2>스케줄</h2></div></div>
         {schedules.length ? (
-          <div className="table-wrap">
+          <div className="table-wrap" role="region" aria-label="Dagster 스케줄 표" tabIndex={0}>
             <table data-slot="dagster-operations-schedule-table">
               <thead><tr><th scope="col">작업</th><th scope="col">주기</th><th scope="col">상태</th></tr></thead>
               <tbody>

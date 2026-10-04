@@ -2,6 +2,15 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-10-04 — Transport Dagster 공통 UI 채택 후보
+
+사용자 후속 요청으로 common `090f984`에서 feature branch를 시작했다. UI `0.1.0-dev.2`는
+한국어 주기·표 키보드 진입·종료 경과 시간을 보완한다. UI 42 tests, build/pack과 smoke lock
+생성 PASS. Python API 변경은 없다. Transport의 소유권 migration/fencing·작업별 호출 보호·
+메모리 개선은 소비자 PR로 분리하며 [적용 가이드](runbooks/dagster-adoption.md)에 경계를 남긴다.
+최종 CI·2인 적대 리뷰·n150 live UI는 아직 진행 중이다.
+
+
 ## 2026-10-04 (Codex, T-319·T-216 review·live·회귀 closure)
 
 [최종 리뷰](reviews/adversarial/2026-10-04-dagster-recovery.md)에 독립 2인 원본/post-fix/final delta와 8 finding FIXED를 보존했다. [실행 증거](reviews/adversarial/evidence/2026-10-04-dagster-live-e2e.md)는 weather Python345/frontend64, common Python21/UI34/floor21, clean tarball build, 실제 production-build UI 로그인·메뉴·실패상세·상한·모바일·Dagster 중단/복원 재시도 PASS를 기록한다. 합성192000fact tracemalloc 피크446740271→12766381bytes이며 운영 RSS가 아니다. [적용 가이드](runbooks/dagster-adoption.md)를 사용자 요청대로 PR에 포함했다.

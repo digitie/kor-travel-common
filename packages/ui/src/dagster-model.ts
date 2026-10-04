@@ -23,10 +23,11 @@ export function runStatusLabel(status: string): string {
   return RUN_STATUS_LABELS[status] ?? status;
 }
 
-/** Seconds a run now shown as STARTED has been running, or null if it isn't. */
+/** 진행 중 실행은 확인 시각, 종료 실행은 종료 시각까지의 경과 초. 유효한 시각이 없으면 null. */
 export function runElapsedSeconds(run: DagsterRun, nowSeconds: number): number | null {
-  if (run.status !== "STARTED" || run.startTime == null) return null;
-  return Math.max(0, nowSeconds - run.startTime);
+  if (run.startTime == null || !Number.isFinite(run.startTime)) return null;
+  const end = run.status === "STARTED" ? nowSeconds : (run.endTime ?? NaN);
+  return Number.isFinite(end) ? Math.max(0, end - run.startTime) : null;
 }
 
 /**
@@ -39,6 +40,7 @@ export function runElapsedSeconds(run: DagsterRun, nowSeconds: number): number |
 export const STALLED_RUN_THRESHOLD_SECONDS = 600;
 
 export function isStalledRun(run: DagsterRun, nowSeconds: number): boolean {
+  if (run.status !== "STARTED") return false;
   const elapsed = runElapsedSeconds(run, nowSeconds);
   const configured = run.maxRuntimeSeconds;
   const threshold = configured !== undefined && Number.isFinite(configured) && configured > 0
@@ -68,15 +70,24 @@ export function describeCron(cron: string): string {
   const [minute = "", hour = "", day, month, weekday] = parts;
   if (day !== "*" || month !== "*" || weekday !== "*") return cron;
   if (hour === "*") {
+    const every = /^\*\/(\d+)$/.exec(minute);
+    if (every && Number(every[1]) > 0 && Number(every[1]) < 60 && 60 % Number(every[1]) === 0) {
+      return `${Number(every[1])}분마다`;
+    }
     if (/^\d+$/.test(minute)) {
+      if (Number(minute) > 59) return cron;
       return minute === "0" ? "매시 정각" : `매시 ${minute}분`;
     }
     return cron;
   }
   const minuteNum = Number(minute);
-  if (!/^\d+$/.test(minute) || Number.isNaN(minuteNum)) return cron;
+  if (!/^\d+$/.test(minute) || minuteNum > 59) return cron;
+  const everyHour = /^\*\/(\d+)$/.exec(hour);
+  if (everyHour && Number(everyHour[1]) > 0 && Number(everyHour[1]) <= 24 && 24 % Number(everyHour[1]) === 0) {
+    return `${Number(everyHour[1])}시간마다 ${minuteNum}분`;
+  }
   const hours = hour.split(",");
-  if (!hours.every((value) => /^\d+$/.test(value))) return cron;
+  if (!hours.every((value) => /^\d+$/.test(value) && Number(value) < 24)) return cron;
   const times = hours.map((value) => `${value.padStart(2, "0")}:${minute.padStart(2, "0")}`);
   return `매일 ${times.join(", ")}`;
 }

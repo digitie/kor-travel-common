@@ -118,6 +118,8 @@ except DeadlineExceeded:
 
 대기만 제한하며 daemon thread를 강제로 종료하지 않는다. timeout 뒤 동일 client를 재사용하거나
 close하지 않는다. async client는 제공자의 public timeout/cancellation 계약을 사용한다.
+아직 종료하지 않은 동기 호출은 프로세스당 4개로 제한한다. timeout 뒤에도 실제 종료까지
+slot을 점유하며, 용량 부족은 `DeadlineExceeded`로 전달한다. 확인 실패를 정상/빈 큐로 바꾸지 않는다.
 worker process 회수는 run monitoring/launcher가 소유하며, daemon/code server 자체 중단은
 서비스 관리자의 restart/healthcheck가 필요하다. OS process의 실제 종료도 운영에서 확인한다.
 
@@ -146,3 +148,71 @@ worker process 회수는 run monitoring/launcher가 소유하며, daemon/code se
 합성 Python allocation과 운영 전체 RSS는 구분한다. 운영 배포 뒤 launcher crash/hard hang/
 취소/native retry child 실행과 shared host RSS를 확인한다. 실행하지 않은 배포 검증은
 `NOT_RUN`으로 남긴다. 독립 2인 리뷰와 post-fix 재검토 evidence를 PR에 연결한다.
+
+
+## 8. Transport 채택 사례 (2026-10-04)
+
+Weather PR #72와 common PR #24의 Python 코어 및 PR #25의 보강 코드를 transport가 고정하여 사용한다.
+도메인 `CollectionRun` SQL은 transport에 둔다. `0024` migration의 `orchestrator_run_id`·`heartbeat_at`을
+추가하고 전용 collector session의 flush/commit에서 status·owner를 잠가 늦은 게시를 거절한다.
+부분 commit은 보존하며 terminal Dagster 실행의 running 기록만 회수한다. metadata 조회 실패는
+죽은 worker의 근거가 아니며, 없는 run은 4시간 실행 상한보다 긴 5시간 grace와 heartbeat CAS를 거친다.
+
+수집 정책은 앱이 결정한다. Transport의 KRIC는 실패·강제 종료도 마지막 시도부터 48시간을 지키며,
+버스 기준정보는 성공 후 72시간, 철도 기준정보는 성공 후 48시간을 보호한다. 유가·장소의 과금과
+provider receipt를 generic retry로 우회하지 않는다. 자동 인프라 재시도는 멱등 공항·고속도로·휴게소
+기준정보에 1회만 허용하며 provider 실패는 `Failure(allow_retries=False)`와 run tag 정책으로 막는다.
+
+UI `0.1.0-dev.2`는 5분·4시간·8시간 cron, 키보드 진입 가능한 두 표, terminal 경과 시간을 제공한다.
+Transport는 최근 30건 외 진행 중 목록을 별도로 합쳐 중복 제거하고 job의 `dagster/max_runtime`을
+공통 snapshot에 전달한다. 실패 event는 location tag와 UUID를 함께 제한하여 페이지를 넘겨 읽는다.
+작업별 GraphQL·본문 크기·시간 상한과 인증·Origin은 소비자가 유지한다.
+
+**실제 instance**: transport의 `backend/dagster_home/dagster.yaml`은 전용 instance용이다.
+공용 daemon 운영에서는 Manager가 소유한 instance YAML의 monitoring, `run_retries.enabled`,
+`retry_on_asset_or_op_failure=false`, project/job tag concurrency를 별도로 확인해야 한다.
+code-server의 YAML만 바꾸고 shared instance가 바뀌었다고 보고하면 안 된다. candidate의 격리
+instance 결과와 운영 shared instance의 활성 설정/worker 종료 결과를 evidence에서 구분한다.
+
+### native retry가 비활성화된 공용 instance
+
+Transport의 실제 shared instance는 monitoring만 활성화되어 있었다. job의 `dagster/max_retries`
+태그는 instance의 native retry를 켜지 않는다. 이때 다음 fallback sensor를 사용한다.
+
+```python
+from kortravelcommon.dagster import RecoveryPolicy, infrastructure_retry_sensor
+
+worker_retry = infrastructure_retry_sensor(
+    name="transport_infra_retry_airport_collection_job",
+    project="transport", location_name="kor-travel-transport", job=airport_collection_job,
+    policy=RecoveryPolicy(14400, idempotent=True, infrastructure_retries=1),
+)
+# 소비자의 Definitions(sensors=[worker_retry, ...])에 등록한다.
+```
+
+`UNEXPECTED_TERMINATION`, `START_TIMEOUT`, `RUN_WORKER_RESTART` 이벤트만 허용한다.
+같은 run에 step 실패가 있으면 제외하며, provider 실패·취소·원인 불명은 재예약하지 않는다.
+project/location을 함께 검증하고, 실행 중인 같은 job은 합친다. 재시도 횟수와 부모 run ID를
+공통 태그에 기록하며 결정적인 run key로 이벤트 재평가를 중복 제거한다. run config를 보존해
+전체 멱등 job을 다시 실행한다. repository origin도 기본 `__repository__`와 일치해야 하며,
+다른 이름은 factory의 `repository_name`에 주입한다. origin 없는 실행은 project/location 태그를
+함께 요구한다. partition job과 부분 op/asset 선택 실행은 지원하지 않는다. native retry 횟수도
+같은 예산에 합산하고 이미 발급된 native/fallback child를 확인한다. fallback child뿐 아니라
+원 parent의 native 예산도 요청 반환 전에 닫는다. 제출 실패에는 같은 run key로 다시 준비한다.
+억제 태그와 `kortravelcommon/infra_retry_pending=true`를 같은 metadata 쓰기에 남긴다.
+저장 응답이 유실되거나 제출 전에 native retry를 켜도 이 표식이 있는 인계는 fallback이
+마무리한다. 발급된 child를 확인하면 표식을 false로 닫고, child에는 표식을 상속하지 않는다.
+실행 계획의 일부 step 또는 resolved op subset도 전체 job으로 확대하지 않는다.
+
+일반 polling sensor가 실패 실행 100건씩 확인하고 한 tick에 한 실행만 재예약한다. batch 끝에서
+새 실패부터 다시 확인하며, metadata 장애·10초 timeout에는 cursor를 전진시키지 않는다.
+느리지만 정상인 조회에서는 5초 작업 예산 뒤 마지막 완료 행을 저장해 다음 tick에서 이어간다.
+run failure callback 예외도 이벤트를 소비하는 Dagster 동작을 피하기 위한 경계다. 전체 조회는
+10초/동시 4개 상한이며 metadata 장애는 sensor tick 실패로 전달한다. native retry 활성화 시
+미완료 인계만 처리하고 새 실패는 native에 위임한다. 오래된 실패가 많으면 한 순회만큼 복구가 지연될 수 있다.
+native retry 설정 전환은 기존 daemon/code-server를 drain한 뒤 수행하여 서로 다른 설정의
+daemon을 동시에 두지 않는다. fresh sensor의 최초 순회는 기존 scope의 미재시도 실패도 대상이다.
+
+sensor 확인과 다른 수동/예약 발화는 원자적이지 않다. shared coordinator의 job limit과 소비자
+DB lease를 함께 적용한다. DB lease는 중복 provider 호출을 막지만 queued run의 메모리 제한을
+대신하지 않는다. 같은 instance에서 운영 daemon과 sensor가 실제 실행되는지도 배포 후 확인한다.

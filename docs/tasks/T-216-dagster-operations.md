@@ -29,3 +29,12 @@ run·스케줄 상세·새로고침 UI를 유지한다. 공용 CSS는 `.kt-dagst
 [PR #24](https://github.com/digitie/kor-travel-common/pull/24),
 [weather PR #72](https://github.com/digitie/kor-travel-weather/pull/72)에 증거를 보존한다.
 IN_PROGRESS는 외부 운영 배포/채택까지 완료로 세지 않기 위해 유지한다.
+
+
+## Transport 후속 채택 후보 — 2026-10-04
+
+사용자가 transport 확산과 필요시 common 수정을 요청했다. UI `0.1.0-dev.2`의 주기 표시,
+키보드 표 진입, terminal 경과 시간·잘못된 확인 시각 방어를 추가했다. Python 도메인 SQL은
+소비자가 소유하고 기존 `090f984` 공용 복구 코어를 사용한다. 기존 T-301 checkout은 보존한다.
+UI 42건·build·pack 및 tarball lock 생성 PASS. 소비자 CI·2인 최종 적대 리뷰·n150 live UI는
+현재 IN_PROGRESS이며 후속 evidence에서 정확한 candidate SHA와 결과를 기록한다.
