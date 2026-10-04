@@ -285,6 +285,12 @@ def infrastructure_retry_sensor(
                 )
         if subprocess_failure and not crashed_steps:
             return SkipReason("명시적인 자식 프로세스 종료 기록이 없습니다.")
+        # 느린 STEP 이력을 모두 검증한 즉시 저장한다. 추가 metadata 조회가
+        # deadline을 소진해 완료 지점을 잃는 일을 막는다. 다음 tick은 scope와 중복을 재검증한다.
+        if subprocess_failure and step_cursor and monotonic() - context.started >= 8:
+            return _StepCheckpoint(
+                run.run_id, step_cursor, crashed_steps, True, context.failure_storage_id
+            )
         attempts = [
             run.tags.get(INFRA_RETRY_ATTEMPT_TAG, "0"),
             run.tags.get("dagster/retry_number", "0"),
@@ -388,7 +394,13 @@ def infrastructure_retry_sensor(
                 return SensorResult(cursor=runs[index - 1].run_id)
             records = instance.get_records_for_run(
                 run_id=run.run_id,
-                of_type=DagsterEventType.RUN_FAILURE,
+                # 완료 checkpoint 뒤에 추가된 step 실패도 확인한다. terminal 이벤트 ID만
+                # 같다고 step 이력이 불변이라고 가정하지 않는다.
+                of_type=(
+                    {DagsterEventType.RUN_FAILURE, DagsterEventType.STEP_FAILURE}
+                    if checkpoint is not None and checkpoint.complete
+                    else DagsterEventType.RUN_FAILURE
+                ),
                 limit=1,
                 ascending=False,
             ).records
