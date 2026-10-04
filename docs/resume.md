@@ -10,7 +10,7 @@
 
 ## 다음 한 작업
 
-common #24·weather #72는 main에 머지되었다. 현재 사용자 요청에 따라 transport 채택을 검증 중이다. UI `0.1.0-dev.2` 후속 후보의 CI·독립 리뷰·n150 live UI를 완료하고 common과 transport PR을 머지한다. T-301 원본 변경은 보존한다.
+common #24·weather #72는 main에 머지되었다. transport 채택을 위한 Python `430a9e9`와 UI `0.1.0-dev.2`의 두 독립 리뷰·CI·격리 소비자 live UI가 통과했다. [common PR #25](https://github.com/digitie/kor-travel-common/pull/25)와 [최종 코드 판정](reviews/adversarial/2026-10-04-transport-adoption-closure.md)에 증거를 보존했다. transport PR #67의 최종 후보 재리뷰·CI가 끝난 뒤 두 PR을 머지한다. 운영 shared coordinator 전환·worker kill·RSS 측정은 NOT_RUN이다. T-301 원본 변경은 보존한다.
 
 ## 시작 파일과 검증
 
