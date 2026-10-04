@@ -1,18 +1,28 @@
 {
   "name": "@kor-travel/ui",
-  "version": "0.1.0-dev.0",
+  "version": "0.1.0-dev.1",
   "description": "kor-travel 공용 로그인과 탐색 메뉴",
   "license": "GPL-3.0-or-later",
   "author": "Youn-sok Choi (digitie)",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": ["*.css"],
   "files": [
     "dist",
+    "dagster.css",
     "LICENSE",
     "NOTICE",
     "THIRD_PARTY_NOTICES.md"
   ],
   "exports": {
+    "./dagster-operations": {
+      "types": "./dist/dagster-operations.d.ts",
+      "import": "./dist/dagster-operations.js"
+    },
+    "./dagster-model": {
+      "types": "./dist/dagster-model.d.ts",
+      "import": "./dist/dagster-model.js"
+    },
+    "./dagster.css": "./dagster.css",
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"

@@ -44,6 +44,13 @@ Next의 Server Component에서 콜백을 전달하지 않는다. 위 예처럼 C
 
 ## 예시·검증
 
+`DagsterOperations`는 weather에서 추출한 운영 표시 컴포넌트다. `snapshot`, `onRefresh`,
+`runUrl`, `scheduleUrl`을 주입하고 `jobLabel`·`locationUrl`·`loading`·`error`를 선택한다.
+`@kor-travel/ui/dagster.css`와 tokens를 로드한다. `dagster-model` subpath는 React 없이
+snapshot 타입·시간/주기/상태 표시 함수를 제공한다. 조회·인증·취소/재실행은 소비자 소유다.
+실행 상한이 있는 run에는 `maxRuntimeSeconds`를 전달하여 긴 batch의 오탐을 방지한다.
+기본 표시 시간대는 Asia/Seoul이다. URL callback은 앱이 검증한 내부 Dagster 링크만 반환한다.
+
 [예시 안내](examples/README.md)의 여섯 프로젝트 데이터는 리모트 `main`의 고정 커밋에서 확인했다. 실제 앱 데이터·인증 서버는 연결하지 않는다. 최신 안정 기준과 실행 한계는 T-215 evidence를 따른다.
 
 ```bash

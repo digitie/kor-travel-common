@@ -6,6 +6,11 @@
 
 ## [Unreleased]
 
+### 실행 복구와 운영 UI 개발 후보
+
+- Python `kortravelcommon.dagster`·`deadline`: 멱등 job의 제한된 인프라 재시도, 중복 예약 합침, 주입형 lease 회수 sensor와 호출 대기 상한.
+- UI `0.1.0-dev.1`: weather에서 추출한 `DagsterOperations`, snapshot 타입/표시 함수와 범위가 한정된 CSS. 앱이 인증·조회·URL·label을 주입한다.
+
 ### tokens
 
 #### Added

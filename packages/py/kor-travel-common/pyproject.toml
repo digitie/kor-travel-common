@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kor-travel-common"
+version = "0.1.0.dev0"
+description = "kor-travel 공용 실행 복구 프리미티브"
+requires-python = ">=3.11"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE", "NOTICE"]
+
+[project.optional-dependencies]
+dagster = ["dagster>=1.9,<2"]
+dev = ["pytest>=8", "ruff>=0.9"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kortravelcommon"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

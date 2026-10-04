@@ -13,3 +13,6 @@ export type { AppMenuProps, AppMenuGroup, AppMenuItem, AppMenuLinkItem, AppMenuA
 export { sanitizeLocalPath, getActiveMenuItemId } from "./navigation.js";
 export type { MenuRoute } from "./navigation.js";
 export { getLoginErrorMessage } from "./login-messages.js";
+export { DagsterOperations } from "./dagster-operations.js";
+export type { DagsterOperationsProps } from "./dagster-operations.js";
+export type { DagsterSnapshot, DagsterRun, DagsterRepository, DagsterSchedule } from "./dagster-model.js";
