@@ -23,7 +23,7 @@ export function runStatusLabel(status: string): string {
   return RUN_STATUS_LABELS[status] ?? status;
 }
 
-/** Seconds a run now shown as STARTED has been running, or null if it isn't. */
+/** 진행 중 실행은 확인 시각, 종료 실행은 종료 시각까지의 경과 초. 유효한 시각이 없으면 null. */
 export function runElapsedSeconds(run: DagsterRun, nowSeconds: number): number | null {
   if (run.startTime == null || !Number.isFinite(run.startTime)) return null;
   const end = run.status === "STARTED" ? nowSeconds : (run.endTime ?? NaN);
