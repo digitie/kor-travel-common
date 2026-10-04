@@ -14,12 +14,18 @@ run·스케줄 상세·새로고침 UI를 유지한다. 공용 CSS는 `.kt-dagst
 
 ## 수용 기준
 
-- [ ] weather의 label/URL을 상수로 common에 넣지 않는다.
-- [ ] 오류 원문은 React text로 렌더링하고 pending 중 중복 새로고침을 막는다.
-- [ ] 긴 batch는 자체 실행 상한 전에 정체로 표시하지 않는다.
-- [ ] 소비자는 UI·tokens tarball과 출처 SHA·digest를 고정한다.
-- [ ] 단위·패키지 빌드·tarball 설치·weather lint/type/test/build 및 2인 리뷰를 기록한다.
+- [x] weather의 label/URL을 상수로 common에 넣지 않는다.
+- [x] 오류 원문은 React text로 렌더링하고 pending 중 중복 새로고침을 막는다.
+- [x] 긴 batch는 자체 실행 상한 전에 정체로 표시하지 않는다.
+- [x] 소비자는 UI·tokens tarball과 출처 SHA·digest를 고정한다.
+- [x] 단위·패키지 빌드·tarball 설치·weather lint/type/test/build 및 2인 리뷰를 기록한다.
 
 ## 검증 기록
 
 실행 결과는 journal·리뷰 기록에 남긴다. 다른 소비자의 채택은 `NOT_RUN(후속 이관)`.
+
+코드·단위·소비자 live 검증과 2인 review는 완료했다.
+[최종 리뷰](../reviews/adversarial/2026-10-04-dagster-recovery.md),
+[PR #24](https://github.com/digitie/kor-travel-common/pull/24),
+[weather PR #72](https://github.com/digitie/kor-travel-weather/pull/72)에 증거를 보존한다.
+IN_PROGRESS는 외부 운영 배포/채택까지 완료로 세지 않기 위해 유지한다.

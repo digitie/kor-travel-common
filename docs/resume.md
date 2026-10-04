@@ -1,16 +1,16 @@
 # 현재 상태와 다음 한 작업
 
-현재 상태의 정본이다. 정책은 [AGENTS](../AGENTS.md), 문서 선택은 [문서 지도](README.md), 상세 상태·선행은 [task 원장](tasks.md)을 따른다. 마지막 갱신: 2026-09-29, Codex.
+현재 상태의 정본이다. 정책은 [AGENTS](../AGENTS.md), 문서 선택은 [문서 지도](README.md), 상세 상태·선행은 [task 원장](tasks.md)을 따른다. 마지막 갱신: 2026-10-04, Codex.
 
 ## 현재 상태
 
-2026-10-04 사용자 요청: [T-319](tasks/T-319-dagster-recovery.md) Python 실행 복구와 [T-216](tasks/T-216-dagster-operations.md) 공용 Dagster UI 후보를 구현·검증 중이다. weather는 별도 소비자 PR로 연동한다. 다른 소비자 확산과 운영 배포는 미실행이다.
+2026-10-04 사용자 요청: [T-319](tasks/T-319-dagster-recovery.md) Python 실행 복구와 [T-216](tasks/T-216-dagster-operations.md) 공용 Dagster UI 코드·2인 리뷰·live UI·회귀·코드 후보 CI가 완료되었다. [최종 리뷰](reviews/adversarial/2026-10-04-dagster-recovery.md), common PR #24와 weather PR #72에 증거를 보존했다. 다른 소비자 확산과 운영 배포는 미실행이다.
 
 사용자 요청 T-215 공용 로그인·메뉴·6개 실제 프로젝트 테마 예시를 구현했다. 최신 React/Next의 WSL 빌드·단위·tarball 설치·브라우저 검증, 두 독립 post-fix 리뷰와 후보 CI가 통과했다. [최종 리뷰](reviews/adversarial/2026-09-29-t215-wsl-post-fix.md)와 [PR #23](https://github.com/digitie/kor-travel-common/pull/23)이 evidence다. 기존 T-301 작업 checkout과 PR #22는 보존했다.
 
 ## 다음 한 작업
 
-T-319·T-216의 검증과 독립 2인 리뷰를 완료하고 common·weather draft PR을 만든다. T-301 원본 변경은 보존한다.
+common #24·weather #72의 evidence-only closure CI를 확인하고 순서대로 PR merge한다. 이후 운영 담당자가 Dagster 적용 가이드의 migration·실제 instance 설정·launcher 복구를 검증한다. T-301 원본 변경은 보존한다.
 
 ## 시작 파일과 검증
 

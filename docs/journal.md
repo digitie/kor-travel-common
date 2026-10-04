@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-10-04 (Codex, T-319·T-216 review·live·회귀 closure)
+
+[최종 리뷰](reviews/adversarial/2026-10-04-dagster-recovery.md)에 독립 2인 원본/post-fix/final delta와 8 finding FIXED를 보존했다. [실행 증거](reviews/adversarial/evidence/2026-10-04-dagster-live-e2e.md)는 weather Python345/frontend64, common Python21/UI34/floor21, clean tarball build, 실제 production-build UI 로그인·메뉴·실패상세·상한·모바일·Dagster 중단/복원 재시도 PASS를 기록한다. 합성192000fact tracemalloc 피크446740271→12766381bytes이며 운영 RSS가 아니다. [적용 가이드](runbooks/dagster-adoption.md)를 사용자 요청대로 PR에 포함했다.
+
+최종 코드 common ed47e9a/weather74882e1의 GitHub CI가 전부 PASS다. evidence-only closure PR CI 확인 후 common#24를 merge commit으로 먼저 병합하여 weather의 고정 Python SHA를 main에서 보존하고 weather#72를 병합한다. registry 발행·운영 배포·다른 앱 실제 이관은 NOT_RUN이다. 원본 common T-301 미커밋 변경은 보존했다. 상세 task의 IN_PROGRESS는 외부 채택/운영 검증 잔여를 뜻하며 이번 코드/PR 범위가 미구현이라는 뜻이 아니다.
+
 ## 2026-10-04 (Codex, T-319·T-216 실행 복구와 공용 운영 UI 후보)
 
 사용자 요청으로 최신 weather·transport·map·pinvi·geo의 Dagster 정책을 비교했다. common 원본의 사용자 미커밋 T-301 변경은 보존하고 main `be7f21f`에서 별도 worktree를 만들었다. Python 공통은 정책 태그·예약 합침·주입형 회수 sensor·동기 deadline을 제공한다. weather의 DB 소유권/부분 게시 변경은 weather PR이 소유한다. 사용자 추가 요청에 따라 weather Dagster 운영 화면을 공용 UI `0.1.0-dev.1`로 추출했고 소비자에 로그인·메뉴도 적용한다.

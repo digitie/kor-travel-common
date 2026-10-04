@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-10-04 | full·post-fix·final delta | [Dagster 복구·메모리·공용 UI](adversarial/2026-10-04-dagster-recovery.md), common ed47e9a/weather74882e1 | A UI·artifact / B recovery·memory | 8 finding FIXED·최종 코드 PASS·live/회귀/코드 CI PASS |
 | 2026-09-29 | full WSL post-fix | [T-215 최종 판정](adversarial/2026-09-29-t215-wsl-post-fix.md), `b4a3a77` | A 인증·신뢰 경계 / B UI·패키징·CI | **A/B 코드 PASS, 설치·후보 CI 통과, 열린 finding 0** |
 | 2026-09-29 | full WSL | [T-215 WSL 정식 리뷰](adversarial/2026-09-29-t215-wsl.md), `dd084f1` | A 인증·라우트 / B UI·패키징·CI | 코드 A/B PASS, merge BLOCK: 동적 tarball CI integrity 수정 필요 |
 | 2026-09-29 | 파일 스냅샷 보조·delta | [T-215 로그인·메뉴](adversarial/2026-09-29-t215.md), SHA256 고정 | A 보안·라우팅 / B React·접근성·배포 | 코드 finding FIXED, **A/B merge BLOCK**, 최신 런타임·lock·정식 commit gate 미완료 |

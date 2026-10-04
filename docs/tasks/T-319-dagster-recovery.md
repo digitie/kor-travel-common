@@ -27,14 +27,20 @@ Python 공통 코드를 요청했다. 문서의 단계별 Python task 순서보�
 
 ## 수용 기준
 
-- [ ] metadata 장애 시 중복 예약을 만들지 않으며 외부 location의 동명 job은 막지 않는다.
-- [ ] 멱등성을 명시하지 않은 job은 native 자동 재시도를 상속하지 않는다.
-- [ ] deadline 뒤 client 재사용 금지 계약과 daemon/instance 설정 선행을 문서화한다.
-- [ ] wheel에서 core-only import·dagster extra·테스트가 동작한다.
-- [ ] 두 독립 reviewer가 동일 commit 기준선과 post-fix를 검토한다.
+- [x] metadata 장애 시 중복 예약을 만들지 않으며 외부 location의 동명 job은 막지 않는다.
+- [x] 멱등성을 명시하지 않은 job은 native 자동 재시도를 상속하지 않는다.
+- [x] deadline 뒤 client 재사용 금지 계약과 daemon/instance 설정 선행을 문서화한다.
+- [x] wheel에서 core-only import·dagster extra·테스트가 동작한다.
+- [x] 두 독립 reviewer가 동일 commit 기준선과 post-fix를 검토한다.
 
 ## 검증 기록
 
 실행 결과와 리뷰 disposition은 같은 PR의 journal·리뷰 기록에 남긴다.
 운영 장애 주입·shared plane 배포: `NOT_RUN(이번 작업은 코드 보강·UI 검증·PR 병합 범위)`.
 소비자 구현 안내는 [Dagster 적용 가이드](../runbooks/dagster-adoption.md)에 둔다.
+
+코드·단위·소비자 live 검증과 2인 review는 완료했다.
+[최종 리뷰](../reviews/adversarial/2026-10-04-dagster-recovery.md),
+[PR #24](https://github.com/digitie/kor-travel-common/pull/24),
+[weather PR #72](https://github.com/digitie/kor-travel-weather/pull/72)에 증거를 보존한다.
+IN_PROGRESS는 외부 운영 배포/채택까지 완료로 세지 않기 위해 유지한다.
