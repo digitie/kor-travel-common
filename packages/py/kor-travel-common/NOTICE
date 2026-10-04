@@ -1,0 +1,25 @@
+kor-travel-common
+Copyright (C) 2026 Youn-sok Choi (digitie)
+SPDX-License-Identifier: GPL-3.0-or-later
+
+이 프로그램의 자체 작성 부분은 GNU 일반 공중 사용 허가서 버전 3 또는
+(수령자의 선택에 따라) 그 이후 버전에 따라 재배포·수정할 수 있다. 전문은
+루트 LICENSE에 있다. GPLv3 7조의 추가 허가는 부여하지 않는다.
+
+원천 고지는 재선언으로 지우지 않는다. templates/agent-config/의 geo 설정
+6개는 GPL-3.0-only이며 파일별 범위와 수정 고지는 해당 디렉터리 README.md와
+PROVENANCE.md를 따른다. 이는 추가 허가가 아니라 기존 원천 조건의 보존이다.
+서드파티 고지·원문 사본은 THIRD_PARTY_NOTICES.md와 LICENSES/에 있다.
+
+버전: 패키지별 CHANGELOG.md와 Git 태그(tokens-vX.Y.Z, ui-vX.Y.Z, py-vX.Y.Z)를
+따른다. 현재 패키지는 미발행 상태다. 배포 시 LICENSE·NOTICE·
+THIRD_PARTY_NOTICES.md와 그 문서가 참조하는 해당 LICENSES/ 사본을 동봉한다.
+
+소스·연락처:
+  https://github.com/digitie/kor-travel-common
+  https://github.com/digitie/kor-travel-common/issues
+  저작권자: Youn-sok Choi (GitHub: digitie)
+
+AI 보조 기여물은 이를 지시·수용한 권리자가 배포한다. 타인의 원천 조건은
+유지하며 기여 조건은 CONTRIBUTING.md, 라이선스 규칙은
+docs/standards/licensing.md를 따른다.

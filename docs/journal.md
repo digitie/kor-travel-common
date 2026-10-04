@@ -2,6 +2,12 @@
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 
+## 2026-10-04 (Codex, T-319·T-216 실행 복구와 공용 운영 UI 후보)
+
+사용자 요청으로 최신 weather·transport·map·pinvi·geo의 Dagster 정책을 비교했다. common 원본의 사용자 미커밋 T-301 변경은 보존하고 main `be7f21f`에서 별도 worktree를 만들었다. Python 공통은 정책 태그·예약 합침·주입형 회수 sensor·동기 deadline을 제공한다. weather의 DB 소유권/부분 게시 변경은 weather PR이 소유한다. 사용자 추가 요청에 따라 weather Dagster 운영 화면을 공용 UI `0.1.0-dev.1`로 추출했고 소비자에 로그인·메뉴도 적용한다.
+
+검증은 WSL Ubuntu-26.04, Python 3.13에서 수행한다. Python 단위·UI 단위·tarball·weather 소비자 회귀·빌드의 최종 결과와 2인 리뷰는 후속 closure 기록으로 남긴다. 운영 shared plane 교체·장애 주입·다른 소비자 채택은 NOT_RUN이다. CodeGraph는 사용하지 않고 신규 심볼·공개 export의 영향도를 rg·TypeScript·소비자 빌드로 추적했다.
+
 ## 2026-09-29 (Codex, T-215 WSL 검증·post-fix PASS)
 
 사용자 로컬 권한 변경 후 WSL Ubuntu-26.04에서 설치·Git 쓰기·최신 React/Next 실행을 확인했다. 원 main에서 별도 branch로 T-215만 분리하고 사용자 T-301 변경과 PR #22를 보존했다. 로그인·실제 리모트 메뉴20/8/7/15/12/9개·프로젝트 색상 예시를 최신 런타임으로 다시 촬영했다. 소스 import·Tailwind 해석·문서 title을 실제 빌드와 브라우저에서 수정했다.

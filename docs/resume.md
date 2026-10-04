@@ -4,11 +4,13 @@
 
 ## 현재 상태
 
+2026-10-04 사용자 요청: [T-319](tasks/T-319-dagster-recovery.md) Python 실행 복구와 [T-216](tasks/T-216-dagster-operations.md) 공용 Dagster UI 후보를 구현·검증 중이다. weather는 별도 소비자 PR로 연동한다. 다른 소비자 확산과 운영 배포는 미실행이다.
+
 사용자 요청 T-215 공용 로그인·메뉴·6개 실제 프로젝트 테마 예시를 구현했다. 최신 React/Next의 WSL 빌드·단위·tarball 설치·브라우저 검증, 두 독립 post-fix 리뷰와 후보 CI가 통과했다. [최종 리뷰](reviews/adversarial/2026-09-29-t215-wsl-post-fix.md)와 [PR #23](https://github.com/digitie/kor-travel-common/pull/23)이 evidence다. 기존 T-301 작업 checkout과 PR #22는 보존했다.
 
 ## 다음 한 작업
 
-T-215 PR의 최종 closure CI·merge 결과를 확인한 뒤 후속 요청을 기다린다. 소비자 채택과 별도 T-301 PR을 자동으로 진행하지 않는다.
+T-319·T-216의 검증과 독립 2인 리뷰를 완료하고 common·weather draft PR을 만든다. T-301 원본 변경은 보존한다.
 
 ## 시작 파일과 검증
 
