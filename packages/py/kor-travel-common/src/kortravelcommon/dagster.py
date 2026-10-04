@@ -7,16 +7,23 @@ from dataclasses import dataclass
 from typing import Any
 
 from dagster import (
+    DagsterEventType,
     DagsterRunStatus,
     DefaultSensorStatus,
+    RunRequest,
     RunsFilter,
     ScheduleDefinition,
     SkipReason,
+    run_failure_sensor,
     sensor,
 )
 
+from kortravelcommon.deadline import call_with_deadline
+
 PROJECT_TAG = "kortravelcommon/project"
 JOB_TAG = "kortravelcommon/job"
+INFRA_RETRY_ATTEMPT_TAG = "kortravelcommon/infra_retry_attempt"
+INFRA_RETRY_PARENT_TAG = "kortravelcommon/infra_retry_parent"
 ACTIVE_STATUSES = [
     DagsterRunStatus.QUEUED,
     DagsterRunStatus.STARTING,
@@ -116,3 +123,96 @@ def reconciliation_sensor(
         return SkipReason(f"중단된 실행 기록 {recovered}건 회수")
 
     return reconcile_tick
+
+
+def infrastructure_retry_sensor(
+    *, name: str, project: str, location_name: str, job: Any, policy: RecoveryPolicy
+):
+    """native retry가 꺼진 instance에서 멱등 job의 worker 장애만 제한적으로 재예약한다.
+
+    실행 종료 이벤트의 명시적 인프라 사유만 허용한다. step/provider 실패, timeout에
+    의한 취소, 원인 불명은 제외한다. native retry가 켜지면 이 sensor는 위임한다.
+    run key는 이벤트 재평가를 중복 제거하며, 동시 수동 실행은 JOB_TAG queue limit과
+    소비자 DB lease가 별도로 보호해야 한다. partition job은 이 factory의 대상이 아니다.
+    """
+    if not policy.idempotent or not policy.infrastructure_retries:
+        raise ValueError("인프라 재시도 sensor는 재시도가 허용된 멱등 job에만 적용합니다.")
+    if job.partitions_def is not None:
+        raise ValueError("partition job은 전용 재시도 정책이 필요합니다.")
+
+    def retry_failed_run(context):
+        instance = context.instance
+        if instance.run_retries_enabled:
+            return SkipReason("native run retry에 위임합니다.")
+        run = context.dagster_run
+        if run.job_name != job.name or run.status != DagsterRunStatus.FAILURE:
+            return SkipReason("대상 job의 실패 이벤트가 아닙니다.")
+        origin = run.remote_job_origin
+        location = (
+            origin.repository_origin.code_location_origin.location_name
+            if origin is not None
+            else run.tags.get("dagster/code_location")
+        )
+        if location != location_name or run.tags.get(PROJECT_TAG) != project:
+            return SkipReason("다른 project/location의 실행은 재시도하지 않습니다.")
+        reason = getattr(context.failure_event.event_specific_data, "failure_reason", None)
+        if getattr(reason, "value", None) not in {
+            "UNEXPECTED_TERMINATION",
+            "START_TIMEOUT",
+            "RUN_WORKER_RESTART",
+        }:
+            return SkipReason("명시적인 worker 인프라 장애만 재시도합니다.")
+        # 인프라 종료 전에 provider/step 실패가 있었으면 같은 호출을 반복하지 않는다.
+        if instance.get_records_for_run(
+            run_id=run.run_id, of_type=DagsterEventType.STEP_FAILURE, limit=1
+        ).records:
+            return SkipReason("step 실패가 기록되어 자동 재시도하지 않습니다.")
+        attempt = run.tags.get(INFRA_RETRY_ATTEMPT_TAG, "0")
+        if not attempt.isascii() or not attempt.isdecimal() or len(attempt) > 6:
+            return SkipReason("재시도 횟수가 유효하지 않습니다.")
+        next_attempt = int(attempt) + 1
+        if next_attempt > policy.infrastructure_retries:
+            return SkipReason("인프라 재시도 상한에 도달했습니다.")
+        if has_active_run(
+            instance, job_name=job.name, project=project, location_name=location_name
+        ):
+            return SkipReason("같은 job의 실행이 남아 있어 재시도를 합칩니다.")
+        # sensor/예약 identity를 새 sensor가 소유한다. 과거 native retry lineage도 섞지 않는다.
+        tags = {
+            key: value
+            for key, value in run.tags.items()
+            if key
+            not in {
+                "dagster/sensor_name",
+                "dagster/schedule_name",
+                "dagster/run_key",
+                "dagster/root_run_id",
+                "dagster/parent_run_id",
+                "dagster/retry_number",
+            }
+        }
+        tags.update(policy.tags(project=project, job_name=job.name))
+        tags.update(
+            {
+                "dagster/code_location": location_name,
+                INFRA_RETRY_ATTEMPT_TAG: str(next_attempt),
+                INFRA_RETRY_PARENT_TAG: run.run_id,
+            }
+        )
+        return RunRequest(
+            run_key=f"{project}/infra/{run.run_id}/{next_attempt}",
+            run_config=run.run_config,
+            tags=tags,
+        )
+
+    @run_failure_sensor(
+        name=name,
+        monitored_jobs=[job],
+        request_job=job,
+        minimum_interval_seconds=60,
+        default_status=DefaultSensorStatus.RUNNING,
+    )
+    def retry_tick(context):
+        return call_with_deadline(lambda: retry_failed_run(context), timeout_seconds=10)
+
+    return retry_tick

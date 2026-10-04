@@ -118,6 +118,8 @@ except DeadlineExceeded:
 
 대기만 제한하며 daemon thread를 강제로 종료하지 않는다. timeout 뒤 동일 client를 재사용하거나
 close하지 않는다. async client는 제공자의 public timeout/cancellation 계약을 사용한다.
+아직 종료하지 않은 동기 호출은 프로세스당 4개로 제한한다. timeout 뒤에도 실제 종료까지
+slot을 점유하며, 용량 부족은 `DeadlineExceeded`로 전달한다. 확인 실패를 정상/빈 큐로 바꾸지 않는다.
 worker process 회수는 run monitoring/launcher가 소유하며, daemon/code server 자체 중단은
 서비스 관리자의 restart/healthcheck가 필요하다. OS process의 실제 종료도 운영에서 확인한다.
 
@@ -150,7 +152,7 @@ worker process 회수는 run monitoring/launcher가 소유하며, daemon/code se
 
 ## 8. Transport 채택 사례 (2026-10-04)
 
-Weather PR #72와 common PR #24의 Python 코어를 transport가 commit `090f984`로 고정하여 사용한다.
+Weather PR #72와 common PR #24의 Python 코어 및 PR #25의 보강 코드를 transport가 고정하여 사용한다.
 도메인 `CollectionRun` SQL은 transport에 둔다. `0024` migration의 `orchestrator_run_id`·`heartbeat_at`을
 추가하고 전용 collector session의 flush/commit에서 status·owner를 잠가 늦은 게시를 거절한다.
 부분 commit은 보존하며 terminal Dagster 실행의 running 기록만 회수한다. metadata 조회 실패는
@@ -171,3 +173,30 @@ Transport는 최근 30건 외 진행 중 목록을 별도로 합쳐 중복 제�
 `retry_on_asset_or_op_failure=false`, project/job tag concurrency를 별도로 확인해야 한다.
 code-server의 YAML만 바꾸고 shared instance가 바뀌었다고 보고하면 안 된다. candidate의 격리
 instance 결과와 운영 shared instance의 활성 설정/worker 종료 결과를 evidence에서 구분한다.
+
+### native retry가 비활성화된 공용 instance
+
+Transport의 실제 shared instance는 monitoring만 활성화되어 있었다. job의 `dagster/max_retries`
+태그는 instance의 native retry를 켜지 않는다. 이때 다음 fallback sensor를 사용한다.
+
+```python
+from kortravelcommon.dagster import RecoveryPolicy, infrastructure_retry_sensor
+
+worker_retry = infrastructure_retry_sensor(
+    name="transport_infra_retry_airport_collection_job",
+    project="transport", location_name="kor-travel-transport", job=airport_collection_job,
+    policy=RecoveryPolicy(14400, idempotent=True, infrastructure_retries=1),
+)
+# 소비자의 Definitions(sensors=[worker_retry, ...])에 등록한다.
+```
+
+`UNEXPECTED_TERMINATION`, `START_TIMEOUT`, `RUN_WORKER_RESTART` 이벤트만 허용한다.
+같은 run에 step 실패가 있으면 제외하며, provider 실패·취소·원인 불명은 재예약하지 않는다.
+project/location을 함께 검증하고, 실행 중인 같은 job은 합친다. 재시도 횟수와 부모 run ID를
+공통 태그에 기록하며 결정적인 run key로 이벤트 재평가를 중복 제거한다. run config를 보존해
+전체 멱등 job을 다시 실행한다. partition job은 지원하지 않는다. 조회는 10초/동시 4개 상한이며
+metadata 장애는 sensor tick 실패로 전달한다. native retry 활성화 시 fallback은 위임한다.
+
+sensor 확인과 다른 수동/예약 발화는 원자적이지 않다. shared coordinator의 job limit과 소비자
+DB lease를 함께 적용한다. DB lease는 중복 provider 호출을 막지만 queued run의 메모리 제한을
+대신하지 않는다. 같은 instance에서 운영 daemon과 sensor가 실제 실행되는지도 배포 후 확인한다.

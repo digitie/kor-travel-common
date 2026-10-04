@@ -4,9 +4,27 @@ import threading
 from types import SimpleNamespace
 
 import pytest
-from dagster import DagsterInstance, DagsterRunStatus, build_schedule_context, job, op
+from dagster import (
+    DagsterEvent,
+    DagsterEventType,
+    DagsterInstance,
+    DagsterRunStatus,
+    RunRequest,
+    SkipReason,
+    build_run_status_sensor_context,
+    build_schedule_context,
+    job,
+    op,
+)
+from dagster._core.events import JobFailureData, RunFailureReason
 
-from kortravelcommon.dagster import RecoveryPolicy, coalescing_schedule
+from kortravelcommon.dagster import (
+    INFRA_RETRY_ATTEMPT_TAG,
+    INFRA_RETRY_PARENT_TAG,
+    RecoveryPolicy,
+    coalescing_schedule,
+    infrastructure_retry_sensor,
+)
 from kortravelcommon.deadline import DeadlineExceeded, call_with_deadline
 
 
@@ -138,3 +156,151 @@ def test_consumer_predicate_is_preserved():
     )
     with DagsterInstance.local_temp() as instance:
         assert schedule.evaluate_tick(build_schedule_context(instance=instance)).skip_message
+
+
+def retry_definition():
+    return infrastructure_retry_sensor(
+        name="test_infra_retry",
+        project="test",
+        location_name="test",
+        job=sample,
+        policy=RecoveryPolicy(300, idempotent=True, infrastructure_retries=1),
+    )
+
+
+def failure_context(instance, reason=RunFailureReason.UNEXPECTED_TERMINATION, **tags):
+    run = instance.create_run_for_job(
+        sample,
+        status=DagsterRunStatus.FAILURE,
+        run_config={"ops": {"noop": {}}},
+        tags={**sample.tags, "dagster/code_location": "test", **tags},
+    )
+    event = DagsterEvent(
+        event_type_value=DagsterEventType.RUN_FAILURE.value,
+        job_name=sample.name,
+        event_specific_data=JobFailureData(None, failure_reason=reason),
+    )
+    return build_run_status_sensor_context(
+        sensor_name="test_infra_retry",
+        dagster_event=event,
+        dagster_instance=instance,
+        dagster_run=run,
+    )
+
+
+@pytest.mark.parametrize(
+    "reason",
+    [
+        RunFailureReason.UNEXPECTED_TERMINATION,
+        RunFailureReason.START_TIMEOUT,
+        RunFailureReason.RUN_WORKER_RESTART,
+    ],
+)
+def test_infra_retry_preserves_config_and_deduplicates_event_with_one_attempt(reason):
+    with DagsterInstance.local_temp() as instance:
+        context = failure_context(instance, reason, **{"dagster/schedule_name": "old"})
+        retry = retry_definition()
+        request = retry(context)
+        assert isinstance(request, RunRequest)
+        assert request.run_config == context.dagster_run.run_config
+        assert request.tags[INFRA_RETRY_ATTEMPT_TAG] == "1"
+        assert request.tags[INFRA_RETRY_PARENT_TAG] == context.dagster_run.run_id
+        assert "dagster/schedule_name" not in request.tags
+        assert retry(context).run_key == request.run_key
+        assert isinstance(retry(failure_context(instance, **request.tags)), SkipReason)
+
+
+@pytest.mark.parametrize(
+    "reason",
+    [
+        RunFailureReason.STEP_FAILURE,
+        RunFailureReason.RUN_EXCEPTION,
+        RunFailureReason.JOB_INITIALIZATION_FAILURE,
+        RunFailureReason.UNKNOWN,
+        None,
+    ],
+)
+def test_provider_or_unknown_failure_is_not_retried(reason):
+    with DagsterInstance.local_temp() as instance:
+        assert isinstance(retry_definition()(failure_context(instance, reason)), SkipReason)
+
+
+@pytest.mark.parametrize(
+    "tags",
+    [
+        {"dagster/code_location": "foreign"},
+        {"kortravelcommon/project": "foreign"},
+        {INFRA_RETRY_ATTEMPT_TAG: "invalid"},
+        {INFRA_RETRY_ATTEMPT_TAG: "-1"},
+        {INFRA_RETRY_ATTEMPT_TAG: "99999999999999"},
+        {INFRA_RETRY_ATTEMPT_TAG: "١"},
+    ],
+)
+def test_retry_scope_and_malformed_budget_fail_closed(tags):
+    with DagsterInstance.local_temp() as instance:
+        assert isinstance(retry_definition()(failure_context(instance, **tags)), SkipReason)
+
+
+def test_native_retry_and_active_job_prevent_fallback_retry(monkeypatch):
+    with DagsterInstance.local_temp() as instance:
+        context = failure_context(instance)
+        monkeypatch.setattr(DagsterInstance, "run_retries_enabled", property(lambda self: True))
+        assert isinstance(retry_definition()(context), SkipReason)
+        monkeypatch.setattr(DagsterInstance, "run_retries_enabled", property(lambda self: False))
+        instance.create_run_for_job(sample, status=DagsterRunStatus.STARTED, tags=sample.tags)
+        assert isinstance(retry_definition()(context), SkipReason)
+
+
+def test_infra_failure_after_step_failure_is_not_retried(monkeypatch):
+    with DagsterInstance.local_temp() as instance:
+        context = failure_context(instance)
+        monkeypatch.setattr(
+            instance, "get_records_for_run", lambda **kw: SimpleNamespace(records=[object()])
+        )
+        assert isinstance(retry_definition()(context), SkipReason)
+
+
+def test_retry_requires_explicit_idempotent_policy():
+    with pytest.raises(ValueError, match="멱등"):
+        infrastructure_retry_sensor(
+            name="unsafe",
+            project="test",
+            location_name="test",
+            job=sample,
+            policy=RecoveryPolicy(300),
+        )
+
+
+def test_timed_out_calls_keep_bounded_capacity_until_they_finish(monkeypatch):
+    import kortravelcommon.deadline as deadline_module
+
+    release = threading.Event()
+    exited = threading.Event()
+    monkeypatch.setattr(deadline_module, "_CALL_SLOTS", threading.BoundedSemaphore(1))
+
+    def blocked():
+        try:
+            release.wait(5)
+        finally:
+            exited.set()
+
+    try:
+        with pytest.raises(DeadlineExceeded):
+            call_with_deadline(blocked, timeout_seconds=0.01)
+        with pytest.raises(DeadlineExceeded, match="상한"):
+            call_with_deadline(
+                lambda: pytest.fail("용량 부족이면 호출하지 않는다"), timeout_seconds=1
+            )
+    finally:
+        release.set()
+        assert exited.wait(1)
+
+
+def test_retry_storage_failure_is_not_interpreted_as_an_empty_queue(monkeypatch):
+    with DagsterInstance.local_temp() as instance:
+        context = failure_context(instance)
+        monkeypatch.setattr(
+            instance, "get_runs", lambda **kw: (_ for _ in ()).throw(ConnectionError("offline"))
+        )
+        with pytest.raises(ConnectionError):
+            retry_definition()(context)
