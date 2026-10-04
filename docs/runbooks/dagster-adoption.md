@@ -146,3 +146,28 @@ worker process 회수는 run monitoring/launcher가 소유하며, daemon/code se
 합성 Python allocation과 운영 전체 RSS는 구분한다. 운영 배포 뒤 launcher crash/hard hang/
 취소/native retry child 실행과 shared host RSS를 확인한다. 실행하지 않은 배포 검증은
 `NOT_RUN`으로 남긴다. 독립 2인 리뷰와 post-fix 재검토 evidence를 PR에 연결한다.
+
+
+## 8. Transport 채택 사례 (2026-10-04)
+
+Weather PR #72와 common PR #24의 Python 코어를 transport가 commit `090f984`로 고정하여 사용한다.
+도메인 `CollectionRun` SQL은 transport에 둔다. `0024` migration의 `orchestrator_run_id`·`heartbeat_at`을
+추가하고 전용 collector session의 flush/commit에서 status·owner를 잠가 늦은 게시를 거절한다.
+부분 commit은 보존하며 terminal Dagster 실행의 running 기록만 회수한다. metadata 조회 실패는
+죽은 worker의 근거가 아니며, 없는 run은 4시간 실행 상한보다 긴 5시간 grace와 heartbeat CAS를 거친다.
+
+수집 정책은 앱이 결정한다. Transport의 KRIC는 실패·강제 종료도 마지막 시도부터 48시간을 지키며,
+버스 기준정보는 성공 후 72시간, 철도 기준정보는 성공 후 48시간을 보호한다. 유가·장소의 과금과
+provider receipt를 generic retry로 우회하지 않는다. 자동 인프라 재시도는 멱등 공항·고속도로·휴게소
+기준정보에 1회만 허용하며 provider 실패는 `Failure(allow_retries=False)`와 run tag 정책으로 막는다.
+
+UI `0.1.0-dev.2`는 5분·4시간·8시간 cron, 키보드 진입 가능한 두 표, terminal 경과 시간을 제공한다.
+Transport는 최근 30건 외 진행 중 목록을 별도로 합쳐 중복 제거하고 job의 `dagster/max_runtime`을
+공통 snapshot에 전달한다. 실패 event는 location tag와 UUID를 함께 제한하여 페이지를 넘겨 읽는다.
+작업별 GraphQL·본문 크기·시간 상한과 인증·Origin은 소비자가 유지한다.
+
+**실제 instance**: transport의 `backend/dagster_home/dagster.yaml`은 전용 instance용이다.
+공용 daemon 운영에서는 Manager가 소유한 instance YAML의 monitoring, `run_retries.enabled`,
+`retry_on_asset_or_op_failure=false`, project/job tag concurrency를 별도로 확인해야 한다.
+code-server의 YAML만 바꾸고 shared instance가 바뀌었다고 보고하면 안 된다. candidate의 격리
+instance 결과와 운영 shared instance의 활성 설정/worker 종료 결과를 evidence에서 구분한다.

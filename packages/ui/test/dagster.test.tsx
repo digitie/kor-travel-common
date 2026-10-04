@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { expect, test, vi } from "vitest";
 import { DagsterOperations } from "../src/dagster-operations.js";
 import type { DagsterSnapshot } from "../src/dagster-model.js";
-import { isStalledRun } from "../src/dagster-model.js";
+import { describeCron, isStalledRun, runElapsedSeconds } from "../src/dagster-model.js";
 import { readFileSync } from "node:fs";
 
 const snapshot: DagsterSnapshot = {
@@ -17,10 +17,27 @@ const snapshot: DagsterSnapshot = {
     endTime: 2, errorMessage: "<script>failure</script>" }],
 };
 
+test("종료된 실행의 경과 시간과 유효하지 않은 조회 시각을 구분한다", () => {
+  expect(runElapsedSeconds(snapshot.runs[0]!, NaN)).toBe(1);
+  expect(isStalledRun({ ...snapshot.runs[0]!, endTime: 10000 }, 20000)).toBe(false);
+  expect(runElapsedSeconds({ ...snapshot.runs[0]!, status: "STARTED", endTime: null }, NaN)).toBeNull();
+});
+
+test.each([
+  ["*/5 * * * *", "5분마다"], ["45 */4 * * *", "4시간마다 45분"],
+  ["0 */8 * * *", "8시간마다 0분"], ["*/0 * * * *", "*/0 * * * *"],
+  ["75 */4 * * *", "75 */4 * * *"], ["0 25 * * *", "0 25 * * *"],
+  ["*/7 * * * *", "*/7 * * * *"],
+])("소비자 주기 %s를 정확한 한국어 또는 원본으로 표시한다", (cron, label) => {
+  expect(describeCron(cron)).toBe(label);
+});
+
 test("주입된 앱 label·URL로 실패와 스케줄을 표시한다", async () => {
   render(<DagsterOperations snapshot={snapshot} onRefresh={vi.fn()} jobLabel={() => "교통 수집"}
     runUrl={id => `/dagster/runs/${id}`} scheduleUrl={name => `/dagster/schedules/${name}`} />);
   expect(screen.getByText("<script>failure</script>")).toBeVisible();
+  expect(screen.getByRole("region", { name: "최근 Dagster 실행 표" })).toHaveAttribute("tabindex", "0");
+  expect(screen.getByRole("region", { name: "Dagster 스케줄 표" })).toHaveAttribute("tabindex", "0");
   expect(screen.getByRole("link", { name: /Dagster에서 열기/ })).toHaveAttribute("href", "/dagster/runs/test-run");
   await userEvent.click(screen.getByRole("button", { name: "교통 수집" }));
   expect(screen.getByRole("button", { name: "교통 수집" })).toHaveAttribute("aria-expanded", "true");

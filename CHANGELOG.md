@@ -8,6 +8,10 @@
 
 ### 실행 복구와 운영 UI 개발 후보
 
+- UI `0.1.0-dev.2`: transport 채택 시 필요한 5분/4시간/8시간 주기를 한국어로 표시한다.
+  하루/시간 경계에서 균등하지 않거나 잘못된 cron은 추측하지 않고 원본을 유지한다.
+  실행·스케줄 표의 키보드 진입과 종료된 실행의 경과 시간도 보존한다.
+
 - Python `kortravelcommon.dagster`·`deadline`: 멱등 job의 제한된 인프라 재시도, 중복 예약 합침, 주입형 lease 회수 sensor와 호출 대기 상한.
 - UI `0.1.0-dev.1`: weather에서 추출한 `DagsterOperations`, snapshot 타입/표시 함수와 범위가 한정된 CSS. 앱이 인증·조회·URL·label을 주입한다.
 

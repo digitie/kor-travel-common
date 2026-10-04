@@ -10,7 +10,7 @@
 
 ## 다음 한 작업
 
-common #24·weather #72의 evidence-only closure CI를 확인하고 순서대로 PR merge한다. 이후 운영 담당자가 Dagster 적용 가이드의 migration·실제 instance 설정·launcher 복구를 검증한다. T-301 원본 변경은 보존한다.
+common #24·weather #72는 main에 머지되었다. 현재 사용자 요청에 따라 transport 채택을 검증 중이다. UI `0.1.0-dev.2` 후속 후보의 CI·독립 리뷰·n150 live UI를 완료하고 common과 transport PR을 머지한다. T-301 원본 변경은 보존한다.
 
 ## 시작 파일과 검증
 
