@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
-# Origin: kor-travel-weather@5da6e15 packages/kor-travel-weather-dagster/src/kortravelweather_dagster/external_weather.py
+# Origin: kor-travel-weather@5da6e15 packages/kor-travel-weather-dagster/src/kortravelweather_dagster/external_weather.py  # noqa: E501
 # Modified: 2026-10-04 — provider 의존성을 제거하고 유한한 대기 상한과 오류 계약으로 추출
 """동기 호출의 대기 상한. 중단된 호출이 있는 객체는 재사용하지 않는다."""
 

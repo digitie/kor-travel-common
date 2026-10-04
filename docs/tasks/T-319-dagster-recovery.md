@@ -36,4 +36,5 @@ Python 공통 코드를 요청했다. 문서의 단계별 Python task 순서보�
 ## 검증 기록
 
 실행 결과와 리뷰 disposition은 같은 PR의 journal·리뷰 기록에 남긴다.
-운영 장애 주입·shared plane 배포: `NOT_RUN(이번 작업은 코드 보강과 draft PR 범위)`.
+운영 장애 주입·shared plane 배포: `NOT_RUN(이번 작업은 코드 보강·UI 검증·PR 병합 범위)`.
+소비자 구현 안내는 [Dagster 적용 가이드](../runbooks/dagster-adoption.md)에 둔다.

@@ -15,8 +15,9 @@ export interface DagsterOperationsProps {
   onRefresh: () => void;
   jobLabel?: (name: string) => string;
   runUrl: (id: string) => string;
-  scheduleUrl: (name: string) => string;
+  scheduleUrl: (name: string, repository: DagsterRepository) => string;
   locationUrl?: string;
+  testId?: string;
 }
 
 function statusClass(status: string | null | undefined) {
@@ -73,7 +74,7 @@ function ScheduleRow({ schedule, expanded, onToggle, jobLabel, dagsterScheduleUr
         <td><span className={`status ${statusClass(schedule.status)}`}>{schedule.status === "RUNNING" ? "사용" : "중지"}</span></td>
       </tr>
       {expanded ? (
-        <tr className="sync-run-detail-row">
+        <tr className="sync-run-detail-row" data-slot="dagster-operations-schedule-detail">
           <td colSpan={3}>
             <div className="sync-run-detail-grid">
               <div><span>실행되는 작업</span><code>{schedule.jobName}</code></div>
@@ -89,10 +90,12 @@ function ScheduleRow({ schedule, expanded, onToggle, jobLabel, dagsterScheduleUr
 }
 
 export function DagsterOperations({ snapshot, error = "", loading = false, onRefresh: load,
-  jobLabel = (name) => name, runUrl, scheduleUrl, locationUrl }: DagsterOperationsProps) {
+  jobLabel = (name) => name, runUrl, scheduleUrl, locationUrl, testId }: DagsterOperationsProps) {
   const [expandedSchedule, setExpandedSchedule] = useState<string | null>(null);
-  const schedules = snapshot?.repositories.flatMap((repository: DagsterRepository) => repository.schedules) ?? [];
-  const healthy = schedules.filter((schedule) => schedule.status === "RUNNING").length;
+  const schedules = snapshot?.repositories.flatMap((repository: DagsterRepository) =>
+    repository.schedules.map(schedule => ({ schedule, repository,
+      identity: JSON.stringify([repository.locationName, repository.name, schedule.name]) }))) ?? [];
+  const healthy = schedules.filter(({ schedule }) => schedule.status === "RUNNING").length;
   const successes = snapshot?.runs.filter((run) => run.status === "SUCCESS").length ?? 0;
   const failures = snapshot?.runs.filter((run) => run.status === "FAILURE").length ?? 0;
   // The snapshot's own fetch time, not the render clock: elapsed durations
@@ -102,42 +105,42 @@ export function DagsterOperations({ snapshot, error = "", loading = false, onRef
   const stalled = snapshot?.runs.filter((run) => isStalledRun(run, nowSeconds)).length ?? 0;
 
   return (
-    <div className="kt-dagster-operations" aria-busy={loading}>
+    <div className="kt-dagster-operations" data-slot="dagster-operations" data-testid={testId} aria-busy={loading}>
       <div className="panel-head">
-        <button type="button" onClick={load} disabled={loading}>새로고침</button>
+        <button data-slot="dagster-operations-refresh" type="button" onClick={load} disabled={loading}>새로고침</button>
         {locationUrl ? <a className="inline-link" href={locationUrl} target="_blank" rel="noreferrer">Dagster UI ↗</a> : null}
       </div>
-      {error ? <div className="error" role="alert">{error} <button type="button" className="ghost" onClick={load} disabled={loading}>다시 시도</button></div> : null}
+      {error ? <div className="error" data-slot="dagster-operations-error" role="alert">{error} <button type="button" className="ghost" onClick={load} disabled={loading}>다시 시도</button></div> : null}
       {stalled > 0 ? (
         <div className="error" role="alert">
           {stalled}개 실행이 실행 상한을 넘었습니다. 아래 목록에서 &quot;정체 의심&quot; 표시를 확인하세요.
         </div>
       ) : null}
-      <section className="ops-grid" aria-label="Dagster 요약">
+      <section className="ops-grid" data-slot="dagster-operations-summary" aria-label="Dagster 요약">
         <div className="panel ops-card"><span>사용 중인 스케줄</span><strong>{snapshot ? `${healthy}/${schedules.length}` : "—"}</strong><small>전체 스케줄 대비</small></div>
         <div className="panel ops-card"><span>최근 성공</span><strong>{snapshot ? successes : "—"}</strong><small>최근 {snapshot?.runs.length ?? 0}건 중</small></div>
         <div className="panel ops-card"><span>최근 실패</span><strong>{snapshot ? failures : "—"}</strong><small>재시도·원인 확인 대상</small></div>
         <div className="panel ops-card"><span>정체된 실행</span><strong className={stalled > 0 ? "warn-text" : undefined}>{snapshot ? stalled : "—"}</strong><small>job별 실행 상한 · 미설정 시 {Math.floor(STALLED_RUN_THRESHOLD_SECONDS / 60)}분</small></div>
       </section>
       <section className="panel dagster-runs">
-        <div className="panel-head"><div><h2>최근 실행 · 마지막 확인 {snapshot ? new Date(snapshot.checkedAt).toLocaleTimeString("ko-KR") : "불러오는 중…"}</h2></div></div>
-        {snapshot?.runs.length ? <div className="table-wrap"><table><thead><tr><th scope="col">상태</th><th scope="col">작업</th><th scope="col">시작</th><th scope="col">종료</th><th scope="col" /></tr></thead><tbody>{snapshot.runs.map((run) => <RunRow key={run.runId} run={run} nowSeconds={nowSeconds} jobLabel={jobLabel} dagsterRunUrl={runUrl} />)}</tbody></table></div> : <div className="empty">{snapshot ? "최근 Dagster 실행이 없습니다." : "실행 기록을 불러오는 중…"}</div>}
+        <div className="panel-head"><div><h2>최근 실행 · 마지막 확인 {snapshot ? new Date(snapshot.checkedAt).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul" }) : "불러오는 중…"}</h2></div></div>
+        {snapshot?.runs.length ? <div className="table-wrap"><table data-slot="dagster-operations-run-table"><thead><tr><th scope="col">상태</th><th scope="col">작업</th><th scope="col">시작</th><th scope="col">종료</th><th scope="col">상세</th></tr></thead><tbody>{snapshot.runs.map((run) => <RunRow key={run.runId} run={run} nowSeconds={nowSeconds} jobLabel={jobLabel} dagsterRunUrl={runUrl} />)}</tbody></table></div> : <div className="empty">{snapshot ? "최근 Dagster 실행이 없습니다." : "실행 기록을 불러오는 중…"}</div>}
       </section>
       <section className="panel">
         <div className="panel-head"><div><h2>스케줄</h2></div></div>
         {schedules.length ? (
           <div className="table-wrap">
-            <table>
+            <table data-slot="dagster-operations-schedule-table">
               <thead><tr><th scope="col">작업</th><th scope="col">주기</th><th scope="col">상태</th></tr></thead>
               <tbody>
-                {schedules.map((schedule) => (
+                {schedules.map(({ schedule, repository, identity }) => (
                   <ScheduleRow
-                    key={schedule.name}
+                    key={identity}
                     schedule={schedule}
                     jobLabel={jobLabel}
-                    dagsterScheduleUrl={scheduleUrl}
-                    expanded={expandedSchedule === schedule.name}
-                    onToggle={() => setExpandedSchedule((current) => (current === schedule.name ? null : schedule.name))}
+                    dagsterScheduleUrl={(name) => scheduleUrl(name, repository)}
+                    expanded={expandedSchedule === identity}
+                    onToggle={() => setExpandedSchedule((current) => (current === identity ? null : identity))}
                   />
                 ))}
               </tbody>

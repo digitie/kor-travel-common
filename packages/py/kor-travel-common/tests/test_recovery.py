@@ -55,6 +55,20 @@ def test_non_idempotent_jobs_never_inherit_retries():
 
 
 @pytest.mark.parametrize(
+    "kwargs",
+    [{"max_runtime_seconds": value} for value in (float("nan"), float("inf"), 1.5, "300", True)]
+    + [
+        {"max_runtime_seconds": 300, "idempotent": "false", "infrastructure_retries": 1},
+        {"max_runtime_seconds": 300, "idempotent": True, "infrastructure_retries": 1.5},
+        {"max_runtime_seconds": 300, "infrastructure_retries": True},
+    ],
+)
+def test_dynamic_policy_values_cannot_disable_safety(kwargs):
+    with pytest.raises(ValueError):
+        RecoveryPolicy(**kwargs)
+
+
+@pytest.mark.parametrize(
     "status", [DagsterRunStatus.STARTING, DagsterRunStatus.STARTED, DagsterRunStatus.CANCELING]
 )
 def test_schedule_coalesces_and_recovers_after_terminal_status(status):

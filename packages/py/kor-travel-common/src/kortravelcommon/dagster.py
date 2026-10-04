@@ -34,6 +34,12 @@ class RecoveryPolicy:
     infrastructure_retries: int = 0
 
     def __post_init__(self) -> None:
+        if (
+            type(self.max_runtime_seconds) is not int
+            or type(self.infrastructure_retries) is not int
+            or type(self.idempotent) is not bool
+        ):
+            raise ValueError("실행/재시도 상한은 정수, 멱등 선언은 boolean이어야 합니다.")
         if self.max_runtime_seconds <= 0 or self.infrastructure_retries < 0:
             raise ValueError("실행 상한은 양수, 재시도 상한은 0 이상이어야 합니다.")
         if self.infrastructure_retries and not self.idempotent:

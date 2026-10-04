@@ -165,7 +165,11 @@
 
 `DagsterOperations`와 `dagster-operations` subpath는 동일 컴포넌트를 제공한다.
 필수 props는 `snapshot`(null 허용), `onRefresh`, `runUrl`, `scheduleUrl`이다.
-선택 props는 `jobLabel`(기본 원문 ID), `locationUrl`, `loading`(false), `error`(빈 문자열)이다.
+선택 props는 `jobLabel`(기본 원문 ID), `locationUrl`, `loading`(false), `error`(빈 문자열),
+`testId`이다. `scheduleUrl(name, repository)`는 location/name 문맥을 제공하며 이름만 받는
+기존 콜백도 사용 가능하다. 확장 상태는 location/repository/schedule 복합 identity로 구분한다.
+슬롯은 `dagster-operations`, `-refresh`, `-error`, `-summary`, `-run-table`,
+`-schedule-table`, `-schedule-detail`이다(뒤의 이름도 `dagster-operations` 접두사를 사용).
 `dagster-model` subpath는 snapshot DTO·상태/주기/경과 표시 함수를 제공하며 React를 import하지 않는다.
 run의 `maxRuntimeSeconds`가 유한한 양수이면 정체 의심 상한에 사용하고, 없는 경우 600초로 판정한다.
 `dagster.css`는 `.kt-dagster-operations` 안에만 적용한다. 원격 조회·GraphQL scope·인증·재실행 권한은

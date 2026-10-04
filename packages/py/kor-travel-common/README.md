@@ -4,6 +4,7 @@
 Dagster가 필요할 때만 `[dagster]` extra를 설치한다. 인증·DB·provider client를 소유하지 않는다.
 이번 후보는 [T-319](../../../docs/tasks/T-319-dagster-recovery.md) 범위이며 다른 Python task의
 구현·릴리스 완료를 뜻하지 않는다.
+소비자 적용 순서는 [Dagster 적용 가이드](../../../docs/runbooks/dagster-adoption.md)를 따른다.
 
 ```python
 from kortravelcommon.dagster import RecoveryPolicy, coalescing_schedule
