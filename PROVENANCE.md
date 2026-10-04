@@ -30,6 +30,11 @@
 | PV-013 | `packages/tokens/tokens.css` | kor-travel-map | `c494e227e010565be295de3f9670b2f7c8c20944` | `packages/kor-travel-map-admin/frontend/src/app/globals.css` | GPL-3.0-or-later | semantic 토큰·다크 값·형태·모션 값을 추출해 `--kt-*` 이름과 공개 패키지 계약에 맞게 재구성. 의미·접근성 규칙은 같은 커밋의 `packages/kor-travel-map-admin/frontend/design.md`와 대조 (2026-09-07) | [T-101](docs/tasks/T-101-tokens-package.md), [디자인 토큰 조사](docs/survey/cross/design-tokens.md) §3.2·§3.6 |
 | PV-014 | `packages/tokens/examples/weather-overrides.css` | kor-travel-weather | `6003da995fa4b35799f9dadc406c6ba2878bfbae` | `packages/kor-travel-weather-admin/frontend/app/tokens.css` | GPL-3.0-or-later | weather light/dark 값을 `--kt-*` 앱 오버라이드와 비배포 `--space-*` 호환 예제로 재표현. 원천 파일은 수정하지 않으며 실제 이관·6폭 diff는 T-461 범위 (2026-09-07) | [T-102](docs/tasks/T-102-map-vocabulary-shim.md), [weather 토큰 조사](docs/survey/inventory/kor-travel-weather.md) §3.1 |
 
+| PV-015 | `packages/ui/src/dagster-operations.tsx` | kor-travel-weather | `5da6e15` | `packages/kor-travel-weather-admin/frontend/app/admin/dagster/page.tsx` | GPL-3.0-or-later | 날씨 조회·label·URL·페이지 헤더를 제거하고 주입형 표시 컴포넌트와 자체 실행 상한 판정으로 추출(2026-10-04) | [T-216](docs/tasks/T-216-dagster-operations.md) |
+| PV-016 | `packages/ui/src/dagster-model.ts` | kor-travel-weather | `5da6e15` | `packages/kor-travel-weather-admin/frontend/lib/dagster.ts` | GPL-3.0-or-later | provider label·HTTP 조회를 제외하고 공용 타입/표시 함수와 선택 실행 상한으로 추출(2026-10-04) | [T-216](docs/tasks/T-216-dagster-operations.md) |
+
+| PV-017 | `packages/py/kor-travel-common/src/kortravelcommon/deadline.py` | kor-travel-weather | `5da6e15` | `packages/kor-travel-weather-dagster/src/kortravelweather_dagster/external_weather.py` | GPL-3.0-or-later | provider 없이 동기 callable에 적용하는 대기 상한/오류 계약으로 추출(2026-10-04) | [T-319](docs/tasks/T-319-dagster-recovery.md) |
+
 ### 2026-09-07 출처 대조 정정
 
 고정 canview 원문과 다시 대조한 결과 PV-001의 `validate_plan.py`는 docstring 1줄과 출처 헤더만 다르며, 완료 상세 제목과 archive 제목 일치 검사는 원본에 이미 있다. common이 이 검사를 추가했다는 이전 설명은 오기다. PV-002에는 여러 길이의 inline code backtick 처리, PV-003에는 대응 회귀 시험이 추가되었다. 원천 커밋은 그대로이며 현재 수정 고지는 파일 헤더로 확인한다.

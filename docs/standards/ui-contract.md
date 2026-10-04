@@ -161,6 +161,17 @@
 
 메뉴 ID는 그룹 내 및 항목 전체에서 유일해야 한다. 그룹/항목/권한/경로/로그아웃 정책은 소비자 소유다. 반응형 메뉴는 lg 미만에서 가로 strip, lg 이상에서 세로 rail이며 전체 셸·drawer를 대체하지 않는다. 최신 Next App Router에서는 client adapter가 Link와 콜백을 주입하고 서버는 `navigation` subpath만 직접 import할 수 있다. 스타일·통합 사용법은 [패키지 안내](../../packages/ui/README.md)를 따른다.
 
+### 4.8 Dagster 운영 표시(T-216 개발 후보)
+
+`DagsterOperations`와 `dagster-operations` subpath는 동일 컴포넌트를 제공한다.
+필수 props는 `snapshot`(null 허용), `onRefresh`, `runUrl`, `scheduleUrl`이다.
+선택 props는 `jobLabel`(기본 원문 ID), `locationUrl`, `loading`(false), `error`(빈 문자열)이다.
+`dagster-model` subpath는 snapshot DTO·상태/주기/경과 표시 함수를 제공하며 React를 import하지 않는다.
+run의 `maxRuntimeSeconds`가 유한한 양수이면 정체 의심 상한에 사용하고, 없는 경우 600초로 판정한다.
+`dagster.css`는 `.kt-dagster-operations` 안에만 적용한다. 원격 조회·GraphQL scope·인증·재실행 권한은
+소비자 소유이며 callback URL은 소비자가 안전한 Dagster 링크로 구성한다. 재시도 버튼은 조회
+새로고침만 수행한다. pending 시 새로고침을 disabled하며 실패 메시지는 React text로 표시한다.
+
 ## 5. 문구 사전
 
 **UC-4 (MUST)** 아래 문자열은 계약이며 변경은 파괴 항목이다. 소비자 e2e는 이 문구를 그대로 단언할 수 있다.

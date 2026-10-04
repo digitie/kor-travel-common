@@ -1,0 +1,31 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ */
+.kt-dagster-operations { display: grid; gap: 1rem; min-width: 0; color: var(--kt-text-primary); }
+.kt-dagster-operations .ops-grid { display: grid; gap: .75rem; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.kt-dagster-operations .panel { min-width: 0; border: 1px solid var(--kt-border); background: var(--kt-surface-card); }
+.kt-dagster-operations .ops-card { display: grid; gap: .5rem; padding: 1rem; }
+.kt-dagster-operations .ops-card strong { font-size: 1.75rem; }
+.kt-dagster-operations small { display: block; color: var(--kt-text-secondary); overflow-wrap: anywhere; }
+.kt-dagster-operations .panel-head { padding: .75rem 1rem; border-bottom: 1px solid var(--kt-border); }
+.kt-dagster-operations h2 { margin: 0; font-size: 1rem; }
+.kt-dagster-operations .table-wrap { overflow-x: auto; }
+.kt-dagster-operations table { width: 100%; border-collapse: collapse; text-align: left; }
+.kt-dagster-operations th, .kt-dagster-operations td { padding: .75rem; border-bottom: 1px solid var(--kt-border); }
+.kt-dagster-operations th { font-weight: 600; color: var(--kt-text-secondary); }
+.kt-dagster-operations code { display: block; font-size: .75rem; overflow-wrap: anywhere; }
+.kt-dagster-operations .status { display: inline-block; padding: .2rem .45rem; background: var(--kt-surface-subtle); }
+.kt-dagster-operations .on { color: var(--kt-success); }
+.kt-dagster-operations .off, .kt-dagster-operations .dagster-run-error { color: var(--kt-error); }
+.kt-dagster-operations .warn, .kt-dagster-operations .warn-text { color: var(--kt-warning); }
+.kt-dagster-operations .error { padding: .75rem; border: 1px solid var(--kt-error); }
+.kt-dagster-operations button { min-height: 2.75rem; cursor: pointer; }
+.kt-dagster-operations button:disabled { cursor: wait; }
+.kt-dagster-operations :focus-visible { outline: 2px solid var(--kt-focus); outline-offset: 2px; }
+.kt-dagster-operations .inline-link { white-space: nowrap; color: var(--kt-brand); }
+.kt-dagster-operations .empty { padding: 1rem; color: var(--kt-text-secondary); }
+.kt-dagster-operations .sync-run-detail-grid { display: grid; gap: .75rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 640px) {
+  .kt-dagster-operations .ops-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kt-dagster-operations .sync-run-detail-grid { grid-template-columns: minmax(0, 1fr); }
+}
