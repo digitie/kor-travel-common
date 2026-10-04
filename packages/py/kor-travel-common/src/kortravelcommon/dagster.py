@@ -140,8 +140,9 @@ def infrastructure_retry_sensor(
 ):
     """native retry가 꺼진 instance에서 멱등 job의 worker 장애만 제한적으로 재예약한다.
 
-    실행 종료 이벤트의 명시적 인프라 사유만 허용한다. step/provider 실패, timeout에
-    의한 취소, 원인 불명은 제외한다. native retry가 켜지면 미완료 인계만 마무리한다.
+    실행 종료 이벤트의 명시적 인프라 사유와 증명된 자식 프로세스 종료만 허용한다.
+    provider 실패, timeout에 의한 취소, 원인 불명은 제외한다.
+    native retry가 켜지면 미완료 인계만 마무리한다.
     run key는 이벤트 재평가를 중복 제거하며, 동시 수동 실행은 JOB_TAG queue limit과
     소비자 DB lease가 별도로 보호해야 한다. partition job은 이 factory의 대상이 아니다.
     """
@@ -181,12 +182,22 @@ def infrastructure_retry_sensor(
             )
         ):
             return SkipReason("부분 선택 실행은 전체 job으로 확대하지 않습니다.")
-        reason = getattr(context.failure_event.event_specific_data, "failure_reason", None)
-        if getattr(reason, "value", None) not in {
-            "UNEXPECTED_TERMINATION",
-            "START_TIMEOUT",
-            "RUN_WORKER_RESTART",
-        }:
+        failure_data = context.failure_event.event_specific_data
+        reason = getattr(failure_data, "failure_reason", None)
+        subprocess_failure = (
+            getattr(reason, "value", None) == "RUN_EXCEPTION"
+            and getattr(getattr(failure_data, "error", None), "cls_name", None)
+            == "DagsterSubprocessError"
+        )
+        if (
+            getattr(reason, "value", None)
+            not in {
+                "UNEXPECTED_TERMINATION",
+                "START_TIMEOUT",
+                "RUN_WORKER_RESTART",
+            }
+            and not subprocess_failure
+        ):
             return SkipReason("명시적인 worker 인프라 장애만 재시도합니다.")
         if run.step_keys_to_execute is not None:
             plan = (
@@ -197,10 +208,36 @@ def infrastructure_retry_sensor(
             if plan is None or set(run.step_keys_to_execute) != {step.key for step in plan.steps}:
                 return SkipReason("부분 실행 계획은 전체 job으로 확대하지 않습니다.")
         # 인프라 종료 전에 provider/step 실패가 있었으면 같은 호출을 반복하지 않는다.
-        if instance.get_records_for_run(
-            run_id=run.run_id, of_type=DagsterEventType.STEP_FAILURE, limit=1
-        ).records:
-            return SkipReason("step 실패가 기록되어 자동 재시도하지 않습니다.")
+        step_cursor = None
+        crashed_steps = 0
+        while True:
+            failures = instance.get_records_for_run(
+                run_id=run.run_id,
+                of_type=DagsterEventType.STEP_FAILURE,
+                limit=100,
+                cursor=step_cursor,
+            )
+            for record in failures.records:
+                event = getattr(getattr(record, "event_log_entry", None), "dagster_event", None)
+                data = getattr(event, "event_specific_data", None)
+                if not (
+                    subprocess_failure
+                    and getattr(getattr(data, "error_source", None), "value", None)
+                    == "FRAMEWORK_ERROR"
+                    and getattr(getattr(data, "error", None), "cls_name", None)
+                    == "ChildProcessCrashException"
+                    and getattr(data, "user_failure_data", None) is None
+                ):
+                    return SkipReason("step/provider 실패는 자동 재시도하지 않습니다.")
+                crashed_steps += 1
+            if not getattr(failures, "has_more", False):
+                break
+            next_cursor = getattr(failures, "cursor", None)
+            if not next_cursor or next_cursor == step_cursor:
+                raise RuntimeError("step 실패 이력 cursor가 전진하지 않습니다.")
+            step_cursor = next_cursor
+        if subprocess_failure and not crashed_steps:
+            return SkipReason("명시적인 자식 프로세스 종료 기록이 없습니다.")
         attempts = [
             run.tags.get(INFRA_RETRY_ATTEMPT_TAG, "0"),
             run.tags.get("dagster/retry_number", "0"),

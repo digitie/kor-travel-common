@@ -190,8 +190,13 @@ worker_retry = infrastructure_retry_sensor(
 # 소비자의 Definitions(sensors=[worker_retry, ...])에 등록한다.
 ```
 
-`UNEXPECTED_TERMINATION`, `START_TIMEOUT`, `RUN_WORKER_RESTART` 이벤트만 허용한다.
-같은 run에 step 실패가 있으면 제외하며, provider 실패·취소·원인 불명은 재예약하지 않는다.
+`UNEXPECTED_TERMINATION`, `START_TIMEOUT`, `RUN_WORKER_RESTART` 이벤트를 허용한다.
+멀티프로세스 자식 종료는 `RUN_EXCEPTION` + `DagsterSubprocessError`이고, 모든 step 실패가
+`FRAMEWORK_ERROR` + `ChildProcessCrashException`이며 user failure가 없는 경우에만 허용한다.
+적어도 하나의 자식 종료 기록을 요구한다. 실패 이력은 100건씩 끝까지 검사하므로 뒤 페이지에
+provider 오류가 섞여 있어도 제외한다. 전체 sensor의 10초 제한은 이 검사에도 적용된다.
+일반 step/provider 실패·취소·원인 불명은 재예약하지 않는다. 실제 자식 `os._exit(42)`와
+native retry OFF인 격리 SQLite instance로 fallback 요청 1개와 잔여 예산 0을 검증한다.
 project/location을 함께 검증하고, 실행 중인 같은 job은 합친다. 재시도 횟수와 부모 run ID를
 공통 태그에 기록하며 결정적인 run key로 이벤트 재평가를 중복 제거한다. run config를 보존해
 전체 멱등 job을 다시 실행한다. repository origin도 기본 `__repository__`와 일치해야 하며,
