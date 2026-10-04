@@ -194,8 +194,16 @@ worker_retry = infrastructure_retry_sensor(
 같은 run에 step 실패가 있으면 제외하며, provider 실패·취소·원인 불명은 재예약하지 않는다.
 project/location을 함께 검증하고, 실행 중인 같은 job은 합친다. 재시도 횟수와 부모 run ID를
 공통 태그에 기록하며 결정적인 run key로 이벤트 재평가를 중복 제거한다. run config를 보존해
-전체 멱등 job을 다시 실행한다. partition job은 지원하지 않는다. 조회는 10초/동시 4개 상한이며
-metadata 장애는 sensor tick 실패로 전달한다. native retry 활성화 시 fallback은 위임한다.
+전체 멱등 job을 다시 실행한다. repository origin도 기본 `__repository__`와 일치해야 하며,
+다른 이름은 factory의 `repository_name`에 주입한다. origin 없는 실행은 project/location 태그를
+함께 요구한다. partition job과 부분 op/asset 선택 실행은 지원하지 않는다. native retry 횟수도
+같은 예산에 합산하고 fallback child에는 잔여 native retry 예산만 전달한다.
+
+일반 polling sensor가 실패 실행 100건씩 확인하고 한 tick에 한 실행만 재예약한다. batch 끝에서
+새 실패부터 다시 확인하며, metadata 장애·10초 timeout에는 cursor를 전진시키지 않는다.
+run failure callback 예외도 이벤트를 소비하는 Dagster 동작을 피하기 위한 경계다. 전체 조회는
+10초/동시 4개 상한이며 metadata 장애는 sensor tick 실패로 전달한다. native retry 활성화 시
+fallback은 위임한다. 오래된 실패가 많으면 한 순회만큼 복구가 지연될 수 있다.
 
 sensor 확인과 다른 수동/예약 발화는 원자적이지 않다. shared coordinator의 job limit과 소비자
 DB lease를 함께 적용한다. DB lease는 중복 provider 호출을 막지만 queued run의 메모리 제한을

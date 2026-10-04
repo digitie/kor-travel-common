@@ -4,6 +4,7 @@
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from types import SimpleNamespace
 from typing import Any
 
 from dagster import (
@@ -13,8 +14,8 @@ from dagster import (
     RunRequest,
     RunsFilter,
     ScheduleDefinition,
+    SensorResult,
     SkipReason,
-    run_failure_sensor,
     sensor,
 )
 
@@ -24,6 +25,7 @@ PROJECT_TAG = "kortravelcommon/project"
 JOB_TAG = "kortravelcommon/job"
 INFRA_RETRY_ATTEMPT_TAG = "kortravelcommon/infra_retry_attempt"
 INFRA_RETRY_PARENT_TAG = "kortravelcommon/infra_retry_parent"
+_RETRY_SCAN_HEAD = "head"
 ACTIVE_STATUSES = [
     DagsterRunStatus.QUEUED,
     DagsterRunStatus.STARTING,
@@ -126,7 +128,13 @@ def reconciliation_sensor(
 
 
 def infrastructure_retry_sensor(
-    *, name: str, project: str, location_name: str, job: Any, policy: RecoveryPolicy
+    *,
+    name: str,
+    project: str,
+    location_name: str,
+    job: Any,
+    policy: RecoveryPolicy,
+    repository_name: str = "__repository__",
 ):
     """native retry가 꺼진 instance에서 멱등 job의 worker 장애만 제한적으로 재예약한다.
 
@@ -155,6 +163,13 @@ def infrastructure_retry_sensor(
         )
         if location != location_name or run.tags.get(PROJECT_TAG) != project:
             return SkipReason("다른 project/location의 실행은 재시도하지 않습니다.")
+        if origin is not None and (
+            origin.repository_origin.repository_name != repository_name
+            or origin.job_name != job.name
+        ):
+            return SkipReason("다른 repository/job origin은 재시도하지 않습니다.")
+        if run.op_selection or run.asset_selection or run.asset_check_selection:
+            return SkipReason("부분 선택 실행은 전체 job으로 확대하지 않습니다.")
         reason = getattr(context.failure_event.event_specific_data, "failure_reason", None)
         if getattr(reason, "value", None) not in {
             "UNEXPECTED_TERMINATION",
@@ -167,31 +182,30 @@ def infrastructure_retry_sensor(
             run_id=run.run_id, of_type=DagsterEventType.STEP_FAILURE, limit=1
         ).records:
             return SkipReason("step 실패가 기록되어 자동 재시도하지 않습니다.")
-        attempt = run.tags.get(INFRA_RETRY_ATTEMPT_TAG, "0")
-        if not attempt.isascii() or not attempt.isdecimal() or len(attempt) > 6:
+        attempts = [
+            run.tags.get(INFRA_RETRY_ATTEMPT_TAG, "0"),
+            run.tags.get("dagster/retry_number", "0"),
+        ]
+        if any(
+            not value.isascii() or not value.isdecimal() or len(value) > 6 for value in attempts
+        ):
             return SkipReason("재시도 횟수가 유효하지 않습니다.")
-        next_attempt = int(attempt) + 1
+        next_attempt = sum(int(value) for value in attempts) + 1
         if next_attempt > policy.infrastructure_retries:
             return SkipReason("인프라 재시도 상한에 도달했습니다.")
         if has_active_run(
             instance, job_name=job.name, project=project, location_name=location_name
         ):
             return SkipReason("같은 job의 실행이 남아 있어 재시도를 합칩니다.")
-        # sensor/예약 identity를 새 sensor가 소유한다. 과거 native retry lineage도 섞지 않는다.
+        # 이전 run의 native 상태 태그는 전달하지 않는다. job 정의의 실행 설정만 다시 적용한다.
         tags = {
             key: value
             for key, value in run.tags.items()
-            if key
-            not in {
-                "dagster/sensor_name",
-                "dagster/schedule_name",
-                "dagster/run_key",
-                "dagster/root_run_id",
-                "dagster/parent_run_id",
-                "dagster/retry_number",
-            }
+            if not key.startswith("dagster/")
         }
+        tags.update(job.tags)
         tags.update(policy.tags(project=project, job_name=job.name))
+        tags["dagster/max_retries"] = str(policy.infrastructure_retries - next_attempt)
         tags.update(
             {
                 "dagster/code_location": location_name,
@@ -205,14 +219,54 @@ def infrastructure_retry_sensor(
             tags=tags,
         )
 
-    @run_failure_sensor(
+    def evaluate_failures(context):
+        instance = context.instance
+        if instance.run_retries_enabled:
+            return SkipReason("native run retry에 위임합니다.")
+        cursor = None if context.cursor == _RETRY_SCAN_HEAD else context.cursor or None
+        if cursor is not None and instance.get_run_by_id(cursor) is None:
+            cursor = None
+        runs = instance.get_runs(
+            filters=RunsFilter(
+                job_name=job.name, statuses=[DagsterRunStatus.FAILURE], tags={PROJECT_TAG: project}
+            ),
+            limit=100,
+            cursor=cursor,
+        )
+        requests = []
+        for run in runs:
+            records = instance.get_records_for_run(
+                run_id=run.run_id,
+                of_type=DagsterEventType.RUN_FAILURE,
+                limit=1,
+                ascending=False,
+            ).records
+            if not records:
+                continue
+            event = records[0].event_log_entry.dagster_event
+            result = retry_failed_run(
+                SimpleNamespace(
+                    instance=instance,
+                    dagster_run=run,
+                    failure_event=event,
+                )
+            )
+            if isinstance(result, RunRequest):
+                requests.append(result)
+                # 같은 job은 한 tick에 하나만 발급한다. 다음 tick에 active 여부를 재확인한다.
+                return SensorResult(run_requests=requests, cursor=run.run_id)
+        # 유한한 batch를 모두 확인한 뒤에만 cursor를 전진한다. 끝에서는 새 실패부터 재확인한다.
+        return SensorResult(cursor=runs[-1].run_id if len(runs) == 100 else _RETRY_SCAN_HEAD)
+
+    @sensor(
         name=name,
-        monitored_jobs=[job],
-        request_job=job,
+        job=job,
         minimum_interval_seconds=60,
         default_status=DefaultSensorStatus.RUNNING,
     )
     def retry_tick(context):
-        return call_with_deadline(lambda: retry_failed_run(context), timeout_seconds=10)
+        # run_failure_sensor는 callback 예외도 failure event cursor를 소비한다. 일반 sensor의
+        # 결과 반환 경계를 사용하여 metadata 오류/timeout 시 동일 batch를 다시 확인한다.
+        return call_with_deadline(lambda: evaluate_failures(context), timeout_seconds=10)
 
     return retry_tick

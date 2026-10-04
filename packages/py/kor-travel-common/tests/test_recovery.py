@@ -11,8 +11,8 @@ from dagster import (
     DagsterRunStatus,
     RunRequest,
     SkipReason,
-    build_run_status_sensor_context,
     build_schedule_context,
+    build_sensor_context,
     job,
     op,
 )
@@ -180,12 +180,16 @@ def failure_context(instance, reason=RunFailureReason.UNEXPECTED_TERMINATION, **
         job_name=sample.name,
         event_specific_data=JobFailureData(None, failure_reason=reason),
     )
-    return build_run_status_sensor_context(
-        sensor_name="test_infra_retry",
-        dagster_event=event,
-        dagster_instance=instance,
+    instance.report_dagster_event(event, run.run_id)
+    return SimpleNamespace(
         dagster_run=run,
+        sensor_context=build_sensor_context(instance=instance),
     )
+
+
+def evaluate_retry(definition, context):
+    tick = definition.evaluate_tick(context.sensor_context)
+    return tick.run_requests[0] if tick.run_requests else SkipReason(tick.skip_message or "생략")
 
 
 @pytest.mark.parametrize(
@@ -200,14 +204,14 @@ def test_infra_retry_preserves_config_and_deduplicates_event_with_one_attempt(re
     with DagsterInstance.local_temp() as instance:
         context = failure_context(instance, reason, **{"dagster/schedule_name": "old"})
         retry = retry_definition()
-        request = retry(context)
+        request = evaluate_retry(retry, context)
         assert isinstance(request, RunRequest)
         assert request.run_config == context.dagster_run.run_config
         assert request.tags[INFRA_RETRY_ATTEMPT_TAG] == "1"
         assert request.tags[INFRA_RETRY_PARENT_TAG] == context.dagster_run.run_id
         assert "dagster/schedule_name" not in request.tags
-        assert retry(context).run_key == request.run_key
-        assert isinstance(retry(failure_context(instance, **request.tags)), SkipReason)
+        assert request.tags["dagster/max_retries"] == "0"
+        assert evaluate_retry(retry, context).run_key == request.run_key
 
 
 @pytest.mark.parametrize(
@@ -222,7 +226,9 @@ def test_infra_retry_preserves_config_and_deduplicates_event_with_one_attempt(re
 )
 def test_provider_or_unknown_failure_is_not_retried(reason):
     with DagsterInstance.local_temp() as instance:
-        assert isinstance(retry_definition()(failure_context(instance, reason)), SkipReason)
+        assert isinstance(
+            evaluate_retry(retry_definition(), failure_context(instance, reason)), SkipReason
+        )
 
 
 @pytest.mark.parametrize(
@@ -234,30 +240,42 @@ def test_provider_or_unknown_failure_is_not_retried(reason):
         {INFRA_RETRY_ATTEMPT_TAG: "-1"},
         {INFRA_RETRY_ATTEMPT_TAG: "99999999999999"},
         {INFRA_RETRY_ATTEMPT_TAG: "١"},
+        {INFRA_RETRY_ATTEMPT_TAG: "1"},
+        {"dagster/retry_number": "1", "dagster/parent_run_id": "old", "dagster/root_run_id": "old"},
+        {"dagster/retry_number": "invalid"},
     ],
 )
 def test_retry_scope_and_malformed_budget_fail_closed(tags):
     with DagsterInstance.local_temp() as instance:
-        assert isinstance(retry_definition()(failure_context(instance, **tags)), SkipReason)
+        assert isinstance(
+            evaluate_retry(retry_definition(), failure_context(instance, **tags)), SkipReason
+        )
 
 
 def test_native_retry_and_active_job_prevent_fallback_retry(monkeypatch):
     with DagsterInstance.local_temp() as instance:
         context = failure_context(instance)
         monkeypatch.setattr(DagsterInstance, "run_retries_enabled", property(lambda self: True))
-        assert isinstance(retry_definition()(context), SkipReason)
+        assert isinstance(evaluate_retry(retry_definition(), context), SkipReason)
         monkeypatch.setattr(DagsterInstance, "run_retries_enabled", property(lambda self: False))
         instance.create_run_for_job(sample, status=DagsterRunStatus.STARTED, tags=sample.tags)
-        assert isinstance(retry_definition()(context), SkipReason)
+        assert isinstance(evaluate_retry(retry_definition(), context), SkipReason)
 
 
 def test_infra_failure_after_step_failure_is_not_retried(monkeypatch):
     with DagsterInstance.local_temp() as instance:
         context = failure_context(instance)
+        original = instance.get_records_for_run
         monkeypatch.setattr(
-            instance, "get_records_for_run", lambda **kw: SimpleNamespace(records=[object()])
+            instance,
+            "get_records_for_run",
+            lambda **kw: (
+                SimpleNamespace(records=[object()])
+                if kw["of_type"] == DagsterEventType.STEP_FAILURE
+                else original(**kw)
+            ),
         )
-        assert isinstance(retry_definition()(context), SkipReason)
+        assert isinstance(evaluate_retry(retry_definition(), context), SkipReason)
 
 
 def test_retry_requires_explicit_idempotent_policy():
@@ -299,8 +317,122 @@ def test_timed_out_calls_keep_bounded_capacity_until_they_finish(monkeypatch):
 def test_retry_storage_failure_is_not_interpreted_as_an_empty_queue(monkeypatch):
     with DagsterInstance.local_temp() as instance:
         context = failure_context(instance)
+        original = instance.get_runs
         monkeypatch.setattr(
             instance, "get_runs", lambda **kw: (_ for _ in ()).throw(ConnectionError("offline"))
         )
-        with pytest.raises(ConnectionError):
-            retry_definition()(context)
+        with pytest.raises(Exception) as caught:
+            retry_definition().evaluate_tick(context.sensor_context)
+        assert isinstance(caught.value, ConnectionError)
+        assert context.sensor_context.cursor is None
+        monkeypatch.setattr(instance, "get_runs", original)
+        assert isinstance(evaluate_retry(retry_definition(), context), RunRequest)
+
+
+def test_retry_cursor_cycles_to_new_failures_after_the_last_page():
+    with DagsterInstance.local_temp() as instance:
+        retry = retry_definition()
+        first = failure_context(instance)
+        first_tick = retry.evaluate_tick(first.sensor_context)
+        assert len(first_tick.run_requests) == 1
+        end_tick = retry.evaluate_tick(
+            build_sensor_context(instance=instance, cursor=first_tick.cursor)
+        )
+        assert end_tick.cursor == "head"
+        second = failure_context(instance)
+        new_tick = retry.evaluate_tick(
+            build_sensor_context(instance=instance, cursor=end_tick.cursor)
+        )
+        assert new_tick.run_requests[0].tags[INFRA_RETRY_PARENT_TAG] == second.dagster_run.run_id
+
+
+def test_partial_op_selection_is_not_expanded_to_the_entire_job():
+    with DagsterInstance.local_temp() as instance:
+        context = failure_context(instance)
+        original_run = context.dagster_run
+        selected = instance.create_run_for_job(
+            sample,
+            status=DagsterRunStatus.FAILURE,
+            op_selection=["noop"],
+            tags=original_run.tags,
+        )
+        records = instance.get_records_for_run(run_id=original_run.run_id).records
+        instance.report_dagster_event(records[-1].event_log_entry.dagster_event, selected.run_id)
+        # 첫 run은 삭제하여 부분 실행의 판정만 검증한다.
+        instance.delete_run(original_run.run_id)
+        assert isinstance(evaluate_retry(retry_definition(), context), SkipReason)
+
+
+@pytest.mark.parametrize("foreign", ["repository", "job"])
+def test_retry_origin_repository_and_job_are_both_scoped(monkeypatch, foreign):
+    with DagsterInstance.local_temp() as instance:
+        context = failure_context(instance)
+        run = context.dagster_run
+        origin = SimpleNamespace(
+            job_name="other" if foreign == "job" else sample.name,
+            repository_origin=SimpleNamespace(
+                repository_name="other" if foreign == "repository" else "__repository__",
+                code_location_origin=SimpleNamespace(location_name="test"),
+            ),
+        )
+        scoped_run = SimpleNamespace(
+            job_name=run.job_name,
+            run_id=run.run_id,
+            status=run.status,
+            tags=run.tags,
+            remote_job_origin=origin,
+        )
+        monkeypatch.setattr(instance, "get_runs", lambda **kw: [scoped_run])
+        assert isinstance(evaluate_retry(retry_definition(), context), SkipReason)
+
+
+def test_retry_metadata_deadline_does_not_consume_the_failure(monkeypatch):
+    import kortravelcommon.dagster as dagster_module
+
+    release = threading.Event()
+    exited = threading.Event()
+    bounded_call = dagster_module.call_with_deadline
+    with DagsterInstance.local_temp() as instance:
+        context = failure_context(instance)
+        original = instance.get_runs
+
+        def short_deadline(call, **kwargs):
+            def invoke():
+                try:
+                    return call()
+                finally:
+                    exited.set()
+
+            return bounded_call(invoke, timeout_seconds=0.01)
+
+        monkeypatch.setattr(dagster_module, "call_with_deadline", short_deadline)
+        monkeypatch.setattr(instance, "get_runs", lambda **kw: release.wait(5) and [])
+        try:
+            with pytest.raises(DeadlineExceeded):
+                retry_definition().evaluate_tick(context.sensor_context)
+            assert context.sensor_context.cursor is None
+        finally:
+            release.set()
+            assert exited.wait(1)
+        monkeypatch.setattr(instance, "get_runs", original)
+        monkeypatch.setattr(dagster_module, "call_with_deadline", bounded_call)
+        assert isinstance(evaluate_retry(retry_definition(), context), RunRequest)
+
+
+def test_retry_does_not_copy_native_parent_bookkeeping_tags():
+    previous_tags = {
+        "dagster/auto_retry_run_id": "unrelated",
+        "dagster/will_retry": "true",
+        "dagster/is_resume_retry": "true",
+        "dagster/is_asset_resume_retry": "true",
+        "dagster/failure_reason": "UNEXPECTED_TERMINATION",
+        "dagster/retry_strategy": "FROM_FAILURE",
+    }
+    with DagsterInstance.local_temp() as instance:
+        context = failure_context(instance, **previous_tags, source="preserved")
+        request = evaluate_retry(retry_definition(), context)
+        assert isinstance(request, RunRequest)
+        assert not (previous_tags.keys() & request.tags.keys())
+        assert request.tags["source"] == "preserved"
+        child = instance.create_run_for_job(sample, tags=request.tags)
+        assert not child.is_resume_retry
