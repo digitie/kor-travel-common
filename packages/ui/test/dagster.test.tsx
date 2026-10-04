@@ -155,7 +155,7 @@ test("job 정보가 없는 스케줄은 이름을 작업으로 단정하지 않�
   render(<DagsterOperations snapshot={{ ...snapshot, repositories: [{ ...repository,
     schedules: [{ ...repository.schedules[0]!, jobName: null }] }] }}
     onRefresh={vi.fn()} runUrl={() => "#"} scheduleUrl={() => "#"} />);
-  await userEvent.click(screen.getByRole("button", { name: "hourly" }));
+  await userEvent.click(screen.getByRole("button", { name: "스케줄 · hourly (작업 미확인)" }));
   const detail = screen.getByText("실행되는 작업").parentElement!;
   expect(detail).toHaveTextContent("미확인");
 });

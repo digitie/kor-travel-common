@@ -76,7 +76,7 @@ function ScheduleRow({ schedule, expanded, onToggle, jobLabel, dagsterScheduleUr
         <td>
           <button className="ghost row-expand-toggle" type="button" onClick={onToggle} aria-expanded={expanded}>
             {expanded ? <span aria-hidden="true">▾</span> : <span aria-hidden="true">▸</span>}
-            {jobLabel(schedule.jobName ?? schedule.name)}
+            {schedule.jobName === null ? `스케줄 · ${schedule.name} (작업 미확인)` : jobLabel(schedule.jobName)}
           </button>
         </td>
         <td>{schedule.cron ? describeCron(schedule.cron) : "수동 실행"}</td>

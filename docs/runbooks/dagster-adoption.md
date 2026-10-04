@@ -229,6 +229,10 @@ DB lease를 함께 적용한다. DB lease는 중복 provider 호출을 막지만
 repository의 선택 `sensors`, schedule의 `lastTick`, `timezone`, `overdue`는 API가
 확인한 값만 전달한다. 조회 실패 시 `error`와 마지막 성공 snapshot을 함께 넘기면
 마지막 결과임을 명확히 표시한다. 인증 실패를 빈 정상 snapshot으로 바꾸지 않는다.
+`schedule.jobName`은 `string | null`이다. 작업 이름을 모르는 API는 null을 전달하고,
+문자열 함수에 전달하는 소비자는 `jobName !== null`로 좁힌다. 스케줄 이름을 작업 이름으로 추측하지 않는다.
+`scheduleUrl`의 repository 인자를 자체 `jobName: string` 타입으로 좁혀 선언했던 소비자는
+공용 `DagsterRepository` 타입을 사용하고 nullable 값을 좁힌다. 콜백이 실제로 받는 공용 타입을 축소하지 않는다.
 행은 50개씩 렌더링하며 검색·집계는 전달된 전체 실행에 적용한다. 서버는 최근 종료
 실행과 오래된 활성 실행을 모두 포함하되 응답 상한·취소 가능한 요청·polling을 적용한다.
 CSS는 `@kor-travel/ui/dagster.css`, 토큰은 `@kor-travel/tokens/tokens.css`를 로드한다.
