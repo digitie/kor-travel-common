@@ -93,7 +93,8 @@ def test_real_multiprocess_crash_produces_one_fallback_request():
     assert "actual-child-crash: one bounded fallback request" in result.stdout
 
 
-def test_slow_finite_step_pages_resume_without_late_metadata_write(monkeypatch):
+@pytest.mark.parametrize("failure_delay", [0, 3.1])
+def test_slow_finite_step_pages_resume_without_late_metadata_write(monkeypatch, failure_delay):
     with DagsterInstance.local_temp() as instance:
         context = failure_context(instance, RunFailureReason.RUN_EXCEPTION)
         instance.report_dagster_event(
@@ -114,6 +115,7 @@ def test_slow_finite_step_pages_resume_without_late_metadata_write(monkeypatch):
 
         def events(**kw):
             if kw["of_type"] != DagsterEventType.STEP_FAILURE:
+                time.sleep(failure_delay)
                 return original(**kw)
             pages.append(kw.get("cursor"))
             time.sleep(5.1)
@@ -137,6 +139,12 @@ def test_slow_finite_step_pages_resume_without_late_metadata_write(monkeypatch):
         second = definition.evaluate_tick(
             build_sensor_context(instance=instance, cursor=first.cursor)
         )
+        if failure_delay:
+            assert second.run_requests == []
+            assert writes == []
+            second = definition.evaluate_tick(
+                build_sensor_context(instance=instance, cursor=second.cursor)
+            )
         assert len(second.run_requests) == 1
         assert second.run_requests[0].tags["dagster/max_retries"] == "0"
         assert pages == [None, "second"]

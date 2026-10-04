@@ -197,6 +197,8 @@ worker_retry = infrastructure_retry_sensor(
 provider 오류가 섞여 있어도 제외한다. 느린 유한 페이지는 5초 작업 예산 뒤 마지막 검사 위치를
 sensor cursor에 저장해 다음 tick에서 이어 읽는다. 부분 검사 중에는 재시도 요청이나 native 억제
 태그를 쓰지 않는다. 전체 sensor의 10초 제한과 인계 전 잔여 시간 검사는 이 검사에도 적용된다.
+검사가 끝났지만 인계 예산이 부족하면 완료 phase도 저장한다. 같은 RUN_FAILURE storage ID일
+때만 다음 tick에서 완료 검증을 재사용하고, 이벤트가 바뀌면 처음부터 다시 검사한다.
 일반 step/provider 실패·취소·원인 불명은 재예약하지 않는다. 실제 자식 `os._exit(42)`와
 native retry OFF인 격리 SQLite instance로 fallback 요청 1개와 잔여 예산 0을 검증한다.
 project/location을 함께 검증하고, 실행 중인 같은 job은 합친다. 재시도 횟수와 부모 run ID를

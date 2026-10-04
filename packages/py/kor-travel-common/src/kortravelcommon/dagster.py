@@ -37,10 +37,13 @@ class _StepCheckpoint:
     run_id: str
     cursor: str
     crashed_steps: int
+    complete: bool = False
+    failure_storage_id: int = 0
 
     def encode(self) -> str:
         return _STEP_CURSOR_PREFIX + json.dumps(
-            [self.run_id, self.cursor, self.crashed_steps], separators=(",", ":")
+            [self.run_id, self.cursor, self.crashed_steps, self.complete, self.failure_storage_id],
+            separators=(",", ":"),
         )
 
 
@@ -50,7 +53,7 @@ def _decode_step_checkpoint(cursor: str | None) -> _StepCheckpoint | None:
     value = json.loads(cursor[len(_STEP_CURSOR_PREFIX) :])
     if not (
         isinstance(value, list)
-        and len(value) == 3
+        and len(value) in (3, 5)
         and isinstance(value[0], str)
         and value[0]
         and isinstance(value[1], str)
@@ -59,6 +62,8 @@ def _decode_step_checkpoint(cursor: str | None) -> _StepCheckpoint | None:
         and value[2] > 0
     ):
         raise ValueError("step 복구 checkpoint가 유효하지 않습니다.")
+    if len(value) == 5 and not (type(value[3]) is bool and type(value[4]) is int and value[4] > 0):
+        raise ValueError("step 복구 완료 phase가 유효하지 않습니다.")
     return _StepCheckpoint(*value)
 
 
@@ -243,9 +248,11 @@ def infrastructure_retry_sensor(
                 return SkipReason("부분 실행 계획은 전체 job으로 확대하지 않습니다.")
         # 인프라 종료 전에 provider/step 실패가 있었으면 같은 호출을 반복하지 않는다.
         checkpoint = context.step_checkpoint
+        if checkpoint is not None and checkpoint.failure_storage_id != context.failure_storage_id:
+            checkpoint = None
         step_cursor = checkpoint.cursor if checkpoint is not None else None
         crashed_steps = checkpoint.crashed_steps if checkpoint is not None else 0
-        while True:
+        while not (checkpoint is not None and checkpoint.complete):
             failures = instance.get_records_for_run(
                 run_id=run.run_id,
                 of_type=DagsterEventType.STEP_FAILURE,
@@ -266,13 +273,16 @@ def infrastructure_retry_sensor(
                     return SkipReason("step/provider 실패는 자동 재시도하지 않습니다.")
                 crashed_steps += 1
             if not getattr(failures, "has_more", False):
+                step_cursor = getattr(failures, "cursor", None) or step_cursor
                 break
             next_cursor = getattr(failures, "cursor", None)
             if not next_cursor or next_cursor == step_cursor:
                 raise RuntimeError("step 실패 이력 cursor가 전진하지 않습니다.")
             step_cursor = next_cursor
             if monotonic() - context.started >= 5:
-                return _StepCheckpoint(run.run_id, step_cursor, crashed_steps)
+                return _StepCheckpoint(
+                    run.run_id, step_cursor, crashed_steps, False, context.failure_storage_id
+                )
         if subprocess_failure and not crashed_steps:
             return SkipReason("명시적인 자식 프로세스 종료 기록이 없습니다.")
         attempts = [
@@ -313,9 +323,11 @@ def infrastructure_retry_sensor(
         # 전체 deadline이 끝난 worker는 metadata를 뒤늦게 변경하지 않는다.
         # 검증 완료 위치를 저장하고 다음 tick에서 예산·scope를 다시 확인한다.
         if monotonic() - context.started >= 8:
-            final_cursor = getattr(failures, "cursor", None) or step_cursor
+            final_cursor = step_cursor
             if subprocess_failure and final_cursor:
-                return _StepCheckpoint(run.run_id, final_cursor, crashed_steps)
+                return _StepCheckpoint(
+                    run.run_id, final_cursor, crashed_steps, True, context.failure_storage_id
+                )
             raise TimeoutError("재시도 인계에 필요한 시간 예산이 부족합니다.")
         # 이전 run의 native 상태 태그는 전달하지 않는다. job 정의의 실행 설정만 다시 적용한다.
         tags = {key: value for key, value in run.tags.items() if not key.startswith("dagster/")}
@@ -390,6 +402,7 @@ def infrastructure_retry_sensor(
                     failure_event=event,
                     started=started,
                     step_checkpoint=checkpoint,
+                    failure_storage_id=records[0].storage_id,
                 )
             )
             if isinstance(result, _StepCheckpoint):
