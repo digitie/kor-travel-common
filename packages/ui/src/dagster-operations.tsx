@@ -119,7 +119,8 @@ export function DagsterOperations({ snapshot, error = "", loading = false, onRef
   const lastPage = Math.max(0, Math.ceil(filteredRuns.length / DAGSTER_RUN_PAGE_SIZE) - 1);
   const visiblePage = Math.min(page, lastPage);
   const visibleRuns = filteredRuns.slice(visiblePage * DAGSTER_RUN_PAGE_SIZE, (visiblePage + 1) * DAGSTER_RUN_PAGE_SIZE);
-  const statuses = [...new Set(runs.map(run => run.status))].sort();
+  // 다음 조회에서 0건이 되어도 사용자가 선택한 상태를 option과 필터에 함께 유지한다.
+  const statuses = [...new Set([...runs.map(run => run.status), ...(status ? [status] : [])])].sort();
   function selectRun(runId: string) {
     setLocalSelectedRunId(runId);
     onSelectRun?.(runId);
@@ -159,7 +160,7 @@ export function DagsterOperations({ snapshot, error = "", loading = false, onRef
         <div className="panel-head"><div><h2>최근 실행 · 마지막 확인 {snapshot ? new Date(snapshot.checkedAt).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul" }) : "불러오는 중…"}</h2></div></div>
         {runs.length ? <div className="dagster-run-toolbar">
           <label>실행 검색<input aria-label="실행 검색" placeholder="작업 이름 또는 run ID" value={search} onChange={event => { setSearch(event.target.value); setPage(0); }} /></label>
-          <label>상태<select aria-label="상태 필터" value={status} onChange={event => { setStatus(event.target.value); setPage(0); }}><option value="">전체 상태</option>{statuses.map(value => <option key={value} value={value}>{runStatusLabel(value)}</option>)}</select></label>
+          <label>상태<select aria-label="상태 필터" value={status} onChange={event => { setStatus(event.target.value); setPage(0); }}><option value="">전체 상태</option>{statuses.map(value => <option key={value} value={value}>{runStatusLabel(value)}{runs.some(run => run.status === value) ? "" : " · 현재 0건"}</option>)}</select></label>
         </div> : null}
         {visibleRuns.length ? <div className="table-wrap" role="region" aria-label="최근 Dagster 실행 표" tabIndex={0}><table data-slot="dagster-operations-run-table"><thead><tr><th scope="col">상태</th><th scope="col">작업</th><th scope="col">시작</th><th scope="col">종료</th><th scope="col">상세</th></tr></thead><tbody>{visibleRuns.map((run) => <RunRow key={run.runId} run={run} nowSeconds={nowSeconds} jobLabel={jobLabel} dagsterRunUrl={runUrl} selected={run.runId === selectedId} onSelect={showRunDetails ? () => selectRun(run.runId) : undefined} />)}</tbody></table></div> : <div className="empty">{runs.length ? "검색 조건에 맞는 실행이 없습니다." : snapshot ? "최근 Dagster 실행이 없습니다." : "실행 기록을 불러오는 중…"}</div>}
         {runs.length ? <div className="dagster-run-pagination" aria-label="실행 페이지">
@@ -182,7 +183,7 @@ export function DagsterOperations({ snapshot, error = "", loading = false, onRef
       </section> : null}
       </div>
       {showRepositories && snapshot ? <section className="panel" data-slot="dagster-operations-repositories">
-        <div className="panel-head"><h2>코드 위치</h2></div><div className="dagster-repositories">{snapshot.repositories.map(repository => <div key={JSON.stringify([repository.locationName, repository.name])}><strong>{repository.locationName}</strong><code>{repository.name}</code><small>작업 {repository.jobs.length} · 자산 {repository.assetCount ?? repository.assets.length} · 스케줄 {repository.schedules.length} · 센서 {repository.sensors?.length ?? 0}</small></div>)}</div>
+        <div className="panel-head"><h2>코드 위치</h2></div><div className="dagster-repositories">{snapshot.repositories.map(repository => <div key={JSON.stringify([repository.locationName, repository.name])}><strong>{repository.locationName}</strong><code>{repository.name}</code><small>작업 {repository.jobs.length} · 자산 {repository.assetCount ?? repository.assets.length} · 스케줄 {repository.schedules.length} · 센서 {repository.sensors === undefined ? "미확인" : repository.sensors.length}</small></div>)}</div>
       </section> : null}
       <section className="panel">
         <div className="panel-head"><div><h2>스케줄</h2></div></div>

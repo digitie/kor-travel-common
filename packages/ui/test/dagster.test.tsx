@@ -130,3 +130,22 @@ test("센서와 스케줄의 실패 tick 및 시간대를 표시한다", async (
   expect(screen.getByText("schedule tick 실패")).toBeVisible();
   expect(screen.getByText("조회 시점에 예정된 tick이 지연되었습니다.")).toBeVisible();
 });
+
+test("refresh 후 0건이 된 상태 필터도 화면과 내부 조건을 일치시킨다", async () => {
+  const props = { onRefresh: vi.fn(), runUrl: () => "#", scheduleUrl: () => "#" };
+  const { rerender } = render(<DagsterOperations {...props} snapshot={snapshot} />);
+  await userEvent.selectOptions(screen.getByLabelText("상태 필터"), "FAILURE");
+  rerender(<DagsterOperations {...props} snapshot={{ ...snapshot,
+    runs: [{ ...snapshot.runs[0]!, status: "SUCCESS" }] }} />);
+  expect(screen.getByLabelText("상태 필터")).toHaveValue("FAILURE");
+  expect(screen.getByRole("option", { name: "실패 · 현재 0건" })).toBeInTheDocument();
+  await userEvent.selectOptions(screen.getByLabelText("상태 필터"), "");
+  expect(screen.getByRole("status")).toHaveTextContent("검색 1건");
+  expect(screen.getByRole("link", { name: /Dagster에서 열기/ })).toBeVisible();
+});
+
+test("미제공 센서 목록을 확인된 0개로 표시하지 않는다", () => {
+  render(<DagsterOperations snapshot={snapshot} showRepositories onRefresh={vi.fn()}
+    runUrl={() => "#"} scheduleUrl={() => "#"} />);
+  expect(screen.getByText(/센서 미확인/)).toBeVisible();
+});
