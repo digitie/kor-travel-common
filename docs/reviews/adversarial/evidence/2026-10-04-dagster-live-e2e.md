@@ -28,7 +28,14 @@
 | Dagster 연결 중단 | 테스트 webserver만 중단하고 새로고침 시 오류/다시 시도 표시, 이전 3개 run과 마지막 확인 시각 유지, PASS |
 | 연결 복원 | 같은 metadata로 webserver 복원 후 다시 시도: 오류 사라짐, 10:22:35 KST로 확인 시각 갱신, 동일 run 유지, PASS |
 
-[데스크톱](2026-10-04-dagster-ui-desktop.jpg) · [모바일](2026-10-04-dagster-ui-mobile.jpg).
+[데스크톱 원본 base64](2026-10-04-dagster-ui-desktop.jpg.base64) ·
+[모바일 원본 base64](2026-10-04-dagster-ui-mobile.jpg.base64).
+저장 형식 note: common 정보 검사기는 모든 tracked 파일을 UTF-8로 읽으므로 JPEG 원본을
+base64 텍스트로 인코딩했다. pixels/내용은 변경하지 않았다. 원래 JPEG를 관찰한 reviewer
+보고서의 파일명은 역사로 유지한다. Python `base64.b64decode(Path(file).read_text())`로
+원본 JPEG를 복원할 수 있다. 로컬 표시용 JPEG는 weather의 ignored `.codex_tmp`에 보존했다.
+원본 SHA-256: desktop `f3c674363d4b29a2153355d823a219d30b37dcd8b2d082ca63fc430d7f831279`,
+mobile `c73f06671a36fb0b39ab2a90c3855a4edf8e1a0dd8e0a1e195210b4bfbaf7642`.
 브라우저 accessibility tree와 읽기 전용 DOM/computed-style로 확인했다.
 실제 run 실행/취소 UI 권한은 Dagster 운영 링크가 소유하며 이번 테스트에서 실행하지 않았다.
 
@@ -51,6 +58,8 @@
 처음 실제 Dagster 조회에서 로그 limit2000이 서버 상한1000을 넘어 실패 상세가 사라졌다.
 cursor pagination/timeout을 고쳤고 실제 UI 상세 표시 및 후속 page 회귀 시험을 통과했다.
 처음 tarball integrity/Origin 형식 CI 실패도 수정했다. 실패를 최종 PASS로 덮어 기록하지 않는다.
+evidence-only closure의 최초 secret-scan은 JPEG의 UTF-8 decode 오류로 실패했다.
+위 원본 인코딩 후 secret/redaction 전체758파일·발견0을 직접 재확인했다.
 
 ## 메모리 측정과 범위
 
