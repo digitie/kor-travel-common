@@ -73,3 +73,9 @@ builder 버전을 실제 재구축 기록에서 별도로 검증해야 한다.
 [Common 정확 source CI8](evidence/map-health-2026-10-05/common-builtin-exact-ci.json)는 PASS다.
 [세 번째 실제 실패](evidence/map-health-2026-10-05/rebuild-markers-third-negative.json)는
 기존 운영 6개 서비스와 generation을 유지했다. 실패·소스 PASS는 새 runtime/live PASS로 바꾸지 않는다.
+
+## 최종 CI: 바이너리 캡처 보존 계약
+
+최초 문서 HEAD `a891c08`의 문서 링크·계획·337 도구 테스트는 통과했으나 전체 트리 정보 유출 검사기는 PNG를 UTF-8로 해석할 수 없어 fail-closed했다. 검사기·정책·예외를 완화하지 않고 현재 Common 트리의 중복 PNG만 제거하고 [고정 원본 링크·SHA256 색인](evidence/map-health-2026-10-05/ui-ticks-retry1-screenshots/README.md)과 [8개 바이트 동일성 증명](evidence/map-health-2026-10-05/ui-ticks-retry1-screenshots/storage-proof.json)을 추가했다. Map·PinVi의 원본 PNG와 Common 최초 보존 Git history, 기존 영수증·리뷰 원문·manifest를 보존한다. 제품 코드와 실제 재구축 source는 변경되지 않았다.
+
+보존 위치 변경의 두 좁은 독립 리뷰 [A](evidence/map-health-2026-10-05/final-ci-storage-review-recovery.md)·[B](evidence/map-health-2026-10-05/final-ci-storage-review-ui.md)는 PASS, 새 finding0이다. [최초 실제 CI 실패](evidence/map-health-2026-10-05/final-ci-first-attempt-negative.json)의 source/job/사유·private 원문 digest를 보존했다. 전체 트리 secret/redaction1047파일·발견0, 문서676개/로컬대상2769개·오류0을 root가 실행했다. reviewer의 미실행 CI/머지는 이 수용 범위에 넣지 않는다.

@@ -1,0 +1,62 @@
+{
+  "recorded_at": "2026-10-05T21:32:16.608609+00:00",
+  "status": "FAILED_PRIOR_ATTEMPT_PRESERVED",
+  "common_head": "a891c08f52e5f0deb18283cb3a202c829ac87bfd",
+  "pinvi_head": "92d0f40e24c4b420e4d699eba4f2f98165e8e58f",
+  "jobs": [
+    {
+      "repository": "digitie/kor-travel-common",
+      "job": 111981176264,
+      "name": "docs",
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-10-05T21:17:51Z",
+      "completed_at": "2026-10-05T21:19:37Z",
+      "url": "https://github.com/digitie/kor-travel-common/actions/runs/37374967802/job/111981176264",
+      "private_raw_log_sha256": "b985ce13b0697624f5dfdd184938554e7c38500b8bd48d59dca8ac0bc1c5bead",
+      "reason": "UTF-8-only fail-closed production scanner rejects binary PNG"
+    },
+    {
+      "repository": "digitie/kor-travel-common",
+      "job": 111981176301,
+      "name": "tools (windows-2025)",
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-10-05T21:18:02Z",
+      "completed_at": "2026-10-05T21:21:34Z",
+      "url": "https://github.com/digitie/kor-travel-common/actions/runs/37374967802/job/111981176301",
+      "private_raw_log_sha256": "feed9b61c2386c129cc149749538e99a0f8fb9c276a3a0ccafe59ab1d2eab0df",
+      "reason": "UTF-8-only fail-closed secret scanner rejects binary PNG"
+    },
+    {
+      "repository": "digitie/kor-travel-common",
+      "job": 111981176342,
+      "name": "secret-scan",
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-10-05T21:22:53Z",
+      "completed_at": "2026-10-05T21:23:01Z",
+      "url": "https://github.com/digitie/kor-travel-common/actions/runs/37374967802/job/111981176342",
+      "private_raw_log_sha256": "68e6a52ed7f248a1e2f66756141ce216e2c43449746db3caeb1e9eb64ad04b47",
+      "reason": "UTF-8-only fail-closed secret scanner rejects binary PNG"
+    },
+    {
+      "repository": "digitie/pinvi",
+      "job": 111981369332,
+      "name": "integration-test (4)",
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-10-05T21:24:47Z",
+      "completed_at": "2026-10-05T21:27:08Z",
+      "url": "https://github.com/digitie/pinvi/actions/runs/37375022437/job/111981369332",
+      "private_raw_log_sha256": "60b5face7ee6afcc328213362067f11cac99082345262bcc957c505bd120c8e4",
+      "reason": "DockerHub testcontainers/ryuk:0.8.1 image pull HTTP502; 166 setup errors, 12 passed; exact-source retry required"
+    }
+  ],
+  "notes": [
+    "No historical failure is converted into success.",
+    "Original logs kept private; this record contains only job metadata, reason and digest.",
+    "No production code or scanner policy changes; Common current binary duplicates removed after exact immutable capture verification.",
+    "PinVi retry cannot start while sibling integration shard is still running; HTTP403 rejection preserved as orchestrator state, not product failure."
+  ]
+}
