@@ -48,3 +48,7 @@ IN_PROGRESS는 외부 운영 배포/채택까지 완료로 세지 않기 위해 
 ## 2026-10-05 Geo 채택·최종 코드 검증
 
 [최종 판정](../reviews/adversarial/2026-10-05-geo-common.md)에 fixed73e3ff8/Geo4c59efe, 두 독립 최종 PASS, 최초 BLOCK와 전체 수정 원문·SHA256, Python69/UI48·Geo UI231·실제 PostgreSQL17·Linux Chromium/Firefox13항목씩의 증거를 보존했다. 메모리는 유한 page·응답·동시성 구조를 적용했고 운영 RSS 실측은 NOT_RUN이다. 운영 설정/다른 앱 채택은 완료로 세지 않는다. 가이드를 포함한 common PR26·Geo PR570의 최종 checks PASS 후 merge한다.
+
+## Map·PinVi HTTP 후속 (2026-10-05)
+
+공용 HTTP 제한을 구현하고 두 독립 리뷰의 clean CI 의존 누락·DigestAuth 중간 응답·느린 정리 finding을 수정했다. API 소비자 채택·재구축·live 검증은 각 Map/PinVi PR에서 수행하며 이 문서에서 완료로 세지 않는다. 고정 후보의 전체 리뷰와 CI는 진행 중이다.

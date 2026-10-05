@@ -273,3 +273,39 @@ UI dev.6은 표 영역 내부 가로 스크롤과 공통 grid child의 `min-widt
 `showRunDetails=false` 기본 경로도 별도 검증한다. 표에 최소 너비만 주면 unclassed grid wrapper가
 min-content를 페이지로 전파할 수 있다. 320/390/640px에서 문서 폭이 viewport를 넘지 않고,
 focus 가능한 표 영역에서 ArrowRight로 스크롤되는지 확인한다. 상세 표시 경로만 검사하지 않는다.
+
+
+## 9. GraphQL·상태 조회의 응답과 대기 상한
+
+API 환경은 `kor-travel-common[http]`를 전체 SHA에 고정하고 lock을 갱신한다.
+`kortravelcommon.http.bounded_request`는 기본 4MiB plain 응답, 읽기 전체 10초와
+별도 정리 최대 50ms를 적용한다. 압축 헤더는 해제 전에 거부하며 오류 status에도 같은
+상한을 적용한다. redirect와 HTTPX 인증 재요청은 비활성화한다. Bearer 등 인증 header,
+URL 허용목록과 client 수명은 앱이 관리한다. body를 먼저 읽을 수 있는 response hook는
+거부한다. 표준 HTTPX 또는 취소에 협조하는 transport만 지원하며 취소를 억제하는
+임의 transport의 강제 종료는 보장하지 않는다. 취소·정리 실패 뒤 client 폐기는 앱 책임이다.
+
+```python
+from kortravelcommon.http import bounded_request
+
+response = await bounded_request(client, "POST", graphql_url,
+    json={"query": query, "variables": variables},
+    max_response_bytes=4 * 1024 * 1024, total_timeout_seconds=10)
+response.raise_for_status()
+payload = response.json()
+if not isinstance(payload, dict):
+    raise ValueError("GraphQL 응답은 객체이어야 합니다.")
+```
+
+`BoundedResponseError`는 `httpx.RequestError`다. write 요청에서 이런 실패를 성공이나
+미실행으로 단정하지 않는다. 앱의 기존 uncertain outcome·idempotency key·claim 복구
+절차를 유지한다. provider 업무 실패를 새 run으로 무조건 복제하지 않는다.
+
+대시보드는 최근 완료 목록과 별도 활성 실행 목록을 함께 조회해 오래된 STARTED를
+숨기지 않는다. 활성 목록을 자르면 정상 전체 집계로 표시하지 않고 degraded로 알린다.
+잘못된 results shape와 HTTP 200 degraded 응답은 정상 빈 목록으로 캐시하지 않는다.
+UI는 마지막 정상 snapshot과 조회 시각·장애 경고를 함께 유지한다.
+
+Map처럼 전체 snapshot의 완료 봉인이 필요한 적재는 batch마다 봉인하거나 부재 행을
+삭제하지 않는다. 변환은 작은 batch로 나누되 기존 단일 transaction과 최종 한 번 봉인을
+유지한다. 각 worker의 executor 동시성·DB pool도 함께 줄여 프로세스별 메모리 곱셈을 막는다.

@@ -1,3 +1,7 @@
+## 2026-10-05 Map·PinVi 공용 HTTP 후속
+
+[T-319](tasks/T-319-dagster-recovery.md)의 HTTP 응답 cap·deadline·별도 정리 예산과 dev 의존을 보강했다. 신규 23개 HTTP 회귀가 통과했다. 두 독립 사전 리뷰 원문은 보존하고 고정 후보 전체 post-fix 리뷰·CI는 진행 중이다. 소비자 재구축·live는 해당 저장소 검증이며 현재 완료로 표시하지 않는다.
+
 ## 2026-10-05 — PinVi Common Dagster dev.6 후속
 
 [최종 판정](reviews/adversarial/2026-10-05-pinvi-common.md)에 두 독립 code PASS·최초 조건부 원문/closure·SHA와 실제 PinVi N150 live 4PASS를 연결했다. dev.4 cap 미확인 모델·nullable schedule migration·소비자 actual autodiscovery gate를 가이드에 기록했다. UI50/check/build/tarball smoke, 기존337 tool tests·문서 gate PASS. 운영 shared daemon/worker kill/RSS는 NOT_RUN이다. CodeGraph index empty는 manual module/caller trace fallback으로 명시한다. 원본 T-301 checkout은 보존했다. 최종 CI 후 PR #27 merge다.

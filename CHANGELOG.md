@@ -6,6 +6,13 @@
 
 ## [Unreleased]
 
+### Python HTTP 조회 보강
+
+- `http` extra와 `bounded_request`: plain 응답 크기·전체 읽기 deadline·별도 정리 예산을 제한한다.
+- Map·PinVi에서 재사용할 때 HTTPX 인증 중간 응답과 response hook의 body cap 우회를 차단한다.
+- 기존 core/Dagster API는 유지하며 HTTP 소비자는 `http` extra로 이관한다. 상세는 [적용 가이드](docs/runbooks/dagster-adoption.md#9-graphql상태-조회의-응답과-대기-상한)를 따른다.
+
+
 ### 실행 복구와 운영 UI 개발 후보
 
 - UI `0.1.0-dev.6`: 모바일 표 가독성과 내부 keyboard 스크롤을 보강하고 기본 상세OFF 구성의 grid 너비 전파를 막는다. 기존 dev.3/4/5 artifact bytes는 보존한다.
