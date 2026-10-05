@@ -51,4 +51,4 @@ IN_PROGRESS는 외부 운영 배포/채택까지 완료로 세지 않기 위해 
 
 ## Map·PinVi HTTP 후속 (2026-10-05)
 
-공용 HTTP 제한을 구현하고 두 독립 리뷰의 clean CI 의존 누락·DigestAuth 중간 응답·느린 정리 finding을 수정했다. API 소비자 채택·재구축·live 검증은 각 Map/PinVi PR에서 수행하며 이 문서에서 완료로 세지 않는다. 고정 후보의 전체 리뷰와 CI는 진행 중이다.
+공용 HTTP 제한을 구현하고 두 독립 리뷰의 clean CI 의존 누락·DigestAuth 중간 응답·느린 정리 finding을 수정했다. API 소비자 채택·재구축·live 검증은 각 Map/PinVi PR에서 수행하며 이 문서에서 완료로 세지 않는다. 고정1f8e339의 두 독립 FULL 리뷰와 finding closure를 [최종 판정](../reviews/adversarial/2026-10-05-map-http-closure.md)에 보존했다. 외부 CI·소비자 운영 live는 별도 gate다.

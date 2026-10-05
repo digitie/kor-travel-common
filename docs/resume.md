@@ -1,5 +1,9 @@
 # 현재 상태와 다음 한 작업
 
+## 2026-10-05 — Map·PinVi HTTP 최종 독립 리뷰
+
+고정1f8e339의 두 독립 FULL 리뷰 PASS와 모든 finding FIXED, Python95/HTTP26·strict 타입·wheel·문서 도구 검증을 [최종 판정](reviews/adversarial/2026-10-05-map-http-closure.md)에 보존했다. 소비자 실제 재구축/live 및 공통 PR28 exact CI gate는 후속이다.
+
 ## 2026-10-05 Map·PinVi HTTP 후보
 
 [T-319](tasks/T-319-dagster-recovery.md)의 HTTP 응답 cap·deadline·별도 정리 예산과 dev 의존을 보강했다. 신규 26개 HTTP 회귀가 통과했다. 두 독립 사전 리뷰 원문은 보존하고 고정 후보 전체 post-fix 리뷰·CI는 진행 중이다. 소비자 재구축·live는 해당 저장소 검증이며 현재 완료로 표시하지 않는다.
