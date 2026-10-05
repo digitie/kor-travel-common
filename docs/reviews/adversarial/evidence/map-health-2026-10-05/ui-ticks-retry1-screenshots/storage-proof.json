@@ -1,0 +1,58 @@
+{
+  "status": "PASS",
+  "reason": "Common UTF-8-only fail-closed scanners reject binary PNG; preserve exact captures at immutable Map commit and original Common history without weakening policy",
+  "common_original_commit": "a891c08f52e5f0deb18283cb3a202c829ac87bfd",
+  "map_capture_commit": "4acadf7bbd9d70d80bb3db8be4708095913e23ff",
+  "captures": [
+    {
+      "file": "map-chromium-desktop.png",
+      "bytes": 617306,
+      "sha256": "16e1874b5fc4e9266bb67a309adcd72cce1e926330cef81f379454a103b229e9",
+      "immutable_url": "https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/map-chromium-desktop.png"
+    },
+    {
+      "file": "map-chromium-mobile.png",
+      "bytes": 349537,
+      "sha256": "d7c8d31235bc90bfa773e5583fb91999afc8522cdee66450abd227fd74e8b959",
+      "immutable_url": "https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/map-chromium-mobile.png"
+    },
+    {
+      "file": "map-firefox-desktop.png",
+      "bytes": 981867,
+      "sha256": "a3578128b6a21dc9c8a37197c81914beacb6ef129e6dc479af837c009e81d3b1",
+      "immutable_url": "https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/map-firefox-desktop.png"
+    },
+    {
+      "file": "map-firefox-mobile.png",
+      "bytes": 568648,
+      "sha256": "add38846d51578c3d0d2f9745a20427d78cbae8953d50b78d228879715f6dfce",
+      "immutable_url": "https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/map-firefox-mobile.png"
+    },
+    {
+      "file": "pinvi-chromium-desktop.png",
+      "bytes": 455777,
+      "sha256": "86c8d17130c238b6605650d27355ea717cd028d145b85906c52435321b3dd6d5",
+      "immutable_url": "https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/pinvi-chromium-desktop.png"
+    },
+    {
+      "file": "pinvi-chromium-mobile.png",
+      "bytes": 292431,
+      "sha256": "91afd1d6442d6d9cecbdbc9770bdebd790bf6278ed4583f4acc8bce955a54f80",
+      "immutable_url": "https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/pinvi-chromium-mobile.png"
+    },
+    {
+      "file": "pinvi-firefox-desktop.png",
+      "bytes": 658800,
+      "sha256": "f0d7d11299a80da0613624b8906e18d8f80d0deb1270d99a60694b474f5d899d",
+      "immutable_url": "https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/pinvi-firefox-desktop.png"
+    },
+    {
+      "file": "pinvi-firefox-mobile.png",
+      "bytes": 362036,
+      "sha256": "c21f8fbb58f1dda3ef44eda7714f47083b8d014f36aaae2de9f32016e6970aa4",
+      "immutable_url": "https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/pinvi-firefox-mobile.png"
+    }
+  ],
+  "original_capture_manifest_sha256": "364b5658bd10818609c8c3369a2c3a75dffc45364f5e0b658b62a1a4f848eb22",
+  "product_code_changed": false
+}

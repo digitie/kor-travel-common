@@ -1,0 +1,14 @@
+# 실제 UI 캡처 보존 위치
+
+Common 전체 트리 정보 유출 검사기는 UTF-8 텍스트만 수용하고 바이너리 입력은 fail-closed한다. 이 계약을 유지하기 위해 Common의 현재 트리에는 원본 캡처 manifest와 이 색인을 보존한다. 실제 캡처8개는 아래 고정 Map commit에 보존하며, Common 최초 보존 commit `a891c08f52e5f0deb18283cb3a202c829ac87bfd`의 동일 파일도 Git history에 남는다. 두 저장소의 원본 PNG bytes와 SHA256이 모두 일치함을 확인한 뒤 현재 Common 트리의 중복 PNG만 제거했다. 기존 리뷰 원문·영수증·manifest는 변경하지 않았으며 이전 manifest의 Common 파일 경로는 최초 보존 commit의 스냅샷을 가리킨다.
+
+| 원본 캡처 | bytes | SHA256 |
+| --- | ---: | --- |
+| [map-chromium-desktop.png](https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/map-chromium-desktop.png) | 617306 | `16e1874b5fc4e9266bb67a309adcd72cce1e926330cef81f379454a103b229e9` |
+| [map-chromium-mobile.png](https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/map-chromium-mobile.png) | 349537 | `d7c8d31235bc90bfa773e5583fb91999afc8522cdee66450abd227fd74e8b959` |
+| [map-firefox-desktop.png](https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/map-firefox-desktop.png) | 981867 | `a3578128b6a21dc9c8a37197c81914beacb6ef129e6dc479af837c009e81d3b1` |
+| [map-firefox-mobile.png](https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/map-firefox-mobile.png) | 568648 | `add38846d51578c3d0d2f9745a20427d78cbae8953d50b78d228879715f6dfce` |
+| [pinvi-chromium-desktop.png](https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/pinvi-chromium-desktop.png) | 455777 | `86c8d17130c238b6605650d27355ea717cd028d145b85906c52435321b3dd6d5` |
+| [pinvi-chromium-mobile.png](https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/pinvi-chromium-mobile.png) | 292431 | `91afd1d6442d6d9cecbdbc9770bdebd790bf6278ed4583f4acc8bce955a54f80` |
+| [pinvi-firefox-desktop.png](https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/pinvi-firefox-desktop.png) | 658800 | `f0d7d11299a80da0613624b8906e18d8f80d0deb1270d99a60694b474f5d899d` |
+| [pinvi-firefox-mobile.png](https://github.com/digitie/kor-travel-map/blob/4acadf7bbd9d70d80bb3db8be4708095913e23ff/docs/reviews/common-dagster-2026-10-05/evidence/ui-ticks-retry1-screenshots/pinvi-firefox-mobile.png) | 362036 | `c21f8fbb58f1dda3ef44eda7714f47083b8d014f36aaae2de9f32016e6970aa4` |

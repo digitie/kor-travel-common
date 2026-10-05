@@ -273,3 +273,83 @@ UI dev.6은 표 영역 내부 가로 스크롤과 공통 grid child의 `min-widt
 `showRunDetails=false` 기본 경로도 별도 검증한다. 표에 최소 너비만 주면 unclassed grid wrapper가
 min-content를 페이지로 전파할 수 있다. 320/390/640px에서 문서 폭이 viewport를 넘지 않고,
 focus 가능한 표 영역에서 ArrowRight로 스크롤되는지 확인한다. 상세 표시 경로만 검사하지 않는다.
+
+
+## 9. GraphQL·상태 조회의 응답과 대기 상한
+
+API 환경은 `kor-travel-common[http]`를 전체 SHA에 고정하고 lock을 갱신한다.
+`kortravelcommon.http.bounded_request`는 기본 4MiB plain 응답, 읽기 전체 10초와
+별도 정리 최대 50ms를 적용한다. 압축 헤더는 해제 전에 거부하며 오류 status에도 같은
+상한을 적용한다. redirect와 HTTPX 인증 재요청은 비활성화한다. Bearer 등 인증 header,
+URL 허용목록과 client 수명은 앱이 관리한다. body를 먼저 읽을 수 있는 response hook는
+거부한다. 표준 HTTPX 또는 취소에 협조하는 transport만 지원하며 취소를 억제하는
+임의 transport의 강제 종료는 보장하지 않는다. 본문 실패는 원래 예외를 유지하고 정상 본문 뒤 정리 실패도 `BoundedResponseError`로 알린다.
+`httpx.RequestError` 뒤에는 client를 폐기하고, 가능하면 조회 단위로 client 수명을 제한한다.
+외부 취소 뒤 client 폐기도 앱 책임이다.
+
+```python
+from kortravelcommon.http import bounded_request
+
+response = await bounded_request(client, "POST", graphql_url,
+    json={"query": query, "variables": variables},
+    max_response_bytes=4 * 1024 * 1024, total_timeout_seconds=10)
+response.raise_for_status()
+payload = response.json()
+if not isinstance(payload, dict):
+    raise ValueError("GraphQL 응답은 객체이어야 합니다.")
+```
+
+`BoundedResponseError`는 `httpx.RequestError`다. write 요청에서 이런 실패를 성공이나
+미실행으로 단정하지 않는다. 앱의 기존 uncertain outcome·idempotency key·claim 복구
+절차를 유지한다. provider 업무 실패를 새 run으로 무조건 복제하지 않는다.
+
+대시보드는 최근 완료 목록과 별도 활성 실행 목록을 함께 조회해 오래된 STARTED를
+숨기지 않는다. 활성 목록을 자르면 정상 전체 집계로 표시하지 않고 degraded로 알린다.
+잘못된 results shape와 HTTP 200 degraded 응답은 정상 빈 목록으로 캐시하지 않는다.
+UI는 마지막 정상 snapshot과 조회 시각·장애 경고를 함께 유지한다.
+
+Map처럼 전체 snapshot의 완료 봉인이 필요한 적재는 batch마다 봉인하거나 부재 행을
+삭제하지 않는다. 변환은 작은 batch로 나누되 기존 단일 transaction과 최종 한 번 봉인을
+유지한다. 각 worker의 executor 동시성·DB pool도 함께 줄여 프로세스별 메모리 곱셈을 막는다.
+
+## 10. code-server 자식 로딩을 확인하는 경량 건강 점검
+
+`code-server start`의 proxy `DagsterApi` health는 자식 load error에도 SERVING일 수 있다.
+`python -I -m kortravelcommon.dagster_health <loopback-port>`를 `[dagster]`가 설치된 이미지에서
+실행한다. 공통 `code_server_is_healthy(port)`는 proxy health 뒤 자식 `ListRepositories`를
+각 4초·수신 4MiB 상한으로 호출하고 channel을 닫는다. 빈 protobuf, 손상 wire/JSON,
+중복 JSON 필드, 다른 class, 누락/손상 repository symbol은 모두 실패한다. 정상 빈 symbol
+목록은 정상 `ListRepositoriesResponse` schema이면 허용한다.
+
+Dagster 전체를 import하지 않고 설치된 Dagster의 생성 protobuf를 파일로 로드한다.
+wire schema를 복제하지 않으며 설치 경로/프로토콜 변경도 정상으로 오인하지 않는다.
+이 호출은 health 판정만 한다. Docker `unhealthy`는 자동 재시작을 의미하지 않으므로
+소비자의 watchdog/launcher·native run monitoring·중지 복구 정책을 별도로 유지한다.
+CLI 기동·두 RPC를 포함하도록 컨테이너 healthcheck timeout은 15초 이상으로 두고,
+실제 사용 Dagster 버전·이미지에서 성공/빈 응답/load error/deadline을 확인한다.
+
+Map standalone 채택의 실제 protobuf 빈·잘못된 reply가 기존 substring probe에서
+healthy로 통과한 적대 리뷰 반례가 승격 근거다. Manager와 Map의 같은 proxy/자식 로딩
+계약 비용을 공통 Python으로 줄이며 Manager 운영 watchdog은 이 변경으로 대체하지 않는다.
+새 공통 후보·Map 채택의 운영 재구축/live gate는 아직 NOT_RUN이다.
+
+건강 점검의 JSON 지원 profile은 현재 소비자가 쓰는 `ModuleCodePointer`, `FileCodePointer`,
+`PackageCodePointer`와 표준 문자열/목록/nullable metadata다. 포인터 필드·working directory,
+executable/entry point/image, library versions와 plain JSON container context도 검증한다.
+Custom/autoload pointer, stateful `defs_state_info`, typed container context와 새/알려지지 않은
+필드는 정상으로 추측하지 않고 실패한다. 이 profile은 임의 Dagster serdes 객체의 대체물이
+아니며 해당 location을 채택하려면 고정 Dagster 버전의 실제 positive/negative reply 회귀와
+명시적 공통 profile 확장이 먼저다. 현재 Map 운영 module location에서 실제 CLI를 확인한다.
+
+Library versions와 repository pointer dictionary의 Dagster serdes marker 키
+(`__class__`, `__enum__`, `__set__`, `__frozenset__`, `__mapping_items__`)도 거부한다.
+일반 repository 이름 `__repository__`는 marker가 아니며 Map Definitions의 정상
+default 이름으로 허용한다. 실제 serializer/isolated CLI 정상 control을 유지한다.
+
+## 11. 최신 tick 조회의 저장소 작업 상한
+
+Dagster 1.13.24의 repository batch loader는 `ticks(limit: 3)`만으로 전체 tick 이력의 rank 작업을 제한하지 않는다. 실제 Map 요약은 sensor tick 저장소의 15초 statement timeout 때문에 실패했으며, API의 공통 HTTP 10초 deadline이 먼저 `unavailable`로 반환했다. HTTP·응답 cap을 늘리거나 공유 DB의 이력을 삭제하지 않는다.
+
+Map·PinVi처럼 최신 3건을 표시하는 요약은 `ticks(limit: 3, statuses: [STARTED, SKIPPED, SUCCESS, FAILURE])`를 사용한다. 실제 설치 schema의 네 상태를 전부 포함하므로 실패·진행 중 tick을 숨기지 않는다. 이 버전에서는 nonempty `statuses`가 batch loader를 우회하고 selector별 최신 LIMIT 조회를 사용한다. 실제 Map의 같은 query는 2.077초에 정상 응답했으며 state당 최대 3건을 유지했다. [독립 진단·조회 검증](../reviews/adversarial/evidence/map-health-2026-10-05/review-summary-tick-query-recovery.md)을 참조한다.
+
+이 query 선택은 소비자 API가 소유한다. 공통 Python HTTP 코드는 요청 전체 deadline·응답 바이트 상한·연결 정리를 계속 적용한다. Dagster를 업그레이드할 때는 실제 enum과 resolver 경로를 다시 확인한다. 새 tick 상태가 추가되면 전체 상태 선택과 검증을 함께 갱신한다. selector의 legacy NULL 값과 timestamp 동률에서 두 저장소 경로가 완전히 같다고 주장하지 않는다. 수용 기준은 소유 instigation의 최신 최대 3건과 모든 현재 상태·오류 정보를 보존하는 것이다.

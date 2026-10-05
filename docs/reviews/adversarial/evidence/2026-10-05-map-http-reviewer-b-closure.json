@@ -1,0 +1,85 @@
+{
+  "schema": "kor-travel-common.adversarial.preservation.v1",
+  "preservation_execution_id": "J-COMMON-HTTP-EVIDENCE-20261005-01",
+  "preserved_at_utc": "2026-10-05T08:18:56Z",
+  "baseline": "7dc1d6dda955b9b836cb3f24d6fd5bcd37fabe52",
+  "final_candidate": "1f8e339c7c79f86f8952b0d4c326ab4dae56bee8",
+  "final_review_scope": "full",
+  "final_verdict": "PASS",
+  "findings": [
+    {
+      "id": "B-P1-01",
+      "severity": "P1",
+      "disposition": "FIXED"
+    },
+    {
+      "id": "B-P2-01",
+      "severity": "P2",
+      "disposition": "FIXED"
+    },
+    {
+      "id": "B-P2-02",
+      "severity": "P2",
+      "disposition": "FIXED"
+    }
+  ],
+  "raw_records": [
+    {
+      "phase": "precommit",
+      "verdict": "BLOCK",
+      "execution_id": "J-COMMON-HTTP-20261005-01",
+      "candidate": null,
+      "original_sha256": "5eda243427a38b01a4386353d533605b13f6895b8d4e81f41ea093346f2d3280",
+      "markdown_file": "2026-10-05-map-http-reviewer-b-precommit-raw.md",
+      "markdown_file_sha256": "56b1dbc10c62baa5c8d888080069c2ba0e7c666f7b5393d70b14153e2fce7a4c",
+      "wrapper_file": "2026-10-05-map-http-reviewer-b-precommit-raw.json",
+      "wrapper_file_sha256": "c7823b99290aa94a85263d52d5ded0759a45e719b74d46b121437430e63abfb2"
+    },
+    {
+      "phase": "postfix-2f7a927",
+      "verdict": "CONDITIONAL",
+      "execution_id": "J-COMMON-HTTP-POSTFIX-20261005-01",
+      "candidate": "2f7a9277c7191bb87e91593a37d53ad6e3ed2065",
+      "original_sha256": "9d9a7aea8eca6aa738583bcee2b39c45964f308d581b55f87cd41f2f74e12baf",
+      "markdown_file": "2026-10-05-map-http-reviewer-b-postfix-2f7a927-raw.md",
+      "markdown_file_sha256": "9d9a7aea8eca6aa738583bcee2b39c45964f308d581b55f87cd41f2f74e12baf",
+      "wrapper_file": "2026-10-05-map-http-reviewer-b-postfix-2f7a927-raw.json",
+      "wrapper_file_sha256": "d0e0bbb5b809e4f1a278fdac3fb52c7b280b1da9dd2883693deed929e4a7e2f1"
+    },
+    {
+      "phase": "postfix-befbd6f",
+      "verdict": "CONDITIONAL",
+      "execution_id": "J-COMMON-HTTP-POSTFIX-20261005-02",
+      "candidate": "befbd6fdb68127cd3f800651bd888cc44ebfbe34",
+      "original_sha256": "fd13243d01d0b3ddccea7eebb888c5c8e93d2a64a0ba6f7598021c5ff033a8ca",
+      "markdown_file": "2026-10-05-map-http-reviewer-b-postfix-befbd6f-raw.md",
+      "markdown_file_sha256": "fd13243d01d0b3ddccea7eebb888c5c8e93d2a64a0ba6f7598021c5ff033a8ca",
+      "wrapper_file": "2026-10-05-map-http-reviewer-b-postfix-befbd6f-raw.json",
+      "wrapper_file_sha256": "d39b6d73e37dae0327d5c3a0d479df5cf8174789c513cd5f2c78fb41cc1dd08e"
+    },
+    {
+      "phase": "final",
+      "verdict": "PASS",
+      "execution_id": "J-COMMON-HTTP-POSTFIX-20261005-03",
+      "candidate": "1f8e339c7c79f86f8952b0d4c326ab4dae56bee8",
+      "original_sha256": "37c66482f5c46a8c2d64aa20d3b2543de8531de8a7f0c5c07bf3e325926f48e5",
+      "markdown_file": "2026-10-05-map-http-reviewer-b-final-raw.md",
+      "markdown_file_sha256": "a06b23254246fe1b52eb4c02a464941b73c107f1985da6e7ad2f6b384bc756c4",
+      "wrapper_file": "2026-10-05-map-http-reviewer-b-final-raw.json",
+      "wrapper_file_sha256": "1c9dff79dd73774670ccc66908e44ddb8961e2f5c5db4bd1056bd9511d22c0a1"
+    }
+  ],
+  "existing_tracked_files_unchanged": [
+    {
+      "file": "2026-10-05-map-http-reviewer-b.md",
+      "file_sha256": "56b1dbc10c62baa5c8d888080069c2ba0e7c666f7b5393d70b14153e2fce7a4c"
+    },
+    {
+      "file": "2026-10-05-map-http-reviewer-b.json",
+      "file_sha256": "abbca35598937442a148c8dd91f6df8d9c8facae9baa56ea2cee0c65b90de0a8"
+    }
+  ],
+  "closure_document": "2026-10-05-map-http-reviewer-b-closure.md",
+  "closure_document_file_sha256": "6a4ecc68577ea1766e0b76c02ad6bed298d0b871b423cc9edeb281324f96be72",
+  "display_normalization": "공개 MD trailing whitespace를 제거했으며 original_sha256은 JSON raw의 원본 digest다. 현재 MD/wrapper 파일 digest는 각각 따로 기록한다."
+}

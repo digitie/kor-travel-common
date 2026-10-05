@@ -1,0 +1,43 @@
+# Common HTTP 2f7a927 FULL 독립 post-fix 리뷰
+고정 candidate 2f7a9277c7191bb87e91593a37d53ad6e3ed2065, baseline7dc1d6dda955b9b836cb3f24d6fd5bcd37fabe52.
+판정 BLOCK: 이전 H-01~H-04 해소, 추가 H-05 cleanup 실패의 성공 반환과 H-06 공개 typing 오류가 남았다. 이 문서는 다음 수정 후보와 구분하여 불변 보존한다.
+
+## 범위와 보존
+본인 /tmp/common-map-http-2f7a927-recovery-independent에 git archive로 고정했다. 제품/원본/설치·외부서비스 수정 없음. docs/reviews/adversarial/evidence/2026-10-05-map-http-manifest.json 14개 파일SHA256 모두 직접 일치. 본인 reviewer-a md는 기존 BLOCK 원문과 byte identical(3622f7661f03d29e9fab87ef167b7f32c1cfe1b83757868b67089b977d36b496). reviewer-b md/json 내용은 열거나 출력하지 않고 파일 bytes SHA만 대조했다. 전체 문서 링크 검사 도구는595문서를 자동 스캔했으며 원문 내용을 출력하거나 reviewer-b 판정을 읽지 않았다.
+15파일 전체 delta를 검토했다: public HTTP module/test, optional http/dev extra/uv lock, packageREADME/CHANGELOG, Dagster guide/task/journal/resume, manifest 및 보존 원문 파일(metadata만). 기존 Common Dagster/Python core와 UI 제품 source는 변경없다.
+
+## 이전 finding closure
+H-01 cleanCI: dev에 httpx 직접 의존과 uv.lock 반영. 현재 workflow dev+dagster 전이 closure60packages에 httpx 포함 PASS. 기존 clean install/collection 누락의 구조적 원인 해소. fresh network uv sync는 본인 미실행이다.
+H-02 인증 flow cap우회: build_request/send(auth=None,follow_redirects=False,stream=True) 적용. DefaultDigestAuth client에서 first401 largebody가 cap에 거부되고 actual standard HTTP/1.1 loopback request1회/Authorization 없음; auth 재요청 없음 PASS. Mock rawchunk case request1/read1, cap1024/peak73494bytes(구현·producer allocation 포함)였고 중간16MiB누적 해소. response hook는 request send 이전 fail-closed 확인 PASS.
+H-03 close deadline: response.stream 직접 consume와 별도50ms wait_for cleanup. 읽기40ms+slowclose250ms 반례에서0.0912288s로 제한, cleanup cooperative cancellation 확인 PASS. caller cancel0.0502952s에 CancelledError 그대로 전파 PASS. 표준 HTTPX/협조적transport만 지원하고 악의적cancel억제coroutine 강제종료 불가라는 README/guide 계약은 적절하다.
+H-04 timeout.request: total deadline에서 ReadTimeout.request.url 실제값 http://test.invalid/path 보존 PASS.
+
+## 추가 P2 H-05: 정리 실패를 숨기고 성공 응답을 반환한다
+packages/py/kor-travel-common/src/kortravelcommon/http.py:96-103 (finally close handling).
+본문200 b'ok' 뒤 cooperative aclose가250ms 걸리는 stream은50ms에 취소되었지만 helper는200/ok를 정상 반환했다. inner stream.closed=False/cancelled=True/elapsed0.0507424s. aclose가 httpx.ReadError를 던지는 stream도200/ok 반환, closed=False였다.
+문서는 cleanup 실패 뒤 client 폐기를 앱 책임으로 두지만 호출자는 cleanup 실패를 전달받지 않아 폐기 경로를 선택할 수 없다. connection pool/transport resource를 정리하지 못한 상태를 정상으로 숨길 수 있다.
+수정 권고: 성공 body 뒤 cleanup timeout/error는 request를 연결한 BoundedResponseError로 반환하여 호출자가 client 폐기를 알게 한다. 이미 발생한 body cap/timeout/callercancel의 원예외는 cleanup 실패가 덮어쓰지 않게 유지한다. successful body+close timeout/readerror2회귀와 기존 오류 보존을 함께 검증한다. 실제 표준 HTTPX transport에서 느린close/resource leak을 재현한 finding이 아니라 지원하는 cooperative customstream의 명시 실패 전달 계약이다.
+
+## 추가 P2 H-06: strict typing에서 async raw stream union 오류
+src/kortravelcommon/http.py:82.
+본인 <python> -m mypy --strict src/kortravelcommon/http.py 실행:
+Item SyncByteStream of SyncByteStream | AsyncByteStream has no attribute __aiter__ (not async iterable), union-attr1FAIL.
+httpx.Response.stream의 public annotation은 union이며 AsyncClient.send의 runtime check가 consumer module에서 정적으로 좁혀지지 않는다. AsyncByteStream isinstance narrowing이나 근거 있는 cast로 계약을 표현하고 strict gate를 통과해야 한다. 실제 네트워크 정상 실행과 타입 게이트는 별도이다.
+
+## 직접 실행한 정상 경계
+- 독립 frozen Common pytest92 PASS(104.68s), 신규 HTTP23 포함. 부모 결과와 합산하지 않는다.
+- ruff check http.py/test_http.py PASS. mypy strict는 위1FAIL.
+- 실제 standard AsyncHTTPTransport/본인 loopback fixture에서 gzip/oversized chunked 거부, all requests Accept-Encoding identity, redirect 설정True에도302미추적/target0,401body그대로, trickle60ms→0.0659129s, callercancel0.0028416s PASS.
+- declared Content-Length oversized/negative/malformed body-before-read, 압축4형태 decoder-before-read, cap/error-status/input finite validation은 본인 full92에 포함 PASS.
+- uv build --wheel 성공. wheel SHA256077172558aabc9e4ee5e39d874e5f4653d5f6937cbf2a70e87d242163f502bae. module source byte exact, METADATA httpx dependency가 dev/http extras에만 존재.
+- wheel을 본인 temp에 unpack하고 Python -S로 wheel code만 sys.path에 넣어 import kortravelcommon와 deadline 실행: httpx/dagster sys.modules 없음 PASS. no-extra core import의 실제 wheel 경계 확인이며 pip clean환경 설치를 수행한 것은 아니다.
+- python3 tools/validate_document_links.py:595documents/2693localtargets/errors0. python3 tools/validate_plan.py:109tasks/errors0.
+- README/Dagster guide는 인증header/client수명/URL소유권, responsehook금지, 읽기10s+별도50ms, 제한위반은RequestError, write uncertain outcome/claim/idempotency유지, oldactive/degraded/snapshot complete봉인 경계를 명시한다. 후보 소비자/live를 완료로 세지 않는 task/journal 범위가 정확하다.
+- uv.lock 전체 package delta는 anyio/h11/httpcore/httpx 추가와 common extras metadata변경이며 기존 Dagster/다른package 객체가 변하지 않는 범위이다.
+
+## 명령·증거와 미실행
+본인 snapshot의 PYTHONPATH=packages/py/kor-travel-common/src, 재사용 Python /home/digitie/.cache/map-common-recovery-venv/bin/python(httpx0.28.1,Python3.13).
+<python> -m pytest -q(패키지cwd), -m ruff check ..., -m mypy --strict ..., uv build --wheel --out-dir 본인wheel-output.
+probe_closure.py, probe_real_transport.py, probe_cleanup_success.py; closure-evidence.json, real-transport-evidence.json, cleanup-success-evidence.json, wheel-evidence.json 보존.
+처음 wheel metadata probe는 quote형태를 너무 제한해 자체assert가 실패했고 표준metadata표현의 dependency/extra semantic 검사로 보정했다. 제품 실패로 집계하지 않는다. 문서 도구 파일명을 처음 잘못 호출한 own명령실패2건 후 실제 validate_document_links/validate_plan을 실행했다.
+Python3.11/httpx0.27/TLS/HTTP2, freshCI, tools337 unittest, 실제Map/PinViAPP/PG/N150운영/UI/live/후속candidate전체는 미실행이다. 표준transport cleanup 지연은 재현하지 못했다. peer findings 결과는 읽지 않았으며 구현자 추가 점검 안내와 별개로 H-05를 본인 fixedprobe에서 직접 재현했다.
