@@ -27,6 +27,8 @@
 .kt-dagster-operations .sync-run-detail-grid { display: grid; gap: .75rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (max-width: 640px) {
   .kt-dagster-operations .ops-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* 좁은 화면에서 이름을 몇 글자씩 쪼개지 않고 focus 가능한 표 영역 안에서 스크롤한다. */
+  .kt-dagster-operations .table-wrap table { min-width: 40rem; }
   .kt-dagster-operations .sync-run-detail-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
