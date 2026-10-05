@@ -146,14 +146,14 @@ export function DagsterOperations({ snapshot, error = "", loading = false, onRef
       {error ? <div className="error" data-slot="dagster-operations-error" role="alert">{error}{snapshot ? <small>아래는 마지막 조회 결과입니다. 현재 상태는 확인하지 못했습니다.</small> : null} <button type="button" className="ghost" onClick={load} disabled={loading}>다시 시도</button></div> : null}
       {stalled > 0 ? (
         <div className="error" role="alert">
-          {stalled}개 실행이 실행 상한을 넘었습니다. 아래 목록에서 &quot;정체 의심&quot; 표시를 확인하세요.
+          {stalled}개 실행의 경과 시간이 확인 기준을 넘었습니다. 아래 목록에서 &quot;정체 의심&quot; 표시를 확인하세요.
         </div>
       ) : null}
       <section className="ops-grid" data-slot="dagster-operations-summary" aria-label="Dagster 요약">
         <div className="panel ops-card"><span>사용 중인 스케줄</span><strong>{snapshot ? `${healthy}/${schedules.length}` : "—"}</strong><small>전체 스케줄 대비</small></div>
         <div className="panel ops-card"><span>최근 성공</span><strong>{snapshot ? successes : "—"}</strong><small>최근 {snapshot?.runs.length ?? 0}건 중</small></div>
         <div className="panel ops-card" data-tone={failures > 0 ? "error" : undefined}><span>최근 실패</span><strong>{snapshot ? failures : "—"}</strong><small>재시도·원인 확인 대상</small></div>
-        <div className="panel ops-card" data-tone={stalled > 0 ? "warning" : undefined}><span>정체된 실행</span><strong className={stalled > 0 ? "warn-text" : undefined}>{snapshot ? stalled : "—"}</strong><small>job별 실행 상한 · 미설정 시 {Math.floor(STALLED_RUN_THRESHOLD_SECONDS / 60)}분</small></div>
+        <div className="panel ops-card" data-tone={stalled > 0 ? "warning" : undefined}><span>정체된 실행</span><strong className={stalled > 0 ? "warn-text" : undefined}>{snapshot ? stalled : "—"}</strong><small>job별 실행 상한 · 생략 시 지연 기준 {Math.floor(STALLED_RUN_THRESHOLD_SECONDS / 60)}분</small></div>
       </section>
       <div className={showRunDetails ? "dagster-run-layout" : undefined}>
       <section className="panel dagster-runs">
@@ -175,7 +175,7 @@ export function DagsterOperations({ snapshot, error = "", loading = false, onRef
           {selectedRun ? <div className="dagster-detail-body"><strong>{jobLabel(selectedRun.jobName)}</strong><code>{selectedRun.runId}</code>
             <span className={`status ${runStatusClass(selectedRun, nowSeconds)}`}>{runStatusLabel(selectedRun.status)}</span>
             <dl><dt>시작</dt><dd>{dateTime(selectedRun.startTime)}</dd><dt>종료</dt><dd>{dateTime(selectedRun.endTime)}</dd>
-              <dt>실행 상한</dt><dd>{formatElapsed(selectedRun.maxRuntimeSeconds !== undefined && Number.isFinite(selectedRun.maxRuntimeSeconds) && selectedRun.maxRuntimeSeconds > 0 ? selectedRun.maxRuntimeSeconds : STALLED_RUN_THRESHOLD_SECONDS)}</dd></dl>
+              <dt>{selectedRun.maxRuntimeSeconds === undefined ? "지연 판단 기준" : "실행 상한"}</dt><dd>{(selectedRun.maxRuntimeSeconds !== undefined && (selectedRun.maxRuntimeSeconds === null || !Number.isFinite(selectedRun.maxRuntimeSeconds) || selectedRun.maxRuntimeSeconds <= 0)) ? "미확인" : formatElapsed(selectedRun.maxRuntimeSeconds !== undefined && Number.isFinite(selectedRun.maxRuntimeSeconds) && selectedRun.maxRuntimeSeconds > 0 ? selectedRun.maxRuntimeSeconds : STALLED_RUN_THRESHOLD_SECONDS)}</dd></dl>
             {selectedRun.errorMessage ? <p className="dagster-run-error">{selectedRun.errorMessage}</p> : null}
             <a className="inline-link" href={runUrl(selectedRun.runId)} target="_blank" rel="noreferrer">선택한 실행을 Dagster에서 열기 ↗</a>
           </div> : <p className="empty">목록에서 실행을 선택하면 상세를 확인할 수 있습니다.</p>}

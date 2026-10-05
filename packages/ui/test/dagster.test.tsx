@@ -159,3 +159,22 @@ test("job 정보가 없는 스케줄은 이름을 작업으로 단정하지 않�
   const detail = screen.getByText("실행되는 작업").parentElement!;
   expect(detail).toHaveTextContent("미확인");
 });
+
+
+test("explicit unknown runtime does not invent a cap or mark an active run stalled", () => {
+  const run = { runId: "unknown-cap", jobName: "__ASSET_JOB", status: "STARTED",
+    startTime: 1, endTime: null, errorMessage: null, maxRuntimeSeconds: null };
+  expect(isStalledRun(run, 100000)).toBe(false);
+});
+
+test("unknown cap detail is explicit, while omitted cap is labeled only as a delay heuristic", async () => {
+  const run = { runId: "unknown-cap", jobName: "__ASSET_JOB", status: "STARTED",
+    startTime: 1, endTime: null, errorMessage: null, maxRuntimeSeconds: null };
+  const props = {onRefresh:vi.fn(), runUrl:()=>"#", scheduleUrl:()=>"#", showRunDetails:true};
+  const {rerender} = render(<DagsterOperations {...props} snapshot={{...snapshot,runs:[run]}} />);
+  await userEvent.click(screen.getByRole("button",{name:/실행 상세:/}));
+  expect(screen.getByText("미확인")).toBeVisible();
+  expect(screen.queryByText("정체 의심")).toBeNull();
+  rerender(<DagsterOperations {...props} snapshot={{...snapshot,runs:[{...run,maxRuntimeSeconds:undefined}]}} />);
+  expect(screen.getByText("지연 판단 기준")).toBeVisible();
+});

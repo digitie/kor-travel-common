@@ -57,3 +57,12 @@ tarball 소비자·live UI·2인 최종 리뷰는 이 절 작성 시 IN_PROGRESS
 ## 2026-10-05 Geo 채택·최종 코드 검증
 
 [최종 판정](../reviews/adversarial/2026-10-05-geo-common.md)에 fixed73e3ff8/Geo4c59efe, 두 독립 최종 PASS, 최초 BLOCK와 전체 수정 원문·SHA256, Python69/UI48·Geo UI231·실제 PostgreSQL17·Linux Chromium/Firefox13항목씩의 증거를 보존했다. 메모리는 유한 page·응답·동시성 구조를 적용했고 운영 RSS 실측은 NOT_RUN이다. 운영 설정/다른 앱 채택은 완료로 세지 않는다. 가이드를 포함한 common PR26·Geo PR570의 최종 checks PASS 후 merge한다.
+
+
+## PinVi 후속 — 실행 상한 미확인 (2026-10-05)
+
+`DagsterRun.maxRuntimeSeconds`는 양수이면 실제 cap, 생략하면 기존 600초 지연 heuristic,
+명시적 `null`이면 cap 미확인이다. `null` run은 cap 기반 stalled count에 넣지 않고 상세에
+미확인으로 표시한다. 생략의 상세는 “지연 판단 기준”으로 구분하여 실제 daemon 설정인 척하지 않는다.
+UI `0.1.0-dev.4`로 새 artifact를 만들며 기존 dev.3 bytes를 바꾸지 않는다.
+PinVi가 run tag를 확인해 숫자 또는 null을 전달한다. 운영 RSS·shared daemon 배포는 NOT_RUN이다.
