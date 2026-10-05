@@ -2,7 +2,7 @@
 
 ## 2026-10-05 Map·PinVi HTTP 후보
 
-[T-319](tasks/T-319-dagster-recovery.md)의 HTTP 응답 cap·deadline·별도 정리 예산과 dev 의존을 보강했다. 신규 23개 HTTP 회귀가 통과했다. 두 독립 사전 리뷰 원문은 보존하고 고정 후보 전체 post-fix 리뷰·CI는 진행 중이다. 소비자 재구축·live는 해당 저장소 검증이며 현재 완료로 표시하지 않는다.
+[T-319](tasks/T-319-dagster-recovery.md)의 HTTP 응답 cap·deadline·별도 정리 예산과 dev 의존을 보강했다. 신규 24개 HTTP 회귀가 통과했다. 두 독립 사전 리뷰 원문은 보존하고 고정 후보 전체 post-fix 리뷰·CI는 진행 중이다. 소비자 재구축·live는 해당 저장소 검증이며 현재 완료로 표시하지 않는다.
 
 
 현재 상태의 정본이다. 정책은 [AGENTS](../AGENTS.md), 문서 선택은 [문서 지도](README.md), 상세 상태·선행은 [task 원장](tasks.md)을 따른다. 마지막 갱신: 2026-10-05, Codex.

@@ -155,3 +155,15 @@ def test_slow_cooperative_cleanup_has_separate_bounded_budget():
         run(stream, total_timeout_seconds=0.04)
     assert caught.value.request.url == "http://example.test/graphql"
     assert time.monotonic() - start < 0.25
+
+
+def test_cleanup_failure_never_returns_healthy_response():
+    class SlowClose(Chunks):
+        async def aclose(self):
+            await asyncio.sleep(1)
+            self.closed = True
+
+    stream = SlowClose([b"{}"])
+    with pytest.raises(BoundedResponseError, match="정리"):
+        run(stream)
+    assert not stream.closed

@@ -2,19 +2,20 @@
   "base": "7dc1d6dda955b9b836cb3f24d6fd5bcd37fabe52",
   "reviewScope": "full",
   "files": {
-    "packages/py/kor-travel-common/src/kortravelcommon/http.py": "e76f656c527c5350bdb48e660dd520b99918b3bd6272ebbfd1401b0f6bf6c38b",
-    "packages/py/kor-travel-common/tests/test_http.py": "9515abb34a1a147db4febc683152f5ba3ee1ebce52551470bf38a5c9683e8f32",
+    "packages/py/kor-travel-common/src/kortravelcommon/http.py": "be340d76b35dc67913943a2696c4d4d7d3b4ed1a60a18187e0d83876a9798a87",
+    "packages/py/kor-travel-common/tests/test_http.py": "9bf677c8286b9d640bd645aa2313960948062efe569e1d440ac4413227cfebeb",
     "packages/py/kor-travel-common/pyproject.toml": "ddbbaeafa6342cde3d1731fd62ae347aeb1257dc054a865c34d32d6b7c286faf",
     "packages/py/kor-travel-common/uv.lock": "6b6c095140d778dcdbea0941cf8248a2801c46a91917ec5bbf0a9c0d94bcd812",
     "packages/py/kor-travel-common/README.md": "2591b0faa6b3c063bd8f5a420b2fc6d82178c4394b9cf30d21f3ec427ce6c2f4",
-    "docs/runbooks/dagster-adoption.md": "13b1c9b80c5dfd4d1fd772098267fea52fdc4ea8f29816da8eb1b1402f9c9b6a",
+    "docs/runbooks/dagster-adoption.md": "1009b558025e369c48a5e165d8d90157f588513a5df21ee9d1ae72c68afe2ee0",
     "docs/tasks/T-319-dagster-recovery.md": "433f220ec78902ee803907716aecc831122467d443e2c8de8722946e280e84c5",
-    "docs/journal.md": "1ab57f0380d0e9a8fb90707c324865663b896a903bdf1a80a4b9bc4230c16778",
-    "docs/resume.md": "001acb267e7e14625f47391b20a88b9e8a329beac707208a3f82b972a32d222a",
+    "docs/journal.md": "ef04823dc6a21cae9180adfd45125396ffcc09cd0a1b2a7b13a93325def56d44",
+    "docs/resume.md": "42df5bc528e512e2b51e9407ef4f753ff17986aacc77e8d62097ab106dc2065d",
     "CHANGELOG.md": "c005b9df3de0c3e98c7dee1a39e553f4ca670ef9c4d7858e7688e3ad396402ae",
     "docs/reviews/adversarial/evidence/2026-10-05-map-http-reviewer-a.md": "3622f7661f03d29e9fab87ef167b7f32c1cfe1b83757868b67089b977d36b496",
     "docs/reviews/adversarial/evidence/2026-10-05-map-http-reviewer-b.md": "56b1dbc10c62baa5c8d888080069c2ba0e7c666f7b5393d70b14153e2fce7a4c",
     "docs/reviews/adversarial/evidence/2026-10-05-map-http-reviewer-a.json": "8aa4263e7d098e3f4ea368a262fc9e6da8f21aaba5f363bd4535da422aa51aa4",
-    "docs/reviews/adversarial/evidence/2026-10-05-map-http-reviewer-b.json": "abbca35598937442a148c8dd91f6df8d9c8facae9baa56ea2cee0c65b90de0a8"
+    "docs/reviews/adversarial/evidence/2026-10-05-map-http-reviewer-b.json": "abbca35598937442a148c8dd91f6df8d9c8facae9baa56ea2cee0c65b90de0a8",
+    "packages/py/kor-travel-common/src/kortravelcommon/py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   }
 }

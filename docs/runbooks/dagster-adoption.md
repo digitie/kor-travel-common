@@ -283,7 +283,9 @@ API 환경은 `kor-travel-common[http]`를 전체 SHA에 고정하고 lock을 �
 상한을 적용한다. redirect와 HTTPX 인증 재요청은 비활성화한다. Bearer 등 인증 header,
 URL 허용목록과 client 수명은 앱이 관리한다. body를 먼저 읽을 수 있는 response hook는
 거부한다. 표준 HTTPX 또는 취소에 협조하는 transport만 지원하며 취소를 억제하는
-임의 transport의 강제 종료는 보장하지 않는다. 취소·정리 실패 뒤 client 폐기는 앱 책임이다.
+임의 transport의 강제 종료는 보장하지 않는다. 본문 실패는 원래 예외를 유지하고 정상 본문 뒤 정리 실패도 `BoundedResponseError`로 알린다.
+`httpx.RequestError` 뒤에는 client를 폐기하고, 가능하면 조회 단위로 client 수명을 제한한다.
+외부 취소 뒤 client 폐기도 앱 책임이다.
 
 ```python
 from kortravelcommon.http import bounded_request

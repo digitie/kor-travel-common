@@ -15,7 +15,6 @@ import httpx
 
 DEFAULT_RESPONSE_LIMIT = 4 * 1024 * 1024
 DEFAULT_TOTAL_TIMEOUT_SECONDS = 10.0
-_READ_CHUNK_BYTES = 64 * 1024
 
 
 class BoundedResponseError(httpx.RequestError):
@@ -59,6 +58,7 @@ async def bounded_request(
     kwargs.pop("follow_redirects", None)
     request = client.build_request(method, url, headers=headers, **kwargs)
     response: httpx.Response | None = None
+    completed = False
     try:
         async with asyncio.timeout(total_timeout_seconds):
             # 기본 DigestAuth 등은 중간 401 body를 cap 이전에 materialize한다.
@@ -83,6 +83,7 @@ async def bounded_request(
                 if len(content) + len(chunk) > max_response_bytes:
                     raise BoundedResponseError("응답이 크기 상한을 초과했습니다.", request=request)
                 content.extend(chunk)
+            completed = True
             return httpx.Response(
                 response.status_code,
                 headers=response.headers,
@@ -97,5 +98,10 @@ async def bounded_request(
             # transport 또는 취소에 협조하는 transport를 사용하고 client 수명을 관리한다.
             try:
                 await asyncio.wait_for(response.aclose(), timeout=0.05)
-            except (TimeoutError, httpx.HTTPError):
-                pass
+            except (TimeoutError, httpx.HTTPError) as exc:
+                if completed:
+                    raise BoundedResponseError(
+                        "응답 정리를 완료하지 못했습니다.", request=request
+                    ) from exc
+                # 본문 실패/외부 취소는 원래 예외를 보존한다. 소비자는 RequestError 뒤
+                # client를 폐기하므로 이 경로를 정상 응답·재사용 가능 상태로 해석하지 않는다.
