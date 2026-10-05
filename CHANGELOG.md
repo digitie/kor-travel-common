@@ -8,16 +8,27 @@
 
 ### 실행 복구와 운영 UI 개발 후보
 
+- UI `0.1.0-dev.4`: PinVi 채택에서 실행 상한 미확인과 일반 지연 경고를 구분한다.
+
 - UI `0.1.0-dev.3`: geo의 상태 카드·목록/상세·코드 위치·tick 표시를 비교해 공용 계약으로 새로 구현했다.
   선택 상세(`showRunDetails`)와 코드 위치(`showRepositories`)는 기본적으로 꺼져 있으며 앱이 상세를 주입할 수 있다.
   실행 검색·상태 필터·센서 tick과 조회 실패 시 마지막 snapshot 경고를 제공한다.
 
 #### Breaking
 
+- `DagsterRun.maxRuntimeSeconds`가 `number | undefined`에서 `number | null | undefined`로 넓어진다.
+  기존 값을 읽어 number-only 변수/콜백에 전달하던 코드는 null guard가 필요하다.
+
 - 실행 표는 전체 행을 한 번에 표시하던 방식에서 페이지당 50행으로 바뀐다. 전체 조회 결과의 집계·검색은 유지한다.
 - `DagsterSchedule.jobName`은 확인되지 않은 작업을 표현하기 위해 `string | null`이 된다.
 
 #### Migration
+
+- 실제 run tag의 양수 cap은 숫자, cap을 확인하지 못한 run은 null을 전달한다.
+  cap을 읽을 때 `typeof value === "number" && Number.isFinite(value) && value > 0`으로 좁힌다.
+  속성을 생략한 소비자는 기존 600초 heuristic을 유지하지만 상세의 “지연 판단 기준” 문구를 받는다.
+  null·잘못된 숫자는 “미확인”이며 cap 기반 stalled count에 포함하지 않는다.
+  기존 dev.3 bytes는 유지하고 nullable 표현이 필요한 소비자만 dev.4 artifact로 이관한다.
 
 - 실행 행 전체를 DOM에서 검사하던 소비자는 페이지 이동 또는 검색으로 찾는다. 행 식별자와 기존 `data-slot`은 유지한다.
   자세한 채택은 [Dagster 적용 가이드](docs/runbooks/dagster-adoption.md)의 운영 UI 절을 따른다.
