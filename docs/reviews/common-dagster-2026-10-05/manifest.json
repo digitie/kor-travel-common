@@ -1,47 +1,56 @@
 [
   {
     "file": "review-01.json",
-    "sha256": "04ec8d1e1898c5bde879f5ff1f573d44c6439c5f9ecae7be575583002b7bdffb",
-    "source": "common-pinvi-limit-independent-recovery.md"
+    "source": "common-pinvi-limit-independent-recovery.md",
+    "original_sha256": "04ec8d1e1898c5bde879f5ff1f573d44c6439c5f9ecae7be575583002b7bdffb",
+    "file_sha256": "91ca976d1123af66502f169a28595036440ce4cc6dfbc3aae87f267b21e8155c"
   },
   {
     "file": "review-02.json",
-    "sha256": "50b7faab90a66743c719d78ec92a197618882eac78c5392d93471d94cd4c9caa",
-    "source": "review.md"
+    "source": "review.md",
+    "original_sha256": "50b7faab90a66743c719d78ec92a197618882eac78c5392d93471d94cd4c9caa",
+    "file_sha256": "3ef6578b1d6ba8323bb3dd219fc6295dcadf6fbd8d9679da49d13aa544b0b320"
   },
   {
     "file": "review-03.json",
-    "sha256": "c7e7d6b8196a61999841765db360016e6556e81370875a8137f47678d8408327",
-    "source": "james-common-limit-review-8746120.md"
+    "source": "james-common-limit-review-8746120.md",
+    "original_sha256": "c7e7d6b8196a61999841765db360016e6556e81370875a8137f47678d8408327",
+    "file_sha256": "1068eef729c26adadd57e47a8d34bfe805e2be7d6478dce8b52d397b16c3ab56"
   },
   {
     "file": "review-04.json",
-    "sha256": "c959e58ce792d260f37cf2b3822212c2214853369d69823390fed71d1378995a",
-    "source": "james-common-limit-closure-9ce1726.md"
+    "source": "james-common-limit-closure-9ce1726.md",
+    "original_sha256": "c959e58ce792d260f37cf2b3822212c2214853369d69823390fed71d1378995a",
+    "file_sha256": "3b9a3d9a7e9084b3c8914dcf497ca4e3ec5882a95a1ca6b7f805d2c48dcb00f5"
   },
   {
     "file": "review-05.json",
-    "sha256": "d3257c5b07948244c0398e0c98e43eaab1ac02a1d9a24af20a5afa38a27fc132",
-    "source": "james-common-mobile-fa8179e.md"
+    "source": "james-common-mobile-fa8179e.md",
+    "original_sha256": "d3257c5b07948244c0398e0c98e43eaab1ac02a1d9a24af20a5afa38a27fc132",
+    "file_sha256": "77cdba85cc52701f3ea845bce05df4cf82b61d77497eec692fa2eb7198ef05a7"
   },
   {
     "file": "review-06.json",
-    "sha256": "ebb7125abb4cdfc78833566c75bba22a695b590d9324318276e18b0814b30391",
-    "source": "common-fa8179e-independent-recovery.md"
+    "source": "common-fa8179e-independent-recovery.md",
+    "original_sha256": "ebb7125abb4cdfc78833566c75bba22a695b590d9324318276e18b0814b30391",
+    "file_sha256": "34499df3ec606141f36f8961c9265269fad7d31f436cb590486befe408c15792"
   },
   {
     "file": "review-07.json",
-    "sha256": "237439363377c184fbe75681be8bc7a015a16fe28db5443dcc5588ea353921af",
-    "source": "james-common-default-e285598.md"
+    "source": "james-common-default-e285598.md",
+    "original_sha256": "237439363377c184fbe75681be8bc7a015a16fe28db5443dcc5588ea353921af",
+    "file_sha256": "558329c96057b5c224b50997708b7b13aa765a703322813bbc7507a5b9917193"
   },
   {
     "file": "review-08.json",
-    "sha256": "0ac85352e84bb0fb988d65b208f31055911e98b259a1e1ed3fde9f75d2e59223",
-    "source": "common-e285598-independent-recovery.md"
+    "source": "common-e285598-independent-recovery.md",
+    "original_sha256": "0ac85352e84bb0fb988d65b208f31055911e98b259a1e1ed3fde9f75d2e59223",
+    "file_sha256": "9dfa22b7680fe5186ed0cd6897999a4d78a824d8091e6e581340da1592e5e4b8"
   },
   {
     "file": "review-09.json",
-    "sha256": "a28940f5f49cd6e30d57225f6ee38cbc7c9b89018c3531d42d19e3b5f39023fd",
-    "source": "james-dev6-evidence-closure.md"
+    "source": "james-dev6-evidence-closure.md",
+    "original_sha256": "a28940f5f49cd6e30d57225f6ee38cbc7c9b89018c3531d42d19e3b5f39023fd",
+    "file_sha256": "3715fbdedc801355d3d24582f76d51ec1237e9839a7abc805ddc6aa880a7ffce"
   }
 ]

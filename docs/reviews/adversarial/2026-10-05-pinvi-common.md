@@ -25,3 +25,5 @@ Common CodeGraph index가 비어 semantic 조회를 하지 못해 현재 모듈/
 운영 shared daemon 배포/worker kill/RSS·외부 provider 호출은 NOT_RUN이다. synthetic allocation과
 실제 운영 RSS는 구분한다. T-301 원본 worktree는 보존했다. 최종 문서 CI 후 Common #27을 먼저 merge하고
 PinVi #575의 최종 ready Aggregate gate를 통과해 merge한다.
+
+문서 증거의 원문 해시(`original_sha256`)와 JSON 파일 해시(`file_sha256`)를 구분한 최종 metadata 검토도 [별도 원문 manifest](../common-dagster-2026-10-05/metadata-manifest.json)에 보존했다. J-DOC-P2-01은 FIXED이며 제품 리뷰 건수에는 추가하지 않는다.
