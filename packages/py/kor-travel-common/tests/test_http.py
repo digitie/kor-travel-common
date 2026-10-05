@@ -167,3 +167,15 @@ def test_cleanup_failure_never_returns_healthy_response():
     with pytest.raises(BoundedResponseError, match="정리"):
         run(stream)
     assert not stream.closed
+
+
+@pytest.mark.parametrize("body_delay", [0, 0.02])
+def test_raw_cleanup_exception_is_normalized_or_preserves_body_failure(body_delay):
+    class BrokenClose(Chunks):
+        async def aclose(self):
+            raise OSError("synthetic transport cleanup failure")
+
+    stream = BrokenClose([b"{}"], delay=body_delay)
+    expected = BoundedResponseError if body_delay == 0 else httpx.ReadTimeout
+    with pytest.raises(expected):
+        run(stream, total_timeout_seconds=0.01)

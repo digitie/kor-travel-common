@@ -101,7 +101,7 @@ async def bounded_request(
             # transport 또는 취소에 협조하는 transport를 사용하고 client 수명을 관리한다.
             try:
                 await asyncio.wait_for(response.aclose(), timeout=0.05)
-            except (TimeoutError, httpx.HTTPError) as exc:
+            except Exception as exc:
                 if completed:
                     raise BoundedResponseError(
                         "응답 정리를 완료하지 못했습니다.", request=request
