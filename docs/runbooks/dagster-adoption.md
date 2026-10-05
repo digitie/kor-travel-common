@@ -345,3 +345,11 @@ Library versions와 repository pointer dictionary의 Dagster serdes marker 키
 (`__class__`, `__enum__`, `__set__`, `__frozenset__`, `__mapping_items__`)도 거부한다.
 일반 repository 이름 `__repository__`는 marker가 아니며 Map Definitions의 정상
 default 이름으로 허용한다. 실제 serializer/isolated CLI 정상 control을 유지한다.
+
+## 11. 최신 tick 조회의 저장소 작업 상한
+
+Dagster 1.13.24의 repository batch loader는 `ticks(limit: 3)`만으로 전체 tick 이력의 rank 작업을 제한하지 않는다. 실제 Map 요약은 sensor tick 저장소의 15초 statement timeout 때문에 실패했으며, API의 공통 HTTP 10초 deadline이 먼저 `unavailable`로 반환했다. HTTP·응답 cap을 늘리거나 공유 DB의 이력을 삭제하지 않는다.
+
+Map·PinVi처럼 최신 3건을 표시하는 요약은 `ticks(limit: 3, statuses: [STARTED, SKIPPED, SUCCESS, FAILURE])`를 사용한다. 실제 설치 schema의 네 상태를 전부 포함하므로 실패·진행 중 tick을 숨기지 않는다. 이 버전에서는 nonempty `statuses`가 batch loader를 우회하고 selector별 최신 LIMIT 조회를 사용한다. 실제 Map의 같은 query는 2.077초에 정상 응답했으며 state당 최대 3건을 유지했다. [독립 진단·조회 검증](../reviews/adversarial/evidence/map-health-2026-10-05/review-summary-tick-query-recovery.md)을 참조한다.
+
+이 query 선택은 소비자 API가 소유한다. 공통 Python HTTP 코드는 요청 전체 deadline·응답 바이트 상한·연결 정리를 계속 적용한다. Dagster를 업그레이드할 때는 실제 enum과 resolver 경로를 다시 확인한다. 새 tick 상태가 추가되면 전체 상태 선택과 검증을 함께 갱신한다. selector의 legacy NULL 값과 timestamp 동률에서 두 저장소 경로가 완전히 같다고 주장하지 않는다. 수용 기준은 소유 instigation의 최신 최대 3건과 모든 현재 상태·오류 정보를 보존하는 것이다.

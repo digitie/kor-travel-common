@@ -1,3 +1,15 @@
+## 2026-10-06 — Map·PinVi 공통 Dagster 실제 재구축·live 수용 완료
+
+Common a960bdb, Map 1a3c467, PinVi 0058369의 제품113파일 두 독립 FULL 리뷰와 가이드 리뷰를 통과했다. 공용 Python은 bounded HTTP·경량 child health·실행 복구 정책을 제공하며 앱의 operation/lease/claim·비멱등 쓰기 계약을 유지한다. 요청별 응답4MiB/10초와 정리50ms, DB pool/step 제한·100개 batch를 적용했다. Map tick 조회의 오래된 batch history 정렬 지연은 상태 조건을 명시하여 native indexed LIMIT 경로로 줄였고 실제 summary/UI 복구를 확인했다.
+
+운영 paired 재구축과 설치 source·관련 Common bytes·실제 이미지 identity·여섯 서비스 healthy를 검증했다. Chromium/Firefox×Map/PinVi 실제 UI4건과 캡처8개를 직접 확인했다. ACL40·D1 11건·D2 정상 수용/validator·소유 fixture purge1/7·잔존0/ACTIVE없음/BLOCKED없음까지 통과했다. Common의 ESM export를 읽기 위한 type=module은 별도 테스트 이미지 package.json에만 추가하고 실제 마지막 layer/semantic delta를 증명했다. 앞선 모든 실패·초기 BLOCK와 수정 후 PASS 원문은 보존한다.
+
+격리 native Dagster에서 실제 raise·worker crash·stall/timeout 뒤 수동 재시도와 동시 정상 job을 확인했다. 최종 Map 운영 Dagster 이미지의 관련 설치 코드와 버전이 이전 격리 이미지와 같은지, 실제 최종 이미지 ID가 배포 기록과 맞는지 독립 검증했다. 이 결과는 해당 불변 코드 범위에 한정해 이어받는다. 공유 운영 DB의 worker 장애 주입이나 운영 RSS 감소율 실측으로 설명하지 않는다. 유한 응답·batch·동시성 구조와 합성 메모리 측정은 운영 RSS와 구분한다. 기존 인간 dirty checkout·외부 transport/HAProxy 후속은 보존한다.
+
+다음 한 작업은 문서 포함 exact HEAD CI 통과 후 Common #28 → Map #1303 → PinVi #576 순서로 merge commit 병합하는 것이다. 제품 Git pin의 ancestry를 보존한다. 이 절이 현재 상태이며 아래의 진행 중/NOT_RUN 문단은 이전 시점의 이력이다.
+
+[실제 검증·리뷰 원문과 실패 이력](reviews/adversarial/2026-10-05-map-health-closure.md), [공통 적용 가이드](runbooks/dagster-adoption.md).
+
 ## 2026-10-05 — metadata map의 serdes marker 차단 (진행 중)
 
 99d8 고정 후보 재리뷰에서 library versions와 pointer dictionary의 typed marker가 경량 검증을 우회하는 P2를 확인했다. 다섯 reserved serdes marker를 거부하되 정상 Map default 이름 __repository__는 허용한다. 실제 isolated CLI 정상 default repository와 두 공격 응답, 모든 marker 회귀를 포함한 health65 PASS를 확인했다. 이전99 전체146 PASS는 이전 소스 증거이며 새 후보의 두 독립 FULL 리뷰·CI·운영 재구축/live가 남았다. [가이드 §10](runbooks/dagster-adoption.md#10-code-server-자식-로딩을-확인하는-경량-건강-점검)에 지원 경계를 보완했다.

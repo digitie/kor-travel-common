@@ -73,3 +73,7 @@ dev.6은 dev.4 cap 미확인 계약을 보존하고, 좁은 표의 내부 스크
 dev.5 기본 옵션의 페이지 넘침 P2는 수정 후 두 독립 리뷰와 N150 24개 CSS 조합/PinVi 실제 UI4+keyboard2로 확인했다.
 검증 원문은 [PinVi 후속 판정](../reviews/adversarial/2026-10-05-pinvi-common.md)에 연결한다.
 dev.3/4/5 frozen bytes는 바꾸지 않는다. 운영 shared daemon/worker kill/RSS는 NOT_RUN이다.
+
+## 2026-10-06 Map·PinVi 실제 후속 수용
+
+[후속 판정](../reviews/adversarial/2026-10-05-map-health-closure.md)에 Common a960/Map1a3/PinVi005 제품113파일 2인 FULL·최종 가이드·실제 paired 재구축·운영 설치 bytes/identity·여섯 서비스 healthy·Chromium/Firefox UI4·ACL40/D1/D2와 실패 원문을 보존한다. 기존 전역 task IN_PROGRESS는 다른 소비자 운영 채택·공유 DB 장애 주입/RSS까지 완료로 세지 않기 위해 유지한다. 이번 Map/PinVi 후속 구현·실제 수용은 완료했고 최종 문서 포함 CI와 #28/#1303/#576 merge는 다음 gate다.

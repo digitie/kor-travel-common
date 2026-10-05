@@ -52,3 +52,7 @@ IN_PROGRESS는 외부 운영 배포/채택까지 완료로 세지 않기 위해 
 ## Map·PinVi HTTP 후속 (2026-10-05)
 
 공용 HTTP 제한을 구현하고 두 독립 리뷰의 clean CI 의존 누락·DigestAuth 중간 응답·느린 정리 finding을 수정했다. API 소비자 채택·재구축·live 검증은 각 Map/PinVi PR에서 수행하며 이 문서에서 완료로 세지 않는다. 고정1f8e339의 두 독립 FULL 리뷰와 finding closure를 [최종 판정](../reviews/adversarial/2026-10-05-map-http-closure.md)에 보존했다. 외부 CI·소비자 운영 live는 별도 gate다.
+
+## 2026-10-06 Map·PinVi 실제 후속 수용
+
+[후속 판정](../reviews/adversarial/2026-10-05-map-health-closure.md)에 Common a960/Map1a3/PinVi005 제품113파일 2인 FULL·최종 가이드·실제 paired 재구축·운영 설치 bytes/identity·여섯 서비스 healthy·Chromium/Firefox UI4·ACL40/D1/D2와 실패 원문을 보존한다. 기존 전역 task IN_PROGRESS는 다른 소비자 운영 채택·공유 DB 장애 주입/RSS까지 완료로 세지 않기 위해 유지한다. 이번 Map/PinVi 후속 구현·실제 수용은 완료했고 최종 문서 포함 CI와 #28/#1303/#576 merge는 다음 gate다.
