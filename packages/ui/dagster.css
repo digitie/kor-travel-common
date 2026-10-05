@@ -2,6 +2,8 @@
  * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
  */
 .kt-dagster-operations { display: grid; gap: 1rem; min-width: 0; color: var(--kt-text-primary); }
+/* 상세 패널을 끈 기본 구성의 wrapper도 grid min-content를 페이지로 전파하지 않는다. */
+.kt-dagster-operations > * { min-width: 0; }
 .kt-dagster-operations .ops-grid { display: grid; gap: .75rem; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .kt-dagster-operations .panel { min-width: 0; border: 1px solid var(--kt-border); background: var(--kt-surface-card); }
 .kt-dagster-operations .ops-card { display: grid; gap: .5rem; padding: 1rem; }

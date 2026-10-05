@@ -12,7 +12,7 @@ const lock = JSON.parse(readFileSync(lockPath, "utf8"));
 // 매 실행에서 생성한 두 로컬 산출물만 갱신한다. registry 고정값은 유지한다.
 for (const [name, filename] of [
   ["@kor-travel/tokens", "kor-travel-tokens-0.1.0.tgz"],
-  ["@kor-travel/ui", "kor-travel-ui-0.1.0-dev.5.tgz"],
+  ["@kor-travel/ui", "kor-travel-ui-0.1.0-dev.6.tgz"],
 ]) {
   const source = `file:../../../../test-results/ui-pack/${filename}`;
   const entry = lock.packages[`node_modules/${name}`];
