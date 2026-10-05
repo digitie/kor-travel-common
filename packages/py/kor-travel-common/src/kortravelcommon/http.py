@@ -79,7 +79,10 @@ async def bounded_request(
             content = bytearray()
             # Response.aiter_bytes는 EOF에서 aclose를 내부 await하므로 raw stream을
             # 직접 소비하고 close는 별도의 작은 예산으로 실행한다(identity만 허용).
-            async for chunk in response.stream:
+            stream = response.stream
+            if not isinstance(stream, httpx.AsyncByteStream):
+                raise BoundedResponseError("비동기 응답 stream이 아닙니다.", request=request)
+            async for chunk in stream:
                 if len(content) + len(chunk) > max_response_bytes:
                     raise BoundedResponseError("응답이 크기 상한을 초과했습니다.", request=request)
                 content.extend(chunk)

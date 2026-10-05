@@ -2,7 +2,7 @@
   "base": "7dc1d6dda955b9b836cb3f24d6fd5bcd37fabe52",
   "reviewScope": "full",
   "files": {
-    "packages/py/kor-travel-common/src/kortravelcommon/http.py": "be340d76b35dc67913943a2696c4d4d7d3b4ed1a60a18187e0d83876a9798a87",
+    "packages/py/kor-travel-common/src/kortravelcommon/http.py": "e0d1fa2ac144f0b17d61d968c91eab6e80336e68ddbae35809499c286470334c",
     "packages/py/kor-travel-common/tests/test_http.py": "9bf677c8286b9d640bd645aa2313960948062efe569e1d440ac4413227cfebeb",
     "packages/py/kor-travel-common/pyproject.toml": "ddbbaeafa6342cde3d1731fd62ae347aeb1257dc054a865c34d32d6b7c286faf",
     "packages/py/kor-travel-common/uv.lock": "6b6c095140d778dcdbea0941cf8248a2801c46a91917ec5bbf0a9c0d94bcd812",
