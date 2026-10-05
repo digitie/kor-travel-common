@@ -1,3 +1,7 @@
+## 2026-10-05 — PinVi Common Dagster dev.6 후속
+
+[최종 판정](reviews/adversarial/2026-10-05-pinvi-common.md)에 두 독립 code PASS·최초 조건부 원문/closure·SHA와 실제 PinVi N150 live 4PASS를 연결했다. dev.4 cap 미확인 모델·nullable schedule migration·소비자 actual autodiscovery gate를 가이드에 기록했다. UI50/check/build/tarball smoke, 기존337 tool tests·문서 gate PASS. 운영 shared daemon/worker kill/RSS는 NOT_RUN이다. CodeGraph index empty는 manual module/caller trace fallback으로 명시한다. 원본 T-301 checkout은 보존했다. 최종 CI 후 PR #27 merge다.
+
 # kor-travel-common 작업 일지
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.

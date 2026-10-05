@@ -30,3 +30,7 @@ common #24·weather #72는 main에 머지되었다. transport 채택을 위한 P
 ## 2026-10-05 geo 대시보드 후속
 
 [T-216](tasks/T-216-dagster-operations.md)의 `dev.3` 후보: 목록/상세·tick·검색·50행 pagination. 기존 작업 branch를 보존한다. [최종 판정](reviews/adversarial/2026-10-05-geo-common.md)에 두 코드 PASS·69 Python/48 UI·소비자 live와 실패 수정 원문을 보존했다. common PR26·Geo PR570의 문서 포함 최종 checks가 통과한 뒤 순서대로 merge한다. 운영 배포·RSS 측정·다른 소비자 확산은 후속이며 완료로 세지 않는다.
+
+## 2026-10-05 PinVi 채택 후속
+
+Common dev.6의 두 독립 post-fix PASS, UI50·tarball smoke와 PinVi 실제 N150 live 4PASS를 [최종 판정](reviews/adversarial/2026-10-05-pinvi-common.md)에 보존했다. [Common #27](https://github.com/digitie/kor-travel-common/pull/27)과 [PinVi #575](https://github.com/digitie/pinvi/pull/575)에 최종 CI/머지 게이트를 결박했다. 이후 운영 검증은 별도 배포 요청에서 진행한다. Common #26/Geo #570은 merge 완료. 운영 shared daemon/worker kill/RSS는 NOT_RUN이다. 기존 T-301 원본 변경은 보존한다.

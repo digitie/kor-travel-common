@@ -70,3 +70,5 @@
 ## 새 리뷰 시작
 
 [적대적 리뷰 템플릿](adversarial/TEMPLATE.md)을 복사해 새 파일을 만들고, [agent workflow](../runbooks/agent-workflow.md)의 2인 리뷰 gate를 따른다. 일반 작업 시작 시 이 아카이브 전체를 읽지 않는다.
+
+- [2026-10-05 PinVi 채택 후속](adversarial/2026-10-05-pinvi-common.md): runtime cap 미확인·nullable migration, 두 독립 post-fix PASS와 소비자 live 4PASS.
