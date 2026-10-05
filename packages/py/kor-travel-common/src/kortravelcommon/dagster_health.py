@@ -9,6 +9,7 @@ wire schema를 재구현하지 않고, 빈/손상/오류 응답은 실패로 판
 import importlib.metadata
 import importlib.util
 import json
+import math
 import sys
 from typing import Any
 
@@ -35,6 +36,74 @@ def _reply_class() -> Any:
     return module.ListRepositoriesReply
 
 
+def _is_plain_json(value: Any) -> bool:
+    """container context는 typed serdes 객체가 없는 표준 JSON만 지원한다."""
+    if value is None or type(value) in (str, int, bool):
+        return True
+    if type(value) is float:
+        return math.isfinite(value)
+    if isinstance(value, list):
+        return all(_is_plain_json(item) for item in value)
+    if isinstance(value, dict):
+        return all(
+            isinstance(key, str) and not key.startswith("__") and _is_plain_json(item)
+            for key, item in value.items()
+        )
+    return False
+
+
+def _is_pointer(value: Any) -> bool:
+    """소비자가 쓰는 표준 module/file/package pointer만 지원한다."""
+    if not isinstance(value, dict):
+        return False
+    fields = {
+        "ModuleCodePointer": ("module", "fn_name"),
+        "FileCodePointer": ("python_file", "fn_name"),
+        "PackageCodePointer": ("module", "attribute"),
+    }.get(value.get("__class__"))
+    if fields is None or set(value) - {"__class__", "working_directory", *fields}:
+        return False
+    if not all(isinstance(value.get(field), str) for field in fields):
+        return False
+    return value.get("working_directory") is None or isinstance(value["working_directory"], str)
+
+
+def _has_supported_metadata(payload: dict[str, Any]) -> bool:
+    allowed = {
+        "__class__",
+        "repository_symbols",
+        "repository_code_pointer_dict",
+        "executable_path",
+        "entry_point",
+        "container_image",
+        "container_context",
+        "dagster_library_versions",
+        "defs_state_info",
+    }
+    if set(payload) - allowed:
+        return False
+    for field in ("executable_path", "container_image"):
+        if payload.get(field) is not None and not isinstance(payload[field], str):
+            return False
+    entry = payload.get("entry_point")
+    if entry is not None and (
+        not isinstance(entry, list) or not all(isinstance(item, str) for item in entry)
+    ):
+        return False
+    context = payload.get("container_context")
+    if context is not None and (not isinstance(context, dict) or not _is_plain_json(context)):
+        return False
+    versions = payload.get("dagster_library_versions")
+    if versions is not None and (
+        not isinstance(versions, dict)
+        or not all(isinstance(value, str) for value in versions.values())
+    ):
+        return False
+    # 현재 소비자는 stateful component location을 쓰지 않는다. 알려지지 않은
+    # typed metadata를 정상으로 추측하지 않고 후속 명시적 profile 확장까지 거부한다.
+    return payload.get("defs_state_info") is None
+
+
 def _is_loaded_reply(raw: bytes) -> bool:
     if not raw or len(raw) > _MAX_REPLY_BYTES:
         return False
@@ -50,8 +119,12 @@ def _is_loaded_reply(raw: bytes) -> bool:
         payload.get("repository_code_pointer_dict"), dict
     ):
         return False
+    pointers = payload["repository_code_pointer_dict"]
+    if not _has_supported_metadata(payload) or not all(_is_pointer(p) for p in pointers.values()):
+        return False
     return all(
         isinstance(symbol, dict)
+        and not set(symbol) - {"__class__", "repository_name", "attribute"}
         and symbol.get("__class__") == "LoadableRepositorySymbol"
         and isinstance(symbol.get("repository_name"), str)
         and bool(symbol["repository_name"])

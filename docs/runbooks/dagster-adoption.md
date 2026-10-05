@@ -332,3 +332,11 @@ Map standalone 채택의 실제 protobuf 빈·잘못된 reply가 기존 substrin
 healthy로 통과한 적대 리뷰 반례가 승격 근거다. Manager와 Map의 같은 proxy/자식 로딩
 계약 비용을 공통 Python으로 줄이며 Manager 운영 watchdog은 이 변경으로 대체하지 않는다.
 새 공통 후보·Map 채택의 운영 재구축/live gate는 아직 NOT_RUN이다.
+
+건강 점검의 JSON 지원 profile은 현재 소비자가 쓰는 `ModuleCodePointer`, `FileCodePointer`,
+`PackageCodePointer`와 표준 문자열/목록/nullable metadata다. 포인터 필드·working directory,
+executable/entry point/image, library versions와 plain JSON container context도 검증한다.
+Custom/autoload pointer, stateful `defs_state_info`, typed container context와 새/알려지지 않은
+필드는 정상으로 추측하지 않고 실패한다. 이 profile은 임의 Dagster serdes 객체의 대체물이
+아니며 해당 location을 채택하려면 고정 Dagster 버전의 실제 positive/negative reply 회귀와
+명시적 공통 profile 확장이 먼저다. 현재 Map 운영 module location에서 실제 CLI를 확인한다.

@@ -1,3 +1,7 @@
+## 2026-10-05 — 경량 health의 표준 metadata profile 보강 (진행 중)
+
+독립 리뷰에서 e0b5e31 후보의 null/미등록 code pointer와 executable/entry point 잘못된 타입이 실제 Dagster 역직렬화에서는 거부되지만 경량 CLI에서는 정상 처리되는 P2를 확인했다. 기존 PASS/BLOCK 판정은 그대로 보존한다. module/file/package pointer와 nullable metadata 타입을 검증하고, stateful/custom typed metadata·알려지지 않은 필드는 실패로 판정한다. 지원 profile과 확장 방법은 [가이드 §10](runbooks/dagster-adoption.md#10-code-server-자식-로딩을-확인하는-경량-건강-점검)에 명시했다. schema 변경 후 전체 Python139 PASS, 실제 isolated CLI 7건을 포함한 health51 PASS를 각각 확인했으며 합산하지 않는다. 새 고정 후보의 두 독립 리뷰·CI·운영 재구축/live가 남았다.
+
 ## 2026-10-05 — Map code-server의 빈 reply 오인 방지 (진행 중)
 
 T-319의 공용 `dagster_health`는 proxy SERVING 뒤 실제 `ListRepositoriesResponse` protobuf/JSON을 검증한다. Map 최신 main의 substring 점검이 빈/잘못된 reply를 정상으로 판정한 독립 적대 리뷰 반례를 반영했다. 전체 Dagster import 없이 설치된 생성 protobuf를 사용하며 각 RPC 4초·수신 4MiB·channel 정리와 fail-closed를 적용한다. [가이드 §10](runbooks/dagster-adoption.md#10-code-server-자식-로딩을-확인하는-경량-건강-점검)에 소비자 채택·재시작 정책 경계를 기록했다. 새 고정 후보 2인 리뷰·CI·실제 paired 재구축/live는 진행 중이다.

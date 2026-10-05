@@ -11,7 +11,12 @@ from pathlib import Path
 
 import grpc
 import pytest
+from dagster._check import CheckError
+from dagster._core.code_pointer import ModuleCodePointer
 from dagster._grpc.__generated__ import dagster_api_pb2 as wire
+from dagster._grpc.types import ListRepositoriesResponse, LoadableRepositorySymbol
+from dagster._serdes import deserialize_value, serialize_value
+from dagster_shared.serdes.errors import DeserializationError
 from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 
 from kortravelcommon.dagster_health import code_server_is_healthy
@@ -173,3 +178,164 @@ def test_rpc_deadlines_receive_cap_and_channel_cleanup(monkeypatch, failure):
     assert calls == (
         ["health", "closed"] if failure == "not-serving" else ["health", "list", "closed"]
     )
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("repository_code_pointer_dict", {"repo": None}),
+        ("repository_code_pointer_dict", {"repo": {"__class__": "UnknownPointer"}}),
+        (
+            "repository_code_pointer_dict",
+            {"repo": {"__class__": "ModuleCodePointer", "module": [], "fn_name": "defs"}},
+        ),
+        (
+            "repository_code_pointer_dict",
+            {
+                "repo": {
+                    "__class__": "ModuleCodePointer",
+                    "module": "jobs",
+                    "fn_name": "defs",
+                    "working_directory": 1,
+                }
+            },
+        ),
+        ("executable_path", []),
+        ("executable_path", {}),
+        ("container_image", 123),
+        ("entry_point", 123),
+        ("entry_point", [False]),
+        ("entry_point", [None]),
+        ("container_context", []),
+        ("container_context", {"nested": {"__class__": "UnknownContext"}}),
+        ("dagster_library_versions", []),
+        ("dagster_library_versions", {"dagster": 123}),
+        ("defs_state_info", {"__class__": "UnknownState"}),
+    ],
+)
+def test_invalid_metadata_rejected_by_actual_dagster_and_health(field, value):
+    payload = json.loads(normal())
+    payload[field] = value
+    text = json.dumps(payload)
+    with pytest.raises((CheckError, DeserializationError)):
+        deserialize_value(text, ListRepositoriesResponse)
+    test_actual_wire_response_is_fail_closed(text, False)
+
+
+@pytest.mark.parametrize(
+    "kind,fields",
+    [
+        ("ModuleCodePointer", {"module": "jobs", "fn_name": "defs"}),
+        ("FileCodePointer", {"python_file": "/work/jobs.py", "fn_name": "defs"}),
+        ("PackageCodePointer", {"module": "jobs", "attribute": "defs"}),
+    ],
+)
+def test_supported_pointer_and_optional_metadata_are_valid(kind, fields):
+    payload = json.loads(
+        normal(
+            [
+                {
+                    "__class__": "LoadableRepositorySymbol",
+                    "repository_name": "repo",
+                    "attribute": "defs",
+                }
+            ]
+        )
+    )
+    payload.update(
+        {
+            "repository_code_pointer_dict": {
+                "repo": {"__class__": kind, **fields, "working_directory": None}
+            },
+            "executable_path": "/usr/local/bin/python",
+            "entry_point": ["dagster"],
+            "container_image": None,
+            "container_context": {"nested": [1, "value", None]},
+            "dagster_library_versions": {"dagster": "1.13.24"},
+            "defs_state_info": None,
+        }
+    )
+    text = json.dumps(payload)
+    assert isinstance(deserialize_value(text, ListRepositoriesResponse), ListRepositoriesResponse)
+    test_actual_wire_response_is_fail_closed(text, True)
+
+
+def test_unknown_profile_is_rejected_without_reinterpreting_schema():
+    payload = json.loads(normal())
+    payload["future_metadata"] = "unknown"
+    test_actual_wire_response_is_fail_closed(json.dumps(payload), False)
+
+
+@pytest.mark.parametrize(
+    "variant",
+    [
+        "normal",
+        "empty-wire",
+        "pointer-null",
+        "pointer-unknown",
+        "executable-list",
+        "entry-number",
+        "unsupported-state",
+    ],
+)
+def test_actual_isolated_module_cli_schema_boundary(variant):
+    control = serialize_value(
+        ListRepositoriesResponse(
+            repository_symbols=[LoadableRepositorySymbol(repository_name="repo", attribute="defs")],
+            repository_code_pointer_dict={"repo": ModuleCodePointer("jobs", "defs", None)},
+            executable_path="/usr/local/bin/python",
+            entry_point=["dagster"],
+        )
+    )
+    payload = json.loads(control)
+    if variant == "pointer-null":
+        payload["repository_code_pointer_dict"] = {"repo": None}
+    elif variant == "pointer-unknown":
+        payload["repository_code_pointer_dict"] = {"repo": {"__class__": "UnknownPointer"}}
+    elif variant == "executable-list":
+        payload["executable_path"] = []
+    elif variant == "entry-number":
+        payload["entry_point"] = 123
+    elif variant == "unsupported-state":
+        payload["defs_state_info"] = {"__class__": "DefsStateInfo", "info_mapping": {}}
+        assert isinstance(
+            deserialize_value(json.dumps(payload), ListRepositoriesResponse),
+            ListRepositoriesResponse,
+        )
+    raw = (
+        b""
+        if variant == "empty-wire"
+        else wire.ListRepositoriesReply(
+            serialized_list_repositories_response_or_error=json.dumps(payload)
+        ).SerializeToString()
+    )
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        server = grpc.server(executor)
+        readiness = health.HealthServicer()
+        readiness.set("DagsterApi", health_pb2.HealthCheckResponse.SERVING)
+        health_pb2_grpc.add_HealthServicer_to_server(readiness, server)
+        server.add_generic_rpc_handlers(
+            (
+                grpc.method_handlers_generic_handler(
+                    "api.DagsterApi",
+                    {
+                        "ListRepositories": grpc.unary_unary_rpc_method_handler(
+                            lambda request, context: raw
+                        )
+                    },
+                ),
+            )
+        )
+        port = server.add_insecure_port("127.0.0.1:0")
+        server.start()
+        try:
+            result = subprocess.run(
+                [sys.executable, "-I", "-m", "kortravelcommon.dagster_health", str(port)],
+                capture_output=True,
+                text=True,
+                timeout=20,
+            )
+            assert result.returncode == (0 if variant == "normal" else 1)
+            assert result.stdout == result.stderr == ""
+        finally:
+            server.stop(0).wait()
