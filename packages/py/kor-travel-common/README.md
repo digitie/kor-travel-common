@@ -81,3 +81,9 @@ uv build
 사용법·인증/정리/transport 제한은 [Dagster 적용 가이드](../../../docs/runbooks/dagster-adoption.md#9-graphql상태-조회의-응답과-대기-상한)에 있다.
 core-only·Dagster-only 설치는 HTTP 모듈을 import하지 않는다. 테스트용 `dev`에는 httpx를
 직접 선언하여 깨끗한 `dev+dagster` CI에서도 HTTP 회귀를 실행한다.
+
+## 경량 code-server health
+
+`python -I -m kortravelcommon.dagster_health 12703`은 loopback proxy health와 유효한 자식
+저장소 protobuf/JSON을 확인한다(각 RPC 4초·수신 4MiB). 빈/손상/오류 응답은 exit1이다.
+Dagster 전체 import와 프로세스 재시작은 하지 않는다. [가이드 §10](../../../docs/runbooks/dagster-adoption.md#10-code-server-자식-로딩을-확인하는-경량-건강-점검)을 따른다.

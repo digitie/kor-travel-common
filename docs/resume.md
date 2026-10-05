@@ -1,3 +1,7 @@
+## 2026-10-05 — Map code-server의 빈 reply 오인 방지 (진행 중)
+
+T-319의 공용 `dagster_health`는 proxy SERVING 뒤 실제 `ListRepositoriesResponse` protobuf/JSON을 검증한다. Map 최신 main의 substring 점검이 빈/잘못된 reply를 정상으로 판정한 독립 적대 리뷰 반례를 반영했다. 전체 Dagster import 없이 설치된 생성 protobuf를 사용하며 각 RPC 4초·수신 4MiB·channel 정리와 fail-closed를 적용한다. [가이드 §10](runbooks/dagster-adoption.md#10-code-server-자식-로딩을-확인하는-경량-건강-점검)에 소비자 채택·재시작 정책 경계를 기록했다. 새 고정 후보 2인 리뷰·CI·실제 paired 재구축/live는 진행 중이다.
+
 # 현재 상태와 다음 한 작업
 
 ## 2026-10-05 — Map·PinVi HTTP 최종 독립 리뷰

@@ -311,3 +311,24 @@ UI는 마지막 정상 snapshot과 조회 시각·장애 경고를 함께 유지
 Map처럼 전체 snapshot의 완료 봉인이 필요한 적재는 batch마다 봉인하거나 부재 행을
 삭제하지 않는다. 변환은 작은 batch로 나누되 기존 단일 transaction과 최종 한 번 봉인을
 유지한다. 각 worker의 executor 동시성·DB pool도 함께 줄여 프로세스별 메모리 곱셈을 막는다.
+
+## 10. code-server 자식 로딩을 확인하는 경량 건강 점검
+
+`code-server start`의 proxy `DagsterApi` health는 자식 load error에도 SERVING일 수 있다.
+`python -I -m kortravelcommon.dagster_health <loopback-port>`를 `[dagster]`가 설치된 이미지에서
+실행한다. 공통 `code_server_is_healthy(port)`는 proxy health 뒤 자식 `ListRepositories`를
+각 4초·수신 4MiB 상한으로 호출하고 channel을 닫는다. 빈 protobuf, 손상 wire/JSON,
+중복 JSON 필드, 다른 class, 누락/손상 repository symbol은 모두 실패한다. 정상 빈 symbol
+목록은 정상 `ListRepositoriesResponse` schema이면 허용한다.
+
+Dagster 전체를 import하지 않고 설치된 Dagster의 생성 protobuf를 파일로 로드한다.
+wire schema를 복제하지 않으며 설치 경로/프로토콜 변경도 정상으로 오인하지 않는다.
+이 호출은 health 판정만 한다. Docker `unhealthy`는 자동 재시작을 의미하지 않으므로
+소비자의 watchdog/launcher·native run monitoring·중지 복구 정책을 별도로 유지한다.
+CLI 기동·두 RPC를 포함하도록 컨테이너 healthcheck timeout은 15초 이상으로 두고,
+실제 사용 Dagster 버전·이미지에서 성공/빈 응답/load error/deadline을 확인한다.
+
+Map standalone 채택의 실제 protobuf 빈·잘못된 reply가 기존 substring probe에서
+healthy로 통과한 적대 리뷰 반례가 승격 근거다. Manager와 Map의 같은 proxy/자식 로딩
+계약 비용을 공통 Python으로 줄이며 Manager 운영 watchdog은 이 변경으로 대체하지 않는다.
+새 공통 후보·Map 채택의 운영 재구축/live gate는 아직 NOT_RUN이다.
