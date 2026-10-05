@@ -340,3 +340,8 @@ Custom/autoload pointer, stateful `defs_state_info`, typed container context와 
 필드는 정상으로 추측하지 않고 실패한다. 이 profile은 임의 Dagster serdes 객체의 대체물이
 아니며 해당 location을 채택하려면 고정 Dagster 버전의 실제 positive/negative reply 회귀와
 명시적 공통 profile 확장이 먼저다. 현재 Map 운영 module location에서 실제 CLI를 확인한다.
+
+Library versions와 repository pointer dictionary의 Dagster serdes marker 키
+(`__class__`, `__enum__`, `__set__`, `__frozenset__`, `__mapping_items__`)도 거부한다.
+일반 repository 이름 `__repository__`는 marker가 아니며 Map Definitions의 정상
+default 이름으로 허용한다. 실제 serializer/isolated CLI 정상 control을 유지한다.

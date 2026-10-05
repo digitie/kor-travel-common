@@ -210,6 +210,7 @@ def test_rpc_deadlines_receive_cap_and_channel_cleanup(monkeypatch, failure):
         ("container_context", {"nested": {"__class__": "UnknownContext"}}),
         ("dagster_library_versions", []),
         ("dagster_library_versions", {"dagster": 123}),
+        ("dagster_library_versions", {"__class__": "UnknownLibraryMetadata", "dagster": "1.13.24"}),
         ("defs_state_info", {"__class__": "UnknownState"}),
     ],
 )
@@ -276,6 +277,9 @@ def test_unknown_profile_is_rejected_without_reinterpreting_schema():
         "executable-list",
         "entry-number",
         "unsupported-state",
+        "versions-marker",
+        "pointers-marker",
+        "default-repository",
     ],
 )
 def test_actual_isolated_module_cli_schema_boundary(variant):
@@ -296,6 +300,24 @@ def test_actual_isolated_module_cli_schema_boundary(variant):
         payload["executable_path"] = []
     elif variant == "entry-number":
         payload["entry_point"] = 123
+    elif variant == "versions-marker":
+        payload["dagster_library_versions"] = {
+            "__class__": "UnknownLibraryMetadata",
+            "dagster": "1.13.24",
+        }
+    elif variant == "pointers-marker":
+        payload["repository_code_pointer_dict"] = {
+            "__class__": payload["repository_code_pointer_dict"]["repo"]
+        }
+    elif variant == "default-repository":
+        payload["repository_symbols"][0]["repository_name"] = "__repository__"
+        payload["repository_code_pointer_dict"] = {
+            "__repository__": payload["repository_code_pointer_dict"]["repo"]
+        }
+        assert isinstance(
+            deserialize_value(json.dumps(payload), ListRepositoriesResponse),
+            ListRepositoriesResponse,
+        )
     elif variant == "unsupported-state":
         payload["defs_state_info"] = {"__class__": "DefsStateInfo", "info_mapping": {}}
         assert isinstance(
@@ -335,7 +357,22 @@ def test_actual_isolated_module_cli_schema_boundary(variant):
                 text=True,
                 timeout=20,
             )
-            assert result.returncode == (0 if variant == "normal" else 1)
+            assert result.returncode == (0 if variant in ("normal", "default-repository") else 1)
             assert result.stdout == result.stderr == ""
         finally:
             server.stop(0).wait()
+
+
+@pytest.mark.parametrize("field", ["dagster_library_versions", "repository_code_pointer_dict"])
+@pytest.mark.parametrize(
+    "marker", ["__class__", "__enum__", "__set__", "__frozenset__", "__mapping_items__"]
+)
+def test_mapping_serdes_markers_are_rejected(field, marker):
+    payload = json.loads(normal())
+    value = (
+        "1.13.24"
+        if field == "dagster_library_versions"
+        else {"__class__": "ModuleCodePointer", "module": "jobs", "fn_name": "defs"}
+    )
+    payload[field] = {marker: value}
+    test_actual_wire_response_is_fail_closed(json.dumps(payload), False)

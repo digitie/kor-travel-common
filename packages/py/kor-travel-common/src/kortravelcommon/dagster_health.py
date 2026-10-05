@@ -14,6 +14,9 @@ import sys
 from typing import Any
 
 _MAX_REPLY_BYTES = 4 * 1024 * 1024
+_SERDES_MARKERS = frozenset(
+    {"__class__", "__enum__", "__set__", "__frozenset__", "__mapping_items__"}
+)
 
 
 def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -96,6 +99,7 @@ def _has_supported_metadata(payload: dict[str, Any]) -> bool:
     versions = payload.get("dagster_library_versions")
     if versions is not None and (
         not isinstance(versions, dict)
+        or bool(_SERDES_MARKERS.intersection(versions))
         or not all(isinstance(value, str) for value in versions.values())
     ):
         return False
@@ -120,7 +124,11 @@ def _is_loaded_reply(raw: bytes) -> bool:
     ):
         return False
     pointers = payload["repository_code_pointer_dict"]
-    if not _has_supported_metadata(payload) or not all(_is_pointer(p) for p in pointers.values()):
+    if (
+        _SERDES_MARKERS.intersection(pointers)
+        or not _has_supported_metadata(payload)
+        or not all(_is_pointer(p) for p in pointers.values())
+    ):
         return False
     return all(
         isinstance(symbol, dict)

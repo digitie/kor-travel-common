@@ -1,3 +1,7 @@
+## 2026-10-05 — metadata map의 serdes marker 차단 (진행 중)
+
+99d8 고정 후보 재리뷰에서 library versions와 pointer dictionary의 typed marker가 경량 검증을 우회하는 P2를 확인했다. 다섯 reserved serdes marker를 거부하되 정상 Map default 이름 __repository__는 허용한다. 실제 isolated CLI 정상 default repository와 두 공격 응답, 모든 marker 회귀를 포함한 health65 PASS를 확인했다. 이전99 전체146 PASS는 이전 소스 증거이며 새 후보의 두 독립 FULL 리뷰·CI·운영 재구축/live가 남았다. [가이드 §10](runbooks/dagster-adoption.md#10-code-server-자식-로딩을-확인하는-경량-건강-점검)에 지원 경계를 보완했다.
+
 ## 2026-10-05 — 경량 health의 표준 metadata profile 보강 (진행 중)
 
 독립 리뷰에서 e0b5e31 후보의 null/미등록 code pointer와 executable/entry point 잘못된 타입이 실제 Dagster 역직렬화에서는 거부되지만 경량 CLI에서는 정상 처리되는 P2를 확인했다. 기존 PASS/BLOCK 판정은 그대로 보존한다. module/file/package pointer와 nullable metadata 타입을 검증하고, stateful/custom typed metadata·알려지지 않은 필드는 실패로 판정한다. 지원 profile과 확장 방법은 [가이드 §10](runbooks/dagster-adoption.md#10-code-server-자식-로딩을-확인하는-경량-건강-점검)에 명시했다. schema 변경 후 전체 Python139 PASS, 실제 isolated CLI 7건을 포함한 health51 PASS를 각각 확인했으며 합산하지 않는다. 새 고정 후보의 두 독립 리뷰·CI·운영 재구축/live가 남았다.
