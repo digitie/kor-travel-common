@@ -6,7 +6,7 @@ export type DagsterTick = { status: string; timestamp: number | null; errorMessa
 export type DagsterSchedule = { name: string; status: string | null; cron: string | null; jobName: string | null; lastTick?: DagsterTick | null; timezone?: string | null; overdue?: boolean };
 export type DagsterSensor = { name: string; status: string | null; lastTick?: DagsterTick | null };
 export type DagsterRepository = { name: string; locationName: string; schedules: DagsterSchedule[]; jobs: string[]; assets: string[]; assetCount?: number; sensors?: DagsterSensor[] };
-export type DagsterRun = { runId: string; status: string; jobName: string; startTime: number | null; endTime: number | null; errorMessage: string | null; maxRuntimeSeconds?: number };
+export type DagsterRun = { runId: string; status: string; jobName: string; startTime: number | null; endTime: number | null; errorMessage: string | null; maxRuntimeSeconds?: number | null };
 export type DagsterSnapshot = { repositories: DagsterRepository[]; runs: DagsterRun[]; checkedAt: string };
 
 const RUN_STATUS_LABELS: Record<string, string> = {
@@ -42,10 +42,10 @@ export function runElapsedSeconds(run: DagsterRun, nowSeconds: number): number |
 export const STALLED_RUN_THRESHOLD_SECONDS = 600;
 
 export function isStalledRun(run: DagsterRun, nowSeconds: number): boolean {
-  if (run.status !== "STARTED") return false;
+  if (run.status !== "STARTED" || (run.maxRuntimeSeconds !== undefined && (run.maxRuntimeSeconds === null || !Number.isFinite(run.maxRuntimeSeconds) || run.maxRuntimeSeconds <= 0))) return false;
   const elapsed = runElapsedSeconds(run, nowSeconds);
   const configured = run.maxRuntimeSeconds;
-  const threshold = configured !== undefined && Number.isFinite(configured) && configured > 0
+  const threshold = configured != null && Number.isFinite(configured) && configured > 0
     ? configured : STALLED_RUN_THRESHOLD_SECONDS;
   return elapsed !== null && elapsed >= threshold;
 }

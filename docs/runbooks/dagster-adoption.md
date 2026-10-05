@@ -249,3 +249,27 @@ repository의 선택 `sensors`, schedule의 `lastTick`, `timezone`, `overdue`는
 행은 50개씩 렌더링하며 검색·집계는 전달된 전체 실행에 적용한다. 서버는 최근 종료
 실행과 오래된 활성 실행을 모두 포함하되 응답 상한·취소 가능한 요청·polling을 적용한다.
 CSS는 `@kor-travel/ui/dagster.css`, 토큰은 `@kor-travel/tokens/tokens.css`를 로드한다.
+
+
+## PinVi 후속 — 실행 상한 미확인 (2026-10-05)
+
+`DagsterRun.maxRuntimeSeconds`는 양수이면 실제 cap, 생략하면 기존 600초 지연 heuristic,
+명시적 `null`이면 cap 미확인이다. `null` run은 cap 기반 stalled count에 넣지 않고 상세에
+미확인으로 표시한다. 생략의 상세는 “지연 판단 기준”으로 구분하여 실제 daemon 설정인 척하지 않는다.
+UI `0.1.0-dev.4`로 새 artifact를 만들며 기존 dev.3 bytes를 바꾸지 않는다.
+PinVi가 run tag를 확인해 숫자 또는 null을 전달한다. 운영 RSS·shared daemon 배포는 NOT_RUN이다.
+
+## 실제 code location 자동 탐색 gate
+
+조립용 임시 `Definitions` 객체는 모듈 전역에 남기지 않는다. `_base_defs` 같은 private 이름도
+Dagster 자동 탐색은 포함하며, 최종 `defs`와 함께 남으면 gRPC가 code location을 로드하지 못한다.
+소비자에서 `dagster job list -m <module> -d <working-directory>`와 실제 gRPC import 경로를 확인한다.
+단순 Python import/`defs.get_repository_def()` 검사만으로 배포 로딩 gate를 대신하지 않는다.
+PinVi 채택에서 실제 이전 실패→후보 성공을 회귀로 확인했다(PinVi PR #575).
+
+## 모바일 표와 기본 옵션 gate
+
+UI dev.6은 표 영역 내부 가로 스크롤과 공통 grid child의 `min-width: 0`을 함께 적용한다.
+`showRunDetails=false` 기본 경로도 별도 검증한다. 표에 최소 너비만 주면 unclassed grid wrapper가
+min-content를 페이지로 전파할 수 있다. 320/390/640px에서 문서 폭이 viewport를 넘지 않고,
+focus 가능한 표 영역에서 ArrowRight로 스크롤되는지 확인한다. 상세 표시 경로만 검사하지 않는다.
