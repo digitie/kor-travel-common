@@ -1,0 +1,9 @@
+{
+  "repository": "/home/digitie/dev/kor-travel-common-codex-cutover",
+  "head": "3d3ca855f21180e46b5260a2c23b40bd74bd4624",
+  "base": "efcd671207d7f9e2fb01251bab6854a8d543279a",
+  "files": {
+    "docs/journal.md": "4ba3ce184ff18fc2019fd0a55646d6ea953525c14f6bc00fc944374542df9b7e",
+    "docs/runbooks/dagster-adoption.md": "e8308f849808d0098e1bb44fb0c003a48ac6dfb7c8a933b71af63dac07c722dc"
+  }
+}
