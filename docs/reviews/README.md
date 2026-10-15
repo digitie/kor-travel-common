@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-10-15 | FULL·최종 immutable | [Dagster RPC·복구 가이드](adversarial/2026-10-15-dagster-rpc-recovery-guide.md), `61f93d98` | A SDK·복구 / B 정본·운영 | 두 독립 PASS·P3 2건 FIXED·운영 검증 별도 |
 | 2026-10-15 | FULL·post-fix | [Geo 이전·중지 복구 가이드](adversarial/2026-10-15-geo-dagster-cutover-guide-post-fix.md), `7594a717` | A SDK·복구 / B 정본·검증 | 두 독립 PASS·4 finding FIXED·운영 검증은 별도 |
 | 2026-10-06 | FULL113·반복 post-fix | [Map 경량 health·bounded tick 소비 검증](adversarial/2026-10-05-map-health-closure.md), Common `a960` / Map `1a3c` / PinVi `0058` | A 복구·DB·메모리 / B UI·인증·빌드 | 두 독립 FULL 리뷰 PASS·실제 재구축/UI4/D1 11/D2 PASS·운영 증거는 report 현재 절 참조 |
 | 2026-10-05 | FULL·반복 post-fix | [Geo 시각 구성·복구](adversarial/2026-10-05-geo-common.md), `73e3ff8` | A UI·계약 / B 정합·예산 | 두 최종 PASS·열린0·69 Python/48 UI·Geo 실환경13항목×2브라우저 |

@@ -1,0 +1,30 @@
+{
+  "candidate": "61f93d98d5d7df9b3e597eefd9d7d04e7bbf098b",
+  "parent": "ae5ca6c5bfaf6e514cc2d5b41855c14af67d3de7",
+  "delta_base": "091d4fe1dda8eacf43b453ad39b4f2e42e9e80fc",
+  "pr_base": "efcd671207d7f9e2fb01251bab6854a8d543279a",
+  "scope": [
+    "docs/runbooks/dagster-adoption.md",
+    "docs/journal.md"
+  ],
+  "files": {
+    "docs/runbooks/dagster-adoption.md": "3819e84cf3864457e419989d06cd9ce0dceef7d8a08f50eb011d1f3036d89454",
+    "docs/journal.md": "d6658a7c51751f4e08d9b10796ca799ba37e3b611e8a1a0b11110292f0681469"
+  },
+  "reviews": {
+    "a": {
+      "file": "2026-10-15-dagster-rpc-recovery-guide-reviewer-a.md",
+      "sha256": "8af1a9b0b7eaf20223134747ab731411caa728b6c84366ec1d7dffbbb632b9cc"
+    },
+    "a-final": {
+      "file": "2026-10-15-dagster-rpc-recovery-guide-reviewer-a-final.md",
+      "sha256": "65f86c663dc3c5fc5534afba9fdcdcac8bb26d2a77ceaa4eaba2799b58f27a2c"
+    },
+    "b": {
+      "file": "2026-10-15-dagster-rpc-recovery-guide-reviewer-b.md",
+      "sha256": "12028343ac45a87f8a36492fdd8c62072016f29e24587c95de3aea642783a1bd"
+    }
+  },
+  "isolation": "최종 Git object-only 및 같은 바이트의 자기 임시 snapshot; 상세 요청·실행 기록은 원문 참조",
+  "excluded": "Python 공개 API·Geo 튜닝 변경·운영 배포·소비자 전체 완주"
+}
