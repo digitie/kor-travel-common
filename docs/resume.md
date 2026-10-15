@@ -1,3 +1,12 @@
+## 2026-10-16 — health 조회와 복구 분리 후보
+
+Common31 phase와 Common32 strict HTTP를 보존한 feature 통합점에서 새 gRPC live/ready
+API·quiet CLI를 추가했다. 기존 API는 유지하고 새 두 RPC는 하나의 논리4초를 공유한다.
+health는 DB/run/프로세스 변경을 하지 않는다. 소비자 Manager override의 reaper/kill
+제거·복구 경계 이관과 실제 적용은 별도 작업이다.
+[가이드 §14](runbooks/dagster-adoption.md#14-생존정의-준비-조회와-복구-동작-분리)를 따른다.
+로컬 wheel/합성 CLI 수치는 운영 절감 효과가 아니다. 두 독립 리뷰·CI·소비자 채택은 후속이다.
+
 ## 2026-10-16 — HTTP 상태 줄 부정 응답 보강
 
 초기 후보의 두 독립 리뷰가 상태 코드 뒤 SP 누락을 건강한 응답으로 오인하는 P2를 재현했다.

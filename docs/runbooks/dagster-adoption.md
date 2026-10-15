@@ -593,7 +593,7 @@ Docker interval/start-period/timeout 최적값을 모든 앱에 동일 수치로
 예약 분산은 §13의 일일 횟수·간격·공식 발표 계약을 보존하고 run 동시성/신선도 보장과
 분리한다.
 
-[로컬 합성 CLI 측정](../reviews/adversarial/evidence/2026-10-16-grpc-health-local-measurements.json)은
+[로컬 합성 CLI 측정](../reviews/adversarial/evidence/2026-10-16-grpc-health-local-measurements-final.json)은
 x86 WSL/Python3.11 차가운 CLI 각3표본이며 부모 wall에는 interpreter와 관측 hook이
 포함된다. peak RSS는 실행 후 /proc/self/status VmHWM이며 PSS가 아니다.
 기존 Common ready 대비 새 ready의 CPU/RSS 절감은 입증하지 않았다. live는 정의 조회를

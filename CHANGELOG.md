@@ -11,6 +11,13 @@
 - core-only `kortravelcommon.http_health` 함수·CLI: loopback GET 한 번, 전체 deadline·16KiB 헤더·strict2xx·조용한 종료 코드를 제공한다.
 - redirect·본문·재시도와 앱별 경로·운영 재시작은 포함하지 않는다. [적용 가이드](docs/runbooks/http-health-probe.md)를 따른다. 소비자 실제 채택·운영 효과는 후속이다.
 
+### Python 조회 전용 gRPC health
+
+- 선택 grpc-health extra와 grpc_health의 live/ready API·quiet CLI를 추가한다.
+  기대 repository 검증·공유 논리4초·자동 RPC retry 차단을 제공하며 기존 API는 유지한다.
+- 조회는 run/DB/프로세스를 변경하지 않는다. 소비자의 기존 reaper/kill 책임 분리와
+  실제 배포·운영 효과는 후속이다. [가이드 §14](docs/runbooks/dagster-adoption.md#14-생존정의-준비-조회와-복구-동작-분리)를 따른다.
+
 ### Python 고정 phase 예약 분산
 
 - Dagster 의존성이 없는 `kortravelcommon.scheduling.staggered_cron`을 추가한다.

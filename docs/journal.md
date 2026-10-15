@@ -1,3 +1,36 @@
+## 2026-10-16 — 조회 전용 gRPC health 후보
+
+Common32(2587915)와 Common31(1bb5f6e)을 새 feature branch에서만 통합했다.
+양쪽 원 PR의 main merge나 기존 작업 checkout 변경은 하지 않았다. git local identity가
+비어 있어 정본 HEAD의 공개 committer metadata를 값 출력 없이 WT-local에 적용했다.
+CHANGELOG/journal/resume의 독립 절을 모두 보존했고 두 Python 모듈 바이트를 대조했다.
+
+T-319의 health/복구 격리 설계에 따라 새 live/ready API·quiet CLI·선택 extra를 구현했다.
+기존 RPC별4초 API는 유지하고 parser 결과만 재사용하여 JSON 재해석을 피한다.
+새 채널에는 자동 retry 비활성 옵션을 명시했다. unknown profile과 expected repository
+불일치는 실패로 판정한다. Dagster1.13.24/1.13.25의 설치 generated wire SHA가 동일했다.
+
+신규 모듈 부재 회귀 RED 후 관련112PASS, 큰 정수 예산 거절 추가 후 신규48PASS를 확인했다.
+기존 함수를 호출하는 mock에 새 retry 옵션을 요구해 첫 수정 시험1FAIL이 있었고,
+legacy와 새 계약의 옵션 검증을 분리해 고쳤다. 제품 legacy API 변경이 원인은 아니다.
+최종 Python3.11/Dagster1.13.25 전체326PASS/102.90초, Dagster1.13.24 신규48PASS,
+ruff·wheel/설치·문서 link707/2838targets·plan109·도구337(336PASS/1SKIP)을 확인했다.
+첫 문서 unittest는 tools/tests 잘못된 경로로 실패했고, 별도 venv에서는 jsonschema
+미설치로337중3SKIP였다. 정본 tests 경로/system Python에서336PASS/1플랫폼SKIP를
+다시 확인했다. 이전 실패·수치 원문은 보존하며 CI는 후속이다.
+
+로컬 cold CLI 측정 wrapper의 argv0 누락으로 최초 legacy 시험이 실패해 수정했다.
+초기 RUSAGE maxrss는 fork-parent high-water floor가 섞일 수 있어 원문을 보존하고,
+새 표본에 post-exec /proc/self/status VmHWM과 RUSAGE 값을 구분해 기록했다.
+최종3표본에서 기존 ready CPU0.077745초/peak RSS41328KiB,
+새 ready0.081461초/41032KiB, live0.062884초/38432KiB다.
+동등 ready의 CPU/RSS 개선을 입증하지 않았고 live는 정의 조회를 생략하는 다른 계약이다.
+wall/CPU에는 interpreter·관측 hook이 포함되고 운영 ARM/DB/worker 효과는 미실측이다.
+core-only/grpc-only wheel 설치·pip check·모듈 SHA·quiet CLI 성공/실패/timeout을 확인했다.
+
+CodeGraph는 선택 도구이며 이번 작은 모듈 영향은 rg/직접 parser 추적/회귀로 확인했다.
+두 독립 제품 리뷰·소비자 exact pin/HC override 전환·배포/live·운영 CPU는 NOT_RUN이다.
+
 ## 2026-10-16 — HTTP 상태 줄 P2 수정
 
 두 독립 원문에서 `HTTP/1.1 200` 뒤 SP 없이 줄이 끝나는 응답을 초기 후보가
