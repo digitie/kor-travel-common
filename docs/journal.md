@@ -1,3 +1,20 @@
+## 2026-10-16 — HTTP 생존 점검의 반복 import 비용 보강
+
+Weather API와 Transport backend의 반복 urllib 점검 관측을 근거로 stdlib-only
+`http_health`를 추가했다. loopback 한 번·전체 예산·헤더16KiB·strict2xx·조용한 종료이며
+앱별 경로/주기/재시작·provider/DB/run 판정은 소유하지 않는다.
+`rg`로 새 import와 기존 소비자를 추적하고 socket·monotonic·CLI 회귀로 범위를 검증했다.
+새 경로에는 기존 호출자가 없어 CodeGraph 영향 그래프는 사용하지 않았다.
+
+`uv sync --locked --all-extras` 뒤 전체 Python204PASS, 신규44PASS,
+core-only wheel 정상 의존 해석·빈 venv 설치·pip check·설치 모듈 SHA 동일·CLI200/503을 확인했다.
+문서 링크694/2804targets·plan109오류0·도구337실행 중336PASS/1SKIP였다.
+초기 ruff는103자 줄1건을 거절했고 줄바꿈 후 PASS, 기능 변경 없이 신규44를 다시 통과했다.
+이 수치는 별도 예약 분산 branch의230과 합산하지 않으며 소비자 운영 효과도 아니다.
+검증된 prototype의 단일 비통제 CPU 표본과 새 완전한 헤더/CLI 구현은 가이드에서 구분했다.
+두 독립 리뷰·실제 소비자 설치/같은 workload/live는 NOT_RUN이다.
+기존 예약 개선이 빠지지 않도록 소비자는 두 Common 후보를 통합한 고정 commit을 사용해야 한다.
+
 ## 2026-10-15 — Geo 실제 복구 교훈 보강
 
 Dagster1.13.24의 두 구간 시작 RPC 예산, 일반 timeout의 영향 범위, None/False origin ID

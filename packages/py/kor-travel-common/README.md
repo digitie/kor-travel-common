@@ -87,3 +87,9 @@ core-only·Dagster-only 설치는 HTTP 모듈을 import하지 않는다. 테스�
 `python -I -m kortravelcommon.dagster_health 12703`은 loopback proxy health와 유효한 자식
 저장소 protobuf/JSON을 확인한다(각 RPC 4초·수신 4MiB). 빈/손상/오류 응답은 exit1이다.
 Dagster 전체 import와 프로세스 재시작은 하지 않는다. [가이드 §10](../../../docs/runbooks/dagster-adoption.md#10-code-server-자식-로딩을-확인하는-경량-건강-점검)을 따른다.
+
+## 경량 HTTP 생존 점검
+
+`python -m kortravelcommon.http_health --port 8000 --path /health`는 core-only로
+loopback GET의2xx 헤더를 확인한다. 전체4초·헤더16KiB 상한이며 redirect·재시도·본문 완료 대기는 없다.
+경로·Docker timeout·소비자 실제 검증은 [전용 가이드](../../../docs/runbooks/http-health-probe.md)를 따른다.

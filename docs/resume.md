@@ -1,3 +1,12 @@
+## 2026-10-16 — 경량 HTTP 생존 점검 후보
+
+[T-319](tasks/T-319-dagster-recovery.md)의 core-only HTTP 점검 함수·CLI와
+[적용 가이드](runbooks/http-health-probe.md)를 추가했다. Python204PASS(신규44포함),
+core-only wheel 정상 설치·실제 loopback CLI200/503·ruff·문서 링크/plan·도구336PASS/1SKIP를 확인했다.
+두 독립 리뷰·소비자 exact pin/이미지·운영 healthy/CPU/UI는 후속이다.
+이 후보의 기준 main은8d04353이며 별도 고정 phase 예약 PR을 포함했다고 주장하지 않는다.
+소비자는 예약 개선을 보존하는 통합 commit을 다시 고정하고 관련 회귀를 수행해야 한다.
+
 ## 2026-10-06 — Map·PinVi 공통 Dagster 구현·재구축·live·머지 완료
 
 [Common #28](https://github.com/digitie/kor-travel-common/pull/28) → [Map #1303](https://github.com/digitie/kor-travel-map/pull/1303) → [PinVi #576](https://github.com/digitie/pinvi/pull/576) 순서로 병합했다. Common·Map은 merge commit, PinVi는 main ruleset의 squash-only·linear history 정책에 따라 squash로 병합했다. PinVi 재구축 원본0058369와 검증 HEAD92d0f40는 remote tags codex/pinvi-map-runtime-20261006·codex/pinvi-map-reviewed-20261006 및 유지한 feature branch에 원본 이력을 보존했다. 저장소 설정은 변경하지 않았다. 최종 문서 포함 HEAD의 필수 CI, Common·Map main ancestry와 PinVi 보존 참조, 병합 tree 일치를 확인했다. 실제 paired 재구축, 두 독립 FULL 제품 리뷰·가이드 리뷰·최종 문서 리뷰, Chromium/Firefox×Map/PinVi live UI4건·8캡처, ACL40·D1 11건·D2 normal/attempt0·소유 fixture 정리·잔존0 검증을 완료했다.

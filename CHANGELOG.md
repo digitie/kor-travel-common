@@ -6,6 +6,11 @@
 
 ## [Unreleased]
 
+### Python 경량 HTTP 생존 점검
+
+- core-only `kortravelcommon.http_health` 함수·CLI: loopback GET 한 번, 전체 deadline·16KiB 헤더·strict2xx·조용한 종료 코드를 제공한다.
+- redirect·본문·재시도와 앱별 경로·운영 재시작은 포함하지 않는다. [적용 가이드](docs/runbooks/http-health-probe.md)를 따른다. 소비자 실제 채택·운영 효과는 후속이다.
+
 ### Python HTTP 조회 보강
 
 - `http` extra와 `bounded_request`: plain 응답 크기·전체 읽기 deadline·별도 정리 예산을 제한한다.

@@ -56,3 +56,17 @@ IN_PROGRESS는 외부 운영 배포/채택까지 완료로 세지 않기 위해 
 ## 2026-10-06 Map·PinVi 실제 후속 수용
 
 [후속 판정](../reviews/adversarial/2026-10-05-map-health-closure.md)에 Common a960/Map1a3/PinVi005 제품113파일 2인 FULL·최종 가이드·실제 paired 재구축·운영 설치 bytes/identity·여섯 서비스 healthy·Chromium/Firefox UI4·ACL40/D1/D2와 실패 원문을 보존한다. 기존 전역 task IN_PROGRESS는 다른 소비자 운영 채택·공유 DB 장애 주입/RSS까지 완료로 세지 않기 위해 유지한다. 이번 Map/PinVi 후속 구현·실제 수용은 완료했고 최종 문서 포함 CI와 #28/#1303/#576 merge는 다음 gate다.
+
+## 2026-10-16 경량 HTTP 생존 점검 — 수용 설계
+
+Weather API와 Transport backend가 같은 Python urllib HTTP 생존 점검을 반복하며
+실제 호스트 단일 표본에서 각각 약3초의 self CPU를 사용했다.
+앱의 상태 경로·주기·Docker 재시작 정책은 소비자가 소유한다.
+
+- core-only stdlib 모듈 `kortravelcommon.http_health`는 IPv4 loopback의 명시한
+  port/path에 GET 한 번만 보낸다. DNS·TLS·redirect·자동 재시도·provider/DB 호출은 없다.
+- 연결/전송/헤더 수신에 하나의 monotonic 전체 예산을 사용하고 최대16KiB 헤더만 읽는다.
+  완전한 HTTP/1.0 또는1.1 헤더의2xx만 성공이며 malformed/EOF/timeout/non2xx는 실패다.
+- 검증된 함수와 CLI를 제공하며 성공0/실패1/잘못된 인자2, 응답 본문·오류·주소를 출력하지 않는다.
+- 실제 loopback 반례·전체 Python·core-only wheel 설치·두 독립 리뷰가 필요하다.
+  소비자 exact source 채택과 실제 healthy/CPU/UI 검증 전 운영 효과는 NOT_RUN이다.
