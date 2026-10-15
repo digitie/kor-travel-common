@@ -383,8 +383,9 @@ proxy가 정상이어도 자식 load error가 있을 수 있으므로 §10의 �
 호스트 파일을 rename으로 교체해도 이미 생성된 file bind mount는 이전 inode를 볼 수
 있다. daemon·web·code server가 실제로 읽는 instance/workspace와 호스트 파일을 각각
 확인한다. 호스트 SHA만 같거나 compose 경로가 맞다는 이유로 실제 mount도 같다고
-가정하지 않는다. 필요한 서비스만 갱신하고, 다른 location·DB·실행 worker를 함께
-재시작하는 전체 workspace reload로 우회하지 않는다. 같은 inode에 설정을 쓸 때도
+가정하지 않는다. 필요한 서비스만 갱신하고 다른 code location 전체를 reload하는
+workspace reload로 우회하지 않는다. 전체 stack·DB·실행 worker 재시작도 별도 범위로
+판단한다. workspace reload 자체가 DB를 재시작한다는 뜻은 아니다. 같은 inode에 설정을 쓸 때도
 부분 쓰기·parser 관측 가능성을 고려하고, 변경 후 실제 mount와 native 조회로 확인한다.
 
 1. 새 code server를 자동 예약이 중지된 상태로 준비하고 실제 설치 코드·storage·권한을 확인한다.
@@ -402,7 +403,11 @@ Geo처럼 backup 설정이 이미 비활성화된 경우의 due 조회 job은 �
 ### sensor·백업 복원과 UNKNOWN
 
 새 instance에 처음 등록하는 run-status sensor는 대상의 event high-water를 기준으로
-복원한다. 전환 중 새 실패를 놓치지 않도록 활성화 직전에 high-water를 다시 올리지 않는다.
+복원한다. 확정한 high-water의 유효 `RunStatusSensorCursor`를 STOPPED 상태에 저장하고
+같은 instance에서 다시 읽어 확인한 뒤 public `start_sensor`를 호출한다. cursor가 None이거나
+유효하지 않으면 첫 tick이 그때의 최신 event부터 시작할 수 있으므로 start만으로
+활성화와 첫 tick 사이 실패가 보호되는 것은 아니다. 전환 중 새 실패를 놓치지 않도록
+활성화 직전에 high-water를 다시 올리지 않는다.
 같은 instance에서 재시작할 때는 기존 cursor와 미처리 실패를 보존한다. 다른 instance의
 cursor를 복사하면 기존 실패를 대량 재생하거나 새 실패를 놓칠 수 있다.
 일반 retry sensor는 cursor를 새로 둬도 과거 실패를 다시 검색할 수 있으므로 실제
@@ -423,3 +428,11 @@ controller 상태와 실제 metadata를 먼저 조회하고, 결과를 모르는
 강제 종료·경쟁 rollback하지 않는다. 부분 성공은 별도 복구 상태로 남기며 기존 실패와
 최초 실행 증거를 보존한다. 운영 주소·DSN·cookie·토큰·원본 로그는 소비자의 비공개
 운영 기록에만 두고, 공개 evidence에는 검증 범위와 미관측 항목을 구분한다.
+
+
+확인한 공식 원문은 Dagster **1.13.24**의
+[proxy servicer](https://github.com/dagster-io/dagster/blob/1.13.24/python_modules/dagster/dagster/_grpc/proxy_server.py),
+[scheduler checkpoint](https://github.com/dagster-io/dagster/blob/1.13.24/python_modules/dagster/dagster/_scheduler/scheduler.py),
+[run-status cursor 초기화](https://github.com/dagster-io/dagster/blob/1.13.24/python_modules/dagster/dagster/_core/definitions/run_status_sensor_definition.py),
+[workspace reload](https://github.com/dagster-io/dagster/blob/1.13.24/python_modules/dagster/dagster/_core/workspace/context.py)다.
+소비자의 실제 설치 버전과 원문을 함께 대조한다.
