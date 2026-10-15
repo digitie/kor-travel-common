@@ -108,29 +108,29 @@ def _has_supported_metadata(payload: dict[str, Any]) -> bool:
     return payload.get("defs_state_info") is None
 
 
-def _is_loaded_reply(raw: bytes) -> bool:
+def _loaded_payload(raw: bytes) -> dict[str, Any] | None:
     if not raw or len(raw) > _MAX_REPLY_BYTES:
-        return False
+        return None
     reply = _reply_class().FromString(raw)
     payload = json.loads(
         reply.serialized_list_repositories_response_or_error,
         object_pairs_hook=_unique_object,
     )
     if not isinstance(payload, dict) or payload.get("__class__") != "ListRepositoriesResponse":
-        return False
+        return None
     symbols = payload.get("repository_symbols")
     if not isinstance(symbols, list) or not isinstance(
         payload.get("repository_code_pointer_dict"), dict
     ):
-        return False
+        return None
     pointers = payload["repository_code_pointer_dict"]
     if (
         _SERDES_MARKERS.intersection(pointers)
         or not _has_supported_metadata(payload)
         or not all(_is_pointer(p) for p in pointers.values())
     ):
-        return False
-    return all(
+        return None
+    valid = all(
         isinstance(symbol, dict)
         and not set(symbol) - {"__class__", "repository_name", "attribute"}
         and symbol.get("__class__") == "LoadableRepositorySymbol"
@@ -141,6 +141,11 @@ def _is_loaded_reply(raw: bytes) -> bool:
         for symbol in symbols
     )
 
+    return payload if valid else None
+
+
+def _is_loaded_reply(raw: bytes) -> bool:
+    return _loaded_payload(raw) is not None
 
 def code_server_is_healthy(port: int) -> bool:
     """loopback code-server를 RPC 각 4초·수신 4MiB 한도로 점검한다.

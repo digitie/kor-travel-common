@@ -1,0 +1,206 @@
+{
+  "phase": "LOCAL_SYNTHETIC_COLD_CLI_MEASUREMENTS_ONLY",
+  "python": "Python 3.11.15",
+  "architecture": "local x86_64 WSL",
+  "samples": [
+    {
+      "exit": 0,
+      "cpu_s": 0.080016,
+      "rusage_maxrss_kib": 50652,
+      "peak_rss_kib": 41156,
+      "rss_at_exit_kib": 41156,
+      "dagster_imported": false,
+      "sqlalchemy_imported": false,
+      "case": "legacy_ready",
+      "wall_s": 0.11843006499111652
+    },
+    {
+      "exit": 0,
+      "cpu_s": 0.08146099999999999,
+      "rusage_maxrss_kib": 52572,
+      "peak_rss_kib": 41032,
+      "rss_at_exit_kib": 41032,
+      "dagster_imported": false,
+      "sqlalchemy_imported": false,
+      "case": "new_ready",
+      "wall_s": 0.10474765812978148
+    },
+    {
+      "exit": 0,
+      "cpu_s": 0.062884,
+      "rusage_maxrss_kib": 52828,
+      "peak_rss_kib": 38288,
+      "rss_at_exit_kib": 38288,
+      "dagster_imported": false,
+      "sqlalchemy_imported": false,
+      "case": "new_live_grpc_only_installed",
+      "wall_s": 0.07526164408773184
+    },
+    {
+      "exit": 0,
+      "cpu_s": 0.071434,
+      "rusage_maxrss_kib": 52828,
+      "peak_rss_kib": 41160,
+      "rss_at_exit_kib": 41160,
+      "dagster_imported": false,
+      "sqlalchemy_imported": false,
+      "case": "legacy_ready",
+      "wall_s": 0.08944988902658224
+    },
+    {
+      "exit": 0,
+      "cpu_s": 0.076874,
+      "rusage_maxrss_kib": 52828,
+      "peak_rss_kib": 40908,
+      "rss_at_exit_kib": 40908,
+      "dagster_imported": false,
+      "sqlalchemy_imported": false,
+      "case": "new_ready",
+      "wall_s": 0.09357928670942783
+    },
+    {
+      "exit": 0,
+      "cpu_s": 0.060543,
+      "rusage_maxrss_kib": 52828,
+      "peak_rss_kib": 38432,
+      "rss_at_exit_kib": 38432,
+      "dagster_imported": false,
+      "sqlalchemy_imported": false,
+      "case": "new_live_grpc_only_installed",
+      "wall_s": 0.0713723017834127
+    },
+    {
+      "exit": 0,
+      "cpu_s": 0.077745,
+      "rusage_maxrss_kib": 52828,
+      "peak_rss_kib": 41328,
+      "rss_at_exit_kib": 41328,
+      "dagster_imported": false,
+      "sqlalchemy_imported": false,
+      "case": "legacy_ready",
+      "wall_s": 0.09605290181934834
+    },
+    {
+      "exit": 0,
+      "cpu_s": 0.08260300000000001,
+      "rusage_maxrss_kib": 52828,
+      "peak_rss_kib": 40968,
+      "rss_at_exit_kib": 40968,
+      "dagster_imported": false,
+      "sqlalchemy_imported": false,
+      "case": "new_ready",
+      "wall_s": 0.10928735043853521
+    },
+    {
+      "exit": 0,
+      "cpu_s": 0.063331,
+      "rusage_maxrss_kib": 52828,
+      "peak_rss_kib": 38308,
+      "rss_at_exit_kib": 38308,
+      "dagster_imported": false,
+      "sqlalchemy_imported": false,
+      "case": "new_live_grpc_only_installed",
+      "wall_s": 0.07406345475465059
+    },
+    {
+      "exit": 1,
+      "cpu_s": 0.07769499999999999,
+      "rusage_maxrss_kib": 52828,
+      "peak_rss_kib": 41240,
+      "rss_at_exit_kib": 41240,
+      "dagster_imported": false,
+      "sqlalchemy_imported": false,
+      "case": "grpc_only_readiness_no_dagster_distribution",
+      "wall_s": 0.09207501308992505
+    },
+    {
+      "exit": 1,
+      "cpu_s": 0.064606,
+      "rusage_maxrss_kib": 52956,
+      "peak_rss_kib": 38232,
+      "rss_at_exit_kib": 38232,
+      "dagster_imported": false,
+      "sqlalchemy_imported": false,
+      "case": "not_serving",
+      "wall_s": 0.08108759019523859
+    },
+    {
+      "exit": 1,
+      "cpu_s": 0.068436,
+      "rusage_maxrss_kib": 52956,
+      "peak_rss_kib": 38536,
+      "rss_at_exit_kib": 38536,
+      "dagster_imported": false,
+      "sqlalchemy_imported": false,
+      "case": "shared_deadline_timeout",
+      "wall_s": 4.031645113136619
+    },
+    {
+      "exit": 1,
+      "cpu_s": 0.016912,
+      "rusage_maxrss_kib": 53084,
+      "peak_rss_kib": 15172,
+      "rss_at_exit_kib": 15172,
+      "dagster_imported": false,
+      "sqlalchemy_imported": false,
+      "case": "core_only_missing_grpc",
+      "wall_s": 0.020560591015964746
+    }
+  ],
+  "summary": {
+    "legacy_ready": {
+      "n": 3,
+      "wall_median_s": 0.09605290181934834,
+      "cpu_median_s": 0.077745,
+      "peak_rss_kib": 41328
+    },
+    "new_ready": {
+      "n": 3,
+      "wall_median_s": 0.10474765812978148,
+      "cpu_median_s": 0.08146099999999999,
+      "peak_rss_kib": 41032
+    },
+    "new_live_grpc_only_installed": {
+      "n": 3,
+      "wall_median_s": 0.07406345475465059,
+      "cpu_median_s": 0.062884,
+      "peak_rss_kib": 38432
+    }
+  },
+  "installed": {
+    "core": {
+      "version": "0.1.0.dev0",
+      "grpc_module_sha": "8ed9cf1f6d132b893b7c6c80ea69d2b3cd9ac130076ac1e011a25d7334a625df",
+      "legacy_module_sha": "a0edc3dca6c78d2dce8a4bb22094aab6e9d5234384631b72b2902d574b253f1e",
+      "requires": [
+        "dagster<2,>=1.9; extra == 'dagster'",
+        "httpx<1.0,>=0.27; extra == 'dev'",
+        "pytest>=8; extra == 'dev'",
+        "ruff>=0.9; extra == 'dev'",
+        "grpcio-health-checking<2,>=1.71; extra == 'grpc-health'",
+        "grpcio<2,>=1.71; extra == 'grpc-health'",
+        "protobuf<7,>=5.29; extra == 'grpc-health'",
+        "httpx<1.0,>=0.27; extra == 'http'"
+      ]
+    },
+    "grpc_only": {
+      "version": "0.1.0.dev0",
+      "grpc_module_sha": "8ed9cf1f6d132b893b7c6c80ea69d2b3cd9ac130076ac1e011a25d7334a625df",
+      "legacy_module_sha": "a0edc3dca6c78d2dce8a4bb22094aab6e9d5234384631b72b2902d574b253f1e",
+      "requires": [
+        "dagster<2,>=1.9; extra == 'dagster'",
+        "httpx<1.0,>=0.27; extra == 'dev'",
+        "pytest>=8; extra == 'dev'",
+        "ruff>=0.9; extra == 'dev'",
+        "grpcio-health-checking<2,>=1.71; extra == 'grpc-health'",
+        "grpcio<2,>=1.71; extra == 'grpc-health'",
+        "protobuf<7,>=5.29; extra == 'grpc-health'",
+        "httpx<1.0,>=0.27; extra == 'http'"
+      ]
+    }
+  },
+  "instrumentation": "parent wall includes cold interpreter + child resource/json hook; self CPU and ru_maxrss include startup/hook; RSS is not PSS; peak_rss is Linux post-exec /proc/self/status VmHWM; RUSAGE_CHILD inherits fork-parent floor and is separately recorded",
+  "remote_or_operational_calls": 0,
+  "app_DB_or_provider_calls": 0,
+  "wheel_sha256": "8469a1d37c205cc64bcea46565b92bca4dff422e60457df961daec7d0556ff0a"
+}

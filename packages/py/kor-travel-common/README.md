@@ -82,8 +82,29 @@ uv build
 core-only·Dagster-only 설치는 HTTP 모듈을 import하지 않는다. 테스트용 `dev`에는 httpx를
 직접 선언하여 깨끗한 `dev+dagster` CI에서도 HTTP 회귀를 실행한다.
 
+## 고정 phase 예약 분산
+
+`kortravelcommon.scheduling.staggered_cron(interval_minutes=180, phase_minutes=27)`은
+명시적인 phase로 5필드 cron을 만든다. Dagster를 import하지 않는 core-only 함수다.
+지원 주기·시간대·기존 coalescing과의 관계는
+[적용 가이드 §13](../../../docs/runbooks/dagster-adoption.md#13-명시적인-고정-phase로-예약-시작-분산)을 따른다.
+
 ## 경량 code-server health
 
 `python -I -m kortravelcommon.dagster_health 12703`은 loopback proxy health와 유효한 자식
 저장소 protobuf/JSON을 확인한다(각 RPC 4초·수신 4MiB). 빈/손상/오류 응답은 exit1이다.
 Dagster 전체 import와 프로세스 재시작은 하지 않는다. [가이드 §10](../../../docs/runbooks/dagster-adoption.md#10-code-server-자식-로딩을-확인하는-경량-건강-점검)을 따른다.
+
+## 경량 HTTP 생존 점검
+
+`python -m kortravelcommon.http_health --port 8000 --path /health`는 core-only로
+loopback GET의2xx 헤더를 확인한다. 전체4초·헤더16KiB 상한이며 redirect·재시도·본문 완료 대기는 없다.
+경로·Docker timeout·소비자 실제 검증은 [전용 가이드](../../../docs/runbooks/http-health-probe.md)를 따른다.
+
+## 조회 전용 gRPC health
+
+새 kortravelcommon.grpc_health는 liveness와 기대 repository의 readiness를 분리한다.
+두 RPC는 기본4초 이하의 한 논리 예산을 공유하며 기존 dagster_health API/CLI는 유지한다.
+grpc-health extra만으로 liveness를 쓸 수 있고 readiness에는 지원 Dagster distribution의
+생성 protobuf 파일이 추가로 필요하다. Dagster 본체·DB·복구 동작은 import/실행하지 않는다.
+[적용 가이드 §14](../../../docs/runbooks/dagster-adoption.md#14-생존정의-준비-조회와-복구-동작-분리)를 따른다.

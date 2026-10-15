@@ -1,0 +1,65 @@
+{
+  "phase": "POSTFIX_INSTALLED_CORE_GRPC_ONLY_PROXY_BYPASS_PASS",
+  "installed": {
+    "core": {
+      "source_sha256": "2aa9cccee16c65d04590c4c4ef2c2c7404ea7c27ef932df731bb84a7398a8f15",
+      "dagster_distributions": 0
+    },
+    "grpc_only": {
+      "source_sha256": "2aa9cccee16c65d04590c4c4ef2c2c7404ea7c27ef932df731bb84a7398a8f15",
+      "dagster_distributions": 0
+    }
+  },
+  "actual_loopback_cases": [
+    {
+      "role": "core",
+      "environment_key": "grpc_proxy",
+      "exit": 1,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "proxy_connections": 0
+    },
+    {
+      "role": "core",
+      "environment_key": "http_proxy",
+      "exit": 1,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "proxy_connections": 0
+    },
+    {
+      "role": "core",
+      "environment_key": "https_proxy",
+      "exit": 1,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "proxy_connections": 0
+    },
+    {
+      "role": "grpc_only",
+      "environment_key": "grpc_proxy",
+      "exit": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "proxy_connections": 0
+    },
+    {
+      "role": "grpc_only",
+      "environment_key": "http_proxy",
+      "exit": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "proxy_connections": 0
+    },
+    {
+      "role": "grpc_only",
+      "environment_key": "https_proxy",
+      "exit": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "proxy_connections": 0
+    }
+  ],
+  "wheel_sha256": "63bf13f3d16689b6ae877edf57f19897eec81e50d846ce077ff6b22207dcfcfb",
+  "external_or_operating_calls": 0
+}

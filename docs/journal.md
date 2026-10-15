@@ -1,3 +1,108 @@
+## 2026-10-16 — gRPC proxy 환경 우회 P2 수정 후보
+
+독립 리뷰 A가 source3ed16d1에서 grpc_proxy CONNECT 때문에 정상 loopback 생존을
+실패로 판정하고 native stderr를 출력하는 반례를 재현했다. 별도 터널 모형은 닫힌 target을
+다른 합성 건강 서버로 연결해 정상 오인할 수 있음도 보였다. 이 두 원문·SHA를 root가
+보존하며 작성자는 제공된 재현 모형만 읽고 상대 리뷰 원문은 읽지 않았다.
+
+새 실제 회귀를 기존 source에서 먼저 실행해1FAIL RED를 보존했다.
+제품 변경은 grpc.enable_http_proxy=0 한 옵션이며 retry0·deadline·parser·legacy
+동작은 유지한다. 신규12조건과 기존48을 합한60PASS, 전체338PASS/104.81초,
+별도 Dagster1.13.24 신규60PASS·ruff·새 wheel/core-only/grpc-only 설치/pipcheck/
+설치source 동일·proxy 환경 실제CLI6건을 확인했다. proxy fixture는 종료 뒤 accept
+backlog와 handler까지 닫아 늦은 연결을 놓치지 않고, 닫힌 target 포트를 바인드한
+socket을 유지해 재할당 race를 막는다. 이 과정은 외부/운영 호출0이다.
+
+이전 cold CPU/RSS 측정은6ffc 제품의 원문으로 보존하며 이 옵션 수정의 재측정으로
+표시하지 않는다. 초기 manifest/리뷰·실패는 그대로이고 새 post-fix manifest로 두
+독립 reviewer의 재검토·CI를 진행한다. 소비자/운영 적용은 NOT_RUN이다.
+
+## 2026-10-16 — 조회 전용 gRPC health 후보
+
+Common32(2587915)와 Common31(1bb5f6e)을 새 feature branch에서만 통합했다.
+양쪽 원 PR의 main merge나 기존 작업 checkout 변경은 하지 않았다. git local identity가
+비어 있어 정본 HEAD의 공개 committer metadata를 값 출력 없이 WT-local에 적용했다.
+CHANGELOG/journal/resume의 독립 절을 모두 보존했고 두 Python 모듈 바이트를 대조했다.
+
+T-319의 health/복구 격리 설계에 따라 새 live/ready API·quiet CLI·선택 extra를 구현했다.
+기존 RPC별4초 API는 유지하고 parser 결과만 재사용하여 JSON 재해석을 피한다.
+새 채널에는 자동 retry 비활성 옵션을 명시했다. unknown profile과 expected repository
+불일치는 실패로 판정한다. Dagster1.13.24/1.13.25의 설치 generated wire SHA가 동일했다.
+
+신규 모듈 부재 회귀 RED 후 관련112PASS, 큰 정수 예산 거절 추가 후 신규48PASS를 확인했다.
+기존 함수를 호출하는 mock에 새 retry 옵션을 요구해 첫 수정 시험1FAIL이 있었고,
+legacy와 새 계약의 옵션 검증을 분리해 고쳤다. 제품 legacy API 변경이 원인은 아니다.
+최종 Python3.11/Dagster1.13.25 전체326PASS/102.90초, Dagster1.13.24 신규48PASS,
+ruff·wheel/설치·문서 link707/2838targets·plan109·도구337(336PASS/1SKIP)을 확인했다.
+첫 문서 unittest는 tools/tests 잘못된 경로로 실패했고, 별도 venv에서는 jsonschema
+미설치로337중3SKIP였다. 정본 tests 경로/system Python에서336PASS/1플랫폼SKIP를
+다시 확인했다. 이전 실패·수치 원문은 보존하며 CI는 후속이다.
+
+로컬 cold CLI 측정 wrapper의 argv0 누락으로 최초 legacy 시험이 실패해 수정했다.
+초기 RUSAGE maxrss는 fork-parent high-water floor가 섞일 수 있어 원문을 보존하고,
+새 표본에 post-exec /proc/self/status VmHWM과 RUSAGE 값을 구분해 기록했다.
+최종3표본에서 기존 ready CPU0.077745초/peak RSS41328KiB,
+새 ready0.081461초/41032KiB, live0.062884초/38432KiB다.
+동등 ready의 CPU/RSS 개선을 입증하지 않았고 live는 정의 조회를 생략하는 다른 계약이다.
+wall/CPU에는 interpreter·관측 hook이 포함되고 운영 ARM/DB/worker 효과는 미실측이다.
+core-only/grpc-only wheel 설치·pip check·모듈 SHA·quiet CLI 성공/실패/timeout을 확인했다.
+
+CodeGraph는 선택 도구이며 이번 작은 모듈 영향은 rg/직접 parser 추적/회귀로 확인했다.
+두 독립 제품 리뷰·소비자 exact pin/HC override 전환·배포/live·운영 CPU는 NOT_RUN이다.
+
+## 2026-10-16 — HTTP 상태 줄 P2 수정
+
+두 독립 원문에서 `HTTP/1.1 200` 뒤 SP 없이 줄이 끝나는 응답을 초기 후보가
+healthy로 판정하는 반례를 확인했다. 상태 줄 split3요소를 요구하는 한 조건을 고치고,
+HTTP/1.0·1.1 SP 누락 거부2건과 빈 이유문구의 필수 SP 유지2건을 추가했다.
+`uv run --no-sync ruff check .`·`uv run --no-sync pytest -q`가 PASS(208건/102.11초)였다.
+초기204와 합산하지 않는다. 새 wheel을 빈 core-only venv에 일반 의존 해석으로 설치하고
+pip check·설치source SHA·실제CLI200/503/누락SP 종료0/1/1을 확인했다.
+이전 wheel과 원문은 별도 보존했고 post-fix 두 독립 재검토·CI·소비자 운영은 후속이다.
+
+## 2026-10-16 — HTTP 생존 점검의 반복 import 비용 보강
+
+Weather API와 Transport backend의 반복 urllib 점검 관측을 근거로 stdlib-only
+`http_health`를 추가했다. loopback 한 번·전체 예산·헤더16KiB·strict2xx·조용한 종료이며
+앱별 경로/주기/재시작·provider/DB/run 판정은 소유하지 않는다.
+`rg`로 새 import와 기존 소비자를 추적하고 socket·monotonic·CLI 회귀로 범위를 검증했다.
+새 경로에는 기존 호출자가 없어 CodeGraph 영향 그래프는 사용하지 않았다.
+
+`uv sync --locked --all-extras` 뒤 전체 Python204PASS, 신규44PASS,
+core-only wheel 정상 의존 해석·빈 venv 설치·pip check·설치 모듈 SHA 동일·CLI200/503을 확인했다.
+문서 링크694/2804targets·plan109오류0·도구337실행 중336PASS/1SKIP였다.
+초기 ruff는103자 줄1건을 거절했고 줄바꿈 후 PASS, 기능 변경 없이 신규44를 다시 통과했다.
+이 수치는 별도 예약 분산 branch의230과 합산하지 않으며 소비자 운영 효과도 아니다.
+검증된 prototype의 단일 비통제 CPU 표본과 새 완전한 헤더/CLI 구현은 가이드에서 구분했다.
+두 독립 리뷰·실제 소비자 설치/같은 workload/live는 NOT_RUN이다.
+기존 예약 개선이 빠지지 않도록 소비자는 두 Common 후보를 통합한 고정 commit을 사용해야 한다.
+
+## 2026-10-15 — 고정 phase 예약 분산 리뷰 원문 보존
+
+`41b672c` 전체 delta 독립 FULL 2인 PASS / OPEN 0, 고정 HEAD CI 8개 SUCCESS를
+확인했다. 두 원문을 SHA 대조 후 바이트 그대로 archive하고 manifest·closure·resume을
+갱신했다. reviewer의 초기 환경 실패와 후속 검증 범위도 원문에 유지한다.
+제품 변경 없이 문서 gate와 최종 CI를 다시 확인한다. 소비자 운영 검증은 별도다.
+
+## 2026-10-15 — 고정 phase 예약 분산 후보
+
+T-319의 수용 설계를 먼저 추가한 뒤 Dagster import 없는 `scheduling.staggered_cron`을
+구현했다. Weather/Transport 두 고정 소스의 동일 cron 집중이 근거이며 소비자 파일은
+수정하지 않았다. 설치된 CodeGraph init/status/impact로 범위를 확인했다.
+설치 CLI에 explore가 없어 실패한 뒤 지원되는 impact로 대체했다.
+
+최신 Python 전체230PASS·ruff·wheel build, Dagster1.13.24 달력70PASS,
+core-only wheel 새 프로세스2개/Dagster 미설치·미import·phase 동일을 확인했다.
+필수 문서 link693/target2803·plan109·unittest337(336PASS/1SKIP)·diff 검사를 통과했다.
+첫 ruff는 신규 zip의 strict 누락2건으로 실패해 고쳤고 재검사했다.
+추가 DST 달력 회귀를 포함한 최신 lock(Dagster1.13.25/Python3.13) 전체를 재실행해
+230PASS/103.00초를 확인했다. 두 독립 리뷰·CI·소비자 pin/운영 실측은 아직 완료가 아니다.
+
+로컬 x86 Python3.13 순수 함수 고정 입력10만회에서 wall0.931147초·processCPU0.931098초,
+tracemalloc current80/peak916바이트를 관측했다. 입력/SDK/run worker·운영 RSS는 포함하지
+않으며 다른 구현 대비 절감률 또는 실제 호스트 CPU 개선으로 해석하지 않는다.
+지원 범위·DST·동시성/coalescing·발표 시각 및 후속 실측은 가이드 §13에 기록했다.
+
 ## 2026-10-15 — Geo 실제 복구 교훈 보강
 
 Dagster1.13.24의 두 구간 시작 RPC 예산, 일반 timeout의 영향 범위, None/False origin ID
