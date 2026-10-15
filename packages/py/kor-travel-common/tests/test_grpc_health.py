@@ -5,8 +5,11 @@
 import contextlib
 import json
 import os
+import socket
+import socketserver
 import subprocess
 import sys
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -188,6 +191,7 @@ def fake_rpc(monkeypatch, *, first=3, second=2, decode=0, close=0, require_no_re
         assert target == "127.0.0.1:1"
         if require_no_retry:
             assert ("grpc.enable_retries", 0) in options
+            assert ("grpc.enable_http_proxy", 0) in options
         return Channel()
 
     monkeypatch.setattr(grpc, "insecure_channel", channel_factory)
@@ -250,3 +254,71 @@ def test_source_has_no_recovery_side_effect_calls():
     forbidden = {"kill", "Popen", "report_run_failed", "DagsterInstance", "fork", "system"}
     assert not any(isinstance(node, ast.Attribute) and node.attr in forbidden
                    for node in ast.walk(tree))
+
+
+@contextlib.contextmanager
+def rejecting_proxy():
+    attempts = []
+
+    class Reject(socketserver.BaseRequestHandler):
+        def handle(self):
+            attempts.append(True)
+            self.request.settimeout(1)
+            self.request.recv(4096)
+            self.request.sendall(
+                b"HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n"
+            )
+
+    with socketserver.ThreadingTCPServer(("127.0.0.1", 0), Reject) as instance:
+        thread = threading.Thread(target=instance.serve_forever, kwargs={"poll_interval": 0.01})
+        thread.start()
+        try:
+            yield instance.server_address[1], attempts
+        finally:
+            instance.shutdown()
+            thread.join(timeout=2)
+            assert not thread.is_alive()
+            instance.socket.setblocking(False)
+            while True:
+                try:
+                    queued, _ = instance.socket.accept()
+                except BlockingIOError:
+                    break
+                attempts.append(True)
+                queued.close()
+
+
+def proxy_cli(port, variable, proxy_port, mode):
+    root = str(Path(probe.__file__).parents[1])
+    env = {key: value for key, value in os.environ.items()
+           if key.lower() not in {"grpc_proxy", "http_proxy", "https_proxy",
+                                  "no_proxy", "no_grpc_proxy"}}
+    env.update(PYTHONPATH=root, **{variable: f"http://127.0.0.1:{proxy_port}"})
+    args = [sys.executable, "-m", "kortravelcommon.grpc_health", str(port), "--check", mode]
+    if mode == "ready":
+        args += ["--repository", "repo"]
+    return subprocess.run(args, env=env, capture_output=True, timeout=10)
+
+
+@pytest.mark.parametrize("variable", ["grpc_proxy", "http_proxy", "https_proxy"])
+@pytest.mark.parametrize("mode,raw,expected", [
+    ("live", None, 0), ("ready", None, 0), ("ready", b"malformed", 1),
+])
+def test_actual_proxy_environment_cannot_redirect_or_emit_errors(variable, mode, raw, expected):
+    with rejecting_proxy() as (proxy_port, attempts), server(raw=raw) as (port, _):
+        result = proxy_cli(port, variable, proxy_port, mode)
+        assert result.returncode == expected
+        assert result.stdout == result.stderr == b""
+    assert attempts == []
+
+
+@pytest.mark.parametrize("variable", ["grpc_proxy", "http_proxy", "https_proxy"])
+def test_closed_loopback_target_never_becomes_healthy_through_proxy(variable):
+    with socket.socket() as unused:
+        unused.bind(("127.0.0.1", 0))
+        port = unused.getsockname()[1]
+    with rejecting_proxy() as (proxy_port, attempts):
+        result = proxy_cli(port, variable, proxy_port, "live")
+        assert result.returncode == 1
+        assert result.stdout == result.stderr == b""
+    assert attempts == []

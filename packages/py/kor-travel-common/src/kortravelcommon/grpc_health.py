@@ -54,6 +54,7 @@ def _probe(port: int, budget: float, repository: str | None) -> bool:
             options=(
                 ("grpc.max_receive_message_length", _MAX_REPLY_BYTES),
                 ("grpc.enable_retries", 0),
+                ("grpc.enable_http_proxy", 0),
             ),
         ) as channel:
             response = health_pb2_grpc.HealthStub(channel).Check(
