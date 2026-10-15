@@ -112,3 +112,11 @@ run DB 변경/PID1 종료 동작이 있어 소비자 PR에서 제거·책임 이
   새 supervisor/서비스·실제 배포/운영 효과는 이번 Common 코드 수용에 포함하지 않는다.
 
 계약·이관과 실측 한계는 [적용 가이드 §14](../runbooks/dagster-adoption.md#14-생존정의-준비-조회와-복구-동작-분리)에 둔다.
+
+
+### proxy 환경 우회 반례 (후속 수정)
+
+독립 리뷰가 새 health 채널의 proxy 환경 상속을 재현했다. 새 채널에서 HTTP proxy
+사용을 명시 차단한다. grpc_proxy/http_proxy/https_proxy 각각 정상·손상 정의·닫힌
+target의 실제 subprocess 회귀로 loopback target 귀속·proxy 연결0·quiet를 확인한다.
+원 initial manifest/실패 증거는 유지하며 post-fix 두 독립 재검토 전 완료로 세지 않는다.

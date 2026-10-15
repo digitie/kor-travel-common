@@ -14,7 +14,7 @@
 ### Python 조회 전용 gRPC health
 
 - 선택 grpc-health extra와 grpc_health의 live/ready API·quiet CLI를 추가한다.
-  기대 repository 검증·공유 논리4초·자동 RPC retry 차단을 제공하며 기존 API는 유지한다.
+  기대 repository 검증·공유 논리4초·자동 RPC retry/proxy 우회 차단을 제공하며 기존 API는 유지한다.
 - 조회는 run/DB/프로세스를 변경하지 않는다. 소비자의 기존 reaper/kill 책임 분리와
   실제 배포·운영 효과는 후속이다. [가이드 §14](docs/runbooks/dagster-adoption.md#14-생존정의-준비-조회와-복구-동작-분리)를 따른다.
 

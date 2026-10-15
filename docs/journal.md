@@ -1,3 +1,22 @@
+## 2026-10-16 — gRPC proxy 환경 우회 P2 수정 후보
+
+독립 리뷰 A가 source3ed16d1에서 grpc_proxy CONNECT 때문에 정상 loopback 생존을
+실패로 판정하고 native stderr를 출력하는 반례를 재현했다. 별도 터널 모형은 닫힌 target을
+다른 합성 건강 서버로 연결해 정상 오인할 수 있음도 보였다. 이 두 원문·SHA를 root가
+보존하며 작성자는 제공된 재현 모형만 읽고 상대 리뷰 원문은 읽지 않았다.
+
+새 실제 회귀를 기존 source에서 먼저 실행해1FAIL RED를 보존했다.
+제품 변경은 grpc.enable_http_proxy=0 한 옵션이며 retry0·deadline·parser·legacy
+동작은 유지한다. 신규12조건과 기존48을 합한60PASS, 전체338PASS/104.81초,
+별도 Dagster1.13.24 신규60PASS·ruff·새 wheel/core-only/grpc-only 설치/pipcheck/
+설치source 동일·proxy 환경 실제CLI6건을 확인했다. proxy fixture는 종료 뒤 accept
+backlog와 handler까지 닫아 늦은 연결을 놓치지 않고, 닫힌 target 포트를 바인드한
+socket을 유지해 재할당 race를 막는다. 이 과정은 외부/운영 호출0이다.
+
+이전 cold CPU/RSS 측정은6ffc 제품의 원문으로 보존하며 이 옵션 수정의 재측정으로
+표시하지 않는다. 초기 manifest/리뷰·실패는 그대로이고 새 post-fix manifest로 두
+독립 reviewer의 재검토·CI를 진행한다. 소비자/운영 적용은 NOT_RUN이다.
+
 ## 2026-10-16 — 조회 전용 gRPC health 후보
 
 Common32(2587915)와 Common31(1bb5f6e)을 새 feature branch에서만 통합했다.

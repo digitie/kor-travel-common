@@ -314,10 +314,9 @@ def test_actual_proxy_environment_cannot_redirect_or_emit_errors(variable, mode,
 
 @pytest.mark.parametrize("variable", ["grpc_proxy", "http_proxy", "https_proxy"])
 def test_closed_loopback_target_never_becomes_healthy_through_proxy(variable):
-    with socket.socket() as unused:
+    with socket.socket() as unused, rejecting_proxy() as (proxy_port, attempts):
         unused.bind(("127.0.0.1", 0))
         port = unused.getsockname()[1]
-    with rejecting_proxy() as (proxy_port, attempts):
         result = proxy_cli(port, variable, proxy_port, "live")
         assert result.returncode == 1
         assert result.stdout == result.stderr == b""

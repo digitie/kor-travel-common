@@ -1,3 +1,10 @@
+## 2026-10-16 — proxy 환경 우회 P2 후속 수정
+
+독립 리뷰의 실제 loopback CONNECT/정상 오인 반례를 반영해 새 gRPC 채널에서 proxy를
+명시 비활성화했다. 전체338PASS/새60PASS·별도1.13.24 60PASS와 새 wheel 설치/
+proxy 격리 회귀를 확인했다. 원문·초기 manifest는 보존하고 post-fix 두 리뷰·CI·
+소비자/운영 채택은 아직 후속이다. 기존 legacy API의 동작은 그대로다.
+
 ## 2026-10-16 — health 조회와 복구 분리 후보
 
 Common31 phase와 Common32 strict HTTP를 보존한 feature 통합점에서 새 gRPC live/ready

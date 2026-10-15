@@ -564,6 +564,12 @@ python -I -m kortravelcommon.grpc_health 12703 --check live
 python -I -m kortravelcommon.grpc_health 12703 --check ready --repository __repository__
 ~~~
 
+새 채널은 grpc.enable_http_proxy=0으로 grpc_proxy/http_proxy/https_proxy 등
+proxy 환경을 무시한다. 논리 target을127.0.0.1로 적는 것만으로 proxy 우회를 막을 수는
+없으므로 이 옵션을 제거하면 안 된다. 실제 로컬 회귀는 정상/손상 응답과 닫힌 target에서
+proxy 연결0·조용한 종료를 확인한다. 기존 legacy API/CLI에는 이 새 격리 계약을 소급해
+주장하지 않으며 소비자는 새 CLI로 명시 전환해야 한다.
+
 새 CLI는 출력 없이 성공0/조회 실패1/잘못된 인자2로 끝난다. 기존
 python -m kortravelcommon.dagster_health PORT의 인자·종료 코드는 보존한다.
 
