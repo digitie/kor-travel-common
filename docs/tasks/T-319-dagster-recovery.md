@@ -93,3 +93,22 @@ Weather API와 Transport backend가 같은 Python urllib HTTP 생존 점검을 �
 - 검증된 함수와 CLI를 제공하며 성공0/실패1/잘못된 인자2, 응답 본문·오류·주소를 출력하지 않는다.
 - 실제 loopback 반례·전체 Python·core-only wheel 설치·두 독립 리뷰가 필요하다.
   소비자 exact source 채택과 실제 healthy/CPU/UI 검증 전 운영 효과는 NOT_RUN이다.
+
+## 2026-10-16 health 조회·복구 격리 — 후속 수용 기준
+
+사용자 CPU·반복 실패 분석 후 확인한 여러 소비자의 공통 health 생성 경로가 근거다.
+기존 Common health 자체는 조회 전용이지만 소비자 Manager override에는 별도 reaper/
+run DB 변경/PID1 종료 동작이 있어 소비자 PR에서 제거·책임 이관을 확인해야 한다.
+
+- 기존 API/CLI·고정 phase·strict HTTP를 보존하고 새 live/ready API를 추가한다.
+- optional gRPC lazy import, IPv4 loopback, strict SERVING, 기대 repository/profile 검증,
+  공유 logical4초·4MiB 응답 한도·quiet CLI0/1/2를 회귀로 확인한다.
+- HC 경로에 run 변경·kill/reaper·DB/앱/Dagster 본체 import·자동 복구를 넣지 않는다.
+- 실제 격리 loopback success/error/deadline, Python3.11/core-only/grpc-only wheel,
+  cold CLI wall/self CPU/실행 후 RSS를 측정한다. 논리 deadline과 process hard wall을 구분한다.
+- 소비자는 measured cadence/phase와 bootstrap 여유를 정한다. 초 단위 시각보다
+  일일 횟수/간격/공식 발표·정확한 run 귀속과 UNKNOWN 보존을 우선한다.
+- 동일 immutable 후보의 두 독립 적대 리뷰와 소비자 운영 채택은 별도 gate다.
+  새 supervisor/서비스·실제 배포/운영 효과는 이번 Common 코드 수용에 포함하지 않는다.
+
+계약·이관과 실측 한계는 [적용 가이드 §14](../runbooks/dagster-adoption.md#14-생존정의-준비-조회와-복구-동작-분리)에 둔다.

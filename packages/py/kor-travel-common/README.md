@@ -100,3 +100,11 @@ Dagster 전체 import와 프로세스 재시작은 하지 않는다. [가이드 
 `python -m kortravelcommon.http_health --port 8000 --path /health`는 core-only로
 loopback GET의2xx 헤더를 확인한다. 전체4초·헤더16KiB 상한이며 redirect·재시도·본문 완료 대기는 없다.
 경로·Docker timeout·소비자 실제 검증은 [전용 가이드](../../../docs/runbooks/http-health-probe.md)를 따른다.
+
+## 조회 전용 gRPC health
+
+새 kortravelcommon.grpc_health는 liveness와 기대 repository의 readiness를 분리한다.
+두 RPC는 기본4초 이하의 한 논리 예산을 공유하며 기존 dagster_health API/CLI는 유지한다.
+grpc-health extra만으로 liveness를 쓸 수 있고 readiness에는 지원 Dagster distribution의
+생성 protobuf 파일이 추가로 필요하다. Dagster 본체·DB·복구 동작은 import/실행하지 않는다.
+[적용 가이드 §14](../../../docs/runbooks/dagster-adoption.md#14-생존정의-준비-조회와-복구-동작-분리)를 따른다.
