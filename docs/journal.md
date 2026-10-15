@@ -1,3 +1,22 @@
+## 2026-10-15 — 고정 phase 예약 분산 후보
+
+T-319의 수용 설계를 먼저 추가한 뒤 Dagster import 없는 `scheduling.staggered_cron`을
+구현했다. Weather/Transport 두 고정 소스의 동일 cron 집중이 근거이며 소비자 파일은
+수정하지 않았다. 설치된 CodeGraph init/status/impact로 범위를 확인했다.
+설치 CLI에 explore가 없어 실패한 뒤 지원되는 impact로 대체했다.
+
+초기 Python 전체230PASS·ruff·wheel build, Dagster1.13.24 달력70PASS,
+core-only wheel 새 프로세스2개/Dagster 미설치·미import·phase 동일을 확인했다.
+필수 문서 link693/target2803·plan109·unittest337(336PASS/1SKIP)·diff 검사를 통과했다.
+첫 ruff는 신규 zip의 strict 누락2건으로 실패해 고쳤고 재검사했다.
+추가 DST 달력 회귀를 포함한 최신 lock 환경 전체 검사는 재실행 예정이며
+두 독립 리뷰·CI·소비자 pin/운영 실측도 아직 완료가 아니다.
+
+로컬 x86 Python3.13 순수 함수 고정 입력10만회에서 wall0.931147초·processCPU0.931098초,
+tracemalloc current80/peak916바이트를 관측했다. 입력/SDK/run worker·운영 RSS는 포함하지
+않으며 다른 구현 대비 절감률 또는 실제 호스트 CPU 개선으로 해석하지 않는다.
+지원 범위·DST·동시성/coalescing·발표 시각 및 후속 실측은 가이드 §13에 기록했다.
+
 ## 2026-10-15 — Geo 실제 복구 교훈 보강
 
 Dagster1.13.24의 두 구간 시작 RPC 예산, 일반 timeout의 영향 범위, None/False origin ID
