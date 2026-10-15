@@ -156,7 +156,7 @@ def test_invalid_repository(name):
     assert not probe.grpc_code_server_is_ready(1, repository_name=name)
 
 
-def fake_rpc(monkeypatch, *, first=3, second=2, decode=0, close=0):
+def fake_rpc(monkeypatch, *, first=3, second=2, decode=0, close=0, require_no_retry=True):
     clock = [0.0]
     timeouts = []
     monkeypatch.setattr(probe.time, "monotonic", lambda: clock[0])
@@ -184,7 +184,13 @@ def fake_rpc(monkeypatch, *, first=3, second=2, decode=0, close=0):
         clock[0] += first
         return SimpleNamespace(status=health_pb2.HealthCheckResponse.SERVING)
 
-    monkeypatch.setattr(grpc, "insecure_channel", lambda *args, **kwargs: Channel())
+    def channel_factory(target, *, options):
+        assert target == "127.0.0.1:1"
+        if require_no_retry:
+            assert ("grpc.enable_retries", 0) in options
+        return Channel()
+
+    monkeypatch.setattr(grpc, "insecure_channel", channel_factory)
     monkeypatch.setattr(health_pb2_grpc, "HealthStub", lambda _: SimpleNamespace(Check=check))
 
     def parsed(*args):
@@ -197,7 +203,7 @@ def fake_rpc(monkeypatch, *, first=3, second=2, decode=0, close=0):
 
 def test_old_each_rpc_budget_vs_new_shared_budget(monkeypatch):
     import kortravelcommon.dagster_health as legacy
-    timeouts = fake_rpc(monkeypatch)
+    timeouts = fake_rpc(monkeypatch, require_no_retry=False)
     monkeypatch.setattr(legacy, "_is_loaded_reply", lambda _: True)
     assert code_server_is_healthy(1) is True  # 기존 함수의 각4초 호환 계약은 유지한다.
     assert timeouts == [4, 4]

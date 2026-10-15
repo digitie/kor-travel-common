@@ -51,7 +51,10 @@ def _probe(port: int, budget: float, repository: str | None) -> bool:
         remaining()
         with grpc.insecure_channel(
             f"127.0.0.1:{port}",
-            options=(("grpc.max_receive_message_length", _MAX_REPLY_BYTES),),
+            options=(
+                ("grpc.max_receive_message_length", _MAX_REPLY_BYTES),
+                ("grpc.enable_retries", 0),
+            ),
         ) as channel:
             response = health_pb2_grpc.HealthStub(channel).Check(
                 health_pb2.HealthCheckRequest(service="DagsterApi"), timeout=remaining()
