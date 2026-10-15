@@ -440,9 +440,10 @@ ID 비교를 완화하지 말고 origin ID·selector와 실제 정의의 interva
 프로세스·컨테이너 소속은 실제 PID/CID로 연결한다.
 
 daemon CLI를 HTTP 200이나 GraphQL `healthy`만으로 대체하면 thread 정지를 놓칠 수 있다.
-검증한 배포의 CLI heartbeat 허용 지연은 300초였고, 같은 SDK GraphQL 경로의 기본
-판정은 1800초였다. 경량화하더라도 같은 instance·required daemon 집합·heartbeat 시각과
-기존 허용 지연을 보존한다. 기존 CS의 child 복구·진행 중 run 보호·orphan reaper도 유지한다.
+검증한 배포의 CLI heartbeat tolerance 설정은 300초였고, 같은 SDK GraphQL 경로의
+기본 tolerance는 1800초였다. 실제 판정은 heartbeat 시각에 interval(기본 30초)과
+tolerance를 합산한다. 경량화하더라도 같은 instance·required daemon 집합·heartbeat
+시각·interval·tolerance와 오류 처리 계약을 보존한다. 기존 CS의 child 복구·진행 중 run 보호·orphan reaper도 유지한다.
 
 ### sensor·백업 복원과 UNKNOWN
 
