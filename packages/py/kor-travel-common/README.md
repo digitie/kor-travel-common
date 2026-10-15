@@ -82,6 +82,13 @@ uv build
 core-only·Dagster-only 설치는 HTTP 모듈을 import하지 않는다. 테스트용 `dev`에는 httpx를
 직접 선언하여 깨끗한 `dev+dagster` CI에서도 HTTP 회귀를 실행한다.
 
+## 고정 phase 예약 분산
+
+`kortravelcommon.scheduling.staggered_cron(interval_minutes=180, phase_minutes=27)`은
+명시적인 phase로 5필드 cron을 만든다. Dagster를 import하지 않는 core-only 함수다.
+지원 주기·시간대·기존 coalescing과의 관계는
+[적용 가이드 §13](../../../docs/runbooks/dagster-adoption.md#13-명시적인-고정-phase로-예약-시작-분산)을 따른다.
+
 ## 경량 code-server health
 
 `python -I -m kortravelcommon.dagster_health 12703`은 loopback proxy health와 유효한 자식

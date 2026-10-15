@@ -11,6 +11,12 @@
 - core-only `kortravelcommon.http_health` 함수·CLI: loopback GET 한 번, 전체 deadline·16KiB 헤더·strict2xx·조용한 종료 코드를 제공한다.
 - redirect·본문·재시도와 앱별 경로·운영 재시작은 포함하지 않는다. [적용 가이드](docs/runbooks/http-health-probe.md)를 따른다. 소비자 실제 채택·운영 효과는 후속이다.
 
+### Python 고정 phase 예약 분산
+
+- Dagster 의존성이 없는 `kortravelcommon.scheduling.staggered_cron`을 추가한다.
+  명시적인 분 주기/phase로 일일 예약 횟수를 보존하며 잘못된 주기·bool을 거절한다.
+  소비자 적용·실제 CPU/RSS·수집 신선도 실측은 후속이며 이 함수만으로 보장하지 않는다.
+
 ### Python HTTP 조회 보강
 
 - `http` extra와 `bounded_request`: plain 응답 크기·전체 읽기 deadline·별도 정리 예산을 제한한다.

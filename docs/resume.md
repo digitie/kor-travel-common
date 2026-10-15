@@ -15,6 +15,22 @@ core-only wheel 정상 설치·실제 loopback CLI200/503·ruff·문서 링크/p
 이 후보의 기준 main은8d04353이며 별도 고정 phase 예약 PR을 포함했다고 주장하지 않는다.
 소비자는 예약 개선을 보존하는 통합 commit을 다시 고정하고 관련 회귀를 수행해야 한다.
 
+## 2026-10-15 — 고정 phase 예약 분산 독립 리뷰 완료
+
+고정 `41b672c`의 독립 FULL 2인 PASS / OPEN 0과 CI 8개 SUCCESS를 확인했다.
+[원문·판정](reviews/adversarial/2026-10-15-scheduling-phase.md)을 후속 문서로 보존한다.
+제품 Python 바이트와 Weather 소비자 pin은 그대로다. 소비자 운영 gate를 이 소스 리뷰로
+대체하지 않으며 실제 배포·첫 tick·수집량·freshness·CPU/RSS·복구·live는 후속이다.
+archive commit의 문서 gate와 최종 CI 확인 후, 소비자 운영 결과와 함께 병합을 판단한다.
+
+## 2026-10-15 — 고정 phase 예약 분산 후보
+
+T-319에 Dagster import 없는 `staggered_cron`과 적용 가이드 §13을 추가했다.
+같은 일일 예약 횟수·간격·자정/월경계·DST 한계·coalescing 보존을 실제 SDK 달력으로
+검증했고 Python 전체230PASS·core-only wheel 검증을 마쳤다. 두 독립 리뷰·CI·
+소비자 pin/실제 수집량·freshness·운영 RSS/CPU 검증은 후속이며 아직 병합하지 않는다.
+[검토 범위](reviews/adversarial/evidence/2026-10-15-scheduling-phase-manifest.md)를 따른다.
+
 ## 2026-10-06 — Map·PinVi 공통 Dagster 구현·재구축·live·머지 완료
 
 [Common #28](https://github.com/digitie/kor-travel-common/pull/28) → [Map #1303](https://github.com/digitie/kor-travel-map/pull/1303) → [PinVi #576](https://github.com/digitie/pinvi/pull/576) 순서로 병합했다. Common·Map은 merge commit, PinVi는 main ruleset의 squash-only·linear history 정책에 따라 squash로 병합했다. PinVi 재구축 원본0058369와 검증 HEAD92d0f40는 remote tags codex/pinvi-map-runtime-20261006·codex/pinvi-map-reviewed-20261006 및 유지한 feature branch에 원본 이력을 보존했다. 저장소 설정은 변경하지 않았다. 최종 문서 포함 HEAD의 필수 CI, Common·Map main ancestry와 PinVi 보존 참조, 병합 tree 일치를 확인했다. 실제 paired 재구축, 두 독립 FULL 제품 리뷰·가이드 리뷰·최종 문서 리뷰, Chromium/Firefox×Map/PinVi live UI4건·8캡처, ACL40·D1 11건·D2 normal/attempt0·소유 fixture 정리·잔존0 검증을 완료했다.

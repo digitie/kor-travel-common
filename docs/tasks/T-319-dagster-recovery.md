@@ -27,6 +27,29 @@ Python 공통 코드를 요청했다. 문서의 단계별 Python task 순서보�
 
 ## 수용 기준
 
+### 2026-10-15 고정 phase 예약 분산 — 수용 설계
+
+사용자 요청에 따라 `kortravelcommon.scheduling.staggered_cron`을 추가한다.
+Weather acc8의 external 9개가 같은 3시간 cron을 사용하고 Transport 15a928b의
+airport/highway가 같은 5분 cron을 사용한 관찰이 공통화 근거다.
+앱별 phase 표와 provider 발표 시각·수집 범위·실제 배포는 소비자가 소유한다.
+
+- keyword-only 정수 `interval_minutes`, `phase_minutes`로 5필드 cron 문자열을 만든다.
+  bool·잘못된 타입과 범위는 거절한다. phase는 명시적으로 고정하며 해시·랜덤·슬롯 수를 쓰지 않는다.
+- 60분 약수인 분 주기 또는 24시간 약수인 정시 주기만 허용한다.
+  5·180·1440분은 허용하며 7·90분은 거절한다. `0 <= phase < interval`이다.
+- 실제 Dagster 달력으로 일일 횟수·간격·phase와 자정·월 경계를 확인한다.
+  Weather 후보 phase 7,27,47,67,87,107,127,147,167은 합계72회/일,
+  Transport 후보 phase1/3은 각각288회/일을 보존한다. 다른 phase 추가가 기존 cron을 바꾸지 않는다.
+- 순수 helper는 Dagster를 import하지 않으며 core-only wheel에서 동작한다.
+  시간대는 소비자 scheduler가 소유하고 KST/UTC 같은 DST 없는 clock에서 간격을 검증한다.
+  DST 전환·daemon 지연·coalescing·실제 run 동시성은 cron 분산과 별개다.
+- 운영 CPU/RSS·수집량·신선도 개선은 소비자 실측 전 NOT_RUN이다.
+  이번 Common 후보에는 자동 runtime 설정·서비스·소비자 pin 변경을 넣지 않는다.
+
+구현·wheel·필수 문서 gate 후 동일 immutable 후보를 두 명이 독립 리뷰한다.
+소비자 채택·실측과 병합 전 승인 상태를 이 설계의 달력 검증 결과로 대체하지 않는다.
+
 - [x] metadata 장애 시 중복 예약을 만들지 않으며 외부 location의 동명 job은 막지 않는다.
 - [x] 멱등성을 명시하지 않은 job은 native 자동 재시도를 상속하지 않는다.
 - [x] deadline 뒤 client 재사용 금지 계약과 daemon/instance 설정 선행을 문서화한다.

@@ -25,6 +25,32 @@ core-only wheel 정상 의존 해석·빈 venv 설치·pip check·설치 모듈 
 두 독립 리뷰·실제 소비자 설치/같은 workload/live는 NOT_RUN이다.
 기존 예약 개선이 빠지지 않도록 소비자는 두 Common 후보를 통합한 고정 commit을 사용해야 한다.
 
+## 2026-10-15 — 고정 phase 예약 분산 리뷰 원문 보존
+
+`41b672c` 전체 delta 독립 FULL 2인 PASS / OPEN 0, 고정 HEAD CI 8개 SUCCESS를
+확인했다. 두 원문을 SHA 대조 후 바이트 그대로 archive하고 manifest·closure·resume을
+갱신했다. reviewer의 초기 환경 실패와 후속 검증 범위도 원문에 유지한다.
+제품 변경 없이 문서 gate와 최종 CI를 다시 확인한다. 소비자 운영 검증은 별도다.
+
+## 2026-10-15 — 고정 phase 예약 분산 후보
+
+T-319의 수용 설계를 먼저 추가한 뒤 Dagster import 없는 `scheduling.staggered_cron`을
+구현했다. Weather/Transport 두 고정 소스의 동일 cron 집중이 근거이며 소비자 파일은
+수정하지 않았다. 설치된 CodeGraph init/status/impact로 범위를 확인했다.
+설치 CLI에 explore가 없어 실패한 뒤 지원되는 impact로 대체했다.
+
+최신 Python 전체230PASS·ruff·wheel build, Dagster1.13.24 달력70PASS,
+core-only wheel 새 프로세스2개/Dagster 미설치·미import·phase 동일을 확인했다.
+필수 문서 link693/target2803·plan109·unittest337(336PASS/1SKIP)·diff 검사를 통과했다.
+첫 ruff는 신규 zip의 strict 누락2건으로 실패해 고쳤고 재검사했다.
+추가 DST 달력 회귀를 포함한 최신 lock(Dagster1.13.25/Python3.13) 전체를 재실행해
+230PASS/103.00초를 확인했다. 두 독립 리뷰·CI·소비자 pin/운영 실측은 아직 완료가 아니다.
+
+로컬 x86 Python3.13 순수 함수 고정 입력10만회에서 wall0.931147초·processCPU0.931098초,
+tracemalloc current80/peak916바이트를 관측했다. 입력/SDK/run worker·운영 RSS는 포함하지
+않으며 다른 구현 대비 절감률 또는 실제 호스트 CPU 개선으로 해석하지 않는다.
+지원 범위·DST·동시성/coalescing·발표 시각 및 후속 실측은 가이드 §13에 기록했다.
+
 ## 2026-10-15 — Geo 실제 복구 교훈 보강
 
 Dagster1.13.24의 두 구간 시작 RPC 예산, 일반 timeout의 영향 범위, None/False origin ID

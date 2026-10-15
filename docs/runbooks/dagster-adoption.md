@@ -481,3 +481,58 @@ controller 상태와 실제 metadata를 먼저 조회하고, 결과를 모르는
 [run-status cursor 초기화](https://github.com/dagster-io/dagster/blob/1.13.24/python_modules/dagster/dagster/_core/definitions/run_status_sensor_definition.py),
 [workspace reload](https://github.com/dagster-io/dagster/blob/1.13.24/python_modules/dagster/dagster/_core/workspace/context.py)다.
 소비자의 실제 설치 버전과 원문을 함께 대조한다.
+
+## 13. 명시적인 고정 phase로 예약 시작 분산
+
+`kortravelcommon.scheduling.staggered_cron(*, interval_minutes, phase_minutes)`은
+Dagster import·환경변수·clock 조회·랜덤·해시·전역 예약표 없이 5필드 cron 문자열을 만든다.
+phase 표는 소비자가 이름별 상수로 소유한다. 재시작이나 다른 job 추가로 기존 phase를
+다시 배정하지 않는다. 저장된 스케줄을 바꾸거나 새 실행을 만드는 함수는 아니다.
+
+```python
+from kortravelcommon.scheduling import staggered_cron
+
+cron = staggered_cron(interval_minutes=180, phase_minutes=27)
+# 기존 coalescing_schedule(..., cron_schedule=cron, execution_timezone="Asia/Seoul")
+```
+
+지원하는 interval은 1,2,3,4,5,6,10,12,15,20,30,60,120,180,240,360,480,720,1440분이다.
+즉 60분의 약수인 분 주기 또는 24시간의 약수인 정시 주기만 허용한다.
+90분·7분처럼 clock을 이 방식으로 동일 간격 분할하지 못하는 주기는 `ValueError`다.
+두 인수는 bool 아닌 정수이며 잘못된 타입은 `TypeError`,
+`0 <= phase_minutes < interval_minutes` 위반은 `ValueError`다.
+
+### 소비자 후보와 적용 순서
+
+Weather acc8 external 9개가 `15 */3 * * *`에 모이는 관찰과 Transport 15a928b의
+airport/highway `*/5 * * * *`가 공통화 근거다. 후보는 다음과 같다.
+
+| 소비자 | interval | 고정 phase 후보 | DST 없는 clock의 예약 횟수 |
+| --- | --- | --- | --- |
+| Weather external 9개 | 180분 | 7,27,47,67,87,107,127,147,167 | 각8회/일, 합계72회/일 |
+| Transport airport/highway | 5분 | 각각1/3분 | 각각288회/일 |
+
+실제 Dagster 달력에서 Weather 후보의 동일 분 예약은 기존9개에서 최대1개로 나뉜다.
+이 수치는 예약 시작 충돌이며 오래 실행되는 run의 동시성이 1이라는 뜻이 아니다.
+이 변경만으로 전체 일일 원천 호출량·CPU 총량이 줄었다고 주장하지 않는다.
+기존 job/config·수집 범위·source lineage·unique/upsert·timeout·max concurrency·coalescing은
+그대로 유지하고 소비자 PR에서 phase만 핀한다. 정확한 시각보다 안정적 분산이 목적이다.
+
+provider의 발표 시각·격자·lookback은 provider public API와 소비자 정책이 소유한다.
+phase를 앞당기면 아직 발표되지 않은 값을 만날 수 있으므로 단순 cron 횟수 동등만으로
+수집량·데이터 신선도 동등을 확정하지 않는다. 새 schedule을 켠 뒤 첫 실제 tick,
+동일 입력/기간의 수집량·source/fact lineage·freshness·취소/복구와 RSS/PSS/CPU를 확인한다.
+현재 Common 후보의 소비자 적용·운영 개선 실측은 **NOT_RUN**이다.
+
+### clock과 실행 정책의 경계
+
+helper에는 timezone 인수가 없다. scheduler에 `Asia/Seoul` 또는 검토한 timezone을 명시한다.
+KST/UTC처럼 DST가 없는 clock에서는 자정·월/연도 경계를 포함해 interval 간격을 보존한다.
+DST가 있는 지역에서는 cron의 wall-clock 의미를 따르므로 하루가 23/25시간이거나
+시각이 건너뛰거나 반복될 수 있다. 고정 elapsed-time 간격이나 임의 DST 지역의 같은
+실행 횟수를 보장하지 않는다. 실제 Dagster 달력/설치 버전으로 전환일을 별도 확인한다.
+
+daemon 지연·중지 후 catch-up·tick coalescing·재시도·실제 run 시작 시각은 기존 Dagster와
+소비자 계약이다. 이 helper는 실행 슬롯·reservation lock·중복 실행 방지를 구현하지 않는다.
+기존 `coalescing_schedule` 및 instance 동시성 제한을 함께 유지한다. phase는 예약된
+cron 위치만 고정하며 metadata 장애를 정상으로 바꾸거나 실패 작업을 자동 재실행하지 않는다.
