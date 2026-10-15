@@ -353,3 +353,73 @@ Dagster 1.13.24의 repository batch loader는 `ticks(limit: 3)`만으로 전체 
 Map·PinVi처럼 최신 3건을 표시하는 요약은 `ticks(limit: 3, statuses: [STARTED, SKIPPED, SUCCESS, FAILURE])`를 사용한다. 실제 설치 schema의 네 상태를 전부 포함하므로 실패·진행 중 tick을 숨기지 않는다. 이 버전에서는 nonempty `statuses`가 batch loader를 우회하고 selector별 최신 LIMIT 조회를 사용한다. 실제 Map의 같은 query는 2.077초에 정상 응답했으며 state당 최대 3건을 유지했다. [독립 진단·조회 검증](../reviews/adversarial/evidence/map-health-2026-10-05/review-summary-tick-query-recovery.md)을 참조한다.
 
 이 query 선택은 소비자 API가 소유한다. 공통 Python HTTP 코드는 요청 전체 deadline·응답 바이트 상한·연결 정리를 계속 적용한다. Dagster를 업그레이드할 때는 실제 enum과 resolver 경로를 다시 확인한다. 새 tick 상태가 추가되면 전체 상태 선택과 검증을 함께 갱신한다. selector의 legacy NULL 값과 timestamp 동률에서 두 저장소 경로가 완전히 같다고 주장하지 않는다. 수용 기준은 소유 instigation의 최신 최대 3건과 모든 현재 상태·오류 정보를 보존하는 것이다.
+
+## 12. 호스트 이전과 중지 상태 복구
+
+이 절은 Geo 이전 과정에서 확인한 Dagster 1.13.24 동작을 같은 제어 평면을 사용하는
+소비자가 재검증할 때 참고하는 절차다. 새 공용 Python API나 모든 소비자의 이전 완료를
+뜻하지 않는다. Docker·workspace의 생명주기는 Manager가 소유하고, 앱의 실행 정책과
+데이터·백업·인증은 각 소비자가 소유한다. 앱별 실행 상한·메모리·DB pool 튜닝은 보존한다.
+
+### 실행이 없는지 확인하기
+
+`dagster code-server start`의 proxy와 관리되는 `dagster api grpc` 자식은 같은 RPC를
+모두 지원하지 않는다. 이 버전의 proxy는 `GetCurrentRuns`를 전달하지 않아
+`UNIMPLEMENTED`를 반환한다. 이를 빈 실행 목록으로 처리하면 안 된다. 실제 실행을
+관리하는 API 자식의 지원 RPC와 metadata의 활성 run·진행 중 tick을 함께 확인한다.
+proxy가 정상이어도 자식 load error가 있을 수 있으므로 §10의 로딩 검사도 유지한다.
+조회 실패·시간초과·응답 오류·조회 중 child 교체는 실행 없음의 증거가 아니다.
+
+중지된 schedule도 scheduler가 `ScheduleInstigatorData.last_iteration_timestamp`를
+기록할 수 있다. 이 버전은 처음 값이 없을 때와 checkpoint 간격이 지났을 때 해당 값을
+갱신하며 `STOPPED`·cron·`start_timestamp`를 보존한다. 이 필드 차이만으로 재활성화나
+작업 실행을 단정하지 않는다. 전환용 snapshot을 비교할 때 정상 checkpoint만 구분하고
+상태·origin·cron·시작 시각·sensor cursor의 차이는 계속 검증한다. 변경된 checkpoint는
+유한한 숫자·비역행·관측 시간 범위를 확인하며, 비교를 맞추려고 DB 값을 되돌리지 않는다.
+업그레이드 후에는 실제 설치 SDK의 해당 경로와 설정을 다시 확인한다.
+
+### 파일과 코드 등록 순서
+
+호스트 파일을 rename으로 교체해도 이미 생성된 file bind mount는 이전 inode를 볼 수
+있다. daemon·web·code server가 실제로 읽는 instance/workspace와 호스트 파일을 각각
+확인한다. 호스트 SHA만 같거나 compose 경로가 맞다는 이유로 실제 mount도 같다고
+가정하지 않는다. 필요한 서비스만 갱신하고, 다른 location·DB·실행 worker를 함께
+재시작하는 전체 workspace reload로 우회하지 않는다. 같은 inode에 설정을 쓸 때도
+부분 쓰기·parser 관측 가능성을 고려하고, 변경 후 실제 mount와 native 조회로 확인한다.
+
+1. 새 code server를 자동 예약이 중지된 상태로 준비하고 실제 설치 코드·storage·권한을 확인한다.
+2. 기존 location의 예약을 중지하고 실제 worker·활성 run·진행 중 tick이 없는지 확인한 뒤 정상 종료한다.
+3. 새 workspace에 등록한 뒤 native `RepositoryLocation` 로딩과 앱별 scope를 확인한다.
+4. 실제 설정에서 부작용이 없는 검증 job을 정해 큐 제출·실제 worker 실행·terminal 결과까지 확인한다.
+5. 실패 감지·제한된 재시도 sensor와 필요한 schedule을 앱별로 복원하고 최초 완료 tick을 별도 확인한다.
+
+Geo처럼 backup 설정이 이미 비활성화된 경우의 due 조회 job은 검증 후보가 될 수 있다.
+실제 설정·출력·DB 작업 및 artifact 변화가 없음을 확인해야 하며, 운영 값을 임의로 바꿔
+검증 전용 성공을 만들지 않는다. repository가 보이거나 HTTP 200인 것만으로 daemon의
+큐 소비와 실행 성공을 증명할 수 없다. 완료 뒤에도 이전 호스트의 정본 배포 설정이
+폐기된 code server를 다시 올리지 않도록 Manager의 배치 설정을 함께 정리한다.
+
+### sensor·백업 복원과 UNKNOWN
+
+새 instance에 처음 등록하는 run-status sensor는 대상의 event high-water를 기준으로
+복원한다. 전환 중 새 실패를 놓치지 않도록 활성화 직전에 high-water를 다시 올리지 않는다.
+같은 instance에서 재시작할 때는 기존 cursor와 미처리 실패를 보존한다. 다른 instance의
+cursor를 복사하면 기존 실패를 대량 재생하거나 새 실패를 놓칠 수 있다.
+일반 retry sensor는 cursor를 새로 둬도 과거 실패를 다시 검색할 수 있으므로 실제
+필터와 대상 이력을 확인한다. public `start_sensor`·`start_schedule`의 새 시작 시각을
+확인하고, 첫 tick의 오류·run key·새 run을 관측한다. 단순히 RUNNING 상태를 쓰는 것과
+첫 tick 성공은 구분한다. 다음 cron 시각을 계산한 것은 실제 cron 실행 증거가 아니다.
+
+백업 catalog와 실제 파일은 별도로 이전한다. available 상태여도 대상 파일이 없을 수
+있고, 보존 기간 설정 변경은 기존 `expires_at`을 연장하지 않는다. 소비자의 실제 보존
+정책·최소 보존 개수·경로 허용목록을 확인한 뒤 janitor를 복원한다. 큰 파일은 작은
+고정 크기 chunk로 전체 checksum을 검사해 메모리 사용량이 파일 크기에 비례하지 않게
+한다. 새 비공개 경로로 복사해 검증한 뒤 기존 파일을 덮어쓰지 않고 공개하며, 임시
+hardlink가 남으면 삭제 후에도 공간이 회수되지 않으므로 소유 임시 파일의 정리도 추적한다.
+실제 API와 worker의 UID·파일 접근을 확인하고 광범위한 쓰기 권한 부여로 해결하지 않는다.
+
+전환·제출 응답의 timeout은 미실행을 의미하지 않는다. 알려진 operation/run/Exec ID,
+controller 상태와 실제 metadata를 먼저 조회하고, 결과를 모르는 요청을 반복 제출하거나
+강제 종료·경쟁 rollback하지 않는다. 부분 성공은 별도 복구 상태로 남기며 기존 실패와
+최초 실행 증거를 보존한다. 운영 주소·DSN·cookie·토큰·원본 로그는 소비자의 비공개
+운영 기록에만 두고, 공개 evidence에는 검증 범위와 미관측 항목을 구분한다.
