@@ -1,3 +1,10 @@
+## 2026-10-15 — 고정 phase 예약 분산 리뷰 원문 보존
+
+`41b672c` 전체 delta 독립 FULL 2인 PASS / OPEN 0, 고정 HEAD CI 8개 SUCCESS를
+확인했다. 두 원문을 SHA 대조 후 바이트 그대로 archive하고 manifest·closure·resume을
+갱신했다. reviewer의 초기 환경 실패와 후속 검증 범위도 원문에 유지한다.
+제품 변경 없이 문서 gate와 최종 CI를 다시 확인한다. 소비자 운영 검증은 별도다.
+
 ## 2026-10-15 — 고정 phase 예약 분산 후보
 
 T-319의 수용 설계를 먼저 추가한 뒤 Dagster import 없는 `scheduling.staggered_cron`을
