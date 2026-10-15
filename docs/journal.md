@@ -1,3 +1,16 @@
+## 2026-10-15 — Geo 실제 복구 교훈 보강
+
+Dagster1.13.24의 두 구간 시작 RPC 예산, 일반 timeout의 영향 범위, None/False origin ID
+차이와 strict 비교, 특정 checkpoint snapshot/CAS, healthcheck 경량화의 heartbeat 계약을
+adoption guide §12에 추가했다. 실제 새 NOOP SUCCESS·두 sensor 최초 SKIPPED/0run·Janitor
+fresh start를 관측했으며 기존 실패 이력은 보존했다. 첫 실제 Janitor cron·전체 배치와
+모든 소비자의 이전 완주는 NOT_RUN/미완료다. 운영 주소·로그·자격 증명은 올리지 않는다.
+이 문서 델타의 필수 검사와 독립 리뷰 2인은 진행 중이며 기존 승인 원문을 덮지 않는다.
+
+## 2026-10-15 — Dagster 호스트 이전·중지 복구 가이드 보강
+
+[적용 가이드](runbooks/dagster-adoption.md#12-호스트-이전과-중지-상태-복구)에 proxy와 API child의 RPC 차이, STOPPED schedule checkpoint, 실제 file bind mount, 큐 실행 검증과 sensor 복원, 대용량 백업의 일정 메모리 검증 및 UNKNOWN 복구를 추가했다. Geo 이전에서 발견한 동작을 다른 소비자가 재검증할 수 있게 설명하며 Python 공개 API·앱별 튜닝·채택 완료 상태를 변경하지 않는다. 소비자 운영 결과와 최초 cron·전체 배치 실행 여부는 소비자 기록에서 별도로 검증한다.
+
 ## 2026-10-06 — Map·PinVi 공통 Dagster 구현·재구축·live·머지 완료
 
 [Common #28](https://github.com/digitie/kor-travel-common/pull/28) → [Map #1303](https://github.com/digitie/kor-travel-map/pull/1303) → [PinVi #576](https://github.com/digitie/pinvi/pull/576) 순서로 병합했다. Common·Map은 merge commit, PinVi는 main ruleset의 squash-only·linear history 정책에 따라 squash로 병합했다. PinVi 재구축 원본0058369와 검증 HEAD92d0f40는 remote tags codex/pinvi-map-runtime-20261006·codex/pinvi-map-reviewed-20261006 및 유지한 feature branch에 원본 이력을 보존했다. 저장소 설정은 변경하지 않았다. 최종 문서 포함 HEAD의 필수 CI, Common·Map main ancestry와 PinVi 보존 참조, 병합 tree 일치를 확인했다. 실제 paired 재구축, 두 독립 FULL 제품 리뷰·가이드 리뷰·최종 문서 리뷰, Chromium/Firefox×Map/PinVi live UI4건·8캡처, ACL40·D1 11건·D2 normal/attempt0·소유 fixture 정리·잔존0 검증을 완료했다.
