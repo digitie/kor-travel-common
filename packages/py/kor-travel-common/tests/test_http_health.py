@@ -78,6 +78,8 @@ def test_actual_status_and_one_request(status):
         b"HTTP/1.1 200 OK\r\nContent-Length: 0\r\nContent-Length: 0\r\n\r\n",
         b"HTTP/1.1 200 OK\r\nContent-Length: 0\r\nTransfer-Encoding: chunked\r\n\r\n",
         b"HTTP/1.1 200 OK\r\nTransfer-Encoding: nope\r\n\r\n",
+        b"HTTP/1.1 200\r\n\r\n",
+        b"HTTP/1.0 204\r\n\r\n",
         b"HTTP/1.1 2000 OK\r\n\r\n",
         b"HTTP/2 200 OK\r\n\r\n",
         b"HTTP/1.1 200 OK\r\nLong:" + b"x" * 16384 + b"\r\n\r\n",
@@ -86,6 +88,13 @@ def test_actual_status_and_one_request(status):
 def test_malformed_eof_and_header_cap(response):
     with server(response) as (port, _):
         assert not check_http_health(port=port, timeout_seconds=0.5)
+
+
+@pytest.mark.parametrize("protocol,status", [("HTTP/1.1", 200), ("HTTP/1.0", 204)])
+def test_empty_reason_preserves_required_separator(protocol, status):
+    response = f"{protocol} {status} \r\n\r\n".encode()
+    with server(response) as (port, _):
+        assert check_http_health(port=port)
 
 
 def test_body_is_not_awaited():

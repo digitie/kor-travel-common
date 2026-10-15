@@ -1,3 +1,13 @@
+## 2026-10-16 — HTTP 상태 줄 P2 수정
+
+두 독립 원문에서 `HTTP/1.1 200` 뒤 SP 없이 줄이 끝나는 응답을 초기 후보가
+healthy로 판정하는 반례를 확인했다. 상태 줄 split3요소를 요구하는 한 조건을 고치고,
+HTTP/1.0·1.1 SP 누락 거부2건과 빈 이유문구의 필수 SP 유지2건을 추가했다.
+`uv run --no-sync ruff check .`·`uv run --no-sync pytest -q`가 PASS(208건/102.11초)였다.
+초기204와 합산하지 않는다. 새 wheel을 빈 core-only venv에 일반 의존 해석으로 설치하고
+pip check·설치source SHA·실제CLI200/503/누락SP 종료0/1/1을 확인했다.
+이전 wheel과 원문은 별도 보존했고 post-fix 두 독립 재검토·CI·소비자 운영은 후속이다.
+
 ## 2026-10-16 — HTTP 생존 점검의 반복 import 비용 보강
 
 Weather API와 Transport backend의 반복 urllib 점검 관측을 근거로 stdlib-only

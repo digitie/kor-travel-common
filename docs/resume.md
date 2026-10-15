@@ -1,3 +1,11 @@
+## 2026-10-16 — HTTP 상태 줄 부정 응답 보강
+
+초기 후보의 두 독립 리뷰가 상태 코드 뒤 SP 누락을 건강한 응답으로 오인하는 P2를 재현했다.
+split 결과3요소를 요구하고 빈 이유 문구의 정상 응답은 유지했다.
+전체 Python208PASS(신규48포함)·ruff·새 core-only wheel 설치/동일source·실제CLI3조건을 확인했다.
+고정 post-fix의 두 독립 재검토와 CI·소비자 채택/실측은 후속이며 이전 결과를 덮지 않는다.
+[계약](runbooks/http-health-probe.md)을 따른다.
+
 ## 2026-10-16 — 경량 HTTP 생존 점검 후보
 
 [T-319](tasks/T-319-dagster-recovery.md)의 core-only HTTP 점검 함수·CLI와

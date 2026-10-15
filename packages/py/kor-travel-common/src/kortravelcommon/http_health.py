@@ -61,7 +61,7 @@ def check_http_health(*, port: int, path: str = "/health", timeout_seconds: floa
             lines = bytes(header).split(b"\r\n\r\n", 1)[0].split(b"\r\n")
             status = lines[0].split(b" ", 2)
             if (
-                len(status) < 2
+                len(status) != 3
                 or status[0] not in (b"HTTP/1.0", b"HTTP/1.1")
                 or len(status[1]) != 3
                 or not status[1].isdigit()
