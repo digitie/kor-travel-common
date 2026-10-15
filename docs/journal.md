@@ -5,12 +5,12 @@ T-319의 수용 설계를 먼저 추가한 뒤 Dagster import 없는 `scheduling
 수정하지 않았다. 설치된 CodeGraph init/status/impact로 범위를 확인했다.
 설치 CLI에 explore가 없어 실패한 뒤 지원되는 impact로 대체했다.
 
-초기 Python 전체230PASS·ruff·wheel build, Dagster1.13.24 달력70PASS,
+최신 Python 전체230PASS·ruff·wheel build, Dagster1.13.24 달력70PASS,
 core-only wheel 새 프로세스2개/Dagster 미설치·미import·phase 동일을 확인했다.
 필수 문서 link693/target2803·plan109·unittest337(336PASS/1SKIP)·diff 검사를 통과했다.
 첫 ruff는 신규 zip의 strict 누락2건으로 실패해 고쳤고 재검사했다.
-추가 DST 달력 회귀를 포함한 최신 lock 환경 전체 검사는 재실행 예정이며
-두 독립 리뷰·CI·소비자 pin/운영 실측도 아직 완료가 아니다.
+추가 DST 달력 회귀를 포함한 최신 lock(Dagster1.13.25/Python3.13) 전체를 재실행해
+230PASS/103.00초를 확인했다. 두 독립 리뷰·CI·소비자 pin/운영 실측은 아직 완료가 아니다.
 
 로컬 x86 Python3.13 순수 함수 고정 입력10만회에서 wall0.931147초·processCPU0.931098초,
 tracemalloc current80/peak916바이트를 관측했다. 입력/SDK/run worker·운영 RSS는 포함하지
