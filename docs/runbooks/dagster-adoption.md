@@ -400,6 +400,50 @@ Geo처럼 backup 설정이 이미 비활성화된 경우의 due 조회 job은 �
 큐 소비와 실행 성공을 증명할 수 없다. 완료 뒤에도 이전 호스트의 정본 배포 설정이
 폐기된 code server를 다시 올리지 않도록 Manager의 배치 설정을 함께 정리한다.
 
+### 시작 RPC의 시간 예산과 실행 증거
+
+Dagster 1.13.24에서 daemon → code-server proxy → API child의 시작 RPC는 두 구간이다.
+실제 이전 검증에서는 기본 60초 deadline이 만료된 뒤 같은 run의 늦은 worker와 큐 재처리가
+겹쳤다. 바깥 run-monitor의 STARTING 상한만 늘려서는 안쪽 RPC deadline이 바뀌지 않는다.
+
+부모 RPC에는 자식 RPC보다 여유를 두고, STARTING monitor는 부모 RPC보다 길게 둔다.
+해당 ARM64 배포에서 검증한 proxy 300초·daemon 360초·monitor 600초는 소비자별 예시다.
+이를 모든 앱의 공통 기본값으로 고정하거나 기존 자원·배치·동시성 튜닝을 바꾸지 않는다.
+`DAGSTER_GRPC_TIMEOUT_SECONDS`는 StartRun 전용 변수가 아니라 일반 RPC 기본값이다.
+schedule·sensor·repository·shutdown의 별도 시간 예산도 함께 대조하고 영향 범위를 기록한다.
+env 파일을 편집한 것만으로 이미 실행 중인 두 구간에 설정이 반영됐다고 가정하지 않는다.
+
+응답 timeout 뒤에는 알려진 run과 worker를 먼저 정산한다. 기존 FAILURE를 SUCCESS로
+덮거나 결과가 불명확한 제출을 반복하지 않는다. 부작용 없는 새 검증 run을 사용한 경우에도
+그 run의 큐 이벤트·정확한 repository origin·worker·terminal SUCCESS와 업무 출력·백업
+불변을 함께 연결해야 한다. 과거 실패 이력과 새 검증 성공은 별도 증거로 보존한다.
+
+### 정본 origin과 상태 비교
+
+복원할 sensor·schedule은 실제 workspace/저장 상태의 정본 origin으로 조회한다.
+endpoint와 location 이름이 같아도 serialized origin ID가 같다는 뜻은 아니다.
+이 버전에서는 `GrpcServerCodeLocationOrigin.use_ssl=None`과 명시적 `False`가
+비TLS 연결을 사용하면서도 서로 다른 origin ID를 만들었다. selector 일치만 확인하거나
+ID 비교를 완화하지 말고 origin ID·selector와 실제 정의의 interval/type 또는 cron/timezone을
+함께 비교한다. 다른 버전에 이 생략 규칙을 그대로 적용하지 않는다.
+
+중지 schedule의 합법 checkpoint 차이를 정산할 때도 원본 snapshot과 실제 관측 snapshot을
+보존한다. 검토한 특정 상태의 전체 SHA를 새 CAPTURE와 다시 비교하고 ACTIVATE 직전
+전체 snapshot CAS를 유지한다. 실행 중 임의 상태를 정상화하거나 새 checkpoint를
+자동 승인하는 예외로 넓히지 않는다.
+
+### healthcheck 비용과 상태 판정
+
+컨테이너 health와 개별 job 실패를 구분한다. 높은 CPU에서는 짧은 probe의 생성 비용,
+동시 job, 열에 따른 클럭 제한을 나눠 관측한다. 메모리 점유나 load 한 값만으로 원인을
+단정하지 않는다. CS의 경량 gRPC probe를 매번 Dagster 전체 import라고 분류하지 않고,
+프로세스·컨테이너 소속은 실제 PID/CID로 연결한다.
+
+daemon CLI를 HTTP 200이나 GraphQL `healthy`만으로 대체하면 thread 정지를 놓칠 수 있다.
+검증한 배포의 CLI heartbeat 허용 지연은 300초였고, 같은 SDK GraphQL 경로의 기본
+판정은 1800초였다. 경량화하더라도 같은 instance·required daemon 집합·heartbeat 시각과
+기존 허용 지연을 보존한다. 기존 CS의 child 복구·진행 중 run 보호·orphan reaper도 유지한다.
+
 ### sensor·백업 복원과 UNKNOWN
 
 새 instance에 처음 등록하는 run-status sensor는 대상의 event high-water를 기준으로

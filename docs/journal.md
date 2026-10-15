@@ -1,3 +1,12 @@
+## 2026-10-15 — Geo 실제 복구 교훈 보강
+
+Dagster1.13.24의 두 구간 시작 RPC 예산, 일반 timeout의 영향 범위, None/False origin ID
+차이와 strict 비교, 특정 checkpoint snapshot/CAS, healthcheck 경량화의 heartbeat 계약을
+adoption guide §12에 추가했다. 실제 새 NOOP SUCCESS·두 sensor 최초 SKIPPED/0run·Janitor
+fresh start를 관측했으며 기존 실패 이력은 보존했다. 첫 실제 Janitor cron·전체 배치와
+모든 소비자의 이전 완주는 NOT_RUN/미완료다. 운영 주소·로그·자격 증명은 올리지 않는다.
+이 문서 델타의 필수 검사와 독립 리뷰 2인은 진행 중이며 기존 승인 원문을 덮지 않는다.
+
 ## 2026-10-15 — Dagster 호스트 이전·중지 복구 가이드 보강
 
 [적용 가이드](runbooks/dagster-adoption.md#12-호스트-이전과-중지-상태-복구)에 proxy와 API child의 RPC 차이, STOPPED schedule checkpoint, 실제 file bind mount, 큐 실행 검증과 sensor 복원, 대용량 백업의 일정 메모리 검증 및 UNKNOWN 복구를 추가했다. Geo 이전에서 발견한 동작을 다른 소비자가 재검증할 수 있게 설명하며 Python 공개 API·앱별 튜닝·채택 완료 상태를 변경하지 않는다. 소비자 운영 결과와 최초 cron·전체 배치 실행 여부는 소비자 기록에서 별도로 검증한다.
