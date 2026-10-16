@@ -137,3 +137,10 @@ private PID namespace/exact origin만으로 old worker 사망을 증명하지 �
 원문 보관·색인 정산만 추가하며 제품/기본 STOPPED·§15 규범은 변경하지 않는다.
 앞 절의 재검토 대기는 이 후속에서 해소됐지만 소비자 실제 활성화/물리 소멸 검증·
 운영 E2E·CPU/RSS와 전역 IN_PROGRESS는 여전히 별도다. closure SHA의 CI는 별도 확인한다.
+
+## 2026-10-16 다중 job 인프라 재시도 — 추가 수용 설계
+
+공유 native retry의 정책 확대 없이 단일 센서에서 여러 명시 job의 기존 엄격 판정을 공유한다.
+[설계·채택 경계](../runbooks/dagster-multi-job-retry.md)를 따른다. 기존 단일 API와
+Common34 incarnation 정산은 유지하고 소비자 코드/배포는 별도다. Python 회귀·실제 SQLite·wheel·
+두 독립 리뷰가 필요하며 운영 효과는 NOT_RUN이다.
