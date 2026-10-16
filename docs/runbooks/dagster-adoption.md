@@ -848,7 +848,10 @@ QueuePool checkout TimeoutError도 SDK 기존 retry/backoff 대상이다.
 따라서 전체 대기는1초로 끝나지 않으며 최대6회 연결 시도와 기존 backoff를 포함한다.
 중첩 checkout·pool 포화·heartbeat/tick 지연을 별도로 검증해야 한다.
 
-프로세스 PID를 connect record와 checkout에서 검사한다. fork된 자식은 부모 pool의
+QueuePool의 public connect()를 좁게 확장해 super().connect() 이전에 PID scope를 검사한다.
+SQLAlchemy의 pre_ping은 checkout 이벤트보다 먼저 실행되므로 이벤트 검사만으로는
+부모 연결의 ping/close를 막지 못한다. 이후 connect record/checkout PID 검사도 유지한다.
+fork된 자식은 부모 pool의
 활성 범위를 사용할 수 없으며 새 프로세스/새 instance에서 원 설정을 해석해야 한다.
 부모 socket을 강제로 닫거나 같은 raw connection을 여러 thread에서 공유하지 않는다.
 정확히세 engine의 strong registry는 수명 동안만 유지하고 종료 finally에서 현재 pool을

@@ -265,3 +265,53 @@ def test_pre_ping_replaces_dead_idle_fake_connection_before_return():
     assert len(created) == 2 and pinged == [first_record]
     second.close()
     queue.dispose()
+
+
+def test_fork_scope_rejected_before_ping_or_parent_connection_close(monkeypatch):
+    from sqlalchemy import event
+    from sqlalchemy.engine.default import DefaultDialect
+
+    pid = [100]
+    events = []
+    monkeypatch.setattr(pool, "os", types.SimpleNamespace(getpid=lambda: pid[0]))
+    class Connection:
+        def rollback(self):
+            events.append(("rollback", pid[0]))
+        def close(self):
+            events.append(("close", pid[0]))
+    class Dialect(DefaultDialect):
+        def do_ping(self, connection):
+            events.append(("ping", pid[0]))
+            return True
+
+    with pool.activation():
+        # 원 후보에는 subclass가 없으므로 실제 QueuePool의 선행 ping 반례가 RED다.
+        pool_class = getattr(pool, "DaemonQueuePool", QueuePool)
+        queue = pool_class(Connection, pool_size=2, max_overflow=2, timeout=1,
+                           pre_ping=True, dialect=Dialect())
+        event.listen(queue, "connect", pool._on_connect)
+        event.listen(queue, "checkout", pool._on_checkout)
+        first = queue.connect()
+        first.close()
+        events.clear()
+        pid[0] = 200
+        try:
+            with pytest.raises(pool.PoolScopeError):
+                queue.connect()
+            assert events == []
+        finally:
+            pid[0] = 100
+            queue.dispose()
+
+
+def test_recreated_pool_preserves_early_scope_guard(registered, monkeypatch):
+    with pool.activation():
+        item = engine()
+        item.dispose()
+        assert type(item.pool).__name__ == "DaemonQueuePool"
+        monkeypatch.setattr(pool, "os", types.SimpleNamespace(getpid=lambda: os.getpid() + 1))
+        try:
+            with pytest.raises(pool.PoolScopeError):
+                item.pool.connect()
+        finally:
+            monkeypatch.undo()

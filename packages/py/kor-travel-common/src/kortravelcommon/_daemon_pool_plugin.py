@@ -29,6 +29,15 @@ class PoolScopeError(RuntimeError):
     """허용된 daemon 수명 밖의 pool 생성을 거절한다."""
 
 
+class DaemonQueuePool(QueuePool):
+    """ping과 원 연결 접근보다 먼저 프로세스 소유권을 검사한다."""
+
+    def connect(self):
+        if _owner_pid != os.getpid():
+            raise PoolScopeError("다른 프로세스의 daemon pool은 사용할 수 없습니다.")
+        return super().connect()
+
+
 def _on_connect(connection, record):
     record.info["kortravel_pid"] = os.getpid()
 
@@ -54,7 +63,7 @@ class DaemonPoolPlugin(CreateEnginePlugin):
         if any(key.startswith("pool_") or key == "max_overflow" for key in kwargs):
             raise PoolScopeError("기존 pool 옵션을 덮어쓸 수 없습니다.")
         kwargs.update(
-            poolclass=QueuePool,
+            poolclass=DaemonQueuePool,
             pool_size=POOL_SIZE,
             max_overflow=MAX_OVERFLOW,
             pool_timeout=POOL_TIMEOUT,
