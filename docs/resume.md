@@ -1,5 +1,9 @@
 ## 2026-10-16 — Common35 기준선 문서 통합
 
+## Common36 소스 리뷰 종결 (2026-10-16)
+
+PID1 leader clock 고정5d2/제품a34cbd8의 두 독립 A/C FULL4 SOURCE_PASS·OPEN0와 후보CI8SUCCESS를 [통합 판정](reviews/adversarial/2026-10-16-pid1-leader-clock-closure.md)에 보존했다. 실제 Common36 lab 재드릴·소비자 이미지/활성화·운영 효과/병합과 전역T319는 후속이다. closure는 제품/규범 변경0이다.
+
 Common34 최종4ad615e 위로 Common35를 다시 올려 두 리뷰 원문·통합 보고서와
 활성화 전제 §15를 함께 보존했다. 제품/테스트/의존성 packages tree는 검토03396709와
 동일하다. 초기 closure58d2426의 CI8SUCCESS는 그 SHA의 이력이며 새 HEAD CI는 별도다.

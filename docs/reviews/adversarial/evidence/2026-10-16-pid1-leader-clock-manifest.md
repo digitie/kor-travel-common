@@ -36,3 +36,7 @@ root/A의 격리된 ARM64 QEMU PID1-only 실제 관측 원문 SHA256은 3ada39c0
 ## 리뷰 요청
 
 A와 C가 동일 immutable 후보의 전체3파일·기존 reader를 독립적으로 읽는다. thread/leader 귀속, malformed/unstable failclosed, 기존 clock/namespace/cgroup 보존·cursor 호환·증거 범위 과장을 공격한다. 상대 원문은 두 결과 확정 전 미공유한다. 두 리뷰 원문과 disposition은 완료 후 별도 closure로 보존한다. 현재 리뷰 판정은 PENDING이며 작성자 시험은 독립 리뷰로 집계하지 않는다.
+
+## 독립 리뷰 종결 후속
+
+고정5d2의 A/C FULL4 SOURCE_PASS/OPEN0·원문SHA와 CI8SUCCESS를 [통합 판정](../2026-10-16-pid1-leader-clock-closure.md)에 보존했다. 위 PENDING은 최초 요청 시점이며 이번 closure로 소스 리뷰만 해소됐다. 제품/규범/수용 기준은 같고 실제 lab·소비자 배포·운영 효과/최종closure CI는 별도다.
