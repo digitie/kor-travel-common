@@ -137,3 +137,21 @@ private PID namespace/exact origin만으로 old worker 사망을 증명하지 �
 원문 보관·색인 정산만 추가하며 제품/기본 STOPPED·§15 규범은 변경하지 않는다.
 앞 절의 재검토 대기는 이 후속에서 해소됐지만 소비자 실제 활성화/물리 소멸 검증·
 운영 E2E·CPU/RSS와 전역 IN_PROGRESS는 여전히 별도다. closure SHA의 CI는 별도 확인한다.
+
+## 2026-10-16 다중 job 인프라 재시도 — 추가 수용 설계
+
+공유 native retry의 정책 확대 없이 단일 센서에서 여러 명시 job의 기존 엄격 판정을 공유한다.
+[설계·채택 경계](../runbooks/dagster-multi-job-retry.md)를 따른다. 기존 단일 API와
+Common34 incarnation 정산은 유지하고 소비자 코드/배포는 별도다. Python 회귀·실제 SQLite·wheel·
+두 독립 리뷰가 필요하며 운영 효과는 NOT_RUN이다.
+
+후보35는 기존 단일 API의 같은 내부 판정에 다중 job dispatch만 추가했다.
+로컬 전체443PASS/신규22·기존56 관련78PASS/별도 SDK1.13.24 관련161PASS와
+core-only3.11 wheel·설치 바이트를 확인했다. 두 독립 리뷰·소비자 운영 채택은 후속이다.
+
+### Common35 독립 소스 리뷰 종결
+
+고정03396709의 두 독립 subagent FULL9 PASS/OPEN0와 후보 CI8SUCCESS를
+[원문·통합 판정](../reviews/adversarial/2026-10-16-multi-job-retry-closure.md)에 보존했다.
+제품 변경 없는 closure 이후 최종 문서 HEAD CI·병합은 별도이며 소비자 채택·센서 전이·
+운영 복구/CPU/RSS/live의 외부 선행은 그대로다. 전역 상태를 DONE으로 올리지 않는다.

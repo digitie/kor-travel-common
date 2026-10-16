@@ -1,3 +1,19 @@
+## 2026-10-16 — Common35 기준선 문서 통합
+
+Common34 최종4ad615e 위로 Common35를 다시 올려 두 리뷰 원문·통합 보고서와
+활성화 전제 §15를 함께 보존했다. 제품/테스트/의존성 packages tree는 검토03396709와
+동일하다. 초기 closure58d2426의 CI8SUCCESS는 그 SHA의 이력이며 새 HEAD CI는 별도다.
+PR35는 Common34 feature를 base로 하는 draft를 유지한다. Common34 병합 뒤 최종 main
+대상/정확 source pin·소비자 전이/실제 복구·live gate를 따로 정산한다. 운영 변경0이다.
+
+## 2026-10-16 — Common35 다중 job 재시도 소스 리뷰 종결
+
+고정03396709의 두 독립 subagent FULL9 PASS/OPEN0와 CI8SUCCESS를
+[통합 보고서](reviews/adversarial/2026-10-16-multi-job-retry-closure.md)에 보존했다.
+이번 원문/기록 종결은 제품을 바꾸지 않는다. 다음 작업은 최종 문서 HEAD CI 확인과
+PR35 병합 판단이며, 소비자 pin·센서 전이·실제 복구/성능/live는 외부 선행이다.
+T-319 전역 상태는 IN_PROGRESS다. 아래 문단은 각 작성 시점의 이력이다.
+
 ## 2026-10-16 — Common34 독립 리뷰·문서 정산 완료
 
 제품 d1aa와 문서7f915의 A/C 독립 최종 PASS·열린 P0/P1/P2 0을
@@ -14,6 +30,14 @@ singleton/exclusive origin·overlap 미지원·serial 교체의 구 init/worker/
 활성화 전제로 명시했다. 제품·기본 STOPPED·핀·이미지는 d1aa와 같다.
 새 immutable 문서 delta의 C-P2 재검토와 A 독립 재검토·최종 CI가 후속이며,
 C 최초 PASS 초안을 최종 승인으로 세지 않는다. 소비자 운영 검증은 별도다.
+
+## 2026-10-16 — 다중 job 인프라 재시도 후보
+
+기존 단일 retry factory와 같은 엄격 판정을 공유하는 다중 factory를 추가했다.
+최대100개 초기 failure page·tick budget/cursor를 공유하고 요청은 한 tick 최대1개다.
+[가이드](runbooks/dagster-multi-job-retry.md)를 따른다. Python443/관련78·별도1.13.24 관련161,
+core-only3.11 wheel/설치 source를 확인했다. 두 독립 리뷰·CI·소비자 pin/센서 전이·
+실제 복구/CPU/RSS/live는 후속이며 중앙 native 설정과 Common34 정산 소스는 유지했다.
 
 ## 2026-10-16 — proxy 환경 우회 P2 후속 수정
 

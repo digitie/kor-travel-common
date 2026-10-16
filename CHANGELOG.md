@@ -6,6 +6,13 @@
 
 ## [Unreleased]
 
+### Python 다중 job 인프라 재시도
+
+- infrastructure_retry_sensor_for_jobs가 명시 job/policy의 기존 엄격 판정을 한 failure
+  page·cursor·tick budget으로 공유한다. 기존 단일 API·Common34 정산과 native 설정은 유지한다.
+- [적용 가이드](docs/runbooks/dagster-multi-job-retry.md)의 센서 전이·pending·운영 미검증 경계를 따른다.
+
+
 ### Python 경량 HTTP 생존 점검
 
 - core-only `kortravelcommon.http_health` 함수·CLI: loopback GET 한 번, 전체 deadline·16KiB 헤더·strict2xx·조용한 종료 코드를 제공한다.

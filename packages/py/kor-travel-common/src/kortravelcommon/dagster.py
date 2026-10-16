@@ -3,7 +3,7 @@
 """앱 도메인/DB를 소유하지 않는 Dagster 예약·장애 복구 계약."""
 
 import json
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from time import monotonic
 from types import SimpleNamespace
@@ -190,22 +190,64 @@ def infrastructure_retry_sensor(
     policy: RecoveryPolicy,
     repository_name: str = "__repository__",
 ):
-    """native retry가 꺼진 instance에서 멱등 job의 worker 장애만 제한적으로 재예약한다.
+    """기존 단일 job의 엄격한 인프라 재시도 API를 보존한다."""
+    return _infrastructure_retry_sensor(
+        name=name,
+        project=project,
+        location_name=location_name,
+        jobs={job.name: (job, policy)},
+        repository_name=repository_name,
+        single_job=True,
+    )
 
-    실행 종료 이벤트의 명시적 인프라 사유와 증명된 자식 프로세스 종료만 허용한다.
-    provider 실패, timeout에 의한 취소, 원인 불명은 제외한다.
-    native retry가 켜지면 미완료 인계만 마무리한다.
-    run key는 이벤트 재평가를 중복 제거하며, 동시 수동 실행은 JOB_TAG queue limit과
-    소비자 DB lease가 별도로 보호해야 한다. partition job은 이 factory의 대상이 아니다.
+
+def infrastructure_retry_sensor_for_jobs(
+    *,
+    name: str,
+    project: str,
+    location_name: str,
+    jobs: Mapping[str, tuple[Any, RecoveryPolicy]],
+    repository_name: str = "__repository__",
+):
+    """명시한 여러 멱등 job이 하나의 실패 page·cursor·시간 예산을 공유한다.
+
+    각 값은 (JobDefinition, RecoveryPolicy)이며 key는 job.name과 같아야 한다.
+    기존 단일 factory와 같은 실패 분류·부분 선택 제외·pending 인계를 사용한다.
+    native retry가 켜지면 미완료 인계만 마무리하고 한 tick에 요청은 최대 하나다.
+    물리 worker 정산·소비자 DB lease·native 설정 변경은 이 factory가 소유하지 않는다.
     """
-    if not policy.idempotent or not policy.infrastructure_retries:
-        raise ValueError("인프라 재시도 sensor는 재시도가 허용된 멱등 job에만 적용합니다.")
-    if job.partitions_def is not None:
-        raise ValueError("partition job은 전용 재시도 정책이 필요합니다.")
+    return _infrastructure_retry_sensor(
+        name=name,
+        project=project,
+        location_name=location_name,
+        jobs=jobs,
+        repository_name=repository_name,
+        single_job=False,
+    )
+
+
+def _infrastructure_retry_sensor(
+    *, name, project, location_name, jobs, repository_name, single_job
+):
+    # 외부 mapping의 후속 변경이 이미 등록된 allowlist를 바꾸지 않게 고정한다.
+    jobs = {job_name: (job, policy) for job_name, (job, policy) in jobs.items()}
+    if not jobs:
+        raise ValueError("재시도 대상 job을 명시해야 합니다.")
+    for job_name, (job, policy) in jobs.items():
+        if job_name != job.name:
+            raise ValueError("재시도 mapping key는 job.name과 같아야 합니다.")
+        if not policy.idempotent or not policy.infrastructure_retries:
+            raise ValueError("인프라 재시도 sensor는 재시도가 허용된 멱등 job에만 적용합니다.")
+        if job.partitions_def is not None:
+            raise ValueError("partition job은 전용 재시도 정책이 필요합니다.")
 
     def retry_failed_run(context):
         instance = context.instance
         run = context.dagster_run
+        selected = jobs.get(run.job_name)
+        if selected is None:
+            return SkipReason("명시한 재시도 job이 아닙니다.")
+        job, policy = selected
         pending = run.tags.get(INFRA_RETRY_PENDING_TAG) == "true"
         if instance.run_retries_enabled and not pending:
             return SkipReason("native run retry에 위임합니다.")
@@ -400,6 +442,7 @@ def infrastructure_retry_sensor(
             },
         )
         return RunRequest(
+            job_name=None if single_job else job.name,
             run_key=f"{project}/infra/{run.run_id}/{next_attempt}",
             run_config=run.run_config,
             tags=tags,
@@ -421,7 +464,9 @@ def infrastructure_retry_sensor(
                 cursor = None
             runs = instance.get_runs(
                 filters=RunsFilter(
-                    job_name=job.name, statuses=[DagsterRunStatus.FAILURE], tags=filter_tags
+                    job_name=next(iter(jobs)) if single_job else None,
+                    statuses=[DagsterRunStatus.FAILURE],
+                    tags=filter_tags,
                 ),
                 limit=100,
                 cursor=cursor,
@@ -432,6 +477,8 @@ def infrastructure_retry_sensor(
             # 10초를 넘는다는 이유로 같은 100행을 영구 반복하지 않는다.
             if index and monotonic() - started >= 5:
                 return SensorResult(cursor=runs[index - 1].run_id)
+            if run.job_name not in jobs:
+                continue
             records = instance.get_records_for_run(
                 run_id=run.run_id,
                 # 완료 checkpoint 뒤에 추가된 step 실패도 확인한다. terminal 이벤트 ID만
@@ -494,7 +541,9 @@ def infrastructure_retry_sensor(
 
     @sensor(
         name=name,
-        job=job,
+        **({"job": next(iter(jobs.values()))[0]} if single_job else {
+            "jobs": [entry[0] for entry in jobs.values()]
+        }),
         minimum_interval_seconds=60,
         default_status=DefaultSensorStatus.RUNNING,
     )

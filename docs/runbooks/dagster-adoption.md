@@ -709,3 +709,10 @@ hung child를 재시작시키거나 PID1 kill의 모든 효과를 대체하지 �
 Common의 순수 fixture·로컬 Dagster native 이벤트 검증은 소비자 SDK/이미지 채택,
 실제 컨테이너 재시작·첫 tick·큐 해소·수집 신선도·CPU/RSS·live E2E의 대체가 아니다.
 이 가이드 추가 시점의 운영·소비자 검증은 NOT_RUN이다.
+
+## 16. 여러 job의 실패 scan 공유
+
+동일 project/location에서 여러 멱등 job의 인프라 재시도가 필요하면
+[infrastructure_retry_sensor_for_jobs 적용 안내](dagster-multi-job-retry.md)를 따른다.
+기존 단일 factory와 같은 엄격 판정을 사용하며 소비자 native 설정을 켜지 않는다.
+Common34의 incarnation FAILED 정산과 재시도 요청 발급은 서로 다른 책임이다.

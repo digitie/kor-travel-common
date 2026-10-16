@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-10-16 | FULL9·최종 소스 | [다중 job 인프라 재시도](adversarial/2026-10-16-multi-job-retry-closure.md), 제품1b599c4 / 검토03396709 | A SDK·인계 / B(팀 D) 귀속·SQLite·회귀 | 두 독립 PASS·열린0·소비자 운영 별도 |
 | 2026-10-16 | FULL·post-fix·활성화 전제 | [Native incarnation 복구](adversarial/2026-10-16-native-incarnation-closure.md), 제품d1aa4bb / 문서7f915e5 | A launcher·SDK / B(팀 C) 소유권·활성화 | 두 독립 PASS·P1/P2 FIXED·정정 BLOCK 보존·소비자 운영 별도 |
 | 2026-10-16 | FULL·post-fix | [Dagster gRPC 조회·복구 분리](adversarial/2026-10-16-grpc-health-closure.md), 제품1511e3d / 검토d247d19 | A RPC·예산·target / B 패키징·CLI·소비자 | 두 독립 PASS·proxy P2 FIXED·새 열린0·운영 채택 별도 |
 | 2026-10-16 | FULL·post-fix | [경량 HTTP 생존 점검](adversarial/2026-10-16-http-health-closure.md), 제품001b03e / 검토b483f5f | A HTTP·예산·CLI / B core-only·소비자·패키징 | 두 독립 PASS·P2 2건 FIXED·새 열린0·소비자 운영 별도 |
