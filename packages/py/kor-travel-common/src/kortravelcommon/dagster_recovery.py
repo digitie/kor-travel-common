@@ -193,6 +193,58 @@ def _decode_cursor(raw):
     return value
 
 
+def _unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("중복된 launcher 연결 필드입니다.")
+        result[key] = value
+    return result
+
+
+def _default_worker_origin(run):
+    # DefaultRunLauncher.launch_run_from_grpc_client의 실제 전송 태그 형식만 허용한다.
+    raw = run.tags.get(".dagster/grpc_info")
+    if type(raw) is not str or len(raw) > 4096:
+        return False
+    try:
+        info = json.loads(raw, object_pairs_hook=_unique_object)
+    except (ValueError, TypeError):
+        return False
+    if type(info) is not dict:
+        return False
+    location = run.remote_job_origin.repository_origin.code_location_origin
+    ssl = getattr(location, "use_ssl", None)
+    if ssl is not None and type(ssl) is not bool:
+        return False
+    expected_ssl = ssl is True
+    keys = {"host", "port"} if "port" in info else {"host", "socket"}
+    if expected_ssl:
+        keys.add("use_ssl")
+    if set(info) != keys or ("use_ssl" in info and info["use_ssl"] is not True):
+        return False
+    host = getattr(location, "host", None)
+    if type(host) is not str or not host or info.get("host") != host:
+        return False
+    port = getattr(location, "port", None)
+    sock = getattr(location, "socket", None)
+    if port is not None:
+        return (
+            type(port) is int
+            and 1 <= port <= 65535
+            and sock is None
+            and type(info.get("port")) is int
+            and info["port"] == port
+        )
+    return (
+        type(sock) is str
+        and bool(sock)
+        and "port" not in info
+        and type(info.get("socket")) is str
+        and info["socket"] == sock
+    )
+
+
 def _owned(run, project, location_name, repository_name, repository_origin_id):
     origin = run.remote_job_origin
     if origin is None:
@@ -203,9 +255,11 @@ def _owned(run, project, location_name, repository_name, repository_origin_id):
         or repository.code_location_origin.location_name != location_name
         or repository.repository_name != repository_name
         or origin.job_name != run.job_name
+        or not _default_worker_origin(run)
     ):
         return False
-    # 과거 무태그 run은 exact origin으로 귀속한다. 모순된 태그는 받아들이지 않는다.
+    # 과거 project 무태그 run도 exact origin과 launcher 태그로 귀속한다.
+    # 모순된 태그는 받아들이지 않는다.
     tags = run.tags
     return (
         tags.get("kortravelcommon/project", project) == project
@@ -252,6 +306,7 @@ def native_incarnation_recovery_sensor(
     """
     from dagster import (
         DagsterRunStatus,
+        DefaultRunLauncher,
         DefaultSensorStatus,
         RunsFilter,
         SensorResult,
@@ -271,6 +326,12 @@ def native_incarnation_recovery_sensor(
 
     @sensor(name=name, minimum_interval_seconds=60, default_status=DefaultSensorStatus.STOPPED)
     def recover(context):
+        try:
+            launcher = context.instance.run_launcher
+        except Exception:
+            return SkipReason("실행 launcher를 확인하지 못해 정산을 보류합니다.")
+        if type(launcher) is not DefaultRunLauncher:
+            return SkipReason("컨테이너 내부 DefaultRunLauncher만 정산할 수 있습니다.")
         anchor = read_container_incarnation()
         if anchor is None:
             return SkipReason("컨테이너 init/clock을 확인하지 못해 정산을 보류합니다.")

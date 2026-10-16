@@ -620,6 +620,9 @@ run monitoring을 켜는 것만으로 사라진 STARTED worker를 즉시 찾지 
 Weather·Geo처럼 동일한 공백을 가진 소비자는
 kortravelcommon.dagster_recovery.native_incarnation_recovery_sensor를 명시적으로
 등록할 수 있다. 이 센서는 **재시작 전 worker 유실의 native 실패 정산만** 수행한다.
+현재 instance의 launcher가 정확히 DefaultRunLauncher인 경우만 진행한다.
+Docker/K8s 등 외부 launcher·custom subclass·조회 불능은 정산 없이 보류한다.
+code-server init 교체로 외부 worker의 사망을 추정하면 안 된다.
 기본 STOPPED이고 실제 배포의 PID namespace·origin·clock 검증 후 별도로 활성화한다.
 Common 코드/로컬 시험 완료를 소비자 배포·운영 복구 완료로 집계하지 않는다.
 
@@ -640,7 +643,13 @@ RemoteRepositoryOrigin.get_id()이며 hostname/port/SSL 기본값을 추측해 �
 동일 location 이름의 다른 호스트·origin을 승인하면 정상 worker를 오판할 수 있다.
 예전 use_ssl=None과 명시 false의 차이도 실제 origin 일치 검증에 포함한다.
 프로젝트·job tag가 있으면 origin과 모순되지 않아야 하며 무태그 이전 실행도
-정확한 persisted origin이 있을 때만 대상이다.
+정확한 persisted origin과 Default launcher 연결 태그가 있을 때만 대상이다.
+현재 launcher가 바뀌었어도 과거 외부 worker가 살아 있을 수 있으므로 run별
+.dagster/grpc_info의 host/port 또는 socket/use_ssl도 실제 origin과 비교한다.
+태그 누락·깨진 JSON·중복/알 수 없는 필드·타입/주소/SSL 모순은 보류한다.
+SDK Default는 use_ssl=True만 태그에 남기므로 origin의 None/false는 태그 필드 부재와
+대응하고 true는 명시 true와 대응한다. 임의 legacy JSON을 canonical로 정정하지 않는다.
+증거 태그 없는 이전 실행은 자동 정산하지 않아 수동 확인이 필요할 수 있다.
 
 ### 정산 조건·메모리·clock
 

@@ -16,6 +16,7 @@ from dagster import (
     DagsterEventType,
     DagsterInstance,
     DagsterRunStatus,
+    DefaultRunLauncher,
     DefaultSensorStatus,
     build_sensor_context,
     job,
@@ -67,13 +68,22 @@ def record(
         run_id="test-run",
         status=status,
         job_name="sample",
-        tags={"kortravelcommon/project": project},
+        tags={
+            "kortravelcommon/project": project,
+            ".dagster/grpc_info": json.dumps({"host": "127.0.0.1", "port": 9000}),
+        },
         remote_job_origin=NS(
             job_name="sample",
             repository_origin=NS(
                 repository_name=repository,
                 get_id=lambda: ORIGIN_ID,
-                code_location_origin=NS(location_name=location),
+                code_location_origin=NS(
+                    location_name=location,
+                    host="127.0.0.1",
+                    port=9000,
+                    socket=None,
+                    use_ssl=None,
+                ),
             ),
         )
         if origin
@@ -120,7 +130,13 @@ def test_non_orphan_or_foreign_is_never_failed(kw):
 
 
 def test_legacy_exact_origin_and_boundary():
-    assert eligible(record(tags={}))
+    assert eligible(
+        record(
+            tags={
+                ".dagster/grpc_info": json.dumps({"host": "127.0.0.1", "port": 9000}),
+            }
+        )
+    )
     cutoff = ANCHOR.started_at_lower_bound - 60
     assert not eligible(record(start=cutoff))
     assert eligible(record(start=cutoff - 0.001))
@@ -206,6 +222,7 @@ def invoke(monkeypatch, rows, *, cursor=None, current=None, anchor=ANCHOR):
     )
     monkeypatch.setattr(recovery, "read_container_incarnation", lambda: anchor)
     with DagsterInstance.ephemeral() as instance:
+        monkeypatch.setattr(instance, "_run_launcher", DefaultRunLauncher())
         # 실제 sensor wrapper/context를 쓰되 DB·RPC 없는 대역으로 평가한다.
         context = build_sensor_context(instance=instance, cursor=cursor)
         monkeypatch.setattr(instance, "get_run_records", fake.get_run_records)
@@ -266,6 +283,7 @@ def test_paging_bounded_and_failure_does_not_commit_cursor(monkeypatch):
         row.dagster_run.run_id = str(index)
     after = []
     with DagsterInstance.ephemeral() as instance:
+        monkeypatch.setattr(instance, "_run_launcher", DefaultRunLauncher())
         monkeypatch.setattr(recovery, "read_container_incarnation", lambda: ANCHOR)
 
         def page(**kwargs):
@@ -301,7 +319,12 @@ def test_real_sdk_local_run_failure_event_and_replay(monkeypatch):
     )
     monkeypatch.setattr(recovery, "read_container_incarnation", lambda: ANCHOR)
     with DagsterInstance.ephemeral() as instance:
+        monkeypatch.setattr(instance, "_run_launcher", DefaultRunLauncher())
         run = instance.create_run_for_job(sample, remote_job_origin=origin)
+        instance.add_run_tags(
+            run.run_id,
+            {".dagster/grpc_info": json.dumps({"host": "127.0.0.1", "port": 9000})},
+        )
         instance.report_dagster_event(
             DagsterEvent(DagsterEventType.RUN_START.value, job_name="sample"),
             run.run_id,
@@ -335,7 +358,11 @@ def test_real_sdk_local_run_failure_event_and_replay(monkeypatch):
 
 
 def test_same_location_foreign_repository_origin_is_not_owned():
-    row = record(tags={})
+    row = record(
+        tags={
+            ".dagster/grpc_info": json.dumps({"host": "127.0.0.1", "port": 9000}),
+        }
+    )
     row.dagster_run.remote_job_origin.repository_origin.get_id = lambda: "b" * 40
     assert not eligible(row)
 
@@ -411,6 +438,7 @@ def test_anchor_drift_on_final_read_preserves_native(monkeypatch):
     anchors = iter([ANCHOR, replace(ANCHOR, pid1_start_ticks=10001)])
     monkeypatch.setattr(recovery, "read_container_incarnation", lambda: next(anchors))
     with DagsterInstance.ephemeral() as instance:
+        monkeypatch.setattr(instance, "_run_launcher", DefaultRunLauncher())
         monkeypatch.setattr(instance, "get_run_records", lambda **kw: [record()])
         monkeypatch.setattr(instance, "report_run_failed", lambda *a: pytest.fail("mutation"))
         with pytest.raises(Exception, match="incarnation/clock"):
@@ -424,6 +452,7 @@ def test_anchor_drift_on_final_read_preserves_native(monkeypatch):
 
 def test_partial_failure_replay_rechecks_native_terminal(monkeypatch):
     with DagsterInstance.ephemeral() as instance:
+        monkeypatch.setattr(instance, "_run_launcher", DefaultRunLauncher())
         first = record()
         first.dagster_run.run_id = "first"
         second = record()
@@ -477,7 +506,11 @@ def test_same_location_actual_sdk_different_origin_cannot_be_reaped(change):
         "__repository__",
     )
     assert original.get_id() != foreign.get_id()
-    row = record(tags={})
+    row = record(
+        tags={
+            ".dagster/grpc_info": json.dumps({"host": "127.0.0.1", "port": 9000}),
+        }
+    )
     row.dagster_run.remote_job_origin = RemoteJobOrigin(foreign, "sample")
     assert not recovery._candidate(
         row,
@@ -508,10 +541,15 @@ def test_recovery_failure_uses_existing_retry_and_preserves_existing_child(monke
     policy = RecoveryPolicy(300, idempotent=True, infrastructure_retries=1)
     monkeypatch.setattr(recovery, "read_container_incarnation", lambda: ANCHOR)
     with DagsterInstance.ephemeral() as instance:
+        monkeypatch.setattr(instance, "_run_launcher", DefaultRunLauncher())
         run = instance.create_run_for_job(
             sample,
             remote_job_origin=origin,
             tags=policy.tags(project="test", job_name="sample"),
+        )
+        instance.add_run_tags(
+            run.run_id,
+            {".dagster/grpc_info": json.dumps({"host": "127.0.0.1", "port": 9000})},
         )
         instance.report_dagster_event(
             DagsterEvent(DagsterEventType.RUN_START.value, job_name="sample"),
@@ -538,3 +576,111 @@ def test_recovery_failure_uses_existing_retry_and_preserves_existing_child(monke
         )
         duplicate = retry.evaluate_tick(build_sensor_context(instance=instance))
         assert not duplicate.run_requests
+
+
+@pytest.mark.parametrize("kind", ["external", "custom_subclass", "unknown"])
+def test_external_custom_unknown_launcher_abstains_before_any_anchor_or_query(monkeypatch, kind):
+    from dagster import DefaultRunLauncher
+
+    class CustomLauncher(DefaultRunLauncher):
+        pass
+
+    with DagsterInstance.ephemeral() as instance:
+        monkeypatch.setattr(instance, "_run_launcher", DefaultRunLauncher())
+        original = instance._run_launcher
+        launcher = {
+            "external": NS(dispose=lambda: None),
+            "custom_subclass": CustomLauncher(),
+            "unknown": None,
+        }[kind]
+        monkeypatch.setattr(instance, "_run_launcher", launcher)
+        monkeypatch.setattr(
+            recovery,
+            "read_container_incarnation",
+            lambda: pytest.fail("anchor was accessed"),
+        )
+        monkeypatch.setattr(
+            instance,
+            "get_run_records",
+            lambda **kw: pytest.fail("native metadata was accessed"),
+        )
+        try:
+            result = definition().evaluate_tick(
+                build_sensor_context(
+                    instance=instance,
+                    cursor=recovery._cursor(ANCHOR, None),
+                )
+            )
+            assert result.skip_message and not result.run_requests
+        finally:
+            instance._run_launcher = original
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        None,
+        "",
+        "[]",
+        "null",
+        "{",
+        "{}",
+        '{"host":"127.0.0.1","port":"9000"}',
+        '{"host":"127.0.0.1","port":true}',
+        '{"host":"localhost","port":9000}',
+        '{"host":"127.0.0.1","port":9001}',
+        '{"host":"127.0.0.1","port":9000,"socket":"/tmp/example.sock"}',
+        '{"host":"127.0.0.1","port":9000,"unknown":1}',
+        '{"host":"127.0.0.1","port":9000,"use_ssl":false}',
+        '{"host":"127.0.0.1","port":9000,"use_ssl":true}',
+        '{"host":"foreign","host":"127.0.0.1","port":9000}',
+        '{"host":"127.0.0.1","port":9001,"port":9000}',
+    ],
+)
+def test_missing_corrupt_or_contradictory_launcher_history_is_not_reaped(raw):
+    assert not eligible(record(tags={".dagster/grpc_info": raw}))
+
+
+@pytest.mark.parametrize("ssl", [None, False, True])
+@pytest.mark.parametrize("socket_mode", [False, True])
+def test_actual_default_launcher_tagging_format_without_rpc(monkeypatch, ssl, socket_mode):
+    from dagster._grpc.types import StartRunResult
+    from dagster._serdes import serialize_value
+
+    options = {
+        "host": "127.0.0.1",
+        "location_name": "test",
+        "use_ssl": ssl,
+        **({"socket": "/tmp/example.sock"} if socket_mode else {"port": 9000}),
+    }
+    location = GrpcServerCodeLocationOrigin(**options)
+    origin = RemoteJobOrigin(RemoteRepositoryOrigin(location, "__repository__"), "sample")
+    with DagsterInstance.local_temp() as instance:
+        run = instance.create_run_for_job(sample, remote_job_origin=origin)
+        rpc_calls = []
+
+        def start_run(args):
+            rpc_calls.append(args.run_id)
+            return serialize_value(
+                StartRunResult(success=True, message=None, serializable_error_info=None)
+            )
+
+        client = NS(
+            host=location.host,
+            port=location.port,
+            socket=location.socket,
+            use_ssl=bool(location.use_ssl),
+            start_run=start_run,
+        )
+        DefaultRunLauncher.launch_run_from_grpc_client(instance, run, client)
+        stored = instance.get_run_by_id(run.run_id)
+        assert recovery._default_worker_origin(stored)
+        expected = {
+            "host": "127.0.0.1",
+            **({"socket": "/tmp/example.sock"} if socket_mode else {"port": 9000}),
+            **({"use_ssl": True} if ssl else {}),
+        }
+        assert json.loads(stored.tags[".dagster/grpc_info"]) == expected
+        assert rpc_calls == [run.run_id]
+        # fake RPC 하나로 실제 태그 생산만 검증하며 worker를 시작하지 않는다.
+        assert stored.status == DagsterRunStatus.NOT_STARTED
