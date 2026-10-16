@@ -605,3 +605,107 @@ x86 WSL/Python3.11 차가운 CLI 각3표본이며 부모 wall에는 interpreter�
 기존 Common ready 대비 새 ready의 CPU/RSS 절감은 입증하지 않았다. live는 정의 조회를
 생략하는 다른 계약이므로 ready와의 차이를 동등 기능 절감률로 표현하지 않는다.
 운영 ARM64·server CPU/DB·worker 실패/복구·실제 소비자 E2E 효과는 NOT_RUN이다.
+
+## 15. 컨테이너 재시작 뒤 native 실행 정산
+
+### 소유권과 적용 순서
+
+순수 live health는 DB 쓰기·PID 종료·orphan 정산을 하지 않는다.
+DefaultRunLauncher는 Dagster1.13.24에서 worker-health 검사를 지원하지 않으므로
+run monitoring을 켜는 것만으로 사라진 STARTED worker를 즉시 찾지 못한다.
+같은 gRPC 서버가 추적 중인 worker의 종료는 서버 자체 감독이 FAILURE로 기록하지만,
+서버 교체로 그 목록이 사라지면 실행별 max-runtime까지 남을 수 있다.
+앱 sync/load-job lease 수렴 센서는 native run 상태 변경과 다른 책임이다.
+
+Weather·Geo처럼 동일한 공백을 가진 소비자는
+kortravelcommon.dagster_recovery.native_incarnation_recovery_sensor를 명시적으로
+등록할 수 있다. 이 센서는 **재시작 전 worker 유실의 native 실패 정산만** 수행한다.
+현재 instance의 launcher가 정확히 DefaultRunLauncher인 경우만 진행한다.
+Docker/K8s 등 외부 launcher·custom subclass·조회 불능은 정산 없이 보류한다.
+code-server init 교체로 외부 worker의 사망을 추정하면 안 된다.
+기본 STOPPED이고 실제 배포의 PID namespace·origin·clock 검증 후 별도로 활성화한다.
+Common 코드/로컬 시험 완료를 소비자 배포·운영 복구 완료로 집계하지 않는다.
+
+~~~python
+from kortravelcommon.dagster_recovery import native_incarnation_recovery_sensor
+
+native_recovery = native_incarnation_recovery_sensor(
+    name="weather_native_incarnation_recovery",
+    project="weather",
+    location_name="weather_location",
+    repository_origin_id=expected_repository_origin_id,
+    grace_seconds=60,
+)
+~~~
+
+expected_repository_origin_id는 소비자 workspace 정본의 실제
+RemoteRepositoryOrigin.get_id()이며 hostname/port/SSL 기본값을 추측해 만들지 않는다.
+동일 location 이름의 다른 호스트·origin을 승인하면 정상 worker를 오판할 수 있다.
+예전 use_ssl=None과 명시 false의 차이도 실제 origin 일치 검증에 포함한다.
+프로젝트·job tag가 있으면 origin과 모순되지 않아야 하며 무태그 이전 실행도
+정확한 persisted origin과 Default launcher 연결 태그가 있을 때만 대상이다.
+현재 launcher가 바뀌었어도 과거 외부 worker가 살아 있을 수 있으므로 run별
+.dagster/grpc_info의 host/port 또는 socket/use_ssl도 실제 origin과 비교한다.
+태그 누락·깨진 JSON·중복/알 수 없는 필드·타입/주소/SSL 모순은 보류한다.
+SDK Default는 use_ssl=True만 태그에 남기므로 origin의 None/false는 태그 필드 부재와
+대응하고 true는 명시 true와 대응한다. 임의 legacy JSON을 canonical로 정정하지 않는다.
+증거 태그 없는 이전 실행은 자동 정산하지 않아 수동 확인이 필요할 수 있다.
+
+### 정산 조건·메모리·clock
+
+Linux64 Docker의 **private PID namespace** 안에서만 사용한다. host PID namespace를
+공유하는 배포에 등록하지 않는다. init은 /proc/1이며 user-code child/reload 시각을
+anchor로 쓰지 않는다. Docker 표식·PID namespace·같은 cgroup·boot ID·PID1 시작 ticks를
+확인한다. 이 자료는 신뢰된 배포 전제의 교차 확인이며 컨테이너 보안 인증은 아니다.
+
+**센서 활성화 전 소비자 필수 전제:** 해당 exact gRPC origin endpoint는 단일
+code-server가 독점 소유해야 한다. 같은 origin을 공유하는 구/신 컨테이너의 동시
+생존·rolling/blue-green overlap·여러 서버로 분기하는 proxy/LB routing은 지원하지 않는다.
+private PID namespace와 origin 일치는 구 worker가 죽었다는 충분한 증거가 아니다.
+소비자는 기존 배포 절차의 구 init/PID·시작 ticks와 worker 소멸, 구 cgroup의
+비어 있음/소멸을 확인한 뒤 신 서버로 넘기는 serial 교체 증거를 활성화 근거에 포함한다.
+PID/cgroup 경로가 재사용되면 경로 이름만으로 과거 프로세스 소멸을 판정하지 않는다.
+이 배포 전제와 물리 소멸이 미확인/UNKNOWN이면 기본 STOPPED를 유지하고 활성화하지 않는다.
+이 센서 자체는 구 namespace의 살아 있는 worker나 외부 routing을 조회·증명하지 않는다.
+rolling overlap을 지원하려면 별도 worker 사망 증거가 필요하며 현재 API만으로
+안전하다고 선언하지 않는다. 새 supervisor/health kill/전역 retry를 추가하는 요구가 아니다.
+
+NTP adjtimex(modes=0) 읽기에서 정상 동기화·최대 오차1초 이내가 확인돼야 한다.
+다른 ABI·권한/파일 부재·미동기화·leap 전환·불확실한 realtime/boottime 표본은
+UNKNOWN으로 보류한다. 이 호출은 clock을 조정하지 않는다. 저장한 동일 boot의
+epoch 기준에서1초 넘는 변화가 관측되면 기존 cursor를 보존하고 보류한다.
+과거 NTP 변경 이력 전체를 증명하지는 못한다. clock 변경으로 보류된 cursor를
+자동 초기화하지 않으며 운영자가 원인·기준을 확인한 뒤 재설정한다.
+
+첫 tick은 init/clock 기준 기록만 한다. 이후 정확한 origin의 native STARTED이고
+start_time이 검증된 init 시작의 보수적 하한보다 grace(최소60초)만큼 이른 경우만
+정산한다. 현재 incarnation의 정상 장기 run·같은 컨테이너 reload·STARTING·QUEUED·
+CANCELING·start_time 누락·경계 동등 값은 대상이 아니다. 기본100개 page·최대5page와
+tick당 협력적5초 예산으로 메모리/조회량을 제한한다. DB 호출 자체의 hard timeout은
+아니므로 소비자 metadata DB/RPC 예산이 별도로 필요하다.
+
+완료 page cursor를 센서 저장소에 유지하고 완주하면 head부터 재확인한다.
+중간 조회/쓰기 실패는 cursor 성공 반환 없이 실패하므로 같은 후보를 다시 확인한다.
+incarnation 전체를 영구 완료 표시하여 늦게 나타난 이전 실행을 누락하지 않는다.
+쓰기 직전 init/clock·실행 status/start_time/origin을 재조회하며 이미 terminal이면
+아무것도 쓰지 않는다. 공식 report_run_failed와 구조화 RUN_WORKER_RESTART 사유를 쓴다.
+이는 원자 CAS가 아니다. 최종 재조회와 쓰기 사이 외부 수동 terminal 기록 경쟁은
+기존 run-monitoring과 같은 잔여 한계이며 새 outbox/직접 runs-table UPDATE로 숨기지 않는다.
+
+### 실패 재시도와 서버 복구는 별도다
+
+이 센서는 RunRequest를 만들지 않는다. 실패 뒤 재시도는 기존
+infrastructure_retry_sensor의 exact project/location/job·멱등 선언·허용 사유·상한·
+이미 발급된 child 검사를 재사용한다. native retry가 활성화됐으면 기존 위임 계약을
+유지한다. Weather는 retry tag만 설정한 상태와 실제 센서 등록/instance 활성화를
+구분해야 하고, Geo의 backup_verify 이외 비멱등 job을 자동 retry로 넓히지 않는다.
+
+이 센서도 code location이 로드되지 않으면 실행되지 않는다. SERVING proxy 뒤의
+hung child를 재시작시키거나 PID1 kill의 모든 효과를 대체하지 않는다.
+따라서 Manager의 기존 health reaper/PID 종료를 제거하는 변경은 이 센서 추가만으로
+완전 동등 복구가 되었다고 판단하지 않는다. 서버 복구의 운영 소유자/수동 대응을
+별도로 정하고 실제 run worker 유실·정상 장기 실행·동시 타 location 보존을 검증한다.
+
+Common의 순수 fixture·로컬 Dagster native 이벤트 검증은 소비자 SDK/이미지 채택,
+실제 컨테이너 재시작·첫 tick·큐 해소·수집 신선도·CPU/RSS·live E2E의 대체가 아니다.
+이 가이드 추가 시점의 운영·소비자 검증은 NOT_RUN이다.

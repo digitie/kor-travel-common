@@ -1,3 +1,20 @@
+## 2026-10-16 — Common34 독립 리뷰·문서 정산 완료
+
+제품 d1aa와 문서7f915의 A/C 독립 최종 PASS·열린 P0/P1/P2 0을
+[최종 판정](reviews/adversarial/2026-10-16-native-incarnation-closure.md)에 보존했다.
+A의 외부 launcher P1과 C의 활성화 전제 P2는 FIXED다. C의 철회된 PASS 초안·정정
+BLOCK·후속 FIXED 원문은 모두 바이트 그대로 남겼고 초안을 최종 승인으로 세지 않는다.
+이번 closure는 제품/§15 규범 변경0이다. 새 closure HEAD CI 확인과 소비자 운영 gate는
+별도이며 전역 T-319 IN_PROGRESS·기본 STOPPED를 유지한다.
+
+## 2026-10-16 — Common34 활성화 전제 문서 보완
+
+C의 정정 리뷰 C-P2-01을 수용해 [가이드 §15](runbooks/dagster-adoption.md#15-컨테이너-재시작-뒤-native-실행-정산)에
+singleton/exclusive origin·overlap 미지원·serial 교체의 구 init/worker/cgroup 소멸 증거를
+활성화 전제로 명시했다. 제품·기본 STOPPED·핀·이미지는 d1aa와 같다.
+새 immutable 문서 delta의 C-P2 재검토와 A 독립 재검토·최종 CI가 후속이며,
+C 최초 PASS 초안을 최종 승인으로 세지 않는다. 소비자 운영 검증은 별도다.
+
 ## 2026-10-16 — proxy 환경 우회 P2 후속 수정
 
 독립 리뷰의 실제 loopback CONNECT/정상 오인 반례를 반영해 새 gRPC 채널에서 proxy를
