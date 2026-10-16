@@ -860,6 +860,12 @@ recreate는 유휴 연결도 남아 있으면 거절한다. 따라서 close=Fals
 떼어놓아 연결 상한·종료 집계를 우회할 수 없다. 기본 close=True는 유휴 연결을 닫은 뒤
 빈 pool만 재생성한다. 활성화마다 별도 scope identity를 부여하고 connect에서 검사하여
 같은 PID의 다음 활성화에서도 이전 engine/pool을 다시 사용하지 못한다.
+connect/dispose/recreate는 같은 pool별 잠금으로 직렬화하여 대여 검사와 세대 교체 사이의
+thread 경합을 막는다. 반환은 이 잠금을 쓰지 않아 포화 중 대기 checkout을 깨울 수 있다.
+재생성이 끝난 이전 pool은 퇴역 상태로 고정하므로 이미 옛 참조를 받은 thread도 다시
+대여할 수 없다. 재생성된 pool은 원 활성화 identity를 그대로 계승하므로 다음 활성화에서
+옛 engine을 dispose해도 새 수명의 미등록 engine으로 회생하지 않는다. fork PID 검사는 상속된 전역·pool 잠금에 들어가기 전에 수행한다.
+자식 finally도 부모 잠금이나 연결 I/O 없이 실패한다.
 SDK가 도중에 engine.dispose하여 빈 pool을 재생성했어도 현재 pool을 종료 시 닫는다.
 원 SDK instance.dispose만으로는 schedule engine 정리가 보장되지 않는다.
 

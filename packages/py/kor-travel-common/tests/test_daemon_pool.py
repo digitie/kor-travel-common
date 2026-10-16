@@ -15,7 +15,10 @@ from sqlalchemy.pool import NullPool, QueuePool
 from kortravelcommon import _daemon_pool_plugin as pool
 from kortravelcommon import daemon_pool as cli
 
-URL = "postgresql+psycopg2://fixture:fixture@127.0.0.1:1/fixture?connect_timeout=3&options=-cstatement_timeout%3D5000%20-clock_timeout%3D1000"
+# 연결하지 않는 가짜 credential을 URL 구조 API로 넣어 원 옵션 보존만 검사한다.
+URL = make_url(
+    "postgresql+psycopg2://127.0.0.1:1/fixture?connect_timeout=3&options=-cstatement_timeout%3D5000%20-clock_timeout%3D1000"
+).set(username="fixture", password="<fixture>").render_as_string(hide_password=False)
 
 
 @pytest.fixture(autouse=True)
@@ -272,6 +275,7 @@ def test_fork_scope_rejected_before_ping_or_parent_connection_close(monkeypatch)
     from sqlalchemy.engine.default import DefaultDialect
 
     pid = [100]
+    monkeypatch.setattr(pool, "_lock_pid", 100)
     events = []
     monkeypatch.setattr(pool, "os", types.SimpleNamespace(getpid=lambda: pid[0]))
     class Connection:
@@ -381,7 +385,8 @@ def test_old_scope_cannot_reactivate_old_or_finally_recreated_pool(registered):
         first_pool = old.pool
     after_scope_pool = old.pool
     with pool.activation():
-        for stale in (first_pool, after_scope_pool):
+        old.dispose()
+        for stale in (first_pool, after_scope_pool, old.pool):
             with pytest.raises(pool.PoolScopeError):
                 stale.connect()
 
@@ -390,6 +395,7 @@ def test_child_dispose_and_recreate_cannot_close_parent_pool(monkeypatch):
     from sqlalchemy.engine.default import DefaultDialect
 
     pid = [100]
+    monkeypatch.setattr(pool, "_lock_pid", 100)
     calls = []
     monkeypatch.setattr(pool, "os", types.SimpleNamespace(getpid=lambda: pid[0]))
     class Connection:
@@ -413,3 +419,165 @@ def test_child_dispose_and_recreate_cannot_close_parent_pool(monkeypatch):
         finally:
             pid[0] = 100
             queue.dispose()
+
+
+def test_retired_pool_reference_cannot_connect_after_recreate(registered):
+    with pool.activation():
+        item = engine()
+        retired = item.pool
+        item.dispose()
+        assert item.pool is not retired
+        with pytest.raises(pool.PoolScopeError):
+            retired.connect()
+
+
+def test_dispose_check_and_close_serialize_with_checkout(monkeypatch):
+    import threading
+
+    from sqlalchemy.engine.default import DefaultDialect
+
+    checked = threading.Event()
+    release = threading.Event()
+    attempted = threading.Event()
+    created = threading.Event()
+    errors = []
+    connections = []
+    class Connection:
+        def __init__(self):
+            created.set()
+        def rollback(self):
+            pass
+        def close(self):
+            pass
+    with pool.activation():
+        queue = pool.DaemonQueuePool(Connection, pool_size=2, max_overflow=2,
+                                     dialect=DefaultDialect())
+        original = queue.checkedout
+        def gated_checkedout():
+            result = original()
+            checked.set()
+            assert release.wait(2)
+            return result
+        monkeypatch.setattr(queue, "checkedout", gated_checkedout)
+        def dispose():
+            try:
+                queue.dispose()
+            except BaseException as error:
+                errors.append(error)
+        def borrow():
+            attempted.set()
+            try:
+                connections.append(queue.connect())
+            except BaseException as error:
+                errors.append(error)
+        first = threading.Thread(target=dispose)
+        second = threading.Thread(target=borrow)
+        first.start()
+        try:
+            assert checked.wait(2)
+            second.start()
+            assert attempted.wait(2)
+            assert not created.wait(0.05)
+        finally:
+            release.set()
+            first.join(2)
+            if second.ident is not None:
+                second.join(2)
+            for connection in connections:
+                connection.close()
+            monkeypatch.setattr(queue, "checkedout", original)
+            queue.dispose()
+        assert not first.is_alive() and not second.is_alive() and errors == []
+
+
+def test_waiting_checkout_can_be_unblocked_by_connection_return():
+    import threading
+
+    from sqlalchemy.engine.default import DefaultDialect
+
+    class Connection:
+        def rollback(self):
+            pass
+        def close(self):
+            pass
+    with pool.activation():
+        queue = pool.DaemonQueuePool(Connection, pool_size=2, max_overflow=2,
+                                     timeout=1, dialect=DefaultDialect())
+        held = [queue.connect() for _ in range(4)]
+        waiting = threading.Event()
+        acquired = []
+        errors = []
+        def borrow():
+            waiting.set()
+            try:
+                acquired.append(queue.connect())
+            except BaseException as error:
+                errors.append(error)
+        thread = threading.Thread(target=borrow)
+        thread.start()
+        try:
+            assert waiting.wait(2)
+            held.pop().close()
+            thread.join(2)
+            assert not thread.is_alive() and errors == [] and len(acquired) == 1
+        finally:
+            for connection in held + acquired:
+                connection.close()
+            queue.dispose()
+
+
+def test_fork_global_entrypoints_reject_before_inherited_lock(monkeypatch):
+    class PoisonLock:
+        def __enter__(self):
+            raise AssertionError("inherited lock entered")
+        def __exit__(self, *args):
+            pass
+    with pool.activation():
+        plugin = pool.DaemonPoolPlugin(make_url(URL), {"poolclass": NullPool})
+        with monkeypatch.context() as child:
+            child.setattr(pool, "_lock", PoisonLock())
+            child.setattr(pool, "os", types.SimpleNamespace(getpid=lambda: os.getpid() + 1))
+            with pytest.raises(pool.PoolScopeError):
+                pool.DaemonPoolPlugin(make_url(URL), {"poolclass": NullPool})
+            with pytest.raises(pool.PoolScopeError):
+                plugin.engine_created(types.SimpleNamespace(dispose=lambda: pytest.fail("I/O")))
+            with pytest.raises(pool.PoolScopeError):
+                with pool.activation():
+                    pytest.fail("entered child scope")
+
+
+def test_fork_activation_exit_rejects_before_inherited_lock(monkeypatch):
+    class PoisonLock:
+        def __enter__(self):
+            raise AssertionError("inherited lock entered")
+        def __exit__(self, *args):
+            pass
+    manager = pool.activation()
+    manager.__enter__()
+    try:
+        with monkeypatch.context() as child:
+            child.setattr(pool, "_lock", PoisonLock())
+            child.setattr(pool, "os", types.SimpleNamespace(getpid=lambda: os.getpid() + 1))
+            with pytest.raises(pool.PoolScopeError):
+                manager.__exit__(None, None, None)
+    finally:
+        # 모형 자식은 별도 주소 공간이 아니므로 부모의 빈 활성 상태만 복원한다.
+        pool._owner_pid = None
+        pool._scope = None
+
+
+def test_fork_pool_methods_reject_before_inherited_pool_lock(monkeypatch):
+    class PoisonLock:
+        def __enter__(self):
+            raise AssertionError("inherited pool lock entered")
+        def __exit__(self, *args):
+            pass
+    with pool.activation():
+        queue = pool.DaemonQueuePool(lambda: pytest.fail("I/O"))
+        with monkeypatch.context() as child:
+            child.setattr(queue, "_lifecycle_lock", PoisonLock())
+            child.setattr(pool, "os", types.SimpleNamespace(getpid=lambda: os.getpid() + 1))
+            for operation in (queue.connect, queue.dispose, queue.recreate):
+                with pytest.raises(pool.PoolScopeError):
+                    operation()
+        queue.dispose()

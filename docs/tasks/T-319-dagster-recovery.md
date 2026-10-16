@@ -217,3 +217,15 @@ PG 전체 CPU는 다른 소비자의 부하도 포함하므로 daemon 원인 비
 - fake DBAPI/독립 단위·wheel 설치·문서 필수 검사를 먼저 수행한다. 실제 SDK/PG daemon
   paired 검증·소비자 빌드·root CPU/RSS/신선도 측정과 두 독립 리뷰는 별도 gate다.
   이 설계 문서는 실제 성능 개선이나 소비자 채택 완료를 뜻하지 않는다.
+
+### Common38 pool 수명 동시성 보강(2026-10-17)
+
+- 기존1aada의 순차 busy 검사만으로는 thread checkout과 dispose 사이 경쟁을 막지 못한다.
+  pool별 public connect/dispose/recreate를 직렬화하고 반환은 기존 SQLAlchemy 경로를 유지한다.
+- 재생성된 새 pool은 원 scope를 계승하며 이전 pool은 퇴역한다. 다음 활성화의 옛 engine
+  재생성과 이미 옛 참조를 받은 thread 모두 미등록 pool로 회생하지 못한다.
+- fork 자식은 전역·pool 상속 잠금 이전에 거절한다. 자식 finally도 부모 연결 I/O를 하지 않는다.
+- own SQLAlchemy2.0.54/fakeDBAPI 새6회귀: 옛1aada는5FAIL/1PASS, 수정본 포함 전체30PASS.
+  실제 fork·SDK·PG는 root 전용 검증이며 소비자 전체 CPU 감소율을 뜻하지 않는다.
+- CI recovery 설치에는 daemon-pool extra를 명시해 lazy PostgreSQL engine 회귀의 driver를
+  제공한다. 가짜 URL은 placeholder를 구조 API로 넣고 secret scanner 예외는 추가하지 않는다.
