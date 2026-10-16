@@ -41,3 +41,12 @@ root 문서 links/plan·도구 unittest(336PASS/1SKIP)·diff를 확인한다.
 [통합 판정](../2026-10-16-multi-job-retry-closure.md)은 두 PASS/OPEN0이다.
 위 검토 기준 manifest는03396709 Git object에 그대로 남고 이 절은 그 이후 closure 기록이다.
 제품·수용 계약은 바꾸지 않으며 소비자 운영과 종결 commit CI/merge는 별도다.
+
+
+## 최종 Common34 기준선 문서 통합
+
+원 검토03396709/closure58d2426은 immutable 이력으로 보존한다. Common34의 최종
+`4ad615e2abb0f11f846dead8381ef91d923a0f1d` 위로 올린 후 packages 전체 tree가
+03396709와 동일함을 확인했다. A/D 원문·원 closure 보고서와 Common34 원문6개는
+바이트 그대로이며 새 제품 판정/독립 테스트 수를 추가하지 않는다. 문서 충돌은 양쪽
+절을 보존해 정산했다. 새 HEAD CI·Common34 선행 병합·소비자 운영 gate는 별도다.

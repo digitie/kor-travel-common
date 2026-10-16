@@ -1,3 +1,11 @@
+## 2026-10-16 — Common35 기준선 문서 통합
+
+Common34 최종4ad615e 위로 Common35를 다시 올려 두 리뷰 원문·통합 보고서와
+활성화 전제 §15를 함께 보존했다. 제품/테스트/의존성 packages tree는 검토03396709와
+동일하다. 초기 closure58d2426의 CI8SUCCESS는 그 SHA의 이력이며 새 HEAD CI는 별도다.
+PR35는 Common34 feature를 base로 하는 draft를 유지한다. Common34 병합 뒤 최종 main
+대상/정확 source pin·소비자 전이/실제 복구·live gate를 따로 정산한다. 운영 변경0이다.
+
 ## 2026-10-16 — Common35 다중 job 재시도 소스 리뷰 종결
 
 고정03396709의 두 독립 subagent FULL9 PASS/OPEN0와 CI8SUCCESS를
