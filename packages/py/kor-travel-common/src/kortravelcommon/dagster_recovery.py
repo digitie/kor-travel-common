@@ -10,7 +10,7 @@ import stat
 import sys
 import time
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 _CLOCK_DRIFT_SECONDS = 1.0
@@ -158,7 +158,7 @@ def read_container_incarnation():
         if group != (proc / "1/cgroup").read_bytes():
             return None
         return ContainerIncarnation(boot, ticks, hz, epoch, error)
-    except (OSError, ValueError, AttributeError, ZeroDivisionError):
+    except (OSError, ValueError, AttributeError, IndexError, ZeroDivisionError):
         return None
 
 
@@ -278,6 +278,8 @@ def native_incarnation_recovery_sensor(
         if saved is not None and saved["boot"] == anchor.boot_id:
             if abs(saved["epoch"] - anchor.boot_epoch) > _CLOCK_DRIFT_SECONDS:
                 return SkipReason("clock 기준이 변하여 cursor를 보존하고 정산을 보류합니다.")
+            # 작은 slew를 매 tick 누적하여 최초 clock 기준을 이동시키지 않는다.
+            anchor = replace(anchor, boot_epoch=saved["epoch"])
         identity = (saved["boot"], saved["ticks"], saved["hz"]) if saved else None
         if identity != anchor.identity:
             # 새 init은 첫 tick에 기록만 한다. 재로드된 user-code child는 이 값을 바꾸지 않는다.

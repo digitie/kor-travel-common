@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 """운영 접속 없이 init 정산의 귀속·보류·실제 native 이벤트를 검증한다."""
 
+import ctypes
 import json
 import subprocess
 import sys
@@ -331,3 +332,209 @@ def test_real_sdk_local_run_failure_event_and_replay(monkeypatch):
             )
             == 1
         )
+
+
+def test_same_location_foreign_repository_origin_is_not_owned():
+    row = record(tags={})
+    row.dagster_run.remote_job_origin.repository_origin.get_id = lambda: "b" * 40
+    assert not eligible(row)
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "{}",
+        "[]",
+        "{",
+        json.dumps({"v": 1, "extra": True}),
+    ],
+)
+def test_bad_cursor_abstains_before_writes(monkeypatch, raw):
+    with pytest.raises(ValueError):
+        invoke(monkeypatch, [record()], cursor=raw)
+
+
+@pytest.mark.parametrize(
+    "state,status,error",
+    [
+        (-1, 0, 1),
+        (1, 0, 1),
+        (5, 0, 1),
+        (0, 0x40, 1),
+        (0, 0x1000, 1),
+        (0, 0, -1),
+        (0, 0, 1000001),
+    ],
+)
+def test_ntp_unsynchronized_or_error_cannot_be_success(monkeypatch, state, status, error):
+    def query(pointer):
+        value = pointer._obj
+        assert value.modes == 0
+        value.status = status
+        value.maxerror = error
+        return state
+
+    monkeypatch.setattr(recovery.ctypes, "CDLL", lambda *a, **kw: NS(adjtimex=query))
+    with pytest.raises(OSError):
+        recovery._ntp_error_seconds()
+
+
+def test_ntp_query_only_valid_abi(monkeypatch):
+    def query(pointer):
+        assert pointer._obj.modes == 0
+        assert ctypes.sizeof(pointer._obj) == 208
+        pointer._obj.maxerror = 50000
+        return 0
+
+    monkeypatch.setattr(recovery.ctypes, "CDLL", lambda *a, **kw: NS(adjtimex=query))
+    assert recovery._ntp_error_seconds() == 0.05
+
+
+def test_gradual_clock_slew_cannot_move_original_baseline(monkeypatch):
+    result, calls = invoke(
+        monkeypatch,
+        [],
+        cursor=recovery._cursor(ANCHOR, None),
+        anchor=replace(ANCHOR, boot_epoch=1000.8),
+    )
+    assert not calls and json.loads(result.cursor)["epoch"] == ANCHOR.boot_epoch
+    later, calls = invoke(
+        monkeypatch,
+        [],
+        cursor=result.cursor,
+        anchor=replace(ANCHOR, boot_epoch=1001.5),
+    )
+    assert not calls and later.skip_message
+
+
+def test_anchor_drift_on_final_read_preserves_native(monkeypatch):
+    anchors = iter([ANCHOR, replace(ANCHOR, pid1_start_ticks=10001)])
+    monkeypatch.setattr(recovery, "read_container_incarnation", lambda: next(anchors))
+    with DagsterInstance.ephemeral() as instance:
+        monkeypatch.setattr(instance, "get_run_records", lambda **kw: [record()])
+        monkeypatch.setattr(instance, "report_run_failed", lambda *a: pytest.fail("mutation"))
+        with pytest.raises(Exception, match="incarnation/clock"):
+            definition().evaluate_tick(
+                build_sensor_context(
+                    instance=instance,
+                    cursor=recovery._cursor(ANCHOR, None),
+                )
+            )
+
+
+def test_partial_failure_replay_rechecks_native_terminal(monkeypatch):
+    with DagsterInstance.ephemeral() as instance:
+        first = record()
+        first.dagster_run.run_id = "first"
+        second = record()
+        second.dagster_run.run_id = "second"
+        current = {"first": first, "second": second}
+        failures = []
+        monkeypatch.setattr(recovery, "read_container_incarnation", lambda: ANCHOR)
+        monkeypatch.setattr(instance, "get_run_records", lambda **kw: [first, second])
+        monkeypatch.setattr(instance, "get_run_record_by_id", lambda rid: current[rid])
+
+        def fail(run, *args):
+            if run.run_id == "second" and not failures:
+                raise RuntimeError("metadata failed")
+            current[run.run_id] = record(status=DagsterRunStatus.FAILURE)
+            failures.append(run.run_id)
+
+        # 첫 실행의 partial 성공을 만든 뒤 둘째 쓰기에서 실패시킨다.
+        state = {"second_failed": False}
+
+        def partial(run, *args):
+            if run.run_id == "second" and not state["second_failed"]:
+                state["second_failed"] = True
+                raise RuntimeError("metadata failed")
+            fail(run, *args)
+
+        monkeypatch.setattr(instance, "report_run_failed", partial)
+        sensor = definition()
+        cursor = recovery._cursor(ANCHOR, None)
+        with pytest.raises(Exception, match="metadata failed"):
+            sensor.evaluate_tick(build_sensor_context(instance=instance, cursor=cursor))
+        sensor.evaluate_tick(build_sensor_context(instance=instance, cursor=cursor))
+        assert failures == ["first", "second"]
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"host": "localhost"},
+        {"port": 9001},
+        {"use_ssl": False},
+    ],
+)
+def test_same_location_actual_sdk_different_origin_cannot_be_reaped(change):
+    options = {"host": "127.0.0.1", "port": 9000, "location_name": "test"}
+    original = RemoteRepositoryOrigin(
+        GrpcServerCodeLocationOrigin(**options),
+        "__repository__",
+    )
+    foreign = RemoteRepositoryOrigin(
+        GrpcServerCodeLocationOrigin(**(options | change)),
+        "__repository__",
+    )
+    assert original.get_id() != foreign.get_id()
+    row = record(tags={})
+    row.dagster_run.remote_job_origin = RemoteJobOrigin(foreign, "sample")
+    assert not recovery._candidate(
+        row,
+        ANCHOR,
+        60,
+        "test",
+        "test",
+        "__repository__",
+        original.get_id(),
+        DagsterRunStatus.STARTED,
+    )
+
+
+def test_recovery_failure_uses_existing_retry_and_preserves_existing_child(monkeypatch):
+    from kortravelcommon.dagster import (
+        INFRA_RETRY_PARENT_TAG,
+        RecoveryPolicy,
+        infrastructure_retry_sensor,
+    )
+
+    origin = RemoteJobOrigin(
+        RemoteRepositoryOrigin(
+            GrpcServerCodeLocationOrigin(host="127.0.0.1", port=9000, location_name="test"),
+            "__repository__",
+        ),
+        "sample",
+    )
+    policy = RecoveryPolicy(300, idempotent=True, infrastructure_retries=1)
+    monkeypatch.setattr(recovery, "read_container_incarnation", lambda: ANCHOR)
+    with DagsterInstance.ephemeral() as instance:
+        run = instance.create_run_for_job(
+            sample,
+            remote_job_origin=origin,
+            tags=policy.tags(project="test", job_name="sample"),
+        )
+        instance.report_dagster_event(
+            DagsterEvent(DagsterEventType.RUN_START.value, job_name="sample"),
+            run.run_id,
+            timestamp=800.0,
+        )
+        definition(repository_origin_id=origin.repository_origin.get_id()).evaluate_tick(
+            build_sensor_context(instance=instance, cursor=recovery._cursor(ANCHOR, None)),
+        )
+        retry = infrastructure_retry_sensor(
+            name="recovery_retry",
+            project="test",
+            location_name="test",
+            job=sample,
+            policy=policy,
+        )
+        first = retry.evaluate_tick(build_sensor_context(instance=instance))
+        assert len(first.run_requests) == 1
+        assert first.run_requests[0].tags[INFRA_RETRY_PARENT_TAG] == run.run_id
+        instance.create_run_for_job(
+            sample,
+            remote_job_origin=origin,
+            tags=first.run_requests[0].tags,
+        )
+        duplicate = retry.evaluate_tick(build_sensor_context(instance=instance))
+        assert not duplicate.run_requests
