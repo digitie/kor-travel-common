@@ -1,3 +1,11 @@
+## 2026-10-16 — Common35 다중 job 재시도 소스 리뷰 종결
+
+고정03396709의 두 독립 subagent FULL9 PASS/OPEN0와 CI8SUCCESS를
+[통합 보고서](reviews/adversarial/2026-10-16-multi-job-retry-closure.md)에 보존했다.
+이번 원문/기록 종결은 제품을 바꾸지 않는다. 다음 작업은 최종 문서 HEAD CI 확인과
+PR35 병합 판단이며, 소비자 pin·센서 전이·실제 복구/성능/live는 외부 선행이다.
+T-319 전역 상태는 IN_PROGRESS다. 아래 문단은 각 작성 시점의 이력이다.
+
 ## 2026-10-16 — Common34 독립 리뷰·문서 정산 완료
 
 제품 d1aa와 문서7f915의 A/C 독립 최종 PASS·열린 P0/P1/P2 0을

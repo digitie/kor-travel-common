@@ -1,3 +1,13 @@
+## 2026-10-16 — Common35 두 독립 소스 리뷰 원문 보존
+
+고정03396709에서 A와 팀 D의 독립 FULL9 PASS/OPEN0를 확인한 뒤 root가 두 원문을
+FULL 읽고 docs closure를 맡겼다. 원본 SHA를 확인하여 evidence reviewer-a/b로 bytes
+그대로 복사하고 [통합 판정](reviews/adversarial/2026-10-16-multi-job-retry-closure.md)·
+색인·manifest 종결 절·현재 상태/task를 갱신했다. archive B는 팀 D이며 Common34
+작성분을 새로운 독립 리뷰로 세지 않는다. source/test/lock 바이트는03396709와 같다.
+문서 종결 전 candidate CI8SUCCESS를 실제 GH로 확인했지만 새 HEAD의 CI는 별도다.
+종결본 문서 links718개/2867targets 오류0·plan109 오류0·도구337개 실행(336PASS/1SKIP,64.248초)·diff check0을 확인했다. 소비자 운영·merge는 수행하지 않았다.
+
 ## 2026-10-16 — Common34 리뷰 closure
 
 A/C 두 독립 제품·문서 최종 판정과 초기 차단/정정/수정 이력을

@@ -33,3 +33,11 @@ native/manual/Common child 중복·같은 job active·native ON pending 인계·
 core-only3.11 wheel/설치 bytes·새 API import는 작성자 검증이며 독립 reviewer 실적으로 합산하지 않는다.
 root 문서 links/plan·도구 unittest(336PASS/1SKIP)·diff를 확인한다.
 소비자 배포/실제 복구·CPU/RSS/live E2E와 독립 두 리뷰는 NOT_RUN이다.
+
+## 독립 리뷰 종결 기록
+
+고정03396709 전체9파일에 대한 [A 원문](2026-10-16-multi-job-retry-reviewer-a.md)과
+[B 원문](2026-10-16-multi-job-retry-reviewer-b.md)(팀 D)를 bytes 그대로 보존했다.
+[통합 판정](../2026-10-16-multi-job-retry-closure.md)은 두 PASS/OPEN0이다.
+위 검토 기준 manifest는03396709 Git object에 그대로 남고 이 절은 그 이후 closure 기록이다.
+제품·수용 계약은 바꾸지 않으며 소비자 운영과 종결 commit CI/merge는 별도다.

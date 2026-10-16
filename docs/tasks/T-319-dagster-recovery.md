@@ -148,3 +148,10 @@ Common34 incarnation 정산은 유지하고 소비자 코드/배포는 별도다
 후보35는 기존 단일 API의 같은 내부 판정에 다중 job dispatch만 추가했다.
 로컬 전체443PASS/신규22·기존56 관련78PASS/별도 SDK1.13.24 관련161PASS와
 core-only3.11 wheel·설치 바이트를 확인했다. 두 독립 리뷰·소비자 운영 채택은 후속이다.
+
+### Common35 독립 소스 리뷰 종결
+
+고정03396709의 두 독립 subagent FULL9 PASS/OPEN0와 후보 CI8SUCCESS를
+[원문·통합 판정](../reviews/adversarial/2026-10-16-multi-job-retry-closure.md)에 보존했다.
+제품 변경 없는 closure 이후 최종 문서 HEAD CI·병합은 별도이며 소비자 채택·센서 전이·
+운영 복구/CPU/RSS/live의 외부 선행은 그대로다. 전역 상태를 DONE으로 올리지 않는다.
