@@ -722,6 +722,15 @@ Common의 순수 fixture·로컬 Dagster native 이벤트 검증은 소비자 SD
 실제 컨테이너 재시작·첫 tick·큐 해소·수집 신선도·CPU/RSS·live E2E의 대체가 아니다.
 이 가이드 추가 시점의 운영·소비자 검증은 NOT_RUN이다.
 
+### Common36 격리 실측 기록의 범위
+
+[실제 r2 역사 부분 검증](../reviews/adversarial/2026-10-16-common36-historical-partial-closure.md)은
+ARM64/QEMU lab의 fault1·공식 부모 실패·단일 child SUCCESS와 사후 센서별2tick/중복0를
+확인했다. control 두 개가 이미 성공한 뒤의 tick이므로 정상 control을 계속 실행한 채
+두 tick을 관측하는 원 전체 LIVE gate는 HOLD다. 원 controller 실패와 r3의
+timeout/background OOM·별도 정상 정리는 보존한다. 이 기록은 위 활성화 조건을
+완화하지 않으며 native ARM 운영 복구·성능/소비자 live 완료의 근거로 확대하지 않는다.
+
 ## 16. 여러 job의 실패 scan 공유
 
 동일 project/location에서 여러 멱등 job의 인프라 재시도가 필요하면

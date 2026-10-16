@@ -1,0 +1,104 @@
+{
+  "all_selected_ticks_after_controls_success": true,
+  "child_success_timestamp": 1792131587.0190337,
+  "closure_sha256": "1451f0b1684dd5683f99c96a9b504a873bb5b0c873500e262fa610b49f57733b",
+  "common_retry_attempt": 1,
+  "control_success_timestamp": {
+    "a5e94970-f506-4bbb-aab8-68310c6c2796": 1792132324.4931116,
+    "b55aaf23-d7c4-4f81-bacb-7807cc6429af": 1792132324.542734
+  },
+  "current_stopped": [
+    {
+      "exit_code": 0,
+      "id": "a072f0995e72cf710bf11c4bcb06e4f761738831920cf96188678b882f696bbd",
+      "oom_killed": false,
+      "pid": 0,
+      "role": "daemon",
+      "running": false
+    },
+    {
+      "exit_code": 0,
+      "id": "ee3a4277774dd4b045841a295a5a429f845cdf5abef5f37138cb30049c831b79",
+      "oom_killed": false,
+      "pid": 0,
+      "role": "foreign",
+      "running": false
+    },
+    {
+      "exit_code": 0,
+      "id": "c0b231796aa5407b97e6ef93bfeff72d8a6e32814f66651b2acafea64a734cf8",
+      "oom_killed": false,
+      "pid": 0,
+      "role": "main",
+      "running": false
+    }
+  ],
+  "d_observation_sha256": "694912926240fc32894f9b6f5c9ddf0f076dc988d83d78e6b2df92a6f792e97f",
+  "dagster_parent_run_id": null,
+  "database_and_wal_unchanged": true,
+  "db_sha256": {
+    "home/storage/history/runs.db": "15c4c8fc40d7fcf7b6450f396d087bb4745c2bf429c865aae5538f04dc5bdaae",
+    "home/storage/history/runs.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "home/storage/history/runs/62d0c2c6-46f3-4b2a-8172-3b451059461b.db": "9aa7361389422abd45f08842420d6eef517506a878b509f8f092384e71490e1d",
+    "home/storage/history/runs/62d0c2c6-46f3-4b2a-8172-3b451059461b.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "home/storage/history/runs/a5e94970-f506-4bbb-aab8-68310c6c2796.db": "b0841c1fe36372c5a568cf0d086bd5a8ad9925183f1a2bcd9b212e38c889b62d",
+    "home/storage/history/runs/a5e94970-f506-4bbb-aab8-68310c6c2796.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "home/storage/history/runs/b55aaf23-d7c4-4f81-bacb-7807cc6429af.db": "dd30ae1520593f3df009a93987ae40a4a11ee381f0f11f1b64efde957332042d",
+    "home/storage/history/runs/b55aaf23-d7c4-4f81-bacb-7807cc6429af.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "home/storage/history/runs/bf3b027e-feaa-4a2e-8f1f-046c0d08d1d2.db": "5b8366c7f3b42036ebdf4d9dde0f830557a979c782b88c3de2eaa51f3ae76ec6",
+    "home/storage/history/runs/bf3b027e-feaa-4a2e-8f1f-046c0d08d1d2.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "home/storage/schedules/schedules.db": "4c3a2428f3b7590cfbb6115517db527ce5a47f6d17d0f9b4eeceaab1e8fe3ce4",
+    "home/storage/schedules/schedules.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "lab": "common36-owned-live-d-r1-0a0443e6-ea68-4e7e-8059-d626e89f58ff",
+  "lineage_binding": "kortravelcommon/infra_retry_parent + deterministic dagster/run_key + exact origin/project/config",
+  "native_max_retries": 0,
+  "new_mutations": 0,
+  "one_shot_controller_pass": false,
+  "original_failures_preserved": true,
+  "parent_official_worker_restart_failure_events": 1,
+  "phase": "INDEPENDENT_HISTORY_VERIFIED_WITH_ORDERING_LIMITATION",
+  "post_child_completed_ticks": {
+    "owned_incarnation": [
+      {
+        "end": 1792132356.0801167,
+        "id": 25,
+        "run_ids": [],
+        "start": 1792132355.012016,
+        "status": "SKIPPED"
+      },
+      {
+        "end": 1792132419.5313072,
+        "id": 27,
+        "run_ids": [],
+        "start": 1792132417.608452,
+        "status": "SKIPPED"
+      }
+    ],
+    "owned_infra": [
+      {
+        "end": 1792132354.659337,
+        "id": 24,
+        "run_ids": [],
+        "start": 1792132353.424815,
+        "status": "SKIPPED"
+      },
+      {
+        "end": 1792132417.3129737,
+        "id": 26,
+        "run_ids": [],
+        "start": 1792132414.634313,
+        "status": "SKIPPED"
+      }
+    ]
+  },
+  "post_child_ticks_with_controls_still_started": false,
+  "read_only": true,
+  "runs": {
+    "62d0c2c6-46f3-4b2a-8172-3b451059461b": "SUCCESS",
+    "a5e94970-f506-4bbb-aab8-68310c6c2796": "SUCCESS",
+    "b55aaf23-d7c4-4f81-bacb-7807cc6429af": "SUCCESS",
+    "bf3b027e-feaa-4a2e-8f1f-046c0d08d1d2": "FAILURE"
+  },
+  "sdk_imports": false
+}

@@ -1,3 +1,13 @@
+## 2026-10-16 — Common36 실제 격리 lab 부분 증거
+
+[역사 부분 검증](reviews/adversarial/2026-10-16-common36-historical-partial-closure.md)에
+r2 fault1→공식 부모 FAILURE→child1SUCCESS와 사후 센서별2tick/추가child0를 보존했다.
+control들은 그 tick 전에 이미 SUCCESS여서 원 동시 보호 LIVE gate는 HOLD다.
+r2 controller 실패·r3 timeout/backgroundOOM·별도 cleanup을 성공으로 덮지 않는다.
+제품5d2/소스 A·C PASS는 그대로이며 native amd64 계획은 조사만 했다.
+다음은 남은 동시 보호 검증 계획 검토·Weather 실제 live UI34/소비자 gate다.
+전역 T-319 IN_PROGRESS·PR36 draft/미병합을 유지한다. 아래는 각 시점의 이력이다.
+
 ## 2026-10-16 — Common35 기준선 문서 통합
 
 ## Common36 소스 리뷰 종결 (2026-10-16)
