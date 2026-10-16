@@ -144,3 +144,7 @@ private PID namespace/exact origin만으로 old worker 사망을 증명하지 �
 [설계·채택 경계](../runbooks/dagster-multi-job-retry.md)를 따른다. 기존 단일 API와
 Common34 incarnation 정산은 유지하고 소비자 코드/배포는 별도다. Python 회귀·실제 SQLite·wheel·
 두 독립 리뷰가 필요하며 운영 효과는 NOT_RUN이다.
+
+후보35는 기존 단일 API의 같은 내부 판정에 다중 job dispatch만 추가했다.
+로컬 전체443PASS/신규22·기존56 관련78PASS/별도 SDK1.13.24 관련161PASS와
+core-only3.11 wheel·설치 바이트를 확인했다. 두 독립 리뷰·소비자 운영 채택은 후속이다.

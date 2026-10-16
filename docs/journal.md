@@ -16,6 +16,25 @@ blue-green overlap 미지원과 기존 serial 교체의 구 init/PID ticks·work
 핀/이미지 변경은 없으며 초기 PASS 초안·정정 BLOCK 원문을 덮지 않았다.
 문서 links714개/2851targets 오류0·plan109 오류0·도구337실행(336PASS/1SKIP,63.227초)·diff0을 확인했다. 새 문서 HEAD의 C/A 재검토·최종 CI·소비자 활성화는 후속이다.
 
+## 2026-10-16 — 단일 다중-job 인프라 재시도 factory 후보
+
+Common34 d1aa4bb에서 별도 격리 feature worktree로 시작하고 원본 dirty/작업자를
+보존했다. Linux CodeGraph init/status/context로 공개 factory·caller 영향을 확인했다.
+정본 로컬 git identity는 값 출력 없이 해당 WT-local에만 적용했다. 설계 먼저 commit하고
+Draft PR35를 만든 뒤 새17-job scan 회귀1FAIL을 보존했다.
+
+추가 API는 명시 job/policy mapping을 고정하고 기존 단일 API와 동일 private 판정으로
+위임한다. 원 provider 실패 이력·부분 선택·origin/project/job·멱등/예산·child 중복·
+active/pending 인계 계약을 유지했다. 다중 factory만 project FAILURE page를 공유하고
+RunRequest.job_name을 명시한다. source diff는 기존 재시도 판정 body를 공유하며
+Common34 dagster_recovery.py·다른 runtime/의존성은 바꾸지 않았다.
+
+신규22·기존56 관련78PASS, 잠긴1.13.25 전체443PASS/110.31초와 별도1.13.24의
+관련161PASS/14.86초를 확인했다. 기존 도구337개 중336PASS/1SKIP, links/plan/ruff를
+확인했고 wheel/core-only Python3.11.15·설치 module bytes·새 API import를 검증했다.
+이 결과는 운영 실패 재현·소비자 채택·CPU/RSS 절감 실측이 아니다. 두 독립 리뷰와 CI,
+Weather 별도 pin/등록·pending 전이와 실제 복구/live가 다음 gate다.
+
 ## 2026-10-16 — gRPC proxy 환경 우회 P2 수정 후보
 
 독립 리뷰 A가 source3ed16d1에서 grpc_proxy CONNECT 때문에 정상 loopback 생존을
