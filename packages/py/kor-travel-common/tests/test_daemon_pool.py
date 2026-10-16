@@ -222,3 +222,14 @@ def test_help_delegation_does_not_require_dsn(monkeypatch):
     monkeypatch.setattr(sys, "argv", ["own-wrapper", "--help"])
     cli.run()
     assert called == ["official"]
+
+
+@pytest.mark.parametrize("arguments", [
+    ["run", "--instance-ref", "synthetic-no-secret"],
+    ["run", "--instance-ref=synthetic-no-secret"],
+])
+def test_hidden_instance_ref_cannot_bypass_environment_contract(monkeypatch, arguments):
+    monkeypatch.setattr(cli, "_original_cli", lambda: lambda: pytest.fail("위임하면 안 됨"))
+    monkeypatch.setattr(sys, "argv", ["own-wrapper", *arguments])
+    with pytest.raises(cli.DaemonPoolConfigurationError):
+        cli.run()

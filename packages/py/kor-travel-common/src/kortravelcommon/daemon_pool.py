@@ -84,6 +84,9 @@ def run() -> None:
         original()
         return
 
+    if any(arg == "--instance-ref" or arg.startswith("--instance-ref=") for arg in sys.argv[2:]):
+        raise DaemonPoolConfigurationError("별도 instance ref는 지원하지 않습니다.")
+
     from kortravelcommon._daemon_pool_plugin import activation
 
     _validate_storage_config()
