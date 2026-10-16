@@ -1,3 +1,11 @@
+## 2026-10-16 — Common34 활성화 전제 문서 보완
+
+C의 정정 리뷰 C-P2-01을 수용해 [가이드 §15](runbooks/dagster-adoption.md#15-컨테이너-재시작-뒤-native-실행-정산)에
+singleton/exclusive origin·overlap 미지원·serial 교체의 구 init/worker/cgroup 소멸 증거를
+활성화 전제로 명시했다. 제품·기본 STOPPED·핀·이미지는 d1aa와 같다.
+새 immutable 문서 delta의 C-P2 재검토와 A 독립 재검토·최종 CI가 후속이며,
+C 최초 PASS 초안을 최종 승인으로 세지 않는다. 소비자 운영 검증은 별도다.
+
 ## 2026-10-16 — proxy 환경 우회 P2 후속 수정
 
 독립 리뷰의 실제 loopback CONNECT/정상 오인 반례를 반영해 새 gRPC 채널에서 proxy를

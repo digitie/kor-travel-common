@@ -120,3 +120,11 @@ run DB 변경/PID1 종료 동작이 있어 소비자 PR에서 제거·책임 이
 사용을 명시 차단한다. grpc_proxy/http_proxy/https_proxy 각각 정상·손상 정의·닫힌
 target의 실제 subprocess 회귀로 loopback target 귀속·proxy 연결0·quiet를 확인한다.
 원 initial manifest/실패 증거는 유지하며 post-fix 두 독립 재검토 전 완료로 세지 않는다.
+
+## Common34 활성화 전제 문서 후속
+
+C-P2-01의 singleton/exclusive gRPC origin·구/신 overlap 미지원·구 init/worker/cgroup
+소멸을 확인한 serial 교체 전제를 [가이드 §15](../runbooks/dagster-adoption.md#15-컨테이너-재시작-뒤-native-실행-정산)에 명시했다.
+private PID namespace/exact origin만으로 old worker 사망을 증명하지 않는다.
+제품/기본 STOPPED는 유지한다. C의 정정 BLOCK 원문을 보존하며 이 문서 delta의 C/A
+재검토 전 finding을 FIXED로 닫지 않는다. 소비자 gate·운영 검증과 전역 IN_PROGRESS는 별도다.

@@ -658,6 +658,18 @@ Linux64 Docker의 **private PID namespace** 안에서만 사용한다. host PID 
 anchor로 쓰지 않는다. Docker 표식·PID namespace·같은 cgroup·boot ID·PID1 시작 ticks를
 확인한다. 이 자료는 신뢰된 배포 전제의 교차 확인이며 컨테이너 보안 인증은 아니다.
 
+**센서 활성화 전 소비자 필수 전제:** 해당 exact gRPC origin endpoint는 단일
+code-server가 독점 소유해야 한다. 같은 origin을 공유하는 구/신 컨테이너의 동시
+생존·rolling/blue-green overlap·여러 서버로 분기하는 proxy/LB routing은 지원하지 않는다.
+private PID namespace와 origin 일치는 구 worker가 죽었다는 충분한 증거가 아니다.
+소비자는 기존 배포 절차의 구 init/PID·시작 ticks와 worker 소멸, 구 cgroup의
+비어 있음/소멸을 확인한 뒤 신 서버로 넘기는 serial 교체 증거를 활성화 근거에 포함한다.
+PID/cgroup 경로가 재사용되면 경로 이름만으로 과거 프로세스 소멸을 판정하지 않는다.
+이 배포 전제와 물리 소멸이 미확인/UNKNOWN이면 기본 STOPPED를 유지하고 활성화하지 않는다.
+이 센서 자체는 구 namespace의 살아 있는 worker나 외부 routing을 조회·증명하지 않는다.
+rolling overlap을 지원하려면 별도 worker 사망 증거가 필요하며 현재 API만으로
+안전하다고 선언하지 않는다. 새 supervisor/health kill/전역 retry를 추가하는 요구가 아니다.
+
 NTP adjtimex(modes=0) 읽기에서 정상 동기화·최대 오차1초 이내가 확인돼야 한다.
 다른 ABI·권한/파일 부재·미동기화·leap 전환·불확실한 realtime/boottime 표본은
 UNKNOWN으로 보류한다. 이 호출은 clock을 조정하지 않는다. 저장한 동일 boot의

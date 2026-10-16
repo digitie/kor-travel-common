@@ -1,3 +1,12 @@
+## 2026-10-16 — Common34 singleton 활성화 전제 보완 후보
+
+제품 d1aa를 그대로 두고 C의 정정 C-P2-01을 수용했다. private PID namespace/exact
+origin만으로 살아 있는 구 worker를 구분할 수 없으므로 단일 endpoint 독점·rolling/
+blue-green overlap 미지원과 기존 serial 교체의 구 init/PID ticks·worker/cgroup 소멸
+증거를 가이드에 명시했다. UNKNOWN이면 STOPPED를 유지한다. 새 runtime guard나
+핀/이미지 변경은 없으며 초기 PASS 초안·정정 BLOCK 원문을 덮지 않았다.
+문서 links714개/2851targets 오류0·plan109 오류0·도구337실행(336PASS/1SKIP,63.227초)·diff0을 확인했다. 새 문서 HEAD의 C/A 재검토·최종 CI·소비자 활성화는 후속이다.
+
 ## 2026-10-16 — gRPC proxy 환경 우회 P2 수정 후보
 
 독립 리뷰 A가 source3ed16d1에서 grpc_proxy CONNECT 때문에 정상 loopback 생존을
