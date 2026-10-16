@@ -155,3 +155,22 @@ core-only3.11 wheel·설치 바이트를 확인했다. 두 독립 리뷰·소비
 [원문·통합 판정](../reviews/adversarial/2026-10-16-multi-job-retry-closure.md)에 보존했다.
 제품 변경 없는 closure 이후 최종 문서 HEAD CI·병합은 별도이며 소비자 채택·센서 전이·
 운영 복구/CPU/RSS/live의 외부 선행은 그대로다. 전역 상태를 DONE으로 올리지 않는다.
+
+## Common36 PID1 leader clock 소스 종결
+
+제품a34cbd8/고정5d2의 A/C 두 독립 FULL4 SOURCE_PASS·OPEN0와 QEMU 반례/검증 범위를 [최종 판정](../reviews/adversarial/2026-10-16-pid1-leader-clock-closure.md)에 보존했다. 제품·가이드 계약은 같고 원실패/cursor는 보존한다. 실제 새 lab 재드릴·소비자 pin/배포·복구/CPU/RSS는 별도이며 IN_PROGRESS를 유지한다.
+
+## Common36 실제 격리 lab 부분 기록
+
+[별도 역사 판정](../reviews/adversarial/2026-10-16-common36-historical-partial-closure.md)에
+r2 fault1/공식 부모 실패/child1SUCCESS와 child 후 센서별2tick·중복0를 확인했다.
+control SUCCESS 뒤에만 그 tick이 있어 원 동시 보호 순서는 HOLD다.
+r2/r3 controller 실패와 r3 cleanup을 원형 보존하며 운영 완료·전역 DONE으로 세지 않는다.
+제품/수용 기준/활성화 전제는 바꾸지 않는다.
+
+## Common36 native 격리 통합 실제 종결
+
+[별도15 gate 판정](../reviews/adversarial/2026-10-16-common36-native-live-closure.md)은
+실제 SDK에서 control2가 childSUCCESS 이전 시작해 센서별 후속 완료2tick까지 STARTED를 유지한 뒤
+release/SUCCESS·정상stop하는 순서를 검증했다. 원ARM 부분HOLD와 native 초기화실패/정리를 유지한다.
+제품/테스트/규범 변경0이며 전역 IN_PROGRESS·소비자 실제 live/운영 성능/병합은 별도다.

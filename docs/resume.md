@@ -1,4 +1,26 @@
+## 2026-10-16 — Common36 native 격리 복구 실제 완주
+
+[새 native 실제 종결](reviews/adversarial/2026-10-16-common36-native-live-closure.md)은 원 SDK1.13.24/Common5d2에서
+bootstrap 직렬 초기화→fault1→공식 부모 실패→child1SUCCESS→control2 STARTED를 유지한 센서별2tick→release/SUCCESS2→정상stop을 검증했다.
+원 ARM 부분 증거와 native 초기화 실패/cleanup은 보존하며 과거 결과를 바꾸지 않는다.
+이번15 gate PASS는 WSL native amd64 논리 통합 범위다. 소비자 운영/live UI·CPU/RSS·병합과 전역T319는 별도다.
+아래는 각 시점의 이력이다.
+
+## 2026-10-16 — Common36 실제 격리 lab 부분 증거
+
+[역사 부분 검증](reviews/adversarial/2026-10-16-common36-historical-partial-closure.md)에
+r2 fault1→공식 부모 FAILURE→child1SUCCESS와 사후 센서별2tick/추가child0를 보존했다.
+control들은 그 tick 전에 이미 SUCCESS여서 원 동시 보호 LIVE gate는 HOLD다.
+r2 controller 실패·r3 timeout/backgroundOOM·별도 cleanup을 성공으로 덮지 않는다.
+제품5d2/소스 A·C PASS는 그대로이며 native amd64 계획은 조사만 했다.
+다음은 남은 동시 보호 검증 계획 검토·Weather 실제 live UI34/소비자 gate다.
+전역 T-319 IN_PROGRESS·PR36 draft/미병합을 유지한다. 아래는 각 시점의 이력이다.
+
 ## 2026-10-16 — Common35 기준선 문서 통합
+
+## Common36 소스 리뷰 종결 (2026-10-16)
+
+PID1 leader clock 고정5d2/제품a34cbd8의 두 독립 A/C FULL4 SOURCE_PASS·OPEN0와 후보CI8SUCCESS를 [통합 판정](reviews/adversarial/2026-10-16-pid1-leader-clock-closure.md)에 보존했다. 실제 Common36 lab 재드릴·소비자 이미지/활성화·운영 효과/병합과 전역T319는 후속이다. closure는 제품/규범 변경0이다.
 
 Common34 최종4ad615e 위로 Common35를 다시 올려 두 리뷰 원문·통합 보고서와
 활성화 전제 §15를 함께 보존했다. 제품/테스트/의존성 packages tree는 검토03396709와

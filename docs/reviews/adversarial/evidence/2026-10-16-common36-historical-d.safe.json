@@ -1,0 +1,95 @@
+{
+  "child_success_timestamp": 1792131587.0190337,
+  "controls_held_started_during_two_postchild_ticks": false,
+  "controls_success_timestamp": {
+    "a5e94970-f506-4bbb-aab8-68310c6c2796": 1792132324.493112,
+    "b55aaf23-d7c4-4f81-bacb-7807cc6429af": 1792132324.542734
+  },
+  "event_counting": "Exact child event shard only; index mirror is not a second success or run.",
+  "evidence_kind": "SAFE_PROJECTION_OF_D_READ_ONLY_OBSERVATION",
+  "full_scenario_pass": false,
+  "new_mutations": 0,
+  "postchild_ticks": {
+    "owned_incarnation": [
+      {
+        "ended": 1792132419.5313072,
+        "id": 27,
+        "run_ids": [],
+        "started": 1792132417.608452,
+        "status": "SKIPPED"
+      },
+      {
+        "ended": 1792132356.0801167,
+        "id": 25,
+        "run_ids": [],
+        "started": 1792132355.012016,
+        "status": "SKIPPED"
+      }
+    ],
+    "owned_infra": [
+      {
+        "ended": 1792132417.3129737,
+        "id": 26,
+        "run_ids": [],
+        "started": 1792132414.634313,
+        "status": "SKIPPED"
+      },
+      {
+        "ended": 1792132354.659337,
+        "id": 24,
+        "run_ids": [],
+        "started": 1792132353.424815,
+        "status": "SKIPPED"
+      }
+    ]
+  },
+  "postchild_ticks_after_controls_success": true,
+  "runs": [
+    {
+      "attempt": null,
+      "end": 1792132324.542734,
+      "id": "b55aaf23-d7c4-4f81-bacb-7807cc6429af",
+      "job": "owned_control",
+      "native_max_retries": "0",
+      "parent": null,
+      "run_key": null,
+      "start": 1792131058.602324,
+      "status": "SUCCESS"
+    },
+    {
+      "attempt": null,
+      "end": 1792131489.161444,
+      "id": "bf3b027e-feaa-4a2e-8f1f-046c0d08d1d2",
+      "job": "owned_fault",
+      "native_max_retries": "0",
+      "parent": null,
+      "run_key": null,
+      "start": 1792131156.156596,
+      "status": "FAILURE"
+    },
+    {
+      "attempt": null,
+      "end": 1792132324.493112,
+      "id": "a5e94970-f506-4bbb-aab8-68310c6c2796",
+      "job": "owned_control",
+      "native_max_retries": "0",
+      "parent": null,
+      "run_key": null,
+      "start": 1792131522.268206,
+      "status": "SUCCESS"
+    },
+    {
+      "attempt": "1",
+      "end": 1792131587.019034,
+      "id": "62d0c2c6-46f3-4b2a-8172-3b451059461b",
+      "job": "owned_fault",
+      "native_max_retries": "0",
+      "parent": "bf3b027e-feaa-4a2e-8f1f-046c0d08d1d2",
+      "run_key": "owned-live-0a0443e6-ea68-4e7e-8059-d626e89f58ff/infra/bf3b027e-feaa-4a2e-8f1f-046c0d08d1d2/1",
+      "start": 1792131584.762796,
+      "status": "SUCCESS"
+    }
+  ],
+  "source_basename": "common36-r2-historical-postchild-ticks-read-d-r1-20261016.private.json",
+  "source_sha256": "694912926240fc32894f9b6f5c9ddf0f076dc988d83d78e6b2df92a6f792e97f"
+}

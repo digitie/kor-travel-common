@@ -1,0 +1,79 @@
+{
+  "child_success_timestamp": 1792131587.0190337,
+  "evidence_kind": "SAFE_PROJECTION_OF_ROOT_INDEPENDENT_READ_ONLY_PROOF",
+  "fault_count": 1,
+  "full_scenario_pass": false,
+  "limitation": "Controls had already succeeded before these postchild ticks; proof is postchild-only.",
+  "new_mutations": 0,
+  "original_controller": "FAILED_PRESERVED",
+  "postchild_duplicate_runs": 0,
+  "postchild_ticks": {
+    "owned_incarnation": [
+      {
+        "ended": 1792132356.0801167,
+        "id": 25,
+        "run_ids": [],
+        "started": 1792132355.012016,
+        "status": "SKIPPED"
+      },
+      {
+        "ended": 1792132419.5313072,
+        "id": 27,
+        "run_ids": [],
+        "started": 1792132417.608452,
+        "status": "SKIPPED"
+      }
+    ],
+    "owned_infra": [
+      {
+        "ended": 1792132354.659337,
+        "id": 24,
+        "run_ids": [],
+        "started": 1792132353.424815,
+        "status": "SKIPPED"
+      },
+      {
+        "ended": 1792132417.3129737,
+        "id": 26,
+        "run_ids": [],
+        "started": 1792132414.634313,
+        "status": "SKIPPED"
+      }
+    ]
+  },
+  "runs": {
+    "62d0c2c6-46f3-4b2a-8172-3b451059461b": {
+      "infra_attempt": "1",
+      "infra_parent": "bf3b027e-feaa-4a2e-8f1f-046c0d08d1d2",
+      "job": "owned_fault",
+      "native_max_retries": "0",
+      "status": "SUCCESS"
+    },
+    "a5e94970-f506-4bbb-aab8-68310c6c2796": {
+      "infra_attempt": null,
+      "infra_parent": null,
+      "job": "owned_control",
+      "native_max_retries": "0",
+      "status": "SUCCESS"
+    },
+    "b55aaf23-d7c4-4f81-bacb-7807cc6429af": {
+      "infra_attempt": null,
+      "infra_parent": null,
+      "job": "owned_control",
+      "native_max_retries": "0",
+      "status": "SUCCESS"
+    },
+    "bf3b027e-feaa-4a2e-8f1f-046c0d08d1d2": {
+      "infra_attempt": null,
+      "infra_parent": null,
+      "job": "owned_fault",
+      "native_max_retries": "0",
+      "status": "FAILURE"
+    }
+  },
+  "sdk_imports": 0,
+  "single_child": true,
+  "source_basename": "common36-r2-historical-postchild-review-root-r2-20261016.private.json",
+  "source_scope": "Historical postchild gate only; original failed controller is not relabeled one-shot PASS.",
+  "source_sha256": "a8ba234ec36cfb1b70f91cc6e34a41209c206957cf94fc59de2c444c49d61923"
+}

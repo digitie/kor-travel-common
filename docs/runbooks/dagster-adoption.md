@@ -657,6 +657,18 @@ Linux64 Docker의 **private PID namespace** 안에서만 사용한다. host PID 
 공유하는 배포에 등록하지 않는다. init은 /proc/1이며 user-code child/reload 시각을
 anchor로 쓰지 않는다. Docker 표식·PID namespace·같은 cgroup·boot ID·PID1 시작 ticks를
 확인한다. 이 자료는 신뢰된 배포 전제의 교차 확인이며 컨테이너 보안 인증은 아니다.
+PID1 시작 tick은 `/proc/1/task/1/stat`의 leader TID1을 두 번 읽어 같은 값인지 확인한다.
+[Linux procfs의 task별 경로](https://docs.kernel.org/filesystems/proc.html)는
+프로세스 PID와 task TID를 명시하므로 호출한 user-code 스레드나 reload child를 고르지 않는다.
+반환 stat의 PID1 표기 검증도 유지한다. 경로 부재·손상·두 표본 불일치는 UNKNOWN이며
+일반 `/proc/1/stat`로 fallback하지 않는다.
+
+격리된 ARM64 QEMU 검증에서 일반 `/proc/1/stat`의 tick이 읽는 스레드별로 달랐고,
+명시한 leader 경로는 세 호출에서 host PID1 시작 tick과 같았다. 일반 native Dockerexec
+스레드 표본에서는 같은 차이가 나타나지 않았다. 이 반례는 에뮬레이션 경로 선택 결함의
+근거이며 운영 native 장애나 새 센서의 실제 복구 성공을 뜻하지 않는다. 기존 실패·cursor는
+보존하고 clock 경로 수정만으로 cursor를 자동 초기화하지 않는다.
+
 
 **센서 활성화 전 소비자 필수 전제:** 해당 exact gRPC origin endpoint는 단일
 code-server가 독점 소유해야 한다. 같은 origin을 공유하는 구/신 컨테이너의 동시
@@ -709,6 +721,20 @@ hung child를 재시작시키거나 PID1 kill의 모든 효과를 대체하지 �
 Common의 순수 fixture·로컬 Dagster native 이벤트 검증은 소비자 SDK/이미지 채택,
 실제 컨테이너 재시작·첫 tick·큐 해소·수집 신선도·CPU/RSS·live E2E의 대체가 아니다.
 이 가이드 추가 시점의 운영·소비자 검증은 NOT_RUN이다.
+
+### Common36 격리 실측 기록의 범위
+
+[실제 r2 역사 부분 검증](../reviews/adversarial/2026-10-16-common36-historical-partial-closure.md)은
+ARM64/QEMU lab의 fault1·공식 부모 실패·단일 child SUCCESS와 사후 센서별2tick/중복0를
+확인했다. control 두 개가 이미 성공한 뒤의 tick이므로 정상 control을 계속 실행한 채
+두 tick을 관측하는 원 전체 LIVE gate는 HOLD다. 원 controller 실패와 r3의
+timeout/background OOM·별도 정상 정리는 보존한다. 이 기록은 위 활성화 조건을
+완화하지 않으며 native ARM 운영 복구·성능/소비자 live 완료의 근거로 확대하지 않는다.
+
+후속 [native 실제 종결](../reviews/adversarial/2026-10-16-common36-native-live-closure.md)은
+별도 WSL amd64/SDK1.13.24에서 두 control을 STARTED로 유지한 postchild2tick/센서와
+단일 child·정상 종료를 실제 검증했다. ARM 원 부분 기록·실패는 그대로 보존하며
+이 관측은 활성화 전제·소비자 live/운영 성능 gate를 완화하지 않는다.
 
 ## 16. 여러 job의 실패 scan 공유
 

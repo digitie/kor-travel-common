@@ -20,6 +20,10 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-10-16 | FULL8·최종 문서 보존 | [Common36 docs200](adversarial/2026-10-16-common36-docs200-closure.md), 200a350 / base60b252e | A 실제 계약 / C gate·시간순서 | 두 독립 PASS·원문 byte 보존·제품/규범 변경0 |
+| 2026-10-16 | 실제 native 격리 통합 | [Common36 전체 시나리오](adversarial/2026-10-16-common36-native-live-closure.md), 제품5d2·SDK1.13.24 | source root·A / 실행 D | 15 gate PASS·control2 동시 보호·센서별2tick·정상종료·운영 효과 별도 |
+| 2026-10-16 | 실제 격리 lab·역사 부분 검증 | [Common36 composite 증거](adversarial/2026-10-16-common36-historical-partial-closure.md), 제품5d2ad2b·r2 보존 DB | 실행 D / 독립 root·C | child1/두 센서 postchild2tick 양성·controls 동시 보호 순서 HOLD·원 실패 유지 |
+| 2026-10-16 | FULL4·최종 소스 | [PID1 leader clock](adversarial/2026-10-16-pid1-leader-clock-closure.md), 제품a34cbd8 / 검토5d2ad2b | A proc·SDK / C clock·가드 | 두 독립 SOURCE PASS·OPEN0·실제 재드릴 별도 |
 | 2026-10-16 | FULL9·최종 소스 | [다중 job 인프라 재시도](adversarial/2026-10-16-multi-job-retry-closure.md), 제품1b599c4 / 검토03396709 | A SDK·인계 / B(팀 D) 귀속·SQLite·회귀 | 두 독립 PASS·열린0·소비자 운영 별도 |
 | 2026-10-16 | FULL·post-fix·활성화 전제 | [Native incarnation 복구](adversarial/2026-10-16-native-incarnation-closure.md), 제품d1aa4bb / 문서7f915e5 | A launcher·SDK / B(팀 C) 소유권·활성화 | 두 독립 PASS·P1/P2 FIXED·정정 BLOCK 보존·소비자 운영 별도 |
 | 2026-10-16 | FULL·post-fix | [Dagster gRPC 조회·복구 분리](adversarial/2026-10-16-grpc-health-closure.md), 제품1511e3d / 검토d247d19 | A RPC·예산·target / B 패키징·CLI·소비자 | 두 독립 PASS·proxy P2 FIXED·새 열린0·운영 채택 별도 |
