@@ -174,3 +174,21 @@ r2/r3 controller 실패와 r3 cleanup을 원형 보존하며 운영 완료·전�
 실제 SDK에서 control2가 childSUCCESS 이전 시작해 센서별 후속 완료2tick까지 STARTED를 유지한 뒤
 release/SUCCESS·정상stop하는 순서를 검증했다. 원ARM 부분HOLD와 native 초기화실패/정리를 유지한다.
 제품/테스트/규범 변경0이며 전역 IN_PROGRESS·소비자 실제 live/운영 성능/병합은 별도다.
+
+## 2026-10-16 stdlib bytecode 빌드 준비 — 수용 설계
+
+여러 서비스의 실제 동일 gRPC import 표본에서 stdlib93모듈의 bytecode가 없고,
+site-packages54개는 유효했다. 별도 임시 prefix를 prime한 뒤 동일 import self CPU가
+약3.06초에서0.93~0.94초로 줄어든 관찰이 후속 빌드 준비의 근거다.
+이는 동일 prefix/단일 진단 범위이며 전체 서비스 CPU 개선 완료를 뜻하지 않는다.
+
+- 새 opt-in 모듈 kortravelcommon.build_bytecode --stdlib만 추가한다.
+  현재 이미지 interpreter의 sysconfig stdlib만 compileall 단일 worker로 준비한다.
+- checked-hash·optimize0으로 만들고 site-packages/dist-packages/test/tests/idle_test와
+  심볼릭 링크의 scope escape·외부 cache 목적지를 배제한다. 임의 source path 인자는 없다.
+- 런타임 자동 실행·환경/격리 옵션 변경·파일 삭제·provider/DB/앱/Dagster import는 없다.
+  컴파일 실패·권한 부족·잘못된 범위는 nonzero이며 빈 작업을 성공으로 숨기지 않는다.
+- 작은 격리 fixture에서 실패/해시 무효화/링크/비root를 확인하고 Python 전체·문서·wheel을
+  검증한다. 실제 이미지 stdlib 컴파일과 Docker 재빌드/운영 배포는 소비자 후속이다.
+- 같은 immutable source를 두 독립 reviewer가 확인해야 한다. 운영 CPU·메모리·health
+  효과는 소비자 실측 전 NOT_RUN이다. 기존 T-319 IN_PROGRESS를 유지한다.
