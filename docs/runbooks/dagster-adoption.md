@@ -731,6 +731,11 @@ ARM64/QEMU lab의 fault1·공식 부모 실패·단일 child SUCCESS와 사후 �
 timeout/background OOM·별도 정상 정리는 보존한다. 이 기록은 위 활성화 조건을
 완화하지 않으며 native ARM 운영 복구·성능/소비자 live 완료의 근거로 확대하지 않는다.
 
+후속 [native 실제 종결](../reviews/adversarial/2026-10-16-common36-native-live-closure.md)은
+별도 WSL amd64/SDK1.13.24에서 두 control을 STARTED로 유지한 postchild2tick/센서와
+단일 child·정상 종료를 실제 검증했다. ARM 원 부분 기록·실패는 그대로 보존하며
+이 관측은 활성화 전제·소비자 live/운영 성능 gate를 완화하지 않는다.
+
 ## 16. 여러 job의 실패 scan 공유
 
 동일 project/location에서 여러 멱등 job의 인프라 재시도가 필요하면

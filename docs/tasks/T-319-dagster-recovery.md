@@ -167,3 +167,10 @@ r2 fault1/공식 부모 실패/child1SUCCESS와 child 후 센서별2tick·중복
 control SUCCESS 뒤에만 그 tick이 있어 원 동시 보호 순서는 HOLD다.
 r2/r3 controller 실패와 r3 cleanup을 원형 보존하며 운영 완료·전역 DONE으로 세지 않는다.
 제품/수용 기준/활성화 전제는 바꾸지 않는다.
+
+## Common36 native 격리 통합 실제 종결
+
+[별도15 gate 판정](../reviews/adversarial/2026-10-16-common36-native-live-closure.md)은
+실제 SDK에서 control2가 childSUCCESS 이전 시작해 센서별 후속 완료2tick까지 STARTED를 유지한 뒤
+release/SUCCESS·정상stop하는 순서를 검증했다. 원ARM 부분HOLD와 native 초기화실패/정리를 유지한다.
+제품/테스트/규범 변경0이며 전역 IN_PROGRESS·소비자 실제 live/운영 성능/병합은 별도다.

@@ -1,0 +1,126 @@
+{
+  "bootstrap_natural_exit0": true,
+  "child_success": 1792141005.7074819,
+  "child_success_count": 1,
+  "commands": 153,
+  "commands_terminal_exit0": true,
+  "common": "5d2ad2bb45e64197ea359e0e5136b84780dab97a",
+  "complete_observed_at": 1792141007.7075245,
+  "control_ends": {
+    "control": 1792141131.80362,
+    "foreign": 1792141131.869463
+  },
+  "control_started_by_child": {
+    "child_id": "56d7bca8-89db-4697-be0c-a66576c8f612",
+    "child_pipeline_success_timestamp": 1792141005.7074819,
+    "controls": {
+      "control": {
+        "pipeline_start": 1792140902.9538252,
+        "record_start": 1792140902.953825,
+        "run_id": "f8b0093b-9445-4c1f-971a-2a2c730f9d6c"
+      },
+      "foreign": {
+        "pipeline_start": 1792140716.302549,
+        "record_start": 1792140716.302549,
+        "run_id": "7debfca7-cc33-4ce2-bd0e-ce67ba2f4ec1"
+      }
+    }
+  },
+  "controls_held_snapshot_count": 13,
+  "controls_success_count": 2,
+  "faults": 1,
+  "first_anchor": {
+    "end": 1792140880.7003195,
+    "id": 8,
+    "runs": [],
+    "status": "SKIPPED",
+    "time": 1792140880.585156
+  },
+  "gate15": {
+    "bootstrap_disposed_empty_schema_head": true,
+    "both_controls_started_by_child_success": true,
+    "controls_held_through_postchild2_each": true,
+    "exact_single_retry_child_success": true,
+    "exact_source_artifact_reviews": true,
+    "native_retry_budget_zero": true,
+    "new_incarnation_first_anchor_skip": true,
+    "no_duplicate_child_or_extra_runs": true,
+    "normal_stop3_bootstrap_exit0_physical_gone": true,
+    "official_worker_restart_failure_once": true,
+    "parent_and_foreign_started_75grace": true,
+    "prior16_and_foreign_preserved": true,
+    "real_pid1_threads_clock": true,
+    "release_then_control_success2": true,
+    "single_fault_old_physical_gone": true
+  },
+  "lab": "659b40ec-091e-4674-a2da-65e26b94860f",
+  "limitations": [
+    "Native SDK logic integration only; ARM/QEMU prior partial evidence remains separate.",
+    "No production CPU/RSS effect or consumer live-UI proof.",
+    "All original failed controllers/DBs/receipts preserved."
+  ],
+  "new_SDK": 0,
+  "new_mutations": 0,
+  "normal_lab_stops": 3,
+  "owned4_stopped": true,
+  "parent_failure_reason": "RUN_WORKER_RESTART",
+  "phase": "COMMON36_NATIVE_R4_FULL_OWNED_SCENARIO_VERIFIED",
+  "physical": [
+    {
+      "cgroup_empty": true,
+      "pids_gone": true,
+      "role": "old"
+    },
+    {
+      "cgroup_empty": true,
+      "pids_gone": true,
+      "role": "control"
+    },
+    {
+      "cgroup_empty": true,
+      "pids_gone": true,
+      "role": "foreign"
+    }
+  ],
+  "postchild_ticks_before_release": {
+    "owned_incarnation": [
+      {
+        "end": 1792141060.8376446,
+        "start": 1792141060.727243,
+        "status": "TickStatus.SKIPPED"
+      },
+      {
+        "end": 1792141120.8737266,
+        "start": 1792141120.759813,
+        "status": "TickStatus.SKIPPED"
+      }
+    ],
+    "owned_infra": [
+      {
+        "end": 1792141055.9203155,
+        "start": 1792141055.72646,
+        "status": "TickStatus.SKIPPED"
+      },
+      {
+        "end": 1792141116.0066264,
+        "start": 1792141115.759603,
+        "status": "TickStatus.SKIPPED"
+      }
+    ]
+  },
+  "prior_protected": 16,
+  "receipt_sha256": "6fe820585cef66c027bc44967eca1f3eb89df9cabfbbb94ff8fdc04d6d98d729",
+  "release_times": {
+    "control": 1792141131.5984218,
+    "foreign": 1792141131.6030734
+  },
+  "run_count": 4,
+  "sampled_cgroup_memory_peak_bytes_by_role": {
+    "daemon": 221442048,
+    "foreign": 308023296,
+    "main": 425369600
+  },
+  "scope": "WSL_NATIVE_AMD64_SDK1.13.24_NOT_ODROID_PERFORMANCE",
+  "source_sha256": "8cc6866154d2c803585e044c83e249c28111b966e3753497b07983bc2b2e122c",
+  "sqlite_before_after_unchanged": true
+}

@@ -1,3 +1,11 @@
+## 2026-10-16 — Common36 native 격리 복구 실제 완주
+
+[새 native 실제 종결](reviews/adversarial/2026-10-16-common36-native-live-closure.md)은 원 SDK1.13.24/Common5d2에서
+bootstrap 직렬 초기화→fault1→공식 부모 실패→child1SUCCESS→control2 STARTED를 유지한 센서별2tick→release/SUCCESS2→정상stop을 검증했다.
+원 ARM 부분 증거와 native 초기화 실패/cleanup은 보존하며 과거 결과를 바꾸지 않는다.
+이번15 gate PASS는 WSL native amd64 논리 통합 범위다. 소비자 운영/live UI·CPU/RSS·병합과 전역T319는 별도다.
+아래는 각 시점의 이력이다.
+
 ## 2026-10-16 — Common36 실제 격리 lab 부분 증거
 
 [역사 부분 검증](reviews/adversarial/2026-10-16-common36-historical-partial-closure.md)에
