@@ -7,3 +7,11 @@
 - C는 자기 P2 closure와 전체 문서 delta, A는 독립적으로 지원/미지원·unknown·serial 교체/재사용 경계를 검토한다. 두 원문 동결 전 상대 결과를 읽지 않는다.
 - 소비자 기존 serial 배포 증거를 사용하며 새 launcher/receipt chain/supervisor/health kill/전역 retry를 도입하지 않는다.
 - 문서 links/plan/tools/diff를 수행한다. 제품 바이트가 같으므로 이전83case를 새 실행으로 세지 않는다. 실제 old namespace/worker/routing 검사·활성화·운영 E2E는 NOT_RUN이다.
+
+## 후속 closure 기록
+
+검토된 문서 HEAD는 `7f915e57f2e7fb2e3442a1346caf5f2cc7f1d633`이며 위 원래 요청·범위는
+그대로 보존한다. A/C 재검토 PASS·C-P2-01 FIXED 및 초기 BLOCK·철회된 초안의 원문/SHA는
+[통합 판정](../2026-10-16-native-incarnation-closure.md)에 고정했다. archive reviewer-b는 팀 C다.
+이 후속은 원문·disposition·색인·검증 기록만 추가하며 제품/가이드 규범 변경0이다.
+최종 CI는 closure 후속 SHA에서 별도 확인하고 소비자 운영 NOT_RUN을 유지한다.
