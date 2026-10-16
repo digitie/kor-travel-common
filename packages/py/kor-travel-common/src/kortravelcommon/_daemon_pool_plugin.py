@@ -59,6 +59,7 @@ class DaemonPoolPlugin(CreateEnginePlugin):
             max_overflow=MAX_OVERFLOW,
             pool_timeout=POOL_TIMEOUT,
             pool_recycle=POOL_RECYCLE,
+            pool_pre_ping=True,
         )
 
     def update_url(self, url):

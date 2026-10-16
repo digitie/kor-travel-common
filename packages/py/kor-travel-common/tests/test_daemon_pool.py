@@ -47,6 +47,7 @@ def test_plugin_preserves_options_and_lazy_three_engine_lifecycle(registered):
         engines = [engine() for _ in range(3)]
         for item in engines:
             assert isinstance(item.pool, QueuePool)
+            assert item.pool._pre_ping is True
             assert item.pool.size() == 2 and item.pool._max_overflow == 2
             assert item.pool.timeout() == 1 and item.pool._recycle == 3600
             assert item.url == make_url(URL)
@@ -233,3 +234,34 @@ def test_hidden_instance_ref_cannot_bypass_environment_contract(monkeypatch, arg
     monkeypatch.setattr(sys, "argv", ["own-wrapper", *arguments])
     with pytest.raises(cli.DaemonPoolConfigurationError):
         cli.run()
+
+
+def test_pre_ping_replaces_dead_idle_fake_connection_before_return():
+    from sqlalchemy.engine.default import DefaultDialect
+
+    created = []
+    pinged = []
+    class Connection:
+        alive = True
+        def __init__(self):
+            created.append(self)
+        def rollback(self):
+            pass
+        def close(self):
+            self.alive = False
+    class Dialect(DefaultDialect):
+        def do_ping(self, connection):
+            pinged.append(connection)
+            return connection.alive
+    queue = QueuePool(Connection, pool_size=2, max_overflow=2, timeout=1,
+                      recycle=3600, pre_ping=True, dialect=Dialect())
+    first = queue.connect()
+    first_record = first.dbapi_connection
+    first.close()
+    first_record.alive = False
+    second = queue.connect()
+    assert second.dbapi_connection is not first_record
+    assert second.dbapi_connection.alive
+    assert len(created) == 2 and pinged == [first_record]
+    second.close()
+    queue.dispose()

@@ -208,7 +208,7 @@ PG 전체 CPU는 다른 소비자의 부하도 포함하므로 daemon 원인 비
   pool_size2/max_overflow2로 세 engine의 합계 상한은12, 유휴 보관 상한은6이다.
   checkout timeout/recycle은 유한하며 원 statement/lock/connect timeout/options 및
   AUTOCOMMIT은 보존한다. 새 SET 문이나 schema feature cache를 추가하지 않는다.
-- plugin은 weak registry로 engine을 추적한다. checkout의 PID guard로 fork된 프로세스가
+- plugin은 최대3개 strong registry로 수명 동안 engine을 추적한다. checkout의 PID guard로 fork된 프로세스가
   부모 물리 연결을 재사용하지 못하게 한다. CLI 종료 후 세 engine을 명시 dispose한다.
   SDK 자체 instance.dispose는 schedule storage를 정리하지 않고 PG event dispose는
   watcher만 닫으므로 그것만으로 pool 정리를 완료했다고 간주하지 않는다.
