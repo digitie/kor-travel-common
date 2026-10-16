@@ -657,6 +657,18 @@ Linux64 Docker의 **private PID namespace** 안에서만 사용한다. host PID 
 공유하는 배포에 등록하지 않는다. init은 /proc/1이며 user-code child/reload 시각을
 anchor로 쓰지 않는다. Docker 표식·PID namespace·같은 cgroup·boot ID·PID1 시작 ticks를
 확인한다. 이 자료는 신뢰된 배포 전제의 교차 확인이며 컨테이너 보안 인증은 아니다.
+PID1 시작 tick은 `/proc/1/task/1/stat`의 leader TID1을 두 번 읽어 같은 값인지 확인한다.
+[Linux procfs의 task별 경로](https://docs.kernel.org/filesystems/proc.html)는
+프로세스 PID와 task TID를 명시하므로 호출한 user-code 스레드나 reload child를 고르지 않는다.
+반환 stat의 PID1 표기 검증도 유지한다. 경로 부재·손상·두 표본 불일치는 UNKNOWN이며
+일반 `/proc/1/stat`로 fallback하지 않는다.
+
+격리된 ARM64 QEMU 검증에서 일반 `/proc/1/stat`의 tick이 읽는 스레드별로 달랐고,
+명시한 leader 경로는 세 호출에서 host PID1 시작 tick과 같았다. 일반 native Dockerexec
+스레드 표본에서는 같은 차이가 나타나지 않았다. 이 반례는 에뮬레이션 경로 선택 결함의
+근거이며 운영 native 장애나 새 센서의 실제 복구 성공을 뜻하지 않는다. 기존 실패·cursor는
+보존하고 clock 경로 수정만으로 cursor를 자동 초기화하지 않는다.
+
 
 **센서 활성화 전 소비자 필수 전제:** 해당 exact gRPC origin endpoint는 단일
 code-server가 독점 소유해야 한다. 같은 origin을 공유하는 구/신 컨테이너의 동시

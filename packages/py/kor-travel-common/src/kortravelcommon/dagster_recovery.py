@@ -137,7 +137,9 @@ def read_container_incarnation():
         if group != (proc / "self/cgroup").read_bytes() or not group.strip():
             return None
         boot = (proc / "sys/kernel/random/boot_id").read_text().strip()
-        ticks = _start_ticks((proc / "1/stat").read_text())
+        # PID1의 leader task를 명시한다. QEMU가 호출 스레드로 rewrite하는 경로는 쓰지 않는다.
+        leader_stat = proc / "1/task/1/stat"
+        ticks = _start_ticks(leader_stat.read_text())
         error = _ntp_error_seconds()
         epoch, uptime = _clock_sample()
         hz = os.sysconf("SC_CLK_TCK")
@@ -153,7 +155,7 @@ def read_container_incarnation():
             return None
         if boot != (proc / "sys/kernel/random/boot_id").read_text().strip():
             return None
-        if ticks != _start_ticks((proc / "1/stat").read_text()):
+        if ticks != _start_ticks(leader_stat.read_text()):
             return None
         if group != (proc / "1/cgroup").read_bytes():
             return None

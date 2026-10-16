@@ -175,9 +175,10 @@ def test_core_import_does_not_import_dagster():
     assert result.returncode == 0
 
 
-def test_anchor_linux_files_fail_closed(tmp_path, monkeypatch):
+@pytest.fixture
+def anchor_proc(tmp_path, monkeypatch):
     # 합성 proc 자료만 사용한다. 실제 adjtimex나 운영 /proc를 읽지 않는다.
-    for name in ["1", "self", "sys/kernel/random", "1/ns", "self/ns"]:
+    for name in ["1/task/1", "self", "sys/kernel/random", "1/ns", "self/ns"]:
         (tmp_path / "proc" / name).mkdir(parents=True, exist_ok=True)
     (tmp_path / "dockerenv").write_bytes(b"")
     (tmp_path / "proc/1/ns/pid").symlink_to("pid:[1]")
@@ -186,7 +187,8 @@ def test_anchor_linux_files_fail_closed(tmp_path, monkeypatch):
         (tmp_path / "proc" / name).write_text("0::/owned\n")
     (tmp_path / "proc/sys/kernel/random/boot_id").write_text(BOOT)
     fields = ["S"] + ["0"] * 18 + ["1000"]
-    (tmp_path / "proc/1/stat").write_text("1 (init name) " + " ".join(fields))
+    for name in ["1/stat", "1/task/1/stat"]:
+        (tmp_path / "proc" / name).write_text("1 (init name) " + " ".join(fields))
     (tmp_path / "proc/stat").write_text("btime 1000\n")
     monkeypatch.setattr(
         recovery,
@@ -203,6 +205,11 @@ def test_anchor_linux_files_fail_closed(tmp_path, monkeypatch):
         "lstat",
         lambda p: NS(st_mode=0o100600, st_uid=0) if p == tmp_path / "dockerenv" else original(p),
     )
+    return tmp_path / "proc"
+
+
+def test_anchor_linux_files_fail_closed(anchor_proc, monkeypatch):
+    tmp_path = anchor_proc.parent
     assert recovery.read_container_incarnation() is not None
     (tmp_path / "proc/self/cgroup").write_text("0::/foreign\n")
     assert recovery.read_container_incarnation() is None
@@ -210,6 +217,61 @@ def test_anchor_linux_files_fail_closed(tmp_path, monkeypatch):
     monkeypatch.setattr(
         recovery, "_ntp_error_seconds", lambda: (_ for _ in ()).throw(OSError("unsynchronized"))
     )
+    assert recovery.read_container_incarnation() is None
+
+
+def test_anchor_uses_pid1_leader_across_emulated_calling_threads(anchor_proc, monkeypatch):
+    # QEMU의 일반 /proc/1/stat rewrite가 호출 스레드별로 달라도 leader는 동일하다.
+    original = Path.read_text
+    legacy_ticks = iter([1001, 1001, 2001, 2001])
+    legacy_reads = []
+
+    def read_text(path, *args, **kwargs):
+        if path == anchor_proc / "1/stat":
+            legacy_reads.append(path)
+            return "1 (emulated thread) " + " ".join(
+                ["S"] + ["0"] * 18 + [str(next(legacy_ticks))]
+            )
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", read_text)
+    first = recovery.read_container_incarnation()
+    second = recovery.read_container_incarnation()
+    assert first is not None and second is not None
+    assert first.identity == second.identity
+    assert first.pid1_start_ticks == 1000
+    assert not legacy_reads
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "2 (other task) " + " ".join(["S"] + ["0"] * 18 + ["1000"]),
+        "1 (init) " + " ".join(["S"] + ["0"] * 18 + ["0"]),
+        "1 (init) " + " ".join(["S"] + ["0"] * 18 + ["invalid"]),
+        "1 (init) S",
+    ],
+)
+def test_anchor_malformed_leader_does_not_fall_back(anchor_proc, raw):
+    (anchor_proc / "1/task/1/stat").write_text(raw)
+    assert recovery.read_container_incarnation() is None
+
+
+def test_anchor_missing_leader_does_not_fall_back(anchor_proc):
+    (anchor_proc / "1/task/1/stat").unlink()
+    assert recovery.read_container_incarnation() is None
+
+
+def test_anchor_unstable_leader_fails_closed(anchor_proc, monkeypatch):
+    original = Path.read_text
+    ticks = iter([1000, 1001])
+
+    def read_text(path, *args, **kwargs):
+        if path == anchor_proc / "1/task/1/stat":
+            return "1 (init) " + " ".join(["S"] + ["0"] * 18 + [str(next(ticks))])
+        return original(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", read_text)
     assert recovery.read_container_incarnation() is None
 
 
