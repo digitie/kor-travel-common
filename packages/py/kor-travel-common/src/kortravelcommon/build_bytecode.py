@@ -15,9 +15,6 @@ import sysconfig
 from pathlib import Path
 
 _EXCLUDED = frozenset({"site-packages", "dist-packages", "test", "tests", "idle_test"})
-_EXCLUDE_PATTERN = re.compile(
-    r"(^|[\\/])(?:site-packages|dist-packages|test|tests|idle_test)(?:[\\/]|$)"
-)
 
 
 def _walk_error(error: OSError) -> None:
@@ -65,7 +62,10 @@ def _compile_stdlib() -> bool:
         quiet=2,
         optimize=0,
         invalidation_mode=py_compile.PycInvalidationMode.CHECKED_HASH,
-        rx=_EXCLUDE_PATTERN,
+        rx=re.compile(
+            r"^" + re.escape(str(root))
+            + r"[\\/](?:.*[\\/])?(?:site-packages|dist-packages|test|tests|idle_test)(?:[\\/]|$)"
+        ),
         limit_sl_dest=str(root),
     )
 

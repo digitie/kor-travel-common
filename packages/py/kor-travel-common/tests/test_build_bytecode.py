@@ -222,3 +222,13 @@ def test_import_is_opt_in_and_core_only():
         capture_output=True, timeout=10,
     )
     assert child.returncode == 0, child.stderr
+
+
+def test_stdlib_parent_named_tests_does_not_skip_entire_build(stdlib, tmp_path, monkeypatch):
+    root = tmp_path / "tests" / "stdlib"
+    root.mkdir(parents=True)
+    source = root / "actual.py"
+    source.write_text("VALUE = 3")
+    monkeypatch.setattr(build_bytecode.sysconfig, "get_path", lambda name: str(root))
+    assert build_bytecode.main(["--stdlib"]) == 0
+    assert cache(source).is_file()
