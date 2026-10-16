@@ -21,6 +21,7 @@ POOL_TIMEOUT = 1
 POOL_RECYCLE = 3600
 
 _owner_pid: int | None = None
+_scope: object | None = None
 _engines: set[Engine] = set()
 _lock = threading.RLock()
 
@@ -30,12 +31,32 @@ class PoolScopeError(RuntimeError):
 
 
 class DaemonQueuePool(QueuePool):
-    """ping과 원 연결 접근보다 먼저 프로세스 소유권을 검사한다."""
+    """ping과 pool 세대 변경 전에 프로세스·활성 수명·대여 상태를 검사한다."""
+
+    def __init__(self, *args, **kwargs):
+        self._creator_pid = os.getpid()
+        self._pool_scope = _scope
+        super().__init__(*args, **kwargs)
 
     def connect(self):
-        if _owner_pid != os.getpid():
-            raise PoolScopeError("다른 프로세스의 daemon pool은 사용할 수 없습니다.")
+        if (
+            self._creator_pid != os.getpid()
+            or _owner_pid != os.getpid()
+            or self._pool_scope is None
+            or self._pool_scope is not _scope
+        ):
+            raise PoolScopeError("다른 프로세스 또는 수명의 daemon pool입니다.")
         return super().connect()
+
+    def dispose(self):
+        if self._creator_pid != os.getpid() or self.checkedout():
+            raise PoolScopeError("대여 중이거나 다른 프로세스의 pool은 닫을 수 없습니다.")
+        return super().dispose()
+
+    def recreate(self):
+        if self._creator_pid != os.getpid() or self.checkedout() or self.checkedin():
+            raise PoolScopeError("비어 있지 않거나 다른 프로세스의 pool은 재생성할 수 없습니다.")
+        return super().recreate()
 
 
 def _on_connect(connection, record):
@@ -87,11 +108,12 @@ class DaemonPoolPlugin(CreateEnginePlugin):
 @contextmanager
 def activation() -> Iterator[None]:
     """동일 프로세스 CLI 호출을 감싸고 세 storage의 연결 풀을 정리한다."""
-    global _owner_pid
+    global _owner_pid, _scope
     with _lock:
         if _owner_pid is not None or len(_engines):
             raise PoolScopeError("daemon pool 중첩 실행은 허용하지 않습니다.")
         _owner_pid = os.getpid()
+        _scope = object()
     owner = os.getpid()
     try:
         yield
@@ -99,6 +121,7 @@ def activation() -> Iterator[None]:
         original_error = sys.exception()
         with _lock:
             _owner_pid = None
+            _scope = None
             engines = list(_engines)
             _engines.clear()
         problem = False

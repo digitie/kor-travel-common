@@ -315,3 +315,101 @@ def test_recreated_pool_preserves_early_scope_guard(registered, monkeypatch):
                 item.pool.connect()
         finally:
             monkeypatch.undo()
+
+
+def test_busy_engine_dispose_cannot_retire_live_pool_generations(registered):
+    from sqlalchemy.engine import Engine
+    from sqlalchemy.engine.default import DefaultDialect
+
+    opened = []
+    class Connection:
+        closed = False
+        def __init__(self):
+            opened.append(self)
+        def rollback(self):
+            pass
+        def close(self):
+            self.closed = True
+
+    held = []
+    with pool.activation():
+        for _ in range(3):
+            queue = pool.DaemonQueuePool(
+                Connection, pool_size=2, max_overflow=2, timeout=1, dialect=DefaultDialect()
+            )
+            item = Engine(queue, DefaultDialect(), make_url(URL))
+            plugin = pool.DaemonPoolPlugin(make_url(URL), {"poolclass": NullPool})
+            plugin.engine_created(item)
+            held.extend(item.raw_connection() for _ in range(4))
+            with pytest.raises(pool.PoolScopeError):
+                item.dispose()
+            with pytest.raises(pool.PoolScopeError):
+                item.dispose(close=False)
+            assert item.pool is queue
+        assert len(opened) == 12 and all(not row.closed for row in opened)
+        for connection in held:
+            connection.close()
+    assert all(row.closed for row in opened)
+
+
+def test_close_false_with_idle_pool_rejects_but_default_dispose_works(registered):
+    from sqlalchemy.engine import Engine
+    from sqlalchemy.engine.default import DefaultDialect
+
+    class Connection:
+        def rollback(self):
+            pass
+        def close(self):
+            pass
+    with pool.activation():
+        queue = pool.DaemonQueuePool(Connection, pool_size=2, max_overflow=2)
+        item = Engine(queue, DefaultDialect(), make_url(URL))
+        plugin = pool.DaemonPoolPlugin(make_url(URL), {"poolclass": NullPool})
+        plugin.engine_created(item)
+        conn = item.raw_connection()
+        conn.close()
+        with pytest.raises(pool.PoolScopeError):
+            item.dispose(close=False)
+        assert item.pool is queue and queue.checkedin() == 1
+        item.dispose()
+        assert item.pool is not queue and item.pool.checkedin() == 0
+
+
+def test_old_scope_cannot_reactivate_old_or_finally_recreated_pool(registered):
+    with pool.activation():
+        old = engine()
+        first_pool = old.pool
+    after_scope_pool = old.pool
+    with pool.activation():
+        for stale in (first_pool, after_scope_pool):
+            with pytest.raises(pool.PoolScopeError):
+                stale.connect()
+
+
+def test_child_dispose_and_recreate_cannot_close_parent_pool(monkeypatch):
+    from sqlalchemy.engine.default import DefaultDialect
+
+    pid = [100]
+    calls = []
+    monkeypatch.setattr(pool, "os", types.SimpleNamespace(getpid=lambda: pid[0]))
+    class Connection:
+        def rollback(self):
+            pass
+        def close(self):
+            calls.append("closed")
+    with pool.activation():
+        queue = pool.DaemonQueuePool(
+            Connection, pool_size=2, max_overflow=2, dialect=DefaultDialect()
+        )
+        conn = queue.connect()
+        conn.close()
+        pid[0] = 200
+        try:
+            with pytest.raises(pool.PoolScopeError):
+                queue.dispose()
+            with pytest.raises(pool.PoolScopeError):
+                queue.recreate()
+            assert calls == []
+        finally:
+            pid[0] = 100
+            queue.dispose()

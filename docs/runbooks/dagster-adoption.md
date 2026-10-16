@@ -855,7 +855,12 @@ fork된 자식은 부모 pool의
 활성 범위를 사용할 수 없으며 새 프로세스/새 instance에서 원 설정을 해석해야 한다.
 부모 socket을 강제로 닫거나 같은 raw connection을 여러 thread에서 공유하지 않는다.
 정확히세 engine의 strong registry는 수명 동안만 유지하고 종료 finally에서 현재 pool을
-dispose한다. SDK가 도중에 engine.dispose하여 pool을 재생성했어도 현재 pool을 닫는다.
+dispose한다. dispose/recreate는 pool 생성 PID를 검사하고 대여 중인 세대를 거절한다.
+recreate는 유휴 연결도 남아 있으면 거절한다. 따라서 close=False로 살아 있는 이전 세대를
+떼어놓아 연결 상한·종료 집계를 우회할 수 없다. 기본 close=True는 유휴 연결을 닫은 뒤
+빈 pool만 재생성한다. 활성화마다 별도 scope identity를 부여하고 connect에서 검사하여
+같은 PID의 다음 활성화에서도 이전 engine/pool을 다시 사용하지 못한다.
+SDK가 도중에 engine.dispose하여 빈 pool을 재생성했어도 현재 pool을 종료 시 닫는다.
 원 SDK instance.dispose만으로는 schedule engine 정리가 보장되지 않는다.
 
 원 CLI 종료를 먼저 마친 뒤 연결 반환 여부를 확인한다. 미반환/정리 오류가 있으면
