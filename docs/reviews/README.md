@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-10-16 | FULL5·최종 소스 | [stdlib bytecode 빌드 CLI](adversarial/2026-10-16-stdlib-bytecode-closure.md), 제품0845857 / 검토344d91c | A 빌드·계약 / D 범위·패키징 | 두 독립 SOURCE_PASS·OPEN0·실제 이미지/CPU 효과 별도 |
 | 2026-10-16 | FULL8·최종 문서 보존 | [Common36 docs200](adversarial/2026-10-16-common36-docs200-closure.md), 200a350 / base60b252e | A 실제 계약 / C gate·시간순서 | 두 독립 PASS·원문 byte 보존·제품/규범 변경0 |
 | 2026-10-16 | 실제 native 격리 통합 | [Common36 전체 시나리오](adversarial/2026-10-16-common36-native-live-closure.md), 제품5d2·SDK1.13.24 | source root·A / 실행 D | 15 gate PASS·control2 동시 보호·센서별2tick·정상종료·운영 효과 별도 |
 | 2026-10-16 | 실제 격리 lab·역사 부분 검증 | [Common36 composite 증거](adversarial/2026-10-16-common36-historical-partial-closure.md), 제품5d2ad2b·r2 보존 DB | 실행 D / 독립 root·C | child1/두 센서 postchild2tick 양성·controls 동시 보호 순서 HOLD·원 실패 유지 |

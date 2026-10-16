@@ -742,3 +742,51 @@ timeout/background OOM·별도 정상 정리는 보존한다. 이 기록은 위 
 [infrastructure_retry_sensor_for_jobs 적용 안내](dagster-multi-job-retry.md)를 따른다.
 기존 단일 factory와 같은 엄격 판정을 사용하며 소비자 native 설정을 켜지 않는다.
 Common34의 incarnation FAILED 정산과 재시도 요청 발급은 서로 다른 책임이다.
+
+## 17. 이미지 빌드의 stdlib bytecode 준비
+
+반복하는 짧은 Python/health 프로세스는 site-packages bytecode만 준비돼 있어도
+stdlib 소스의 bytecode가 없으면 이를 다시 컴파일할 수 있다.
+동일 interpreter/module 집합의 별도 prefix 진단은 이 비용의 존재를 보여 줬지만,
+CLI 도입만으로 전체 서비스 CPU·메모리·health wall이 개선됐다고 판정하지 않는다.
+
+새 core-only CLI는 **이미지 빌드 때 명시적으로 한 번만** 실행한다.
+Common을 설치한 뒤, 최종 이미지에서 쓰는 바로 그 interpreter로 다음 명령을 실행한다.
+빌드 계정에는 stdlib 내부 cache 경로의 쓰기 권한이 필요하다.
+
+    RUN python -m kortravelcommon.build_bytecode --stdlib
+
+가상환경을 쓰면 최종 interpreter의 절대 경로를 사용한다. 다른 stage/interpreter가
+만든 pyc를 복사해 호환된다고 가정하지 않는다. 후속 layer에서 stdlib를 다시
+복사하거나 bytecode를 제거하면 준비 효과가 사라질 수 있다. 설치된 Python 버전과
+source bytes에 맞는 checked-hash pyc·최종 이미지 내 보존 여부를 확인한다.
+
+### 범위와 실패
+
+sysconfig의 stdlib만 대상으로 compileall worker1·optimize0·checked-hash로 준비한다.
+기존 timestamp cache도 checked-hash로 다시 만든다. site-packages/dist-packages 및
+test/tests/idle_test 하위는 제외한다. 소비자 패키지의 bytecode 준비는 별도 빌드 책임이며
+UV_COMPILE_BYTECODE만으로 이 stdlib 경계가 해결됐다고 간주하지 않는다.
+
+임의 source path 인자는 제공하지 않는다. 디렉터리 symlink는 따라가지 않고 외부 source
+symlink는 생략한다. 외부로 향하는 cache 디렉터리·기존 pyc symlink·별도 pycache prefix는
+실패로 거절한다. 조용히 읽지 못한 하위 디렉터리·빈 대상·문법/권한 실패도 exit1이다.
+실패 전에 일부 정상 pyc가 생길 수 있으며 rollback/삭제를 하지 않는다. 실패한 빌드
+layer를 성공으로 승격하거나 자동 재시도하지 말고 원인을 확인한다.
+
+이 CLI는 신뢰하는 단일 writer 이미지 빌드용이다. 동시에 source·symlink를 바꾸는
+공격자에 대한 파일 시스템 sandbox/원자 snapshot을 제공하지 않는다. source를 고정하고
+다른 빌드 작업과 동시에 이 디렉터리를 수정하지 않는다.
+
+### 런타임과 효과 검증
+
+entrypoint/health 함수에서 자동 실행하지 않는다. PYTHONDONTWRITEBYTECODE와 -I 등
+기존 런타임 환경·격리 옵션을 변경하지 않는다. 해당 설정은 유효한 pyc 읽기를 막는
+기능이 아니며 이 CLI의 명시적 컴파일은 별도다. CLI는 provider·DB·Dagster 본체·앱을
+import하거나 실행하지 않으며 source 파일·설정·수집 시각·재시도 정책을 바꾸지 않는다.
+
+소비자는 최종 source/image/interpreter·설치 package·Config/Env를 결박하고 기존 health
+argv 그대로 cold import/전체 health의 wall·self CPU·RSS와 pyc 유효성·소스 해시를 비교한다.
+cold prime과 warm 반복, 동일 bytecode가 다음 layer에도 남는지, 계측 자체 부하와 실제
+동시 workload를 나눠 기록한다. 새 이미지 빌드·배포와 전후 CPU 감소는 이 Common
+소스/fixture/wheel 검증으로 대체하지 않는다. 미실행 소비자 gate는 NOT_RUN으로 둔다.
