@@ -790,3 +790,107 @@ argv 그대로 cold import/전체 health의 wall·self CPU·RSS와 pyc 유효성
 cold prime과 warm 반복, 동일 bytecode가 다음 layer에도 남는지, 계측 자체 부하와 실제
 동시 workload를 나눠 기록한다. 새 이미지 빌드·배포와 전후 CPU 감소는 이 Common
 소스/fixture/wheel 검증으로 대체하지 않는다. 미실행 소비자 gate는 NOT_RUN으로 둔다.
+
+## 18. daemon 전용 PostgreSQL 연결 재사용
+
+`kor-travel-common[daemon-pool]`의 `kor-travel-dagster-daemon`은 명시적 opt-in이다.
+기존 `dagster-daemon` 명령과 다른 서비스의 storage 기본값은 바꾸지 않는다.
+지원 설치 조합은 Dagster1.13.24 / dagster-postgres0.29.24 / SQLAlchemy2.0.54다.
+소비자는 원 requirements의 나머지 버전·hash를 유지하고 이 조합을 별도 검증한다.
+버전이 다르면 이 진입점은 거절한다.
+
+### 소비자 설정과 같은 프로세스 호출
+
+이 진입점은 원 `dagster-daemon` console entry point를 배포판 metadata에서 확인하고
+동일 Python 프로세스에서 호출한다. SDK의 instance/engine 필드·controller를 교체하거나
+SDK 함수를 monkeypatch하지 않는다. 별도 preflight 프로세스에서 instance를 최적화한 뒤
+exec하는 방식은 새 daemon instance에 전달되지 않으므로 사용하지 않는다.
+
+지원하는 원 YAML storage 형태는 다음과 같다. URL 값은 문서·로그에 넣지 않는다.
+
+```yaml
+storage:
+  postgres:
+    postgres_url:
+      env: KOR_TRAVEL_DAGSTER_SHARED_PG_URL
+    should_autocreate_tables: false
+```
+
+소비자는 daemon에만 `KOR_TRAVEL_DAGSTER_DAEMON_POSTGRES_URL`을 제공한다.
+값은 원 shared URL과 정확히 같아야 한다. 기존 plugin 쿼리, 다른 driver,
+literal URL/custom instance 설정은 거절한다. 실제 명령은 기존 argv에서 실행 파일만
+`kor-travel-dagster-daemon`으로 바꾼다. `run`의 원 옵션과 SDK 신호 처리는 유지한다.
+최상위·run help/version 및 기타 기존 명령은 원 CLI에 위임하며 pool을 켜지 않는다.
+숨김 --instance-ref(분리값/등호값)는 run의 YAML 검증을 우회하므로 이 profile에서 거절한다.
+
+wrapper는 자기 프로세스의 shared URL에만 SQLAlchemy 공식 plugin 이름을 추가하고
+종료 시 원 환경을 복원한다. 다른 컨테이너·공유 YAML·운영 자격증명은 수정하지 않는다.
+이 YAML의 InstanceRef는 해석 전 `{env: ...}`를 보존한다. DefaultRunLauncher로
+외부 CS에 전달되면 CS의 원 환경에서 URL을 해석하므로 plugin이 설치되지 않은 CS에
+daemon의 해석된 URL을 보내지 않는다. literal/custom storage와 local code-server
+자식 환경 전달은 이 지원 계약에 포함하지 않는다. 소비자는 외부 workspace 경로와
+실제 ref 직렬화를 검증한 뒤 활성화한다.
+
+### 풀 상한·timeout·정리
+
+plugin은 `postgresql+psycopg2`의 명시적 NullPool 생성에만 적용한다.
+활성화 뒤 최초 run/event/schedule 세 primary engine에 각각 pool_size2/max_overflow2,
+pool_timeout1초/pool_recycle3600초를 쓴다. primary pooled 연결 상한12, 유휴 보관 상한6이다.
+이는 pooled primary 세 engine의 합계이며 프로세스 전체·PG 전체 접속이나 worker 수의 상한은 아니다.
+공식 DefaultRunLauncher의 gRPC start_run은 같은 프로세스에서 InstanceRef를 해석해 임시
+Instance를 만든다. 네 번째 이후 engine은 원 NullPool·원 연결 수명 그대로 두며 primary
+registry에 넣지 않는다. 임시 Instance의 연결은 원 SDK가 사용 후 닫는다.
+primary 생성 슬롯은 engine_created 이전에 잠금으로 세 개만 예약한다. 생성 실패의 슬롯도
+해당 활성화 종료까지 유지하므로 추가 QueuePool로 무제한 대체하지 않는다.
+이미 pool 옵션이 있으면 primary/임시 구분 없이 거절한다.
+
+원 AUTOCOMMIT·URL connect timeout/options·statement_timeout·lock_timeout을
+그대로 둔다. 새 SET·schema 존재 캐시는 추가하지 않는다.
+idle 연결이 끊긴 뒤 첫 tick이 실패하는 신규 회귀를 막기 위해 SQLAlchemy 공식
+pool_pre_ping=True로 checkout 시 검증·재연결한다. 내부 ping SQL 비용은 기존 workload
+SQL count와 별도로 측정한다. 실행 중 연결 단절/transaction 재시도 범위는 바꾸지 않는다.
+QueuePool checkout TimeoutError도 SDK 기존 retry/backoff 대상이다.
+따라서 전체 대기는1초로 끝나지 않으며 최대6회 연결 시도와 기존 backoff를 포함한다.
+중첩 checkout·pool 포화·heartbeat/tick 지연을 별도로 검증해야 한다.
+
+QueuePool의 public connect()를 좁게 확장해 super().connect() 이전에 PID scope를 검사한다.
+SQLAlchemy의 pre_ping은 checkout 이벤트보다 먼저 실행되므로 이벤트 검사만으로는
+부모 연결의 ping/close를 막지 못한다. 이후 connect record/checkout PID 검사도 유지한다.
+fork된 자식은 부모 pool의
+활성 범위를 사용할 수 없으며 새 프로세스/새 instance에서 원 설정을 해석해야 한다.
+부모 socket을 강제로 닫거나 같은 raw connection을 여러 thread에서 공유하지 않는다.
+최대 세 primary engine의 strong registry는 수명 동안만 유지하고 종료 finally에서 현재 pool을
+dispose한다. dispose/recreate는 pool 생성 PID를 검사하고 대여 중인 세대를 거절한다.
+recreate는 유휴 연결도 남아 있으면 거절한다. 따라서 close=False로 살아 있는 이전 세대를
+떼어놓아 연결 상한·종료 집계를 우회할 수 없다. 기본 close=True는 유휴 연결을 닫은 뒤
+빈 pool만 재생성한다. 활성화마다 별도 scope identity를 부여하고 connect에서 검사하여
+같은 PID의 다음 활성화에서도 이전 engine/pool을 다시 사용하지 못한다.
+connect/dispose/recreate는 같은 pool별 잠금으로 직렬화하여 대여 검사와 세대 교체 사이의
+thread 경합을 막는다. 반환은 이 잠금을 쓰지 않아 포화 중 대기 checkout을 깨울 수 있다.
+재생성이 끝난 이전 pool은 퇴역 상태로 고정하므로 이미 옛 참조를 받은 thread도 다시
+대여할 수 없다. 재생성된 pool은 원 활성화 identity를 그대로 계승하므로 다음 활성화에서
+옛 engine을 dispose해도 새 수명의 미등록 engine으로 회생하지 않는다. fork PID 검사는 상속된 전역·pool 잠금에 들어가기 전에 수행한다.
+자식 finally도 부모 잠금이나 연결 I/O 없이 실패한다.
+SDK가 도중에 engine.dispose하여 빈 pool을 재생성했어도 현재 pool을 종료 시 닫는다.
+원 SDK instance.dispose만으로는 schedule engine 정리가 보장되지 않는다.
+
+원 CLI 종료를 먼저 마친 뒤 연결 반환 여부를 확인한다. 미반환/정리 오류가 있으면
+성공으로 간주하지 않는다. 기존 nonzero SystemExit/예외는 덮지 않고 정리 미완료를
+고정 메시지로 별도 기록한다. 원 정상 종료 중 정리 실패는 오류로 끝난다.
+자동 worker 취소·강제 kill·schema 변경·원 설정 복구 재시도는 하지 않는다.
+
+### 검증 범위
+
+가짜 DBAPI 연결 재사용·상한/포화·옵션 보존·thread/PID·dispose·CLI 위임·환경 복원,
+wheel entry point 및 source-only InstanceRef 검증은 라이브러리 회귀 대상이다.
+SDK/실제 격리 PG에서는 원 NullPool과 같은 workload·결과·timeout/SQL 수를 비교하고
+공식 CLI SIGTERM·primary 세 engine 정리·원 CS ref를 확인한다.
+실제 DefaultRunLauncher/start_run의 임시 from_ref 경로도 RPC 대역과 격리 PG에서 실행해,
+primary 세 QueuePool 보존·임시 세 NullPool 반복 생성/성공·오류 정리를 확인한다.
+단순 ref 직렬화나 cap0 CLI heartbeat만으로 job launch 성공을 검증했다고 하지 않는다.
+운영 DB로 시험하지 않는다.
+
+소비자 실제 CPU/RSS·PG 접속 수·pool 대기·tick 지연·수집 신선도·정상 종료는 별도다.
+격리 반복 읽기에서 연결 수가 줄어도 운영 전체 CPU 감소율이나 공유 PG CPU 중 daemon
+기여도를 뜻하지 않는다. 다른 프로세스의 연결·schema reflection SQL 자체도 이 변경으로
+자동 제거되지 않는다. 계측 후 작은 소비자 opt-in부터 적용한다.
