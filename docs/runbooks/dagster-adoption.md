@@ -834,10 +834,15 @@ daemon의 해석된 URL을 보내지 않는다. literal/custom storage와 local 
 ### 풀 상한·timeout·정리
 
 plugin은 `postgresql+psycopg2`의 명시적 NullPool 생성에만 적용한다.
-run/event/schedule 세 engine에 각각 pool_size2/max_overflow2,
-pool_timeout1초/pool_recycle3600초를 쓴다. 유휴 보관 상한6, 동시 DB 연결 상한12다.
-이는 세 engine 합계이며 PG 전체 접속이나 worker 수의 상한은 아니다.
-이미 pool 옵션이 있거나 세 개를 넘는 engine 생성은 거절한다.
+활성화 뒤 최초 run/event/schedule 세 primary engine에 각각 pool_size2/max_overflow2,
+pool_timeout1초/pool_recycle3600초를 쓴다. primary pooled 연결 상한12, 유휴 보관 상한6이다.
+이는 pooled primary 세 engine의 합계이며 프로세스 전체·PG 전체 접속이나 worker 수의 상한은 아니다.
+공식 DefaultRunLauncher의 gRPC start_run은 같은 프로세스에서 InstanceRef를 해석해 임시
+Instance를 만든다. 네 번째 이후 engine은 원 NullPool·원 연결 수명 그대로 두며 primary
+registry에 넣지 않는다. 임시 Instance의 연결은 원 SDK가 사용 후 닫는다.
+primary 생성 슬롯은 engine_created 이전에 잠금으로 세 개만 예약한다. 생성 실패의 슬롯도
+해당 활성화 종료까지 유지하므로 추가 QueuePool로 무제한 대체하지 않는다.
+이미 pool 옵션이 있으면 primary/임시 구분 없이 거절한다.
 
 원 AUTOCOMMIT·URL connect timeout/options·statement_timeout·lock_timeout을
 그대로 둔다. 새 SET·schema 존재 캐시는 추가하지 않는다.
@@ -854,7 +859,7 @@ SQLAlchemy의 pre_ping은 checkout 이벤트보다 먼저 실행되므로 이벤
 fork된 자식은 부모 pool의
 활성 범위를 사용할 수 없으며 새 프로세스/새 instance에서 원 설정을 해석해야 한다.
 부모 socket을 강제로 닫거나 같은 raw connection을 여러 thread에서 공유하지 않는다.
-정확히세 engine의 strong registry는 수명 동안만 유지하고 종료 finally에서 현재 pool을
+최대 세 primary engine의 strong registry는 수명 동안만 유지하고 종료 finally에서 현재 pool을
 dispose한다. dispose/recreate는 pool 생성 PID를 검사하고 대여 중인 세대를 거절한다.
 recreate는 유휴 연결도 남아 있으면 거절한다. 따라서 close=False로 살아 있는 이전 세대를
 떼어놓아 연결 상한·종료 집계를 우회할 수 없다. 기본 close=True는 유휴 연결을 닫은 뒤
@@ -879,7 +884,11 @@ SDK가 도중에 engine.dispose하여 빈 pool을 재생성했어도 현재 pool
 가짜 DBAPI 연결 재사용·상한/포화·옵션 보존·thread/PID·dispose·CLI 위임·환경 복원,
 wheel entry point 및 source-only InstanceRef 검증은 라이브러리 회귀 대상이다.
 SDK/실제 격리 PG에서는 원 NullPool과 같은 workload·결과·timeout/SQL 수를 비교하고
-공식 CLI SIGTERM·세 engine 정리·원 CS ref를 확인한다. 운영 DB로 시험하지 않는다.
+공식 CLI SIGTERM·primary 세 engine 정리·원 CS ref를 확인한다.
+실제 DefaultRunLauncher/start_run의 임시 from_ref 경로도 RPC 대역과 격리 PG에서 실행해,
+primary 세 QueuePool 보존·임시 세 NullPool 반복 생성/성공·오류 정리를 확인한다.
+단순 ref 직렬화나 cap0 CLI heartbeat만으로 job launch 성공을 검증했다고 하지 않는다.
+운영 DB로 시험하지 않는다.
 
 소비자 실제 CPU/RSS·PG 접속 수·pool 대기·tick 지연·수집 신선도·정상 종료는 별도다.
 격리 반복 읽기에서 연결 수가 줄어도 운영 전체 CPU 감소율이나 공유 PG CPU 중 daemon

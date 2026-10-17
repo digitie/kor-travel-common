@@ -205,10 +205,11 @@ PG 전체 CPU는 다른 소비자의 부하도 포함하므로 daemon 원인 비
   wrapper 자기 프로세스에서만 plugin을 붙이고 공식 dagster-daemon console entry point를
   exec 없이 호출한다. 원 CLI 옵션·신호/종료 흐름은 그대로 두고 환경은 finally 복원한다.
 - PostgreSQL/psycopg2의 명시적 NullPool만 생성 전에 bounded QueuePool로 전환한다.
-  pool_size2/max_overflow2로 세 engine의 합계 상한은12, 유휴 보관 상한은6이다.
+  pool_size2/max_overflow2로 primary pooled 세 engine의 합계 상한은12, 유휴 보관 상한은6이다.
+  임시 SDK Instance는 원 NullPool을 유지하므로 이는 프로세스 전체 접속 상한이 아니다.
   checkout timeout/recycle은 유한하며 원 statement/lock/connect timeout/options 및
   AUTOCOMMIT은 보존한다. 새 SET 문이나 schema feature cache를 추가하지 않는다.
-- plugin은 최대3개 strong registry로 수명 동안 engine을 추적한다. checkout의 PID guard로 fork된 프로세스가
+- plugin은 최대3개 strong registry로 수명 동안 primary engine만 추적한다. checkout의 PID guard로 fork된 프로세스가
   부모 물리 연결을 재사용하지 못하게 한다. CLI 종료 후 세 engine을 명시 dispose한다.
   SDK 자체 instance.dispose는 schedule storage를 정리하지 않고 PG event dispose는
   watcher만 닫으므로 그것만으로 pool 정리를 완료했다고 간주하지 않는다.
@@ -229,3 +230,18 @@ PG 전체 CPU는 다른 소비자의 부하도 포함하므로 daemon 원인 비
   실제 fork·SDK·PG는 root 전용 검증이며 소비자 전체 CPU 감소율을 뜻하지 않는다.
 - CI recovery 설치에는 daemon-pool extra를 명시해 lazy PostgreSQL engine 회귀의 driver를
   제공한다. 가짜 URL은 placeholder를 구조 API로 넣고 secret scanner 예외는 추가하지 않는다.
+
+
+### Common38 공식 launch 임시 Instance 회귀 보강(2026-10-17)
+
+- 미병합17ff 후보의 실제 daemon은 heartbeat/health가 정상이었으나 공식
+  DefaultRunLauncher → gRPC start_run → 임시 DagsterInstance.from_ref에서 네 번째
+  engine이 생겨 PoolScopeError로 job launch를 막았다. 기존 ref 직렬화·cap0 시험은
+  이 경로를 실행하지 않았으며 당시 성공 증거와 실제 실패를 그대로 보존한다.
+- 최초 primary 세 개만 QueuePool로 예약하고, 이후 임시 storage는 원 NullPool로 둔다.
+  기존 strong registry·primary 상한12·fork/세대/동시성·pre_ping 보호는 유지한다.
+  임시 연결까지 합산한 프로세스 전체12라는 새 제약은 두지 않는다.
+- 단위시험은 임시3storage의 반복 성공/가짜 RPC 오류 연결 정리, 동시 생성 시 primary3만
+  예약, 생성 실패 슬롯의 보수적 유지, 다음 활성화의 지연 등록 거절을 확인한다.
+- 실제 SDK/격리 PG에서 원17ff의 launch RED와 수정본 GREEN을 root가 실행한다.
+  새 wheel/두 독립 재리뷰/소비자 갱신과 실제 수집 검증 전 운영 종결로 표시하지 않는다.

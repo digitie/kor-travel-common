@@ -23,9 +23,9 @@ URL = make_url(
 
 @pytest.fixture(autouse=True)
 def clean_scope():
-    assert pool._owner_pid is None and not pool._engines
+    assert pool._owner_pid is None and not pool._engines and pool._primary_slots == 0
     yield
-    assert pool._owner_pid is None and not pool._engines
+    assert pool._owner_pid is None and not pool._engines and pool._primary_slots == 0
 
 
 def engine():
@@ -58,8 +58,11 @@ def test_plugin_preserves_options_and_lazy_three_engine_lifecycle(registered):
         first_pool = engines[0].pool
         engines[0].dispose()
         assert engines[0].pool is not first_pool
-        with pytest.raises(pool.PoolScopeError):
-            engine()
+        temporary = engine()
+        assert type(temporary.pool) is NullPool
+        assert set(engines) == pool._engines
+        assert pool._primary_slots == 3
+        temporary.dispose()
     assert all(item.pool.checkedout() == 0 for item in engines)
 
 
@@ -564,6 +567,7 @@ def test_fork_activation_exit_rejects_before_inherited_lock(monkeypatch):
         # 모형 자식은 별도 주소 공간이 아니므로 부모의 빈 활성 상태만 복원한다.
         pool._owner_pid = None
         pool._scope = None
+        pool._primary_slots = 0
 
 
 def test_fork_pool_methods_reject_before_inherited_pool_lock(monkeypatch):
@@ -581,3 +585,86 @@ def test_fork_pool_methods_reject_before_inherited_pool_lock(monkeypatch):
                 with pytest.raises(pool.PoolScopeError):
                     operation()
         queue.dispose()
+
+
+def test_temporary_sdk_instances_keep_nullpool_and_close_on_success_and_error(registered):
+    from sqlalchemy.engine import Engine
+    from sqlalchemy.engine.default import DefaultDialect
+
+    opened = []
+    class Connection:
+        def __init__(self):
+            self.closed = False
+            opened.append(self)
+        def rollback(self):
+            pass
+        def close(self):
+            self.closed = True
+
+    with pool.activation():
+        primary = [engine() for _ in range(3)]
+        for fail in (False, True, False):
+            temporary = []
+            try:
+                for _ in range(3):
+                    kwargs = {"poolclass": NullPool}
+                    plugin = pool.DaemonPoolPlugin(make_url(URL), kwargs)
+                    assert kwargs == {"poolclass": NullPool}
+                    item = Engine(NullPool(Connection), DefaultDialect(), make_url(URL))
+                    plugin.engine_created(item)
+                    temporary.append(item)
+                    with item.connect():
+                        pass
+                    assert opened[-1].closed
+                if fail:
+                    raise RuntimeError("가짜 RPC 실패")
+            except RuntimeError:
+                assert fail
+            finally:
+                for item in temporary:
+                    item.dispose()
+            assert pool._engines == set(primary) and pool._primary_slots == 3
+        assert len(opened) == 9 and all(row.closed for row in opened)
+    assert pool._primary_slots == 0
+
+
+def test_parallel_engine_constructors_reserve_only_three_primary_slots():
+    from concurrent.futures import ThreadPoolExecutor
+
+    def construct(_):
+        kwargs = {"poolclass": NullPool}
+        plugin = pool.DaemonPoolPlugin(make_url(URL), kwargs)
+        return plugin, kwargs
+    with pool.activation():
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            rows = list(executor.map(construct, range(12)))
+        assert sum(kwargs["poolclass"] is pool.DaemonQueuePool for _, kwargs in rows) == 3
+        assert sum(kwargs == {"poolclass": NullPool} for _, kwargs in rows) == 9
+        assert pool._primary_slots == 3
+
+
+def test_failed_primary_construction_does_not_allow_unbounded_pool_replacement():
+    with pool.activation():
+        for _ in range(3):
+            pool.DaemonPoolPlugin(make_url(URL), {"poolclass": NullPool})
+        kwargs = {"poolclass": NullPool}
+        pool.DaemonPoolPlugin(make_url(URL), kwargs)
+        assert kwargs == {"poolclass": NullPool}
+    with pool.activation():
+        kwargs = {"poolclass": NullPool}
+        pool.DaemonPoolPlugin(make_url(URL), kwargs)
+        assert kwargs["poolclass"] is pool.DaemonQueuePool
+
+
+def test_delayed_temporary_engine_registration_rejects_changed_scope(registered):
+    from sqlalchemy.engine import Engine
+    from sqlalchemy.engine.default import DefaultDialect
+
+    with pool.activation():
+        for _ in range(3):
+            engine()
+        plugin = pool.DaemonPoolPlugin(make_url(URL), {"poolclass": NullPool})
+    with pool.activation():
+        item = Engine(NullPool(lambda: pytest.fail("I/O")), DefaultDialect(), make_url(URL))
+        with pytest.raises(pool.PoolScopeError):
+            plugin.engine_created(item)

@@ -23,6 +23,7 @@ POOL_RECYCLE = 3600
 _owner_pid: int | None = None
 _scope: object | None = None
 _engines: set[Engine] = set()
+_primary_slots = 0
 _lock = threading.RLock()
 _lock_pid = os.getpid()
 
@@ -94,25 +95,33 @@ def _on_checkout(connection, record, proxy):
 
 
 class DaemonPoolPlugin(CreateEnginePlugin):
-    """SDK의 명시적 NullPool만 engine 생성 전에 유한 QueuePool로 전환한다."""
+    """최초 세 storage만 풀링하고 SDK의 임시 instance는 NullPool을 유지한다."""
 
     def __init__(self, url, kwargs):
+        global _primary_slots
         _check_process()
-        with _lock:
-            if _owner_pid != os.getpid():
-                raise PoolScopeError("daemon wrapper에서만 사용할 수 있습니다.")
         if url.drivername != "postgresql+psycopg2" or kwargs.get("poolclass") is not NullPool:
             raise PoolScopeError("지원하는 PostgreSQL NullPool이 아닙니다.")
         if any(key.startswith("pool_") or key == "max_overflow" for key in kwargs):
             raise PoolScopeError("기존 pool 옵션을 덮어쓸 수 없습니다.")
-        kwargs.update(
-            poolclass=DaemonQueuePool,
-            pool_size=POOL_SIZE,
-            max_overflow=MAX_OVERFLOW,
-            pool_timeout=POOL_TIMEOUT,
-            pool_recycle=POOL_RECYCLE,
-            pool_pre_ping=True,
-        )
+        with _lock:
+            if _owner_pid != os.getpid():
+                raise PoolScopeError("daemon wrapper에서만 사용할 수 있습니다.")
+            self._activation_scope = _scope
+            # engine_created보다 먼저 예약하여 동시 생성도 primary 세 개로 제한한다.
+            # 생성 실패의 예약은 해당 activation 종료까지 유지한다.
+            self._primary = _primary_slots < 3
+            if self._primary:
+                _primary_slots += 1
+        if self._primary:
+            kwargs.update(
+                poolclass=DaemonQueuePool,
+                pool_size=POOL_SIZE,
+                max_overflow=MAX_OVERFLOW,
+                pool_timeout=POOL_TIMEOUT,
+                pool_recycle=POOL_RECYCLE,
+                pool_pre_ping=True,
+            )
 
     def update_url(self, url):
         return url
@@ -120,9 +129,14 @@ class DaemonPoolPlugin(CreateEnginePlugin):
     def engine_created(self, engine):
         _check_process()
         with _lock:
-            if _owner_pid != os.getpid() or len(_engines) >= 3:
+            if _owner_pid != os.getpid() or self._activation_scope is not _scope:
                 engine.dispose()
-                raise PoolScopeError("한 daemon instance의 세 engine만 허용합니다.")
+                raise PoolScopeError("engine 생성 중 daemon 활성 수명이 변경되었습니다.")
+            if not self._primary:
+                return
+            if len(_engines) >= 3:
+                engine.dispose()
+                raise PoolScopeError("primary pooled engine 상한을 초과했습니다.")
             _engines.add(engine)
         event.listen(engine, "connect", _on_connect)
         event.listen(engine, "checkout", _on_checkout)
@@ -131,10 +145,10 @@ class DaemonPoolPlugin(CreateEnginePlugin):
 @contextmanager
 def activation() -> Iterator[None]:
     """동일 프로세스 CLI 호출을 감싸고 세 storage의 연결 풀을 정리한다."""
-    global _owner_pid, _scope
+    global _owner_pid, _scope, _primary_slots
     _check_process()
     with _lock:
-        if _owner_pid is not None or len(_engines):
+        if _owner_pid is not None or len(_engines) or _primary_slots:
             raise PoolScopeError("daemon pool 중첩 실행은 허용하지 않습니다.")
         _owner_pid = os.getpid()
         _scope = object()
@@ -151,6 +165,7 @@ def activation() -> Iterator[None]:
             with _lock:
                 _owner_pid = None
                 _scope = None
+                _primary_slots = 0
                 engines = list(_engines)
                 _engines.clear()
             for engine in engines:
