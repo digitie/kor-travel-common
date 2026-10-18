@@ -57,7 +57,12 @@ class Context:
 
 
 @pytest.fixture
-def native(tmp_path, monkeypatch):
+def native_storage_config():
+    return {}
+
+
+@pytest.fixture
+def native(tmp_path, monkeypatch, native_storage_config):
     overrides = {
         "run_coordinator": {
             "module": "dagster._core.run_coordinator",
@@ -65,6 +70,7 @@ def native(tmp_path, monkeypatch):
         },
         "telemetry": {"enabled": False},
     }
+    overrides.update(native_storage_config)
     with DagsterInstance.local_temp(str(tmp_path), overrides=overrides) as instance:
         remote = RemoteJob(
             JobDataSnap.from_job_def(refresh, include_parent_snapshot=True),
@@ -243,7 +249,15 @@ def test_concurrent_create_native_unique(native, monkeypatch):
             pool.submit(launch, native, request_id, None, Context(native.instance))
             for _ in range(2)
         ]
-        results = [future.result(timeout=20) for future in futures]
+        results = []
+        for future in futures:
+            try:
+                results.append(future.result(timeout=20))
+            except adapter.SubmissionBusyError:
+                results.append(None)
+    results = [
+        item or launch(native, request_id, context=Context(native.instance)) for item in results
+    ]
     assert len({run_id(item) for item in results}) == 1
     assert sorted(item[1] for item in results) == [False, True]
     assert native.instance.get_runs_count() == 1
@@ -496,7 +510,7 @@ from dagster import DagsterInstance
 from dagster._serdes import deserialize_value
 from dagster._core.instance.ref import InstanceRef
 from kortravelcommon.dagster_webserver import _launch
-value=json.load(sys.stdin)
+value=json.loads(sys.stdin.readline())
 with DagsterInstance.from_ref(deserialize_value(value['ref'],InstanceRef)) as instance:
     context=SimpleNamespace(instance=instance,has_permission_for_selector=lambda *args:True)
     result=asyncio.run(_launch(SimpleNamespace(context=context),value['id'],value['params']))
@@ -548,3 +562,115 @@ def test_lost_response_after_native_submit_replays_without_resubmit(native, monk
     result = launch(native, request_id)
     assert result[1] is True and run_id(result) == pending.run_id
     assert len(calls) == 1 and native.instance.get_runs_count() == 1
+
+
+def test_stale_submit_cannot_regress_started_run(native, monkeypatch):
+    from dagster._core.events import DagsterEvent, DagsterEventType
+
+    request_id = str(uuid4())
+    original_submit = native.instance.submit_run
+
+    def interrupted(*args, **kwargs):
+        raise RuntimeError("owned before submit")
+
+    monkeypatch.setattr(native.instance, "submit_run", interrupted)
+    with pytest.raises(RuntimeError):
+        launch(native, request_id)
+    row = native.instance.get_runs()[0]
+    monkeypatch.setattr(native.instance, "submit_run", original_submit)
+    coordinator = native.instance.run_coordinator
+    original = coordinator.submit_run
+    entered, release = threading.Event(), threading.Event()
+    entries = []
+
+    def delayed(context):
+        entries.append(context.dagster_run.status)
+        entered.set()
+        assert release.wait(10)
+        return original(context)
+
+    monkeypatch.setattr(coordinator, "submit_run", delayed)
+    with ThreadPoolExecutor(1) as pool:
+        first = pool.submit(launch, native, request_id, None, Context(native.instance))
+        try:
+            assert entered.wait(10)
+            with pytest.raises(adapter.SubmissionBusyError):
+                launch(native, request_id, context=Context(native.instance))
+        finally:
+            release.set()
+        result = first.result(timeout=15)
+    native.instance.report_dagster_event(
+        DagsterEvent(DagsterEventType.PIPELINE_START.value, "refresh"), row.run_id
+    )
+    assert native.instance.get_run_by_id(row.run_id).status == DagsterRunStatus.STARTED
+    replay = launch(native, request_id)
+    assert run_id(result) == run_id(replay) == row.run_id
+    assert entries == [DagsterRunStatus.NOT_STARTED]
+    records = native.instance.get_records_for_run(row.run_id).records
+    events = [
+        r.event_log_entry.dagster_event.event_type_value
+        for r in records
+        if r.event_log_entry.dagster_event
+    ]
+    assert events == ["PIPELINE_ENQUEUED", "PIPELINE_START"]
+    assert native.instance.get_runs_count() == 1
+
+
+def test_run_locks_are_distinct_and_exception_releases(native):
+    first, second = str(uuid4()), str(uuid4())
+    with pytest.raises(ValueError, match="owned"):
+        with adapter._submission_lock(native.instance, first):
+            with adapter._submission_lock(native.instance, second):
+                with pytest.raises(adapter.SubmissionBusyError):
+                    with adapter._submission_lock(native.instance, first):
+                        pytest.fail("같은 run의 중첩 잠금 금지")
+                raise ValueError("owned")
+    with adapter._submission_lock(native.instance, first):
+        pass
+
+
+def test_process_crash_releases_lock(native, tmp_path):
+    from dagster._serdes import serialize_value
+
+    source = str(__import__("pathlib").Path(adapter.__file__).parents[1])
+    key = str(uuid4())
+    code = """
+import sys,os,json
+sys.path.insert(0,sys.argv[1])
+from dagster import DagsterInstance
+from dagster._serdes import deserialize_value
+from dagster._core.instance.ref import InstanceRef
+from kortravelcommon.dagster_webserver import _submission_lock
+value=json.loads(sys.stdin.readline())
+with DagsterInstance.from_ref(deserialize_value(value['ref'],InstanceRef)) as instance:
+    with _submission_lock(instance,value['key']):
+        print('locked',flush=True)
+        sys.stdin.readline()
+        os._exit(7)
+"""
+    child = subprocess.Popen(
+        [sys.executable, "-I", "-B", "-c", code, source],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        child.stdin.write(
+            json.dumps({"ref": serialize_value(native.instance.get_ref()), "key": key}) + "\n"
+        )
+        child.stdin.flush()
+        assert child.stdout.readline().strip() == "locked"
+        with pytest.raises(adapter.SubmissionBusyError):
+            with adapter._submission_lock(native.instance, key):
+                pytest.fail("살아 있는 프로세스의 잠금 금지")
+        child.stdin.write("exit\n")
+        child.stdin.flush()
+        assert child.wait(timeout=15) == 7
+        with adapter._submission_lock(native.instance, key):
+            pass
+    finally:
+        if child.poll() is None:
+            # 소유 fixture만 정상 EOF로 종료하며 다른 프로세스를 조작하지 않는다.
+            child.stdin.close()
+            child.wait(timeout=15)

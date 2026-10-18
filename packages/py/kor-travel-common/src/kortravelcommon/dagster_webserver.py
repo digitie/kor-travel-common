@@ -6,7 +6,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import stat
+import sys
+from contextlib import contextmanager
 from importlib.metadata import version
+from pathlib import Path
 from uuid import UUID, uuid5
 
 _NAMESPACE = UUID("ae499c92-88dd-5c9d-9629-8187b5d94b98")
@@ -104,6 +109,108 @@ def _same_request(run, params, digest: str) -> None:
         _conflict("requestId")
 
 
+class SubmissionBusyError(RuntimeError):
+    """동일 run의 제출 중에는 같은 요청 식별자로 재시도해야 한다."""
+
+
+@contextmanager
+def _submission_lock(instance, run_id: str):
+    """native 저장소와 run별로 재조회→제출을 직렬화하고 crash 때 자동 해제한다."""
+    from dagster._core.storage.runs.sqlite.sqlite_run_storage import SqliteRunStorage
+    from sqlalchemy import create_engine, text
+    from sqlalchemy.engine import make_url
+    from sqlalchemy.pool import NullPool
+
+    if str(UUID(run_id)) != run_id:
+        raise RuntimeError("정규 native run UUID가 필요합니다")
+    storage = instance.run_storage
+    if type(storage) is SqliteRunStorage:
+        import fcntl
+
+        database = make_url(storage._conn_string).database
+        if not database or not os.path.isabs(database):
+            raise RuntimeError("파일 기반 native SQLite 저장소가 필요합니다")
+        directory = Path(database).resolve(strict=True).parent / ".kortravel-native-submit-locks"
+        directory.mkdir(mode=0o700, exist_ok=True)
+        parent_fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        try:
+            parent_stat = os.fstat(parent_fd)
+            if parent_stat.st_uid != os.geteuid() or stat.S_IMODE(parent_stat.st_mode) != 0o700:
+                raise RuntimeError(
+                    "native SQLite 제출 잠금 디렉터리는 현재 사용자 0700이어야 합니다"
+                )
+            fd = os.open(
+                run_id + ".lock",
+                os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW,
+                0o600,
+                dir_fd=parent_fd,
+            )
+        finally:
+            os.close(parent_fd)
+        try:
+            info = os.fstat(fd)
+            if (
+                not stat.S_ISREG(info.st_mode)
+                or info.st_nlink != 1
+                or info.st_uid != os.geteuid()
+                or stat.S_IMODE(info.st_mode) != 0o600
+            ):
+                raise RuntimeError("native SQLite 제출 잠금은 단일 일반 파일이어야 합니다")
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError as error:
+                raise SubmissionBusyError(
+                    "native 제출 중입니다. 같은 requestId로 재시도하세요"
+                ) from error
+            yield
+        finally:
+            # unlink하면 병렬 호출이 다른 inode를 잠글 수 있어 파일은 유지한다.
+            os.close(fd)
+        return
+
+    from dagster_postgres.run_storage import PostgresRunStorage
+
+    if type(storage) is not PostgresRunStorage:
+        raise RuntimeError("지원하는 native run 저장소가 아닙니다")
+    expected = {"1.13.24": "0.29.24", "1.13.25": "0.29.25"}[version("dagster")]
+    if version("dagster-postgres") != expected or storage._token_provider is not None:
+        raise RuntimeError("검증한 버전의 URL 기반 native PostgreSQL 저장소가 필요합니다")
+    key = int.from_bytes(
+        hashlib.sha256(("kortravel/native-submit/" + run_id).encode()).digest()[:8],
+        "big",
+        signed=True,
+    )
+    # native engine pool을 잡은 채 submit의 추가 checkout을 기다리지 않는다.
+    engine = create_engine(
+        storage.postgres_url,
+        poolclass=NullPool,
+        connect_args={"connect_timeout": 5},
+        isolation_level="AUTOCOMMIT",
+    )
+    try:
+        with engine.connect() as connection:
+            locked = connection.execute(
+                text("SELECT pg_try_advisory_lock(:key)"), {"key": key}
+            ).scalar_one()
+            if not locked:
+                raise SubmissionBusyError("native 제출 중입니다. 같은 requestId로 재시도하세요")
+            try:
+                yield
+            finally:
+                pending_error = sys.exc_info()[0] is not None
+                try:
+                    if not connection.execute(
+                        text("SELECT pg_advisory_unlock(:key)"), {"key": key}
+                    ).scalar_one():
+                        raise RuntimeError("native 제출 잠금 해제를 확인하지 못했습니다")
+                except Exception:
+                    if not pending_error:
+                        raise
+    finally:
+        # NullPool 실제 connection close는 unlock 예외/프로세스 종료 때도 session lock을 푼다.
+        engine.dispose()
+
+
 async def _launch(info, request_id: str, values):
     from dagster._core.definitions.selector import JobSelector
     from dagster._core.errors import DagsterRunAlreadyExists
@@ -149,9 +256,13 @@ async def _launch(info, request_id: str, values):
             if run is None:
                 raise
             replayed = True
-    _same_request(run, params, digest)
-    if run.status == DagsterRunStatus.NOT_STARTED:
-        instance.submit_run(run_id, workspace=info.context)
+    with _submission_lock(instance, run_id):
+        run = instance.get_run_by_id(run_id)
+        if run is None:
+            raise RuntimeError("native run이 제출 전에 사라졌습니다")
+        _same_request(run, params, digest)
+        if run.status == DagsterRunStatus.NOT_STARTED:
+            instance.submit_run(run_id, workspace=info.context)
     records = instance.get_run_records(RunsFilter(run_ids=[run_id]))
     if len(records) != 1:
         raise RuntimeError("native run 조회 결과가 하나가 아닙니다")
