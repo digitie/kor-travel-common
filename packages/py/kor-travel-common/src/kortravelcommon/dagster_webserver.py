@@ -145,13 +145,31 @@ def _bound_run_connection(storage, connection):
         _BOUND_STORAGE_CONNECTION.reset(previous_binding)
 
 
+def _submission_engine(native_engine):
+    """native 연결 정책을 계승하되 원 pool의 checkout은 사용하지 않는다."""
+    from sqlalchemy.engine import Engine
+    from sqlalchemy.pool import NullPool, QueuePool
+
+    # 공식 recreate가 native creator/connect listener(예: CLI statement_timeout)를 계승한다.
+    # 원 pool의 checkout을 점유하지 않으며 native SQL/SET 본문을 복사하지 않는다.
+    if type(native_engine.pool) not in {NullPool, QueuePool}:
+        raise RuntimeError("지원하는 native PostgreSQL pool이 아닙니다")
+    return Engine(
+        pool=native_engine.pool.recreate(),
+        dialect=native_engine.dialect,
+        url=native_engine.url,
+        execution_options=native_engine.get_execution_options(),
+        echo=native_engine.echo,
+        hide_parameters=native_engine.hide_parameters,
+    )
+
+
 @contextmanager
 def _submission_lock(instance, run_id: str):
     """native 저장소와 run별로 재조회→제출을 직렬화하고 crash 때 자동 해제한다."""
     from dagster._core.storage.runs.sqlite.sqlite_run_storage import SqliteRunStorage
-    from sqlalchemy import create_engine, text
+    from sqlalchemy import text
     from sqlalchemy.engine import make_url
-    from sqlalchemy.pool import NullPool
 
     if str(UUID(run_id)) != run_id:
         raise RuntimeError("정규 native run UUID가 필요합니다")
@@ -212,13 +230,7 @@ def _submission_lock(instance, run_id: str):
         "big",
         signed=True,
     )
-    # native engine pool을 잡은 채 submit의 추가 checkout을 기다리지 않는다.
-    engine = create_engine(
-        storage.postgres_url,
-        poolclass=NullPool,
-        connect_args={"connect_timeout": 5},
-        isolation_level="AUTOCOMMIT",
-    )
+    engine = _submission_engine(storage._engine)
     try:
         with engine.connect() as connection:
             locked = connection.execute(
@@ -242,7 +254,7 @@ def _submission_lock(instance, run_id: str):
                     if not pending_error:
                         raise
     finally:
-        # NullPool 실제 connection close는 unlock 예외/프로세스 종료 때도 session lock을 푼다.
+        # 요청 전용 pool을 닫으며 unlock 예외/프로세스 종료 때도 session lock을 푼다.
         engine.dispose()
 
 

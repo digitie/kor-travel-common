@@ -716,3 +716,73 @@ def test_console_entrypoint_matches_same_process_main():
     result = subprocess.run([str(executable), "--help"], capture_output=True, text=True, timeout=30)
     assert result.returncode == 0
     assert "--workspace" in result.stdout
+
+
+@pytest.mark.parametrize("pool_name", ["NullPool", "QueuePool"])
+def test_submission_engine_preserves_native_creator_listeners_without_borrowing(pool_name):
+    import sqlite3
+
+    from sqlalchemy import create_engine, event
+    from sqlalchemy.pool import NullPool, QueuePool
+
+    created, closed = [], []
+    pool_type = {"NullPool": NullPool, "QueuePool": QueuePool}[pool_name]
+
+    def creator():
+        connection = sqlite3.connect(":memory:")
+        created.append(connection)
+        return connection
+
+    options = (
+        {"pool_size": 1, "max_overflow": 0, "pool_timeout": 0.1} if pool_name == "QueuePool" else {}
+    )
+    native_engine = create_engine(
+        "sqlite://", creator=creator, poolclass=pool_type, hide_parameters=True, **options
+    )
+
+    @event.listens_for(native_engine, "connect")
+    def policy(connection, record):
+        connection.execute("PRAGMA busy_timeout=80")
+
+    @event.listens_for(native_engine.pool, "close")
+    def closed_connection(connection, record):
+        closed.append(connection)
+
+    try:
+        with native_engine.connect() as borrowed:
+            assert borrowed.exec_driver_sql("PRAGMA busy_timeout").scalar_one() == 80
+            clone = adapter._submission_engine(native_engine)
+            assert clone.pool is not native_engine.pool
+            assert clone.hide_parameters is True
+            assert clone.get_execution_options() == native_engine.get_execution_options()
+            try:
+                with clone.connect() as scoped:
+                    assert scoped.exec_driver_sql("PRAGMA busy_timeout").scalar_one() == 80
+                    assert len(created) == 2
+                    if pool_name == "QueuePool":
+                        assert native_engine.pool.checkedout() == 1
+                        assert clone.pool.checkedout() == 1
+            finally:
+                clone.dispose()
+            assert created[1] in closed
+            assert created[0] not in closed
+            assert borrowed.exec_driver_sql("SELECT 1").scalar_one() == 1
+    finally:
+        native_engine.dispose()
+    assert set(closed) == set(created)
+
+
+def test_submission_engine_refuses_custom_pool_before_recreate():
+    from sqlalchemy import create_engine
+    from sqlalchemy.pool import NullPool
+
+    class CustomPool(NullPool):
+        def recreate(self):
+            pytest.fail("custom pool의 수명 변경 금지")
+
+    engine = create_engine("sqlite://", poolclass=CustomPool)
+    try:
+        with pytest.raises(RuntimeError, match="pool"):
+            adapter._submission_engine(engine)
+    finally:
+        engine.pool.dispose()
