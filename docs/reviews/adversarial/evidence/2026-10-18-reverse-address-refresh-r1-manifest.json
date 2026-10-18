@@ -1,0 +1,23 @@
+{
+  "scope": "Common #39 formal review; consumer integration references only until their CI passes",
+  "repositories": [
+    {
+      "repository": "common",
+      "path": "/home/digitie/dev/kor-travel-common-codex-reverse-address-20261018",
+      "base": "c48595880aaad4367802ad71af2525a8a5e17c6a",
+      "head": "812b291659e40564595c3c28b7e8d51cbcc46df9"
+    },
+    {
+      "repository": "weather",
+      "path": "/home/digitie/dev/kor-travel-weather-codex-reverse-address-20261018",
+      "base": "28f731e6dcb12d5f4cde2ad86fd25acbf3da2eac",
+      "head": "3516a89c7d97d2dba008a1d07631b5ccbed6911a"
+    },
+    {
+      "repository": "transport",
+      "path": "/home/digitie/dev/kor-travel-transport-codex-reverse-address-20261018",
+      "base": "61a566dee0b1cc40f858652c0683883c26e56411",
+      "head": "e1e6035468e6e00dfcf7d107a0dce77967dc3703"
+    }
+  ]
+}

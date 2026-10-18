@@ -1,0 +1,24 @@
+{
+  "scope": "Common39 FULL post-fix r4, consumer integrations context only",
+  "base": "c48595880aaad4367802ad71af2525a8a5e17c6a",
+  "head": "c067a7f6a11b106931a73cd7465503d90e54d976",
+  "previous": "14115ba99ab5d72d4f381d25b2dca810b24914d6",
+  "path": "/home/digitie/dev/kor-travel-common-codex-reverse-address-20261018",
+  "request": "VWorld-primary/Kakao-fallback, six calendar months + Admin manual, source/coords/facts preserved, low CPU/memory and reliable retry/resume, daemon OFF",
+  "fixes": [
+    "B-P1-03: SQL eligible page and cursor wrap at beginning/end allow prefix new/moved/due targets while manual failures wait",
+    "B-P2-04: sensor uses global eligible predicate, not mere cursor-tail row existence; no backoff-only run",
+    "Same-cycle verified/reuse also require unexpired six-month verification",
+    "Unmerged new page callback protocol: cursor,limit,now,cycle,force; retries and required pending_failures retained. Test helper now uses actual DatabaseAddressSource instead of mirrored list predicate."
+  ],
+  "root_checks": [
+    "4 new regressions RED->GREEN, engine23 PASS, full Common509 PASS, Ruff/secrets/redaction PASS",
+    "Owned PostgreSQL17 Numeric/Float eligibility, wrap/backoff/no-work, moved coords, same-cycle expiry PASS",
+    "Consumer UI22 PASS with fixture provider, consumer pins being updated. CI pending is not counted as pass."
+  ],
+  "exclusions": [
+    "No production/SSH/real providers/keys/Daemon/Docker operations",
+    "Read-only immutable Git object; owned temporary fixtures only; do not read peer new report before both finalize",
+    "Consumers WIP and formal consumer review/deploy gates excluded"
+  ]
+}

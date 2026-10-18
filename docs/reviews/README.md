@@ -20,6 +20,8 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-10-18 | FULL4·post-fix | [주소 갱신 커서·backoff](adversarial/2026-10-18-reverse-address-refresh-r4-post-fix.md), 제품c067a7f / basec485958 | A source·신뢰 / B DB·누락 | 두 독립 SOURCE PASS·r3 P1/P2 FIXED·소비자/운영 별도 |
+| 2026-10-18 | FULL·post-fix | [VWorld·Kakao 주소 갱신](adversarial/2026-10-18-reverse-address-refresh-post-fix.md), 제품0f768a1 / basec485958 | A 신뢰 경계 / B 복구·DB | 두 독립 Common SOURCE PASS·4 finding와 자체 기아 반례 FIXED·소비자 운영 별도 |
 | 2026-10-16 | FULL5·최종 소스 | [stdlib bytecode 빌드 CLI](adversarial/2026-10-16-stdlib-bytecode-closure.md), 제품0845857 / 검토344d91c | A 빌드·계약 / D 범위·패키징 | 두 독립 SOURCE_PASS·OPEN0·실제 이미지/CPU 효과 별도 |
 | 2026-10-16 | FULL8·최종 문서 보존 | [Common36 docs200](adversarial/2026-10-16-common36-docs200-closure.md), 200a350 / base60b252e | A 실제 계약 / C gate·시간순서 | 두 독립 PASS·원문 byte 보존·제품/규범 변경0 |
 | 2026-10-16 | 실제 native 격리 통합 | [Common36 전체 시나리오](adversarial/2026-10-16-common36-native-live-closure.md), 제품5d2·SDK1.13.24 | source root·A / 실행 D | 15 gate PASS·control2 동시 보호·센서별2tick·정상종료·운영 효과 별도 |

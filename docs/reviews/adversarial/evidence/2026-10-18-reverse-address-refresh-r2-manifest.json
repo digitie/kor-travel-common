@@ -1,0 +1,26 @@
+{
+  "scope": "Common39 formal post-fix FULL review; consumers context only, their final merge gates remain separate",
+  "request": "VWorld primary, Kakao fallback; per-coordinate six calendar months automatic refresh and admin manual queue; preserve source/coords/facts, bounded memory/retry/resume, daemon OFF",
+  "repositories": [
+    {
+      "repository": "common",
+      "path": "/home/digitie/dev/kor-travel-common-codex-reverse-address-20261018",
+      "base": "c48595880aaad4367802ad71af2525a8a5e17c6a",
+      "head": "0f768a1974a65bfade4c0fa3c79b897c9663e1a6"
+    },
+    {
+      "repository": "weather",
+      "path": "/home/digitie/dev/kor-travel-weather-codex-reverse-address-20261018",
+      "base": "28f731e6dcb12d5f4cde2ad86fd25acbf3da2eac",
+      "head": "2a8481fd27a99bc22487fca4ac76875150440cd0"
+    },
+    {
+      "repository": "transport",
+      "path": "/home/digitie/dev/kor-travel-transport-codex-reverse-address-20261018",
+      "base": "61a566dee0b1cc40f858652c0683883c26e56411",
+      "head": "60e41371aa9d7a6b031ec9cee41caada636c7d97"
+    }
+  ],
+  "checks": "Common CI all green; root Common501 PASS, focused25 PASS, owned PostgreSQL17 row-lock/fencing/dedup drill PASS. Consumer UI18 PASS and local regressions passed; their final CI not granted here.",
+  "exclusions": "No production, SSH, real credentials/provider calls, daemon start, consumer merge/deploy"
+}
