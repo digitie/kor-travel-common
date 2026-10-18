@@ -21,6 +21,8 @@ Geo API나 Geo 데이터 토큰은 이 갱신의 선행 조건이 아니다. 좌
 3. DatabaseAddressSource에 target_key·longitude·latitude·display_name을 label한 SELECT를 전달한다.
    안정적인 target_key를 사용한다. 키셋 조회는 target_key 문자열 순서다.
 4. VworldKakaoAddressResolver에 서버 키를 주입하고 refresh_reverse_addresses를 호출한다.
+   pending_failures=source.pending_failures를 필수 전달해 현재 활성 원천의 실패만
+   수동 cycle의 잔여로 판단한다. 신규 API를 도입한 소비자도 이 인자를 함께 연결한다.
    원천 SELECT는 읽기만 한다. HTTP 호출 중 DB transaction을 유지하지 않는다.
 5. address_refresh_definitions로 제한된 address_refresh_job과 10분 간격 sensor를 등록한다.
    sensor는 DB에서 미확인·기한 경과·재시도·중단 배치가 있는지만 읽는다.
@@ -42,6 +44,8 @@ DB에 커서·수동 cycle·90초 lease를 저장한다. 만료된 owner는 늦�
 새 worker의 lease를 해제할 수 없다. 결과 저장 후 cursor 저장 전에 죽어도 다시 읽어
 중복 호출을 피한다. 실패 위치는 지수 backoff(최대 24시간) 후 재시도하며,
 자동 sensor가 켜져 있으면 다음 실행에서 이어 처리한다.
+자동 달력 갱신을 꺼도 이미 시작한 수동 cycle의 실패는 backoff 후 이어 처리한다.
+대기 시간에는 sensor가 새 run을 만들지 않으며 원천이 비활성/삭제되면 한 번 정리 후 끝낸다.
 커서 진행과 재시도를 번갈아 처리해 반복 실패 1건이 새 위치를 영구히 막지 않는다.
 배치 크기 1에서도 신규 위치의 처리 슬롯을 먼저 보장한다.
 

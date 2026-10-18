@@ -469,7 +469,19 @@ class DatabaseAddressSource:
                 .mappings()
                 .first()
             )
-            if control is not None and (control["cursor"] or control["force_refresh"]):
+            if control is not None and control["force_refresh"]:
+                if conn.execute(
+                    select(self.source.c.target_key)
+                    .where(self.source.c.target_key > control["cursor"])
+                    .limit(1)
+                ).first() is not None:
+                    return True
+                failures = self._failed_targets()
+                if conn.execute(failures.limit(1)).first() is None:
+                    # 대기 중 원천이 비활성/삭제됐으면 한 번만 cycle을 정리한다.
+                    return True
+                return conn.execute(failures.where(self._due(now)).limit(1)).first() is not None
+            if control is not None and control["cursor"]:
                 return True
             if not automatic:
                 return False
@@ -482,6 +494,18 @@ class DatabaseAddressSource:
                 ).first()
                 is not None
             )
+
+    def _failed_targets(self) -> Any:
+        return (
+            select(self.source.c.target_key)
+            .select_from(self._joined())
+            .where(self.store.entries.c.status == "error")
+        )
+
+    def pending_failures(self) -> bool:
+        """현재 활성 원천의 실패만 세며 삭제·비활성 원천은 cycle을 붙잡지 않는다."""
+        with self.store.engine.connect() as conn:
+            return conn.execute(self._failed_targets().limit(1)).first() is not None
 
     def summary(self) -> dict[str, Any]:
         entries = self.store.entries
@@ -565,6 +589,7 @@ def refresh_reverse_addresses(
     page: Callable[[str, int], Sequence[AddressTarget]],
     lookup: Callable[[str], AddressTarget | None],
     *,
+    pending_failures: Callable[[], bool],
     batch_size: int = 50,
     budget_seconds: float = 30.0,
     force: bool = False,
@@ -657,10 +682,13 @@ def refresh_reverse_addresses(
             if advance:
                 cursor = target.key
                 store.advance(owner, cursor, now())
-        # 끝까지 읽었으면 다음 실행은 신규/실패 위치를 포함해 처음부터 확인한다.
-        if not page(cursor, 1):
+        remaining = bool(page(cursor, 1))
+        retry_pending = force and pending_failures()
+        # 수동 cycle은 실패 재시도까지 끝나야 완료다. 자동 갱신을 꺼도
+        # 수동 요청의 실패는 이어가되 backoff 중에는 sensor run을 만들지 않는다.
+        if not remaining and not retry_pending:
             store.complete_cycle(owner, now())
-        stats["remaining"] = int(bool(page(cursor, 1)))
+        stats["remaining"] = int(remaining or retry_pending)
         if stats["failed"]:
             stats["status"] = "partial_failure"
         return stats

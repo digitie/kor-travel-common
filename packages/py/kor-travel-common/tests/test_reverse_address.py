@@ -60,6 +60,10 @@ def run(store, resolver, targets, now=START, **kwargs):
         resolver,
         page,
         lambda key: next((target for target in targets if target.key == key), None),
+        pending_failures=lambda: any(
+            (row := store.row(target.key)) is not None and row["status"] == "error"
+            for target in targets
+        ),
         now=lambda: now,
         **kwargs,
     )
@@ -234,13 +238,17 @@ def test_database_source_due_manual_resume_and_changed_coordinate(setup_store):
         resolver,
         source.page,
         source.lookup,
+        pending_failures=source.pending_failures,
         force=True,
         batch_size=1,
         now=lambda: START,
     )
     assert result["remaining"] == 1
     assert source.has_work(START, automatic=False)
-    refresh_reverse_addresses(setup_store, resolver, source.page, source.lookup, now=lambda: START)
+    refresh_reverse_addresses(
+        setup_store, resolver, source.page, source.lookup,
+        pending_failures=source.pending_failures, now=lambda: START,
+    )
     assert not source.has_work(START)
     assert source.summary()["total"] == 2
     assert len(source.sample()) == 2
@@ -298,3 +306,67 @@ def test_expired_owner_after_completion_is_not_reported_in_progress(setup_store)
     assert source.summary()["in_progress"]
     setup_store.release("live")
     assert not source.summary()["in_progress"]
+
+
+def retry_source(store):
+    from sqlalchemy import Column, Float, String, Table, insert, select
+
+    from kortravelcommon.reverse_address import DatabaseAddressSource
+
+    metadata = MetaData()
+    targets = Table(
+        "retry_targets", metadata,
+        Column("target_key", String, primary_key=True),
+        Column("longitude", Float), Column("latitude", Float),
+    )
+    metadata.create_all(store.engine)
+    with store.engine.begin() as conn:
+        conn.execute(insert(targets), {"target_key": "a", "longitude": 127, "latitude": 37})
+    return DatabaseAddressSource(store, select(targets)), targets
+
+
+def refresh_source(source, resolver, now=START, **kwargs):
+    return refresh_reverse_addresses(
+        source.store, resolver, source.page, source.lookup,
+        pending_failures=source.pending_failures, now=lambda: now, **kwargs,
+    )
+
+
+def test_manual_failure_resumes_after_backoff_even_when_automatic_disabled(setup_store):
+    source, _ = retry_source(setup_store)
+    resolver = Resolver()
+    resolver.fail = True
+    result = refresh_source(source, resolver, force=True)
+    assert result["remaining"] == 1
+    assert not source.has_work(START + timedelta(minutes=1), automatic=False)
+    assert source.has_work(START + timedelta(minutes=3), automatic=False)
+    resolver.fail = False
+    result = refresh_source(source, resolver, now=START + timedelta(minutes=3))
+    assert result["remaining"] == 0 and result["requests"] == 1
+    assert setup_store.row("a")["status"] == "ok"
+    assert not source.has_work(START + timedelta(days=200), automatic=False)
+
+
+def test_manual_cycle_waits_for_an_existing_failure_without_resetting_backoff(setup_store):
+    source, _ = retry_source(setup_store)
+    resolver = Resolver()
+    resolver.fail = True
+    refresh_source(source, resolver)
+    result = refresh_source(source, resolver, force=True, now=START + timedelta(seconds=30))
+    assert result["requests"] == 0 and result["remaining"] == 1
+    assert not source.has_work(START + timedelta(minutes=1), automatic=False)
+    assert source.has_work(START + timedelta(minutes=3), automatic=False)
+
+
+def test_removed_manual_failure_does_not_leave_a_permanent_pending_cycle(setup_store):
+    from sqlalchemy import delete
+
+    source, targets = retry_source(setup_store)
+    resolver = Resolver()
+    resolver.fail = True
+    refresh_source(source, resolver, force=True)
+    with setup_store.engine.begin() as conn:
+        conn.execute(delete(targets))
+    assert source.has_work(START, automatic=False)  # provider 없는 마지막 정리 tick
+    refresh_source(source, resolver, now=START + timedelta(minutes=1))
+    assert not source.has_work(START, automatic=False)
