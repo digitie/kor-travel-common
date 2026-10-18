@@ -113,3 +113,33 @@ def test_provider_failure_never_leaks_key_or_url(monkeypatch):
             client.reverse(AddressTarget("a", 127, 37))
     finally:
         client.close()
+
+
+def test_kakao_body_is_bounded_before_loading_json():
+    transport = httpx.MockTransport(lambda request: httpx.Response(200, content=b"x" * 131073))
+    client = VworldKakaoAddressResolver(vworld_key=None, kakao_key="fixture", transport=transport)
+    try:
+        with pytest.raises(ReverseAddressError, match="kakao_response_budget"):
+            client._kakao_get("coord2address.json", AddressTarget("a", 127, 37))
+    finally:
+        client.close()
+
+
+def test_slow_drip_response_has_total_body_deadline(monkeypatch):
+    class Chunks(httpx.SyncByteStream):
+        def __iter__(self):
+            yield b'{"documents":'
+            yield b"[]}"
+
+    transport = httpx.MockTransport(lambda request: httpx.Response(200, stream=Chunks()))
+    client = VworldKakaoAddressResolver(
+        vworld_key=None, kakao_key="fixture", timeout=1, transport=transport
+    )
+    client._pace = lambda: None
+    moments = iter([0.0, 0.1, 2.0])
+    monkeypatch.setattr("kortravelcommon.address_providers.time.monotonic", lambda: next(moments))
+    try:
+        with pytest.raises(ReverseAddressError, match="kakao_deadline"):
+            client._kakao_get("coord2address.json", AddressTarget("a", 127, 37))
+    finally:
+        client.close()

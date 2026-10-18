@@ -69,9 +69,10 @@ class VworldKakaoAddressResolver(AddressResolver):
         )
 
         factory = self.vworld_factory or VworldClient
+        key = self.vworld_key
         try:
             async with factory(
-                api_key=self.vworld_key, timeout=self.timeout, max_retries=0, max_rps=2.0
+                api_key=key, timeout=self.timeout, max_retries=0, max_rps=2.0
             ) as client:
                 raw = await client.get_address(
                     (target.longitude, target.latitude),
@@ -123,16 +124,22 @@ class VworldKakaoAddressResolver(AddressResolver):
 
     def _kakao_get(self, path: str, target: AddressTarget) -> dict[str, Any]:
         self._pace()
+        deadline = time.monotonic() + self.timeout
         with self._http.stream(
             "GET",
             "https://dapi.kakao.com/v2/local/geo/" + path,
             params={"x": target.longitude, "y": target.latitude, "input_coord": "WGS84"},
-            headers={"Authorization": "KakaoAK " + str(self.kakao_key)},
+            headers={
+                "Authorization": "KakaoAK " + str(self.kakao_key),
+                "Accept-Encoding": "identity",
+            },
         ) as response:
             if response.status_code != 200:
                 raise ReverseAddressError(f"kakao_http_{response.status_code}")
             content = bytearray()
             for chunk in response.iter_bytes():
+                if time.monotonic() >= deadline:
+                    raise ReverseAddressError("kakao_deadline")
                 if len(content) + len(chunk) > 131072:
                     raise ReverseAddressError("kakao_response_budget")
                 content.extend(chunk)
