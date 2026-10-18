@@ -18,6 +18,8 @@ from dagster import (
     sensor,
 )
 
+from .dagster import RecoveryPolicy
+
 
 def address_refresh_definitions(
     *,
@@ -29,8 +31,9 @@ def address_refresh_definitions(
     """같은 job만 예약한다. provider 호출·트랜잭션은 sensor에서 실행하지 않는다."""
     tags = {
         "dagster/code_location": location_name,
-        "kortravel/project": project,
-        "dagster/max_runtime": "120",
+        **RecoveryPolicy(120, idempotent=True, infrastructure_retries=1).tags(
+            project=project, job_name="address_refresh_job"
+        ),
     }
 
     @op(name="refresh_addresses", config_schema={"force": Field(bool, default_value=False)})
