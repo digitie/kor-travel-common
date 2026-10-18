@@ -340,6 +340,50 @@ def refresh_source(source, resolver, now=START, **kwargs):
     )
 
 
+@pytest.mark.parametrize("change", ["deleted", "filtered", "longitude", "latitude"])
+def test_summary_excludes_resolution_for_removed_or_moved_source(setup_store, change):
+    from sqlalchemy import delete, select, update
+
+    from kortravelcommon.reverse_address import DatabaseAddressSource
+
+    source, targets = retry_source(setup_store)
+    refresh_source(source, Resolver())
+    original = setup_store.row("a")
+    with setup_store.engine.begin() as conn:
+        if change == "deleted":
+            conn.execute(delete(targets))
+        elif change in ("longitude", "latitude"):
+            conn.execute(update(targets).values({change: 129 if change == "longitude" else 39}))
+    if change == "filtered":
+        source = DatabaseAddressSource(
+            setup_store, select(targets).where(targets.c.target_key != "a")
+        )
+
+    summary = source.summary()
+    assert summary["total"] == (1 if change in ("longitude", "latitude") else 0)
+    assert summary["last_resolved_at"] is None
+    assert summary["items"] == []
+    assert setup_store.row("a") == original
+
+
+def test_summary_keeps_current_point_last_good_time_after_failure_not_newer_orphan(setup_store):
+    source, _ = retry_source(setup_store)
+    resolver = Resolver()
+    refresh_source(source, resolver)
+    # 다른 원천의 더 최근 정상 결과를 남겨도 현재 source의 확인 시각은 바뀌지 않는다.
+    run(setup_store, Resolver(), [AddressTarget("orphan", 128, 38)], now=START + timedelta(days=1))
+    resolver.fail = True
+    refresh_source(source, resolver, now=START + timedelta(days=200))
+    original = setup_store.row("a")
+
+    summary = source.summary()
+    assert summary["total"] == summary["failed"] == 1
+    assert summary["last_resolved_at"] == START.isoformat()
+    assert summary["items"][0]["status"] == "error"
+    assert summary["items"][0]["resolved_at"] == START.isoformat()
+    assert setup_store.row("a") == original
+
+
 def test_manual_failure_resumes_after_backoff_even_when_automatic_disabled(setup_store):
     source, _ = retry_source(setup_store)
     resolver = Resolver()

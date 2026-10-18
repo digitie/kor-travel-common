@@ -62,6 +62,9 @@ Daemon이 꺼져 있으면 대기하며, UI가 임의로 Daemon을 기동하지 
 ## Admin 보안·표시 계약
 
 Admin Dagster 화면에서 전체 주소 수동 갱신·상태 새로고침과 최근 50개 결과를 제공한다.
+최근 정상 확인 시각은 현재 원천 SELECT에 포함되고 좌표가 같은 결과에서만 집계한다.
+삭제·제외·좌표 이동 전 결과는 집계에서 숨기며 저장된 과거 결과를 삭제하지 않는다.
+같은 좌표의 재시도 실패에는 마지막 정상 확인 시각을 계속 표시한다.
 BFF는 세션과 같은 Origin을 확인하며 서버에서 고정한 자기 프로젝트의
 address_refresh_job만 실행한다. 브라우저의 GraphQL·repository·job·run config는 받지 않는다.
 UUID requestId를 자기 location의 실행 tag로 조회해 통신 재시도의 중복 예약을 줄인다.
