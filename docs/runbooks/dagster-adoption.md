@@ -894,3 +894,13 @@ primary 세 QueuePool 보존·임시 세 NullPool 반복 생성/성공·오류 �
 격리 반복 읽기에서 연결 수가 줄어도 운영 전체 CPU 감소율이나 공유 PG CPU 중 daemon
 기여도를 뜻하지 않는다. 다른 프로세스의 연결·schema reflection SQL 자체도 이 변경으로
 자동 제거되지 않는다. 계측 후 작은 소비자 opt-in부터 적용한다.
+
+
+### native webserver와 같은 wheel에 포함할 때
+
+daemon-pool과 dagster-webserver extra는 합집합으로 설치할 수 있다. daemon extra의
+검증 profile(Dagster1.13.24/PG0.29.24/SQLAlchemy2.0.54)이 전체 resolve에도 적용된다.
+두 console entrypoint와 SQLAlchemy plugin이 같은 whole wheel에 들어가며,
+webserver는 [native 멱등 제출 가이드](dagster-idempotent-launch.md)의 별도 process에서
+실행한다. daemon 전용 DSN/plugin을 webserver에 활성화하지 않는다. 이 소스 정합은
+공유 host 배포·consumer pin·실수집·CPU/RSS 수용 완료를 뜻하지 않는다.
