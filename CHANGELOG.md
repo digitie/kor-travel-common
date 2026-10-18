@@ -6,6 +6,16 @@
 
 ## [Unreleased]
 
+### Python native 멱등 제출
+
+- 선택 dagster-webserver extra와 같은 프로세스의 native CLI/schema adapter를 추가한다.
+  launchIdempotentRun은 권한을 보존하며 selector/UUID에 영속 native run ID를 부여하고,
+  같은 요청의 config/tag 충돌을 거절한다. 기존 native mutation과 core import는 유지한다.
+- run별 OS/session lock 안의 fresh status/submit으로 stale NOT_STARTED 제출 경합을 막는다.
+  지원 coordinator/저장소·busy 재시도·운영 미검증 경계는
+  [가이드](docs/runbooks/dagster-idempotent-launch.md)를 따른다.
+
+
 ### Python 주소 갱신 집계 보정
 
 - 최근 정상 확인 시각을 현재 원천·동일 좌표의 파생 결과에서만 집계한다.

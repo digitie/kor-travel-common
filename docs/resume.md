@@ -1,3 +1,11 @@
+## 2026-10-18 — native 제출 경합 보강
+
+초기23e의 독립 P1(run 한 개여도 stale submit이 STARTED를 QUEUED로 덮음)을 수용해
+제품2704830에서 fresh status/submit을 run별 OS/session lock으로 직렬화했다.
+SQLite .24/.25 각44, 전용 ownedPG 각45+추가3, locked 전체558 PASS와 새 wheel 설치·14source/20RECORD 검증을 작성자가 확인했다.
+[가이드](runbooks/dagster-idempotent-launch.md)에 원 실패·명시 busy 재시도·지원 제한을 남긴다.
+다음은 post-fix 두 독립 리뷰와 최종 CI/소비자 gate다. 운영·provider·Daemon은 미실행이다.
+
 ## 2026-10-18 — native 멱등 제출 후보
 
 [Common41 가이드](runbooks/dagster-idempotent-launch.md)의 opt-in schema/같은 프로세스 CLI와

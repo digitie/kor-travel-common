@@ -1,3 +1,16 @@
+## 2026-10-18 — native 제출 stale context P1 보강
+
+제품23e의 독립 반례를 작성자도1FAIL로 확인했다. NOT_STARTED인 제출 context가 지연되는 동안
+다른 제출이 STARTED까지 진행하면 늦은 native enqueue가 상태를 QUEUED로 되돌렸다.
+제품2704830은 run별 SQLite flock/PG session advisory try-lock 안의 fresh read→submit으로
+이를 직렬화한다. 기존 native pool은 사용하지 않고 별도 NullPool session을 닫는다.
+busy는 명시 오류이며 원 요청UUID를 보존한다. 원문과 첫 후보를 성공 이력으로 덮지 않는다. 새 wheel57,664B/SHA ec557447…의 Python14개 Git exact·RECORD20행과 두SDK 설치/schema42도 확인했다.
+
+SQLite 두SDK 각44 PASS, root가 승인한 신규 전용 PostgreSQL DB 두SDK 각45+추가3 PASS,
+locked 전체558 PASS(130.17초)·Ruff PASS다. 기존 애플리케이션 DB·provider·Daemon은 실행하지 않았다.
+tools는 Node MDX 의존성 부재38FAIL/3ERROR를 보존하고 owned npm ci 뒤336PASS/1SKIP로 정산했다.
+두 post-fix 독립 리뷰·CI·소비자 실제 연결은 root 후속이며 작성자 검증과 별도로 집계한다.
+
 ## 2026-10-18 — native GraphQL 영속 요청 식별자 후보
 
 응답이 유실된 native launch를 같은 UUID로 재시도해도 서로 다른 run을 만들던

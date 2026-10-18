@@ -33,6 +33,7 @@ replayed=true는 기존 run의 현재 상태를 반환했다는 뜻이다. FAILU
 
 - requestId는 하이픈이 있는 UUID 문자열이다. 대문자는 소문자로 정규화하며 UUIDv5의
   입력은 location/repository/job과 정규 UUID다. 다른 job의 같은 요청 UUID는 별도 run이다.
+- UUID namespace와 canonical 입력은 영속 계약이므로 배포 뒤 임의 변경하지 않는다.
 - 같은 selector/UUID의 config·사용자 tags가 다르면 ConflictingExecutionParamsError다.
   config는 native parser로 정규화한 JSON이며 key/tag 순서는 identity에 영향을 주지 않는다.
 - native job launch permission은 기존 run 조회에도 먼저 적용한다. native config 검증과
@@ -59,6 +60,31 @@ subclass/custom coordinator는 명시 거절한다. 동시 native unique 충돌�
 예외는 유지한다. 같은 run ID에 대한 실제 enqueue/dispatch/worker 수명은 native queue
 계약을 따른다. 이 adapter가 별도 semaphore나 새로운 coordinator/worker를 만들지 않는다.
 
+## 제출 경합 후속 수정
+
+초기 제품23e4775의 native unique 검증은 run 한 개만 확인했다. 독립 리뷰가
+NOT_STARTED 제출 context A 지연→B enqueue/STARTED→A 재enqueue로 상태가 QUEUED로
+퇴행하는 P1을 발견했고, 작성자도 원 반례 1 FAIL을 재현했다. 초기 두 리뷰 원문과
+첫 제품은 그대로 보존한다. run 한 개라는 사실을 worker 중복 방지 완료로 확대하지 않는다.
+
+제품2704830은 run별 cross-process critical section 안에서 다시 읽은 상태와 submit을
+직렬화한다. 같은 요청의 제출 중에는 native PythonError 경로의 SubmissionBusyError를
+반환한다. 소비자는 같은 UUID로 재시도하고 이를 새 요청 성공으로 표시하지 않는다.
+
+- SQLite는 POSIX 로컬 파일 저장소를 지원한다. native DB 옆 0700 디렉터리의 UUID별0600
+  일반 파일에 flock을 건다. lock 파일은 빈 metadata이며 해제 뒤에도 재사용한다.
+  활성 중 unlink하면 inode가 갈라질 수 있어 자동 삭제하지 않는다. offline 정리는
+  인스턴스의 모든 webserver가 멈춘 상태에서만 운영자가 판단한다.
+- PostgreSQL은 native PostgresRunStorage의 같은 URL과 검증한 .29.24/.29.25 조합을 사용한다.
+  token provider/custom 저장소는 지원하지 않는다. 별도 NullPool connection의 session
+  advisory try-lock을 사용하며 기존 native engine의 checkout을 점유하지 않는다.
+  URL의 driver/options는 보존한다. 연결은 connect_timeout=5이며 lock busy는 대기하지 않는다.
+- 프로세스/connection 종료가 OS/session lock을 해제한다. TTL이나 영구 guard를 사용하지 않는다.
+  해제 오류 때도 connection을 닫고, 원래 제출 오류가 있으면 그 오류를 보존한다.
+  네트워크 단절의 server session 감지 시간은 PostgreSQL의 기존 연결 계약을 따른다.
+- 동일 native run을 이 field 밖의 임의 Python 코드로 직접 제출하는 writer까지 잠그지는 않는다.
+  SQLite의 서로 다른 호스트/NFS 잠금이나 Windows native 실행은 이번 지원 범위가 아니다.
+
 ## 작성자 검증과 남은 gate
 
 - .24와 .25 각각 실제 schema 41+1 fields, 기존 field return type/CLI 인자, 권한·설정 오류,
@@ -76,8 +102,40 @@ subclass/custom coordinator는 명시 거절한다. 동시 native unique 충돌�
 - 작성자는 독립 리뷰어가 아니다. 두 독립 FULL 리뷰, 정확 HEAD CI와 소비자 연결/UI 검증은
   후속이다. 운영·실 provider·SSH·Docker·Daemon 조작은 NOT_RUN이다.
 
+### 제출 경합 수정 뒤 검증
+
+- 제품2704830의 실제 SQLite 집중 회귀: .24 44 PASS(25.99초), .25 44 PASS(24.08초).
+  원 반례와 같은 사용자 경합에서 둘째 제출을 busy로 거절한 뒤 첫 enqueue→STARTED→replay가
+  ENQUEUED/START만 남고 run 한 개를 유지한다. 별도 프로세스 crash 뒤 잠금 재획득도 포함한다.
+- root가 명시 허용한 신규 전용 owned PostgreSQL DB에서만 native create/submit/store를 실행했다.
+  .24 45 PASS(34.80초), .25 45 PASS(32.19초)에 서로 다른4 run/pool_size1 동시 제출과
+  unlock 오류 시 원예외 보존/session 해제3개를 각 버전에서 추가 PASS했다.
+  기존 애플리케이션 DB·운영 DB·job/daemon/provider는 접근하거나 실행하지 않았다.
+- 신규 PG fixture 초기화는 SQLAlchemy2.1의 bare PostgreSQL URL이 설치되지 않은 psycopg3를
+  선택해 1 ERROR/1 PASS였다. 소유 fixture에 명시 psycopg2 URL을 사용해 재실행했다.
+  native 환경의 URL/driver 호환성은 소비자 설치에서 따로 확인한다. 전체 SQLAlchemy pin은 바꾸지 않았다.
+- locked 최종 패키지 558 PASS(130.17초), Ruff 전체 PASS. 최종 artifact 설치와 문서 검증은
+  후속 journal의 정확 수치를 따른다. 이전553/555는 각 이전 collection의 이력이다.
+- tools 첫 실행은 MDX Node 의존성 미설치로 38 FAIL/3 ERROR/1 SKIP였고, owned WT의
+  npm ci --ignore-scripts 뒤 337 실행(336 PASS/1 SKIP,73.285초)했다. 기존 실패 로그도 보존한다.
+- 독립 리뷰는 root가 작성자를 제외한 두 명에게 별도 배정한다. 이 작성자 검증은 그 수를
+  대체하지 않으며 소비자 UI·운영 완료나 CPU/메모리 절감 판정이 아니다.
+
 공식 upstream 구현은 Dagster 태그 1.13.24 및 1.13.25의
 [GraphQL schema](https://github.com/dagster-io/dagster/blob/1.13.25/python_modules/dagster-graphql/dagster_graphql/schema/__init__.py),
 [native run lifecycle](https://github.com/dagster-io/dagster/blob/1.13.25/python_modules/dagster-graphql/dagster_graphql/implementation/execution/run_lifecycle.py),
 [webserver](https://github.com/dagster-io/dagster/blob/1.13.25/python_modules/dagster-webserver/dagster_webserver/webserver.py)를
 설치된 두 버전 원문과 대조했다.
+
+
+### 최종 artifact·문서 확인
+
+제품2704830의 새 wheel은 57,664 bytes이며 SHA256은
+ec557447713516047e111d9d9bd1177af1e6dab995c9de78854195505d15e5da다.
+패키지 Python14개를 Git source와 비교하고 RECORD20행을 검증했다.
+별도 .24/.25 venv에 no-deps 설치한 뒤 source SHA와 schema42 fields가 일치했다.
+기존 default core import의 lazy SDK 경계도 집중 회귀에 포함된다.
+
+문서 local links765/2967 오류0·plan109 오류0를 확인했다. 이 수치는 검증 당시 문서 tree이며
+후속 기록에 따라 target 수만 늘 수 있다. 독립 post-fix 판정과 정확 최종 HEAD CI는 root가
+별도 정산한다. CI 진행 중인 job을 성공으로 포함하지 않는다.
