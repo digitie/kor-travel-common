@@ -1,3 +1,37 @@
+## 2026-10-18 — native 제출 timeout 정책 보존
+
+제품89291f3은 native Pool.recreate로 creator/options/connect listener를 계승한다.
+운영 조합 .24/.29.24/SQLAlchemy2.0.54 및 .25에서 SQLite51/전용PG58, locked565 PASS,
+[가이드](runbooks/dagster-idempotent-launch.md)에 원a68 timeout1FAIL·후속 wheel을 보존했다.
+다음은 root의 독립2리뷰/최종CI·소비자 수용과 미머지 Common38 wholewheel 통합이다.
+이 main 기반 wheel에는 daemon pool이 아직 없으므로 기존 daemon wheel을 대체하지 않는다.
+운영·provider·worker·Daemon은 NOT_RUN이며 아래는 시점별 기록이다.
+
+## 2026-10-18 — PostgreSQL 제출 연결 fencing
+
+두 번째 P1(lock session 유실 뒤 stale enqueue)을 제품a68d049에서 native run-storage
+동일 물리 connection adapter로 보강했다. 두SDK SQLite48/ownedPG53, locked562 PASS와
+새 wheel14source/21RECORD·정식 console alias를 작성자가 확인했다.
+[가이드](runbooks/dagster-idempotent-launch.md)에 원 실패와 먼저 남을 수 있는 native
+eventlog 시도/권위 run상태를 구분했다. 다음은 post-fix 독립2리뷰·최종CI·소비자 수용이다.
+운영·실provider·worker·Daemon 실행은 없으며 기존 OFF 정책을 유지한다.
+
+## 2026-10-18 — native 제출 경합 보강
+
+초기23e의 독립 P1(run 한 개여도 stale submit이 STARTED를 QUEUED로 덮음)을 수용해
+제품2704830에서 fresh status/submit을 run별 OS/session lock으로 직렬화했다.
+SQLite .24/.25 각44, 전용 ownedPG 각45+추가3, locked 전체558 PASS와 새 wheel 설치·14source/20RECORD 검증을 작성자가 확인했다.
+[가이드](runbooks/dagster-idempotent-launch.md)에 원 실패·명시 busy 재시도·지원 제한을 남긴다.
+다음은 post-fix 두 독립 리뷰와 최종 CI/소비자 gate다. 운영·provider·Daemon은 미실행이다.
+
+## 2026-10-18 — native 멱등 제출 후보
+
+[Common41 가이드](runbooks/dagster-idempotent-launch.md)의 opt-in schema/같은 프로세스 CLI와
+native 영속 run ID를 구현했다. .24/.25 각41 집중 PASS, locked553 PASS는 작성자 범위다.
+UNKNOWN 원문은 보존한다. 다음은 최종 전체·CI와 작성자를 제외한 두 독립 FULL 리뷰,
+소비자 pin/BFF/UI 연결이다. 운영·provider·daemon은 실행하지 않았고 OFF 정책은 유지한다.
+아래 기록은 각 시점의 이력이다.
+
 ## 2026-10-18 — 주소 갱신 summary 후속
 
 제품522525a의 두 독립 FULL SOURCE PASS·OPEN0와 CI8 SUCCESS를

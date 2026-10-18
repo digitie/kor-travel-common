@@ -1,0 +1,22 @@
+{
+  "base": "27cd146ed9e83d3ef481757d2b48e16f232dc88c",
+  "head": "7d46df6341b9bc6d5a2bfa69f80e162bebd71422",
+  "product": "89291f36d731ab906161b96757522e1cd833b4ef",
+  "scope": "영속 요청 ID, native 제출 직렬화·PG 연결 유실 차단·native timeout 보존, opt-in GraphQL/CLI, 테스트·가이드",
+  "files": {
+    ".github/workflows/python-package.yml": "36b89c3e54701ac111fc0f0b02197c2f0bbbf69cb4b6ecd8ee3da968647742bc",
+    "CHANGELOG.md": "5382f6dd6d894de25993c878bec8a974ff4ae574bd5645be55f5802817cdf35a",
+    "docs/journal.md": "2727c27fbb39b6904d5f3b4a562b5230e58da7213fa0b33d75afcd8407c868f2",
+    "docs/resume.md": "b82edd4c3a420f689fec37b49ce99d23dd23a41507c33d396dd1b20760eacd2b",
+    "docs/runbooks/dagster-idempotent-launch.md": "5984f3310d18fcf7f17cefa7f6c8992035d460946bd3aa92641ac894c6616e61",
+    "packages/py/kor-travel-common/pyproject.toml": "65d5b4e293e84c72c64c3aa524664b8114092432d85c76e1eaaf14f70d45d4cd",
+    "packages/py/kor-travel-common/src/kortravelcommon/dagster_webserver.py": "90e06b70e77258cef25c5c6f0e6e9100458480d1ff1bb7e58cf745606992240f",
+    "packages/py/kor-travel-common/tests/test_dagster_webserver.py": "7979b71b113707095151c01b0c92dbae8d4de674c18d9f4a920cc3aee4042b5d",
+    "packages/py/kor-travel-common/uv.lock": "dd2f646a026b3057e67f46056c4ea22004d598a5949c9369c373c88632b70805"
+  },
+  "reviewers": [
+    "/root/review_finish_b",
+    "/root/geo_timeout_analysis"
+  ],
+  "production": "NOT_RUN; 소비자 소유"
+}
