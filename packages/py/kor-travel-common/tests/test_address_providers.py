@@ -1,0 +1,115 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+"""기존 SDK 호출·보조 API·좌표 순서·오류 비밀 비노출."""
+
+import httpx
+import pytest
+
+from kortravelcommon.address_providers import VworldKakaoAddressResolver
+from kortravelcommon.reverse_address import AddressTarget, ReverseAddressError
+
+
+class Vworld:
+    calls = []
+    fail = False
+
+    def __init__(self, **kwargs):
+        assert kwargs["max_retries"] == 0
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args):
+        pass
+
+    async def get_address(self, point, **kwargs):
+        self.calls.append((point, kwargs))
+        if self.fail:
+            raise RuntimeError("SECRET-KEY https://provider.invalid/key")
+        return {
+            "response": {
+                "status": "OK",
+                "result": [
+                    {
+                        "type": "road",
+                        "text": "신도로 1",
+                        "zipcode": "12345",
+                        "structure": {"level1": "서울", "level2": "새구", "level4L": "새동"},
+                    },
+                    {"type": "parcel", "text": "새동 1"},
+                ],
+            }
+        }
+
+
+def test_vworld_sdk_is_used_and_original_coordinate_order_is_preserved(monkeypatch):
+    monkeypatch.setattr(Vworld, "fail", False)
+    Vworld.calls = []
+    client = VworldKakaoAddressResolver(vworld_key="SECRET", kakao_key=None, vworld_factory=Vworld)
+    client._pace = lambda: None
+    try:
+        result = client.reverse(AddressTarget("a", 127, 37))
+        assert Vworld.calls[0][0] == (127, 37)
+        assert result["address"]["road_address"] == "신도로 1"
+        assert result["address"]["parcel_address"] == "새동 1"
+        assert result["region"]["legal_dong"] == "새동"
+    finally:
+        client.close()
+
+
+def test_kakao_fallback_queries_address_and_both_region_types(monkeypatch):
+    monkeypatch.setattr(Vworld, "fail", True)
+    calls = []
+
+    def handler(request):
+        calls.append(request)
+        assert request.headers["Authorization"] == "KakaoAK SECRET"
+        assert request.url.params["x"] == "127"
+        if request.url.path.endswith("coord2address.json"):
+            return httpx.Response(
+                200,
+                json={
+                    "documents": [
+                        {
+                            "address": {"address_name": "새동 2", "region_3depth_name": "새동"},
+                            "road_address": {"address_name": "새길 2", "zone_no": "12345"},
+                        }
+                    ]
+                },
+            )
+        return httpx.Response(
+            200,
+            json={
+                "documents": [
+                    {"region_type": "B", "code": "1111010100"},
+                    {"region_type": "H", "code": "1111051000", "region_3depth_name": "새행정동"},
+                ]
+            },
+        )
+
+    client = VworldKakaoAddressResolver(
+        vworld_key="BAD",
+        kakao_key="SECRET",
+        vworld_factory=Vworld,
+        transport=httpx.MockTransport(handler),
+    )
+    client._pace = lambda: None
+    try:
+        result = client.reverse(AddressTarget("a", 127, 37))
+        assert len(calls) == 2
+        assert result["provider"] == "kakao"
+        assert result["address"]["admin_dong_code"] == "1111051000"
+        assert result["region"]["admin_dong"] == "새행정동"
+    finally:
+        client.close()
+
+
+def test_provider_failure_never_leaks_key_or_url(monkeypatch):
+    monkeypatch.setattr(Vworld, "fail", True)
+    client = VworldKakaoAddressResolver(vworld_key="SECRET", kakao_key=None, vworld_factory=Vworld)
+    client._pace = lambda: None
+    try:
+        with pytest.raises(ReverseAddressError, match="^vworld_failed$"):
+            client.reverse(AddressTarget("a", 127, 37))
+    finally:
+        client.close()

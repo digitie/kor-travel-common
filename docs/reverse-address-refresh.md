@@ -1,31 +1,66 @@
-# 같은 좌표의 주소 변경 대응
+# 좌표 기반 주소 갱신 구현 가이드
 
-## 범위와 책임
+## 목적과 경계
 
-좌표가 같아도 도로명·건물번호·우편번호·법정동·행정동이 변경될 수 있다. 날씨/교통 수집과 분리한 Dagster 작업이 Geo의 현재 data_token을 읽고 위치별 파생 주소를 갱신한다. Geo 원천 적재·게시와 경계 지문 개선은 이번 범위 밖이다.
+Weather·Transport는 기존 VWorld API를 우선하고 Kakao Local API를 보조로 사용한다.
+Geo API나 Geo 데이터 토큰은 이 갱신의 선행 조건이 아니다. 좌표 재탐색과 달리,
+같은 좌표에서 행정구역·도로명·지번 주소가 바뀌었는지 확인한다.
 
-원천 주소·관리자 편집·좌표·KMA 격자·과거 관측은 보존한다. 파생 현재 주소는 별도 테이블에 저장하고 API에서 원천 정보와 구분해 제공한다. 기존 지점을 덮어쓰지 않는 수집기 보호 규칙은 유지한다.
+소비자가 소유하는 원천 주소, 관리자 입력, 좌표, KMA 격자, 과거 fact는 수정하지 않는다.
+최신 확인 주소와 행정구역은 같은 소비자 DB의 파생 테이블에 저장한다.
+실패 시 마지막 정상 결과와 그 확인일을 보존하고 재확인 필요 상태로 표시한다.
+좌표가 바뀌면 이전 좌표의 파생 주소를 현재 주소로 노출하지 않는다.
 
-## 갱신 계약
+## 공통 Python 연결
 
-- 공통 Geo HTTP 계약·결과 검증·영속 커서·위치별 상태·재시도는 kor-travel-common이 소유한다. 소비자는 자신의 대상 선택·schema migration·Dagster·읽기 API 연결을 소유한다.
-- 신규 위치는 최초 주소 보강이 필요하다. 첫 token 기준선 저장과 기존 주소 검증 완료는 구분한다. 기존 소비자의 첫 token 무재계획 정책은 변경하지 않는다.
-- 같은 token·같은 좌표의 검증 완료 행은 HTTP 재호출하지 않는다. token이 변경되면 기존 좌표도 다시 처리한다. 결과가 같으면 주소 변경으로 세지 않는다.
-- token 없음·버전 불일치·잘못된 응답·HTTP 실패는 성공으로 기록하지 않는다. 이전 정상 결과와 원천 정보를 보존하며 상태·다음 시도 시각을 제공한다.
-- 영속 keyset cursor와 제한 배치/시간 예산을 사용한다. HTTP 중 DB transaction을 잡지 않는다. lease 소유권과 만료를 확인한 transaction에서만 결과/커서를 저장한다.
-- 위치별 좌표·provider identity를 함께 기록한다. 재조회 중 좌표가 바뀌면 이전 위치의 결과를 새 위치에 적용하지 않는다. 관리자 값을 파생 주소로 덮어쓰지 않는다.
-- 같은 좌표의 결과는 같은 provider/token 안에서 재사용한다. HTTP redirect를 따르지 않고 키는 헤더로만 전달하며 오류 메시지에 URL·키·payload를 남기지 않는다.
+1. Common의 [reverse-address] extra를 고정 commit으로 설치한다. Dagster는
+   [dagster,reverse-address]를 사용한다. VWorld는 기존 python-vworld-api public API를 사용한다.
+2. 소비자 Base.metadata에 reverse_address_tables를 등록하고 소비자 Alembic에서
+   reverse_address_entries·reverse_address_control을 생성한다.
+   과거 migration에는 실행 시점의 Common helper를 호출하지 않고 컬럼을 고정한다.
+3. DatabaseAddressSource에 target_key·longitude·latitude·display_name을 label한 SELECT를 전달한다.
+   안정적인 target_key를 사용한다. 키셋 조회는 target_key 문자열 순서다.
+4. VworldKakaoAddressResolver에 서버 키를 주입하고 refresh_reverse_addresses를 호출한다.
+   원천 SELECT는 읽기만 한다. HTTP 호출 중 DB transaction을 유지하지 않는다.
+5. address_refresh_definitions로 제한된 address_refresh_job과 10분 간격 sensor를 등록한다.
+   sensor는 DB에서 미확인·기한 경과·재시도·중단 배치가 있는지만 읽는다.
+   대상이 없으면 새 run이나 provider 호출을 만들지 않는다.
 
-## 실행·소비
+위치별 성공/정상 무결과 확인일에서 달력 6개월 후가 다음 자동 확인일이다.
+8월 31일은 다음 해 2월 말일로 맞추며 180일로 환산하지 않는다.
+같은 좌표는 정상 결과를 재사용하지만 실제 제공자 확인일과 다음 갱신일을 연장하지 않는다.
+주소 변경 집계는 정규화한 address·region만 비교하며 provider 교체 자체는 변경으로 세지 않는다.
 
-자동 실행은 기본 비활성화다. 신규 job·설정·migration을 제공하되 daemon OFF·기존 일정·Geo 튜닝은 변경하지 않는다. Geo URL·전용 키가 없으면 명시적으로 건너뛴다. 기본 HTTP 연결/읽기 시간, 배치와 재시도 상한은 설정에 명시한다.
+한 run은 기본 50개·30초이며 provider는 순차 호출한다. 한 주소의 외부 timeout 때문에
+실제 종료는 진행 중인 한 주소의 timeout만큼 예산을 넘길 수 있다. SDK 내부 재시도는 끈다.
+VWorld 실패/무결과이면 Kakao 주소 및 행정구역 API로 fallback한다. worker 요청 간격은
+최소 0.5초다. provider 키·요청 URL·원문 예외는 상태/API/Dagster 로그에 남기지 않는다.
 
-주소 조회는 마지막 검증 token·시각·현재 확인된 token과 상태를 같이 반환한다. 오래된 결과를 새 token의 최신 주소처럼 표시하지 않는다. 파생 주소 변경은 API 소비자가 관측할 수 있어야 하며 원천 주소를 대체하는 의미로 노출하지 않는다.
+## 중단·실패 복구
 
-## 검증 기준
+DB에 커서·수동 cycle·90초 lease를 저장한다. 만료된 owner는 늦게 받은 응답을 쓰거나
+새 worker의 lease를 해제할 수 없다. 결과 저장 후 cursor 저장 전에 죽어도 다시 읽어
+중복 호출을 피한다. 실패 위치는 지수 backoff(최대 24시간) 후 재시도하며,
+자동 sensor가 켜져 있으면 다음 실행에서 이어 처리한다.
 
-동일 좌표의 주소/행정코드/우편번호 변경, 동일 token 무호출, 실패 뒤 정상값 보존·부분 재개, token NULL/변경 중 응답, 같은 좌표 중복 호출 방지, 동시 소유권·만료 뒤 늦은 쓰기 거부, 좌표 변경 뒤 옛 결과 비노출, 기존 fact/관리자 값 보존을 시험한다. 로컬 SQLite는 빠른 회귀용이고 PostgreSQL migration·실제 HTTP/소비자 계약은 별도 검증한다.
+수동 force는 기한 전에도 전체 위치를 재확인한다. 부분 배치는 같은 cycle을 이어서
+완료한 위치를 다시 호출하지 않는다. 수동 요청은 큐 등록 성공일 뿐 주소 갱신 완료가 아니다.
+Daemon이 꺼져 있으면 대기하며, UI가 임의로 Daemon을 기동하지 않는다.
 
-## 현재 단계
+## Admin 보안·표시 계약
 
-설계 초안과 Draft PR을 먼저 기록한다. 코드·회귀·독립 리뷰·CI 결과를 후속 커밋으로 추가한다. 운영 migration·배포·live UI·실수집 검증은 아직 수행하지 않았다.
+Admin Dagster 화면에서 전체 주소 수동 갱신·상태 새로고침과 최근 50개 결과를 제공한다.
+BFF는 세션과 같은 Origin을 확인하며 서버에서 고정한 자기 프로젝트의
+address_refresh_job만 실행한다. 브라우저의 GraphQL·repository·job·run config는 받지 않는다.
+UUID requestId를 자기 location의 실행 tag로 조회해 통신 재시도의 중복 예약을 줄인다.
+동시 요청의 경합은 DB lease로 격리하며, 수동 run이 lease를 얻지 못하면 실패로 표시한다.
+다른 프로젝트 실행은 조회하거나 변경하지 않는다.
+
+서버 키와 DB는 소비자 소유다. 실제 저장·서비스 방식은 각 제공자의 현행 이용 조건과
+허용 범위를 확인한 배포 설정에서만 활성화한다. 이 문서는 제공자 이용 허가를 대신하지 않는다.
+
+## 검증·적용 상태
+
+설계와 구현용 PR이다. 로컬 fixture 검증, 두 독립 리뷰, CI, 실제 브라우저 검증 결과는
+각 PR의 검증 기록에 적는다. 운영 migration·외부 API 실호출·Daemon 재기동·배포는
+이 코드 작업의 성공으로 간주하지 않는다.
