@@ -1,3 +1,11 @@
+## 2026-10-18 — native 멱등 제출 후보
+
+[Common41 가이드](runbooks/dagster-idempotent-launch.md)의 opt-in schema/같은 프로세스 CLI와
+native 영속 run ID를 구현했다. .24/.25 각41 집중 PASS, locked553 PASS는 작성자 범위다.
+UNKNOWN 원문은 보존한다. 다음은 최종 전체·CI와 작성자를 제외한 두 독립 FULL 리뷰,
+소비자 pin/BFF/UI 연결이다. 운영·provider·daemon은 실행하지 않았고 OFF 정책은 유지한다.
+아래 기록은 각 시점의 이력이다.
+
 ## 2026-10-18 — 주소 갱신 summary 후속
 
 제품522525a의 두 독립 FULL SOURCE PASS·OPEN0와 CI8 SUCCESS를

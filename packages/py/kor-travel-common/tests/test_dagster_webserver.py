@@ -5,6 +5,7 @@
 import asyncio
 import copy
 import importlib
+import json
 import subprocess
 import sys
 import threading
@@ -469,3 +470,81 @@ def test_nonqueued_coordinator_is_rejected(native, monkeypatch):
     with pytest.raises(UserFacingGraphQLError):
         launch(native)
     assert native.instance.get_runs_count() == 0
+
+
+def test_separate_process_resumes_not_started_native_run(native, monkeypatch, tmp_path):
+    from dagster._serdes import serialize_value
+
+    request_id = str(uuid4())
+    original = native.instance.submit_run
+
+    def stop_before_submit(*args, **kwargs):
+        raise RuntimeError("owned process interruption")
+
+    monkeypatch.setattr(native.instance, "submit_run", stop_before_submit)
+    with pytest.raises(RuntimeError):
+        launch(native, request_id)
+    pending = native.instance.get_runs()[0]
+    assert pending.status == DagsterRunStatus.NOT_STARTED
+    monkeypatch.setattr(native.instance, "submit_run", original)
+    source = str(__import__("pathlib").Path(adapter.__file__).parents[1])
+    code = """
+import sys,json,asyncio
+from types import SimpleNamespace
+sys.path.insert(0,sys.argv[1])
+from dagster import DagsterInstance
+from dagster._serdes import deserialize_value
+from dagster._core.instance.ref import InstanceRef
+from kortravelcommon.dagster_webserver import _launch
+value=json.load(sys.stdin)
+with DagsterInstance.from_ref(deserialize_value(value['ref'],InstanceRef)) as instance:
+    context=SimpleNamespace(instance=instance,has_permission_for_selector=lambda *args:True)
+    result=asyncio.run(_launch(SimpleNamespace(context=context),value['id'],value['params']))
+    print(json.dumps({'run_id':result[0].runId,'replayed':result[1],
+                      'count':instance.get_runs_count()}))
+"""
+    import os
+
+    env = {
+        "PATH": os.defpath,
+        "HOME": str(tmp_path),
+        "TMPDIR": str(tmp_path),
+        "PYTHONDONTWRITEBYTECODE": "1",
+    }
+    result = subprocess.run(
+        [sys.executable, "-I", "-B", "-c", code, source],
+        input=json.dumps(
+            {
+                "ref": serialize_value(native.instance.get_ref()),
+                "id": request_id,
+                "params": values(),
+            }
+        ),
+        text=True,
+        capture_output=True,
+        timeout=30,
+        env=env,
+    )
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout) == {"run_id": pending.run_id, "replayed": True, "count": 1}
+    assert native.instance.get_run_by_id(pending.run_id).status == DagsterRunStatus.QUEUED
+
+
+def test_lost_response_after_native_submit_replays_without_resubmit(native, monkeypatch):
+    request_id = str(uuid4())
+    original = native.instance.submit_run
+    calls = []
+
+    def submit_then_lost(*args, **kwargs):
+        calls.append(args[0])
+        original(*args, **kwargs)
+        raise TimeoutError("owned response lost")
+
+    monkeypatch.setattr(native.instance, "submit_run", submit_then_lost)
+    with pytest.raises(TimeoutError):
+        launch(native, request_id)
+    pending = native.instance.get_runs()[0]
+    assert pending.status == DagsterRunStatus.QUEUED
+    result = launch(native, request_id)
+    assert result[1] is True and run_id(result) == pending.run_id
+    assert len(calls) == 1 and native.instance.get_runs_count() == 1

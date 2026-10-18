@@ -1,3 +1,22 @@
+## 2026-10-18 — native GraphQL 영속 요청 식별자 후보
+
+응답이 유실된 native launch를 같은 UUID로 재시도해도 서로 다른 run을 만들던
+Transport/Weather 소비자 문제를 Common opt-in adapter로 다룬다. 최신 main27cd146의 별도
+Linux WT/feature에서 [가이드](runbooks/dagster-idempotent-launch.md)와 Draft PR41을 먼저 만들었다.
+native schema subclass+app 클래스 binding 뒤 기존 CLI main 호출 최소 실험이 통과했다.
+SDK 본문/vendor 수정·새 서버·DB/schema는 없다.
+
+동일 selector/UUID의 UUIDv5 native run ID와 config/tag digest를 사용하고 기존 권한·config/
+create_valid_pipeline_run을 호출한다. native unique 충돌만 재조회하며 NOT_STARTED만 재개,
+기존 queued/실행/종료 상태는 replay한다. QueuedRunCoordinator만 지원하며 소비자의
+dagster/code_location은 selector exactmatch일 때 허용한다. 기존 lock version/source 변경0,
+선택 webstack18개 추가·CI sync extra1개를 보강했다.
+
+소유 .24/.25 각각41 PASS와 locked553 PASS(130.22초, 마지막2회귀 전 collection), wheel
+설치/42field 일치를 확인했다. 초기 fixture accessor 2FAIL/4PASS와 공유 .24 pytest 부재는
+준비 실패이며 수정 뒤 재실행했다. 독립 리뷰·최종 CI·소비자 실제 연결은 아직 후속이다.
+원 r3 REQUEST/CONDITIONAL 보고서는 변경하지 않았다. 외부 DB/provider/운영/daemon은 NOT_RUN.
+
 ## 2026-10-18 — 주소 집계 후속 리뷰 종결
 
 제품522525a에 대해 A/B가 같은 immutable manifest로 독립 FULL 검토 후 PASS·OPEN0를 확정했다.
