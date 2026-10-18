@@ -6,6 +6,14 @@
 
 ## [Unreleased]
 
+### Python daemon PostgreSQL 연결 재사용
+
+- 선택 daemon-pool extra와 정식 kor-travel-dagster-daemon CLI, SQLAlchemy
+  kortravel_daemon_pool plugin을 추가한다. daemon 전용 profile에서 최초 세 primary engine의
+  연결을 재사용하고 공식 SDK의 임시 instance는 NullPool 수명을 유지한다.
+  기존 native timeout과 fork/scope·pool 정리 경계를 보존한다.
+  지원 버전·운영 미검증 범위는 [채택 가이드](docs/runbooks/dagster-adoption.md)를 따른다.
+
 ### Python native 멱등 제출
 
 - 선택 dagster-webserver extra와 같은 프로세스의 native CLI/schema adapter를 추가한다.

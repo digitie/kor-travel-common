@@ -14,6 +14,7 @@ license-files = ["LICENSE", "NOTICE"]
 
 [project.scripts]
 kor-travel-dagster-webserver = "kortravelcommon.dagster_webserver:main"
+kor-travel-dagster-daemon = "kortravelcommon.daemon_pool:main"
 
 [project.optional-dependencies]
 reverse-address = [
@@ -22,6 +23,7 @@ reverse-address = [
   "python-vworld-api @ git+https://github.com/digitie/python-vworld-api@3b174abea1a1e734c60a9c2522b2844474a1ec71",
 ]
 dagster = ["dagster>=1.9,<2"]
+daemon-pool = ["dagster==1.13.24", "dagster-postgres==0.29.24", "SQLAlchemy==2.0.54"]
 dagster-webserver = [
   "dagster-webserver>=1.13.24,<=1.13.25",
   "dagster-graphql>=1.13.24,<=1.13.25",
@@ -47,3 +49,6 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[project.entry-points."sqlalchemy.plugins"]
+kortravel_daemon_pool = "kortravelcommon._daemon_pool_plugin:DaemonPoolPlugin"

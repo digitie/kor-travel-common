@@ -1,3 +1,18 @@
+## 2026-10-18 — Common38과 native webserver 통합 후보
+
+이 후보는 PR38의 061008f와 main f914873(Common41 제품89291f3)을 일반 merge한다.
+daemon-pool/정식 daemon CLI/SQLAlchemy plugin과 native webserver/정식 alias를 한 wheel에
+보존한다. workflow는 두 선택 extra를 함께 검증하고 기존 daemon profile의 SDK .24,
+SQLAlchemy2.0.54를 유지한다. 기존 외부64 package entry는 같고 webserver18개만 추가됐다.
+원92d pool 소스와 main webserver·주소 소스는 각각 byteexact다.
+최종 wholewheel·독립2리뷰·CI·소비자 통합은 이 후보의 정확 HEAD별로 정산한다.
+운영 수용·Daemon OFF·Track1·2 우선 및 그 후 collector CPU/RSS 순서는 바꾸지 않는다.
+아래 기록은 각 시점의 이력이며 main 기반41 wheel의 daemon 부재 설명도 당시 상태다.
+검증: Python3.12.13 locked 전체599 PASS(156.00초), compile·Ruff PASS,
+문서777개/2991targets·plan109 오류0. wholewheel63,151B/SHA1abf0547…,
+Python16개/RECORD23행/두 CLI·plugin 등록과 core lazy import를 별도 설치에서 확인했다.
+작성자는 독립 리뷰어가 아니며 최종2리뷰·CI·소비자/운영 수용은 별도다.
+
 ## 2026-10-18 — native 제출 timeout 정책 보존
 
 제품89291f3은 native Pool.recreate로 creator/options/connect listener를 계승한다.
@@ -31,6 +46,16 @@ native 영속 run ID를 구현했다. .24/.25 각41 집중 PASS, locked553 PASS�
 UNKNOWN 원문은 보존한다. 다음은 최종 전체·CI와 작성자를 제외한 두 독립 FULL 리뷰,
 소비자 pin/BFF/UI 연결이다. 운영·provider·daemon은 실행하지 않았고 OFF 정책은 유지한다.
 아래 기록은 각 시점의 이력이다.
+
+## 2026-10-18 — Common38의 최신 main 정합 후보
+
+PR38 원92d5cf1에 main27cd146을 별도 branch에서 일반 merge했다.
+daemon-pool과 reverse-address extra를 합치고 workflow에서 둘을 설치한다.
+기존92d의 의존 version/artifact와 daemon pool/CLI 소스, main의 주소 모듈·테스트는
+바이트 그대로 보존했다. lock은 기존92d package64개에 main의 고정 VWorld package1개만
+추가했다. 격리된 locked 환경에서 관련72 PASS·Ruff·문서 링크·plan을 확인했다.
+새 통합 후보의 두 독립 리뷰·CI·원격 PR38 반영/병합은 아직 후속이다.
+기존 운영 수용·daemon OFF·Track1·2 선행과 수집기 최적화 순서를 변경하지 않는다.
 
 ## 2026-10-18 — 주소 갱신 summary 후속
 

@@ -1,3 +1,19 @@
+## 2026-10-18 — Common38과 native webserver 통합 후보
+
+소유 clean WT 061008f에 최신 main f914873을 일반 merge했다. 충돌5파일은
+Python workflow extras 합집합, pyproject의 두 CLI/두 extra, lock 및 journal/resume다.
+기존92d의 daemonpool/CLI/plugin과 main의 webserver/주소 제품·회귀를 바꾸지 않았다.
+offline lock은 기존 외부64 package entry의 version/source/artifact를 모두 보존하고
+Common41 webserver 의존18개만 추가했다. Dagster/GraphQL/Webserver1.13.24,
+PG0.29.24와 SQLAlchemy2.0.54는 기존 daemon profile 의도대로 고정한다.
+CHANGELOG에 daemon-pool extra·정식 CLI·plugin 누락을 정산했다.
+최종 검증 수치는 다음 기록에서 정확 HEAD·산출물로 정산하며 운영은 실행하지 않았다.
+기존 미완료 운영 gate·독립 리뷰·CI는 소스 merge 정합과 별도다.
+검증: Python3.12.13 locked 전체599 PASS(156.00초), compile·Ruff PASS,
+문서777개/2991targets·plan109 오류0. wholewheel63,151B/SHA1abf0547…,
+Python16개/RECORD23행/두 CLI·plugin 등록과 core lazy import를 별도 설치에서 확인했다.
+작성자는 독립 리뷰어가 아니며 최종2리뷰·CI·소비자/운영 수용은 별도다.
+
 ## 2026-10-18 — native timeout 정책을 제출 연결에 계승
 
 독립 P2(a68의 별도 engine에서 native statement_timeout80ms→0)를 실제 운영 조합
@@ -57,6 +73,19 @@ dagster/code_location은 selector exactmatch일 때 허용한다. 기존 lock ve
 설치/42field 일치를 확인했다. 초기 fixture accessor 2FAIL/4PASS와 공유 .24 pytest 부재는
 준비 실패이며 수정 뒤 재실행했다. 독립 리뷰·최종 CI·소비자 실제 연결은 아직 후속이다.
 원 r3 REQUEST/CONDITIONAL 보고서는 변경하지 않았다. 외부 DB/provider/운영/daemon은 NOT_RUN.
+
+## 2026-10-18 — Common38/main 충돌 정합
+
+별도 agent/codex-pool-reconcile-20261018에서 PR38 92d5cf1과 main27cd146을
+일반 merge했다. 충돌 두 파일은 Python workflow의 extra 합집합과 uv.lock의
+SQLAlchemy extra metadata를 보존하도록 정산했다. pyproject 자동 병합의
+daemon-pool exact profile과 reverse-address 의존을 함께 유지하고 uv lock --offline으로
+재생성했다. 기존92d의 모든 외부 package version/artifact는 같고 main의 고정 VWorld
+package만 추가했다. daemon pool/CLI와 main 주소 제품·회귀 파일은 변경하지 않았다.
+새 소유 venv의 uv sync --offline --locked --all-extras, 관련72 PASS, Ruff,
+문서766개/2969targets 오류0, plan109 오류0을 확인했다.
+원격 push/PR38 metadata/병합·소비자 배포·provider·DB·daemon/worker 실행은 하지 않았다.
+독립 리뷰/정확 통합 HEAD CI와 기존 운영 수용 미완료는 이 소스 정합과 별도다.
 
 ## 2026-10-18 — 주소 집계 후속 리뷰 종결
 
