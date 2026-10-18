@@ -1,3 +1,12 @@
+## 2026-10-18 — native 제출 timeout 정책 보존
+
+제품89291f3은 native Pool.recreate로 creator/options/connect listener를 계승한다.
+운영 조합 .24/.29.24/SQLAlchemy2.0.54 및 .25에서 SQLite51/전용PG58, locked565 PASS,
+[가이드](runbooks/dagster-idempotent-launch.md)에 원a68 timeout1FAIL·후속 wheel을 보존했다.
+다음은 root의 독립2리뷰/최종CI·소비자 수용과 미머지 Common38 wholewheel 통합이다.
+이 main 기반 wheel에는 daemon pool이 아직 없으므로 기존 daemon wheel을 대체하지 않는다.
+운영·provider·worker·Daemon은 NOT_RUN이며 아래는 시점별 기록이다.
+
 ## 2026-10-18 — PostgreSQL 제출 연결 fencing
 
 두 번째 P1(lock session 유실 뒤 stale enqueue)을 제품a68d049에서 native run-storage

@@ -1,3 +1,17 @@
+## 2026-10-18 — native timeout 정책을 제출 연결에 계승
+
+독립 P2(a68의 별도 engine에서 native statement_timeout80ms→0)를 실제 운영 조합
+.24/.29.24/SQLAlchemy2.0.54에서 작성자도1FAIL로 확인했다. 제품89291f3은 공식
+Pool.recreate로 원 creator/options/connect listener를 계승하고 요청끝dispose한다.
+native NullPool/QueuePool만 지원하며 custom pool은 명시 거절한다. 새 SQL/SET나
+SDK 본문 복사는 없다. 원 pool 전량 대여 중 동작과 같은 물리 연결 fencing을 확인했다.
+
+두 SDK SQLite51/실제 전용PG58 및 locked전체565 PASS(140.23초), Ruff PASS, wheel58,563B/SHA14dd0d99…의14Git/21RECORD,
+두 설치/schema42/console--help를 확인했다. 최초 custom pool 시험 cleanup1FAIL과
+pip 부재 준비 실패는 보존·정정했다. [가이드](runbooks/dagster-idempotent-launch.md)의
+최신 절이 과거 NullPool/connect_timeout5 설명을 대체한다. Common38 통합 wheel과
+daemon CLI 보존·독립2리뷰/최종CI/소비자·운영 수용은 root 소유 후속이며 운영/daemon은 NOT_RUN이다.
+
 ## 2026-10-18 — native run 쓰기를 잠금 session과 결합
 
 270의 별도PG sessionlock이 끊긴 후 stale 제출이 다른 run 상태를 덮는 두 번째 독립 P1을

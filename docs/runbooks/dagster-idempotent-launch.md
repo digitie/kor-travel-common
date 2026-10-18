@@ -67,6 +67,7 @@ NOT_STARTED 제출 context A 지연→B enqueue/STARTED→A 재enqueue로 상태
 퇴행하는 P1을 발견했고, 작성자도 원 반례 1 FAIL을 재현했다. 초기 두 리뷰 원문과
 첫 제품은 그대로 보존한다. run 한 개라는 사실을 worker 중복 방지 완료로 확대하지 않는다.
 
+아래는 제품2704830 당시 계약이며 연결 정책의 최종 변경은 뒤의 timeout 보존 절을 따른다.
 제품2704830은 run별 cross-process critical section 안에서 다시 읽은 상태와 submit을
 직렬화한다. 같은 요청의 제출 중에는 native PythonError 경로의 SubmissionBusyError를
 반환한다. 소비자는 같은 UUID로 재시도하고 이를 새 요청 성공으로 표시하지 않는다.
@@ -171,3 +172,38 @@ context 복원과 connection 종료는 오류에도 수행한다.
   모듈 source SHA와 schema42 fields가 일치했다. 문서만 바꾼 후속 HEAD는 이 제품을 유지한다.
 - scanner가 ContextVar 복원값의 token 변수명을 오탐해 previous_binding으로 명료화했다.
   검사 예외/ignore는 추가하지 않았다. 최종 post-fix 두 독립 판정/CI·소비자 gate는 root가 별도 정산한다.
+
+
+## native PostgreSQL 연결 정책 보존
+
+a68의 별도 engine은 native webserver가 설치한 statement_timeout connect listener를
+잃었다. 작성자는 운영 조합 Dagster1.13.24/dagster-postgres0.29.24/SQLAlchemy2.0.54의
+실제 전용 PG에서 원a68의 80ms 정책이 scoped 연결에서 0으로 바뀌는 1 FAIL을 보존했다.
+
+제품89291f3은 공식 Pool.recreate()로 native creator·연결 인자·pool connect listener를
+계승한 요청 전용 pool과 Engine을 만든다. native CLI의 timeout/URL options를 새 SQL로
+재구현하거나 임의 connect_timeout=5로 덮지 않는다. 같은 물리 연결의 fencing은 유지하고,
+요청 끝에는 clone을 dispose한다. 원 pool을 전량 대여해도 clone 조회/정책이 동작한다.
+
+지원 pool은 공식 native 기본 NullPool과 optimize_for_webserver의 QueuePool이다.
+custom pool subclass는 recreate의 부수효과를 추정하지 않고 거절한다. 임의 Engine 이벤트
+정책을 전부 복제하는 계약은 아니며, 검증한 native SDK 연결 정책을 보존한다.
+Common38의 daemon pool은 별도 CLI/process 계약이다. 이 main 기반 wheel에는 아직 미머지
+Common38 코드가 없으므로 공유 host image에 적용할 최종 wheel은 root가 두 기능을 합쳐
+daemon pool CLI·정책의 보존을 따로 확인한다. 이 후보로 기존 daemon wheel을 대체하지 않는다.
+
+- 두 SDK SQLite 집중 각각51 PASS(.24 21.04초/.25 26.22초).
+- 실제 전용 PG 각각58 PASS(.24/SQLAlchemy2.0.54 30.84초,
+  .25/SQLAlchemy2.1.5 31.97초). 80ms 정책/pg_sleep 취소, 원 pool 전량 대여,
+  pool_size1 동시 요청, lock session 유실 후 STARTED 보존을 포함한다.
+- 새 단위시험의 custom pool 정리 코드가 Engine.dispose의 recreate를 다시 호출해
+  처음1 FAIL/50 PASS였다. pool.dispose로 소유 시험 정리만 고쳐 두 SDK51 PASS를 확인했다.
+  wheel 설치 준비의 python -m pip 부재는 uv pip --python으로 정정했고 제품 실패로 세지 않는다.
+- 최종 locked 전체565 PASS(140.23초), Ruff 전체와 문서 links765/2971 오류0,
+  plan109 오류0를 확인했다. CodeGraph는 연결되었으나 현재 index에 대상 모듈이 없어
+  검증 근거로 세지 않고 실제 source의 호출/연결 경로를 직접 대조했다.
+- 새 wheel은58,563B/SHA256
+  14dd0d99c97ad561c529722c9a64a8bf076920e25fc4d722226202980297dfc9이다.
+  Python14개 Git exact/RECORD21행과 두SDK 설치/schema42/console--help를 확인했다.
+- 운영·실provider·worker·Daemon 실행은 NOT_RUN이며 독립 리뷰/최종 CI/소비자 pin·UI는
+  root가 별도 정산한다. 이전 P1·P2 원 실패와 당시 artifact는 보존한다.
