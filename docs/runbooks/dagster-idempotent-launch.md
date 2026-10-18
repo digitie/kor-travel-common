@@ -128,7 +128,7 @@ NOT_STARTED 제출 context A 지연→B enqueue/STARTED→A 재enqueue로 상태
 설치된 두 버전 원문과 대조했다.
 
 
-### 최종 artifact·문서 확인
+### 2704830 artifact·문서 확인(후속 보강 전)
 
 제품2704830의 새 wheel은 57,664 bytes이며 SHA256은
 ec557447713516047e111d9d9bd1177af1e6dab995c9de78854195505d15e5da다.
@@ -139,3 +139,35 @@ ec557447713516047e111d9d9bd1177af1e6dab995c9de78854195505d15e5da다.
 문서 local links765/2967 오류0·plan109 오류0를 확인했다. 이 수치는 검증 당시 문서 tree이며
 후속 기록에 따라 target 수만 늘 수 있다. 독립 post-fix 판정과 정확 최종 HEAD CI는 root가
 별도 정산한다. CI 진행 중인 job을 성공으로 포함하지 않는다.
+
+
+## PostgreSQL 잠금 session 유실 후속 수정
+
+2704830의 별도 session lock만으로는 충분하지 않았다. 독립 리뷰가 lock backend만 끊긴 뒤
+첫 coordinator 호출이 늦게 계속되어 다른 요청의 STARTED를 QUEUED로 되돌리는 P1을 발견했다.
+작성자도 같은 실제 owned PG 시나리오에서 원270의 1 FAIL을 보존했다.
+
+제품a68d049는 opt-in instance의 run-storage connect factory를 얇은 ContextVar adapter로
+연결한다. 현재 제출의 native run 조회/쓰기만 advisory를 가진 같은 SQLAlchemy connection을
+사용한다. closed/invalidated면 재연결을 거절하고, 다른 thread/context와 기존 mutation은
+원래 factory를 사용한다. SDK 구현/SQL 상태 전이 본문은 복사하지 않는다.
+context 복원과 connection 종료는 오류에도 수행한다.
+
+실제 native eventlog와 run storage는 원래 원자적 한 commit이 아니다. 잠금 유실 뒤 첫
+요청이 실패하더라도 eventlog에 enqueue/실패 시도 이벤트가 먼저 남을 수 있다.
+이를 실제 QUEUED/FAILURE 상태나 수집 완료로 해석하지 않는다. authoritative native run
+상태를 확인하며 이 요청은 성공으로 반환하지 않는다. 같은 UUID의 다음 요청은 유지된
+실제 STARTED/종료 상태를 replay한다. 이 한계를 감추려고 원 native eventlog를 수정하지 않는다.
+
+- .24와 .25 각각 SQLite 집중48 PASS(28.97초/28.09초), owned PG 전체53 PASS(29.05초/37.33초).
+  PG lock backend 하나를 종료한 뒤 실제 run STARTED 유지·행1개·첫 요청 오류·그 actor의
+  새 PG 연결0·same-ID replay를 확인했다. 실제 worker/daemon은 실행하지 않았다.
+- 최종 locked 전체562 PASS(131.43초)와 Ruff 전체 PASS다. 앞선553/555/558은 당시 후보 이력이다.
+- native CLI의 정식 console alias kor-travel-dagster-webserver를 추가했다.
+  python -m 진입도 유지하며 둘 다 같은 main을 호출한다. 두 설치 wheel의 실제 --help를 확인했다.
+- a68 wheel은 58,401B, SHA256
+  81888c56e669e7b0d908c7875bb3e31f337ee529813e4c11e1e7f4179180ced3이다.
+  Python14개 Git exact·RECORD21행·정식 entrypoint를 확인했고 두SDK no-deps 설치 뒤
+  모듈 source SHA와 schema42 fields가 일치했다. 문서만 바꾼 후속 HEAD는 이 제품을 유지한다.
+- scanner가 ContextVar 복원값의 token 변수명을 오탐해 previous_binding으로 명료화했다.
+  검사 예외/ignore는 추가하지 않았다. 최종 post-fix 두 독립 판정/CI·소비자 gate는 root가 별도 정산한다.

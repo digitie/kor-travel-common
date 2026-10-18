@@ -1,3 +1,12 @@
+## 2026-10-18 — PostgreSQL 제출 연결 fencing
+
+두 번째 P1(lock session 유실 뒤 stale enqueue)을 제품a68d049에서 native run-storage
+동일 물리 connection adapter로 보강했다. 두SDK SQLite48/ownedPG53, locked562 PASS와
+새 wheel14source/21RECORD·정식 console alias를 작성자가 확인했다.
+[가이드](runbooks/dagster-idempotent-launch.md)에 원 실패와 먼저 남을 수 있는 native
+eventlog 시도/권위 run상태를 구분했다. 다음은 post-fix 독립2리뷰·최종CI·소비자 수용이다.
+운영·실provider·worker·Daemon 실행은 없으며 기존 OFF 정책을 유지한다.
+
 ## 2026-10-18 — native 제출 경합 보강
 
 초기23e의 독립 P1(run 한 개여도 stale submit이 STARTED를 QUEUED로 덮음)을 수용해

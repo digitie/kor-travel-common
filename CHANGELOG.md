@@ -11,8 +11,10 @@
 - 선택 dagster-webserver extra와 같은 프로세스의 native CLI/schema adapter를 추가한다.
   launchIdempotentRun은 권한을 보존하며 selector/UUID에 영속 native run ID를 부여하고,
   같은 요청의 config/tag 충돌을 거절한다. 기존 native mutation과 core import는 유지한다.
-- run별 OS/session lock 안의 fresh status/submit으로 stale NOT_STARTED 제출 경합을 막는다.
-  지원 coordinator/저장소·busy 재시도·운영 미검증 경계는
+- run별 OS/session lock과 같은 native run-storage connection의 fresh status/submit으로
+  stale NOT_STARTED 제출 경합과 잠금 session 유실 뒤 상태 역행을 막는다.
+  정식 console alias와 python-m 진입을 함께 제공한다. native eventlog의 실패 시도와
+  권위 run상태·지원 coordinator/저장소·busy 재시도·운영 미검증 경계는
   [가이드](docs/runbooks/dagster-idempotent-launch.md)를 따른다.
 
 

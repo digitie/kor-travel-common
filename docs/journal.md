@@ -1,3 +1,17 @@
+## 2026-10-18 — native run 쓰기를 잠금 session과 결합
+
+270의 별도PG sessionlock이 끊긴 후 stale 제출이 다른 run 상태를 덮는 두 번째 독립 P1을
+작성자도 실제 owned PG 원270에서1FAIL로 확인했다. a68d049는 ContextVar adapter로
+현재 native run-store 호출만 advisory 소유 connection에 결합하고 invalidated/closed의
+재연결을 거절한다. 다른 thread/기존 mutation은 원 factory다. native SQL/body복사는 없다.
+
+두SDK SQLite48 PASS와 ownedPG53 PASS(잠금 backend 한 개 종료→STARTED유지/행1/실패요청
+성공반환0/actor재연결0/sameIDreplay 포함), locked562 PASS131.43초와 Ruff PASS를 확인했다.
+eventlog에 먼저 남은 실패 시도는 권위 run상태/수집성공과 구분한다. 정식 console alias와
+python-m은 같은 native main을 쓰며 새 wheel58,401B/SHA81888c56…의 Python14/RECORD21,
+두SDK 설치/schema42/실제console--help도 확인했다. P1 원문·초기실패는 그대로 보존했다.
+post-fix 두 독립 리뷰/CI·소비자·운영 수용은 root 후속이며 작성자 검증으로 대체하지 않는다.
+
 ## 2026-10-18 — native 제출 stale context P1 보강
 
 제품23e의 독립 반례를 작성자도1FAIL로 확인했다. NOT_STARTED인 제출 context가 지연되는 동안
