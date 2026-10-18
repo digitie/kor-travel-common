@@ -23,6 +23,8 @@ Geo API나 Geo 데이터 토큰은 이 갱신의 선행 조건이 아니다. 좌
 4. VworldKakaoAddressResolver에 서버 키를 주입하고 refresh_reverse_addresses를 호출한다.
    위치 읽기 인자로 source.page와 source.retries를 전달한다. 재시도는 활성 원천 join을
    먼저 적용한 뒤 최대 10개를 읽어 비활성/삭제 위치의 오류가 슬롯을 독점하지 않는다.
+   page callback은 cursor·limit·now·cycle·force의 5개 인자를 받는다. 제공된
+   DatabaseAddressSource.page는 실제 due·수동 미확인 위치를 SQL에서 먼저 고른다.
    pending_failures=source.pending_failures를 필수 전달해 현재 활성 원천의 실패만
    수동 cycle의 잔여로 판단한다. 신규 API를 도입한 소비자도 이 인자를 함께 연결한다.
    원천 SELECT는 읽기만 한다. HTTP 호출 중 DB transaction을 유지하지 않는다.
@@ -48,6 +50,8 @@ DB에 커서·수동 cycle·90초 lease를 저장한다. 만료된 owner는 늦�
 자동 sensor가 켜져 있으면 다음 실행에서 이어 처리한다.
 자동 달력 갱신을 꺼도 이미 시작한 수동 cycle의 실패는 backoff 후 이어 처리한다.
 대기 시간에는 sensor가 새 run을 만들지 않으며 원천이 비활성/삭제되면 한 번 정리 후 끝낸다.
+커서는 끝에서 앞쪽으로 순환한다. 대기 중 실패가 있어도 cursor 앞에 새로 생긴 위치,
+변경된 좌표와 6개월 due를 처리한다. 같은 수동 cycle의 캐시도 6개월 유효기간을 연장하지 않는다.
 커서 진행과 재시도를 번갈아 처리해 반복 실패 1건이 새 위치를 영구히 막지 않는다.
 배치 크기 1에서도 신규 위치의 처리 슬롯을 먼저 보장한다.
 

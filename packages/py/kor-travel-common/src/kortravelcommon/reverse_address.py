@@ -260,7 +260,7 @@ class ReverseAddressStore:
     ) -> Mapping[str, Any] | None:
         with self.engine.connect() as conn:
             eligible = (
-                self.entries.c.refresh_id == cycle
+                and_(self.entries.c.refresh_id == cycle, self.entries.c.next_refresh_at > now)
                 if force
                 else (self.entries.c.next_refresh_at > now)
             )
@@ -414,15 +414,16 @@ class DatabaseAddressSource:
             str(row["target_key"]), float(row["longitude"]), float(row["latitude"])
         )
 
-    def page(self, cursor: str, limit: int) -> list[AddressTarget]:
+    def page(
+        self, cursor: str, limit: int, now: datetime | None = None,
+        cycle: str = "", force: bool = False,
+    ) -> list[AddressTarget]:
+        statement = select(self.source).where(self.source.c.target_key > cursor)
+        if now is not None:
+            statement = statement.select_from(self._joined()).where(self._work(now, cycle, force))
         with self.store.engine.connect() as conn:
             rows = conn.execute(
-                select(self.source)
-                .where(
-                    self.source.c.target_key > cursor,
-                )
-                .order_by(self.source.c.target_key)
-                .limit(limit)
+                statement.order_by(self.source.c.target_key).limit(limit)
             ).mappings()
             return [self._target(row) for row in rows]
 
@@ -461,6 +462,18 @@ class DatabaseAddressSource:
             ),
         )
 
+    def _work(self, now: datetime, cycle: str, force: bool) -> Any:
+        if not force:
+            return self._due(now)
+        entries = self.store.entries
+        return or_(
+            self._due(now),
+            and_(
+                entries.c.status != "error",
+                or_(entries.c.refresh_id.is_(None), entries.c.refresh_id != cycle),
+            ),
+        )
+
     def has_work(self, now: datetime | None = None, *, automatic: bool = True) -> bool:
         now = now or datetime.now(UTC)
         with self.store.engine.connect() as conn:
@@ -472,7 +485,8 @@ class DatabaseAddressSource:
             if control is not None and control["force_refresh"]:
                 if conn.execute(
                     select(self.source.c.target_key)
-                    .where(self.source.c.target_key > control["cursor"])
+                    .select_from(self._joined())
+                    .where(self._work(now, control["refresh_id"] or "", True))
                     .limit(1)
                 ).first() is not None:
                     return True
@@ -480,7 +494,7 @@ class DatabaseAddressSource:
                 if conn.execute(failures.limit(1)).first() is None:
                     # 대기 중 원천이 비활성/삭제됐으면 한 번만 cycle을 정리한다.
                     return True
-                return conn.execute(failures.where(self._due(now)).limit(1)).first() is not None
+                return False
             if control is not None and control["cursor"]:
                 return True
             if not automatic:
@@ -598,7 +612,7 @@ class DatabaseAddressSource:
 def refresh_reverse_addresses(
     store: ReverseAddressStore,
     client: AddressResolver,
-    page: Callable[[str, int], Sequence[AddressTarget]],
+    page: Callable[[str, int, datetime, str, bool], Sequence[AddressTarget]],
     retries: Callable[[datetime, int], Sequence[AddressTarget]],
     *,
     pending_failures: Callable[[], bool],
@@ -627,7 +641,12 @@ def refresh_reverse_addresses(
     try:
         cursor, cycle, force = store.prepare(owner, force, now())
         retry_targets = list(retries(now(), min(10, batch_size)))
-        page_targets = list(page(cursor, batch_size))
+        page_targets = list(page(cursor, batch_size, now(), cycle, force))
+        if not page_targets and cursor:
+            # 기다리는 실패가 마지막 key를 붙잡아도 앞쪽 신규/변경/due를 읽는다.
+            cursor = ""
+            store.advance(owner, cursor, now())
+            page_targets = list(page(cursor, batch_size, now(), cycle, force))
         targets = []
         # 실패 위치가 호출/시간 예산을 계속 소진해 새 위치를 영구히 막지 않도록,
         # 매 tick 첫 슬롯은 커서 진행에 주고 재시도와 번갈아 처리한다.
@@ -651,17 +670,10 @@ def refresh_reverse_addresses(
             verified = (
                 same
                 and old["status"] in {"ok", "not_found"}
-                and (
-                    old["refresh_id"] == cycle
-                    if force
-                    else (
-                        old["next_refresh_at"] is not None
-                        and old["next_refresh_at"].replace(
-                            tzinfo=old["next_refresh_at"].tzinfo or UTC
-                        )
-                        > now()
-                    )
-                )
+                and (not force or old["refresh_id"] == cycle)
+                and old["next_refresh_at"] is not None
+                and old["next_refresh_at"].replace(tzinfo=old["next_refresh_at"].tzinfo or UTC)
+                > now()
             )
             waiting = (
                 same
@@ -693,7 +705,12 @@ def refresh_reverse_addresses(
             if advance:
                 cursor = target.key
                 store.advance(owner, cursor, now())
-        remaining = bool(page(cursor, 1))
+        remaining = bool(page(cursor, 1, now(), cycle, force))
+        if not remaining and cursor and page("", 1, now(), cycle, force):
+            # HTTP 중 앞쪽에 생긴 대상도 수동 cycle이 끝나기 전에 이어 처리한다.
+            cursor = ""
+            store.advance(owner, cursor, now())
+            remaining = True
         retry_pending = force and pending_failures()
         # 수동 cycle은 실패 재시도까지 끝나야 완료다. 자동 갱신을 꺼도
         # 수동 요청의 실패는 이어가되 backoff 중에는 sensor run을 만들지 않는다.

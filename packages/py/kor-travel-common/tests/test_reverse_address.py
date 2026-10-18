@@ -52,31 +52,28 @@ def setup_store(tmp_path):
 
 
 def run(store, resolver, targets, now=START, **kwargs):
-    def page(cursor, limit):
-        return [target for target in targets if target.key > cursor][:limit]
+    from sqlalchemy import Column, Float, String, Table, delete, insert, select
 
-    def retries(at, limit):
-        due = []
-        for target in targets:
-            row = store.row(target.key)
-            if row is not None and row["status"] == "error" and (
-                row["coordinate_key"] != target.coordinate_key
-                or row["next_retry_at"].replace(tzinfo=UTC) <= at
-            ):
-                due.append((row["next_retry_at"], target.key, target))
-        return [target for _, _, target in sorted(due)[:limit]]
+    from kortravelcommon.reverse_address import DatabaseAddressSource
 
+    metadata = MetaData()
+    table = Table(
+        "fixture_targets", metadata, Column("target_key", String, primary_key=True),
+        Column("longitude", Float), Column("latitude", Float),
+    )
+    metadata.create_all(store.engine)
+    with store.engine.begin() as conn:
+        conn.execute(delete(table))
+        if targets:
+            conn.execute(insert(table), [
+                {"target_key": target.key, "longitude": target.longitude,
+                 "latitude": target.latitude}
+                for target in targets
+            ])
+    source = DatabaseAddressSource(store, select(table))
     return refresh_reverse_addresses(
-        store,
-        resolver,
-        page,
-        retries,
-        pending_failures=lambda: any(
-            (row := store.row(target.key)) is not None and row["status"] == "error"
-            for target in targets
-        ),
-        now=lambda: now,
-        **kwargs,
+        store, resolver, source.page, source.retries,
+        pending_failures=source.pending_failures, now=lambda: now, **kwargs,
     )
 
 
@@ -402,3 +399,87 @@ def test_inactive_failure_rows_do_not_starve_the_live_manual_retry(setup_store):
     assert result["requests"] == 1
     assert setup_store.row("a")["status"] == "ok"
     assert result["remaining"] == 0
+
+
+def test_waiting_failure_pages_do_not_create_empty_sensor_runs(setup_store):
+    from sqlalchemy import insert
+
+    source, targets = retry_source(setup_store)
+    with setup_store.engine.begin() as conn:
+        conn.execute(insert(targets), [
+            {"target_key": "b", "longitude": 128, "latitude": 38},
+            {"target_key": "c", "longitude": 129, "latitude": 39},
+        ])
+    resolver = Resolver()
+    resolver.fail = True
+    refresh_source(source, resolver)
+    result = refresh_source(source, resolver, force=True, batch_size=1,
+                            now=START + timedelta(seconds=30))
+    assert result["requests"] == 0 and result["remaining"] == 1
+    assert not source.has_work(START + timedelta(minutes=1), automatic=False)
+    assert source.has_work(START + timedelta(minutes=3), automatic=False)
+
+
+def test_pending_manual_failure_does_not_hide_new_or_moved_targets_before_cursor(setup_store):
+    from sqlalchemy import insert, update
+
+    class Poison(Resolver):
+        def reverse(self, target):
+            if target.key == "z":
+                self.calls.append(target.key)
+                raise ReverseAddressError("fixture_failure")
+            return super().reverse(target)
+
+    source, targets = retry_source(setup_store)
+    with setup_store.engine.begin() as conn:
+        conn.execute(update(targets).values(target_key="z"))
+    resolver = Poison()
+    refresh_source(source, resolver, force=True, batch_size=1)
+    with setup_store.engine.begin() as conn:
+        conn.execute(insert(targets), {"target_key": "a", "longitude": 128, "latitude": 38})
+    assert source.has_work(START + timedelta(seconds=1), automatic=False)
+    assert source.has_work(START + timedelta(seconds=1))
+    result = refresh_source(source, resolver, batch_size=1, now=START + timedelta(seconds=1))
+    assert result["requests"] == 1 and setup_store.row("a")["status"] == "ok"
+    with setup_store.engine.begin() as conn:
+        conn.execute(update(targets).where(targets.c.target_key == "a").values(longitude=129))
+    assert source.has_work(START + timedelta(seconds=2), automatic=False)
+    refresh_source(source, resolver, now=START + timedelta(seconds=2))
+    assert setup_store.row("a")["longitude"] == 129
+    assert resolver.calls == ["z", "a", "a"]
+
+
+def test_six_month_due_is_not_hidden_by_an_old_pending_manual_cycle(setup_store):
+    from sqlalchemy import insert
+
+    class Poison(Resolver):
+        def reverse(self, target):
+            if target.key == "z":
+                raise ReverseAddressError("fixture_failure")
+            return super().reverse(target)
+
+    source, targets = retry_source(setup_store)
+    with setup_store.engine.begin() as conn:
+        conn.execute(insert(targets), {"target_key": "z", "longitude": 128, "latitude": 38})
+    resolver = Poison()
+    refresh_source(source, resolver, force=True)
+    cycle = setup_store.row("a")["refresh_id"]
+    later = START + timedelta(days=200)
+    assert source.has_work(later, automatic=False)
+    refresh_source(source, resolver, now=later)
+    assert resolver.calls == ["a", "a"]
+    assert setup_store.row("a")["resolved_at"] == later.replace(tzinfo=None)
+    assert setup_store.row("a")["refresh_id"] == cycle
+
+
+def test_automatic_batch_selects_due_target_without_scanning_healthy_prefix(setup_store):
+    from sqlalchemy import insert
+
+    source, targets = retry_source(setup_store)
+    resolver = Resolver()
+    refresh_source(source, resolver)
+    with setup_store.engine.begin() as conn:
+        conn.execute(insert(targets), {"target_key": "z", "longitude": 128, "latitude": 38})
+    result = refresh_source(source, resolver, batch_size=1, now=START + timedelta(minutes=1))
+    assert result["requests"] == 1 and result["skipped"] == 0
+    assert setup_store.row("z")["status"] == "ok"
