@@ -1,3 +1,11 @@
+## 2026-10-18 — 주소 집계 후속 리뷰 종결
+
+제품522525a에 대해 A/B가 같은 immutable manifest로 독립 FULL 검토 후 PASS·OPEN0를 확정했다.
+[원문·통합 정산](reviews/adversarial/2026-10-18-address-summary-closure.md)에 byte·SHA256과
+독립 검사·작성자 검증·미실행 한계를 보존했다. 제품CI8 SUCCESS를 직접 확인했다.
+closure는 source/test/lock/규범을 바꾸지 않으며 사용자 문서 CI 생략 지시에 따라 기록한다.
+소비자 pin/CI/UI·운영·수집기 CPU/RSS는 이번 source 종결과 별도다.
+
 ## 2026-10-18 — 주소 갱신의 현재 원천 집계 보정
 
 Transport86 r2 독립 리뷰의 T86-B-P2-02를 재현했다. provider 전체의 resolved_at MAX 때문에
