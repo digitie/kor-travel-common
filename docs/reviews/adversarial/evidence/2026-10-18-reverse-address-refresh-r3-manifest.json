@@ -1,0 +1,24 @@
+{
+  "scope": "Common39 formal FULL post-fix r3; consumer Weather/Transport integrations remain context only",
+  "request": "Weather/Transport VWorld-primary Kakao-fallback, six calendar months automatic refresh and Admin manual queue; preserve source/coords/facts and daemon OFF",
+  "base": "c48595880aaad4367802ad71af2525a8a5e17c6a",
+  "head": "14115ba99ab5d72d4f381d25b2dca810b24914d6",
+  "previous_reviewed_product": "0f768a1974a65bfade4c0fa3c79b897c9663e1a6",
+  "path": "/home/digitie/dev/kor-travel-common-codex-reverse-address-20261018",
+  "fixes": [
+    "Weather formal review found AUTO=false manual failure loses retry; keep manual cycle through failures, no run during backoff, clean removed/inactive targets",
+    "Root regression found 11 orphan error rows starve live retry; join active sources before retry limit",
+    "New feature API in this unmerged PR now takes page/retries callbacks and required pending_failures callback; both consumers WIP adapted/pinned, not formal consumer gate"
+  ],
+  "root_checks": [
+    "505 full Common PASS, Ruff PASS",
+    "4 new targeted regressions RED->GREEN",
+    "Weather target10, Transport target19, Admin211 each/type/build PASS; latest UI pending",
+    "Common current CI is still finishing; do not count pending as pass"
+  ],
+  "exclusions": [
+    "No production/SSH/actual credentials/providers/daemon/Docker operations",
+    "No source/index/branch changes; immutable git object; owned temporary fixtures only",
+    "No new peer results until both complete; consumer WIP not source baseline"
+  ]
+}

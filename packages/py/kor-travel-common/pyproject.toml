@@ -13,6 +13,11 @@ license = "GPL-3.0-or-later"
 license-files = ["LICENSE", "NOTICE"]
 
 [project.optional-dependencies]
+reverse-address = [
+  "SQLAlchemy>=2.0,<3",
+  "httpx>=0.27,<1",
+  "python-vworld-api @ git+https://github.com/digitie/python-vworld-api@3b174abea1a1e734c60a9c2522b2844474a1ec71",
+]
 dagster = ["dagster>=1.9,<2"]
 daemon-pool = ["dagster==1.13.24", "dagster-postgres==0.29.24", "SQLAlchemy==2.0.54"]
 http = ["httpx>=0.27,<1.0"]
@@ -21,6 +26,9 @@ dev = ["pytest>=8", "ruff>=0.9", "httpx>=0.27,<1.0"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/kortravelcommon"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

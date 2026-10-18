@@ -61,6 +61,7 @@ AGENTS.md                     모든 작업의 규칙·금지선
 | UI 마크업 계약·SemVer 0.x·이관 절 | [ui contract](standards/ui-contract.md) | `packages/ui` 단위 테스트, consumer-smoke, `tools/ui_drift.py` |
 | OpenAPI/REST 3계층·헤더·health·예외 | [openapi](standards/openapi.md) | `standards/openapi-exceptions.yaml`, drift 워크플로 |
 | Python 패키지 구조·extras·모듈 우선순위·품질 도구 | [backend stack](standards/backend-stack.md) | `packages/py/kor-travel-common` |
+| 6개월 주소 갱신·VWorld/Kakao·Dagster 재개 | [주소 갱신 구현 가이드](reverse-address-refresh.md) | Weather·Transport 소비자 PR |
 | CI·재사용 워크플로·포트·컨테이너 명명 | [ci-deploy](standards/ci-deploy.md) | `.github/workflows/*` |
 | 라이선스·고지·SPDX 헤더·추출 규칙 | [licensing](standards/licensing.md) | `NOTICE`·`THIRD_PARTY_NOTICES.md`·`PROVENANCE.md`, `tools/check_spdx.py` |
 | 라이브러리/플랫폼 버전 일치·판정 어휘·승격 | [versions](standards/versions.md) | `versions.json`, `tools/check_versions.py` |

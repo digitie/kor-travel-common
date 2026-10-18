@@ -586,6 +586,11 @@ grpc-health = [
 http = [
     { name = "httpx" },
 ]
+reverse-address = [
+    { name = "httpx" },
+    { name = "python-vworld-api" },
+    { name = "sqlalchemy" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -596,12 +601,15 @@ requires-dist = [
     { name = "grpcio-health-checking", marker = "extra == 'grpc-health'", specifier = ">=1.71,<2" },
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27,<1.0" },
     { name = "httpx", marker = "extra == 'http'", specifier = ">=0.27,<1.0" },
+    { name = "httpx", marker = "extra == 'reverse-address'", specifier = ">=0.27,<1" },
     { name = "protobuf", marker = "extra == 'grpc-health'", specifier = ">=5.29,<7" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8" },
+    { name = "python-vworld-api", marker = "extra == 'reverse-address'", git = "https://github.com/digitie/python-vworld-api?rev=3b174abea1a1e734c60a9c2522b2844474a1ec71" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9" },
     { name = "sqlalchemy", marker = "extra == 'daemon-pool'", specifier = "==2.0.54" },
+    { name = "sqlalchemy", marker = "extra == 'reverse-address'", specifier = ">=2.0,<3" },
 ]
-provides-extras = ["dagster", "daemon-pool", "http", "grpc-health", "dev"]
+provides-extras = ["reverse-address", "dagster", "daemon-pool", "http", "grpc-health", "dev"]
 
 [[package]]
 name = "mako"
@@ -1050,6 +1058,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/74/26/2fbeedb218a787a5eea551c7532cac4e009f83d689dd2faa0d0353473f86/python_dotenv-1.2.4.tar.gz", hash = "sha256:f0d53e69935a851c0dcc78f3ab7aaccd8cabef0b92382b576b824212902873c0", size = 60824, upload-time = "2026-10-01T05:36:10Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/60/d1/38f3a3405989a89ac18390803e70c6ad7c7760da4f9b83cbeca0c44a0c72/python_dotenv-1.2.4-py3-none-any.whl", hash = "sha256:42269a8a5b3fd54ffa6f3d84b18abed50064717576b4ecf03dc4a55d8aa04fdc", size = 23266, upload-time = "2026-10-01T05:36:08.633Z" },
+]
+
+[[package]]
+name = "python-vworld-api"
+version = "0.1.0"
+source = { git = "https://github.com/digitie/python-vworld-api?rev=3b174abea1a1e734c60a9c2522b2844474a1ec71#3b174abea1a1e734c60a9c2522b2844474a1ec71" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pydantic" },
 ]
 
 [[package]]

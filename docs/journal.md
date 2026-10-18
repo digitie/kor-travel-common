@@ -1,3 +1,34 @@
+## 2026-10-18 — Common38/main 충돌 정합
+
+별도 agent/codex-pool-reconcile-20261018에서 PR38 92d5cf1과 main27cd146을
+일반 merge했다. 충돌 두 파일은 Python workflow의 extra 합집합과 uv.lock의
+SQLAlchemy extra metadata를 보존하도록 정산했다. pyproject 자동 병합의
+daemon-pool exact profile과 reverse-address 의존을 함께 유지하고 uv lock --offline으로
+재생성했다. 기존92d의 모든 외부 package version/artifact는 같고 main의 고정 VWorld
+package만 추가했다. daemon pool/CLI와 main 주소 제품·회귀 파일은 변경하지 않았다.
+새 소유 venv의 uv sync --offline --locked --all-extras, 관련72 PASS, Ruff,
+문서766개/2969targets 오류0, plan109 오류0을 확인했다.
+원격 push/PR38 metadata/병합·소비자 배포·provider·DB·daemon/worker 실행은 하지 않았다.
+독립 리뷰/정확 통합 HEAD CI와 기존 운영 수용 미완료는 이 소스 정합과 별도다.
+
+## 2026-10-18 — 주소 집계 후속 리뷰 종결
+
+제품522525a에 대해 A/B가 같은 immutable manifest로 독립 FULL 검토 후 PASS·OPEN0를 확정했다.
+[원문·통합 정산](reviews/adversarial/2026-10-18-address-summary-closure.md)에 byte·SHA256과
+독립 검사·작성자 검증·미실행 한계를 보존했다. 제품CI8 SUCCESS를 직접 확인했다.
+closure는 source/test/lock/규범을 바꾸지 않으며 사용자 문서 CI 생략 지시에 따라 기록한다.
+소비자 pin/CI/UI·운영·수집기 CPU/RSS는 이번 source 종결과 별도다.
+
+## 2026-10-18 — 주소 갱신의 현재 원천 집계 보정
+
+Transport86 r2 독립 리뷰의 T86-B-P2-02를 재현했다. provider 전체의 resolved_at MAX 때문에
+원천에서 제외한 항만의 시각이 빈 현재 목록에도 남았다. 공통 summary 집계에 현재 source
+join과 경도·위도 일치를 적용한다. 과거 행은 수정·삭제하지 않고 같은 좌표의 재실패가
+보존한 마지막 정상 시각은 유지한다. 삭제·SELECT 제외·경도 이동·위도 이동·더 최근 orphan과
+현재 좌표의 실패 5개 반례를 기존 코드에서 5 FAIL로 확인한 뒤 주소 엔진 28 PASS를 확인했다.
+전체 패키지·도구·CI·두 독립 재검토와 소비자 pin 갱신은 별도로 기록한다.
+운영 DB·provider·배포·Daemon 기동과 수집기 최적화는 실행하지 않았다.
+
 ## 2026-10-16 — Common35 최종 Common34 기준선 충돌 정산
 
 원58d2426을 로컬 보존 ref에 유지한 채 Common34 최종4ad615e 위로 feature commit4개를
