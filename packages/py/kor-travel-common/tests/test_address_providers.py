@@ -143,3 +143,64 @@ def test_slow_drip_response_has_total_body_deadline(monkeypatch):
             client._kakao_get("coord2address.json", AddressTarget("a", 127, 37))
     finally:
         client.close()
+
+
+def test_successful_empty_fallback_overrides_primary_failure(monkeypatch):
+    monkeypatch.setattr(Vworld, "fail", True)
+    client = VworldKakaoAddressResolver(
+        vworld_key="fixture",
+        kakao_key="fixture",
+        vworld_factory=Vworld,
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, json={"documents": []})),
+    )
+    client._pace = lambda: None
+    try:
+        assert client.reverse(AddressTarget("a", 127, 37)) is None
+    finally:
+        client.close()
+
+
+@pytest.mark.parametrize("status_code", [200, 500])
+def test_real_sdk_httpx_logs_never_include_provider_key_or_url(caplog, status_code):
+    import logging
+    from concurrent.futures import ThreadPoolExecutor
+
+    from vworld import VworldClient
+
+    canary = "fixture-canary-never-a-real-key"
+    body = {"response": {"status": "OK", "result": [{"type": "road", "text": "fixture road"}]}}
+
+    def handler(request):
+        # 같은 프로세스의 다른 thread가 보내는 HTTPX 로그는 그대로 남아야 한다.
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            pool.submit(logging.getLogger("httpx").info, "parallel-httpx-record").result()
+        return httpx.Response(status_code, json=body)
+
+    class Factory:
+        def __init__(self, **kwargs):
+            self.session = httpx.AsyncClient(
+                transport=httpx.MockTransport(handler), trust_env=False
+            )
+            self.client = VworldClient(**kwargs, session=self.session)
+
+        async def __aenter__(self):
+            return self.client
+
+        async def __aexit__(self, *args):
+            await self.session.aclose()
+
+    client = VworldKakaoAddressResolver(vworld_key=canary, kakao_key=None, vworld_factory=Factory)
+    client._pace = lambda: None
+    try:
+        with caplog.at_level(logging.INFO, logger="httpx"):
+            if status_code == 200:
+                assert client.reverse(AddressTarget("a", 127, 37))["provider"] == "vworld"
+            else:
+                with pytest.raises(ReverseAddressError, match="vworld_failed"):
+                    client.reverse(AddressTarget("a", 127, 37))
+            logging.getLogger("httpx").info("outside-provider-record")
+        assert canary not in caplog.text and "api.vworld.kr" not in caplog.text
+        assert "parallel-httpx-record" in caplog.text
+        assert "outside-provider-record" in caplog.text
+    finally:
+        client.close()

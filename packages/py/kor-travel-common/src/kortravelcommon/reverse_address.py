@@ -270,10 +270,10 @@ class ReverseAddressStore:
                     .where(
                         self.entries.c.provider_id == self.provider_id,
                         self.entries.c.coordinate_key == target.coordinate_key,
-                        self.entries.c.status == "ok",
+                        self.entries.c.status.in_(["ok", "not_found"]),
                         eligible,
                     )
-                    .order_by(self.entries.c.resolved_at.desc())
+                    .order_by(self.entries.c.checked_at.desc())
                     .limit(1)
                 )
                 .mappings()
@@ -343,8 +343,10 @@ class ReverseAddressStore:
             }
             if reused_from is not None:
                 # 동일 좌표 재사용은 제공자 확인일을 연장하지 않는다.
-                for name in ("checked_at", "resolved_at", "next_refresh_at"):
+                for name in ("checked_at", "next_refresh_at"):
                     value[name] = reused_from[name]
+                if payload is not None:
+                    value["resolved_at"] = reused_from["resolved_at"]
             if old is None:
                 conn.execute(insert(self.entries).values(**value))
             else:
@@ -507,7 +509,19 @@ class DatabaseAddressSource:
             "failed": failed,
             "last_resolved_at": _iso(last),
             "in_progress": bool(
-                control and (control["owner"] or control["cursor"] or control["force_refresh"])
+                control
+                and (
+                    control["cursor"]
+                    or control["force_refresh"]
+                    or (
+                        control["owner"]
+                        and control["lease_until"]
+                        and control["lease_until"].replace(
+                            tzinfo=control["lease_until"].tzinfo or UTC
+                        )
+                        > datetime.now(UTC)
+                    )
+                )
             ),
             "manual_cycle": bool(control and control["force_refresh"]),
             "refresh_months": 6,
@@ -577,13 +591,23 @@ def refresh_reverse_addresses(
         cursor, cycle, force = store.prepare(owner, force, now())
         retry_keys = store.retries(now(), min(10, batch_size))
         retry_targets = [target for key in retry_keys if (target := lookup(key)) is not None]
-        targets = [(target, False) for target in retry_targets]
-        targets.extend((target, True) for target in page(cursor, batch_size))
+        page_targets = list(page(cursor, batch_size))
+        targets = []
+        # 실패 위치가 호출/시간 예산을 계속 소진해 새 위치를 영구히 막지 않도록,
+        # 매 tick 첫 슬롯은 커서 진행에 주고 재시도와 번갈아 처리한다.
+        for index in range(max(len(page_targets), len(retry_targets))):
+            if index < len(page_targets):
+                targets.append((page_targets[index], True))
+            if index < len(retry_targets):
+                targets.append((retry_targets[index], False))
         seen = set()
         for target, advance in targets:
             if clock() >= deadline or int(stats["processed"]) >= batch_size:
                 break
             if target.key in seen:
+                if advance:
+                    cursor = target.key
+                    store.advance(owner, cursor, now())
                 continue
             seen.add(target.key)
             old = store.row(target.key)

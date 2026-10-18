@@ -6,13 +6,36 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import time
 from collections.abc import Callable, Mapping
+from contextvars import ContextVar
 from typing import Any
 
 import httpx
 
 from .reverse_address import AddressResolver, AddressTarget, ReverseAddressError
+
+_PRIVATE_REQUEST = ContextVar("reverse_address_private_request", default=False)
+
+
+class _RequestLogFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        # HTTPX는 정상 응답도 query key가 든 URL을 INFO로 기록한다.
+        # 해당 요청의 context에서만 저수준 로그를 막고 다른 요청은 보존한다.
+        return not _PRIVATE_REQUEST.get()
+
+
+_REQUEST_LOG_FILTER = _RequestLogFilter()
+for _logger_name in (
+    "httpx",
+    "httpcore.connection",
+    "httpcore.http11",
+    "httpcore.http2",
+    "httpcore.proxy",
+    "httpcore.socks",
+):
+    logging.getLogger(_logger_name).addFilter(_REQUEST_LOG_FILTER)
 
 
 def _text(value: Any) -> str | None:
@@ -188,6 +211,13 @@ class VworldKakaoAddressResolver(AddressResolver):
         }
 
     def reverse(self, target: AddressTarget) -> dict[str, Any] | None:
+        mark = _PRIVATE_REQUEST.set(True)
+        try:
+            return self._reverse(target)
+        finally:
+            _PRIVATE_REQUEST.reset(mark)
+
+    def _reverse(self, target: AddressTarget) -> dict[str, Any] | None:
         failure = None
         if self.vworld_key:
             self._pace()
@@ -201,9 +231,8 @@ class VworldKakaoAddressResolver(AddressResolver):
                 failure = "vworld_failed"
         if self.kakao_key:
             try:
-                result = self._kakao(target)
-                if result is not None:
-                    return result
+                # 정상 무결과도 fallback 확인의 완료다. 앞선 VWorld 오류와 구별한다.
+                return self._kakao(target)
             except Exception:
                 failure = "kakao_failed"
         if failure:

@@ -173,6 +173,28 @@ def test_same_result_is_not_reported_as_address_change(setup_store):
     assert run(setup_store, resolver, [target], force=True)["changed"] == 0
 
 
+def test_poison_retry_does_not_starve_next_location_at_smallest_batch(setup_store):
+    class SelectiveResolver(Resolver):
+        def reverse(self, target):
+            if target.key == "a":
+                self.calls.append(target.key)
+                raise ReverseAddressError("fixture_failure")
+            return super().reverse(target)
+
+    resolver = SelectiveResolver()
+    targets = [AddressTarget("a", 127, 37), AddressTarget("b", 128, 38)]
+    for tick in range(3):
+        run(
+            setup_store,
+            resolver,
+            targets,
+            batch_size=1,
+            now=START + timedelta(hours=tick),
+        )
+    assert resolver.calls == ["a", "b", "a"]
+    assert setup_store.row("b")["status"] == "ok"
+
+
 def test_kst_calendar_month_boundary():
     # 4월 30일 18 UTC == 5월 1일 03 KST -> 11월 1일 03 KST.
     assert six_months_after(datetime(2026, 4, 30, 18, tzinfo=UTC)) == datetime(
@@ -236,3 +258,43 @@ def test_provider_switch_with_identical_address_is_not_change(setup_store):
     original = resolver.reverse
     resolver.reverse = lambda value: {**original(value), "provider": "fallback"}
     assert run(setup_store, resolver, [target], force=True)["changed"] == 0
+
+
+def test_normal_not_found_is_reused_without_inventing_resolution_time(setup_store):
+    class NoAddress(Resolver):
+        def reverse(self, target):
+            self.calls.append(target.key)
+            return None
+
+    resolver = NoAddress()
+    targets = [AddressTarget(str(index).zfill(3), 127, 37) for index in range(50)]
+    result = run(setup_store, resolver, targets)
+    assert result["requests"] == 1 and result["reused"] == 49
+    assert setup_store.row("049")["status"] == "not_found"
+    assert setup_store.row("049")["payload"] is None
+    assert setup_store.row("049")["resolved_at"] is None
+    assert setup_store.row("049")["checked_at"] == START.replace(tzinfo=None)
+
+
+def test_expired_owner_after_completion_is_not_reported_in_progress(setup_store):
+    from sqlalchemy import Column, Float, String, Table, select
+
+    from kortravelcommon.reverse_address import DatabaseAddressSource
+
+    metadata = MetaData()
+    target = Table(
+        "summary_targets",
+        metadata,
+        Column("target_key", String),
+        Column("longitude", Float),
+        Column("latitude", Float),
+    )
+    metadata.create_all(setup_store.engine)
+    source = DatabaseAddressSource(setup_store, select(target))
+    now = datetime.now(UTC)
+    assert setup_store.claim("crashed", now - timedelta(minutes=3))
+    assert not source.summary()["in_progress"]
+    assert setup_store.claim("live", now)
+    assert source.summary()["in_progress"]
+    setup_store.release("live")
+    assert not source.summary()["in_progress"]
