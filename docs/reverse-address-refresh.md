@@ -21,6 +21,8 @@ Geo API나 Geo 데이터 토큰은 이 갱신의 선행 조건이 아니다. 좌
 3. DatabaseAddressSource에 target_key·longitude·latitude·display_name을 label한 SELECT를 전달한다.
    안정적인 target_key를 사용한다. 키셋 조회는 target_key 문자열 순서다.
 4. VworldKakaoAddressResolver에 서버 키를 주입하고 refresh_reverse_addresses를 호출한다.
+   위치 읽기 인자로 source.page와 source.retries를 전달한다. 재시도는 활성 원천 join을
+   먼저 적용한 뒤 최대 10개를 읽어 비활성/삭제 위치의 오류가 슬롯을 독점하지 않는다.
    pending_failures=source.pending_failures를 필수 전달해 현재 활성 원천의 실패만
    수동 cycle의 잔여로 판단한다. 신규 API를 도입한 소비자도 이 인자를 함께 연결한다.
    원천 SELECT는 읽기만 한다. HTTP 호출 중 DB transaction을 유지하지 않는다.

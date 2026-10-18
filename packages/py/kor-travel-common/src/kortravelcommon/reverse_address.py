@@ -507,6 +507,18 @@ class DatabaseAddressSource:
         with self.store.engine.connect() as conn:
             return conn.execute(self._failed_targets().limit(1)).first() is not None
 
+    def retries(self, now: datetime, limit: int) -> list[AddressTarget]:
+        """원천 join 후 한도를 적용해 사라진 위치의 오류가 슬롯을 독점하지 않게 한다."""
+        with self.store.engine.connect() as conn:
+            rows = conn.execute(
+                select(self.source)
+                .select_from(self._joined())
+                .where(self.store.entries.c.status == "error", self._due(now))
+                .order_by(self.store.entries.c.next_retry_at, self.source.c.target_key)
+                .limit(limit)
+            ).mappings()
+            return [self._target(row) for row in rows]
+
     def summary(self) -> dict[str, Any]:
         entries = self.store.entries
         with self.store.engine.connect() as conn:
@@ -587,7 +599,7 @@ def refresh_reverse_addresses(
     store: ReverseAddressStore,
     client: AddressResolver,
     page: Callable[[str, int], Sequence[AddressTarget]],
-    lookup: Callable[[str], AddressTarget | None],
+    retries: Callable[[datetime, int], Sequence[AddressTarget]],
     *,
     pending_failures: Callable[[], bool],
     batch_size: int = 50,
@@ -614,8 +626,7 @@ def refresh_reverse_addresses(
     deadline = clock() + budget_seconds
     try:
         cursor, cycle, force = store.prepare(owner, force, now())
-        retry_keys = store.retries(now(), min(10, batch_size))
-        retry_targets = [target for key in retry_keys if (target := lookup(key)) is not None]
+        retry_targets = list(retries(now(), min(10, batch_size)))
         page_targets = list(page(cursor, batch_size))
         targets = []
         # 실패 위치가 호출/시간 예산을 계속 소진해 새 위치를 영구히 막지 않도록,

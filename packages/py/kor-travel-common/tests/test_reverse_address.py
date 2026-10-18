@@ -55,11 +55,22 @@ def run(store, resolver, targets, now=START, **kwargs):
     def page(cursor, limit):
         return [target for target in targets if target.key > cursor][:limit]
 
+    def retries(at, limit):
+        due = []
+        for target in targets:
+            row = store.row(target.key)
+            if row is not None and row["status"] == "error" and (
+                row["coordinate_key"] != target.coordinate_key
+                or row["next_retry_at"].replace(tzinfo=UTC) <= at
+            ):
+                due.append((row["next_retry_at"], target.key, target))
+        return [target for _, _, target in sorted(due)[:limit]]
+
     return refresh_reverse_addresses(
         store,
         resolver,
         page,
-        lambda key: next((target for target in targets if target.key == key), None),
+        retries,
         pending_failures=lambda: any(
             (row := store.row(target.key)) is not None and row["status"] == "error"
             for target in targets
@@ -237,7 +248,7 @@ def test_database_source_due_manual_resume_and_changed_coordinate(setup_store):
         setup_store,
         resolver,
         source.page,
-        source.lookup,
+        source.retries,
         pending_failures=source.pending_failures,
         force=True,
         batch_size=1,
@@ -246,7 +257,7 @@ def test_database_source_due_manual_resume_and_changed_coordinate(setup_store):
     assert result["remaining"] == 1
     assert source.has_work(START, automatic=False)
     refresh_reverse_addresses(
-        setup_store, resolver, source.page, source.lookup,
+        setup_store, resolver, source.page, source.retries,
         pending_failures=source.pending_failures, now=lambda: START,
     )
     assert not source.has_work(START)
@@ -327,7 +338,7 @@ def retry_source(store):
 
 def refresh_source(source, resolver, now=START, **kwargs):
     return refresh_reverse_addresses(
-        source.store, resolver, source.page, source.lookup,
+        source.store, resolver, source.page, source.retries,
         pending_failures=source.pending_failures, now=lambda: now, **kwargs,
     )
 
@@ -370,3 +381,24 @@ def test_removed_manual_failure_does_not_leave_a_permanent_pending_cycle(setup_s
     assert source.has_work(START, automatic=False)  # provider 없는 마지막 정리 tick
     refresh_source(source, resolver, now=START + timedelta(minutes=1))
     assert not source.has_work(START, automatic=False)
+
+
+def test_inactive_failure_rows_do_not_starve_the_live_manual_retry(setup_store):
+    source, _ = retry_source(setup_store)
+    resolver = Resolver()
+    resolver.fail = True
+    refresh_source(source, resolver, force=True)
+    old = START - timedelta(days=1)
+    assert setup_store.claim("orphan-fixture", old)
+    for index in range(11):
+        setup_store.save(
+            "orphan-fixture", AddressTarget(f"removed-{index}", 128, 38), "",
+            old, None, "fixture_failure",
+        )
+    setup_store.release("orphan-fixture")
+    resolver.fail = False
+    assert source.has_work(START + timedelta(minutes=3), automatic=False)
+    result = refresh_source(source, resolver, now=START + timedelta(minutes=3))
+    assert result["requests"] == 1
+    assert setup_store.row("a")["status"] == "ok"
+    assert result["remaining"] == 0
