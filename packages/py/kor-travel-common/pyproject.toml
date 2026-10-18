@@ -12,6 +12,9 @@ requires-python = ">=3.11"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE", "NOTICE"]
 
+[project.scripts]
+kor-travel-dagster-webserver = "kortravelcommon.dagster_webserver:main"
+
 [project.optional-dependencies]
 reverse-address = [
   "SQLAlchemy>=2.0,<3",

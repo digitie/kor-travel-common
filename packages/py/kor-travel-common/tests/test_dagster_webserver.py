@@ -674,3 +674,45 @@ with DagsterInstance.from_ref(deserialize_value(value['ref'],InstanceRef)) as in
             # 소유 fixture만 정상 EOF로 종료하며 다른 프로세스를 조작하지 않는다.
             child.stdin.close()
             child.wait(timeout=15)
+
+
+def test_bound_connection_is_context_local_and_restores_original(native):
+    storage = native.instance.run_storage
+    with storage.connect() as original:
+        with adapter._bound_run_connection(storage, original):
+            with storage.connect() as bound:
+                assert bound is original
+
+            def another_thread():
+                with storage.connect() as other:
+                    assert other is not original
+                    return native.instance.get_runs_count()
+
+            with ThreadPoolExecutor(1) as pool:
+                assert pool.submit(another_thread).result(timeout=10) == 0
+        with storage.connect() as later:
+            assert later is not original
+
+
+@pytest.mark.parametrize("attribute", ["closed", "invalidated"])
+def test_bound_connection_refuses_reconnect(native, attribute):
+    storage = native.instance.run_storage
+    connection = SimpleNamespace(closed=False, invalidated=False)
+    setattr(connection, attribute, True)
+    with adapter._bound_run_connection(storage, connection):
+        with pytest.raises(RuntimeError, match="재연결"):
+            with storage.connect():
+                pytest.fail("끊긴 제출 session의 재연결 금지")
+    with storage.connect() as normal:
+        assert normal is not connection
+
+
+def test_console_entrypoint_matches_same_process_main():
+    from importlib.metadata import distribution
+
+    entries = {entry.name: entry.value for entry in distribution("kor-travel-common").entry_points}
+    assert entries["kor-travel-dagster-webserver"] == "kortravelcommon.dagster_webserver:main"
+    executable = __import__("pathlib").Path(sys.executable).parent / "kor-travel-dagster-webserver"
+    result = subprocess.run([str(executable), "--help"], capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0
+    assert "--workspace" in result.stdout

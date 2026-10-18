@@ -10,12 +10,16 @@ import os
 import stat
 import sys
 from contextlib import contextmanager
+from contextvars import ContextVar
 from importlib.metadata import version
 from pathlib import Path
+from threading import Lock
 from uuid import UUID, uuid5
 
 _NAMESPACE = UUID("ae499c92-88dd-5c9d-9629-8187b5d94b98")
 _REQUEST_TAG = "kortravel/idempotent-request-sha256"
+_BOUND_STORAGE_CONNECTION: ContextVar = ContextVar("native_run_storage_connection", default=None)
+_ADAPTER_INSTALL_LOCK = Lock()
 
 
 def _check_versions() -> None:
@@ -114,6 +118,34 @@ class SubmissionBusyError(RuntimeError):
 
 
 @contextmanager
+def _bound_run_connection(storage, connection):
+    """현재 요청의 native run SQL만 잠금을 소유한 물리 connection에 연결한다."""
+    with _ADAPTER_INSTALL_LOCK:
+        if not getattr(storage, "_kortravel_scoped_connect", False):
+            original_connect = storage.connect
+
+            @contextmanager
+            def scoped_connect():
+                binding = _BOUND_STORAGE_CONNECTION.get()
+                if binding is None or binding[0] is not storage:
+                    with original_connect() as original:
+                        yield original
+                    return
+                bound = binding[1]
+                if bound.closed or bound.invalidated:
+                    raise RuntimeError("native 제출 connection이 끊겨 재연결을 거절합니다")
+                yield bound
+
+            storage.connect = scoped_connect
+            storage._kortravel_scoped_connect = True
+    previous_binding = _BOUND_STORAGE_CONNECTION.set((storage, connection))
+    try:
+        yield
+    finally:
+        _BOUND_STORAGE_CONNECTION.reset(previous_binding)
+
+
+@contextmanager
 def _submission_lock(instance, run_id: str):
     """native 저장소와 run별로 재조회→제출을 직렬화하고 crash 때 자동 해제한다."""
     from dagster._core.storage.runs.sqlite.sqlite_run_storage import SqliteRunStorage
@@ -195,10 +227,13 @@ def _submission_lock(instance, run_id: str):
             if not locked:
                 raise SubmissionBusyError("native 제출 중입니다. 같은 requestId로 재시도하세요")
             try:
-                yield
+                with _bound_run_connection(storage, connection):
+                    yield
             finally:
                 pending_error = sys.exc_info()[0] is not None
                 try:
+                    if connection.closed or connection.invalidated:
+                        raise RuntimeError("native 제출 잠금 connection이 끊겼습니다")
                     if not connection.execute(
                         text("SELECT pg_advisory_unlock(:key)"), {"key": key}
                     ).scalar_one():
