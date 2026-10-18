@@ -549,8 +549,9 @@ class DatabaseAddressSource:
                 select(func.count()).select_from(self._joined()).where(entries.c.status == "error")
             ).scalar_one()
             last = conn.execute(
-                select(func.max(entries.c.resolved_at)).where(
-                    entries.c.provider_id == self.store.provider_id
+                select(func.max(entries.c.resolved_at)).select_from(self._joined()).where(
+                    entries.c.longitude == self.source.c.longitude,
+                    entries.c.latitude == self.source.c.latitude,
                 )
             ).scalar_one()
         return {

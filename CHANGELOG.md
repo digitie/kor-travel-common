@@ -6,6 +6,12 @@
 
 ## [Unreleased]
 
+### Python 주소 갱신 집계 보정
+
+- 최근 정상 확인 시각을 현재 원천·동일 좌표의 파생 결과에서만 집계한다.
+  제외·삭제·이동한 위치의 과거 결과는 보존하되 현재 확인 시각에 섞지 않는다.
+  같은 좌표의 재시도 실패는 마지막 정상 확인일을 유지한다.
+
 ### Python 다중 job 인프라 재시도
 
 - infrastructure_retry_sensor_for_jobs가 명시 job/policy의 기존 엄격 판정을 한 failure

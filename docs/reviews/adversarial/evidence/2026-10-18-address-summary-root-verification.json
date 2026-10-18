@@ -1,0 +1,61 @@
+{
+  "head": "522525aed3db934767c1c9e742b3bfc68e91679c",
+  "recorded_utc": "2026-10-18T03:44:26.140928+00:00",
+  "checks": [
+    {
+      "name": "red",
+      "sha256": "8409d9592253af547479849f164e990bb83cdd29a9a721d0aa3537b384adcaf1",
+      "tail": "     assert summary[\"last_resolved_at\"] == START.isoformat()\nE       AssertionError: assert '2026-02-01T10:00:00+00:00' == '2026-01-31T10:00:00+00:00'\nE         \nE         - 2026-01-31T10:00:00+00:00\nE         ?       ^ ^\nE         + 2026-02-01T10:00:00+00:00\nE         ?       ^ ^\n\ntests/test_reverse_address.py:379: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_reverse_address.py::test_summary_excludes_resolution_for_removed_or_moved_source[deleted]\nFAILED tests/test_reverse_address.py::test_summary_excludes_resolution_for_removed_or_moved_source[filtered]\nFAILED tests/test_reverse_address.py::test_summary_excludes_resolution_for_removed_or_moved_source[longitude]\nFAILED tests/test_reverse_address.py::test_summary_excludes_resolution_for_removed_or_moved_source[latitude]\nFAILED tests/test_reverse_address.py::test_summary_keeps_current_point_last_good_time_after_failure_not_newer_orphan\n5 failed, 23 deselected in 0.55s\n"
+    },
+    {
+      "name": "focused",
+      "sha256": "545dee8316363da67c90edb7a1a8490db87e7881554aae4634020e0f28cc1214",
+      "tail": "............................                                             [100%]\n28 passed in 0.74s\n"
+    },
+    {
+      "name": "full",
+      "sha256": "a383d278d18c8fc50d791f8146094d469fe8666ef229ef5c3891da58916ff17d",
+      "tail": "........................................................................ [ 14%]\n........................................................................ [ 28%]\n........................................................................ [ 42%]\n........................................................................ [ 56%]\n........................................................................ [ 70%]\n........................................................................ [ 84%]\n........................................................................ [ 98%]\n..........                                                               [100%]\n514 passed in 117.23s (0:01:57)\n"
+    },
+    {
+      "name": "wheel",
+      "sha256": "317d244e39a19b1f96b7f3a233331644f838fd59ac7818a992e861089036a98d",
+      "tail": "raded performance.\n         If the cache and target directories are on different filesystems, hardlinking may not be supported.\n         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.\nInstalled 19 packages in 145ms\n + annotated-types==0.8.0\n + anyio==4.15.1\n + certifi==2026.7.22\n + h11==0.16.0\n + httpcore==1.0.9\n + httpx==0.28.1\n + idna==3.20\n + iniconfig==2.3.1\n + kor-travel-common==0.1.0.dev0 (from file:///tmp/common-address-summary-dist/kor_travel_common-0.1.0.dev0-py3-none-any.whl)\n + packaging==26.3\n + pluggy==1.7.0\n + pydantic==2.14.1\n + pydantic-core==2.50.1\n + pygments==2.21.0\n + pytest==9.1.1\n + python-vworld-api==0.1.0 (from git+https://github.com/digitie/python-vworld-api@3b174abea1a1e734c60a9c2522b2844474a1ec71)\n + sqlalchemy==2.1.5\n + typing-extensions==4.16.0\n + typing-inspection==0.4.4\n............................                                             [100%]\n28 passed in 1.16s\nINSTALLED_WHEEL_SOURCE_MATCH\n"
+    },
+    {
+      "name": "tools",
+      "sha256": "743843d44f24da389d48bee3d0cdc38e9a3f15fdcedc211a02a6616b8a9aa4ba",
+      "tail": "_and_must_be_a_real_date) ... ok\ntest_schema_path_edge_cases_are_rejected (test_validate_manifest.ValidateManifestTests.test_schema_path_edge_cases_are_rejected) ... ok\ntest_sensitive_workspace_path_is_redacted_from_all_report_channels (test_validate_manifest.ValidateManifestTests.test_sensitive_workspace_path_is_redacted_from_all_report_channels) ... ok\ntest_unknown_field_and_enforce_are_rejected (test_validate_manifest.ValidateManifestTests.test_unknown_field_and_enforce_are_rejected) ... ok\ntest_unknown_field_does_not_echo_input (test_validate_manifest.ValidateManifestTests.test_unknown_field_does_not_echo_input) ... ok\ntest_until_is_required_and_must_be_a_real_date (test_validate_manifest.ValidateManifestTests.test_until_is_required_and_must_be_a_real_date) ... ok\ntest_valid_manifest_passes (test_validate_manifest.ValidateManifestTests.test_valid_manifest_passes) ... ok\n\n----------------------------------------------------------------------\nRan 337 tests in 60.177s\n\nOK (skipped=3)\n"
+    },
+    {
+      "name": "links",
+      "sha256": "50758cb1da698d1f2e814c452928584a643ebf92c20b0bf8eaf62cd0f02cc11c",
+      "tail": "Checked 761 documents, 2956 local targets; errors=0\n"
+    },
+    {
+      "name": "plan",
+      "sha256": "a14f6b3fbd00010658a4564e93501e3b80f68a740d9e96785f6dd8a15714d933",
+      "tail": "상세 task=109, 오류=0; 읽기 전용 metadata/DAG 검사 (제품 gate 아님)\n"
+    },
+    {
+      "name": "ruff",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "tail": "All checks passed!\n"
+    },
+    {
+      "name": "secrets",
+      "sha256": "7caa018f97e3192120e15540f991642deefed9e2c4a8ab7ed4817a1fd6dced51",
+      "tail": "검사 1180개 파일, 발견 0건, 명시적 예외 0건\n"
+    },
+    {
+      "name": "build",
+      "sha256": "e3b3122fcc116a3a2e29b868db620a75ba6c0b965669c065be13c1d2bd75b5de",
+      "tail": "Building source distribution...\nBuilding wheel from source distribution...\nSuccessfully built /tmp/common-address-summary-dist/kor_travel_common-0.1.0.dev0.tar.gz\nSuccessfully built /tmp/common-address-summary-dist/kor_travel_common-0.1.0.dev0-py3-none-any.whl\n"
+    }
+  ],
+  "limits": [
+    "Owned local fixtures and installed wheel only; production/provider/deploy/UI/CPU/RSS not run",
+    "Common SQL source fix does not close old c067 consumer heads; Weather113/Transport86 pins and gates separate",
+    "Tool unittest337 total includes334PASS/3SKIP (Windows8.3API1/jsonschema unavailable2); skips not counted PASS"
+  ]
+}

@@ -1,3 +1,16 @@
+## 2026-10-18 — 주소 갱신 summary 후속
+
+제품522525a의 두 독립 FULL SOURCE PASS·OPEN0와 CI8 SUCCESS를
+[최종 원문·정산](reviews/adversarial/2026-10-18-address-summary-closure.md)에 보존했다.
+전체514·새 wheel28·도구334/3SKIP 범위를 구분한다. 소비자 새 pin·CI/UI와 운영은 별도다.
+아래 구현 당시 대기 문장은 당시 이력이다.
+
+Transport86 r2의 현재 원천 제외 후에도 최근 정상 확인 시각이 남는 P2를 공통 엔진에서 보정한다.
+현재 source와 좌표가 같은 결과만 MAX에 포함하고 과거 행·동일 좌표 마지막 정상일은 보존한다.
+작성자 반례 5 FAIL→주소 엔진 28 PASS. 전체 검증·CI·두 독립 리뷰 및 Weather/Transport pin 갱신이
+다음 단계다. 운영 적용과 수집기 CPU/RSS 개선 완료로 해석하지 않는다.
+사용자 순서에 따라 Track1·2 전체 완료 뒤 수집기 최적화를 진행하며 Daemon OFF는 유지한다.
+
 ## 2026-10-16 — Common36 native 격리 복구 실제 완주
 
 [새 native 실제 종결](reviews/adversarial/2026-10-16-common36-native-live-closure.md)은 원 SDK1.13.24/Common5d2에서

@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-10-18 | FULL·집계 후속 | [현재 원천 주소 확인 시각](adversarial/2026-10-18-address-summary-closure.md), 제품522525a / base33a3382 | A 계약·소비자 / B SQL·정합 | 두 독립 SOURCE PASS·OPEN0·제품CI8SUCCESS·소비자/운영 별도 |
 | 2026-10-18 | FULL4·post-fix | [주소 갱신 커서·backoff](adversarial/2026-10-18-reverse-address-refresh-r4-post-fix.md), 제품c067a7f / basec485958 | A source·신뢰 / B DB·누락 | 두 독립 SOURCE PASS·r3 P1/P2 FIXED·소비자/운영 별도 |
 | 2026-10-18 | FULL·post-fix | [VWorld·Kakao 주소 갱신](adversarial/2026-10-18-reverse-address-refresh-post-fix.md), 제품0f768a1 / basec485958 | A 신뢰 경계 / B 복구·DB | 두 독립 Common SOURCE PASS·4 finding와 자체 기아 반례 FIXED·소비자 운영 별도 |
 | 2026-10-16 | FULL5·최종 소스 | [stdlib bytecode 빌드 CLI](adversarial/2026-10-16-stdlib-bytecode-closure.md), 제품0845857 / 검토344d91c | A 빌드·계약 / D 범위·패키징 | 두 독립 SOURCE_PASS·OPEN0·실제 이미지/CPU 효과 별도 |

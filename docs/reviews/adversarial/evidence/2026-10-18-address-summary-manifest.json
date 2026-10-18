@@ -1,0 +1,28 @@
+{
+  "scope": "Common40 FULL source/contract post-fix to Transport86 r2 T86-B-P2-02",
+  "base": "33a3382c2f605ca9135da676bed1ff42061d52fb",
+  "head": "522525aed3db934767c1c9e742b3bfc68e91679c",
+  "path": "/home/digitie/dev/kor-travel-common-codex-address-summary-20261018",
+  "created_utc": "2026-10-18T03:37:19.180631+00:00",
+  "request": "현재 원천 및 동일 좌표만 최근 정상 확인 시각 MAX 집계; 원천/과거 sidecar/동일좌표 재실패 마지막 정상일 보존",
+  "acceptance": [
+    "deleted/filtered source and changed longitude/latitude cannot influence last_resolved_at",
+    "newer orphan and other provider cannot displace current valid source result",
+    "same point last good timestamp survives subsequent failed retry",
+    "No mutation/deletion, provider/scheduler/DTO/schema/API signature change",
+    "Weather/Transport consumer pins and smoke separate PRs; collector CPU/RSS only after Track1/2 complete"
+  ],
+  "root_checks": [
+    "5 regressions FAIL on33a/c067 -> address engine28 PASS on5225",
+    "Own locked Python3.12/Dagster1.13.25 full514 PASS/117.23s; Ruff PASS",
+    "Built new wheel + fresh environment installed engine28 PASS and installed reverse_address.py SHA equals candidate",
+    "links761docs/2956targets/0errors, plan109/0errors, tools337executed334PASS3SKIP(environment conditions logged), secrets1180/0findings, diff PASS",
+    "Common40 CI pending, explicitly not PASS. Current Transport8c CI PR848/2SUCCESS but laterCommonP2 still OPEN; old source verdicts preserved."
+  ],
+  "constraints": [
+    "Read-only immutable Git object or own temp fixture, no source/index/branch changes; others share workspace",
+    "No production/env/secret/SSH/Docker/provider/daemon operations",
+    "No new peer report before both finalized; own review report save actual delivered prompt + observed manifest/source hashes + limitations",
+    "Consumer current repos contain independently reviewed old Commonc067 until later pin update; do not claim candidate deployed or collector optimized"
+  ]
+}
