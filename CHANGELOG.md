@@ -6,6 +6,14 @@
 
 ## [Unreleased]
 
+### Python 회수 sensor tick 예산·정체 경보
+
+- `reconciliation_sensor`에 opt-in `budget_seconds`(콜백에 남은 시간 함수 전달·전용 1-slot 대기 상한)와
+  `on_stall`(콜백 예외를 cursor의 정체 시계에 기록하고 임계 경과 시 경보)을 추가한다. 기존 호출은 그대로다.
+- core-only `kortravelcommon.stall`(정체 시계)과 `kortravelcommon.pg_errors`(driver import 없는
+  SQLSTATE·제약·primary message 추출), `call_with_deadline`의 선택 `slots` 인자를 추가한다.
+  사용법과 소비자 책임은 [가이드 §19](docs/runbooks/dagster-adoption.md#19-회수-sensor의-tick-예산과-정체-경보)를 따른다.
+
 ### Python daemon PostgreSQL 연결 재사용
 
 - 선택 daemon-pool extra와 정식 kor-travel-dagster-daemon CLI, SQLAlchemy

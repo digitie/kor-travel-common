@@ -103,6 +103,7 @@ recovery = reconciliation_sensor(
 이어 읽는다. 첫 페이지가 생존 행으로 가득해도 뒤 terminal 행을 영구 누락하지 않는다.
 connection·lock·statement·RPC 대기 상한을 소비자 환경에 맞춰 설정한다.
 legacy 무소유 행은 별도 lease 회수로 이관하며 신규 소유권 migration을 코드보다 먼저 적용한다.
+tick 예산과 연속 실패 경보는 [§19](#19-회수-sensor의-tick-예산과-정체-경보)의 opt-in 인자를 사용한다.
 
 ## 5. 동기 호출 정지
 
@@ -904,3 +905,47 @@ daemon-pool과 dagster-webserver extra는 합집합으로 설치할 수 있다. 
 webserver는 [native 멱등 제출 가이드](dagster-idempotent-launch.md)의 별도 process에서
 실행한다. daemon 전용 DSN/plugin을 webserver에 활성화하지 않는다. 이 소스 정합은
 공유 host 배포·consumer pin·실수집·CPU/RSS 수용 완료를 뜻하지 않는다.
+
+## 19. 회수 sensor의 tick 예산과 정체 경보
+
+weather `weather_sync_recovery`·transport `transport_worker_recovery`처럼 `reconciliation_sensor`
+위에 만든 회수 sensor는 tick 예산·cursor·정체 경보가 없어, 회수 콜백이 계속 실패해도 수집
+정체가 몇 시간 동안 드러나지 않았다. 다음 인자는 모두 opt-in이며 생략하면 기존 동작과 같다.
+의미의 정본은 `kortravelcommon.dagster` 모듈 docstring이다.
+
+```python
+from kortravelcommon.dagster import reconciliation_sensor
+
+def reconcile(context, remaining):
+    # remaining()이 줄면 다음 page를 시작하지 않는다. statement/lock timeout은 앱이 둔다.
+    ...
+
+def alert(context, clock):
+    # clock.key·first_failed_at·last_failure(형식 이름과 SQLSTATE)만 경보에 싣는다.
+    ...
+
+recovery = reconciliation_sensor(
+    name="worker_recovery", reconcile=reconcile, required_resource_keys={"repository"},
+    budget_seconds=40, on_stall=alert,
+)
+```
+
+- `budget_seconds`를 주면 콜백은 `(context, remaining)` 두 인자를 받는다. 대기는 같은 예산에서
+  끊기며 sensor 전용 1-slot 때문에 끝나지 않은 이전 콜백과 겹쳐 실행하지 않는다(다음 tick은
+  `DeadlineExceeded`). 끊긴 thread는 강제 종료되지 않으므로 DB statement/lock timeout을 예산보다
+  짧게 둔다. Dagster의 sensor 평가 상한(기본 60초)보다 작게 잡는다.
+- `on_stall`을 주면 콜백 예외는 tick 실패 대신 `context.log`의 오류 로그와 정체 시계로 남는다.
+  첫 실패 뒤 `stall_after_seconds`(기본 900)에 경보하고 `realert_after_seconds`(기본 3600)마다
+  다시 부른다. 경보 콜백이 실패하면 다음 tick에 재시도한다. 시계는 sensor cursor(`stall:` 접두
+  JSON)에 저장하므로 이 모드에서는 sensor cursor를 factory가 소유한다. keyset 위치는 소비자
+  DB에 둔다. 경보 전송 채널·수신자는 소비자 소유다.
+- 정체 시계는 Dagster와 무관한 `kortravelcommon.stall`(`StallClock`·`observe_failure`·`due_alert`·
+  `mark_alerted`·`to_dict`/`from_dict`)로 다른 저장소(앱 DB 등)에도 쓸 수 있다.
+- `kortravelcommon.pg_errors.pg_error_info(exc)`는 SQLAlchemy·asyncpg·psycopg 3·psycopg2 예외
+  연쇄에서 SQLSTATE·제약 이름·primary message만 꺼낸다(driver import 없음). 어떤 SQLSTATE를
+  재시도·경보할지는 소비자의 도메인 SQL과 함께 소비자가 정한다.
+- `call_with_deadline(..., slots=threading.BoundedSemaphore(n))`는 프로세스 공용 4-slot 대신 호출자
+  전용 slot을 같은 의미로 쓴다.
+
+DB schema·트랜잭션·도메인 SQL과 경보 정책 값은 계속 소비자 소유다. 이 절은 common 단위
+시험만 근거로 하며 소비자 채택·실제 경보 도달·운영 정체 감지는 각 소비자 PR에서 확인한다.
