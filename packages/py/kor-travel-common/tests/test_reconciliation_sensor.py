@@ -161,6 +161,37 @@ def test_stall_clock_lifecycle_in_cursor(monkeypatch, capfd):
     assert _clock(result.cursor).first_failed_at == 9000.0
 
 
+def test_clock_moving_backwards_does_not_suppress_alerts(monkeypatch):
+    now = [1000.0]
+    monkeypatch.setattr(dagster_module, "wall_clock", lambda: now[0])
+    alerts = []
+
+    def reconcile(context):
+        raise RuntimeError("db down")
+
+    sensor_def = reconciliation_sensor(
+        name="s",
+        reconcile=reconcile,
+        required_resource_keys=set(),
+        on_stall=lambda context, clock: alerts.append(clock),
+        stall_after_seconds=900,
+        realert_after_seconds=3600,
+    )
+    # cursor의 시작 시각이 미래(1일 뒤)다: now에서 다시 시작하고 900초 뒤 경보한다.
+    future = 'stall:{"key":"s","first_failed_at":87400.0,"last_failure":"E","alerted_at":null}'
+    result = _tick(sensor_def, future)
+    assert _clock(result.cursor) == StallClock("s", 1000.0, "RuntimeError", None)
+    now[0] = 1900.0
+    result = _tick(sensor_def, result.cursor)
+    assert len(alerts) == 1 and _clock(result.cursor).alerted_at == 1900.0
+
+    # 경보 시각만 미래다: 경보하지 않은 것으로 보고 바로 경보한다.
+    future_alert = 'stall:{"key":"s","first_failed_at":0.0,"last_failure":"E","alerted_at":87400.0}'
+    result = _tick(sensor_def, future_alert)
+    assert len(alerts) == 2
+    assert _clock(result.cursor) == StallClock("s", 0.0, "RuntimeError", 1900.0)
+
+
 def test_failing_on_stall_retries_next_tick_and_cursor_still_committed(monkeypatch):
     now = [0.0]
     monkeypatch.setattr(dagster_module, "wall_clock", lambda: now[0])
