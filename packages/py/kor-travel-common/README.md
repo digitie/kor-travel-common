@@ -28,6 +28,8 @@ job은 영향을 받지 않는다. metadata 조회 실패는 tick 실패로 전�
 `reconciliation_sensor`에는 앱의 CAS/lease 회수 함수를 주입한다. 원천 소유권·orchestrator
 run ID·회수 SQL·부분 게시된 데이터의 멱등성은 앱이 유지한다. 오래된 heartbeat만으로 생존이
 확인된 worker를 죽이지 않는다. 조회 장애와 없는 run ID를 terminal로 간주하지 않는다.
+선택 `budget_seconds`·`on_stall`과 core-only `stall`·`pg_errors`는
+[가이드 §19](../../../docs/runbooks/dagster-adoption.md#19-회수-sensor의-tick-예산과-정체-경보)를 따른다.
 
 `call_with_deadline`은 동기 호출의 **대기만** 제한한다. `DeadlineExceeded` 후 같은 client를
 재사용하거나 close하지 않고 해당 step을 끝낸다. daemon thread를 강제 종료하거나

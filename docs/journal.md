@@ -1,3 +1,12 @@
+## 2026-10-21 — 회수 sensor tick 예산·정체 경보와 PG 오류 분류
+
+kor-travel-map ADR-112 조사에서 weather·transport 회수 sensor가 tick 예산·cursor·정체 경보 없이
+각각 18시간·8시간 수집 정체를 놓친 사실을 근거로, `reconciliation_sensor`에 opt-in
+`budget_seconds`·`on_stall`을 더하고 core-only `stall`·`pg_errors`와 `call_with_deadline(slots=)`를
+추가했다. 기존 호출 경로는 바꾸지 않았다. 검증: n150 throwaway python:3.11 컨테이너에서 locked
+전체 pytest·Ruff·wheel core-only import, 핵심 단언 변이 14건 모두 RED. 독립 리뷰는 사용자 지시에
+따라 1인으로 수행했다. 소비자 채택·운영 경보 도달은 NOT_RUN(소비자 PR 몫)이다.
+
 ## 2026-10-18 — Common38과 native webserver 통합 후보
 
 소유 clean WT 061008f에 최신 main f914873을 일반 merge했다. 충돌5파일은
