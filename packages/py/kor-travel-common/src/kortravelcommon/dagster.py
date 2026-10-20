@@ -282,7 +282,7 @@ def reconciliation_sensor(
                 skip_reason=f"회수 실패 기록: {signature}", cursor=_encode_stall(clock)
             )
         if clock is not None:
-            context.log.info("회수 콜백이 다시 성공하여 정체 시계를 지웁니다: %s", clock.last_failure)
+            context.log.info("회수 콜백 성공으로 정체 시계를 지웁니다: %s", clock.last_failure)
         context.log.info("중단된 실행 기록 회수: %s", recovered)
         return SensorResult(
             skip_reason=f"중단된 실행 기록 {recovered}건 회수", cursor=_encode_stall(None)
