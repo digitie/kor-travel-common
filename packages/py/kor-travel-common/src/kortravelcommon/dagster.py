@@ -1,11 +1,31 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
-"""앱 도메인/DB를 소유하지 않는 Dagster 예약·장애 복구 계약."""
+"""앱 도메인/DB를 소유하지 않는 Dagster 예약·장애 복구 계약.
+
+`reconciliation_sensor`의 선택 기능(기존 호출은 그대로 동작한다):
+
+- `budget_seconds`: 콜백을 `reconcile(context, remaining)`으로 호출한다. `remaining()`은
+  tick 예산의 남은 초(0 이상)이며 콜백은 이를 보고 page 순회를 일찍 멈춘다. 대기는
+  `call_with_deadline`으로 같은 예산에서 끊고 sensor 전용 1-slot을 쓴다. 끝나지 않은 이전
+  콜백이 slot을 쥐고 있으면 다음 tick은 즉시 `DeadlineExceeded`로 실패한다(겹쳐 실행하지
+  않는다). 끊긴 콜백 thread는 종료되지 않으므로 콜백은 자체 statement/lock timeout을 둔다.
+  Dagster의 sensor 평가 상한(기본 60초)보다 작게 잡는다.
+- `on_stall`: 켜면 콜백 예외로 tick을 실패시키지 않고 `context.log`에 남긴 뒤 정체 시계
+  (`kortravelcommon.stall`)에 기록한다. 시계는 sensor cursor에 두며 모든 반환 경로에서
+  cursor를 커밋한다. 실패 서명은 예외 형식 이름과 SQLSTATE뿐이다(원문 message 제외).
+  첫 실패 뒤 `stall_after_seconds`가 지나면 `on_stall(context, clock)`을 부르고,
+  이후 `realert_after_seconds`마다 다시 부른다. `on_stall`이 실패하면 경보하지 않은
+  것으로 두어 다음 tick에 재시도한다. 콜백이 성공하면 시계를 지운다.
+  cursor가 손상되면 경고 후 새 시계로 시작한다(경보가 한 주기 늦어질 수 있다).
+"""
 
 import json
+import math
+import threading
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from time import monotonic
+from time import time as wall_clock
 from types import SimpleNamespace
 from typing import Any
 
@@ -22,6 +42,8 @@ from dagster import (
 )
 
 from kortravelcommon.deadline import call_with_deadline
+from kortravelcommon.pg_errors import pg_error_info
+from kortravelcommon.stall import StallClock, due_alert, mark_alerted, observe_failure
 
 PROJECT_TAG = "kortravelcommon/project"
 JOB_TAG = "kortravelcommon/job"
@@ -30,6 +52,7 @@ INFRA_RETRY_PARENT_TAG = "kortravelcommon/infra_retry_parent"
 INFRA_RETRY_PENDING_TAG = "kortravelcommon/infra_retry_pending"
 _RETRY_SCAN_HEAD = "head"
 _STEP_CURSOR_PREFIX = "steps:"
+_STALL_CURSOR_PREFIX = "stall:"
 
 
 @dataclass(frozen=True)
@@ -162,10 +185,67 @@ def coalescing_schedule(
     return ScheduleDefinition(job=job, should_execute=eligible, **kwargs)
 
 
+def _failure_signature(exc: BaseException) -> str:
+    info = pg_error_info(exc)
+    name = type(exc).__name__
+    return f"{name}:{info.sqlstate}" if info is not None else name
+
+
+def _encode_stall(clock: StallClock | None) -> str:
+    payload = None if clock is None else clock.to_dict()
+    return _STALL_CURSOR_PREFIX + json.dumps(payload, separators=(",", ":"))
+
+
+def _decode_stall(context: Any) -> StallClock | None:
+    cursor = context.cursor
+    if not cursor:
+        return None
+    try:
+        if not cursor.startswith(_STALL_CURSOR_PREFIX):
+            raise ValueError("정체 시계 cursor 접두가 아닙니다.")
+        payload = json.loads(cursor[len(_STALL_CURSOR_PREFIX) :])
+        return None if payload is None else StallClock.from_dict(payload)
+    except (ValueError, TypeError):
+        context.log.warning("정체 시계 cursor가 유효하지 않아 새로 시작합니다.")
+        return None
+
+
 def reconciliation_sensor(
-    *, name: str, reconcile: Callable[[Any], int], required_resource_keys: set[str]
+    *,
+    name: str,
+    reconcile: Callable[..., int],
+    required_resource_keys: set[str],
+    budget_seconds: float | None = None,
+    on_stall: Callable[[Any, StallClock], None] | None = None,
+    stall_after_seconds: float = 900,
+    realert_after_seconds: float = 3600,
 ):
-    """새 작업 예약과 독립적으로 앱이 소유한 stale lease 회수 콜백을 실행한다."""
+    """새 작업 예약과 독립적으로 앱이 소유한 stale lease 회수 콜백을 실행한다.
+
+    budget_seconds·on_stall의 의미는 모듈 docstring을 따른다. 둘 다 생략하면 기존과 같다.
+    """
+    if budget_seconds is not None and (
+        isinstance(budget_seconds, bool)
+        or not isinstance(budget_seconds, (int, float))
+        or not math.isfinite(budget_seconds)
+        or budget_seconds <= 0
+    ):
+        raise ValueError("budget_seconds는 유한한 양수여야 합니다.")
+    # 설정 오류를 정의 시점에 드러낸다.
+    due_alert(None, now=0, stall_after=stall_after_seconds, realert_after=realert_after_seconds)
+    slots = threading.BoundedSemaphore(1) if budget_seconds is not None else None
+
+    def run_reconcile(context) -> int:
+        if budget_seconds is None:
+            return reconcile(context)
+        deadline = monotonic() + budget_seconds
+
+        def remaining() -> float:
+            return max(0.0, deadline - monotonic())
+
+        return call_with_deadline(
+            lambda: reconcile(context, remaining), timeout_seconds=budget_seconds, slots=slots
+        )
 
     @sensor(
         name=name,
@@ -174,9 +254,39 @@ def reconciliation_sensor(
         default_status=DefaultSensorStatus.RUNNING,
     )
     def reconcile_tick(context):
-        recovered = reconcile(context)
+        if on_stall is None:
+            recovered = run_reconcile(context)
+            context.log.info("중단된 실행 기록 회수: %s", recovered)
+            return SkipReason(f"중단된 실행 기록 {recovered}건 회수")
+        clock = _decode_stall(context)
+        try:
+            recovered = run_reconcile(context)
+        except Exception as exc:
+            signature = _failure_signature(exc)
+            context.log.exception("회수 콜백 실패를 정체 시계에 기록합니다: %s", signature)
+            now = wall_clock()
+            clock = observe_failure(clock, key=name, failure=signature, now=now)
+            if due_alert(
+                clock,
+                now=now,
+                stall_after=stall_after_seconds,
+                realert_after=realert_after_seconds,
+            ):
+                try:
+                    on_stall(context, clock)
+                except Exception:
+                    context.log.exception("정체 경보 콜백이 실패하여 다음 tick에 재시도합니다.")
+                else:
+                    clock = mark_alerted(clock, now)
+            return SensorResult(
+                skip_reason=f"회수 실패 기록: {signature}", cursor=_encode_stall(clock)
+            )
+        if clock is not None:
+            context.log.info("회수 콜백이 다시 성공하여 정체 시계를 지웁니다: %s", clock.last_failure)
         context.log.info("중단된 실행 기록 회수: %s", recovered)
-        return SkipReason(f"중단된 실행 기록 {recovered}건 회수")
+        return SensorResult(
+            skip_reason=f"중단된 실행 기록 {recovered}건 회수", cursor=_encode_stall(None)
+        )
 
     return reconcile_tick
 
