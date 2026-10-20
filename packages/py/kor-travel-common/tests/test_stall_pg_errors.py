@@ -122,9 +122,10 @@ def test_psycopg3_and_psycopg2_shapes():
 def test_context_chain_and_unrelated_sqlstate_not_mixed():
     first = Exception("first")
     first.sqlstate = "57014"
+    first.constraint_name = "stale"
+    first.diag = SimpleNamespace(message_primary="canceling statement")
     second = Exception("second")
     second.sqlstate = "23505"
-    second.constraint_name = "other"
     try:
         try:
             raise first
@@ -133,8 +134,9 @@ def test_context_chain_and_unrelated_sqlstate_not_mixed():
     except Exception as exc:
         outer = RuntimeError("outer")
         outer.__context__ = exc
-    # 처음 만나는 SQLSTATE는 second(23505)이고 first의 필드는 섞이지 않는다.
-    assert pg_error_info(outer) == PgErrorInfo("23505", "other", None)
+    # 처음 만나는 SQLSTATE는 second(23505)이고 앞선 57014의 제약·message는 섞지 않는다.
+    assert pg_error_info(outer) == PgErrorInfo("23505", None, None)
+    assert pg_error_info(first) == PgErrorInfo("57014", "stale", "canceling statement")
 
 
 def test_no_pg_error_and_cycle_and_bad_attrs():
