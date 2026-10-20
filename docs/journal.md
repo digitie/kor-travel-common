@@ -1,3 +1,12 @@
+## 2026-10-21 — 정체 시계의 wall clock 역행 보정
+
+PR #42(6c275a0) 후속. wall clock이 뒤로 가면 `first_failed_at > now`(또는 `alerted_at > now`)가
+역행 폭만큼 경보를 억제했다. `observe_failure`는 미래 시작 시각을 손상·역행으로 보고 같은 key로
+`now`에서 다시 시작하며, `due_alert`는 미래 경보 시각을 경보하지 않은 것으로 본다. 리뷰 P3-2(오래
+멈췄던 sensor의 cursor에 남은 옛 시계가 재기동 뒤 첫 일시 실패에 바로 경보)는 고정 4필드에 마지막
+관측 시각이 없어 코드로 구분할 수 없으므로 모듈 docstring과 가이드 §19에 문서화만 했다(재기동 전
+cursor 삭제). 검증: 새 단위 테스트, 수정 되돌림·경계(`>`→`>=`) 변이 4건 모두 RED.
+
 ## 2026-10-21 — 회수 sensor tick 예산·정체 경보와 PG 오류 분류
 
 kor-travel-map ADR-112 조사에서 weather·transport 회수 sensor가 tick 예산·cursor·정체 경보 없이

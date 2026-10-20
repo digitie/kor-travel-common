@@ -940,6 +940,12 @@ recovery = reconciliation_sensor(
   JSON)에 저장하므로 이 모드에서는 sensor cursor를 factory가 소유한다. keyset 위치는 소비자
   DB에 둔다(콜백에서 `context.update_cursor`를 쓰지 않는다). 경보 전송 채널·수신자는 소비자 소유다.
   cursor·경보에는 예외 원문이 없지만 `context.log` traceback에는 기존 tick 실패처럼 남는다.
+- wall clock이 뒤로 가 cursor의 `first_failed_at`이 미래가 되면 현재 시각(`now`)에서 시계를 다시
+  시작하고, 미래 `alerted_at`은 경보하지 않은 것으로 본다(역행 폭만큼 경보가 억제되지 않는다).
+  대신 경보 직후 역행이 일어나면 `realert_after`를 기다리지 않고 한 번 더 경보할 수 있다.
+- 시계에는 마지막 관측 시각이 없다(고정 4필드). 실패 중에 sensor를 오래 멈췄다가 다시 켜면 옛
+  `first_failed_at` 때문에 재기동 뒤 첫 실패에(일시 오류여도) 바로 경보한다. 성공 tick이 시계를
+  지운다. 원치 않으면 재기동 전에 sensor cursor를 지운다(UI의 cursor 편집 또는 `dagster sensor cursor --delete`).
 - 콜백이 멈추는 정체는 `budget_seconds`를 함께 줘야 기록된다. 예산이 없으면 Dagster의 sensor
   평가 timeout이 tick을 먼저 끊어 시계가 시작되지 않는다. 예산과 `on_stall` 소요 시간의 합도
   평가 상한 안에 둔다. 넘으면 경보가 나갔어도 경보 시각이 저장되지 않아 다음 tick에 다시 경보한다.

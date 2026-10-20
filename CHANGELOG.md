@@ -13,6 +13,9 @@
 - core-only `kortravelcommon.stall`(정체 시계)과 `kortravelcommon.pg_errors`(driver import 없는
   SQLSTATE·제약·primary message 추출), `call_with_deadline`의 선택 `slots` 인자를 추가한다.
   사용법과 소비자 책임은 [가이드 §19](docs/runbooks/dagster-adoption.md#19-회수-sensor의-tick-예산과-정체-경보)를 따른다.
+- `kortravelcommon.stall`: wall clock이 뒤로 가 `first_failed_at`이 미래가 되면 `observe_failure`가
+  같은 key라도 `now`에서 시계를 다시 시작하고, `due_alert`는 미래 `alerted_at`을 경보하지 않은 것으로
+  본다. 이전에는 역행 폭만큼 경보가 억제됐다. 그 밖의 동작과 고정 4필드 형태는 그대로다.
 
 ### Python daemon PostgreSQL 연결 재사용
 

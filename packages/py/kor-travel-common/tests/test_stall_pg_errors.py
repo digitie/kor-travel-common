@@ -190,6 +190,31 @@ def test_due_alert_thresholds():
             due_alert(clock, now=1, **kwargs)
 
 
+def test_future_first_failed_at_restarts_clock_same_key():
+    # wall clock이 1000초 뒤로 갔다: 저장된 시작 시각이 미래다.
+    skewed = mark_alerted(observe_failure(None, key="k", failure="E", now=5000), 6000)
+    restarted = observe_failure(skewed, key="k", failure="F", now=4000)
+    assert restarted == StallClock("k", 4000, "F", None)
+    # 재시작했으므로 stall_after 경과 뒤에 경보한다(역행 폭만큼 억제되지 않는다).
+    assert not due_alert(restarted, now=4899)
+    assert due_alert(restarted, now=4900)
+    # 같은 시각은 미래가 아니므로 시계를 유지한다.
+    same = observe_failure(skewed, key="k", failure="G", now=5000)
+    assert same == StallClock("k", 5000, "G", 6000)
+    with pytest.raises(ValueError):
+        observe_failure(skewed, key="k", failure="E", now=float("nan"))
+
+
+def test_future_alerted_at_does_not_suppress_alert():
+    clock = mark_alerted(observe_failure(None, key="k", failure="E", now=1000), 9000)
+    # 시계가 2000으로 돌아갔다: 미래 경보 시각은 경보하지 않은 것으로 본다.
+    assert due_alert(clock, now=2000)
+    assert not due_alert(clock, now=1899)
+    # 같은 시각이면 기존대로 realert_after를 기다린다.
+    assert not due_alert(clock, now=9000)
+    assert due_alert(clock, now=12600)
+
+
 def test_round_trip_is_json_safe_fixed_and_bounded():
     clock = mark_alerted(
         observe_failure(None, key="k", failure="x" * 1000, now=10), 20

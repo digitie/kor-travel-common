@@ -17,6 +17,11 @@
   이후 `realert_after_seconds`마다 다시 부른다. `on_stall`이 실패하면 경보하지 않은
   것으로 두어 다음 tick에 재시도한다. 콜백이 성공하면 시계를 지운다.
   cursor가 손상되면 경고 후 새 시계로 시작한다(경보가 한 주기 늦어질 수 있다).
+  wall clock이 뒤로 가 cursor의 시각이 미래가 되면 시작 시각은 다시 잡고 경보 시각은 없는
+  것으로 본다(`kortravelcommon.stall`).
+  시계는 고정 4필드라 마지막 관측 시각이 없다. 실패 중에 sensor를 오래 멈췄다가 다시 켜면
+  cursor의 옛 시작 시각 때문에 재기동 뒤 첫 실패(일시 오류여도)에 바로 경보한다. 성공 tick은
+  시계를 지우므로 이후는 정상이다. 원치 않으면 재기동 전에 sensor cursor를 지운다.
   이 모드에서는 factory가 cursor를 소유하므로 콜백은 `context.update_cursor`를 쓰지 않는다.
   cursor·경보에는 원문이 없지만 `context.log`의 traceback에는 예외 message가 남는다
   (기존 tick 실패 기록과 같은 범위).

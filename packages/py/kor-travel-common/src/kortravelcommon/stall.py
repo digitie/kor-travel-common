@@ -5,8 +5,13 @@
 - `observe_failure`: 같은 key의 실패는 `first_failed_at`과 `alerted_at`을 유지하고 마지막
   실패 서명만 바꾼다. 실패 서명이 바뀌어도(예: timeout → 연결 거부) 정체는 이어진다.
   key가 다르거나 시계가 없으면 새 시계를 시작한다. 성공은 시계를 버리는 것(None)으로 표현한다.
+  `first_failed_at`이 `now`보다 미래이면(wall clock이 뒤로 갔거나 저장값이 손상됨) 같은 key라도
+  `now`에서 새 시계를 시작한다. 그대로 두면 되돌아간 폭만큼 경보가 억제된다.
 - `due_alert`: 첫 실패 뒤 `stall_after`초가 지났고, 아직 경보하지 않았거나 마지막 경보 뒤
-  `realert_after`초가 지났으면 True다. 시각이 뒤로 가면 경과 시간은 음수이므로 경보하지 않는다.
+  `realert_after`초가 지났으면 True다. `first_failed_at`이 미래이면 경보하지 않는다(다음
+  `observe_failure`가 시계를 다시 시작한다). `alerted_at`이 미래이면 경보하지 않은 것으로 본다
+  (되돌아간 폭만큼 재경보가 억제되지 않게 한다). 대신 경보 직후 역행하면 `realert_after`보다
+  일찍 한 번 더 경보할 수 있다(억제보다 중복을 택한다).
 - `to_dict`/`from_dict`: sensor cursor 등에 넣는 고정 4필드 JSON 형태다. key·실패 서명은
   길이 상한이 있으며 실패 서명은 잘라서 보관한다. 소비자는 예외 message 같은 원문 값을
   서명에 넣지 않는다(SQLSTATE·예외 형식 이름 정도로 제한한다).
@@ -92,7 +97,9 @@ def observe_failure(
 ) -> StallClock:
     if clock is None or clock.key != key:
         return StallClock(key=key, first_failed_at=now, last_failure=failure)
-    _instant(now, "now")
+    if clock.first_failed_at > _instant(now, "now"):
+        # 시계가 뒤로 갔거나 저장값이 손상됐다. 미래 시작 시각은 경보를 억제하므로 다시 시작한다.
+        return StallClock(key=key, first_failed_at=now, last_failure=failure)
     return replace(clock, last_failure=failure)
 
 
@@ -108,7 +115,10 @@ def due_alert(
         raise ValueError("stall_after는 0 이상, realert_after는 양수여야 합니다.")
     if clock is None or now - clock.first_failed_at < stall_after:
         return False
-    return clock.alerted_at is None or now - clock.alerted_at >= realert_after
+    if clock.alerted_at is None or clock.alerted_at > now:
+        # 미래 경보 시각(시계 역행·손상)은 경보하지 않은 것으로 본다.
+        return True
+    return now - clock.alerted_at >= realert_after
 
 
 def mark_alerted(clock: StallClock, now: float) -> StallClock:
