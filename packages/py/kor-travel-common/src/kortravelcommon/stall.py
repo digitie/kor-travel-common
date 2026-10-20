@@ -10,7 +10,8 @@
 - `due_alert`: 첫 실패 뒤 `stall_after`초가 지났고, 아직 경보하지 않았거나 마지막 경보 뒤
   `realert_after`초가 지났으면 True다. `first_failed_at`이 미래이면 경보하지 않는다(다음
   `observe_failure`가 시계를 다시 시작한다). `alerted_at`이 미래이면 경보하지 않은 것으로 본다
-  (되돌아간 폭만큼 재경보가 억제되지 않게 한다).
+  (되돌아간 폭만큼 재경보가 억제되지 않게 한다). 대신 경보 직후 역행하면 `realert_after`보다
+  일찍 한 번 더 경보할 수 있다(억제보다 중복을 택한다).
 - `to_dict`/`from_dict`: sensor cursor 등에 넣는 고정 4필드 JSON 형태다. key·실패 서명은
   길이 상한이 있으며 실패 서명은 잘라서 보관한다. 소비자는 예외 message 같은 원문 값을
   서명에 넣지 않는다(SQLSTATE·예외 형식 이름 정도로 제한한다).
