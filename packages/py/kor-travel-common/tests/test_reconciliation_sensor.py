@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 import json
-import logging
 import threading
 
 import pytest
@@ -103,7 +102,7 @@ def test_invalid_stall_thresholds_rejected():
         )
 
 
-def test_stall_clock_lifecycle_in_cursor(monkeypatch, caplog):
+def test_stall_clock_lifecycle_in_cursor(monkeypatch, capfd):
     now = [1000.0]
     monkeypatch.setattr(dagster_module, "wall_clock", lambda: now[0])
     outcome = {"fail": PgError()}
@@ -122,12 +121,12 @@ def test_stall_clock_lifecycle_in_cursor(monkeypatch, caplog):
         stall_after_seconds=900,
         realert_after_seconds=3600,
     )
-    caplog.set_level(logging.INFO)
     result = _tick(sensor_def)
     clock = _clock(result.cursor)
     assert clock == StallClock("weather_sync_recovery", 1000.0, "PgError:08006", None)
     assert "secret" not in result.cursor
-    assert "PgError:08006" in caplog.text
+    # 예외는 tick 실패 대신 context.log로 드러난다.
+    assert "PgError:08006" in capfd.readouterr().err
     assert alerts == []
 
     # 실패 서명이 바뀌어도 정체 시작 시각은 유지된다.
