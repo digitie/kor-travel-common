@@ -215,7 +215,19 @@ def test_budget_timeout_is_recorded_with_on_stall(monkeypatch):
         release.set()
 
 
-@pytest.mark.parametrize("cursor", ["stall:{bad", 'stall:{"key":"x"}', "other", "stall:[]"])
+_HUGE = "1" + "0" * 400
+_CORRUPT = [
+    "stall:{bad",
+    'stall:{"key":"x"}',
+    "other",
+    "stall:[]",
+    # float 범위를 넘는 정수와 깊은 중첩도 sensor를 멈추지 않는다.
+    'stall:{"key":"c","first_failed_at":' + _HUGE + ',"last_failure":"e","alerted_at":null}',
+    "stall:" + "[" * 100000,
+]
+
+
+@pytest.mark.parametrize("cursor", _CORRUPT)
 def test_corrupt_cursor_starts_new_clock(monkeypatch, cursor):
     monkeypatch.setattr(dagster_module, "wall_clock", lambda: 7.0)
 
@@ -227,3 +239,13 @@ def test_corrupt_cursor_starts_new_clock(monkeypatch, cursor):
     )
     result = _tick(sensor_def, cursor)
     assert _clock(result.cursor) == StallClock("c", 7.0, "RuntimeError", None)
+
+
+def test_overlong_name_rejected_at_definition_with_on_stall():
+    with pytest.raises(ValueError):
+        reconciliation_sensor(
+            name="n" * 201,
+            reconcile=lambda c: 0,
+            required_resource_keys=set(),
+            on_stall=lambda c, k: None,
+        )

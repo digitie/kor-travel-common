@@ -938,7 +938,11 @@ recovery = reconciliation_sensor(
   첫 실패 뒤 `stall_after_seconds`(기본 900)에 경보하고 `realert_after_seconds`(기본 3600)마다
   다시 부른다. 경보 콜백이 실패하면 다음 tick에 재시도한다. 시계는 sensor cursor(`stall:` 접두
   JSON)에 저장하므로 이 모드에서는 sensor cursor를 factory가 소유한다. keyset 위치는 소비자
-  DB에 둔다. 경보 전송 채널·수신자는 소비자 소유다.
+  DB에 둔다(콜백에서 `context.update_cursor`를 쓰지 않는다). 경보 전송 채널·수신자는 소비자 소유다.
+  cursor·경보에는 예외 원문이 없지만 `context.log` traceback에는 기존 tick 실패처럼 남는다.
+- 콜백이 멈추는 정체는 `budget_seconds`를 함께 줘야 기록된다. 예산이 없으면 Dagster의 sensor
+  평가 timeout이 tick을 먼저 끊어 시계가 시작되지 않는다. 예산과 `on_stall` 소요 시간의 합도
+  평가 상한 안에 둔다. 넘으면 경보가 나갔어도 경보 시각이 저장되지 않아 다음 tick에 다시 경보한다.
 - 정체 시계는 Dagster와 무관한 `kortravelcommon.stall`(`StallClock`·`observe_failure`·`due_alert`·
   `mark_alerted`·`to_dict`/`from_dict`)로 다른 저장소(앱 DB 등)에도 쓸 수 있다.
 - `kortravelcommon.pg_errors.pg_error_info(exc)`는 SQLAlchemy·asyncpg·psycopg 3·psycopg2 예외

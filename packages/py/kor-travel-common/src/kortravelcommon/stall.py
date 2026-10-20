@@ -24,9 +24,15 @@ _FIELDS = ("key", "first_failed_at", "last_failure", "alerted_at")
 
 
 def _instant(value: object, name: str) -> float:
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
-        raise ValueError(f"{name} 값은 유한한 초 단위 숫자여야 합니다.")
-    return float(value)
+    if not isinstance(value, bool) and isinstance(value, (int, float)):
+        try:
+            # float 범위를 넘는 정수는 OverflowError이므로 같은 형식 오류로 바꾼다.
+            converted = float(value)
+        except OverflowError:
+            converted = math.inf
+        if math.isfinite(converted):
+            return converted
+    raise ValueError(f"{name} 값은 유한한 초 단위 숫자여야 합니다.")
 
 
 def _key(value: object) -> str:

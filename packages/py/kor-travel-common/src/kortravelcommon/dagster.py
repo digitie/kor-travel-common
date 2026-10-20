@@ -17,6 +17,15 @@
   이후 `realert_after_seconds`마다 다시 부른다. `on_stall`이 실패하면 경보하지 않은
   것으로 두어 다음 tick에 재시도한다. 콜백이 성공하면 시계를 지운다.
   cursor가 손상되면 경고 후 새 시계로 시작한다(경보가 한 주기 늦어질 수 있다).
+  이 모드에서는 factory가 cursor를 소유하므로 콜백은 `context.update_cursor`를 쓰지 않는다.
+  cursor·경보에는 원문이 없지만 `context.log`의 traceback에는 예외 message가 남는다
+  (기존 tick 실패 기록과 같은 범위).
+- 콜백이 멈추는 정체는 `budget_seconds`가 있어야 예외(`DeadlineExceeded`)로 기록된다. 예산이
+  없으면 Dagster의 sensor 평가 timeout이 tick을 먼저 끊어 시계가 시작되지 않는다.
+  `budget_seconds`와 `on_stall` 소요 시간의 합도 sensor 평가 상한 안에 두어야 한다. 넘으면
+  경보는 나갔어도 `alerted_at`이 저장되지 않아 다음 tick에 다시 경보한다.
+- 예산을 넘겨 끊긴 콜백 thread는 tick이 끝난 뒤에도 돌 수 있다. 그 thread에서
+  `context.resources`·`context.log`를 `remaining()`이 0이 된 뒤에 쓰지 않는다.
 """
 
 import json
@@ -205,7 +214,8 @@ def _decode_stall(context: Any) -> StallClock | None:
             raise ValueError("정체 시계 cursor 접두가 아닙니다.")
         payload = json.loads(cursor[len(_STALL_CURSOR_PREFIX) :])
         return None if payload is None else StallClock.from_dict(payload)
-    except (ValueError, TypeError):
+    except Exception:
+        # 거대 정수(OverflowError)·깊은 중첩(RecursionError)도 sensor를 멈추지 않게 한다.
         context.log.warning("정체 시계 cursor가 유효하지 않아 새로 시작합니다.")
         return None
 
@@ -231,8 +241,10 @@ def reconciliation_sensor(
         or budget_seconds <= 0
     ):
         raise ValueError("budget_seconds는 유한한 양수여야 합니다.")
-    # 설정 오류를 정의 시점에 드러낸다.
+    # 설정 오류를 정의 시점에 드러낸다. 시계 key는 sensor 이름이다.
     due_alert(None, now=0, stall_after=stall_after_seconds, realert_after=realert_after_seconds)
+    if on_stall is not None:
+        StallClock(key=name, first_failed_at=0, last_failure="")
     slots = threading.BoundedSemaphore(1) if budget_seconds is not None else None
 
     def run_reconcile(context) -> int:

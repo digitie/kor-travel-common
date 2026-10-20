@@ -153,9 +153,11 @@ def test_no_pg_error_and_cycle_and_bad_attrs():
             raise RuntimeError("driver bug")
 
     assert pg_error_info(Exploding()) is None
-    wrong = Exception()
-    wrong.sqlstate = 23505
-    assert pg_error_info(wrong) is None
+    for bad in (23505, "free text from another library", "2350", "23505x", "abcde"):
+        wrong = Exception()
+        wrong.sqlstate = bad
+        wrong.message = "raw"
+        assert pg_error_info(wrong) is None
 
 
 # --- stall ------------------------------------------------------------------
@@ -210,6 +212,7 @@ def test_round_trip_is_json_safe_fixed_and_bounded():
         {"key": "k", "first_failed_at": True, "last_failure": "e", "alerted_at": None},
         {"key": "k", "first_failed_at": "1", "last_failure": "e", "alerted_at": None},
         {"key": "k", "first_failed_at": float("inf"), "last_failure": "e", "alerted_at": None},
+        {"key": "k", "first_failed_at": 10**400, "last_failure": "e", "alerted_at": None},
         {"key": "k", "first_failed_at": 1, "last_failure": 5, "alerted_at": None},
         {"key": "k", "first_failed_at": 1, "last_failure": "e" * 201, "alerted_at": None},
         {"key": "k", "first_failed_at": 1, "last_failure": "e", "alerted_at": "x"},
