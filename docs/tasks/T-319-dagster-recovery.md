@@ -245,3 +245,12 @@ PG 전체 CPU는 다른 소비자의 부하도 포함하므로 daemon 원인 비
   예약, 생성 실패 슬롯의 보수적 유지, 다음 활성화의 지연 등록 거절을 확인한다.
 - 실제 SDK/격리 PG에서 원17ff의 launch RED와 수정본 GREEN을 root가 실행한다.
   새 wheel/두 독립 재리뷰/소비자 갱신과 실제 수집 검증 전 운영 종결로 표시하지 않는다.
+
+
+## 2026-10-23 workspace 갱신 CPU 후속
+
+[적용 가이드 §19](../runbooks/dagster-adoption.md#19-daemon-workspace-metadata-갱신-주기)의
+명시적60/180초 profile을 추가한다. 기존 수집·센서·heartbeat 정책은 유지한다.
+원SDK method의 경계/장애 유예·종료 원복과 whole wheel/두 독립 리뷰를 공통 gate로 둔다.
+소비자 immutable pin·실제 daemon 배포·같은 조건3쌍 CPU/RAM·작업/배포반영 검증은
+외부 선행이며, 전역T-319의 완료나 전체 CPU 저감 완료로 세지 않는다.
