@@ -86,7 +86,7 @@ def test_original_interval_is_supported_without_semantic_change(monkeypatch):
 
 @pytest.mark.parametrize("arguments", [["run"], ["--help"], ["run", "--help"]])
 def test_cli_profile_only_changes_run_and_restores_on_original_exit(monkeypatch, arguments):
-    url = "postgresql+psycopg2://synthetic:synthetic@localhost/synthetic"
+    url = "postgresql+psycopg2://localhost/synthetic"
     monkeypatch.setenv(cli.WORKSPACE_RELOAD_ENV, "180")
     monkeypatch.setenv(cli.SHARED_URL_ENV, url)
     monkeypatch.setenv(cli.DAEMON_URL_ENV, url)
