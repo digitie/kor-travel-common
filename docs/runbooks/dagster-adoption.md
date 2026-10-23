@@ -959,3 +959,36 @@ recovery = reconciliation_sensor(
 
 DB schema·트랜잭션·도메인 SQL과 경보 정책 값은 계속 소비자 소유다. 이 절은 common 단위
 시험만 근거로 하며 소비자 채택·실제 경보 도달·운영 정체 감지는 각 소비자 PR에서 확인한다.
+
+
+## 20. daemon workspace metadata 갱신 주기
+
+공유 daemon은 수집 worker가 없어도 workspace를 갱신한다. 지원 SDK 1.13.24는 기본
+60초마다 모든 code location의 job metadata를 읽고 JobSnap을 역직렬화·지문 계산한다.
+실제 공유 plane의 30초 GIL 표본86개 중44개에서 이 갱신의 JSON/serdes 경로가 관찰됐다.
+이는 CPU 시간 비율이 아니며, 별도 호스트 30초 표본의 포화나 전체 수집 비용을 이 경로만으로
+설명하지 않는다. 소스 근거는 [공식 controller 1.13.24](https://github.com/dagster-io/dagster/blob/1.13.24/python_modules/dagster/dagster/_daemon/controller.py)와
+[repository snapshot 조회](https://github.com/dagster-io/dagster/blob/1.13.24/python_modules/dagster/dagster/_api/snapshot_repository.py)다.
+
+`kor-travel-dagster-daemon run`에서만 아래 선택을 지원한다.
+
+- `KOR_TRAVEL_DAGSTER_WORKSPACE_RELOAD_SECONDS` 미설정: SDK 원 동작 유지.
+- `60`: 원 갱신60초·freshness 상한300초 유지.
+- `180`: 전체 metadata 갱신을3배 주기로 완화. freshness 상한은420초로 하여 첫 예정
+  갱신 이후의 원240초 실패 유예를 유지한다. 다른 값·빈 문자열은 값이 없는 오류로 거절한다.
+
+이 opt-in은 고정 SDK의 두 주기 상수만 진입점 수명 동안 조정하고 종료 finally에서 원복한다.
+controller 함수·instance/engine·원 CLI와 신호 처리를 교체하지 않는다. 기대 상수가
+60/300이 아니거나 설치 버전이 검증 조합과 다르면 시작을 거절한다. 일반 `dagster-daemon`,
+help/version, worker, webserver에는 적용되지 않는다.
+
+heartbeat, thread 생존 확인, sensor tick, 실행 monitoring·timeout·retry 정책은 그대로다.
+스케줄을3배로 줄이는 기능도 아니다. 배포·code location 변경을 자동 반영하는 데에는 기존보다
+최대 약120초가 더 걸릴 수 있고, 반복 metadata 갱신 실패 시 종료 판단 상한도120초 늦어진다.
+SDK의 RPC 대기와 controller loop 지연은 별도이므로420초를 실제 wall deadline으로 표시하지 않는다.
+배포 담당은 필요한 즉시 location reload와 기존 worker 보호·drain을 계속 수행한다.
+
+공통 수용은 실제 SDK method에서180초 전 갱신 생략/이후 갱신, 원 실패 유예 유지,
+예외·SystemExit 원복, 잘못된 계약 거절과 기존 pool/CLI 회귀다. 소비자 채택은 별도 PR에서
+immutable wheel pin/설정을 바꾸고, 기존 작업·sensor·heartbeat·SIGTERM·같은 입력의
+최소3쌍 CPU/메모리·신선도를 검증한다. 운영 개선 효과와 배포 수용은 아직 NOT_RUN이다.

@@ -1,3 +1,9 @@
+## 2026-10-23 — daemon workspace 갱신 opt-in
+
+- 고정 SDK의 전체 workspace metadata 갱신을 원60초 또는180초로 선택한다.
+  원 실패 유예240초·CLI·pool·신호 처리를 보존하며 미설정 기본 동작은 같다.
+- 소비자 설치/설정/운영 비용 검증은 별도 gate다.
+
 # CHANGELOG
 
 이 문서는 소비자에게 보이는 변경(패키지 공개 API·CSS·규칙·템플릿)을 기록한다. 형식은 Keep a Changelog(`https://keepachangelog.com/ko/1.1.0/`)를 따르되 단일 파일 안에 패키지별 절(`tokens`/`ui`/`py`/`standards`)을 둔다(브리프 D-18·D-31). 릴리스 시 해당 패키지 절만 `## [<pkg>-vX.Y.Z] - YYYY-MM-DD`로 옮기고 나머지는 `[Unreleased]`에 남긴다. 절차는 [release runbook](docs/runbooks/release.md), 버전 규칙은 [versions](docs/standards/versions.md)가 정본이다. 내부 구현 일지는 [journal](docs/journal.md)에 둔다.

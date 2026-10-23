@@ -1,3 +1,13 @@
+## 2026-10-23 — daemon workspace 갱신 비용 분리
+
+공유 plane의 동시30초 차분에서 host97.47%, daemon70.27%/1core를 관찰했다.
+별도 GIL 표본은86개 중44개가 workspace refresh JSON/serdes 경로였으며 CPU 기여율로
+해석하지 않는다. 기본60초 갱신을 명시opt-in180초로 늦추는 후보를 작성했다.
+원SDK failure grace240초·controller 함수·원CLI/pool/신호를 보존한다.
+집중49 PASS(3.62초)와Ruff PASS, 전체·wheel·두 독립 리뷰/CI는 후속이다.
+프로파일러 파일은 배포 저장소 밖이며 운영 instance/sensor 상태 변경은 없었다.
+소비자 실제 설치·운영 CPU 개선은 NOT_RUN이다.
+
 ## 2026-10-21 — 정체 시계의 wall clock 역행 보정
 
 PR #42(6c275a0) 후속. wall clock이 뒤로 가면 `first_failed_at > now`(또는 `alerted_at > now`)가

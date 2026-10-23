@@ -1,3 +1,11 @@
+## 2026-10-23 — workspace 갱신 CPU 후보
+
+공유 daemon의60초 metadata 갱신에서 JSON/serdes·job snapshot 지문 비용을 관찰했다.
+[가이드 §20](runbooks/dagster-adoption.md#20-daemon-workspace-metadata-갱신-주기)의 명시적
+180초 opt-in 후보는 원240초 실패 유예·CLI·pool·신호 처리를 유지한다. 원SDK 경계와
+기존 pool 집중49 PASS/Ruff PASS는 작성자 검증이며 전체·wheel·독립2리뷰·CI는 진행한다.
+소비자 배포/CPU·RAM 저감·작업 신선도 수용은 아직 NOT_RUN, 전역T-319 미완이다.
+
 ## 2026-10-18 — Common38과 native webserver 통합 후보
 
 이 후보는 PR38의 061008f와 main f914873(Common41 제품89291f3)을 일반 merge한다.
