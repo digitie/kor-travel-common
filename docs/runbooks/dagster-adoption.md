@@ -961,7 +961,7 @@ DB schema·트랜잭션·도메인 SQL과 경보 정책 값은 계속 소비자 
 시험만 근거로 하며 소비자 채택·실제 경보 도달·운영 정체 감지는 각 소비자 PR에서 확인한다.
 
 
-## 19. daemon workspace metadata 갱신 주기
+## 20. daemon workspace metadata 갱신 주기
 
 공유 daemon은 수집 worker가 없어도 workspace를 갱신한다. 지원 SDK 1.13.24는 기본
 60초마다 모든 code location의 job metadata를 읽고 JobSnap을 역직렬화·지문 계산한다.

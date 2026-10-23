@@ -249,7 +249,7 @@ PG 전체 CPU는 다른 소비자의 부하도 포함하므로 daemon 원인 비
 
 ## 2026-10-23 workspace 갱신 CPU 후속
 
-[적용 가이드 §19](../runbooks/dagster-adoption.md#19-daemon-workspace-metadata-갱신-주기)의
+[적용 가이드 §20](../runbooks/dagster-adoption.md#20-daemon-workspace-metadata-갱신-주기)의
 명시적60/180초 profile을 추가한다. 기존 수집·센서·heartbeat 정책은 유지한다.
 원SDK method의 경계/장애 유예·종료 원복과 whole wheel/두 독립 리뷰를 공통 gate로 둔다.
 소비자 immutable pin·실제 daemon 배포·같은 조건3쌍 CPU/RAM·작업/배포반영 검증은
