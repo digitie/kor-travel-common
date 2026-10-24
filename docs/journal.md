@@ -1,3 +1,16 @@
+## 2026-10-24 — 공통 지도 UI 후보
+
+사용자 요청에 따라 Map의 Feature 필터·탭·상세 작업면을 공용 API로 추출했다. UI54와 Weather375/1440px 소비2 검증 PASS. [계약](standards/map-controls.md)을 추가했고 배포는 수행하지 않는다.
+
+CI의 설치 산출물 검사가 이전dev.6 파일명을 요구해 실패했다. smoke manifest·lock·무결성 준비 스크립트를
+dev.7로 맞추고 새 peer/dependency를 lock에 반영했다. WSL에서 tarball 설치와 Next webpack/Turbopack
+두 빌드를 통과했다. 소비자 고정 UI tarball의 내용은 변경하지 않았다.
+설치 smoke 화면이 실제 지도 export도 import·렌더하도록 보강했고, 로컬 tarball의 옛 lock 메타데이터를
+다시 읽혀 Base UI peer와 lucide 런타임 의존성을 포함했다. 두 bundler의 최종 빌드도 통과했다.
+James의 검증 P2 두 건을 반영해 지도 CSS export도 실제 import하고 저장소 밖의 독립 디렉터리에서
+tarball을 설치·빌드한다. 부모 node_modules가 의존성을 대신 제공할 수 없는 WSL 격리 검사에서
+webpack/Turbopack 두 빌드 PASS다. 공통 UI 산출물의 해시는 계속 동일하다.
+
 ## 2026-10-23 — daemon workspace 갱신 비용 분리
 
 공유 plane의 동시30초 차분에서 host97.47%, daemon70.27%/1core를 관찰했다.

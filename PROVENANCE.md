@@ -15,6 +15,8 @@
 
 | ID | common 파일군 | 원천 저장소 | 커밋 | 원천 경로 | 원천 라이선스 | 수정 | 근거 |
 |---|---|---|---|---|---|---|---|
+| PV-018 | `packages/ui/src/map-controls.tsx` | kor-travel-map | `974e2d025` | `packages/kor-travel-map-admin/frontend/src/app/features/features-client.tsx` | GPL-3.0-or-later | Feature 필터·탭·상세 작업면을 공용 API로 추출(2026-10-24) | [계약·세 소비자 채택](docs/standards/map-controls.md) |
+| PV-019 | `packages/ui/map-controls.css` | kor-travel-map | `974e2d025` | `packages/kor-travel-map-admin/frontend/src/app/features/features-client.tsx` | GPL-3.0-or-later | Feature 작업면과 button·tabs·native-select 치수를 공용 범위로 구성(2026-10-24) | [계약·검증](docs/standards/map-controls.md) |
 | PV-001 | `tools/validate_plan.py` | canview | `1f93b8adb34a48537db69b950c8a99ce89859760` | `tools/validate_plan.py` | GPL-3.0(원문, 버전 미지정) → common `GPL-3.0-or-later`(권리자 동일) | docstring 1줄("G0–G6 통과" → "gate 통과"), 파서·규칙 무변경 (2026-09-06) | `docs/survey/cross/canview-structure-checklist.md` §1.2 |
 | PV-002 | `tools/validate_document_links.py` | canview | `1f93b8a` | `tools/validate_document_links.py` | 동상 | 대상 경로(`docs/`·`packages/`·`tools/`·`templates/`·`tests/`·루트) 변경, 절대 경로 링크를 오류로 판정, 공백 포함 target(산문)·inline code span 제외 — 사실상 재작성 (2026-09-06) | 동상 §1.2·§4.3 |
 | PV-003 | `tests/test_plan_validation.py` | canview | `1f93b8a` | `tests/test_plan_validation.py` | 동상 | 모듈명 `canview_plan_validation` → `kor_travel_common_plan_validation`, tempdir prefix; 기존 35 tests 보존 + 완료 날짜·PR 제목 회귀 1건 추가·출처 헤더 (2026-09-06) | 동상 §1.2·§4.2 |
