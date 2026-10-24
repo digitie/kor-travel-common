@@ -1,0 +1,44 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+ * Origin: kor-travel-map@974e2d025 packages/kor-travel-map-admin/frontend/src/app/features/features-client.tsx (GPL-3.0-or-later)
+ * Derived-From: FeatureMapToolbar·tabs·button·native-select의 공용 토큰과 치수
+ * Modified: 2026-10-24 — 공용 토큰과 독립적인 지도 UI 범위로 정리
+ */
+.kt-map-filter-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .5rem .75rem; min-width: 0; }
+.kt-map-filter-field { display: flex; flex: 0 1 11rem; flex-direction: column; gap: .25rem; min-width: 0; max-width: 100%; width: 11rem; }
+.kt-map-filter-field > label, .kt-map-filter-label { color: var(--kt-text-secondary); font: 500 var(--text-kt-2xs)/1 var(--kt-font-sans); }
+.kt-map-kind-field { flex: 1 1 28rem; width: auto; }
+.kt-map-kinds { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; min-width: 0; }
+.kt-map-kinds > button { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; gap: .375rem; height: var(--kt-control-h-sm); min-height: var(--kt-control-h-sm); padding: 0 .625rem; border: 1px solid var(--kt-control-line); border-radius: var(--kt-radius-control); color: var(--kt-text-primary); background: var(--kt-surface-card); font: 500 var(--text-kt-xs)/1.5 var(--kt-font-sans); white-space: nowrap; cursor: pointer; }
+.kt-map-kinds > button[aria-pressed="true"] { border-color: var(--kt-brand); background: var(--kt-brand-tint); color: var(--kt-brand); }
+.kt-map-kinds > button:hover { background: var(--kt-surface-subtle); }
+.kt-map-kinds > button[aria-pressed="true"]:hover { color: var(--kt-brand-hover); border-color: var(--kt-brand-hover); }
+.kt-map-kinds > button.kt-map-kind-reset { border-color: transparent; background: transparent; color: var(--kt-text-secondary); }
+.kt-map-kinds > button:disabled { cursor: not-allowed; }
+.kt-map-kinds > button:disabled > * { opacity: .55; }
+.kt-map-kinds svg { width: .875rem; height: .875rem; flex: 0 0 auto; }
+.kt-map-filter-field input[type="search"], .kt-map-filter-field select { box-sizing: border-box; width: 100%; max-width: 100%; height: var(--kt-control-h-sm); min-height: var(--kt-control-h-sm); padding: 0 .625rem; border: 1px solid var(--kt-control-line); border-radius: var(--kt-radius-control); background: var(--kt-surface-card); color: var(--kt-text-primary); font: 400 var(--text-kt-xs)/1.5 var(--kt-font-sans); }
+.kt-map-tabs { display: flex; flex-direction: column; gap: .5rem; min-width: 0; min-height: 0; }
+.kt-map-tab-panel { min-width: 0; min-height: 0; font: 400 var(--text-kt-sm)/1.5 var(--kt-font-sans); }
+.kt-map-tab-panel[hidden] { display: none; }
+.kt-map-view-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; min-width: 0; }
+.kt-map-view-tabs { display: inline-flex; flex-shrink: 0; align-items: center; gap: .125rem; height: var(--kt-control-h); padding: .125rem; box-sizing: border-box; border-radius: var(--kt-radius-control); background: var(--kt-surface-subtle); }
+.kt-map-view-tabs > button { display: inline-flex; align-items: center; justify-content: center; gap: .375rem; height: 100%; min-height: 0; padding: 0 .625rem; border: 1px solid transparent; border-radius: var(--kt-radius-control); background: transparent; color: var(--kt-text-secondary); font: 500 var(--text-kt-sm)/1.5 var(--kt-font-sans); cursor: pointer; }
+.kt-map-view-tabs > button[data-active] { border-color: var(--kt-border); background: var(--kt-surface-card); color: var(--kt-text-primary); }
+.kt-map-view-tabs svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+.kt-map-readout { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; min-width: 0; color: var(--kt-text-secondary); font: 400 var(--text-kt-2xs)/1.5 var(--kt-font-mono); font-variant-numeric: tabular-nums; }
+.kt-map-count { padding: .125rem .375rem; border-radius: var(--kt-radius-control); background: var(--kt-surface-subtle); font-family: var(--kt-font-sans); }
+.kt-map-coordinates { overflow-wrap: anywhere; }
+.kt-map-combobox { box-sizing: border-box; width: 100%; height: var(--kt-control-h-sm); min-height: var(--kt-control-h-sm); flex-wrap: nowrap; gap: .25rem; padding: .125rem .375rem; border-radius: var(--kt-radius-control); border-color: var(--kt-control-line); background: var(--kt-surface-card); font-size: var(--text-kt-xs); }
+.kt-map-selected-chips { display: flex; flex: 0 1 auto; gap: .25rem; min-width: 0; max-width: 65%; overflow-x: auto; scrollbar-width: none; }
+.kt-map-selected-chips:empty { display: none; }
+.kt-map-combobox [data-slot="combobox-chip-input"] { flex-basis: 4rem; min-width: 0; height: 1.5rem; min-height: 0; padding: 0; font-size: var(--text-kt-xs); }
+.kt-map-combobox [data-slot="combobox-chip"] { flex-shrink: 0; max-width: 8rem; min-width: 3rem; height: 1.5rem; font-size: var(--text-kt-2xs); }
+.kt-map-combobox [data-slot="combobox-chip-remove"] { width: 1.5rem; height: 1.5rem; min-height: 0; flex-shrink: 0; }
+.kt-map-select-trigger { display: inline-flex; align-items: center; gap: .375rem; box-sizing: border-box; width: 100%; height: var(--kt-control-h-sm); min-height: var(--kt-control-h-sm); padding: 0 .625rem; border: 1px solid var(--kt-control-line); border-radius: var(--kt-radius-control); background: var(--kt-surface-card); color: var(--kt-text-primary); font: 400 var(--text-kt-xs)/1.5 var(--kt-font-sans); }
+.kt-map-select-trigger > span { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+.kt-map-select-trigger > svg { width: .875rem; height: .875rem; flex-shrink: 0; }
+.kt-map-stage { position: relative; min-width: 0; overflow: hidden; isolation: isolate; }
+.kt-map-detail { position: absolute; top: 5rem; right: .75rem; bottom: 6rem; z-index: 10; width: min(22rem, calc(100% - 1.5rem)); max-height: calc(100% - 11rem); min-width: 0; overflow: auto; overscroll-behavior: contain; border: 1px solid var(--kt-border); border-radius: var(--kt-radius-panel); background: var(--kt-surface-card); color: var(--kt-text-primary); box-shadow: var(--kt-shadow-elevated); font: 400 var(--text-kt-sm)/1.5 var(--kt-font-sans); }
+:where(.kt-map-kinds > button, .kt-map-view-tabs > button, .kt-map-filter-field input, .kt-map-filter-field select, .kt-map-detail):focus-visible { outline: 2px solid var(--kt-focus); outline-offset: 2px; }
+@media (max-width: 40rem) { .kt-map-kind-field { flex-basis: 100%; } .kt-map-filter-field:not(.kt-map-kind-field) { flex: 1 1 9rem; } }

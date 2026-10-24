@@ -1,3 +1,7 @@
+## 2026-10-24 — 공용 지도 작업면 후보
+
+- UI dev.7에 지도 종류 아이콘·필터·지도/목록 탭·건수와 실제 좌표/줌·상세 오버레이를 추가했다. Map/Transport/Weather가 공용 API와 스타일을 채택한다. [계약](docs/standards/map-controls.md).
+
 ## 2026-10-23 — daemon workspace 갱신 opt-in
 
 - 고정 SDK의 전체 workspace metadata 갱신을 원60초 또는180초로 선택한다.

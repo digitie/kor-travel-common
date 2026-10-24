@@ -1,3 +1,7 @@
+## 2026-10-24 — 공용 지도 작업면 후보
+
+Map Feature 작업면을 common으로 추출하고 Map/Transport/Weather 소비자에 연결한다. 종류 아이콘·30px 필터·지도/목록 탭·건수+좌표/줌·상세 오버레이를 공유한다. [계약과 검증](standards/map-controls.md). UI54·Weather 소비자 반응형2 PASS, 소비자 정확 커밋/CI/최종 리뷰는 진행 중이다. 다음은 소비자 채택 후보 고정과 남은 검증이며 운영 빌드·배포는 사용자 지정 다른 에이전트가 수행한다.
+
 ## 2026-10-23 — workspace 갱신 CPU 후보
 
 공유 daemon의60초 metadata 갱신에서 JSON/serdes·job snapshot 지문 비용을 관찰했다.

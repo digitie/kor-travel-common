@@ -1,3 +1,7 @@
+## 2026-10-24 — 공통 지도 UI 후보
+
+사용자 요청에 따라 Map의 Feature 필터·탭·상세 작업면을 공용 API로 추출했다. UI54와 Weather375/1440px 소비2 검증 PASS. [계약](standards/map-controls.md)을 추가했고 배포는 수행하지 않는다.
+
 ## 2026-10-23 — daemon workspace 갱신 비용 분리
 
 공유 plane의 동시30초 차분에서 host97.47%, daemon70.27%/1core를 관찰했다.
