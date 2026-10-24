@@ -5,6 +5,8 @@
 CI의 설치 산출물 검사가 이전dev.6 파일명을 요구해 실패했다. smoke manifest·lock·무결성 준비 스크립트를
 dev.7로 맞추고 새 peer/dependency를 lock에 반영했다. WSL에서 tarball 설치와 Next webpack/Turbopack
 두 빌드를 통과했다. 소비자 고정 UI tarball의 내용은 변경하지 않았다.
+설치 smoke 화면이 실제 지도 export도 import·렌더하도록 보강했고, 로컬 tarball의 옛 lock 메타데이터를
+다시 읽혀 Base UI peer와 lucide 런타임 의존성을 포함했다. 두 bundler의 최종 빌드도 통과했다.
 
 ## 2026-10-23 — daemon workspace 갱신 비용 분리
 
