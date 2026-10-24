@@ -4,4 +4,5 @@
 @import "tailwindcss";
 @import "@kor-travel/tokens/theme.css";
 @import "@kor-travel/tokens/base.css";
+@import "@kor-travel/ui/map-controls.css";
 @source "../node_modules/@kor-travel/ui/dist";

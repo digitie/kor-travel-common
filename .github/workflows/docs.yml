@@ -212,9 +212,16 @@ jobs:
           npm pack --workspace packages/tokens --pack-destination test-results/ui-pack
           npm pack --workspace packages/ui --pack-destination test-results/ui-pack
           node packages/ui/smoke/prepare-lock.mjs
-          npm ci --prefix packages/ui/smoke/next-app --no-audit --no-fund
-          npm run build:webpack --prefix packages/ui/smoke/next-app
-          npm run build --prefix packages/ui/smoke/next-app
+          # 저장소의 node_modules가 누락된 배포 의존성을 대신 공급하지 못하게 격리한다.
+          smoke_dir="$(mktemp -d)"
+          trap 'rm -rf "$smoke_dir"' EXIT
+          smoke_app="$smoke_dir/packages/ui/smoke/next-app"
+          mkdir -p "$smoke_app" "$smoke_dir/test-results/ui-pack"
+          tar --exclude=node_modules --exclude=.next -C packages/ui/smoke/next-app -cf - . | tar -C "$smoke_app" -xf -
+          cp test-results/ui-pack/*.tgz "$smoke_dir/test-results/ui-pack/"
+          npm ci --prefix "$smoke_app" --no-audit --no-fund
+          npm run build:webpack --prefix "$smoke_app"
+          npm run build --prefix "$smoke_app"
           npm ci --prefix packages/ui/examples/next-app --no-audit --no-fund
           npm run build --prefix packages/ui/examples/next-app
       - name: tarball 설치 스모크
