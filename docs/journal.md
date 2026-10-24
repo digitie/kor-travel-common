@@ -2,6 +2,10 @@
 
 사용자 요청에 따라 Map의 Feature 필터·탭·상세 작업면을 공용 API로 추출했다. UI54와 Weather375/1440px 소비2 검증 PASS. [계약](standards/map-controls.md)을 추가했고 배포는 수행하지 않는다.
 
+CI의 설치 산출물 검사가 이전dev.6 파일명을 요구해 실패했다. smoke manifest·lock·무결성 준비 스크립트를
+dev.7로 맞추고 새 peer/dependency를 lock에 반영했다. WSL에서 tarball 설치와 Next webpack/Turbopack
+두 빌드를 통과했다. 소비자 고정 UI tarball의 내용은 변경하지 않았다.
+
 ## 2026-10-23 — daemon workspace 갱신 비용 분리
 
 공유 plane의 동시30초 차분에서 host97.47%, daemon70.27%/1core를 관찰했다.
