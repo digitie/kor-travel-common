@@ -1,3 +1,10 @@
+## 2026-10-25 — 남은 높이 지도 작업면 후보
+
+C-MAP-01의 additive UI dev.8을 구현했다. [계약](standards/map-controls.md)과 [검증 기록](reports/2026-10-25-map-workspace.md)을 따른다.
+후보80b97f2의 CI와 James 독립 리뷰는 통과했고 Popper가 재현한 빈 boolean 슬롯의 불필요한 공간 예약을 수정했다.
+제품a74ac80의 WSL UI76개·타입과 fresh Docker UI76·tokens7·타입/빌드가 통과했고 정규 pack71d9f6ce…를 소비자에 인계했다.
+다음은 최종 CI·두 독립 재리뷰와 소비자 고정이며 운영 변경은 하지 않는다.
+
 ## 2026-10-24 — 공용 지도 작업면 후보
 
 Map Feature 작업면을 common으로 추출하고 Map/Transport/Weather 소비자에 연결한다. 종류 아이콘·30px 필터·지도/목록 탭·건수+좌표/줌·상세 오버레이를 공유한다. [계약과 검증](standards/map-controls.md). UI54·Weather 소비자 반응형2 PASS, 소비자 정확 커밋/CI/최종 리뷰는 진행 중이다. 다음은 소비자 채택 후보 고정과 남은 검증이며 운영 빌드·배포는 사용자 지정 다른 에이전트가 수행한다.
