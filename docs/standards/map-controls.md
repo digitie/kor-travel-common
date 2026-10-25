@@ -44,13 +44,13 @@ Weather 소비자375/1440px 브라우저에서 필터 높이/폭·PC 한 줄·�
 | API | 선택 props | 계약 |
 |---|---|---|
 | `MapWorkspace` | 일반 `div` props·`style`·`ref` | 제한된 부모 높이를 자식 탭과 stage로 전달 |
-| `MapFilterPanel` | `label="지도 필터"`, `expanded`, `onExpandedChange`, `triggerRef` | 640px 이하에서 기본 접힘, PC에서는 항상 본문 표시 |
+| `MapFilterPanel` | `label="지도 필터"`, `expanded`, `onExpandedChange`, `triggerRef` | 폭640px 또는 높이480px 이하에서 기본 접힘, 그 밖에서는 본문 표시 |
 | `MapStage` | `view="map"` 또는 `"list"`, `summary`, `detail`, 일반 `div` props | children은 canvas/목록, summary/detail은 분리된 상부 요약·상세 슬롯 |
 | `MapDetailOverlay` 확장 | `header`, `collapsible=false`, `collapsed`, `onCollapsedChange` | header를 제공한 경우만 고정 header와 본문 스크롤을 사용 |
 
 `MapFilterPanel.label`에는 현재 선택 조건 요약을 넣을 수 있다. 접기 때 본문 DOM과
 입력값은 보존하며 CSS로만 숨긴다. 모바일로 전환하거나 외부에서 접을 때 본문 안의
-초점은 보이는 trigger로 돌린다. `triggerRef`는 React 버튼 ref다. PC에서는 trigger가
+초점은 보이는 trigger로 돌린다. `triggerRef`는 React 버튼 ref다. 넓고 높은 화면에서는 trigger가
 숨겨지므로 소비자는 `getClientRects().length` 등으로 가시성을 확인한 뒤 지도 또는
 원래 열기 버튼으로 복원한다. 상세 진입 초점·닫은 뒤 복원은 기존과 같이 소비자 소유다.
 
@@ -88,8 +88,11 @@ Stage는 빈 자료·키 없음·WebGL 불가·로딩에도 같은 높이를 유
 스크롤하지 않고, list content만 단일 주 스크롤을 소유한다. 목록 자식에 별도 고정 높이와
 중복 overflow:auto를 두지 않는다. 상세 본문은 별도의 문맥 스크롤이다.
 
-요약은 상부 최대35%와 내부 스크롤을 갖고 상세는 그 아래 남은 영역을 사용한다.
-중요 오류/갱신 지연은 summary의 첫 항목에 둔다. overlay는 오른쪽3.5rem·아래3rem을
+요약은 고정 비율 제한 없이 자연 높이를 우선 사용한다. 상세가 없으면 안전 영역 전체를
+사용할 수 있고, 상세가 있으면44px 동작과 header 여백을 먼저 보장한 뒤 요약과 본문을 배분한다.
+전체 내용이 맞지 않는 경우에만 요약 자체를 스크롤한다. 긴 상세 header는 별도의 줄 수 제한 없이
+사용 가능한 높이에서 스크롤하며 닫기·접기 버튼은 상단에 고정한다.
+중요 오류/갱신 지연은 summary의 첫 항목에 둔다. overlay는 오른쪽44px+.75rem·아래24px+1.5rem을
 비워 우측 지도 컨트롤과 하단 출처를 피한다. 소비자가 추가 컨트롤을 다른 위치에 둔다면
 슬롯 바깥의 해당 앱 배치를 점검해야 한다. 요약/상세 자체의 과도한 고정 높이는 넣지 않는다.
 
@@ -100,6 +103,8 @@ Stage는 빈 자료·키 없음·WebGL 불가·로딩에도 같은 높이를 유
 `map-stage-list`, `map-stage-summary`, `map-stage-detail`, `map-detail-header`,
 `map-detail-body`다. stage의 `data-view`는 map/list, 필터의 `data-expanded`는 true/false다.
 새 testid는 강제하지 않으며 일반 DOM props로 소비자가 추가할 수 있다.
+긴 필터 label은 접힌 상태에서 한 줄로 줄이며 title과 접근 가능한 이름에 원문을 유지하고,
+펼친 상태에서는 전체 label을 줄바꿈한다. 짧은 높이 조건과 focus 복원의 matchMedia 조건은 같다.
 
 ### 후보 검증
 

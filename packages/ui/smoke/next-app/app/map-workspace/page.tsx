@@ -15,7 +15,7 @@ export default function WorkspaceSmoke() {
   return <main style={{ height: "100dvh", display: "flex", flexDirection: "column", minHeight: 0, padding: 8, boxSizing: "border-box" }}>
     <h1 style={{ fontSize: 16, margin: "0 0 8px" }}>공용 지도 작업면</h1>
     <MapWorkspace>
-      <MapFilterPanel triggerRef={trigger}>
+      <MapFilterPanel triggerRef={trigger} label="지도 필터 · 모든 종류 · 전체 데이터 출처 · 선택 조건 요약">
         <MapFilterBar>
           <MapKindFilter value={["station"]} options={[{ value: "station", label: "역", icon: <span aria-hidden="true">●</span> }, { value: "fuel", label: "주유소" }]} onToggle={() => undefined} />
           <MapFilterField label="데이터 출처" htmlFor="source"><select id="source" value={state} onChange={(event) => setState(event.target.value)}>{["자료 없음", "키 없음", "WebGL 불가", "조회 중"].map((value) => <option key={value}>{value}</option>)}</select></MapFilterField>

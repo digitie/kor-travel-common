@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 import { createRef, useState } from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MapDetailOverlay, MapFilterPanel, MapKindFilter, MapReadout, MapStage, MapTabPanel, MapTabs, MapViewTabs, MapWorkspace } from "../src/map-controls.js";
@@ -43,6 +43,17 @@ describe("공용 지도 컨트롤", () => {
     const { rerender } = render(<MapFilterPanel expanded><input aria-label="검색" /></MapFilterPanel>);
     screen.getByRole("textbox").focus();
     rerender(<MapFilterPanel expanded={false}><input aria-label="검색" /></MapFilterPanel>);
+    expect(screen.getByRole("button")).toHaveFocus();
+  });
+
+  it("짧은 가로 화면으로 전환되어 입력이 숨으면 필터 버튼으로 초점을 돌린다", () => {
+    let change = () => {};
+    const media = { matches: false, addEventListener: (_: string, listener: () => void) => { change = listener; }, removeEventListener: vi.fn() };
+    vi.stubGlobal("matchMedia", vi.fn(() => media));
+    render(<MapFilterPanel><input aria-label="검색" /></MapFilterPanel>);
+    screen.getByRole("textbox").focus();
+    media.matches = true;
+    act(() => change());
     expect(screen.getByRole("button")).toHaveFocus();
   });
 

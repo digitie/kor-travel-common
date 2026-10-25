@@ -2,6 +2,11 @@
 
 UI dev.8에 opt-in MapWorkspace·MapFilterPanel·MapStage와 상세 header/접기를 추가했다. 기존 dev.7 기본값과 스타일은 유지한다. [계약](docs/standards/map-controls.md).
 
+실제 소비자에서 요약35%가 가격을 가리는 후속을 재현해 자연 높이와 상세 동작 최소공간으로
+배분하도록 수정했다. 짧은 높이의 필터 접힘·긴 label 접근도 보강했다. 가로/200%의 물리적
+내용 부족은 통과로 세지 않으며 [검증 기록](docs/reports/2026-10-25-map-workspace.md)의 v2 절에 남겼다.
+
+
 ## 2026-10-24 — 공용 지도 작업면 후보
 
 - UI dev.7에 지도 종류 아이콘·필터·지도/목록 탭·건수와 실제 좌표/줌·상세 오버레이를 추가했다. Map/Transport/Weather가 공용 API와 스타일을 채택한다. [계약](docs/standards/map-controls.md).

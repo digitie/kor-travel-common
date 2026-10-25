@@ -25,7 +25,7 @@ export function MapFilterPanel({ children, label = "지도 필터", expanded, on
   const body = useRef<HTMLDivElement>(null);
   useImperativeHandle(triggerRef, () => trigger.current!, []);
   useEffect(() => {
-    const mobile = window.matchMedia("(max-width: 40rem)");
+    const mobile = window.matchMedia("(max-width: 40rem), (max-height: 30rem)");
     const restore = () => {
       if (!open && mobile.matches && body.current?.contains(document.activeElement)) trigger.current?.focus();
     };
@@ -34,9 +34,9 @@ export function MapFilterPanel({ children, label = "지도 필터", expanded, on
     return () => mobile.removeEventListener("change", restore);
   }, [open]);
   return <div {...props} className={`kt-map-filter-panel ${className}`} data-slot="map-filter-panel" data-expanded={open}>
-    <button ref={trigger} type="button" className="kt-map-filter-toggle" data-slot="map-filter-trigger" aria-expanded={open} aria-controls={id} onClick={() => {
+    <button ref={trigger} type="button" className="kt-map-filter-toggle" data-slot="map-filter-trigger" title={label} aria-expanded={open} aria-controls={id} onClick={() => {
       setLocalExpanded(!open); onExpandedChange?.(!open);
-    }}>{label}{open ? <ChevronUpIcon aria-hidden="true" /> : <ChevronDownIcon aria-hidden="true" />}</button>
+    }}><span className="kt-map-filter-toggle-label">{label}</span>{open ? <ChevronUpIcon aria-hidden="true" /> : <ChevronDownIcon aria-hidden="true" />}</button>
     <div ref={body} id={id} className="kt-map-filter-panel-body" data-slot="map-filter-panel-body">{children}</div>
   </div>;
 }

@@ -36,8 +36,9 @@ try {
     assert.ok(closeBox.y >= initial.y && closeBox.y + closeBox.height <= initial.y + initial.height, "짧은 화면 닫기 접근");
     if (hasTouch) assert.ok(closeBox.width >= 44 && closeBox.height >= 44, "상세 coarse 44px");
     assert.equal(await page.locator('[data-slot="map-detail-body"]:visible').evaluate((element) => element.scrollHeight > element.clientHeight), true, "상세 본문만 스크롤");
-    const filter = page.getByRole("button", { name: "지도 필터" });
-    if (width <= 640) {
+    const filter = page.locator('[data-slot="map-filter-trigger"]');
+    const compact = width <= 640 || height <= 480;
+    if (compact) {
       assert.equal(await filter.getAttribute("aria-expanded"), "false");
       await filter.click();
     }
@@ -50,7 +51,7 @@ try {
       await select.selectOption(value);
       assert.equal(Math.round((await stage.boundingBox()).height), Math.round(expandedStage.height), "상태별 작업면 높이 보존");
     }
-    if (width <= 640) await filter.click();
+    if (compact) await filter.click();
     await page.getByRole("button", { name: "상세 접기" }).click();
     assert.equal(await page.locator('[data-slot="map-detail-body"]:visible').count(), 0);
     await page.getByRole("button", { name: "상세 펼치기" }).click();
@@ -58,7 +59,7 @@ try {
     await detail.evaluate((element) => element.focus());
     await page.keyboard.press("Escape");
     assert.equal(await detail.count(), 0);
-    if (width <= 640) assert.equal(await filter.evaluate((element) => element === document.activeElement), true);
+    if (compact) assert.equal(await filter.evaluate((element) => element === document.activeElement), true);
     await page.getByRole("tab", { name: "목록", exact: true }).click();
     const list = page.locator('[data-slot="map-stage-list"]');
     assert.equal(await list.evaluate((element) => element.scrollHeight > element.clientHeight && getComputedStyle(element).overflowY === "auto"), true);
@@ -81,6 +82,16 @@ try {
     console.log(JSON.stringify({ width, height, hasTouch, stage: initial, select: selectBox, legacy, errors: errors.length, passed: true }));
     await context.close();
   }
+  const page = await browser.newPage({ viewport: { width: 320, height: 568 }, hasTouch: true });
+  await page.goto(`${origin}/map-workspace`);
+  await page.evaluate(() => { document.documentElement.style.fontSize = "200%"; });
+  const trigger = page.locator('[data-slot="map-filter-trigger"]');
+  assert.equal(await trigger.evaluate((element) => element.getBoundingClientRect().right <= innerWidth), true, "200% 조건 요약이 viewport 밖으로 넘치지 않음");
+  assert.equal(await trigger.getAttribute("title"), await trigger.innerText());
+  await trigger.click();
+  assert.equal(await page.locator(".kt-map-filter-toggle-label").evaluate((element) => element.scrollWidth <= element.clientWidth + 1), true, "펼치면 조건 요약 전체 줄바꿈");
+  console.log(JSON.stringify({ width: 320, fontPercent: 200, filterLabelAccessible: true }));
+  await page.close();
 } finally {
   await browser.close();
 }

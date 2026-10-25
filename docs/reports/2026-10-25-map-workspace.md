@@ -76,3 +76,48 @@ Workspace 밖 기존 dev.7 상세의 absolute/top80px/bottom96px와 필터 높�
 테스트 모의를 보완한 뒤60개가 통과했다. QA mirror 전체 SPDX 검사는 저장소 밖 검증 helper의
 헤더 누락2개를 검출했으며, 실제 소스 정본140개 파일의 SPDX 오류0으로 범위를 구분했다.
 이 과정을 제품 실패나 검증 성공으로 바꾸어 집계하지 않는다.
+
+
+## v2 — 실제 소비자 clipping 후속
+
+앞선 source96103d9·문서a4d28dd·해시e36bae의 단독 짧은 안내 smoke는 통과했지만,
+Transport 소비자의 실제 오류3줄+유가 통계를 넣자320×568/stage y221·h339에서
+요약35%가98.34px로 제한돼 평균/최저 가격(y346–404)이 전부 가렸다. 이 후보는
+소비자 수용 기준으로 superseded이며 원 tarball과 실패 이미지는 보존한다.
+
+35% 제한을 제거하고 자연 높이 우선으로 바꿨다. 상세를 열 때는 닫기/접기 header의 최소
+공간을 남기며, 긴 header 자체를 스크롤하고 동작 버튼을 상단에 고정한다. header의
+필수 시각/상태가 항상 최초에 보인다고 보장하지 않으므로 소비자는 우선순위를 배치해야 한다.
+새 public prop·측정 hook은 없다. 짧은 높이480px 이하도 필터를 기본 접고, 긴 조건 label은
+접힌 상태에서 줄임·펼친 상태에서 전체 줄바꿈으로 처리한다.
+
+고정 문구 재현 fixture의 clip ancestor 전체를 검사한 CSS 초안 결과:
+
+| viewport / 글자 | stage | 상세 | 오류/가격/지연시각 전체 표시 | 닫기·접기 |
+|---|---|---|---|---|
+| 320×568 / 100% | y221·h339 | 없음/있음 | 모두 표시, 요약 자연 높이206px | 44px 접근 가능 |
+| 812×375 / 100% | h203 | 없음 | 모두 표시 | 해당 없음 |
+| 812×375 / 100% | h203 | 있음 | 가격/지연시각 가림, NOT_PASS | 44px 접근 가능 |
+| 320×568 / 200% | h175 | 없음/있음 | 공간 부족, NOT_PASS | 상세가 있으면44px 접근 가능 |
+
+첫 소비자 재현의 가림과 달리 뒤 두 조건은 전체 필수 내용+상세 동작이 물리적으로 맞지 않는
+경우다. 스크롤할 수 있다는 사실만으로 최초 가시성 PASS로 세지 않는다. 소비자 compact화나
+명시적 지도 확장의 판단이 필요하며, 이 미해결 한계를 두 독립 리뷰와 root에 전달한다.
+[재현 fixture](../../packages/ui/smoke/next-app/app/map-workspace/content/page.tsx)와
+[clip 검사](../../packages/ui/smoke/map-workspace-content-browser.mjs)를 함께 보존한다.
+
+v2 최종 source·별도 tarball 경로/해시·정적 설치 결과는 후속 정산에서 고정한다.
+
+
+### v2 정적 설치와 pin
+
+- 후보: `/var/tmp/codex-common-map-workspace-20261025/test-results/ui-pack-v2/kor-travel-ui-0.1.0-dev.8.tgz`.
+- SHA256: `143273f4d435b98f7b5355f33883332bd1873835d70cabce5fc819b45e17f710`.
+- v1은 원래 `ui-pack` 경로에 e36bae 해시 그대로 보존했다. 정식 릴리스 번호는 발행하지 않았다.
+- 최종 정적 설치 후 WSL 타입·UI61·tokens7·별도 설치·webpack/Turbopack PASS.
+- n150 native Chromium 일반4조건과320/200% 긴 필터 label 접근을 통과했다.
+  짧은 가로 화면의 stage는 y148/h219로 늘었다. 기존 dev.7 기본 스타일 검증도 유지됐다.
+- 정적 재현조합6조건은 위 CSS 초안 표와 같은 FULL3/LIMITED_NOT_PASS3 결과다.
+  스크립트의 exit0은 검사가 실행됐음을 뜻하며 제한3조건을 PASS로 바꾸지 않는다.
+- 최종 문서 링크·SPDX142파일·전체 비밀 검사1,232파일 오류/발견0·diff check를 확인했다.
+- 정확 제품 소스는 이 변경의 feature commit으로 고정하며 뒤 기록은 제품 바이트를 바꾸지 않는다.
