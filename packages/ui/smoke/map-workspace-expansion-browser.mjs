@@ -13,8 +13,9 @@ for (const name of ["chromium", "firefox"]) {
     for (const [width, height, font] of [[375, 812, 100], [320, 568, 200], [812, 375, 100]]) {
       const page = await browser.newPage({ viewport: { width, height }, hasTouch: true });
       await page.goto(`${origin}/map-workspace`);
-      await page.getByRole("combobox", { name: "데이터 출처" }).selectOption("키 없음");
-      await page.waitForFunction(() => document.querySelector('[data-slot="map-stage-canvas"]')?.textContent?.includes("키 없음"));
+      await page.getByRole("button", { name: "지도 크게 보기", exact: true }).click();
+      await page.getByRole("button", { name: "원래 화면으로", exact: true }).click();
+      await page.locator(".kt-map-detail-heading").evaluate((element) => { element.textContent = "지도 작업면 시험 위치의 긴 이름과 지역명"; });
       await page.evaluate((font) => { document.documentElement.style.fontSize = `${font}%`; }, font);
       await page.addStyleTag({ content: "button { height:2.25rem; min-height:2.25rem; }" });
       const workspace = page.locator('[data-slot="map-workspace"]');
@@ -34,6 +35,8 @@ for (const name of ["chromium", "firefox"]) {
       assert.equal(closeBox.height, 44);
       assert.equal(backBox.width, 44);
       assert.ok(closeBox.y >= expanded.y && closeBox.y + closeBox.height <= expanded.y + expanded.height, "확장 후 닫기 viewport 접근");
+      const bodyHeight = await page.locator('[data-slot="map-detail-body"]').evaluate((element) => element.clientHeight);
+      assert.ok(bodyHeight >= 44, "긴 제목에도 본문 한 줄 이상 예약");
       const tabsFit = await page.locator('[data-slot="tabs-list"]').evaluate((element) => {
         const bounds = element.getBoundingClientRect();
         return bounds.left >= 0 && bounds.right <= innerWidth && [...element.children].every((child) => child.getBoundingClientRect().right <= bounds.right + 1);
@@ -51,7 +54,14 @@ for (const name of ["chromium", "firefox"]) {
       assert.equal(await back.isVisible(), true, "넓은 화면에서도 복귀 버튼 표시");
       await back.click();
       assert.equal(await page.evaluate(() => document.activeElement !== document.body && document.activeElement.getClientRects().length > 0), true, "숨은 복귀 버튼 대신 보이는 탭으로 초점 이동");
-      console.log(JSON.stringify({ browser: name, width, height, font, initial, expanded, tabsFit, iconHeight: closeBox.height, passed: true }));
+      await page.setViewportSize({ width, height });
+      await expand.click();
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await workspace.focus();
+      await page.keyboard.press("Escape");
+      assert.equal(await workspace.getAttribute("data-expanded"), "false");
+      assert.equal(await page.evaluate(() => document.activeElement !== document.body && document.activeElement.getClientRects().length > 0), true, "PC 전환 후 Escape도 보이는 초점으로 복귀");
+      console.log(JSON.stringify({ browser: name, width, height, font, initial, expanded, tabsFit, iconHeight: closeBox.height, bodyHeight, passed: true }));
       await page.close();
     }
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, hasTouch: true });

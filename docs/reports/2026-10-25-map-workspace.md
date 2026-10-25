@@ -154,3 +154,25 @@ body로 떨어뜨리는 순서를 단위 재현하고 외부 focus/pointer 이�
 [확장·반응형 초점](../../packages/ui/smoke/map-workspace-expansion-browser.mjs)에서 수행한다.
 초기 dev 검사의 임시 input 삽입이 hydration 전에 일어나 발생한 mismatch/timeout은 제품
 초점 실패로 세지 않고 React 상태 반영 이후 삽입하도록 검증 순서를 수정했다.
+
+
+## 확장 후보의 정본 산출물과 최종 검증
+
+- 제품 소스: `20953b7707f6dd46324bf6b15548a26a5d9b8880`.
+- root의 fresh git archive·새 npm ci·Docker 타입/고지/빌드·UI67/tokens7 PASS.
+- 두 독립 pack의 SHA256은 모두 `65480d85e1ebfc6a7fd4c65ecc66e539c6f57e90fe0743c3877827266f117169`다.
+- 정본: `/tmp/codex-map-common-qa.wHaGPG/test-results/ui-pack/kor-travel-ui-0.1.0-dev.8.tgz`.
+  먼저 앱에 전달한 `/tmp/codex-map-preview-pack.r3vnUx` 산출물과 같은 바이트다.
+- 작성자의 WSL 타입·단위67/tokens7도 통과했다. 작성자 mirrorpack을 새 정본으로 배포하지 않았다.
+
+n150 native Chromium/Firefox 각각375×812·320×568 글자200%·812×375에서 같은 canvas DOM,
+글자를 줄이지 않은 탭 폭, generic72px 버튼 규칙 아래 아이콘44px, 긴 제목 뒤 본문44px 이상,
+상세 Escape 우선·두 번째 Escape 복귀, 모바일 확장→PC resize 후 복귀 버튼 표시와 클릭/Escape
+초점 복원을 확인했다. 각 브라우저의 별도 반응형 입력 검사에서 CSS로 먼저 body에 빠진 초점을
+trigger로 복원하고 외부 pointer 뒤에는 훔치지 않는 것도 확인했다. 총8개 조건 PASS다.
+
+이 작성자 브라우저 검증은 실제 SDK가 없는 공용 smoke의 dev preview 결과이며, 실제 데이터·
+가격/특보 전체 가시성과 SDK attribution/줌은 최종 canonical 소비자 검증이다. 기존 LIMITED3을
+이 결과로 소급 PASS로 바꾸지 않는다. 원시 결과는 본인 QA의 `logs/expand-browser-final.log`에
+보존하며 운영 변경은 없다. 후속 검사·문서 변경은209의 runtime src/CSS/패키지 metadata와
+산출물 바이트를 바꾸지 않는다. 최종CI·두 독립 리뷰는 root가 고정 HEAD에서 조율한다.
