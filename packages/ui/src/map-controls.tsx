@@ -6,12 +6,42 @@
 "use client";
 
 import { Tabs } from "@base-ui/react/tabs";
-import { ChevronDownIcon, ChevronUpIcon, ListIcon, MapIcon, XIcon } from "lucide-react";
-import { useEffect, useId, useImperativeHandle, useRef, useState, type ComponentProps, type ReactNode, type Ref } from "react";
+import { ChevronDownIcon, ChevronUpIcon, ListIcon, MapIcon, Maximize2Icon, Minimize2Icon, XIcon } from "lucide-react";
+import { createContext, useContext, useEffect, useId, useImperativeHandle, useRef, useState, type ComponentProps, type ReactNode, type Ref, type RefObject } from "react";
+
+const WorkspaceExpansion = createContext<{
+  enabled: boolean; expanded: boolean; toggle: () => void; id: string; trigger: RefObject<HTMLButtonElement | null>;
+} | null>(null);
 
 /** 부모 route shell이 제공한 남은 높이를 탭과 작업면으로 전달한다. */
-export function MapWorkspace({ className = "", ...props }: ComponentProps<"div">) {
-  return <div {...props} className={`kt-map-workspace ${className}`} data-slot="map-workspace" />;
+export function MapWorkspace({ className = "", expandable = false, id, onKeyDown, ref, tabIndex, ...props }: ComponentProps<"div"> & { expandable?: boolean }) {
+  const generatedId = useId();
+  const workspaceId = id ?? generatedId;
+  const [localExpanded, setLocalExpanded] = useState(false);
+  const expanded = expandable && localExpanded;
+  const trigger = useRef<HTMLButtonElement>(null);
+  const workspace = useRef<HTMLDivElement>(null);
+  useImperativeHandle(ref, () => workspace.current!, []);
+  const restoreFocus = useRef(false);
+  const close = () => { restoreFocus.current = true; setLocalExpanded(false); };
+  useEffect(() => {
+    if (!expanded && restoreFocus.current) {
+      restoreFocus.current = false;
+      const candidates = [trigger.current, workspace.current?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')];
+      const target = candidates.find((element) => element?.getClientRects().length && getComputedStyle(element).visibility !== "hidden");
+      (target ?? workspace.current)?.focus({ preventScroll: true });
+    }
+  }, [expanded]);
+  return <WorkspaceExpansion.Provider value={{ enabled: expandable, expanded, id: workspaceId, trigger, toggle: () => {
+    if (expanded) close(); else setLocalExpanded(true);
+  } }}>
+    <div {...props} ref={workspace} tabIndex={tabIndex ?? (expandable ? -1 : undefined)} id={workspaceId} className={`kt-map-workspace ${className}`} data-slot="map-workspace" data-expanded={expanded} onKeyDown={(event) => {
+      onKeyDown?.(event);
+      if (!event.defaultPrevented && event.key === "Escape" && expanded) {
+        event.preventDefault(); event.stopPropagation(); close();
+      }
+    }} />
+  </WorkspaceExpansion.Provider>;
 }
 
 /** 필터 값과 DOM은 보존하고 모바일에서만 기본 접힘을 적용한다. */
@@ -19,6 +49,7 @@ export function MapFilterPanel({ children, label = "지도 필터", expanded, on
   label?: string; expanded?: boolean; onExpandedChange?: (expanded: boolean) => void; triggerRef?: Ref<HTMLButtonElement>;
 }) {
   const [localExpanded, setLocalExpanded] = useState(false);
+  const workspace = useContext(WorkspaceExpansion);
   const open = expanded ?? localExpanded;
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
@@ -34,9 +65,16 @@ export function MapFilterPanel({ children, label = "지도 필터", expanded, on
     return () => mobile.removeEventListener("change", restore);
   }, [open]);
   return <div {...props} className={`kt-map-filter-panel ${className}`} data-slot="map-filter-panel" data-expanded={open}>
+    <div className="kt-map-filter-header" data-slot="map-filter-header">
     <button ref={trigger} type="button" className="kt-map-filter-toggle" data-slot="map-filter-trigger" title={label} aria-expanded={open} aria-controls={id} onClick={() => {
       setLocalExpanded(!open); onExpandedChange?.(!open);
     }}><span className="kt-map-filter-toggle-label">{label}</span>{open ? <ChevronUpIcon aria-hidden="true" /> : <ChevronDownIcon aria-hidden="true" />}</button>
+    {workspace?.enabled ? <button ref={workspace.trigger} type="button" className="kt-map-workspace-expand" data-slot="map-workspace-expand"
+      aria-label={workspace.expanded ? "원래 화면으로" : "지도 크게 보기"} title={workspace.expanded ? "원래 화면으로" : "지도 크게 보기"}
+      aria-expanded={workspace.expanded} aria-controls={workspace.id} onClick={workspace.toggle}>
+      {workspace.expanded ? <Minimize2Icon aria-hidden="true" /> : <Maximize2Icon aria-hidden="true" />}
+    </button> : null}
+    </div>
     <div ref={body} id={id} className="kt-map-filter-panel-body" data-slot="map-filter-panel-body">{children}</div>
   </div>;
 }

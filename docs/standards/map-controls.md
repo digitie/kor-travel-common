@@ -113,3 +113,28 @@ Stage는 빈 자료·키 없음·WebGL 불가·로딩에도 같은 높이를 유
 않고 높이·접기·단일 스크롤·초점·기존 기본 스타일을 검사한다. 정확 산출물과 수치는
 [검증 기록](../reports/2026-10-25-map-workspace.md)에 둔다. 소비자 실제 데이터/지도 SDK·
 소비자 build/E2E·최종 두 독립 리뷰/CI는 별도 게이트다. registry/Release/운영 변경은 하지 않는다.
+
+
+## 명시적 작업면 확장 — dev.8 선택 적용
+
+`MapWorkspace expandable`은 기본false이며 켰을 때만 `MapFilterPanel`의
+`map-filter-header` 행에 `map-workspace-expand` 아이콘 버튼을 추가한다. 필터 토글과
+같은 행을 사용한다. 버튼 이름은 `지도 크게 보기`/`원래 화면으로`이며 Workspace id를
+aria-controls로 연결한다. Workspace의 `data-expanded` true/false는 공개 계약이다.
+넓고 높은 화면의 확장 진입 버튼은 기본 숨김이고, 확장된 상태의 복귀 버튼은 항상 보인다.
+
+Common은 내부 확장 상태와 키보드만 소유한다. 앱은 지도 route 한정
+`:has([data-slot="map-workspace"][data-expanded="true"])` CSS로 nav·PageHeader·후속
+sibling을 숨기고 기존 Workspace에 전체 남은 높이를 전달한다. fullscreen API·modal·portal·
+DOM 재부착·전역 inert·높이 측정은 사용하지 않는다. 필터/지도·목록 전환과 엔진·조건·
+선택 DOM은 유지한다. expandable을 사용할 때는 그 Workspace 안에 MapFilterPanel을 둔다.
+
+자식이나 소비자 handler가 preventDefault/stopPropagation한 Escape는 존중한다.
+처리되지 않은 Escape만 확장을 원복한다. 복귀 버튼이 보이면 그 버튼, PC 전환으로 숨으면
+보이는 선택 탭 또는 tabIndex=-1인 Workspace로 초점을 돌린다. 상세 Escape는 먼저 상세만
+닫으므로 확장을 동시에 해제하지 않는다.
+
+새 작업면의 아이콘 닫기/접기는 coarse에서44px 높이를 확정한다. 필터 토글은 글자를
+유지하도록 height:auto/min44이고, 탭은 글자 크기를 줄이지 않고 padding·flex로 폭에 맞춘다.
+확장 작업면의 지도 안전 영역은 기본 우측56px·하단48px이며 글자200%에도 배율로 커지지 않는다.
+최종 실제 SDK의 컨트롤·출처 가림 여부는 소비자 실측 게이트다.

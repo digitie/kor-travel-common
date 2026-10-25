@@ -9,6 +9,48 @@ import { MapDetailOverlay, MapFilterPanel, MapKindFilter, MapReadout, MapStage, 
 describe("공용 지도 컨트롤", () => {
   beforeEach(() => vi.stubGlobal("matchMedia", vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }))));
   afterEach(() => vi.unstubAllGlobals());
+  it("기본 작업면은 확장 UI를 추가하지 않는다", () => {
+    const { container } = render(<MapWorkspace><MapFilterPanel>기존 필터</MapFilterPanel></MapWorkspace>);
+    expect(screen.queryByRole("button", { name: "지도 크게 보기" })).toBeNull();
+    expect(container.querySelector('[data-slot="map-workspace"]')).toHaveAttribute("data-expanded", "false");
+  });
+
+  it("명시 확장은 DOM·조건을 유지하고 Escape 뒤 확장 버튼으로 초점을 돌린다", async () => {
+    const { container } = render(<MapWorkspace expandable id="map-work"><MapFilterPanel><input aria-label="조건" defaultValue="서울" /></MapFilterPanel><MapStage>지도</MapStage></MapWorkspace>);
+    const field = screen.getByRole("textbox");
+    const stage = container.querySelector('[data-slot="map-stage"]');
+    const expand = screen.getByRole("button", { name: "지도 크게 보기" });
+    vi.spyOn(expand, "getClientRects").mockReturnValue([{}] as unknown as DOMRectList);
+    expect(expand).toHaveAttribute("aria-controls", "map-work");
+    await userEvent.click(expand);
+    expect(container.querySelector('[data-slot="map-workspace"]')).toHaveAttribute("data-expanded", "true");
+    expect(screen.getByRole("button", { name: "원래 화면으로" })).toHaveAttribute("aria-expanded", "true");
+    field.focus();
+    await userEvent.keyboard("{Escape}");
+    expect(expand).toHaveFocus();
+    expect(expand).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("textbox")).toBe(field);
+    expect(field).toHaveValue("서울");
+    expect(container.querySelector('[data-slot="map-stage"]')).toBe(stage);
+  });
+
+  it("넓은 화면에서 복귀 버튼이 숨으면 초점을 작업면으로 돌린다", async () => {
+    const { container } = render(<MapWorkspace expandable><MapFilterPanel /><button>지도 작업</button></MapWorkspace>);
+    await userEvent.click(screen.getByRole("button", { name: "지도 크게 보기" }));
+    fireEvent.keyDown(screen.getByRole("button", { name: "지도 작업" }), { key: "Escape" });
+    expect(container.querySelector('[data-slot="map-workspace"]')).toHaveFocus();
+  });
+
+  it("상세와 자식 팝업이 처리한 Escape는 작업면 확장을 유지한다", async () => {
+    const dismiss = vi.fn();
+    const { container } = render(<MapWorkspace expandable><MapFilterPanel /><MapDetailOverlay onDismiss={dismiss}><button>상세</button></MapDetailOverlay><button onKeyDown={(event) => { if (event.key === "Escape") event.preventDefault(); }}>팝업</button></MapWorkspace>);
+    await userEvent.click(screen.getByRole("button", { name: "지도 크게 보기" }));
+    fireEvent.keyDown(screen.getByRole("button", { name: "상세", exact: true }), { key: "Escape" });
+    expect(dismiss).toHaveBeenCalledOnce();
+    expect(container.querySelector('[data-slot="map-workspace"]')).toHaveAttribute("data-expanded", "true");
+    fireEvent.keyDown(screen.getByRole("button", { name: "팝업" }), { key: "Escape" });
+    expect(container.querySelector('[data-slot="map-workspace"]')).toHaveAttribute("data-expanded", "true");
+  });
   it("작업면은 데이터·지도 초기화에 의존하지 않고 빈 작업면과 요약·상세를 유지한다", () => {
     const { container, rerender } = render(<MapWorkspace><MapStage summary="관측 기준" detail={<MapDetailOverlay>선택 상세</MapDetailOverlay>}>키 없음</MapStage></MapWorkspace>);
     expect(container.querySelector('[data-slot="map-stage-canvas"]')).toHaveTextContent("키 없음");

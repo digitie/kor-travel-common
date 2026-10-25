@@ -12,9 +12,9 @@ export default function WorkspaceSmoke() {
   const trigger = useRef<HTMLButtonElement>(null);
   const detail = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
-  return <main style={{ height: "100dvh", display: "flex", flexDirection: "column", minHeight: 0, padding: 8, boxSizing: "border-box" }}>
+  return <main className="workspace-smoke-route" style={{ height: "100dvh", display: "flex", flexDirection: "column", minHeight: 0, padding: 8, boxSizing: "border-box" }}>
     <h1 style={{ fontSize: 16, margin: "0 0 8px" }}>공용 지도 작업면</h1>
-    <MapWorkspace>
+    <MapWorkspace expandable>
       <MapFilterPanel triggerRef={trigger} label="지도 필터 · 모든 종류 · 전체 데이터 출처 · 선택 조건 요약">
         <MapFilterBar>
           <MapKindFilter value={["station"]} options={[{ value: "station", label: "역", icon: <span aria-hidden="true">●</span> }, { value: "fuel", label: "주유소" }]} onToggle={() => undefined} />

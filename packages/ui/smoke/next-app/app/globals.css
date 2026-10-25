@@ -6,3 +6,4 @@
 @import "@kor-travel/tokens/base.css";
 @import "@kor-travel/ui/map-controls.css";
 @source "../node_modules/@kor-travel/ui/dist";
+.workspace-smoke-route:has([data-slot="map-workspace"][data-expanded="true"]) > h1 { display: none; }
