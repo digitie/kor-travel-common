@@ -13,6 +13,7 @@ for (const name of ["chromium", "firefox"]) {
     for (const [width, height, font] of [[375, 812, 100], [320, 568, 200], [812, 375, 100]]) {
       const page = await browser.newPage({ viewport: { width, height }, hasTouch: true });
       await page.goto(`${origin}/map-workspace`);
+      await page.waitForLoadState("networkidle");
       await page.getByRole("button", { name: "지도 크게 보기", exact: true }).click();
       await page.getByRole("button", { name: "원래 화면으로", exact: true }).click();
       await page.locator(".kt-map-detail-heading").evaluate((element) => { element.textContent = "지도 작업면 시험 위치의 긴 이름과 지역명"; });
@@ -66,6 +67,7 @@ for (const name of ["chromium", "firefox"]) {
     }
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, hasTouch: true });
     await page.goto(`${origin}/map-workspace`);
+    await page.waitForLoadState("networkidle");
     await page.getByRole("combobox", { name: "데이터 출처" }).selectOption("키 없음");
     await page.waitForFunction(() => document.querySelector('[data-slot="map-stage-canvas"]')?.textContent?.includes("키 없음"));
     await page.locator('[data-slot="map-filter-panel-body"]').evaluate((element) => {

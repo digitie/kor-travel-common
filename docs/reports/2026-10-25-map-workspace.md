@@ -190,3 +190,25 @@ WSL 타입·UI71/tokens7 PASS. [국소 hit-test/초점 회귀](../../packages/ui
 Transport의 확장 중 시간표 anchor 목적지가 followup 숨김으로 사라진 실제 문제에 따라,
 공용 계약은 route chrome만 절약하고 아래/외부 목적지와 native anchor 왕복을 보존하도록 정정했다.
 소비자 수정과 실제 anchor 검증은 해당 앱 소유다.
+
+
+### 사전 리뷰 수정의 정본과 재검증
+
+- 제품: `f15511a2f1d6137b1b9cae509de763e09b8337f0`.
+- root fresh git archive·새 npm ci·Docker 타입/고지/빌드·UI71/tokens7 PASS.
+- 두 독립 pack SHA256: `866aca74b0c29d2487fac2640bccce468134ce0c7faba540782abf61106328ec`.
+- 정본: `/tmp/codex-map-common-qa.y7aO1K/test-results/ui-pack/kor-travel-ui-0.1.0-dev.8.tgz`.
+  먼저 앱에 전달한 `/tmp/codex-map-preview-pack.x0JHXI` 산출물과 같은 바이트다.
+
+작성자 production smoke의 n150 Chromium/Firefox에서 새 국소 회귀2조건을 통과했다.
+각 브라우저 모두 summaryWins=true/markerWins=false, 출처 hit=true, 줌 클릭/키보드 상세닫기,
+양방향 filter focus 복원과 외부 pointer 비탈취가 확인됐다. 기존 확장8조건도 재통과했다.
+이것은 공개 마크업의 국소 검증이며 실제 SDK 전체/운영 데이터 검증으로 확대하지 않는다.
+
+검사 마커는 content의 직접 자식이 아니라 엔진 root 내부에 두어 :only-child 높이를 바꾸지
+않도록 교정했다. cold dev의 초기화·개발 표시 간섭은 production smoke에서 배제했다.
+작성자 QA의 부분 교체에 남아 있던 옛 d.ts 때문에 생긴 local build 실패는 정확 선언으로
+교체 후 통과했으며 root의 fresh canonical 검증과 구분한다. 제품 수정은 추가하지 않았다.
+로그는 `logs/review-map-workspace-layer-focus-browser.mjs.log`와
+`logs/review-map-workspace-expansion-browser.mjs.log`에 보존한다. 후속 검사·문서 정산은
+f155의 runtime src/CSS/package metadata를 바꾸지 않으며 최종CI·독립 재리뷰는 별도다.

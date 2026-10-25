@@ -11,13 +11,14 @@ for (const name of ["chromium", "firefox"]) {
   try {
     const page = await browser.newPage({ viewport: { width: 375, height: 812 }, hasTouch: true });
     await page.goto(`${origin}/map-workspace`);
+    await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "지도 크게 보기", exact: true }).click();
     await page.getByRole("button", { name: "원래 화면으로", exact: true }).click();
     const hit = await page.evaluate(() => {
       const canvas = document.querySelector('[data-slot="map-stage-canvas"]');
       const marker = document.createElement("button"); marker.textContent = "겹친 마커"; marker.dataset.qaMarker = "true";
       Object.assign(marker.style, { position: "absolute", zIndex: "3", top: "8px", left: "8px", width: "250px", height: "44px" });
-      canvas.append(marker);
+      canvas.firstElementChild.append(marker);
       const bounds = document.querySelector('[data-slot="map-stage-summary"]').getBoundingClientRect();
       const target = document.elementFromPoint(bounds.left + 10, bounds.top + 10);
       return { summaryWins: !!target?.closest('[data-slot="map-stage-summary"]'), markerWins: !!target?.closest("[data-qa-marker]") };
