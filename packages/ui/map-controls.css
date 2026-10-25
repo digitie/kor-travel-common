@@ -50,11 +50,11 @@
 .kt-map-workspace .kt-map-view-tabs { align-items: stretch; min-width: 0; max-width: 100%; height: auto; min-height: var(--kt-control-h); padding: 2px; gap: 2px; }
 .kt-map-workspace .kt-map-view-tabs > button { flex: 1 1 0%; min-width: 0; min-height: calc(var(--kt-control-h) - 4px); height: auto; padding-inline: min(.625rem, 10px); gap: min(.375rem, 6px); }
 .kt-map-workspace-stage { flex: 1 1 0%; min-height: 0; box-sizing: border-box; border: 1px solid var(--kt-border); border-radius: var(--kt-radius-panel); background: var(--kt-surface-subtle); }
-.kt-map-stage-content { position: absolute; inset: 0; min-width: 0; min-height: 0; }
+.kt-map-stage-content { position: absolute; inset: 0; z-index: 0; isolation: isolate; min-width: 0; min-height: 0; }
 .kt-map-stage-content > :only-child { height: 100%; min-height: 0; }
 .kt-map-workspace-stage[data-view="map"] > .kt-map-stage-content { overflow: hidden; }
 .kt-map-workspace-stage[data-view="list"] > .kt-map-stage-content { overflow: auto; overscroll-behavior: contain; }
-.kt-map-stage-overlays { position: absolute; inset: 8px 56px 48px 8px; display: flex; flex-direction: column; align-items: stretch; gap: 8px; min-width: 0; min-height: 0; pointer-events: none; }
+.kt-map-stage-overlays { position: absolute; z-index: 1; inset: 8px 56px 48px 8px; display: flex; flex-direction: column; align-items: stretch; gap: 8px; min-width: 0; min-height: 0; pointer-events: none; }
 .kt-map-stage-summary { flex: 0 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; pointer-events: auto; }
 .kt-map-stage-detail { display: flex; flex: 1 0 58px; flex-direction: column; align-self: flex-end; width: min(22rem, 100%); min-height: 0; max-height: 100%; pointer-events: none; }
 .kt-map-stage-detail > .kt-map-detail { position: static; box-sizing: border-box; width: 100%; min-height: 0; max-height: 100%; pointer-events: auto; }

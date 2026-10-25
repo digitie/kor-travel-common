@@ -54,23 +54,28 @@ export function MapFilterPanel({ children, label = "지도 필터", expanded, on
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   const body = useRef<HTMLDivElement>(null);
-  const lastBodyFocus = useRef<Element | null>(null);
+  const lastFilterFocus = useRef<Element | null>(null);
   useImperativeHandle(triggerRef, () => trigger.current!, []);
   useEffect(() => {
     const mobile = window.matchMedia("(max-width: 40rem), (max-height: 30rem)");
     const rememberFocus = (event: FocusEvent) => {
-      if (event.target instanceof Element && body.current?.contains(event.target)) lastBodyFocus.current = event.target;
-      else if (event.target !== document.body || !mobile.matches || open) lastBodyFocus.current = null;
+      if (event.target instanceof Element && (body.current?.contains(event.target) || trigger.current === event.target)) lastFilterFocus.current = event.target;
+      else if (event.target !== document.body) lastFilterFocus.current = null;
     };
     const clearOutsidePointer = (event: PointerEvent) => {
-      if (!(event.target instanceof Node) || !body.current?.contains(event.target)) lastBodyFocus.current = null;
+      if (!(event.target instanceof Node) || (!body.current?.contains(event.target) && !trigger.current?.contains(event.target))) lastFilterFocus.current = null;
     };
     const restore = () => {
       const inside = body.current?.contains(document.activeElement);
-      const lostOnHide = document.activeElement === document.body && lastBodyFocus.current?.isConnected;
-      if (!open && mobile.matches && (inside || lostOnHide)) {
-        lastBodyFocus.current = null;
+      const lostOnHide = document.activeElement === document.body && lastFilterFocus.current?.isConnected;
+      if (!open && mobile.matches && (inside || (lostOnHide && body.current?.contains(lastFilterFocus.current)))) {
+        lastFilterFocus.current = null;
         trigger.current?.focus();
+      } else if (!mobile.matches && (document.activeElement === trigger.current || (lostOnHide && lastFilterFocus.current === trigger.current))) {
+        lastFilterFocus.current = null;
+        const fields = body.current?.querySelectorAll<HTMLElement>('input:not([type="hidden"]), select, textarea, button, a[href], [tabindex]:not([tabindex="-1"])');
+        const target = Array.from(fields ?? []).find((element) => !element.matches(":disabled") && element.getClientRects().length && getComputedStyle(element).visibility !== "hidden");
+        (target ?? body.current)?.focus({ preventScroll: true });
       }
     };
     restore();
@@ -94,7 +99,7 @@ export function MapFilterPanel({ children, label = "지도 필터", expanded, on
       {workspace.expanded ? <Minimize2Icon aria-hidden="true" /> : <Maximize2Icon aria-hidden="true" />}
     </button> : null}
     </div>
-    <div ref={body} id={id} className="kt-map-filter-panel-body" data-slot="map-filter-panel-body">{children}</div>
+    <div ref={body} id={id} tabIndex={-1} className="kt-map-filter-panel-body" data-slot="map-filter-panel-body">{children}</div>
   </div>;
 }
 

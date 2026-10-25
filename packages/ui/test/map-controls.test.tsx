@@ -116,6 +116,47 @@ describe("공용 지도 컨트롤", () => {
     expect(document.body).toHaveFocus();
   });
 
+  it("모바일 trigger가 PC에서 숨으면 보이는 첫 필터 입력으로 초점을 돌린다", () => {
+    let change = () => {};
+    const media = { matches: true, addEventListener: (_: string, listener: () => void) => { change = listener; }, removeEventListener: vi.fn() };
+    vi.stubGlobal("matchMedia", vi.fn(() => media));
+    render(<MapFilterPanel><input aria-label="검색" /></MapFilterPanel>);
+    const input = screen.getByRole("textbox");
+    vi.spyOn(input, "getClientRects").mockReturnValue([{}] as unknown as DOMRectList);
+    const trigger = screen.getByRole("button");
+    trigger.focus(); trigger.blur();
+    media.matches = false;
+    act(() => change());
+    expect(input).toHaveFocus();
+  });
+
+  it("필드 없는 필터도 PC 전환 뒤 body가 아닌 표시 영역으로 초점을 돌린다", () => {
+    let change = () => {};
+    const media = { matches: true, addEventListener: (_: string, listener: () => void) => { change = listener; }, removeEventListener: vi.fn() };
+    vi.stubGlobal("matchMedia", vi.fn(() => media));
+    const { container } = render(<MapFilterPanel>조건 없음</MapFilterPanel>);
+    const trigger = screen.getByRole("button");
+    trigger.focus(); trigger.blur();
+    media.matches = false;
+    act(() => change());
+    expect(container.querySelector('[data-slot="map-filter-panel-body"]')).toHaveFocus();
+  });
+
+  it.each(["focus", "pointer"])("trigger 밖으로 %s 이동한 뒤에는 PC 전환이 초점을 훔치지 않는다", (method) => {
+    let change = () => {};
+    const media = { matches: true, addEventListener: (_: string, listener: () => void) => { change = listener; }, removeEventListener: vi.fn() };
+    vi.stubGlobal("matchMedia", vi.fn(() => media));
+    render(<><MapFilterPanel><input aria-label="검색" /></MapFilterPanel><button>외부 작업</button></>);
+    const trigger = screen.getByRole("button", { name: "지도 필터" });
+    const outside = screen.getByRole("button", { name: "외부 작업" });
+    trigger.focus();
+    if (method === "focus") { outside.focus(); outside.blur(); }
+    else { fireEvent.pointerDown(outside); trigger.blur(); }
+    media.matches = false;
+    act(() => change());
+    expect(document.body).toHaveFocus();
+  });
+
   it("외부에서 상세를 접으면 본문의 초점을 접기 버튼으로 돌린다", () => {
     const { rerender } = render(<MapDetailOverlay header="상세" collapsible collapsed={false}><input aria-label="본문 입력" /></MapDetailOverlay>);
     screen.getByRole("textbox").focus();

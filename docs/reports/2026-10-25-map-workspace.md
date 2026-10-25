@@ -176,3 +176,17 @@ trigger로 복원하고 외부 pointer 뒤에는 훔치지 않는 것도 확인�
 이 결과로 소급 PASS로 바꾸지 않는다. 원시 결과는 본인 QA의 `logs/expand-browser-final.log`에
 보존하며 운영 변경은 없다. 후속 검사·문서 변경은209의 runtime src/CSS/패키지 metadata와
 산출물 바이트를 바꾸지 않는다. 최종CI·두 독립 리뷰는 root가 고정 HEAD에서 조율한다.
+
+
+## 독립 사전 리뷰 P2 후속
+
+공개 마크업+실제 CSS의 Chromium 국소 재현에서 z-index3 마커가 summary보다 먼저 hit되고,
+375px 필터 trigger focus 뒤1440px 전환에서 BODY로 소실되는 두 문제를 작성자도 재현했다.
+이는 전체 실제 SDK의 실패라고 단정하지 않는다. content에z-index0/isolation, overlay에z-index1을
+주고, 직전 filter trigger/field focus를 함께 추적하여 양방향 복원과 외부 이동 보존을 구현했다.
+WSL 타입·UI71/tokens7 PASS. [국소 hit-test/초점 회귀](../../packages/ui/smoke/map-workspace-layer-focus-browser.mjs)의
+새 실제 브라우저 결과와 정본 산출물·독립 재리뷰는 후속으로 고정한다. 이전65480 산출물은 보존한다.
+
+Transport의 확장 중 시간표 anchor 목적지가 followup 숨김으로 사라진 실제 문제에 따라,
+공용 계약은 route chrome만 절약하고 아래/외부 목적지와 native anchor 왕복을 보존하도록 정정했다.
+소비자 수정과 실제 anchor 검증은 해당 앱 소유다.

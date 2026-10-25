@@ -124,8 +124,9 @@ aria-controls로 연결한다. Workspace의 `data-expanded` true/false는 공개
 넓고 높은 화면의 확장 진입 버튼은 기본 숨김이고, 확장된 상태의 복귀 버튼은 항상 보인다.
 
 Common은 내부 확장 상태와 키보드만 소유한다. 앱은 지도 route 한정
-`:has([data-slot="map-workspace"][data-expanded="true"])` CSS로 nav·PageHeader·후속
-sibling을 숨기고 기존 Workspace에 전체 남은 높이를 전달한다. fullscreen API·modal·portal·
+`:has([data-slot="map-workspace"][data-expanded="true"])` CSS로 지도 route의 nav·PageHeader 같은
+chrome을 절약하고 기존 Workspace에 전체 남은 높이를 전달한다. 외부/아래 목적지와 이동 경로는
+보존한다. 후속 sibling을 무조건 숨기지 않으며 native anchor 목적지의 표시·스크롤·왕복을 검증한다. fullscreen API·modal·portal·
 DOM 재부착·전역 inert·높이 측정은 사용하지 않는다. 필터/지도·목록 전환과 엔진·조건·
 선택 DOM은 유지한다. expandable을 사용할 때는 그 Workspace 안에 MapFilterPanel을 둔다.
 
@@ -151,3 +152,9 @@ FilterPanel은 직전 내부 focus만 기억하고, 외부 focusin/외부 pointe
 필수 상태는 body 상단에 둔다. 긴 제목은 최대 max(44px,3em) 안에서 스크롤하며 닫기·접기
 버튼은 고정한다. 이는 제목이 전체 상세 높이를 소모해 body0이 되는 것을 방지하기 위한
 opt-in header 계약이다. 본문까지 물리적으로 맞지 않는 viewport는 실제 소비자에서 별도 검증한다.
+
+
+레이어 순서는 stage 안 content(z-index0/isolation)와 overlay(z-index1)로 분리한다.
+엔진 내부 마커의 큰 z-index는 content 안에 머물며, 실제 SDK의 줌·출처 영역은 안전 여백에서
+접근할 수 있어야 한다. 모바일 trigger를 PC에서 숨길 때는 보이는 첫 필터 필드 또는 표시된
+필터 body로 초점을 돌린다. 외부로 focus/pointer를 옮긴 사용자의 초점은 양방향 전환 모두 보존한다.
