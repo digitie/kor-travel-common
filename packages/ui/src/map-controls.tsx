@@ -107,11 +107,13 @@ export function MapFilterPanel({ children, label = "지도 필터", expanded, on
 export function MapStage({ children, view = "map", summary, detail, className = "", ...props }: ComponentProps<"div"> & {
   view?: "map" | "list"; summary?: ReactNode; detail?: ReactNode;
 }) {
+  const hasSummary = summary != null && typeof summary !== "boolean";
+  const hasDetail = detail != null && typeof detail !== "boolean";
   return <div {...props} className={`kt-map-stage kt-map-workspace-stage ${className}`} data-slot="map-stage" data-view={view}>
     <div className="kt-map-stage-content" data-slot={view === "map" ? "map-stage-canvas" : "map-stage-list"}>{children}</div>
-    {summary != null || detail != null ? <div className="kt-map-stage-overlays">
-      {summary != null ? <div className="kt-map-stage-summary" data-slot="map-stage-summary">{summary}</div> : null}
-      {detail != null ? <div className="kt-map-stage-detail" data-slot="map-stage-detail">{detail}</div> : null}
+    {hasSummary || hasDetail ? <div className="kt-map-stage-overlays">
+      {hasSummary ? <div className="kt-map-stage-summary" data-slot="map-stage-summary">{summary}</div> : null}
+      {hasDetail ? <div className="kt-map-stage-detail" data-slot="map-stage-detail">{detail}</div> : null}
     </div> : null}
   </div>;
 }

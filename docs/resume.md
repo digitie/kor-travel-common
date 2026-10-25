@@ -1,6 +1,8 @@
 ## 2026-10-25 — 남은 높이 지도 작업면 후보
 
-C-MAP-01의 additive UI dev.8을 구현했다. [계약](standards/map-controls.md)과 [검증 기록](reports/2026-10-25-map-workspace.md)을 따른다. 다음은 소비자 채택과 고정 후보 두 독립 리뷰/CI이며 운영 변경은 하지 않는다.
+C-MAP-01의 additive UI dev.8을 구현했다. [계약](standards/map-controls.md)과 [검증 기록](reports/2026-10-25-map-workspace.md)을 따른다.
+후보80b97f2의 CI와 James 독립 리뷰는 통과했고 Popper가 재현한 빈 boolean 슬롯의 불필요한 공간 예약을 수정했다.
+수정 후 WSL UI76개·타입 통과다. 다음은 이 후속의 정규 pack·Docker·CI·두 독립 재리뷰와 소비자 고정이며 운영 변경은 하지 않는다.
 
 ## 2026-10-24 — 공용 지도 작업면 후보
 

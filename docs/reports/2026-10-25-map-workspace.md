@@ -212,3 +212,20 @@ Transport의 확장 중 시간표 anchor 목적지가 followup 숨김으로 사�
 로그는 `logs/review-map-workspace-layer-focus-browser.mjs.log`와
 `logs/review-map-workspace-expansion-browser.mjs.log`에 보존한다. 후속 검사·문서 정산은
 f155의 runtime src/CSS/package metadata를 바꾸지 않으며 최종CI·독립 재리뷰는 별도다.
+## 독립 리뷰 후 빈 슬롯 공간 보강
+
+후보 `80b97f2c1e36e646fc0c6d03e0d9e4ccee75ae58`의 docs·python CI 성공 뒤 두 독립 리뷰를 진행했다.
+James는 전체 diff와 이전 레이어·양방향 초점 수정을 재검토해 잔여 P0/P1/P2 없이 통과했다.
+Popper는 `detail={selected && <MapDetailOverlay />}`에서 `selected=false`일 때 빈 상세 wrapper가
+58px와 gap8px를 예약하는 P2를 새로 발견했다. WSL Chromium/Firefox의 200px stage에서 summary는
+`detail=null`일 때120px, `detail=false`일 때78px/scrollHeight120px였다. 의미 없는 공간이 하부 가격·경고를 밀어낸다.
+
+React가 내용을 렌더하지 않는 boolean `summary`/`detail`은 없는 슬롯과 같이 취급하도록 존재 판정만 보완했다.
+숫자0은 실제 내용으로 유지한다. CSS·높이·엔진·조회·의존성·버전·공개 타입은 변경하지 않는다.
+소비자 Weather/Transport는 기존에도 명시적 `null`을 사용하지만 공용 ReactNode 계약을 수정한다.
+WSL2의 별도 사용자 소유 디렉터리 `/tmp/codex-common-boolean-qa.jfv6Gn`에서 Linux용 `npm ci` 후
+새 회귀의 boolean2개 실패를 먼저 재현했고, 수정 후 전체 UI76개·타입이 통과했다.
+최초 Docker 소유 dist의 권한 오류와 Alpine 의존성을 glibc WSL로 복사한 startup 오류는 테스트 실패 재현으로 세지 않았다.
+
+이 후속은 기존 정본866aca…와 다른 제품이다. 새 정규 pack·Docker·CI와 Popper/James 재리뷰, 양쪽 소비자
+pin·UI 확인을 별도로 진행하며 기존71개/pack 결과를 새 후보의 최종 통과로 확대하지 않는다.

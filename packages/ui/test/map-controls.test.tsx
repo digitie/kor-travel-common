@@ -59,6 +59,23 @@ describe("공용 지도 컨트롤", () => {
     expect(container.querySelector('[data-slot="map-stage-list"]')).toHaveTextContent("저장 자료 없음");
   });
 
+  it.each([false, true, null, undefined])("빈 React 슬롯 %s는 요약·상세 공간을 예약하지 않는다", (empty) => {
+    const { container, rerender } = render(<MapStage summary="가격과 갱신 시각" detail={empty}>지도</MapStage>);
+    expect(container.querySelector('[data-slot="map-stage-summary"]')).toHaveTextContent("가격과 갱신 시각");
+    expect(container.querySelector('[data-slot="map-stage-detail"]')).toBeNull();
+    rerender(<MapStage summary={empty} detail={<MapDetailOverlay>선택 상세</MapDetailOverlay>}>지도</MapStage>);
+    expect(container.querySelector('[data-slot="map-stage-summary"]')).toBeNull();
+    expect(container.querySelector('[data-slot="map-stage-detail"]')).toHaveTextContent("선택 상세");
+    rerender(<MapStage summary={empty} detail={empty}>지도</MapStage>);
+    expect(container.querySelector(".kt-map-stage-overlays")).toBeNull();
+  });
+
+  it("숫자 0 슬롯은 비어 있는 boolean과 구분해 표시한다", () => {
+    const { container } = render(<MapStage summary={0} detail={0}>지도</MapStage>);
+    expect(container.querySelector('[data-slot="map-stage-summary"]')).toHaveTextContent("0");
+    expect(container.querySelector('[data-slot="map-stage-detail"]')).toHaveTextContent("0");
+  });
+
   it("접힌 필터는 값을 보존하고 외부에서 버튼으로 포커스를 돌릴 수 있다", async () => {
     const trigger = createRef<HTMLButtonElement>();
     const changed = vi.fn();

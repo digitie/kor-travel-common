@@ -2,6 +2,12 @@
 
 Map/Transport/Weather의 중복 고정 지도 높이를 opt-in flex 계약으로 대체할 공용 UI를 추가했다. 기존 Map의 공개 dev.7 계약은 유지한다. 엔진·조회·선택·소비자 코드는 변경하지 않았다. 검증 범위와 한계는 [검증 기록](reports/2026-10-25-map-workspace.md)을 따른다.
 
+CI를 통과한 후보 `80b97f2c1e36e646fc0c6d03e0d9e4ccee75ae58`를 James/Popper가 독립 검토했다.
+James는 레이어·양방향 초점 보강 뒤 잔여 지적 없이 통과했고, Popper는 `false` 상세도 빈 공간58px를
+예약하는 P2를 WSL Chromium/Firefox로 재현했다. boolean 슬롯을 없는 슬롯처럼 취급하도록 수정했다.
+WSL 회귀는 수정 전 boolean2개 실패·null/undefined/숫자0 통과, 수정 후 UI76개·타입 통과다.
+최종 수정 후보의 Docker·CI·독립 재리뷰와 소비자 pack 고정 결과는 PR46에서 별도 정산한다.
+
 실제 소비자에서 요약35%가 가격을 가리는 후속을 재현해 자연 높이와 상세 동작 최소공간으로
 배분하도록 수정했다. 짧은 높이의 필터 접힘·긴 label 접근도 보강했다. 가로/200%의 물리적
 내용 부족은 통과로 세지 않으며 [검증 기록](reports/2026-10-25-map-workspace.md)의 v2 절에 남겼다.
