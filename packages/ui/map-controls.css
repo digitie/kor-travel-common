@@ -2,7 +2,7 @@
  * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
  * Origin: kor-travel-map@974e2d025 packages/kor-travel-map-admin/frontend/src/app/features/features-client.tsx (GPL-3.0-or-later)
  * Derived-From: FeatureMapToolbar·tabs·button·native-select의 공용 토큰과 치수
- * Modified: 2026-10-24 — 공용 토큰과 독립적인 지도 UI 범위로 정리
+ * Modified: 2026-10-25 — 기존 범위를 보존하고 opt-in 높이·접기·안전 영역 추가
  */
 .kt-map-filter-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .5rem .75rem; min-width: 0; }
 .kt-map-filter-field { display: flex; flex: 0 1 11rem; flex-direction: column; gap: .25rem; min-width: 0; max-width: 100%; width: 11rem; }
@@ -42,3 +42,37 @@
 .kt-map-detail { position: absolute; top: 5rem; right: .75rem; bottom: 6rem; z-index: 10; width: min(22rem, calc(100% - 1.5rem)); max-height: calc(100% - 11rem); min-width: 0; overflow: auto; overscroll-behavior: contain; border: 1px solid var(--kt-border); border-radius: var(--kt-radius-panel); background: var(--kt-surface-card); color: var(--kt-text-primary); box-shadow: var(--kt-shadow-elevated); font: 400 var(--text-kt-sm)/1.5 var(--kt-font-sans); }
 :where(.kt-map-kinds > button, .kt-map-view-tabs > button, .kt-map-filter-field input, .kt-map-filter-field select, .kt-map-detail):focus-visible { outline: 2px solid var(--kt-focus); outline-offset: 2px; }
 @media (max-width: 40rem) { .kt-map-kind-field { flex-basis: 100%; } .kt-map-filter-field:not(.kt-map-kind-field) { flex: 1 1 9rem; } }
+
+/* 남은 높이 계약은 새 작업면을 사용하는 소비자에만 적용한다. */
+.kt-map-workspace { display: flex; flex: 1 1 0%; flex-direction: column; gap: .5rem; min-width: 0; min-height: 0; overflow: hidden; }
+.kt-map-workspace > .kt-map-tabs, .kt-map-workspace .kt-map-tab-panel:not([hidden]) { display: flex; flex: 1 1 0%; flex-direction: column; min-height: 0; }
+.kt-map-workspace .kt-map-view-header, .kt-map-filter-panel { flex: 0 0 auto; }
+.kt-map-workspace-stage { flex: 1 1 0%; min-height: 0; box-sizing: border-box; border: 1px solid var(--kt-border); border-radius: var(--kt-radius-panel); background: var(--kt-surface-subtle); }
+.kt-map-stage-content { position: absolute; inset: 0; min-width: 0; min-height: 0; }
+.kt-map-stage-content > :only-child { height: 100%; min-height: 0; }
+.kt-map-workspace-stage[data-view="map"] > .kt-map-stage-content { overflow: hidden; }
+.kt-map-workspace-stage[data-view="list"] > .kt-map-stage-content { overflow: auto; overscroll-behavior: contain; }
+.kt-map-stage-overlays { position: absolute; inset: .5rem 3.5rem 3rem .5rem; display: flex; flex-direction: column; align-items: stretch; gap: .5rem; min-width: 0; min-height: 0; pointer-events: none; }
+.kt-map-stage-summary { flex: 0 0 auto; min-height: 0; max-height: 35%; overflow: auto; overscroll-behavior: contain; pointer-events: auto; }
+.kt-map-stage-detail { display: flex; flex: 0 1 auto; flex-direction: column; align-self: flex-end; width: min(22rem, 100%); min-height: 0; max-height: 100%; pointer-events: auto; }
+.kt-map-stage-detail > .kt-map-detail { position: static; box-sizing: border-box; width: 100%; min-height: 0; max-height: 100%; }
+.kt-map-filter-toggle, .kt-map-detail-header > button { display: inline-flex; align-items: center; justify-content: center; gap: .375rem; min-height: 30px; padding: 0 .625rem; border: 1px solid var(--kt-control-line); border-radius: var(--kt-radius-control); background: var(--kt-surface-card); color: var(--kt-text-primary); font: 500 var(--text-kt-xs)/1.5 var(--kt-font-sans); cursor: pointer; }
+.kt-map-filter-toggle { display: none; }
+.kt-map-filter-toggle svg, .kt-map-detail-header > button svg { width: 1rem; height: 1rem; flex: 0 0 auto; }
+.kt-map-detail-slotted { display: flex; flex-direction: column; overflow: hidden; }
+.kt-map-detail-header { display: flex; flex: 0 0 auto; align-items: center; gap: .25rem; min-width: 0; padding: .375rem; border-bottom: 1px solid var(--kt-border); }
+.kt-map-detail-heading { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.kt-map-detail-header > button { flex: 0 0 auto; width: 30px; padding: 0; }
+.kt-map-detail-body { min-height: 0; overflow: auto; overscroll-behavior: contain; }
+.kt-map-detail-body[hidden] { display: none; }
+:where(.kt-map-filter-toggle, .kt-map-detail-header > button):focus-visible { outline: 2px solid var(--kt-focus); outline-offset: -2px; }
+@media (max-width: 40rem) {
+  .kt-map-filter-toggle { display: inline-flex; }
+  .kt-map-filter-panel[data-expanded="false"] > .kt-map-filter-panel-body { display: none; }
+  .kt-map-filter-panel[data-expanded="true"] > .kt-map-filter-panel-body { margin-top: .5rem; max-height: 30dvh; overflow: auto; overscroll-behavior: contain; }
+}
+@media (pointer: coarse) {
+  .kt-map-workspace .kt-map-kinds > button, .kt-map-workspace .kt-map-filter-field input, .kt-map-workspace .kt-map-filter-field select, .kt-map-workspace .kt-map-select-trigger, .kt-map-workspace .kt-map-combobox { min-height: 44px; height: 44px; }
+  .kt-map-workspace .kt-map-view-tabs { min-height: 48px; height: 48px; }
+  .kt-map-workspace .kt-map-view-tabs > button, .kt-map-filter-toggle, .kt-map-detail-header > button { min-height: 44px; min-width: 44px; }
+}

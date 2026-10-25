@@ -1,3 +1,7 @@
+## 2026-10-25 — 남은 높이 지도 작업면 후보
+
+UI dev.8에 opt-in MapWorkspace·MapFilterPanel·MapStage와 상세 header/접기를 추가했다. 기존 dev.7 기본값과 스타일은 유지한다. [계약](docs/standards/map-controls.md).
+
 ## 2026-10-24 — 공용 지도 작업면 후보
 
 - UI dev.7에 지도 종류 아이콘·필터·지도/목록 탭·건수와 실제 좌표/줌·상세 오버레이를 추가했다. Map/Transport/Weather가 공용 API와 스타일을 채택한다. [계약](docs/standards/map-controls.md).

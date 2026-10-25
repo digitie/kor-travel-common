@@ -1,3 +1,7 @@
+## 2026-10-25 — C-MAP-01 공통 작업면
+
+Map/Transport/Weather의 중복 고정 지도 높이를 opt-in flex 계약으로 대체할 공용 UI를 추가했다. 기존 Map의 공개 dev.7 계약은 유지한다. 엔진·조회·선택·소비자 코드는 변경하지 않았다. 검증 범위와 한계는 [검증 기록](reports/2026-10-25-map-workspace.md)을 따른다.
+
 ## 2026-10-24 — 공통 지도 UI 후보
 
 사용자 요청에 따라 Map의 Feature 필터·탭·상세 작업면을 공용 API로 추출했다. UI54와 Weather375/1440px 소비2 검증 PASS. [계약](standards/map-controls.md)을 추가했고 배포는 수행하지 않는다.

@@ -2,12 +2,57 @@
 // SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 // Origin: kor-travel-map@974e2d025 packages/kor-travel-map-admin/frontend/src/app/features/features-client.tsx (GPL-3.0-or-later)
 // Derived-From: FeatureMapToolbar·FeatureMapWorkspace 및 Map의 Base UI 탭 구성
-// Modified: 2026-10-24 — 지도 엔진·도메인과 분리한 공용 필터·탭·상세 오버레이
+// Modified: 2026-10-25 — 기존 계약을 보존하고 남은 높이 작업면·접기·상세 슬롯 추가
 "use client";
 
 import { Tabs } from "@base-ui/react/tabs";
-import { ListIcon, MapIcon, XIcon } from "lucide-react";
-import type { ComponentProps, ReactNode } from "react";
+import { ChevronDownIcon, ChevronUpIcon, ListIcon, MapIcon, XIcon } from "lucide-react";
+import { useEffect, useId, useImperativeHandle, useRef, useState, type ComponentProps, type ReactNode, type Ref } from "react";
+
+/** 부모 route shell이 제공한 남은 높이를 탭과 작업면으로 전달한다. */
+export function MapWorkspace({ className = "", ...props }: ComponentProps<"div">) {
+  return <div {...props} className={`kt-map-workspace ${className}`} data-slot="map-workspace" />;
+}
+
+/** 필터 값과 DOM은 보존하고 모바일에서만 기본 접힘을 적용한다. */
+export function MapFilterPanel({ children, label = "지도 필터", expanded, onExpandedChange, triggerRef, className = "", ...props }: ComponentProps<"div"> & {
+  label?: string; expanded?: boolean; onExpandedChange?: (expanded: boolean) => void; triggerRef?: Ref<HTMLButtonElement>;
+}) {
+  const [localExpanded, setLocalExpanded] = useState(false);
+  const open = expanded ?? localExpanded;
+  const id = useId();
+  const trigger = useRef<HTMLButtonElement>(null);
+  const body = useRef<HTMLDivElement>(null);
+  useImperativeHandle(triggerRef, () => trigger.current!, []);
+  useEffect(() => {
+    const mobile = window.matchMedia("(max-width: 40rem)");
+    const restore = () => {
+      if (!open && mobile.matches && body.current?.contains(document.activeElement)) trigger.current?.focus();
+    };
+    restore();
+    mobile.addEventListener("change", restore);
+    return () => mobile.removeEventListener("change", restore);
+  }, [open]);
+  return <div {...props} className={`kt-map-filter-panel ${className}`} data-slot="map-filter-panel" data-expanded={open}>
+    <button ref={trigger} type="button" className="kt-map-filter-toggle" data-slot="map-filter-trigger" aria-expanded={open} aria-controls={id} onClick={() => {
+      setLocalExpanded(!open); onExpandedChange?.(!open);
+    }}>{label}{open ? <ChevronUpIcon aria-hidden="true" /> : <ChevronDownIcon aria-hidden="true" />}</button>
+    <div ref={body} id={id} className="kt-map-filter-panel-body" data-slot="map-filter-panel-body">{children}</div>
+  </div>;
+}
+
+/** 엔진·데이터 상태와 관계없이 높이를 소유하며 목록 스크롤은 한 곳에 둔다. */
+export function MapStage({ children, view = "map", summary, detail, className = "", ...props }: ComponentProps<"div"> & {
+  view?: "map" | "list"; summary?: ReactNode; detail?: ReactNode;
+}) {
+  return <div {...props} className={`kt-map-stage kt-map-workspace-stage ${className}`} data-slot="map-stage" data-view={view}>
+    <div className="kt-map-stage-content" data-slot={view === "map" ? "map-stage-canvas" : "map-stage-list"}>{children}</div>
+    {summary != null || detail != null ? <div className="kt-map-stage-overlays">
+      {summary != null ? <div className="kt-map-stage-summary" data-slot="map-stage-summary">{summary}</div> : null}
+      {detail != null ? <div className="kt-map-stage-detail" data-slot="map-stage-detail">{detail}</div> : null}
+    </div> : null}
+  </div>;
+}
 
 export function MapFilterBar({ className = "", ...props }: ComponentProps<"div">) {
   return <div {...props} className={`kt-map-filter-bar ${className}`} data-slot="map-filter-bar" />;
@@ -69,9 +114,28 @@ export function MapViewTabs({ viewport, count, status, listValue = "list", listL
   </div>;
 }
 
-export function MapDetailOverlay({ className = "", onDismiss, onKeyDown, ...props }: ComponentProps<"aside"> & { onDismiss?: () => void }) {
-  return <aside {...props} className={`kt-map-detail ${className}`} tabIndex={-1} data-slot="map-detail-overlay" onKeyDown={(event) => {
+export function MapDetailOverlay({ className = "", onDismiss, onKeyDown, header, children, collapsible = false, collapsed, onCollapsedChange, ...props }: ComponentProps<"aside"> & {
+  onDismiss?: () => void; header?: ReactNode; collapsible?: boolean; collapsed?: boolean; onCollapsedChange?: (collapsed: boolean) => void;
+}) {
+  const [localCollapsed, setLocalCollapsed] = useState(false);
+  const compact = collapsed ?? localCollapsed;
+  const bodyId = useId();
+  const body = useRef<HTMLDivElement>(null);
+  const toggle = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (collapsible && compact && body.current?.contains(document.activeElement)) toggle.current?.focus();
+  }, [collapsible, compact]);
+  return <aside {...props} className={`kt-map-detail ${header !== undefined ? "kt-map-detail-slotted" : ""} ${className}`} tabIndex={-1} data-slot="map-detail-overlay" onKeyDown={(event) => {
     onKeyDown?.(event);
     if (!event.defaultPrevented && event.key === "Escape" && onDismiss) { event.preventDefault(); event.stopPropagation(); onDismiss(); }
-  }} />;
+  }}>{header !== undefined ? <>
+    <div className="kt-map-detail-header" data-slot="map-detail-header">
+      <div className="kt-map-detail-heading">{header}</div>
+      {collapsible ? <button ref={toggle} type="button" aria-label={compact ? "상세 펼치기" : "상세 접기"} aria-expanded={!compact} aria-controls={bodyId} onClick={() => {
+        setLocalCollapsed(!compact); onCollapsedChange?.(!compact);
+      }}>{compact ? <ChevronDownIcon aria-hidden="true" /> : <ChevronUpIcon aria-hidden="true" />}</button> : null}
+      {onDismiss ? <button type="button" aria-label="상세 닫기" onClick={onDismiss}><XIcon aria-hidden="true" /></button> : null}
+    </div>
+    <div ref={body} id={bodyId} className="kt-map-detail-body" data-slot="map-detail-body" hidden={collapsible && compact}>{children}</div>
+  </> : children}</aside>;
 }
