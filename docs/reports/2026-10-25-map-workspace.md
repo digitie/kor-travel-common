@@ -229,3 +229,10 @@ WSL2의 별도 사용자 소유 디렉터리 `/tmp/codex-common-boolean-qa.jfv6G
 
 이 후속은 기존 정본866aca…와 다른 제품이다. 새 정규 pack·Docker·CI와 Popper/James 재리뷰, 양쪽 소비자
 pin·UI 확인을 별도로 진행하며 기존71개/pack 결과를 새 후보의 최종 통과로 확대하지 않는다.
+
+제품 `a74ac808752fd6d6062e529909fd0dd656724f08`의 root fresh archive/Docker 정본은
+`/tmp/codex-map-common-qa.dGnyyx`다. 새 `npm ci` 뒤 네트워크를 차단한 타입·tokens7·UI76·빌드/고지 검사가 통과했다.
+정규 tarball SHA256은 `71d9f6ce8c178e3c66a47593a70a7fd9274938587ef9d96c1c7023673370059f`이며,
+별도 archive의 `/tmp/codex-map-preview-pack.9JIgCU`에서 생성한 pack과 byte가 같다.
+이 문서 정산은 runtime/CSS/package metadata/lock을 바꾸지 않는다. 최신 CI와 두 독립 재리뷰·소비자 수용의
+최종 정본은 [PR46](https://github.com/digitie/kor-travel-common/pull/46)이며 운영 이미지·배포는 실행하지 않는다.

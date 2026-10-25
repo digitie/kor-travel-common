@@ -5,8 +5,10 @@ Map/Transport/Weather의 중복 고정 지도 높이를 opt-in flex 계약으로
 CI를 통과한 후보 `80b97f2c1e36e646fc0c6d03e0d9e4ccee75ae58`를 James/Popper가 독립 검토했다.
 James는 레이어·양방향 초점 보강 뒤 잔여 지적 없이 통과했고, Popper는 `false` 상세도 빈 공간58px를
 예약하는 P2를 WSL Chromium/Firefox로 재현했다. boolean 슬롯을 없는 슬롯처럼 취급하도록 수정했다.
-WSL 회귀는 수정 전 boolean2개 실패·null/undefined/숫자0 통과, 수정 후 UI76개·타입 통과다.
-최종 수정 후보의 Docker·CI·독립 재리뷰와 소비자 pack 고정 결과는 PR46에서 별도 정산한다.
+WSL 회귀는 수정 전 boolean2개 실패·null/undefined/숫자0 통과, 제품 `a74ac808752fd6d6062e529909fd0dd656724f08`에서
+UI76개·타입 통과다. 같은 제품의 fresh archive/Docker도 UI76·tokens7·타입/빌드 통과이며
+정규 pack SHA256은 `71d9f6ce8c178e3c66a47593a70a7fd9274938587ef9d96c1c7023673370059f`다.
+최종 CI·독립 재리뷰와 소비자 pack 고정 결과는 PR46에서 별도 정산한다.
 
 실제 소비자에서 요약35%가 가격을 가리는 후속을 재현해 자연 높이와 상세 동작 최소공간으로
 배분하도록 수정했다. 짧은 높이의 필터 접힘·긴 label 접근도 보강했다. 가로/200%의 물리적
