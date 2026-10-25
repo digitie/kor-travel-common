@@ -10,7 +10,7 @@ UI `0.1.0-dev.8` 개발 후보이며 정식 registry/Release 발행이나 운영
 ## 작성자 검증
 
 WSL Ubuntu의 본인 전용 `/var/tmp/codex-common-map-workspace-20261025`에서 잠긴 의존성을
-설치했다. Node22/npm11.19.1 환경이며, 소스 정본은 격리 feature worktree다.
+설치했다. Node22.22.2/npm11.19.1 환경이며, 소스 정본은 격리 feature worktree다.
 
 | 검증 | 결과 |
 |---|---|
@@ -57,3 +57,22 @@ Workspace 밖 기존 dev.7 상세의 absolute/top80px/bottom96px와 필터 높�
 - Firefox/실제 지도 SDK·소비자 앱 build/E2E·CI·두 독립 리뷰는 NOT_RUN(각 소유자가 후속 수행).
 - 부모가 높이를 제한하지 않는 임의 문서 흐름은 자동 지원하지 않는다. 공용 측정 hook은 없다.
 - 본인 로컬 QA 프로세스 정리는 최종 결과 인계 때 별도로 정산한다.
+
+
+## 고정 산출물과 최종 정산
+
+- 제품 소스: `96103d95c64f59bf35fb8979cb573137a43636cc`.
+- 후보: `/var/tmp/codex-common-map-workspace-20261025/test-results/ui-pack/kor-travel-ui-0.1.0-dev.8.tgz`.
+- SHA256: `e36bae790e3fc7910cd083d446d65f346744bd444974aacc5d3697c12a2e44c7`.
+- 독립 설치: `/var/tmp/codex-common-map-workspace-install-20261025` 아래 설치 smoke.
+- 최종 pack의 CSS·emitted JS·버전·고지가 제품 소스/빌드와 일치함을 직접 비교했다.
+  source의 문서 후속 정산은 제품 트리를 바꾸지 않으며 재pack하지 않는다.
+- 최종 CSS(요약 shrink0·새 stage 외곽 frame 포함)로 독립 설치·webpack/Turbopack·
+  native Chromium 네 조건을 다시 통과했다. 위 표의 stage 수치는 최종 결과와 같다.
+- 본인 QA preview·SSH reverse forward 종료, native runner 잔존0을 확인했다.
+  다른 앱 preview·공유 브라우저·운영 프로세스는 변경하지 않았다. 로그/스크린샷은 보존했다.
+
+초기 단위 실행은 jsdom에 `matchMedia` 모의 구현이 없어 새 필터 테스트2개가 실패했다.
+테스트 모의를 보완한 뒤60개가 통과했다. QA mirror 전체 SPDX 검사는 저장소 밖 검증 helper의
+헤더 누락2개를 검출했으며, 실제 소스 정본140개 파일의 SPDX 오류0으로 범위를 구분했다.
+이 과정을 제품 실패나 검증 성공으로 바꾸어 집계하지 않는다.
