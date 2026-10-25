@@ -94,9 +94,26 @@ describe("공용 지도 컨트롤", () => {
     vi.stubGlobal("matchMedia", vi.fn(() => media));
     render(<MapFilterPanel><input aria-label="검색" /></MapFilterPanel>);
     screen.getByRole("textbox").focus();
+    screen.getByRole("textbox").blur();
+    expect(document.body).toHaveFocus();
     media.matches = true;
     act(() => change());
     expect(screen.getByRole("button")).toHaveFocus();
+  });
+
+  it.each(["focus", "pointer"])("사용자가 외부로 %s를 옮긴 뒤에는 반응형 전환이 초점을 훔치지 않는다", (method) => {
+    let change = () => {};
+    const media = { matches: false, addEventListener: (_: string, listener: () => void) => { change = listener; }, removeEventListener: vi.fn() };
+    vi.stubGlobal("matchMedia", vi.fn(() => media));
+    render(<><MapFilterPanel><input aria-label="검색" /></MapFilterPanel><button>외부 작업</button></>);
+    const input = screen.getByRole("textbox");
+    const outside = screen.getByRole("button", { name: "외부 작업" });
+    input.focus();
+    if (method === "focus") { outside.focus(); outside.blur(); }
+    else { fireEvent.pointerDown(outside); input.blur(); }
+    media.matches = true;
+    act(() => change());
+    expect(document.body).toHaveFocus();
   });
 
   it("외부에서 상세를 접으면 본문의 초점을 접기 버튼으로 돌린다", () => {

@@ -145,3 +145,12 @@ v2 최종 source·별도 tarball 경로/해시·정적 설치 결과는 후속 �
 WSL 타입·UI65/tokens7은 통과했다. 새 정본 tarball은 root의 fresh git archive/Dockerpack으로
 만들며 이전7504/143/e36 산출물은 보존한다. 이 소스 초기 고정 시점의 새 소비자 실제자료/
 200%·확장 브라우저 검증·두 독립 리뷰·CI는 후속 실행 중이며 미리 PASS로 세지 않는다.
+
+
+확장 후속에서 UI67/tokens7과 타입 검증을 통과했다. Chromium에서 CSS가 먼저 입력 초점을
+body로 떨어뜨리는 순서를 단위 재현하고 외부 focus/pointer 이동을 훔치지 않는 회귀를 추가했다.
+실제 Weather의 제목+i가 header225px를 써 body0을 만드는 후속은 제목 슬롯만max(44px,3em)으로
+제약하며 필수 상태는 body로 분리하는 계약으로 보강했다. 새 브라우저 검사는
+[확장·반응형 초점](../../packages/ui/smoke/map-workspace-expansion-browser.mjs)에서 수행한다.
+초기 dev 검사의 임시 input 삽입이 hydration 전에 일어나 발생한 mismatch/timeout은 제품
+초점 실패로 세지 않고 React 상태 반영 이후 삽입하도록 검증 순서를 수정했다.

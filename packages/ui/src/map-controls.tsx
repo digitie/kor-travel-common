@@ -54,15 +54,34 @@ export function MapFilterPanel({ children, label = "지도 필터", expanded, on
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   const body = useRef<HTMLDivElement>(null);
+  const lastBodyFocus = useRef<Element | null>(null);
   useImperativeHandle(triggerRef, () => trigger.current!, []);
   useEffect(() => {
     const mobile = window.matchMedia("(max-width: 40rem), (max-height: 30rem)");
+    const rememberFocus = (event: FocusEvent) => {
+      if (event.target instanceof Element && body.current?.contains(event.target)) lastBodyFocus.current = event.target;
+      else if (event.target !== document.body || !mobile.matches || open) lastBodyFocus.current = null;
+    };
+    const clearOutsidePointer = (event: PointerEvent) => {
+      if (!(event.target instanceof Node) || !body.current?.contains(event.target)) lastBodyFocus.current = null;
+    };
     const restore = () => {
-      if (!open && mobile.matches && body.current?.contains(document.activeElement)) trigger.current?.focus();
+      const inside = body.current?.contains(document.activeElement);
+      const lostOnHide = document.activeElement === document.body && lastBodyFocus.current?.isConnected;
+      if (!open && mobile.matches && (inside || lostOnHide)) {
+        lastBodyFocus.current = null;
+        trigger.current?.focus();
+      }
     };
     restore();
+    document.addEventListener("focusin", rememberFocus);
+    document.addEventListener("pointerdown", clearOutsidePointer, true);
     mobile.addEventListener("change", restore);
-    return () => mobile.removeEventListener("change", restore);
+    return () => {
+      document.removeEventListener("focusin", rememberFocus);
+      document.removeEventListener("pointerdown", clearOutsidePointer, true);
+      mobile.removeEventListener("change", restore);
+    };
   }, [open]);
   return <div {...props} className={`kt-map-filter-panel ${className}`} data-slot="map-filter-panel" data-expanded={open}>
     <div className="kt-map-filter-header" data-slot="map-filter-header">
