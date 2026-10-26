@@ -1,3 +1,10 @@
+## 2026-10-26 — T-217 제품·경계 검증
+
+SSR/최초 client HTML의 입력 두 개와 submit을 닫고 effect 후 활성화했다.
+pending 자체의 포커스/aria 계약은 바꾸지 않았다. 새 SSR 지연 click/Enter·layout-before-effect·hydrated callback 회귀와 기존 전체 UI79/tokens7·빌드/타입이 통과했다.
+정규 dev.9 pack을 tokens와 함께 실제 offline 설치하고 ESM/SSR을 확인했다. pack stdout JSON 파싱과 CJS resolver를 쓴 설치 probe의 최초 실패는 보존했으며 제품 수정 없이 검사만 정정했다.
+개발환경 Node22.22.2는 선언된 floor를 만족하며 recommended/CI 고정22.23.1과 구분한다. 독립 두 리뷰·정확 CI·소비자 UI/배포는 미완이다.
+
 ## 2026-10-26 — T-217 초기 설계
 
 최신 main의 공통 LoginForm과 Transport에 고정된 기존 배포 tarball을 대조했다.

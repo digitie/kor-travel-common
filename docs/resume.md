@@ -1,3 +1,9 @@
+## 2026-10-26 — 로그인 hydration 경계 제품 후보
+
+[T-217](tasks/T-217-login-hydration-readiness.md)의 dev.9는 초기 native disabled와 준비 후 기존 제출 계약을 유지한다.
+원 2FAIL을 보존하고 최종 UI79/tokens7·타입/빌드·정규 tarball 설치/SSR을 확인했다.
+다음은 독립 두 리뷰·CI와 별도 Transport 채택이다. 실제 공개 UI와 운영 변경은 없다.
+
 ## 2026-10-26 — 로그인 폼 hydration 준비 경계 착수
 
 [T-217](tasks/T-217-login-hydration-readiness.md)의 SSR·초기 hydration 중 기본 제출 차단을 별도 후보로 준비한다.

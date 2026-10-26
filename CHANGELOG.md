@@ -25,6 +25,12 @@ UI dev.8에 opt-in MapWorkspace·MapFilterPanel·MapStage와 상세 header/접�
 
 ## [Unreleased]
 
+### ui
+
+#### Fixed
+
+- 개발 후보 dev.9의 LoginForm은 SSR·초기 hydration 중 입력과 submit을 native disabled로 닫는다. client handler 준비 후 기존 비동기 pending 포커스·오류·재시도 계약을 유지한다. 공개 props·슬롯·인증 정책은 바뀌지 않는다. [T-217](docs/tasks/T-217-login-hydration-readiness.md).
+
 ### Python 회수 sensor tick 예산·정체 경보
 
 - `reconciliation_sensor`에 opt-in `budget_seconds`(콜백에 남은 시간 함수 전달·전용 1-slot 대기 상한)와
