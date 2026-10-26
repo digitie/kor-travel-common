@@ -1,3 +1,9 @@
+## 2026-10-27 — T-217 병합과 실제 소비자 후보 정산
+
+Common47의 main aa232ad/최종44d7 전체 tree 동일, CI8 SUCCESS 및 J/W 제품·최종 delta PASS를 저장 원장과 Git/GitHub로 대조했다. Transport6913의 실제 UI32 PASS26.014초·SSR script 보류8·인증 cookie·tile40/API10·도메인 쓰기0·정리를 [정산 보고서](reports/2026-10-27-common47-consumer-ui-closure.md)에 기록했다.
+최종 r12는 성공 빌드6e의 원 두 receipt·소스·산출물 검산 후 새 UUID45로 복제한 runtime 재실행이며 새 빌드로 집계하지 않는다. 원 CI4실패·cookie FAIL·stale wrapper FAIL을 보존하고 공개 TLS/운영 배포·CPU/RSS는 미완으로 분리했다. 별도 clean Linux 문서 worktree만 사용하며 원본 checkout과 제품·tgz·패키지 변경, 운영 query는 없다.
+문서 검증은 링크·plan·diff 검사와 도구336 PASS/기존1 SKIP(81.741초)다. 새 worktree의 MDX 의존성 부재로 첫 도구 실행은 실패했으며 원로그를 보존했다. 같은 lock의 기존 로컬 의존성을 임시 연결해 재검증하고 연결을 제거했으며 설치·다운로드는 하지 않았다.
+
 ## 2026-10-26 — T-217 원 CI 4실패와 최소 정렬
 
 후보 f0b60bb의 tools 양 OS·secret-scan은 새 시험의 DOM 식별자/고정 예시가 비밀 할당 패턴에 걸려 실패했다. 검사기·예외를 바꾸지 않고 DOM변수와 예시 상수만 기존 시험 표기처럼 정리했다. packages는 smoke의 옛 dev.8 파일명을 찾아 실패했으므로 기존 manifest/lock/helper의 후보 참조만 dev.9로 정렬했다.
