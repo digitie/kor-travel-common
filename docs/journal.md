@@ -1,3 +1,9 @@
+## 2026-10-26 — T-217 초기 설계
+
+최신 main의 공통 LoginForm과 Transport에 고정된 기존 배포 tarball을 대조했다.
+SSR 활성 폼이 client handler 준비 전 기본 제출될 수 있는 경계를 native disabled로 닫는 최소 계약을 [T-217](tasks/T-217-login-hydration-readiness.md)에 적었다.
+원본 dirty checkout은 보존하고 별도 worktree를 사용한다. 제품·운영 변경과 검증 완료 주장은 없다.
+
 ## 2026-10-25 — C-MAP-01 공통 작업면
 
 Map/Transport/Weather의 중복 고정 지도 높이를 opt-in flex 계약으로 대체할 공용 UI를 추가했다. 기존 Map의 공개 dev.7 계약은 유지한다. 엔진·조회·선택·소비자 코드는 변경하지 않았다. 검증 범위와 한계는 [검증 기록](reports/2026-10-25-map-workspace.md)을 따른다.

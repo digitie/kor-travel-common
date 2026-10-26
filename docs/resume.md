@@ -1,3 +1,8 @@
+## 2026-10-26 — 로그인 폼 hydration 준비 경계 착수
+
+[T-217](tasks/T-217-login-hydration-readiness.md)의 SSR·초기 hydration 중 기본 제출 차단을 별도 후보로 준비한다.
+실제 차단 경로 POST /login 관측과 상세 hydration 원인은 구분한다. 구현·pack·소비자 채택·독립 리뷰/CI는 미완이다.
+
 ## 2026-10-25 — 남은 높이 지도 작업면 후보
 
 C-MAP-01의 additive UI dev.8을 구현했다. [계약](standards/map-controls.md)과 [검증 기록](reports/2026-10-25-map-workspace.md)을 따른다.
