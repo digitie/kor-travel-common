@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { LoginError } from "./login-error.js";
 import { sanitizeLocalPath } from "./navigation.js";
@@ -33,10 +33,14 @@ export function LoginForm({
   const id = useId();
   const passwordRef = useRef<HTMLInputElement>(null);
   const inFlight = useRef(false);
+  const [ready, setReady] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const busy = pending || submitting;
   const message = localError || error;
+
+  // SSR와 최초 client 렌더를 같은 disabled HTML로 유지하고 handler 준비 뒤 연다.
+  useEffect(() => { setReady(true); }, []);
 
   function clearError() {
     setLocalError(null);
@@ -45,7 +49,7 @@ export function LoginForm({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending || inFlight.current) return;
+    if (!ready || pending || inFlight.current) return;
     const form = event.currentTarget;
     const data = new FormData(form);
     const username = String(data.get("username") ?? "").trim();
@@ -82,17 +86,17 @@ export function LoginForm({
       <label htmlFor={`${id}-username`} className="text-kt-sm">{usernameLabel}</label>
       <input id={`${id}-username`} data-slot="login-username" name="username" type="text"
         autoComplete="username" autoCapitalize="none" spellCheck={false} required
-        defaultValue={defaultUsername} readOnly={busy} onChange={clearError}
+        defaultValue={defaultUsername} disabled={!ready} readOnly={busy} onChange={clearError}
         aria-describedby={message ? `${id}-error` : undefined} className={inputClass} />
     </div>
     <div className="space-y-2">
       <label htmlFor={`${id}-password`} className="text-kt-sm">비밀번호</label>
       <input ref={passwordRef} id={`${id}-password`} data-slot="login-password" name="password" type="password"
-        autoComplete="current-password" required readOnly={busy} onChange={clearError}
+        autoComplete="current-password" required disabled={!ready} readOnly={busy} onChange={clearError}
         aria-describedby={message ? `${id}-error` : undefined} className={inputClass} />
     </div>
     <LoginError id={`${id}-error`} error={message} />
-    <button data-slot="login-submit" type="submit" aria-disabled={busy} aria-busy={busy}
+    <button data-slot="login-submit" type="submit" disabled={!ready} aria-disabled={!ready || busy} aria-busy={busy}
       className="min-h-11 w-full rounded-kt-control bg-kt-brand px-4 py-2 text-kt-sm font-semibold text-kt-brand-foreground hover:bg-kt-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kt-focus">
       {busy ? "로그인 중…" : "로그인"}
     </button>

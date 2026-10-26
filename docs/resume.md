@@ -1,3 +1,19 @@
+## 2026-10-26 — 로그인 후보 CI 정렬
+
+원 f0b60bb CI 4실패를 보존하고 시험 식별자/예시 표기와 smoke dev.9 참조만 정렬했다.
+제품·pack b738은 그대로이며 새 CI와 독립 delta리뷰를 기다린다. [T-217](tasks/T-217-login-hydration-readiness.md)의 공개 UI 수용은 별도다.
+
+## 2026-10-26 — 로그인 hydration 경계 제품 후보
+
+[T-217](tasks/T-217-login-hydration-readiness.md)의 dev.9는 초기 native disabled와 준비 후 기존 제출 계약을 유지한다.
+원 2FAIL을 보존하고 최종 UI79/tokens7·타입/빌드·정규 tarball 설치/SSR을 확인했다.
+다음은 독립 두 리뷰·CI와 별도 Transport 채택이다. 실제 공개 UI와 운영 변경은 없다.
+
+## 2026-10-26 — 로그인 폼 hydration 준비 경계 착수
+
+[T-217](tasks/T-217-login-hydration-readiness.md)의 SSR·초기 hydration 중 기본 제출 차단을 별도 후보로 준비한다.
+실제 차단 경로 POST /login 관측과 상세 hydration 원인은 구분한다. 구현·pack·소비자 채택·독립 리뷰/CI는 미완이다.
+
 ## 2026-10-25 — 남은 높이 지도 작업면 후보
 
 C-MAP-01의 additive UI dev.8을 구현했다. [계약](standards/map-controls.md)과 [검증 기록](reports/2026-10-25-map-workspace.md)을 따른다.

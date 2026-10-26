@@ -2,7 +2,7 @@
 
 이 원장은 열린 task의 요약·선행 관계를 관리한다. 수용 기준·외부 선행·검증·evidence는 상세 파일, 현재 다음 한 작업은 [resume](resume.md), 실행 선택과 단계별 출구는 [통합 계획](plan/integration-plan.md)이 정본이다. 작성 문법은 [task 규칙](tasks-rule.md)을 따른다.
 
-총 109개의 상세 작업이 있다. 완료 24개는 완료 원장에 보존하고 열린 85개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
+총 110개의 상세 작업이 있다. 완료 24개는 완료 원장에 보존하고 열린 86개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
 
 ## 실행 대기열
 
@@ -35,8 +35,11 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 
 ## React UI
 
+현재 후속 사용자 요청: [T-217 로그인 hydration 준비 경계](tasks/T-217-login-hydration-readiness.md)는 IN_PROGRESS이며 기존 광역 UI task의 완료를 뜻하지 않는다.
+
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
+| [T-217](tasks/T-217-login-hydration-readiness.md) | IN_PROGRESS | P1 | 로그인 폼 hydration 준비 경계 | T-215 |
 | [T-201](tasks/T-201-ui-package-skeleton.md) | BLOCKED | P0 | packages/ui 골격(ESM·d.ts·subpath exports·`'use client'`/`'use no memo'` 보존·peer react ^19·인라인 아이콘·`cn` extendTailwindMerge·noUncheckedIndexedAccess) + base-ui 사실 확인 3건 기록 + pack 스모크(webpack/Turbopack) | T-109a |
 | [T-203](tasks/T-203-ui-small-components.md) | BLOCKED | P0 | ui 1차 소형 13종(Badge·Skeleton·Separator·Card·Alert·Input·Textarea·NativeSelect·Field·EmptyState·SectionCard·FilterBar·StatStrip) + 단위 테스트(vitest+RTL+jsdom) | T-201 |
 | [T-204](tasks/T-204-ui-contract-standard.md) | BLOCKED | P0 | docs/standards/ui-contract.md 확정(data-slot·testid·heading·sr-only·geo 셀렉터 대응·SemVer 0.x) | T-203 |

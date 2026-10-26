@@ -1,3 +1,21 @@
+## 2026-10-26 — T-217 원 CI 4실패와 최소 정렬
+
+후보 f0b60bb의 tools 양 OS·secret-scan은 새 시험의 DOM 식별자/고정 예시가 비밀 할당 패턴에 걸려 실패했다. 검사기·예외를 바꾸지 않고 DOM변수와 예시 상수만 기존 시험 표기처럼 정리했다. packages는 smoke의 옛 dev.8 파일명을 찾아 실패했으므로 기존 manifest/lock/helper의 후보 참조만 dev.9로 정렬했다.
+원 4job 로그는 보존한다. prod-redaction0은 secret-scan0과 다른 검사였으며 이 범위를 정정한다. 새 secret/prod 전체0·관련13PASS와 정상 prepare-lock을 확인했고 제품/login 산출물 b738은 그대로다. 새 CI·두 delta리뷰·소비자 공개 UI는 미완이다.
+
+## 2026-10-26 — T-217 제품·경계 검증
+
+SSR/최초 client HTML의 입력 두 개와 submit을 닫고 effect 후 활성화했다.
+pending 자체의 포커스/aria 계약은 바꾸지 않았다. 새 SSR 지연 click/Enter·layout-before-effect·hydrated callback 회귀와 기존 전체 UI79/tokens7·빌드/타입이 통과했다.
+정규 dev.9 pack을 tokens와 함께 실제 offline 설치하고 ESM/SSR을 확인했다. pack stdout JSON 파싱과 CJS resolver를 쓴 설치 probe의 최초 실패는 보존했으며 제품 수정 없이 검사만 정정했다.
+개발환경 Node22.22.2는 선언된 floor를 만족하며 recommended/CI 고정22.23.1과 구분한다. 독립 두 리뷰·정확 CI·소비자 UI/배포는 미완이다.
+
+## 2026-10-26 — T-217 초기 설계
+
+최신 main의 공통 LoginForm과 Transport에 고정된 기존 배포 tarball을 대조했다.
+SSR 활성 폼이 client handler 준비 전 기본 제출될 수 있는 경계를 native disabled로 닫는 최소 계약을 [T-217](tasks/T-217-login-hydration-readiness.md)에 적었다.
+원본 dirty checkout은 보존하고 별도 worktree를 사용한다. 제품·운영 변경과 검증 완료 주장은 없다.
+
 ## 2026-10-25 — C-MAP-01 공통 작업면
 
 Map/Transport/Weather의 중복 고정 지도 높이를 opt-in flex 계약으로 대체할 공용 UI를 추가했다. 기존 Map의 공개 dev.7 계약은 유지한다. 엔진·조회·선택·소비자 코드는 변경하지 않았다. 검증 범위와 한계는 [검증 기록](reports/2026-10-25-map-workspace.md)을 따른다.
