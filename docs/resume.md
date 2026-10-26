@@ -1,3 +1,10 @@
+## 2026-10-27 — Common47 병합·소비자 후보 UI32 수용
+
+Common47 최종44d7 CI8 SUCCESS·J/W 독립 두 리뷰와 main aa232ad의 전체 tree 동일성을 확인했다.
+Transport6913의 정규 dev.9 채택·실제 Next 후보 UI32 PASS는 [수용 정산](reports/2026-10-27-common47-consumer-ui-closure.md)에 기록했다.
+최종 runtime은 같은 성공 빌드의 복제 재실행이며 새 빌드가 아니다. 공개 TLS·Transport 배포·운영 CPU/RSS는 미수용이다.
+T-217은 외부 선행 때문에 IN_PROGRESS를 유지하며 다음은 소비자 공개 검증·배포 gate 정산이다. 아래 기록은 당시 상태다.
+
 ## 2026-10-26 — 로그인 후보 CI 정렬
 
 원 f0b60bb CI 4실패를 보존하고 시험 식별자/예시 표기와 smoke dev.9 참조만 정렬했다.

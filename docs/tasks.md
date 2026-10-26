@@ -35,7 +35,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 
 ## React UI
 
-현재 후속 사용자 요청: [T-217 로그인 hydration 준비 경계](tasks/T-217-login-hydration-readiness.md)는 IN_PROGRESS이며 기존 광역 UI task의 완료를 뜻하지 않는다.
+현재 후속 사용자 요청: [T-217 로그인 hydration 준비 경계](tasks/T-217-login-hydration-readiness.md)는 Common47 병합·CI8·독립 두 리뷰와 Transport 후보 UI32를 수용했다. 공개 TLS·운영 배포 외부 선행이 남아 IN_PROGRESS이며 기존 광역 UI task의 완료를 뜻하지 않는다.
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|

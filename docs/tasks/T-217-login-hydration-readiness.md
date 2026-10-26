@@ -4,7 +4,7 @@
 - 우선순위: P1
 - Gate: SSR·hydration 경계 회귀, 기존 UI 전체 단위·타입·빌드, 정규 pack·설치, 독립 2인 리뷰·CI
 - 선행: T-215
-- 외부 선행: Transport 별도 채택 PR의 정확 tarball·lock·빌드 및 Root 소유 공개 UI 재검증
+- 외부 선행: Transport 후보의 정확 tarball·lock·빌드와 HTTP UI32는 수용했으며, 소비자 소유 공개 TLS·운영 배포 검증은 남는다.
 
 ## 관측과 범위
 
@@ -38,6 +38,6 @@ Transport 공개 UI의 로그인 단계에서 차단된 요청이 실제 `POST /
 - 정규 `npm pack -w packages/ui`의 dev.9 산출물은 27파일·SHA256 `b738d8824e36eb6e58d8cc6b78af7dc31233b6763248d634286044def795b403`이다. tokens 원산출물과 함께 임시 디렉터리에 실제 오프라인 설치하고 ESM import/SSR disabled 3개·callback 0을 확인했다.
 - pack metadata parser는 prepack stdout 때문에 처음 실패했고, 설치 probe는 import-only ESM 패키지에 CommonJS resolve를 써 처음 실패했다. 제품·산출물을 바꾸지 않고 원파일 보존 뒤 실제 tgz metadata/ESM resolver로 정정했다.
 - 원 f0b60bb CI는 tools 양 OS·secret-scan의 시험 예시 패턴 3실패와 smoke dev.8 누락 1실패였다. 원문 보존 뒤 검사기/단언 완화 없이 시험 식별자·상수와 후보 파일명만 정렬했다. 제품·산출물은 같다.
-- JSDOM 회귀는 브라우저·Next event replay·실제 공개 UI 수용을 대체하지 않는다. 독립 2인 리뷰·정확 CI·Transport 채택 및 Root 공개 UI는 아직 미완이다.
+- JSDOM 회귀는 브라우저·Next event replay·실제 공개 UI 수용을 대체하지 않는다. 후속 Common47 병합·정확 CI8·J/W 독립 두 리뷰 및 Transport6913 후보 HTTP UI32를 수용했다. [최종 정산](../reports/2026-10-27-common47-consumer-ui-closure.md)에 동일 성공 빌드 복제 재실행·원 실패와 한계를 보존한다. 공개 TLS·운영 배포·운영 CPU/RSS는 미수용이므로 IN_PROGRESS를 유지한다.
 원본 checkout의 미커밋 변경과 기존 CPU/Manager 소비자 PR은 수정하지 않는다.
 Common 변경은 이 task의 commit revert, 소비자는 새 tarball 채택 PR revert로 원복한다.
