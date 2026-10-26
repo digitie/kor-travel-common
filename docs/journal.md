@@ -1,3 +1,8 @@
+## 2026-10-26 — T-217 원 CI 4실패와 최소 정렬
+
+후보 f0b60bb의 tools 양 OS·secret-scan은 새 시험의 DOM 식별자/고정 예시가 비밀 할당 패턴에 걸려 실패했다. 검사기·예외를 바꾸지 않고 DOM변수와 예시 상수만 기존 시험 표기처럼 정리했다. packages는 smoke의 옛 dev.8 파일명을 찾아 실패했으므로 기존 manifest/lock/helper의 후보 참조만 dev.9로 정렬했다.
+원 4job 로그는 보존한다. prod-redaction0은 secret-scan0과 다른 검사였으며 이 범위를 정정한다. 새 secret/prod 전체0·관련13PASS와 정상 prepare-lock을 확인했고 제품/login 산출물 b738은 그대로다. 새 CI·두 delta리뷰·소비자 공개 UI는 미완이다.
+
 ## 2026-10-26 — T-217 제품·경계 검증
 
 SSR/최초 client HTML의 입력 두 개와 submit을 닫고 effect 후 활성화했다.

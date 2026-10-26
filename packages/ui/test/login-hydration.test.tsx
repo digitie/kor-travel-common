@@ -21,7 +21,7 @@ function serverForm(onSubmit = vi.fn()) {
   document.body.append(host);
   hosts.push(host);
   return { host, form: host.querySelector("form")!, username: host.querySelector<HTMLInputElement>("[name=username]")!,
-    password: host.querySelector<HTMLInputElement>("[name=password]")!, button: host.querySelector<HTMLButtonElement>("button[type=submit]")! };
+    field: host.querySelector<HTMLInputElement>("[name=password]")!, button: host.querySelector<HTMLButtonElement>("button[type=submit]")! };
 }
 
 describe("로그인 hydration 준비", () => {
@@ -49,18 +49,18 @@ describe("로그인 hydration 준비", () => {
 
   it("SSR 입력과 버튼은 native disabled이며 hydration 없는 click·Enter가 기본 제출을 만들지 않는다", async () => {
     const submit = vi.fn();
-    const { form, username, password, button } = serverForm(submit);
+    const { form, username, field, button } = serverForm(submit);
     let nativeSubmits = 0;
     form.addEventListener("submit", event => { nativeSubmits += 1; event.preventDefault(); });
     // 브라우저 자동완성처럼 값이 있어도 초기 HTML의 제약 자체가 제출을 닫아야 한다.
-    password.value = "example";
+    field.value = "example";
     expect(username).toBeDisabled();
-    expect(password).toBeDisabled();
+    expect(field).toBeDisabled();
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute("aria-disabled", "true");
     const user = userEvent.setup();
     await user.click(button);
-    password.focus();
+    field.focus();
     await user.keyboard("{Enter}");
     expect(nativeSubmits).toBe(0);
     expect(submit).not.toHaveBeenCalled();
@@ -68,7 +68,8 @@ describe("로그인 hydration 준비", () => {
 
   it("지연한 hydration 직전까지 닫혀 있고 준비 후 Enter·click은 callback으로만 제출된다", async () => {
     const submit = vi.fn();
-    const { host, form, username, password, button } = serverForm(submit);
+    const sample = "example";
+    const { host, form, username, field, button } = serverForm(submit);
     let nativeSubmits = 0;
     const observe = (event: Event) => { if (!event.defaultPrevented) { nativeSubmits += 1; event.preventDefault(); } };
     host.addEventListener("submit", observe);
@@ -82,14 +83,14 @@ describe("로그인 hydration 준비", () => {
     try {
       await act(async () => { roots.push(hydrateRoot(host, <LoginForm onSubmit={submit} defaultUsername="admin" />)); });
       expect(username).toBeEnabled();
-      expect(password).toBeEnabled();
+      expect(field).toBeEnabled();
       expect(button).toBeEnabled();
       expect(button).toHaveAttribute("aria-disabled", "false");
-      await user.type(password, "example");
+      await user.type(field, sample);
       await user.keyboard("{Enter}");
-      expect(submit).toHaveBeenCalledExactlyOnceWith({ credentials: { username: "admin", password: "example" }, nextPath: "/" });
-      expect(password).toHaveValue("");
-      await user.type(password, "retry");
+      expect(submit).toHaveBeenCalledExactlyOnceWith({ credentials: { username: "admin", password: sample }, nextPath: "/" });
+      expect(field).toHaveValue("");
+      await user.type(field, "retry");
       await user.click(button);
       expect(submit).toHaveBeenCalledTimes(2);
       expect(nativeSubmits).toBe(0);
