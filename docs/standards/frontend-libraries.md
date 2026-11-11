@@ -90,7 +90,7 @@ TypeScript는 OpenAPI 생성기와 typescript-eslint peer 범위 때문에 5.9.3
 
 웹은 @kor-travel/ui/check-dependencies.mjs, 모바일은 @kor-travel/tokens/check-dependencies.mjs를 check:dependencies 및 CI에서 실행한다. --profile mobile, --package, --lock, --workspace로 대상 frontend를 지정하고 --artifacts common-artifacts.json을 반드시 전달한다. 필수 직접 의존성·정확 선언·workspace lock의 실제 버전·공통 파일과 원장 및 lock SHA512가 다르면 실패한다.
 
-중앙 reusable CI는 고정 common 커밋의 frontend-artifacts.json과도 대조한다. 앱이 vendor 파일·원장·lock을 함께 바꿔 자체 검사만 통과하는 차이를 차단한다. 로컬 검사에서는 --canonical 경로를 추가해 같은 검증을 실행할 수 있다.
+중앙 reusable CI의 실행 코드는 검토한 common40자리 커밋으로 고정한다. 비교할 버전·산출물 데이터는 현재 common main의 단일 정본을 읽고 실제 관찰 SHA를 기록한다. 이 main은 배포 파일 참조가 아닌 검증 정책 데이터다. 앱이 오래된 workflow/내장 정책을 유지해도 최신 정본과 다른 버전·해시는 중앙 CI에서 실패한다. 앱이 vendor 파일·원장·lock을 함께 바꿔 자체 검사만 통과하는 차이를 차단한다. 로컬 검사에서는 --canonical 경로를 추가해 같은 검증을 실행할 수 있다.
 
 소스 경로는 --source를 반복 지정하거나 앱의 src/app/components/lib에서 자동 검색한다. 소스가 없으면 실패한다. 개별 table/Table 마크업과 Base UI/Floating UI 직접 구현의 재도입도 검사한다. 동적 마크업까지 증명하는 정적 분석기는 아니므로 공개 API 계약 시험과 코드 리뷰를 함께 유지한다.
 

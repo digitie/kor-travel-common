@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import policy from "../dependency-policy.json" with { type: "json" };
-function fixture(change, {profile="web",workspace="",canonical=false}={}) {
+function fixture(change, {profile="web",workspace="",canonical=false,policyOverride,requireCanonical=false}={}) {
  const root=mkdtempSync(join(tmpdir(),"kt-policy-"));
  try {
   const dependencies={}, devDependencies={}, packages={}, artifacts={packages:{}};
@@ -18,8 +18,9 @@ function fixture(change, {profile="web",workspace="",canonical=false}={}) {
   for(const name of policy.profiles[profile].required) {
    const version=policy.versions[name] ?? "1.0.0";
    dependencies[name]=version; packages["node_modules/"+name]={version};
-   if(name.startsWith("@kor-travel/")) {
-    const filename=name.slice(1).replace("/","-")+"-"+version+".tgz";
+   if(policy.artifactPackages.includes(name)) {
+    const prefix=name.startsWith("@")?name.slice(1).replace("/","-"):name;
+    const filename=prefix+"-"+version+".tgz";
     const bytes=Buffer.from(name), integrity="sha512-"+createHash("sha512").update(bytes).digest("base64");
     writeFileSync(join(root,"vendor",filename),bytes);
     dependencies[name]="file:vendor/"+filename;packages["node_modules/"+name].integrity=integrity;artifacts.packages[name]={version,integrity};
@@ -31,7 +32,8 @@ function fixture(change, {profile="web",workspace="",canonical=false}={}) {
   writeFileSync(join(root,"package-lock.json"),JSON.stringify({lockfileVersion:3,packages}));
   writeFileSync(join(root,"common-artifacts.json"),JSON.stringify(artifacts));
   if(canonical) writeFileSync(join(root,"canonical.json"),JSON.stringify(canonicalArtifacts));
-  return spawnSync(process.execPath,[fileURLToPath(new URL("../check-dependencies.mjs",import.meta.url)),"--artifacts","common-artifacts.json","--profile",profile,"--workspace",workspace,...(canonical?["--canonical","canonical.json"]:[])],{cwd:root,encoding:"utf8"});
+  if(policyOverride) { const externalPolicy=structuredClone(policy);policyOverride(externalPolicy);writeFileSync(join(root,"policy.json"),JSON.stringify(externalPolicy)); }
+  return spawnSync(process.execPath,[fileURLToPath(new URL("../check-dependencies.mjs",import.meta.url)),"--artifacts","common-artifacts.json","--profile",profile,"--workspace",workspace,...(canonical?["--canonical","canonical.json"]:[]),...(policyOverride?["--policy","policy.json"]:[])],{cwd:root,encoding:"utf8",env:{...process.env,...(requireCanonical?{KT_REQUIRE_CANONICAL:"1"}:{})}});
  } finally {rmSync(root,{recursive:true,force:true});}
 }
 test("동일 선언·lock·산출물은 통과",()=>{const result=fixture();assert.equal(result.status,0,result.stderr);});
@@ -94,3 +96,13 @@ test("모바일에 DOM 공통 UI를 추가하면 거부",()=>rejected(fixture(({
  packages["node_modules/@kor-travel/ui"]={version,integrity};
  artifacts.packages["@kor-travel/ui"]={version,integrity};
 },{profile:"mobile"}),"공통 Radix 구현으로 이관 필요"));
+test("개별 Radix 직접 선언은 공통 경로로 이관해야 한다",()=>rejected(fixture(({dependencies})=>dependencies["@radix-ui/react-dialog"]="1.0.0"),"개별 Radix"));
+test("개별 Radix 전이 경로 직접 import도 거부",()=>rejected(fixture(({root})=>writeFileSync(join(root,"src/dialog.tsx"),"import { Root } from '@radix-ui/react-dialog';")),"공통 Radix 외 overlay 구현"));
+test("내장 정책이 오래되어도 중앙 최신 정책을 대조한다",()=>rejected(fixture(undefined,{
+ policyOverride:value=>value.versions.pretendard="9.0.0",
+}),"!= 9.0.0"));
+test("중앙 CI는 정책과 산출물의 외부 정본 입력을 요구",()=>rejected(fixture(undefined,{canonical:true,requireCanonical:true}),"--policy 최신 정본"));
+test("중앙 CI의 동일 최신 정책·산출물은 통과",()=>{
+ const result=fixture(undefined,{canonical:true,policyOverride:()=>{},requireCanonical:true});
+ assert.equal(result.status,0,result.stderr);
+});

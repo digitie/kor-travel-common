@@ -5,10 +5,10 @@ import { resolve, dirname } from "node:path";
 import { createHash } from "node:crypto";
 import { parseArgs } from "node:util";
 import { createRequire } from "node:module";
-const { values } = parseArgs({ options: { profile: { type: "string", default: "web" }, package: { type: "string", default: "package.json" }, lock: { type: "string", default: "package-lock.json" }, workspace: { type: "string", default: "" }, artifacts: { type: "string" }, canonical: { type: "string" }, source: { type: "string", multiple: true, default: [] } } });
+const { values } = parseArgs({ options: { profile: { type: "string", default: "web" }, policy: { type: "string" }, package: { type: "string", default: "package.json" }, lock: { type: "string", default: "package-lock.json" }, workspace: { type: "string", default: "" }, artifacts: { type: "string" }, canonical: { type: "string" }, source: { type: "string", multiple: true, default: [] } } });
 const read = p => JSON.parse(readFileSync(p, "utf8"));
 const bundledPolicy = new URL("./dependency-policy.json", import.meta.url);
-const policy = read(existsSync(bundledPolicy) ? bundledPolicy : new URL("../frontend-dependencies.json", import.meta.url));
+const policy = read(values.policy ? resolve(values.policy) : existsSync(bundledPolicy) ? bundledPolicy : new URL("../frontend-dependencies.json", import.meta.url));
 const artifactNames = new Set(policy.artifactPackages);
 const skippedDirectories = new Set(["node_modules", ".next", "test", "tests", "e2e", "dist", "build", ".expo"]);
 const packagePath = resolve(values.package), lockPath = resolve(values.lock);
@@ -26,6 +26,7 @@ for (const section of sections) {
   declaredBy.set(name, section); deps[name] = spec;
  }
 }
+for (const name of Object.keys(deps)) if (name.startsWith("@radix-ui/react-")) errors.push(name + ": 개별 Radix 대신 공통 UI 경로 사용");
 if (!policy.profiles[values.profile]) throw new Error("알 수 없는 검사 프로필");
 const profile = policy.profiles[values.profile];
 for (const name of profile.required) {
@@ -84,6 +85,7 @@ if (!values.artifacts) errors.push("--artifacts 공통 산출물 원장이 필�
 else {
  const artifacts = read(resolve(values.artifacts));
  const canonical = values.canonical ? read(resolve(values.canonical)) : null;
+ if (process.env.KT_REQUIRE_CANONICAL === "1" && !values.policy) errors.push("중앙 CI는 --policy 최신 정본을 요구함");
  if (process.env.KT_REQUIRE_CANONICAL === "1" && !canonical) errors.push("중앙 CI는 --canonical 산출물 정본을 요구함");
  for (const name of artifactNames) {
   if (!(name in deps)) continue;
@@ -111,7 +113,7 @@ function scan(path) {
      if (tag === "table" || tag === "Table") errors.push(file + ": 공통 VirtualTable 외 표 구현");
     }
     if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)
-      && (node.moduleSpecifier.text.startsWith("@base-ui/react") || node.moduleSpecifier.text.startsWith("@floating-ui/"))) errors.push(file + ": 공통 Radix 외 overlay 구현");
+      && (node.moduleSpecifier.text.startsWith("@base-ui/react") || node.moduleSpecifier.text.startsWith("@floating-ui/") || node.moduleSpecifier.text.startsWith("@radix-ui/react-"))) errors.push(file + ": 공통 Radix 외 overlay 구현");
     ts.forEachChild(node, visit);
    }
    visit(source);

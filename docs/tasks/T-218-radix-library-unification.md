@@ -34,7 +34,7 @@ npm run lint, npm run build, npm run check, npm test, npm run doctor, npm run ch
 
 ## Evidence
 
-2026-11-11 현재 공통 UI99·정책16 시험, tokens 시험·타입·예시·빌드·lint·Doctor0을 확인했다. 소비자 검증·리뷰·PR·이미지 배포는 진행 중이다. 최종 근거는 Geo 저장소 docs/kor-travel-common-library-review.md에 하나로 기록한다. 미실행 gate는 통과로 간주하지 않는다.
+2026-11-11 현재 공통 UI99·정책21 시험, tokens 시험·타입·예시·빌드·lint·Doctor0을 확인했다. 소비자 검증·리뷰·PR·이미지 배포는 진행 중이다. 최종 근거는 Geo 저장소 docs/kor-travel-common-library-review.md에 하나로 기록한다. 미실행 gate는 통과로 간주하지 않는다.
 
 ## Rollback과 release 차단
 
