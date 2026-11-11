@@ -1,0 +1,647 @@
+{
+  "head": "4e25c98e4eed1e1212b0842ff30fa4333fdb9a38",
+  "base": "ef7bd62dd81cb01b3c41b8bb10106c4586bb3bcf",
+  "manifest": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-review-supplement-4e25c98/manifest.json",
+  "manifestSha256": "71cd87abb0bcd2715dcc5ff62b69553d82d468c034fcef24f39a4425c704504e",
+  "capsuleRoot": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-review-supplement-4e25c98",
+  "changedBlobs": [
+    {
+      "path": "AGENT-HANDOFF-transport-doctor-20261111.md",
+      "status": "M",
+      "base": {
+        "mode": "100644",
+        "type": "blob",
+        "oid": "1e8251c54d08ee5cc2e3cb70020c42c4c2c9f008",
+        "bytes": 21879,
+        "sha256": "6707d213b7bf7d85eaedad13aecbf1aee9e2bed33ddabee784f3a343d3b9007e",
+        "snapshot": "blobs/base/AGENT-HANDOFF-transport-doctor-20261111.md"
+      },
+      "head": {
+        "mode": "100644",
+        "type": "blob",
+        "oid": "964ea1e4c8e14824268786f130a32dadb4f8b6c4",
+        "bytes": 22480,
+        "sha256": "dc70a656099c87b1e9cad1a016c36aae0fa608450ba03e61daeb4e1979fe9c31",
+        "snapshot": "blobs/head/AGENT-HANDOFF-transport-doctor-20261111.md"
+      }
+    },
+    {
+      "path": "docs/journal.md",
+      "status": "M",
+      "base": {
+        "mode": "100644",
+        "type": "blob",
+        "oid": "321b5dc58e424e63fec299c4e9a6def21124f558",
+        "bytes": 433156,
+        "sha256": "0a79d85edcb2cf4c504f01100592bbb2cc6cc52b487fd55b6d212dd87b5252d1",
+        "snapshot": "blobs/base/docs/journal.md"
+      },
+      "head": {
+        "mode": "100644",
+        "type": "blob",
+        "oid": "7e6dd39f0923aa19fb94ca1403daa0d5e98dfc44",
+        "bytes": 434381,
+        "sha256": "3b4db5564dfe546e2a27db579b5d0f7faaa098a368c20ddae91860c540763d6d",
+        "snapshot": "blobs/head/docs/journal.md"
+      }
+    },
+    {
+      "path": "docs/reports/2026-11-12-transport-c11-validation.json",
+      "status": "M",
+      "base": {
+        "mode": "100644",
+        "type": "blob",
+        "oid": "860fc9ad0ac5df7c53d1ca2859b736990929d6cf",
+        "bytes": 3076,
+        "sha256": "09b0382f41bba55bdfe3358f756bb17c85e8985c504c0941d9eb71ad36f1ca7c",
+        "snapshot": "blobs/base/docs/reports/2026-11-12-transport-c11-validation.json"
+      },
+      "head": {
+        "mode": "100644",
+        "type": "blob",
+        "oid": "6851c98e8836aa8a13a7ff009377f1ec8ec7adcb",
+        "bytes": 7421,
+        "sha256": "145ab990e1eee6304fa59d63e0c4a179e554eda9c70f0963737a8e6277b9ac74",
+        "snapshot": "blobs/head/docs/reports/2026-11-12-transport-c11-validation.json"
+      }
+    },
+    {
+      "path": "docs/reports/2026-11-12-transport-c11-validation.md",
+      "status": "M",
+      "base": {
+        "mode": "100644",
+        "type": "blob",
+        "oid": "fe5a279857a622c87d8cca948527c019fb300122",
+        "bytes": 3259,
+        "sha256": "dade674f2f12688909a7452b37c2827ee3e74b7dcb2f436ffb9a95643b261e0c",
+        "snapshot": "blobs/base/docs/reports/2026-11-12-transport-c11-validation.md"
+      },
+      "head": {
+        "mode": "100644",
+        "type": "blob",
+        "oid": "ddeaebe282c8a87fa24474b552d587ca47372174",
+        "bytes": 6311,
+        "sha256": "e69a248cc803c0934429e18b78a7896ec6ce2bedbcac1528b5db9d2500ef0204",
+        "snapshot": "blobs/head/docs/reports/2026-11-12-transport-c11-validation.md"
+      }
+    },
+    {
+      "path": "docs/resume.md",
+      "status": "M",
+      "base": {
+        "mode": "100644",
+        "type": "blob",
+        "oid": "852e8b02756b1a73a11a88fab26fee1795e8cc26",
+        "bytes": 176250,
+        "sha256": "2a27ef550e9886af463446cc38f05e7d1768a8bc21ac9b9faa469254e5daabfd",
+        "snapshot": "blobs/base/docs/resume.md"
+      },
+      "head": {
+        "mode": "100644",
+        "type": "blob",
+        "oid": "2dfad4456b1e28955c6d11e831a64e7eb3bab922",
+        "bytes": 177475,
+        "sha256": "d06d63156c8a7c9fd95ba53b615a4286f46c2d6f85685a98653a42694dadd34f",
+        "snapshot": "blobs/head/docs/resume.md"
+      }
+    },
+    {
+      "path": "packages/kor-travel-transport-admin/frontend/e2e/doctor-domain-regressions.spec.ts",
+      "status": "M",
+      "base": {
+        "mode": "100644",
+        "type": "blob",
+        "oid": "65f9f1102b364d62e3a56b87080cec4aa50ae219",
+        "bytes": 4608,
+        "sha256": "d737ac7ab01e1d48cfe6daa80acdf80beda6a7b3eb04654339ab0559bbb927ea",
+        "snapshot": "blobs/base/packages/kor-travel-transport-admin/frontend/e2e/doctor-domain-regressions.spec.ts"
+      },
+      "head": {
+        "mode": "100644",
+        "type": "blob",
+        "oid": "e5ca094f0f662bcd1b2e8cf723776f56b40ae203",
+        "bytes": 4752,
+        "sha256": "e85bc4b44be9e19281c6a6cad0ecc883e70ea25dc449fa8ced020a930c7ad3f4",
+        "snapshot": "blobs/head/packages/kor-travel-transport-admin/frontend/e2e/doctor-domain-regressions.spec.ts"
+      }
+    }
+  ],
+  "protectedProof": {
+    "inventory": "protected-git-entries.json",
+    "inventorySha256": "2b636d81bce82217f8b3ed129893e87520891c3cd171f56c497dcda3911ea5d2",
+    "groups": {
+      "allOtherTrackedEntries": {
+        "entries": 872,
+        "baseInventorySha256": "b25fbd59aa478d37aa4e0d48792ed5c378a99ddbe48dc2c7be88bd4808113569",
+        "headInventorySha256": "b25fbd59aa478d37aa4e0d48792ed5c378a99ddbe48dc2c7be88bd4808113569",
+        "equal": true
+      },
+      "packageManifests": {
+        "entries": 3,
+        "baseInventorySha256": "d238573e2adbc51ea81930dbfea0fd7ab73250e23330a1d1aa19c06ef8fcd150",
+        "headInventorySha256": "d238573e2adbc51ea81930dbfea0fd7ab73250e23330a1d1aa19c06ef8fcd150",
+        "equal": true
+      },
+      "locks": {
+        "entries": 3,
+        "baseInventorySha256": "eb7411885601222745e63ef96fed5c0da413b42dcfc88e8b68306f032bf7254b",
+        "headInventorySha256": "eb7411885601222745e63ef96fed5c0da413b42dcfc88e8b68306f032bf7254b",
+        "equal": true
+      },
+      "vendor": {
+        "entries": 19,
+        "baseInventorySha256": "ff7dddd2e9556f0c0af1d06296b6ac2056f23ed74d79f8e9314e849e8adcc95a",
+        "headInventorySha256": "ff7dddd2e9556f0c0af1d06296b6ac2056f23ed74d79f8e9314e849e8adcc95a",
+        "equal": true
+      },
+      "backendAndDeploy": {
+        "entries": 237,
+        "baseInventorySha256": "506ed2845dbb3f5aa7591fefaf872d535181c499edcc9e50c75845120b8c2f97",
+        "headInventorySha256": "506ed2845dbb3f5aa7591fefaf872d535181c499edcc9e50c75845120b8c2f97",
+        "equal": true
+      },
+      "frontendProduct": {
+        "entries": 208,
+        "baseInventorySha256": "da93b7055ad7fe3b46783ca563b84a216f519548078dbf742a15b63b6a0b4a1c",
+        "headInventorySha256": "da93b7055ad7fe3b46783ca563b84a216f519548078dbf742a15b63b6a0b4a1c",
+        "equal": true
+      }
+    },
+    "vendorSha256Sha512": [
+      {
+        "path": "frontend/vendor/kor-travel-tokens-0.1.1.tgz",
+        "base": {
+          "bytes": 34132,
+          "sha256": "7e88aaf70b93fed953198779fd17a003e327499e686794fd5f647b23cc325ad3",
+          "sha512": "sha512-85mqNJXqhTlA4RbtKUhmzx6rH6mOOeNmsXTJtCetQ5y8njLy+5XLZbdT6j1tf3ME9XQA6X63Ah4kmuLdqEZHbA=="
+        },
+        "head": {
+          "bytes": 34132,
+          "sha256": "7e88aaf70b93fed953198779fd17a003e327499e686794fd5f647b23cc325ad3",
+          "sha512": "sha512-85mqNJXqhTlA4RbtKUhmzx6rH6mOOeNmsXTJtCetQ5y8njLy+5XLZbdT6j1tf3ME9XQA6X63Ah4kmuLdqEZHbA=="
+        },
+        "equal": true
+      },
+      {
+        "path": "frontend/vendor/kor-travel-ui-0.2.0.tgz",
+        "base": {
+          "bytes": 71903,
+          "sha256": "16b4c213453fb02b527f8e4ae673a703e4ba3808538ae6fb24f70bdda770d213",
+          "sha512": "sha512-BsRRdnJUp6FQ2KWkXtINb7IkrxxwnWFlLP/oVlNN4UXBKren7uTlnYT4iJsdaO98iA4Tn2EMPX06eT2uB5jEDA=="
+        },
+        "head": {
+          "bytes": 71903,
+          "sha256": "16b4c213453fb02b527f8e4ae673a703e4ba3808538ae6fb24f70bdda770d213",
+          "sha512": "sha512-BsRRdnJUp6FQ2KWkXtINb7IkrxxwnWFlLP/oVlNN4UXBKren7uTlnYT4iJsdaO98iA4Tn2EMPX06eT2uB5jEDA=="
+        },
+        "equal": true
+      },
+      {
+        "path": "frontend/vendor/lightningcss-1.33.0+nativecss.fix.4.tgz",
+        "base": {
+          "bytes": 15376394,
+          "sha256": "12c8326428a56e38231f7b5b376df0c6882e3492da794f3499269628edcaccf0",
+          "sha512": "sha512-zDQ03VJE37OlyBrLsRcsEdIVu0T4BXJKDH5y9//To6GlGN2UrKQGERFVAFblkPQ5ZEbhuOp5wpXxGARZNdbQLA=="
+        },
+        "head": {
+          "bytes": 15376394,
+          "sha256": "12c8326428a56e38231f7b5b376df0c6882e3492da794f3499269628edcaccf0",
+          "sha512": "sha512-zDQ03VJE37OlyBrLsRcsEdIVu0T4BXJKDH5y9//To6GlGN2UrKQGERFVAFblkPQ5ZEbhuOp5wpXxGARZNdbQLA=="
+        },
+        "equal": true
+      },
+      {
+        "path": "frontend/vendor/radix-ui-react-focus-scope-1.3.1+kortravel.fix.2.tgz",
+        "base": {
+          "bytes": 33511,
+          "sha256": "1ca04870692565c243130d99c3dba91f3ac853ab2ec9538fc7b658b17fb7b49a",
+          "sha512": "sha512-v3XweXrUSZ/QfrMVvYmsAkVNDnvcN21QKbSrViXYf0OQf5Ue9xSgqQIukgGjsYMEBQ5qxQW8fnOC9t1Y0ENPXw=="
+        },
+        "head": {
+          "bytes": 33511,
+          "sha256": "1ca04870692565c243130d99c3dba91f3ac853ab2ec9538fc7b658b17fb7b49a",
+          "sha512": "sha512-v3XweXrUSZ/QfrMVvYmsAkVNDnvcN21QKbSrViXYf0OQf5Ue9xSgqQIukgGjsYMEBQ5qxQW8fnOC9t1Y0ENPXw=="
+        },
+        "equal": true
+      },
+      {
+        "path": "packages/kor-travel-transport-admin/frontend/vendor/kor-travel-tokens-0.1.1.tgz",
+        "base": {
+          "bytes": 34132,
+          "sha256": "7e88aaf70b93fed953198779fd17a003e327499e686794fd5f647b23cc325ad3",
+          "sha512": "sha512-85mqNJXqhTlA4RbtKUhmzx6rH6mOOeNmsXTJtCetQ5y8njLy+5XLZbdT6j1tf3ME9XQA6X63Ah4kmuLdqEZHbA=="
+        },
+        "head": {
+          "bytes": 34132,
+          "sha256": "7e88aaf70b93fed953198779fd17a003e327499e686794fd5f647b23cc325ad3",
+          "sha512": "sha512-85mqNJXqhTlA4RbtKUhmzx6rH6mOOeNmsXTJtCetQ5y8njLy+5XLZbdT6j1tf3ME9XQA6X63Ah4kmuLdqEZHbA=="
+        },
+        "equal": true
+      },
+      {
+        "path": "packages/kor-travel-transport-admin/frontend/vendor/kor-travel-ui-0.2.0.tgz",
+        "base": {
+          "bytes": 71903,
+          "sha256": "16b4c213453fb02b527f8e4ae673a703e4ba3808538ae6fb24f70bdda770d213",
+          "sha512": "sha512-BsRRdnJUp6FQ2KWkXtINb7IkrxxwnWFlLP/oVlNN4UXBKren7uTlnYT4iJsdaO98iA4Tn2EMPX06eT2uB5jEDA=="
+        },
+        "head": {
+          "bytes": 71903,
+          "sha256": "16b4c213453fb02b527f8e4ae673a703e4ba3808538ae6fb24f70bdda770d213",
+          "sha512": "sha512-BsRRdnJUp6FQ2KWkXtINb7IkrxxwnWFlLP/oVlNN4UXBKren7uTlnYT4iJsdaO98iA4Tn2EMPX06eT2uB5jEDA=="
+        },
+        "equal": true
+      },
+      {
+        "path": "packages/kor-travel-transport-admin/frontend/vendor/lightningcss-1.33.0+nativecss.fix.4.tgz",
+        "base": {
+          "bytes": 15376394,
+          "sha256": "12c8326428a56e38231f7b5b376df0c6882e3492da794f3499269628edcaccf0",
+          "sha512": "sha512-zDQ03VJE37OlyBrLsRcsEdIVu0T4BXJKDH5y9//To6GlGN2UrKQGERFVAFblkPQ5ZEbhuOp5wpXxGARZNdbQLA=="
+        },
+        "head": {
+          "bytes": 15376394,
+          "sha256": "12c8326428a56e38231f7b5b376df0c6882e3492da794f3499269628edcaccf0",
+          "sha512": "sha512-zDQ03VJE37OlyBrLsRcsEdIVu0T4BXJKDH5y9//To6GlGN2UrKQGERFVAFblkPQ5ZEbhuOp5wpXxGARZNdbQLA=="
+        },
+        "equal": true
+      },
+      {
+        "path": "packages/kor-travel-transport-admin/frontend/vendor/radix-ui-react-focus-scope-1.3.1+kortravel.fix.2.tgz",
+        "base": {
+          "bytes": 33511,
+          "sha256": "1ca04870692565c243130d99c3dba91f3ac853ab2ec9538fc7b658b17fb7b49a",
+          "sha512": "sha512-v3XweXrUSZ/QfrMVvYmsAkVNDnvcN21QKbSrViXYf0OQf5Ue9xSgqQIukgGjsYMEBQ5qxQW8fnOC9t1Y0ENPXw=="
+        },
+        "head": {
+          "bytes": 33511,
+          "sha256": "1ca04870692565c243130d99c3dba91f3ac853ab2ec9538fc7b658b17fb7b49a",
+          "sha512": "sha512-v3XweXrUSZ/QfrMVvYmsAkVNDnvcN21QKbSrViXYf0OQf5Ue9xSgqQIukgGjsYMEBQ5qxQW8fnOC9t1Y0ENPXw=="
+        },
+        "equal": true
+      },
+      {
+        "path": "packages/kor-travel-transport-admin/frontend/vendor/vworld-map-core-1.0.1.tgz",
+        "base": {
+          "bytes": 18236,
+          "sha256": "36d3ba16a3ba65f7a460db6027c07e29821f2795b15a526413949210f0ce92b6",
+          "sha512": "sha512-Djm14Arr7U0r7Sabj6P0V57CdzWIGaJmecklmY1hwrq1QUZJjMUFgkZfGRFalUo6AFzHEwwzOEzbJPMifGhINw=="
+        },
+        "head": {
+          "bytes": 18236,
+          "sha256": "36d3ba16a3ba65f7a460db6027c07e29821f2795b15a526413949210f0ce92b6",
+          "sha512": "sha512-Djm14Arr7U0r7Sabj6P0V57CdzWIGaJmecklmY1hwrq1QUZJjMUFgkZfGRFalUo6AFzHEwwzOEzbJPMifGhINw=="
+        },
+        "equal": true
+      },
+      {
+        "path": "packages/kor-travel-transport-admin/frontend/vendor/vworld-map-web-1.0.3.tgz",
+        "base": {
+          "bytes": 88106,
+          "sha256": "1ab9af8794979a5a19e5ac635cd04a9e87b9847058eaf4e9df743143b8ad4104",
+          "sha512": "sha512-HPXZcz/wP6tFsCZqlAbansWNICcZPubC+/V7rDWXYTQVlOBLl9cZQ1HSMJd25c2CZoMNreVFTQA0vzkVglkS1w=="
+        },
+        "head": {
+          "bytes": 88106,
+          "sha256": "1ab9af8794979a5a19e5ac635cd04a9e87b9847058eaf4e9df743143b8ad4104",
+          "sha512": "sha512-HPXZcz/wP6tFsCZqlAbansWNICcZPubC+/V7rDWXYTQVlOBLl9cZQ1HSMJd25c2CZoMNreVFTQA0vzkVglkS1w=="
+        },
+        "equal": true
+      }
+    ]
+  },
+  "actual44Pass": [
+    {
+      "surface": "native-public",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "eachCaseSinglePassingAttempt": true,
+      "raw": [
+        {
+          "path": "raw/native-public/browser.json",
+          "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/public-native-browser.json",
+          "bytes": 7826,
+          "sha256": "b5051e84caef6203782ebbf8b05eba1e275be0d5c0b7804e0241c1d06a307102"
+        },
+        {
+          "path": "raw/native-public/browser.log",
+          "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/public-native-browser.log",
+          "bytes": 536,
+          "sha256": "ce9e49ecd3959f303c72a84a80b071d84f92d791aeefa04b1a42e0de13d99b00"
+        },
+        {
+          "path": "raw/native-public/browser.exit",
+          "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/public-native-browser.exit",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        }
+      ]
+    },
+    {
+      "surface": "native-admin",
+      "passed": 18,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "eachCaseSinglePassingAttempt": true,
+      "raw": [
+        {
+          "path": "raw/native-admin/browser.json",
+          "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-native-browser.json",
+          "bytes": 24057,
+          "sha256": "31ab429565fd46c7a2ead09380074a177ded12eff94a14bb1be540c0179ce060"
+        },
+        {
+          "path": "raw/native-admin/browser.log",
+          "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-native-browser.log",
+          "bytes": 2462,
+          "sha256": "4172bcb1dc20f1175102cbb6d3f8b11e4fbbab7ecc97304f8fc062c76253553e"
+        },
+        {
+          "path": "raw/native-admin/browser.exit",
+          "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-native-browser.exit",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        }
+      ]
+    },
+    {
+      "surface": "alpine-public",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "eachCaseSinglePassingAttempt": true,
+      "raw": [
+        {
+          "path": "raw/alpine-public/browser.json",
+          "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/public-alpine-browser.json",
+          "bytes": 7858,
+          "sha256": "02e18054f422e48e0132adbb59aada77195cf3780f9f2f6de48cc210a508b1da"
+        },
+        {
+          "path": "raw/alpine-public/browser.log",
+          "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/public-alpine-browser.log",
+          "bytes": 535,
+          "sha256": "96221f9b4e0082dc0e01d43e9a3b6090800cb649f8342d0dc2e51f518f451493"
+        },
+        {
+          "path": "raw/alpine-public/browser.exit",
+          "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/public-alpine-browser.exit",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        }
+      ]
+    },
+    {
+      "surface": "alpine-admin",
+      "passed": 18,
+      "failed": 0,
+      "skipped": 0,
+      "flaky": 0,
+      "eachCaseSinglePassingAttempt": true,
+      "raw": [
+        {
+          "path": "raw/alpine-admin/browser.json",
+          "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-alpine-browser.json",
+          "bytes": 24058,
+          "sha256": "670991de6fe713007248659a6789dc4f0c079037654a55e448aa6deb65a6428f"
+        },
+        {
+          "path": "raw/alpine-admin/browser.log",
+          "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-alpine-browser.log",
+          "bytes": 2461,
+          "sha256": "74e5a2777fcbccccb34eae0e838b1e40ebe968ea70682509091fc8a681fa9921"
+        },
+        {
+          "path": "raw/alpine-admin/browser.exit",
+          "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-alpine-browser.exit",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        }
+      ]
+    }
+  ],
+  "allRawFiles": [
+    {
+      "path": "raw/native-public/browser.json",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/public-native-browser.json",
+      "bytes": 7826,
+      "sha256": "b5051e84caef6203782ebbf8b05eba1e275be0d5c0b7804e0241c1d06a307102"
+    },
+    {
+      "path": "raw/native-public/browser.log",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/public-native-browser.log",
+      "bytes": 536,
+      "sha256": "ce9e49ecd3959f303c72a84a80b071d84f92d791aeefa04b1a42e0de13d99b00"
+    },
+    {
+      "path": "raw/native-public/browser.exit",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/public-native-browser.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "raw/native-admin/browser.json",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-native-browser.json",
+      "bytes": 24057,
+      "sha256": "31ab429565fd46c7a2ead09380074a177ded12eff94a14bb1be540c0179ce060"
+    },
+    {
+      "path": "raw/native-admin/browser.log",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-native-browser.log",
+      "bytes": 2462,
+      "sha256": "4172bcb1dc20f1175102cbb6d3f8b11e4fbbab7ecc97304f8fc062c76253553e"
+    },
+    {
+      "path": "raw/native-admin/browser.exit",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-native-browser.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "raw/alpine-public/browser.json",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/public-alpine-browser.json",
+      "bytes": 7858,
+      "sha256": "02e18054f422e48e0132adbb59aada77195cf3780f9f2f6de48cc210a508b1da"
+    },
+    {
+      "path": "raw/alpine-public/browser.log",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/public-alpine-browser.log",
+      "bytes": 535,
+      "sha256": "96221f9b4e0082dc0e01d43e9a3b6090800cb649f8342d0dc2e51f518f451493"
+    },
+    {
+      "path": "raw/alpine-public/browser.exit",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/public-alpine-browser.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "raw/alpine-admin/browser.json",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-alpine-browser.json",
+      "bytes": 24058,
+      "sha256": "670991de6fe713007248659a6789dc4f0c079037654a55e448aa6deb65a6428f"
+    },
+    {
+      "path": "raw/alpine-admin/browser.log",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-alpine-browser.log",
+      "bytes": 2461,
+      "sha256": "74e5a2777fcbccccb34eae0e838b1e40ebe968ea70682509091fc8a681fa9921"
+    },
+    {
+      "path": "raw/alpine-admin/browser.exit",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-alpine-browser.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "raw/native-public/build.log",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/public-native-build.log",
+      "bytes": 870,
+      "sha256": "f2baed6623c185dfa82b4934f6cf50e54979d70b494874cd0e6381fce74a357e"
+    },
+    {
+      "path": "raw/native-public/build.exit",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/public-native-build.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "raw/native-admin/build.log",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/admin-native-build.log",
+      "bytes": 1933,
+      "sha256": "39f9503f67ea9c19730e64095a5fb7785c58044053babdb8c353d5b8dd5a88e7"
+    },
+    {
+      "path": "raw/native-admin/build.exit",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/admin-native-build.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "raw/alpine-public/build.log",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/public-alpine-build.log",
+      "bytes": 4666,
+      "sha256": "9614a121dfba39501dd347015e2147031f8ca9daf6bbb769fb63e520a603a9b0"
+    },
+    {
+      "path": "raw/alpine-public/build.exit",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/public-alpine-build.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "raw/alpine-admin/build.log",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-alpine-build.log",
+      "bytes": 5752,
+      "sha256": "9bb00374527731a548550b09462629f984223fec53b3f546bf5cca2531bef2c2"
+    },
+    {
+      "path": "raw/alpine-admin/build.exit",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-alpine-build.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "raw/original-admin-native-failure/browser.json",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/admin-native-browser.json",
+      "bytes": 26819,
+      "sha256": "9d2e6af97dc3e6f86bc77b634aa3fb92fe852efd5163b3f5f2a73714fd718ef7"
+    },
+    {
+      "path": "raw/original-admin-native-failure/browser.log",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/admin-native-browser.log",
+      "bytes": 5477,
+      "sha256": "11e312124b7f0de707d8aee423c4eafcd6236b052d88041a491a1aded1afee53"
+    },
+    {
+      "path": "raw/original-admin-native-failure/browser.exit",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/admin-native-browser.exit",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "path": "raw/original-admin-native-failure/error-context.md",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/admin-native-browser-artifacts/doctor-domain-regressions-버스-검색·시간표·날짜-변경-375px-chromium/error-context.md",
+      "bytes": 7921,
+      "sha256": "c595f799a48c9035044c2eed58d6a89dcf61024663f5c474e1afc666c1249b33"
+    },
+    {
+      "path": "raw/original-admin-native-failure/test-failed-1.png",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/admin-native-browser-artifacts/doctor-domain-regressions-버스-검색·시간표·날짜-변경-375px-chromium/test-failed-1.png",
+      "bytes": 17059,
+      "sha256": "2aedf70db87d0525a4c124d4955225e44f430500c5b2da8b648dab30dba2a6d6"
+    },
+    {
+      "path": "raw/original-admin-native-failure/trace.zip",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/before-readiness-fix/admin-native-browser-artifacts/doctor-domain-regressions-버스-검색·시간표·날짜-변경-375px-chromium/trace.zip",
+      "bytes": 2157315,
+      "sha256": "12a30e1b23da8bbed70edeede7e4b5b50496d783c11363cb3a12b80dcea1ccf4"
+    },
+    {
+      "path": "raw/installed/public-alpine-actual-bytes.log",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/public-alpine-actual-bytes.log",
+      "bytes": 27,
+      "sha256": "96c02c03e268f0657ca4682e1fbbe85f6a367dd191abbe5245f5e725dd9ef271"
+    },
+    {
+      "path": "raw/installed/admin-alpine-actual-bytes.log",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/logs-readiness-fix/admin-alpine-actual-bytes.log",
+      "bytes": 27,
+      "sha256": "c3496dfccba536ed7d33e1f86006a351da21956c0cee71ef09f3f120c10ff5df"
+    },
+    {
+      "path": "raw/provenance/source-receipt.json",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/source-receipt.json",
+      "bytes": 42762,
+      "sha256": "23c7451ec79d6cc8bd5d5a0c33c7c2d77cb72c80867574789bfafa87049bfca9"
+    },
+    {
+      "path": "raw/provenance/execution-start.json",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-checkpoint/execution-start.json",
+      "bytes": 167,
+      "sha256": "eb630ec1ff7e4f41cfdfa52b7070a4ad762da6fac817d6447d09819ca3c08c93"
+    },
+    {
+      "path": "raw/provenance/test-readiness-delta.json",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/test-readiness-delta.json",
+      "bytes": 403,
+      "sha256": "06551b5ce78de87abf4e36db4c2ce6ecdbde85b442fe6ad5cd4c93d1d6406802"
+    },
+    {
+      "path": "raw/provenance/race-fix-runtime-equivalence.json",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/race-fix-runtime-equivalence.json",
+      "bytes": 244,
+      "sha256": "3d4a7bcb9c22f049aa38b615bd564e8511e2155b6e5aec618eb5b17732c86e3a"
+    },
+    {
+      "path": "raw/provenance/final-acceptance-confirmation.json",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-n150-final/final-acceptance-confirmation.json",
+      "bytes": 1169,
+      "sha256": "700ce88ce9af48f68b1e88ef318f8393af6b01c18d57970853822868f7c897fc"
+    },
+    {
+      "path": "raw/provenance/transport-c11-final-all-processes.json",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-final-all-processes.json",
+      "bytes": 199,
+      "sha256": "4718f27e909dbfc746469ca563f1a0c0b0069f5ee45e038a65b334b46c36bd81"
+    },
+    {
+      "path": "raw/provenance/transport-c11-remote-runner.py",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-remote-runner.py",
+      "bytes": 8239,
+      "sha256": "ae443833690d69629014cf46a537eab27539b0cce46fb94bdc99910f2147bf99"
+    },
+    {
+      "path": "raw/provenance/transport-c11-readiness-fix-runner.py",
+      "original": "/home/digitie/dev/common-unification-20261111/kor-travel-transport/validation/transport-c11-readiness-fix-runner.py",
+      "bytes": 7979,
+      "sha256": "6b7becbf1bd020d10e7dcb4dfc19883bc6419ee25aa0a6e8f13ec96715749c52"
+    }
+  ],
+  "productionOperations": 0,
+  "note": "상대 snapshot/raw/inventory 경로는 capsuleRoot 기준. 원본 manifest/52파일 bytes는 변경하지 않음."
+}

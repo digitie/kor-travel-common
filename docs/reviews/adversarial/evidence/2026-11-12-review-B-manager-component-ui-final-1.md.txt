@@ -1,0 +1,93 @@
+# 원 리뷰어 B — Manager component UI SDK 독립 최종 검토1
+
+- runid: `Epicurus-B-manager-component-ui-20261111T202419Z`; 역할: 원 B / Epicurus, packaging/platform/security/release/CI. 구현에 참여하지 않았으며 peer raw/verdict·nested review 보고서를 열람하지 않았다. 제품 테스트는 직접 읽고 실행했다.
+- 시작 UTC: `2026-11-11T20:24:28.818687+00:00`; 종료 UTC: `2026-11-11T20:29:45.420789+00:00`.
+- 입력 `review-manifest-manager-component-ui-1.json` SHA256 `ee5688ab6783bb535a88160726fb07721ff3c266c40f4629dc8ee9588eb577fd` 직접 검증.
+- base `9910b9a6dba902c6a59469d3a6f46c6077e78d3f` → head `df3760cc22d23bab71a1b93c7ca9b86299a94d9f` (PR589).
+- 관찰 Git 저장소 `/tmp/codex-manager-component-ui-20261112`에서 immutable ref/blob만 읽었다. manifest10파일의 경로·blob 및 전체 diff 집합이 정확히 일치했다. moving tree와 기존 Aquinas 설치/작업본을 기준선에 섞지 않았다.
+- 증거: [review-B-manager-component-ui-final-1-evidence](review-B-manager-component-ui-final-1-evidence/). Git에서 추출한 본인 격리 snapshot과 기존 `/tmp/kt-manager-candidate-python`을 읽기 전용 참조했다. 대형 install/repack·제품 코드 수정·실제 Docker 접촉·운영 변경 없음.
+
+## Verdict와 finding
+
+**SOURCE/SDK PASS, 신규 finding 0. 최종 CI/release verdict CONDITIONAL.** 정확 head의 원격 `CI`와 `공통 프론트엔드 정책`이 마지막 직접 조회 때 모두 QUEUED였다. 이를 성공으로 간주하지 않는다. 기존 Manager158/9910 source PASS나 다른 synthetic run을 이번 PR589의 정확 CI로 대신하지 않았다. CI 성공·독립 상대 검토·병합·공식 SDK 설치 후의 실제 UI 적용은 별도 단계다.
+
+이번 source에서 OPEN P0/P1/P2/P3 finding은 없다. 아래 추가 공격 및 관찰 경계 안에서 새 진입점의 승인·단일 UI 실행·current 발행 조건을 확인했다. 실제 Geo/Weather 운영 배포나 로그인·health 수용을 수행/승인한 보고서가 아니다. 이전 Manager/소비자 B raw 및 Pinvi OPEN finding은 그대로 보존한다.
+
+## 불변 입력·범위
+
+정확10파일은 CLI, registry, 기존 candidate 모듈, 신규 component candidate 모듈, 신규 제품 test, target config, 문서4개다. 각 blob은 `manifest-blob-proof.json`에 기록했다. frontend/HTTP route/lock/C11 archive/package metadata 변경은 없다. 기존 `service_release.py`, `service_release_compose.py`, G 구현, runtime pin seed는 변경되지 않았다. manifest schema·영구 상태 gate·그룹 layout 변경도 없다.
+
+`config/docker-targets.yml`은 Geo/Weather `ui_candidate`의 role와 source_url 두 선언만 추가한다. YAML에서 이 두 선언을 제거하면 base config 전체와 동등하다. 기존 main runtime3개·oneshot·host·external 좌표·그룹 정의를 유지한다. 설정을 source와 역할의 단일 정본으로 사용하며 별도 canonical URL 상수 표를 추가하지 않았다.
+
+제품의 root 소유 설정 로더·중복 YAML key 거부·기존 전체 registry wiring 검증을 유지한다. SDK의 명시 `config=`는 기존 SDK와 같은 신뢰된 호출자 입력 경계다. 비신뢰 원격 HTTP 설정을 새로 받는 기능이 아니다.
+
+## 핵심 소스 확인
+
+### 대상 선택과 source 승인
+
+- `service_release_component_candidate.py:24` `_selection`은 paired canonical key 집합의 Map/Pinvi를 먼저 거부한다. `registry.py:1133` helper는 target 자체의 containers 중 선언 role에 정확히 맞는 Compose runtime 한 개만 선택한다. 필수 role/source_url 외 키, API 역할, 누락/중복, 잘못된 HTTPS GitHub canonical URL을 거부한다.
+- `entry._declaration`은 등록 target/catalog 및 현재 호스트 소유권을 확인한다. UI runtime이 속한 기존 runtime 그룹 한 개를 유도하고 oneshot 전용 선택을 거부한다. SDK/CLI에 임의 role나 새 group 선택 옵션을 추가하지 않았다. `srv`/`main`/대소문자·공백 변형으로 paired key 검사를 우회하려 해도 미등록 declaration에서 factory 전에 거부됐다.
+- 새 공개 entry `service_release_component_candidate.py:39`는 immutable image ID, 정확40자리 SHA, bool execute, int 대기1..600, root를 검사한다. CLI는 `--confirm`과 `--dry-run`의 필수 상호배타 선택을 유지한다.
+- `service_release_candidate.py:53`의 clone 검증은 기존 root 소유/권한·symlink·commondir/alternates 거부, 정리된 Git 환경, hooks/fsmonitor 비활성, origin URL·commit 객체·origin/main ancestry 검사를 유지한다. custom canonical URL 인자는 검증한 target 선언에서만 내려온다. helper의 Map 기본 URL 동작은 유지된다.
+- source는 G 전과 G 획득 후 재검사하며, 그 뒤 current/Compose 계획을 읽고 client factory를 호출한다. 본인 공격에서 G busy 및 기다리는 동안 origin 변경은 factory 전에 실패했다. 실제 source fetch나 비신뢰 clone hook 실행을 추가하지 않았다.
+
+### Map 추출과 실행·관측 보존
+
+`service_release_candidate.py:283`의 기존 `_apply`는 paired baseline/receipt inventory/companion binding/추가 baseline guard를 callback으로 연결한다. `:299` `_apply_current`의 새 공유 본문은 이 연결을 제외하면 원 Map 본문과 작업 순서가 같다.
+
+본인은 AST에서 **정확5개 연결 치환**(canonical URL, inventory callback, companion callback, baseline 조건, 조건 목록의 최종 판정)을 원 Map 표현으로 되돌린 뒤 body AST 전체가 동일함을 확인했다. 문서 문자열만 제외했으며 그 외 구문/연산 순서 차이를 허용하지 않았다. 제품의 기존5모듈169 및 새60을 포함한 직접 focused 검사도 통과했다. 이 증거는 단순 코드 줄수 추정이 아니다.
+
+새 Geo/Weather 경로는 paired receipt를 다른 앱의 기준선으로 삼지 않는다. 기존 정상 component current와 모든 공유 project overlay를 유지하고, mutation 선택만 등록 UI 한 개로 좁힌다. 제품 fixture는 paired 전용 세 함수를 호출하면 즉시 실패하도록 구성해 실제 분리를 검증한다.
+
+- 후보 OCI revision은 승인 SHA, OCI source는 target canonical URL과 일치해야 한다. 현재 모든 component health를 먼저 검사한다.
+- 공유 project의 current/역할/working_dir/Compose 좌표와 서비스 소유권을 검증한다. 실제 UI 컨테이너는 정확히 한 개여야 한다.
+- resolved Compose를 한 번 JSON으로 고정하고 각 현재 이미지 reference가 저장된 immutable ID로 해석되는지 확인한다. API/Dagster/oneshot overlay를 유지하며 후보 UI image만 바꾼다.
+- child argv는 단일 UI에 `up -d --no-deps --no-build --pull never --force-recreate --wait`를 적용한다. stdin JSON·`--env-file /dev/null`·escape·기존 환경·G FD 전달을 사용하는 실행 helper는 동일하다. Weather migrate 정의는 남지만 실행 대상에 넣지 않는다.
+- 전체 비선택 컨테이너의 ID/image/start/restart/Config/Mounts/HostConfig/network 및 current pointer를 전후 검증한다. dry-run은 up/current 발행 없이 planned만 반환한다.
+- mutation 실패·health 실패·중단·관측 실패·늦은 guard 실패는 성공이나 자동 rollback으로 바뀌지 않는다. 한 번 관찰한 실패 flag는 후속 재검사에서 회복돼도 거짓 성공으로 승격되지 않는다. secret redaction과 진단 보존을 유지한다.
+- publish 직전에도 기존 guard/health를 반복하며 UI metadata만 바꾼 같은 layout의 새 release leaf/current pointer를 발행한다. 오류 뒤 옛 current가 남았다는 사실을 실제 UI 미변경으로 오인하지 않는다. client close는 기존 finally 수명주기를 유지한다.
+
+## 직접 검증
+
+기존 venv는 Python3.14.4 / pytest9.2.0이다. 신규 설치 없이 exact source snapshot에 적용했다.
+
+| 검사 | 본인 직접 결과 |
+| --- | --- |
+| 기존 release/CLI/compose/process/candidate 5모듈 + 새 component60 + registry target | **310 PASS** |
+| registry hosts | **62 PASS** |
+| 위 제품 검사 합계 | **372 PASS**, skip0 |
+| 본인 추가 component 공격 | **54 PASS** (Geo/Weather 각각 동일 공격) |
+| 전체 제품 backend `ruff check . --no-cache` | **PASS** |
+| manifest10 blob·diff 집합 / 설정2선언 / 본문 AST 동등성 | **PASS** |
+
+본인 추가54는 G contention, G 대기 중 source 교체, writable Git config/symlink/alternates/commondir/unmerged commit, render 중 UI restart/current race, DB/다른 컨테이너 ID·Config·Mounts·HostConfig·network 변화, 두 guard의 세 late publication 경계, render/child 실패 redaction, paired 별칭 우회, target 선언을 통한 custom canonical URL 정상 선택을 검사했다. 제품 코드를 monkeypatch해서 성공 조건을 약화하지 않았으며, fake Docker/격리 current/G/source Git만 사용했다. 테스트 환경의 root/호스트와 fixture를 만드는 대역의 범위는 제품 테스트와 같다. 실제 root 소유 운영 clone이나 실제 Docker 배포 증명이 아니다.
+
+초기 검사 명령의 없는 `tests/test_registry.py`는 본인 경로 선택 오류로 no tests ran이었다. 실제 파일 `test_registry_targets_config.py`로 바로잡아 310개를 실행했다. 또한 처음 registry-hosts 2개는 본인 축소 snapshot의 `deploy/systemd/ktdm-backend.service`와 tracked scripts 누락으로 실패했다. 같은 head Git blob에서 필요한 경로를 보충한 뒤 62개 모두 통과했다. 최초 실패 로그를 삭제하지 않았으며 제품 회귀나 0-test 성공으로 세지 않았다. 같은 최초 batch에서 본인 공격54는 모두 통과했다.
+
+CodeGraph는 본인 격리에 `init -i`/`sync`/`status`/`impact _apply_current --json`을 실행했다. 해당 graph의 qualified cross-module 호출 누락은 manual `rg`로 보충했다. graph 결과만으로 신규 component entry의 호출 부재를 추론하지 않았다. index는 본인 임시 폴더와 함께 회수했다.
+
+```bash
+# Windows wrapper: exec_command workdir C:\, PowerShell here-string -> wsl.exe -e bash -lc
+# immutable read: git -C <manifest.checkout> diff <base> <head>
+# git rev-parse <head>:<path>, git cat-file blob <manifest.blob>
+cd "$W/backend"
+PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 DATABASE_URL=sqlite://   /tmp/kt-manager-candidate-python/bin/python -m pytest -p no:cacheprovider   tests/test_service_release.py tests/test_service_release_cli.py   tests/test_service_release_compose.py tests/test_service_release_process.py   tests/test_service_release_candidate.py tests/test_service_release_component_candidate.py   tests/test_registry_targets_config.py -q
+# 별도 실행: tests/test_registry_hosts.py -q; 본인 공격 test_review_b_component_attacks.py
+/tmp/kt-manager-candidate-python/bin/ruff check . --no-cache
+python3 review-B-manager-component-ui-final-1-evidence/semantic-extraction-proof.py
+codegraph init -i
+codegraph sync
+codegraph status
+codegraph impact _apply_current --json
+rg -n 'apply_component_ui_candidate|_apply_current|component_ui_candidate_for_target|CANONICAL_RUNTIME_SOURCE_URLS' backend/src
+```
+
+실제 명령·제품 diff·추가54개 test 코드·AST 비교 코드·결과 로그는 evidence에 보존했다. parent의 manifest 내 8개 handoff evidence SHA도 직접 검증했으나, 그 test 결과를 본인 직접 실행으로 세지 않았다. 본인 before169 재실행은 NOT_RUN; before169는 digest 확인한 전달 증거이며, 본문 AST 비교와 after 제품 검증은 본인 결과다.
+
+## CI와 완료 조건
+
+직접 GitHub 조회 기록은 `ci-observations.json`에 있다. 정확 df3760에 연결된 [CI run43095710359](https://github.com/digitie/kor-travel-docker-manager/actions/runs/43095710359) 및 [중앙 정책 run43095710716](https://github.com/digitie/kor-travel-docker-manager/actions/runs/43095710716)은 초기·최종 관찰 모두 **QUEUED, conclusion null**이다. 실행되지 않은 backend full suite/현재 중앙 정책/browser를 PASS로 적지 않았다. 새 synthetic checkout이 생기면 정확 head와 tree 또는 실제 변경 관련 입력의 동등성을 따로 확인해야 한다.
+
+새 구현의 source/SDK 검토는 PASS, CI gate가 아직 닫히지 않았으므로 최종 배포 가능 판정은 CONDITIONAL이다. 기존 frontend/C11bytes가 그대로라는 사실은 새 backend CLI의 전체 원격 CI 완료를 대신하지 않는다. SDK 설치/운영 Docker/DB/API/Dagster 수명주기/공개 로그인 수용은 모두 NOT_RUN_B이며 다른 담당자의 권한·절차로 남는다.
+
+이전 B 원문 SHA들을 `prior-raw-sha256.json`에 기록하고 변경 없음을 재확인했다. 본인 snapshot247개가 마지막에도 원 Git blob과 같음을 확인한 뒤 `/tmp/review-b-manager-component-20261111T202419Z`만 회수했다. 타인 venv/cache/작업본을 수정하거나 삭제하지 않았다.

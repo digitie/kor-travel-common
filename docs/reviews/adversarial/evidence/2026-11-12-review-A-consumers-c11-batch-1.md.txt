@@ -1,0 +1,79 @@
+# 독립 reviewer A — released C11 consumer batch1
+
+runid Mill-A-Consumers-C11-Batch1. 원 A(Mill), frontend/accessibility, 구현 비참여·read-only. peer raw/verdict 미열람. Git objects만 source로 사용했다.
+
+**Source/package verdict: 5개 저장소 모두 PASS. 신규 P0/P1/P2/P3=0.** 최종 앱 수용은 아래 실제 browser/전체CI의 남은 gate와 구분한다. Manager는 별도15파일 review PASS를 그대로 연결하며 재승인을 반복하지 않았다. Pinvi·Concierge는 이 batch에서 제외한다.
+
+## 불변 입력
+
+- review-manifest-consumers-c11-batch-1.json SHA256 c0affe2a88bf0f176abb0e3df298b0fb2da698f442f74196f00ac3e237f30a4c 일치.
+- canonical common-artifacts.json SHA256 be0bbaba1b825b33754cdbe4352168265d1ccb71467a1031aa095707b0b5eec8 일치.
+- common reviewed2d4579 / released e8ed3ae75000be5cd22a3a11492bd97660635d78. Common7/Scope2는 본인 별도 PASS 원문을 유지한다.
+- Geo12bff3dfc1bc315beedecb9ddbeca4862978c308; Map6b826a7f1ceafe54e122be919cdbb56da98fde3e; Weather2b34884c5b12ea7a696fe331b1cebbf3d3781e25; Manager158db1abad151addcbd75ec2c24fe60ea4f4f449; Transportef7bd62dd81cb01b3c41b8bb10106c4586bb3bcf.
+- source capsules /tmp/review-A-consumers-c11-batch1. 시작/종료UTC 및 관찰 shared HEAD/status는 evidence JSON에 보존. Map shared가720으로 이동해도6b를 교체하여 감사하지 않았다.
+
+## 직접 metadata/source 검증
+
+6개 웹 표면에 대해 source Git의 package/lock/override/vendor, code55 workflow, C11 canonical을 읽고 직접 guard를 실행했다. 모두 exit0. KT_REQUIRE_CANONICAL=1, 외부 C11 policy/canonical, 실제 앱 source 경로를 명시하여 forbidden import/표 구현 및 도달한 managed copies를 검사했다.
+
+source UI/tokens/CSS/VWorld/Scope tarball은 사용된 모든 항목에서 canonical bytes와 완전히 같다. Scope2는 runtime 직접 file 의존성 및 root override이고 모든 도달 lock copy도 fix.2/SRI와 일치한다. monorepo Map은 root lock/workspace를 사용했고 다른 표면은 자기 lock을 사용했다. 버전 문자열만 맞춘 검사가 아니다.
+
+| 저장소·표면 | source/package | 직접 로컬 installed bytes |
+|---|---|---|
+| Geo UI | PASS | 263파일 MATCH |
+| Map admin | PASS | NOT_INSTALLED_LOCALLY; owner n150263 receipt 별도 |
+| Weather admin | PASS | 263파일 MATCH |
+| Manager UI | PASS, 별도15파일 원문 연결 | 153파일 MATCH |
+| Transport public | PASS | 153파일 MATCH |
+| Transport admin | PASS | 263파일 MATCH |
+
+실제 module 파일 전부를 archive regular entries와 대조했다. Map의 n150 설치는 owner의 실행 receipt이고 본인 로컬 설치라고 부르지 않는다. web 미사용 VWorld RN vendor 파일을 실제 RN runtime 채택으로 해석하지 않았다. 새 install·build·live mutation·다른 agent cache 삭제 없음.
+
+## 앱별 source disposition
+
+**Geo PASS.** 원 A-CONS-P2-03을 직접 닫은43c4의 Button/pure helper 및 동일5 regression bytes가12b와 같다. local CVA가 다시 생기지 않았다.43에서 본인 red3/green5, 전체294·type PASS를 유지한다. 이번은 C11 actual263/lock/guard 검증이다. 새로운 스타일·전체 앱 browser54는 아래 별도 gate다.
+
+**Map PASS(이 frontend/package 범위).** A-CONS-P2-02를 직접 닫은 f55의 Button/variants/test bytes가6b에서도 같다. 원 SSR exit1→0, 동일8 test6FAIL→8PASS의 closure를 유지한다. 최신 main#1495 cb38 merge를 별도 추적했다.6b의 frontend는 f569/f55와 같고 backend src/alembic은 incoming cb38와 같다. main 검색 동작을 다시 semantic 승인하거나 DB lifecycle을 실행하지 않았다. b102의 common dependency gate·관리 override 테스트·N7/N8 변이 및 CI/local gate 식별 변경도 읽었다. 중앙 정본 guard는 계속 필수이며 이번 actual guard도 통과했다.
+
+**Weather PASS.** 원 d03 이후 product frontend source 변화 없음. C11 metadata/vendor/workflow와 실제263, canonical guard를 새로 확인했다. 기존 폼/상태/font/map 동작 source1 검토를 유지하며 전체 backend는 반복하지 않았다.
+
+**Manager PASS 연결.** exact158의15파일 SDK/source와 C11은 review-A-manager-candidate-final-1.md에서 본인 PASS/신규0.169 제품·독립6·transport4·frozen stdin·153 bytes 및 CI/central을 확인했다. 이번 표에 그 결과를 연결하며 실제 merged SDK 설치를 수행하거나 그 운영 효과를 승인하지 않는다.
+
+**Transport PASS.** 원 b327 이후 두 product frontend source 변화 없음. public/admin 두 실제 lock, Scope2 direct/override,153/263파일 및 두 canonical source guard를 확인했다. 앞선164/356 단위 결과를 새 실행으로 꾸미지 않았으며 아래 새CI log를 직접 확인했다.
+
+## CI 직접 관찰과 남은 gate
+
+모든 새 CI frontend checkout은 synthetic PR merge다. GitHub compare로 각 source→checkout의 files0을 직접 확인했다. source SHA 자체로 checkout했다는 주장은 하지 않는다.
+
+| 앱 source | CI checkout | 직접 frontend log |
+|---|---|---|
+| Geo12b | 1755c35637de5e8e141ecbf6c668b9bfed1da58b | unit294/type/lint/Doctor0/build PASS |
+| Map6b | 1d60881c75b80763dc3188796270c501f4a15b38 | unit440+별도4/type/build/Doctor0 PASS |
+| Weather2b | 706d52a07a97b5856d9af02b9e1fce8a75ba8e4d | unit308/build/Doctor0/browser20+5 PASS |
+| Transportef7 | afd7083903babb598365907671c34ffe3e14074b | public164/admin356/build/Doctor0 PASS |
+
+Map job의 오래된 Node20 표시명과 달리 실제 setup-node는22.23.1임도 log로 확인했다. Geo·Weather·Transport도22.23.1이다.
+
+- Geo CI43084186827/OpenAPI43084186962/central43084187598 SUCCESS. parent n150 두 builds+browser54는 이번 최종 직접 결과 미수신: PENDING_OWNER.
+- Map frontend43083802281, central43083803046, lint/openapi/docker-images SUCCESS. ci43083802248의 Python3.12는 마지막 직접 jobs 조회 시 진행 중, 다른3 jobs SUCCESS.6b 최초 D는 owner285PASS/1FAIL(옛 private bg-brand assertion). 새720 D286은 실행 중 인계이며 PASS로 바꾸지 않는다.
+- Weather CI43083292923/central43083293544 SUCCESS. CI 실제 browser20+5를 직접 log에서 확인했다. 별도 n150 fresh20+5는 slot2 Map 뒤 대기라는 owner 인계다. 두 실행을 하나로 합치지 않는다.
+- Manager source15 raw의 synthetic fulltree-equivalent CI54/build/browser2 및 backend3726/40skip, released central43084034348 SUCCESS를 연결한다. 다른 batch 앱의 pending gate를 대신하지 않는다.
+- Transport CI43084745064의 두 frontend SUCCESS, backend는 마지막 직접 조회 시 진행 중. live-e2e는 SKIPPED. central43084745441의 두 표면 SUCCESS. 실제 앱 browser/운영 수용은 별도이며 skip을 PASS로 집계하지 않는다.
+
+따라서 reviewer source/package finding으로 막힌 앱은 없지만, Geo/Map/Weather/Transport의 parent가 정한 실제 수용 gate가 모두 끝났다고 주장하지 않는다. 위 진행상태는 ci-observations.json 시각의 사실이다.
+
+## Map720 test-only supplement
+
+review-manifest-map-c11-test-supplement-720.json SHA256 3dd47b07097f1589da7398fa583bd6ebbc781d2dac1b8b9eeca630d22d5fd6be 일치.6b→7202653aff29e1d9738a6264aaefa7a3f9c747b0은 journal/resume/e2e features-list 세 파일뿐이고 지정 blobs 일치. 모든 production/frontend/rootpkg/lock/vendor/backend는 그대로다.
+
+**Test source supplement PASS, 약화 확인 없음.** 옛 private bg-brand class 문자열 대신 common API의 aria-pressed·data-variant와 실제 computed brand background를 검증한다. brand가 비어 있거나 투명하면 실패한다. 선택 버튼의 정확한 brand 채움과 비선택 outline의 다른 채움을 asc/desc 전환 양쪽에서 확인한다. hover를 옮겨 hover 색을 기본 선택 채움으로 오인하지 않는다. sort/order/cursor 요청 검증은 그대로 유지했다.이는 class 존재보다 의미·실제 CSS 회귀를 더 잘 구별하며 WCAG contrast 비율 검증을 추가했다고 과장하지 않는다.
+
+본인은 이 supplement의 전체 D286을 실행하지 않았다. owner rerun PENDING이며 원6b의285/1 실패는 보존한다.6b main batch와720 supplement를 서로 다른 관찰로 기록한다.
+
+## Evidence / commands / limits
+
+review-A-consumers-c11-batch-1-evidence: 원 manifest/changed-paths, source-package-audit.json의6 actual guard argv·hash·file comparisons, closure-and-end-observations.json, ci-observations.json의API comparisons/jobs/직접 log excerpts, map720 manifest/proof/test patch.
+
+실행은 exact Git archive/show/compare, canonical archive 해시·member bytes 대조, immutable code55 Node guard와 latest C11 policy/canonical/source scanning이다. 운영·backend 전체·owner heavy browser를 새로 실행하지 않았고 slot을 사용하지 않았다. 기존 원문과 tarballs는 불변 보존했다.
+
+**5개 저장소의 source/package PASS, 신규0.** Pinvi·Concierge는 포함하지 않으며 batch2에서 따로 검토한다. app merge/install/deploy의 실제 실행과 미완 gate 종료는 부모가 별도로 확인해야 한다.

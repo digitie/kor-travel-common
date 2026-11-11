@@ -1,0 +1,288 @@
+{
+  "schema": "kor-travel.manager.review-input.v1",
+  "input": "manager-mount-order-1",
+  "clientDate": "2026-11-12",
+  "base": "af413443a34063b38d09d788d5dc3ce211decf8a",
+  "head": "ac4eebb5c931a98c6f1dfa921b840ebf415b4aec",
+  "gitTree": "77876ecdfc9abf5cf1d2c9818b43146c63153087",
+  "branch": "agent/fix-candidate-mount-order-20261112",
+  "worktree": "/tmp/codex-manager-mount-order-20261112",
+  "repository": "digitie/kor-travel-docker-manager",
+  "pullRequest": "https://github.com/digitie/kor-travel-docker-manager/pull/590",
+  "sourceFrozen": true,
+  "files": [
+    {
+      "path": "backend/src/kor_travel_docker_manager/services/service_release_candidate.py",
+      "gitBlob": "4b4b67ebff54fcac83c918adf947ca129fb2d1b7",
+      "baseGitBlob": "5fc72070f0e88e5cc6f14c1c10b38d7433c7621e",
+      "sha256": "bbe02f31078c747c9a47199435cbb3f7e93e9c0f8e78cce68b736a29fe60bb51",
+      "bytes": 24079
+    },
+    {
+      "path": "backend/tests/test_service_release_candidate_mounts.py",
+      "gitBlob": "dc3f03a8e540ff3c42d8160b7a83d8448c6b323e",
+      "baseGitBlob": null,
+      "sha256": "6da1e59730ff9495b8a7143d72d9be974fb8979eafec6935f6837629e0d4daa1",
+      "bytes": 7613
+    },
+    {
+      "path": "docs/docker-management.md",
+      "gitBlob": "4da94da3681b4a8b16d97bf9dfe1bb627a2e3d39",
+      "baseGitBlob": "cd21bdc2808f4049faf90747ad6d488a8ab357d9",
+      "sha256": "84b8402a3ab9d09426d3de1929ecd75a69539a1d438ec9b86e3b2f5398a85e7b",
+      "bytes": 190377
+    },
+    {
+      "path": "docs/journal.md",
+      "gitBlob": "9aa72042cc11751c88ebd038c0e3a3f565d85acb",
+      "baseGitBlob": "0a0ef7e018818811734822f311e641f4d65ade19",
+      "sha256": "6d2321501187695b58c25c86eaff19452ac59ba7815d3cccb471a9b7e89ef1c6",
+      "bytes": 241325
+    },
+    {
+      "path": "docs/service-current-release.md",
+      "gitBlob": "142d3c654ff7d10710eebca5f66a24a6a3ae6b0d",
+      "baseGitBlob": "1b0d57fd3028b96c90dcdd154c02a5103366bc46",
+      "sha256": "34c0da6f130b4a88d52004680e5b128d90d15fcd613532e79365e70029ebd5a1",
+      "bytes": 30001
+    },
+    {
+      "path": "docs/tasks.md",
+      "gitBlob": "bb0c7146085040c8c589d2bcf9f8b514ee23a7d3",
+      "baseGitBlob": "976887833a61e85a1d6ffb2ceb3351208a687aa1",
+      "sha256": "6b8e207dbb368372dfae2673b8c64a88e80f9248d36775aeeb31f7f2b2c3261a",
+      "bytes": 50489
+    }
+  ],
+  "unchangedExisting432TestModules": [
+    {
+      "path": "backend/tests/test_service_release.py",
+      "bytesUnchanged": true,
+      "gitBlob": "c6d9154065790218c65ea1df5b9e402f47054011"
+    },
+    {
+      "path": "backend/tests/test_service_release_candidate.py",
+      "bytesUnchanged": true,
+      "gitBlob": "03e58f2c43a10cb963fec07a552bbd12dec3d8e0"
+    },
+    {
+      "path": "backend/tests/test_service_release_cli.py",
+      "bytesUnchanged": true,
+      "gitBlob": "15bec009110d38e71887b6e2d9e971fb6d5bb1fc"
+    },
+    {
+      "path": "backend/tests/test_service_release_compose.py",
+      "bytesUnchanged": true,
+      "gitBlob": "f148045eb6c993b05116ca673f191933945b6d91"
+    },
+    {
+      "path": "backend/tests/test_service_release_process.py",
+      "bytesUnchanged": true,
+      "gitBlob": "48911c2916b52d6e05bf6f54fe26a101ad4e4993"
+    },
+    {
+      "path": "backend/tests/test_service_release_component_candidate.py",
+      "bytesUnchanged": true,
+      "gitBlob": "ddee533e7cc2ad75cbb6f0f4779de01f37247acd"
+    },
+    {
+      "path": "backend/tests/test_registry_targets_config.py",
+      "bytesUnchanged": true,
+      "gitBlob": "ecdbdd16cb8f9204fdfd7a03778911620f508f03"
+    },
+    {
+      "path": "backend/tests/test_registry_hosts.py",
+      "bytesUnchanged": true,
+      "gitBlob": "0d578cd538d1cc1b61570bd057b66eed541dc701"
+    }
+  ],
+  "validation": {
+    "beforeNewTests": {
+      "failed": 18,
+      "passed": 67,
+      "mountOrderFailures": 12,
+      "missingNullFailures": 6
+    },
+    "afterNewTestsPassed": 85,
+    "existingRegressionPassed": 432,
+    "focusedPassed": 517,
+    "ruffAllBackend": "PASS",
+    "codegraph": {
+      "indexedFiles": 270,
+      "impactSymbols": 4,
+      "init": "PASS",
+      "impact": "PASS",
+      "sync": "PASS"
+    },
+    "actualPrivateReplay": {
+      "scope": "보존된 공식 dry-run의 SDK 외부 즉시 전후 inspect, 내부 snapshot 증명 아님",
+      "base": "af413443a34063b38d09d788d5dc3ce211decf8a",
+      "oldSourceSha256": "3843224b5bcb21354729c9fafbc97f28b88a44747e3a96da12df615d9ae63ac7",
+      "newSourceSha256": "bbe02f31078c747c9a47199435cbb3f7e93e9c0f8e78cce68b736a29fe60bb51",
+      "totalContainers": 55,
+      "nonselectedContainers": 54,
+      "oldProjectionDifferences": 5,
+      "newProjectionDifferences": 0,
+      "negativeControlsRejected": {
+        "Source": true,
+        "Destination": true,
+        "RW": true,
+        "Mode": true,
+        "Propagation": true,
+        "Type": true,
+        "added-field": true,
+        "duplicate-added": true
+      },
+      "originalRawHashesVerified": true,
+      "originalRawFilesUnmodified": true,
+      "newSourceExecutedOnlyAsIsolatedAstProjection": true,
+      "liveSDKEdited": false,
+      "guardException": false,
+      "actualApply": false,
+      "dryrunRerun": false
+    },
+    "fullBackendLocallyRun": false,
+    "newInstalls": 0,
+    "readOnlyExistingVenv": "/tmp/kt-manager-candidate-python",
+    "parentExactCI": "pending_parent_verification",
+    "originalAReview": "pending_parent_assignment",
+    "originalBReview": "pending_parent_assignment",
+    "nestedIndependentReviews": []
+  },
+  "safety": {
+    "liveSdkSourceEdited": false,
+    "guardExceptions": false,
+    "newSchemaPinsetOrEnvHash": false,
+    "frontendChanged": false,
+    "configChanged": false,
+    "installerChanged": false,
+    "n150Changed": false,
+    "odroidInstalledRevision": "af413443a34063b38d09d788d5dc3ce211decf8a",
+    "actualApply": false,
+    "officialDryrunRetried": false,
+    "productionProcessesStarted": 0,
+    "privateRawValuesCommitted": false
+  },
+  "artifacts": [
+    {
+      "path": "validation/manager-mount-order-fix-20261112/actual-raw-source-replay-result.json",
+      "sha256": "e06eb959237cb335970840d491e2b63a289d71dab1b1f59fbdf031baf5755939",
+      "bytes": 907
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/actual-raw-source-replay.py",
+      "sha256": "eedd8b05afae853b40930830da69b3ab5611ebfd6521ffbb2c62eb90da4057f8",
+      "bytes": 27998
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/after-new-tests.log",
+      "sha256": "df54c4ac4a19227d7a1c3a4ad82838dcb393be87de471dfb65263aaa17c9594b",
+      "bytes": 179
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/before-af413-new-tests.log",
+      "sha256": "0cb746ed9889f65a85bb25845c043f33d129039fa3de9892df23eb092896eb02",
+      "bytes": 42905
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/before-command.json",
+      "sha256": "700f7fb38a9c2fefe30187579abd312479fcfa1f9972c46959fe097dd1c2c518",
+      "bytes": 501
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/codegraph-callers.log",
+      "sha256": "2be0c37dcdbdfec1886f25cc4940b2984f1a1c235de88ce968bc50fded7ff0f2",
+      "bytes": 316
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/codegraph-impact.log",
+      "sha256": "d04b5d93122b684ff71f85c1ad2515850856f853bc30a92a72b69badc2286c44",
+      "bytes": 363
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/codegraph-init.log",
+      "sha256": "3301e05e06b8c825d741d5db903ee6d5788bb3d753c7ccdf585bbf4948666dd5",
+      "bytes": 31520
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/codegraph-sync.log",
+      "sha256": "789b307cebfe0e152e4d80fb2b646531345f256936e41d951601fca6e585cc69",
+      "bytes": 434
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/collection-path-attempt1-focused-command.json",
+      "sha256": "d64fe648bd2e2945df0e88b0a89cefb9b3dcd0f805d67d56ada9c00d47a2890f",
+      "bytes": 749
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/collection-path-attempt1-focused-regression.log",
+      "sha256": "8ec4e19dc1e4d1d430216a5f2eb8d22122aff203b74a17c3137802ecfc8f2034",
+      "bytes": 83
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/commit-result.json",
+      "sha256": "32d64c5dcee34ace4a1c7214ddc65f11fd6c561968017f1c568ddb85dce5530a",
+      "bytes": 249
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/commit.log",
+      "sha256": "4f18d3979a0da25a5ab23714588773b8b2083a0860c9a72b32cad397d9c9c2b0",
+      "bytes": 236
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/existing-432-test-files-unchanged.json",
+      "sha256": "7e7813b1da0aa69f77f158322b8e52137f9dbd2b9159949b237992c49d26ac79",
+      "bytes": 1244
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/fixture-palindrome-attempt1-before-af413-new-tests.log",
+      "sha256": "b076e99cd5eea8e2ce597a4774c32c50a7c7b088807e19859e32d33fb5d6fd7a",
+      "bytes": 10497
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/fixture-palindrome-attempt1-before-command.json",
+      "sha256": "a707dbd12c88c8ebbe88ed5776e3e795024512efe582d1c4853b57ffeac01197",
+      "bytes": 501
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/focused-collection.log",
+      "sha256": "0a463f4c2d0f349b00f72721b74108499ef9fb572a21088e19c5d4143570a06f",
+      "bytes": 43126
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/focused-command.json",
+      "sha256": "2ec55cd1e9846183c654fbe9b7e2624171522053911782112fcd5d2f20420b6c",
+      "bytes": 800
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/focused-regression.log",
+      "sha256": "8bfc67a3c2e20b38513b6beea137c09d7d8b2ecef84fd1562e634abd2c975ac6",
+      "bytes": 661
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/frozen-delta.patch",
+      "sha256": "02c42fe3ff40180b2ecab3eba7f00655d88ee7a33458607a132047118f09b5a1",
+      "bytes": 15245
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/frozen-six-git-files.tar",
+      "sha256": "ee87a0bde8bd1fbc8529f009392dcd4ae68c5234db4f40f3f5acc79d1eb9afc9",
+      "bytes": 563200
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/pre-push-security-audit.json",
+      "sha256": "3f4e585d2de2feafb308fb4b96e6c13c5be68e55c870e4b52cc25a0113bbb28c",
+      "bytes": 517
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/push.private.log",
+      "sha256": "e7e110f012cd341d71260e7c93fc3cfb86aee04060fbe7662802b5ce65a5557c",
+      "bytes": 533
+    },
+    {
+      "path": "validation/manager-mount-order-fix-20261112/ruff-backend.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "bytes": 19
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "kind": "manager-component-ui-2-effective-environment-fix",
+  "createdAt": "2026-11-11T20:59:07.796550+00:00",
+  "checkout": "/tmp/codex-manager-component-ui-20261112",
+  "base": "9910b9a6dba902c6a59469d3a6f46c6077e78d3f",
+  "previousReviewed": "df3760cc22d23bab71a1b93c7ca9b86299a94d9f",
+  "head": "71550de2f3f0754444d8b1d8fb5478a41cfede8c",
+  "pr": "https://github.com/digitie/kor-travel-docker-manager/pull/589",
+  "originalManifest": {
+    "path": "review-manifest-manager-component-ui-1.json",
+    "sha256": "ee5688ab6783bb535a88160726fb07721ff3c266c40f4629dc8ee9588eb577fd"
+  },
+  "allChangedFiles": [
+    {
+      "path": "backend/src/kor_travel_docker_manager/service_release_cli.py",
+      "blob": "c01919f17de91dfe39e29b8395268181d1766436"
+    },
+    {
+      "path": "backend/src/kor_travel_docker_manager/services/registry.py",
+      "blob": "d0ccdedde4b57f637d65fc2a2f2caa3a80f15df7"
+    },
+    {
+      "path": "backend/src/kor_travel_docker_manager/services/service_release_candidate.py",
+      "blob": "5fc72070f0e88e5cc6f14c1c10b38d7433c7621e"
+    },
+    {
+      "path": "backend/src/kor_travel_docker_manager/services/service_release_component_candidate.py",
+      "blob": "c65e20c61554ae6487e2843462e68ea6072abfcc"
+    },
+    {
+      "path": "backend/tests/test_service_release_component_candidate.py",
+      "blob": "35247b5b09ba9ef06be671cc5ac576ad146eb5ef"
+    },
+    {
+      "path": "config/docker-targets.yml",
+      "blob": "fc1a076aeb9fee12631f527d47774f50eadc2ca8"
+    },
+    {
+      "path": "docs/decisions.md",
+      "blob": "b27363dcc5de5b045dda7fc125c53a64e7b149df"
+    },
+    {
+      "path": "docs/journal.md",
+      "blob": "43f72719fbb4d2321b4a7802ecba3708f181467d"
+    },
+    {
+      "path": "docs/service-current-release.md",
+      "blob": "8f871b0f13a52200aba2cc0b47be59272a92455d"
+    },
+    {
+      "path": "docs/tasks.md",
+      "blob": "5cc90e96fd35b5b0932f3abe7bd733f01007751e"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "validation/manager-component-ui-driver-parent/environment-before-df376.log",
+      "sha256": "a01ef0218a1e2319fef7614532ddd7d02079b2599a566d18e39c5a570aed03c1"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/environment-before-final-controls.log",
+      "sha256": "5e96b17de8366f6dbd6fc4fad395fe09894bcdda0ae70267b0316e153ba307fa"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/environment-focused-after.log",
+      "sha256": "727601a7b073c7c2695d70c27accd317f184cf86a63838e3b0495ecfc66dc6c2"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/environment-focused-final.log",
+      "sha256": "a196d40dcd87592f0b475103247a332aff0b067caeaf11ebcd18af1fc60384ab"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/environment-ruff-final.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/environment-fix-scope-proof.json",
+      "sha256": "1c1e24fa4fa07b8f9ec711375e71ddb7f94951e74206aaa542dedc1fb49420a8"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/environment-staged-security-audit.json",
+      "sha256": "f7d747f5c91ce5f7d0911384998b3ff23f0190bd088c5fb9e816a66e03005d7e"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/environment-codegraph-sync.log",
+      "sha256": "99795a9817f2c263e90f3962dc5a5681b153f77dcd4841b3feda7e34ada3a082"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/environment-codegraph-status.log",
+      "sha256": "c45e0ed4fb8dbd535d84af4bea7b9d80b9e293d427736e8724c2dae9d4633455"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/environment-codegraph-impact.log",
+      "sha256": "903e11036c4953e6d782fb4f3eb78f718b7bfafa780ee721885a377afccf52a1"
+    },
+    {
+      "path": "validation/c11-map-weather-20261112/PR589-component-effective-environment-drift.ko.md",
+      "sha256": "937793ae133bc30d7ec711f378fcb0fd734f394c595c775d8d409acac5439077"
+    }
+  ],
+  "reviewScope": "Previous full SDK scope plus component current effective-environment preservation under G. Current values override stale Compose; only new candidate-image default keys merge. Freeze explicit environment/no selected env_file reread. Compare approved environment/image at admission/post/publication. Redact captured values before render. Existing Map default/callbacks, baseline/current/nonselected, registry/group/pin/manifest schema and existing5 tests unchanged. Actual production values never included; no production apply. New source1 reviews preserved; followup own source review needed."
+}

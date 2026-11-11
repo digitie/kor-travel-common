@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-11-12 | FULL·원문 정산 | [Common7·Scope2](adversarial/2026-11-12-common7-scope2-final.md), [소비자·SDK](adversarial/2026-11-12-consumer-sdk-final.md) | 원 A UI·계약 / 원 B 패키징·CI | 범위별 SOURCE PASS·자기 지적 FIXED, 이전 BLOCK 보존·실제 배포 별도 |
 | 2026-11-11 | FULL·1차 | [Radix 공통화](adversarial/2026-11-11-radix-unification.md), 789e6d2/7402214 | A UI·접근성 / B 패키징·CI·고지 | 두 BLOCK·수정 및 재검토 중 |
 | 2026-10-23 | FULL·소스 정산 | [workspace metadata 갱신 주기](adversarial/2026-10-23-workspace-refresh-closure.md), 89ea368 | A 실행·복구 / B SDK·패키징 | 두 SOURCE PASS·OPEN0·CI8SUCCESS·소비자/운영 별도 |
 | 2026-10-18 | FULL·통합 delta | [daemon 풀·영속 webserver 합집합](adversarial/2026-10-18-daemon-pool-union-closure.md), ff849ea | A 계약·의존성 / B 설치·패키징 | 두 SOURCE PASS·P3 FIXED·CI14SUCCESS·운영 별도 |

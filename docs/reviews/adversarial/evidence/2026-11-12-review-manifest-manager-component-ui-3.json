@@ -1,0 +1,90 @@
+{
+  "kind": "manager-component-ui-3-raw-compose-environment-boundary",
+  "createdAt": "2026-11-11T21:12:49.278140+00:00",
+  "checkout": "/tmp/codex-manager-component-ui-20261112",
+  "base": "9910b9a6dba902c6a59469d3a6f46c6077e78d3f",
+  "previousReviewed": "71550de2f3f0754444d8b1d8fb5478a41cfede8c",
+  "head": "e79881a77ad263986209dfe645dfe414e739ee2e",
+  "pr": "https://github.com/digitie/kor-travel-docker-manager/pull/589",
+  "previousManifest": {
+    "path": "review-manifest-manager-component-ui-2.json",
+    "sha256": "aa1d5838ab0d7f9c37f723028b216664ecaa3e35e4be92f6e34895bf91ae84f3"
+  },
+  "allChangedFiles": [
+    {
+      "path": "backend/src/kor_travel_docker_manager/service_release_cli.py",
+      "blob": "c01919f17de91dfe39e29b8395268181d1766436"
+    },
+    {
+      "path": "backend/src/kor_travel_docker_manager/services/registry.py",
+      "blob": "d0ccdedde4b57f637d65fc2a2f2caa3a80f15df7"
+    },
+    {
+      "path": "backend/src/kor_travel_docker_manager/services/service_release_candidate.py",
+      "blob": "5fc72070f0e88e5cc6f14c1c10b38d7433c7621e"
+    },
+    {
+      "path": "backend/src/kor_travel_docker_manager/services/service_release_component_candidate.py",
+      "blob": "6ac0fd621e1cb119647bceaf07190c3e1bc223ac"
+    },
+    {
+      "path": "backend/tests/test_service_release_component_candidate.py",
+      "blob": "ddee533e7cc2ad75cbb6f0f4779de01f37247acd"
+    },
+    {
+      "path": "config/docker-targets.yml",
+      "blob": "fc1a076aeb9fee12631f527d47774f50eadc2ca8"
+    },
+    {
+      "path": "docs/decisions.md",
+      "blob": "90000acaa1faf82c3c15fceb52396296e47058b0"
+    },
+    {
+      "path": "docs/journal.md",
+      "blob": "0a0ef7e018818811734822f311e641f4d65ade19"
+    },
+    {
+      "path": "docs/service-current-release.md",
+      "blob": "1b0d57fd3028b96c90dcdd154c02a5103366bc46"
+    },
+    {
+      "path": "docs/tasks.md",
+      "blob": "976887833a61e85a1d6ffb2ceb3351208a687aa1"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "validation/manager-component-ui-driver-parent/dollars-before-715-unit.log",
+      "sha256": "7e75d6f7f022a4d1986034456c29bdb6f3fb358c26546958ffb53d924b2c8f51"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/dollars-focused-final.log",
+      "sha256": "86f4139777de7c7b81374dfda2547d04ba853ef7c7b8fb036fe55678164b174d"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/dollars-ruff-final.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/dollars-engine-before-715.json",
+      "sha256": "f50891f9dc886642acdaa11ea0ec0865aeae50dbfbc9dec154541898818cf216"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/dollars-engine-after.json",
+      "sha256": "2bbcd1ba903c0a2e9f2f7514c5dc8e9428e2d8c84b63b5f41d720d73d9f4701e"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/dollars-final-scope-proof.json",
+      "sha256": "bb5365dadad11e60b9b204c1b5003a4a0bac79cac109eb8833f8490ac68b9f38"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/dollars-staged-security-audit.json",
+      "sha256": "fb31954b88fa7d4acf41ed024f42b27cb0c042c2b1415f54dd26594116732f2b"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/dollars-codegraph-sync.log",
+      "sha256": "e6c727e3e5a0af7144805150c06d06b778fd5738c796b46479223bc9c452c421"
+    }
+  ],
+  "scope": "Only component raw-value binding now doubles every raw dollar once before the existing Compose config escaper. Approval/environment comparison remains raw. Existing Map escaper/callbacks/test bytes and C11/frontend/HTTP/config/registry/manifest/pin schema unchanged from input2. Added32 live/image-default boundary controls and docs. Product432PASS/Ruff0, own actualCompose-fakeEngine createEnv11raw values equal; intentional fixture create refusal is not actual deployment. Exact newCI and original independent own-finding closure pending."
+}

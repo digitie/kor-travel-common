@@ -1,0 +1,53 @@
+# 원 리뷰어 B — Map C11 7ce main 병합 보충
+
+- 원 B/Epicurus. packaging/platform/security/release/CI 독립 검토. 구현 참여·peer raw/verdict 열람 없음.
+- 입력 review-manifest-map-c11-main1497-supplement-7ce.json SHA256 8cc46f10fc13d2c05dbd0821acbe8c42e4dae4dc9b1cab9344bf8d4c2f74dfc0 직접 확인.
+- head7ce46cd92ba8d6ae1c7dee556939f70bf94fb3d9/tree b9d87fa457c6e5b5c21f4e058d685748f3958bfe.
+- parents7202653aff29e1d9738a6264aaefa7a3f9c747b0 + incoming main5742b45e7ac077b38e83dc8c95946fe15ab80ab7.
+- runid Epicurus-B-map7ce-20261111T210801Z. 정확 UTC는 review-B-map7ce-main1497-supplement-evidence/session.json, completion.json.
+- 이전 batch1 및720 supplement manifest hash를 검증했고 옛 B 원문을 변경하지 않았다.
+
+## Verdict
+
+**SOURCE-MERGE PASS, 신규 finding0. 최종 정확 CI 조건은 CONDITIONAL.** 이는 한정된 main 병합·패키지/문서 보존 수용이다. backend 전체 동작·운영 migration·실제 배포 승인으로 확대하지 않는다. 기존 B Map 계약/문서 finding FIXED를 유지한다.
+
+정확7ce의 frontend43097581136/policy43097581503/openapi43097581124/docker43097581042/lint43097581112/backend43097581051은 마지막 직접 GitHub 조회에서도 모두 QUEUED/conclusion null이었다. 원720의 D286이나104 focused를 exact7ce whole CI green으로 바꾸지 않는다.
+
+## 불변 소스·병합 proof
+
+Git object만 읽었다. 전체19개 final/main blob 및 fileSHA256, 실제 changed-path 집합, 정확 두 parent와 final tree를 대조했다. product/test16개는 incoming main과 정확히 같은 blob이다. 나머지 CHANGELOG/journal/resume3개는720 내용이 삭제 없이 남는 삽입-only다. Git raw tree inventory 전체가 보존 final-source-git-blobs.txt와 정확하고, frozen19파일 tar의 각 member도 실제 final Git blob과 같다. tar를 source root에 풀거나 실행하지 않았다. 제공 evidence13개의 SHA/크기도 확인했다.
+
+frontend subtree, root package.json/package-lock.json, .github/workflows는720과 동일하다. 따라서 CI guard code pin/공통 패키지 선언/lock/override 및 vendor와 UI 제품 코드는 변하지 않았다. 물리 vendor7개를 integration11 canonical 원본과 다시 전체 byte 비교하고 SRI를 재계산했다. RN tgz도 보관돼 있어7개이며 이를 웹 runtime에서 모두 소비한다는 뜻으로 사용하지 않았다.
+
+## 문서·원 지적 보존
+
+실제 docs 상한 계약의 원본 test는 docs 아래 Markdown에225280bytes를 적용한다. root CHANGELOG에 그 규칙을 임의 확대하지 않았다.
+
+- docs/journal192889bytes, docs/resume195539bytes.
+- 문서3개 삽입 행은 CHANGELOG7/journal10/resume10, 삭제0.
+- docs Markdown526개가 모두 상한 안이며 가장 큰 archive도224806bytes다.
+- 본인은 Git blob 크기로 만든 sparse 메타데이터 fixture에서 원 제품의 docs 전체/아카이브 크기 함수2개를 직접 실행해 통과시켰다.225281bytes 대조 파일은 실제로 거부됐다.
+- 다른 reviewer 문서 본문은 열지 않았다. 크기 검증에 사용한 다른 docs 파일은 내용 대신 정확 size만 재현했다. 새 삽입에는 archive 링크 변경이 없고 기존 archive blob은720과 같아 이전 본인 링크/이력 보존 closure를 유지한다.
+
+## incoming backend 검토와 한계
+
+새 소스가720 전체와 같다는 주장을 하지 않는다. 검색 SQL/ranking/cursor8, prominence 파생 표·모델·runtime 권한, migration451/graph, 내부 client 메서드, Dagster maintenance 연결이 바뀌었다.14개 변경 Python 파일을 직접 compile했고 해당 product diff를 읽었다.
+
+새 prominence0..9/count32767 상한, 공개 place만 집계, 고정 SQL/parameterized timeout·lock key, 내부 session transaction, forward-only451의450 predecessor·table owner/CHECK·bounded DDL, migration 안에서 full backfill하지 않는 경계를 확인했다. 기존 param/DTO 모양과 frontend는 변경되지 않았다. cursor version 증가 및 새 표를 읽는 backend가451을 필요로 함은 문서와 일치한다. 표가 비어 있는 것과 표가 없는 것은 다르므로 새 backend 배포 시 migration 조건이 남는다. 이번 frontend-only source 수용이 backend/schema 전환을 실행하는 것은 아니다.
+
+전달 focused104PASS 원문/status는 digest 확인했다. status의 실행 source는720+pending main merge이고 이를 본인의 exact7ce 실행으로 표기하지 않는다. local Dagster collection은 redis 누락으로 exit2인 원문을 보존했으며 PASS가 아니다. 본인은 대형 의존성 설치나 backend/DB/Dagster 수명주기를 재실행하지 않았다. 새 정확 전체 CI가 backend 통합 수용의 남은 조건이다.
+
+## D286 재사용 범위
+
+해시 확인한 whole-runner receipt는 실제720 입력에 D286/286, flake0/skip0/global error0/wholeRunner0/cleanup exact absence를 기록한다. 최초 D285PASS1FAIL/runner1 이력은 유지된다. 이번7ce와720의 frontend/root package/lock/vendor 전체 byte가 같으므로 **그 frontend 입력에 한해** 재사용 가능하다. 새 backend·migration·Dagster의 실제 동작 증거로 쓰지 않았다. 본인 fresh browser 실행은 NOT_RUN_B다.
+
+새 synthetic d7f00f47514c6429d175a066c9201c00412c8714는 보존 proof와 GitHub compare files0으로7ce 전체 tree 동등성을 확인했다. 같은 tree라는 사실 자체가 queued CI의 실행 성공을 뜻하지 않는다.
+
+## 증거·명령·보존
+
+증거 폴더 review-B-map7ce-main1497-supplement-evidence에 초기19blob/parent/tree/document proof, 원문 tar/inventory 확인, docs 원 함수/상한 대조군, canonical7 byte/SRI, backend static proof, 직접 CI/compare, 이전 raw SHA를 남겼다.
+
+주요 명령은 git show/cat-file/rev-parse/ls-tree/diff, Python hashlib/tarfile/difflib/ast compile, GitHub commit-runs/compare다. 전체 소스 tree inventory 및 tar19를 실제 Git object와 대조했고 source edit/pack/install/heavy browser 반복은 하지 않았다. 본인 snapshot만 회수했다. 기존 raw/manifest/artifact와 타인 cache/작업본은 변경하지 않았다.
+
+실제 운영 DB migration/API/DB/RustFS/Dagster lifecycle·배포·컨테이너 재생성은0/NOT_RUN_B. 정확 전체 CI green 및 정식 frontend-only 배포 admission은 후속 조건이다.
+

@@ -90,6 +90,8 @@ Radix FocusScope의 초기패널 Shift+Tab과 disabled fieldset 상속 결함은
 
 TypeScript는 OpenAPI 생성기와 typescript-eslint peer 범위 때문에 5.9.3, Node 타입은 Node22 실행환경에 맞춘다. NativeWind RC는 사용자 승인에 따른 것으로 대응 엔진과 함께 고정한다. stable로 표시하지 않는다.
 
+Pinvi 모바일의 Expo SDK58 패치는 expo 58.0.24, expo-constants 58.0.16, expo-linking 58.0.17, expo-router 58.0.31로 맞춘다. 이는 모바일에서만 사용하는 SDK 구성으로 웹 앱에 설치를 요구하지 않는다. 모바일 package/lock 및 스타일 호환성 검사는 같은 버전을 대조하고, Expo Doctor도 CI의 필수 검사로 실행한다. React Doctor와 별개의 검사이므로 한쪽 성공으로 다른 쪽 실패를 대체하지 않는다. 이 SDK 패치만으로 동결된 공통 UI·tokens·VWorld·CSS compiler 산출물을 다시 배포하거나 같은 버전의 bytes를 바꾸지 않는다.
+
 ## CSS compiler의 공통 bytes
 
 Lightning CSS는 웹과 모바일 모두 필수인 **빌드/개발 의존성**이다. runtimeRequired에는 넣지 않는다. 승인한 stable SemVer의 build metadata를 포함한 전체 문자열과 단일 vendor SHA512를 대조하며, metadata가 다른 같은 기본 버전도 같은 후보로 취급하지 않는다. 원본 수정과 라이선스/소스 동봉은 [vendor 고지](../../vendor/README.md)를 따른다.
@@ -114,7 +116,7 @@ common root와 실제 Next smoke/example의 설치 정의도 같은 tarball과 r
 
 ## 현재 수용 상태
 
-이 변경은 구현 후보이며 최종 배포 수용을 뜻하지 않는다. 최종 source commit·산출물 해시·앱별 테스트·리뷰·PR·이미지 digest·배포 결과는 Geo의 단일 통합 보고서에서 기록한다.
+공통 C11 구현과 7개 소비 앱의 주 이관 PR은 독립 리뷰·정확 CI 후 머지했다. 배포 수용은 앱마다 별도로 확인한다. 최종 source commit·산출물 해시·앱별 테스트·리뷰·PR·이미지 digest·배포 결과는 Geo의 단일 통합 보고서에서 기록한다.
 
 옛 private mono-root인 maplibre-vworld-react 직접 설치를 모든 프로필에서 금지한다. 기존 source AST 검사도 정본 forbidden 목록의 정확한 package root와 / 하위 경로 import를 거부한다. 지도는 공개 core/web/RN 배포물을 사용하며 node_modules/maplibre-vworld-react/packages/* source alias로 되돌리지 않는다.
 

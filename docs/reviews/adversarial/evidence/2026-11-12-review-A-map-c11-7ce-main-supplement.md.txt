@@ -1,0 +1,75 @@
+# 원 reviewer A — Map C11 7ce/main1497 bounded 보충
+
+runid Mill-A-Map7ce-Main1497-20261111. frontend/API 소비 통합·문서 병합·runtime 증거 재사용 범위, 구현 비참여·read-only. peer raw/verdict 미열람. 시작UTC2026-11-11T21:06:52Z, source/CI 관찰 종료21:11Z 부근.
+
+**SOURCE-MERGE 수용 PASS, 신규 P0/P1/P2/P3=0.** 전체 backend·정확7ce CI 수용은 아직 조건부다. D286을7ce backend 기능 통과로 확대하지 않으며 production migration/실행/배포0이다.
+
+## 불변 입력과 직접 확인
+
+review-manifest-map-c11-main1497-supplement-7ce.json SHA256 8cc46f10fc13d2c05dbd0821acbe8c42e4dae4dc9b1cab9344bf8d4c2f74dfc0 일치. exact7ce46cd92ba8d6ae1c7dee556939f70bf94fb3d9/tree b9d87fa457c6e5b5c21f4e058d685748f3958bfe를 Git objects로 읽었다.
+
+parents는7202653aff29e1d9738a6264aaefa7a3f9c747b0 + incoming main5742b45e7ac077b38e83dc8c95946fe15ab80ab7이다. 시작 shared HEAD7ce/clean. 실제 source는 /tmp/review-A-map7ce에 필요한 Git archive를 격리했다.
+
+19개 변경 집합·각 final Git blob·file SHA256을 직접 대조했다. 제품/테스트16개는 incoming main blob과 정확히 같다. docs3개는 difflib opcode와 Git diff 모두720 내용 삭제/치환 없이 insert-only다. 전달 evidence13개 해시 및 이전 batch1/720 manifest2개 해시도 일치했다.
+
+frozen final-source-git-blobs.txt 전체가 직접 git ls-tree -r7ce와 byte 동일하다. 19파일 archive는 파일19개·원문합3,382,488bytes이며 각 member가 final Git blob과 같다. archive 관찰 mode0444. archive만 보고 저장소 전체가 같은 source라고 가정하지 않았다.
+
+## UI 입력과 D286 재사용
+
+다음을 직접 Git object ID로 대조해720→7ce 동일함을 확인했다.
+
+| 입력 | before/after 동일 ID |
+|---|---|
+| root package.json |322e1db5630dabb42f1a335f9c2432d616d91824|
+| root package-lock.json |7ed57b50c786baf219e8a17a301039334f9c8ff4|
+| admin frontend 전체 tree |e1415735c3c2155881c082e7d8309ac9b6c6ba3e|
+
+frontend 전체에는 source·E2E·vendor·원장·frontend 설정이 포함된다. 따라서 본인의 기존 Map f55 source finding FIXED 및720 test-only 보강의 약화 없음 판정은 유지된다. C11 payload/FocusScope2도 이 merge에서 바뀌지 않았다. 실제 scope 전체 backend는720과 다르다.
+
+owner의 immutable D redacted report·whole runner outcome·cleanup receipt를 직접 읽었다. 실제 observed source720, frontend digest643d18ca6dfbddde68995f5ca70ade48a5da0a81b8e9db4bfe51f3e0d585fb2c,286/286·skip0/flake0/globalError0, inventory dc85a2c127f1ddb68fef6ae55dc71a04ddb2005bfeb784c94249aaf535d939a5, wholeRunnerExit0이다. image/container/network의 positive query exit0 및 exact ID absence와 active process[]도 receipt에 있다.
+
+D child 완료0 이후 scheduler 종료·own cleanup의 순서를 구분했다. 첫285PASS/1FAIL 원문·wholeRunner1은 그대로 보존돼 있다. 별도 새 D/browser/build를 실행하지 않았으며 owner가 실제 수행한 결과의 원문/수용 receipt를 읽은 것이다. **동일 UI 입력 수용으로만** D286 재사용은 타당하다. 새 검색 SQL·migration451·실제 API/DB/Dagster가 D286으로 검증됐다는 결론은 아니다.
+
+## incoming backend/client/schema의 소비 영향
+
+16개 incoming source/test diff를 읽었다. 새 prominence 표/refresh repo·내부 client method·Dagster op가 추가되고 검색 ranking 마지막 자리와 이름 전체 일치가 바뀐다.
+
+- 기존 검색 parameter·응답 envelope/DTO·HTTP route·frontend API client는 이번19개에서 변경되지 않는다. 새 AsyncKorTravelMapClient.refresh_search_prominence는 내부 maintenance용 추가 method이고 기존 UI 요청 메서드를 교체하지 않는다.
+- 공개 검색 rank는 새 prominence·fullness 자리를 포함하므로 opaque cursor version이7→8로 올라간다. 이전 cursor가 새 rank로 조용히 재해석되는 구조가 아니며 기존 unsupported-version/tamper/query-reuse 경계와 해당 단위 검사도 읽었다. 배포 중 옛 cursor의 재사용은 새 cursor 재시작이 필요한 경계다.
+- 실제 immutable Python AST에서 rank 상수식을 별도 평가했다. 최대121,191,119는 SQL int4 및 JS safe integer 범위 안이고 region weight100,000,000은 base max21,191,119보다 크다. frontend 숫자 표현의 overflow 신호는 없었다.
+- 새 prominence table이 비어 있는 경우 COALESCE default1을 사용하지만 **표 자체가 없는 DB에는 적용 전 migration451이 필요하다.** 표 비움과 table 미존재를 혼동하면 안 된다. 새 runtime grant와 application migration graph도451을 포함한다.
+- 모델 PK/범위0..9/count 제한과 migration 정의·schema dump·runtime 권한의 해당 추가를 읽었다. Feature 원본 FK를 추가하지 않고 별도 파생 표만 쓰는 설계다. refresh는 transaction-local timeout·advisory xact lock과 값 변경 upsert/비공개 삭제를 수행한다. 이를 실제 production DB에서 실행하거나 lock/성능을 실측하지 않았다.
+- Dagster는 기존 dedup refresh 뒤 새 op를 연결하고 내부 client의 transaction을 사용한다. callback DTO는 computed/changed/deleted다. 이 source를 배포할 경우 새 table/grant와 새 backend/Dagster의 정확 CI/운영 절차가 필요하다.
+
+이번 수용은 incoming main16개를 임의 변형하지 않고 reviewed C11 frontend와 통합한 상태에 대한 것이다. upstream 신규 검색 기능 전체의 DB 성능/경합 독립 리뷰·migration 실행 승인이나 실제 rollout 수용을 대신하지 않는다. UI-only 배포에서 API/DB/Dagster lifecycle을 동반 호출해서는 안 된다.
+
+## 문서 conflict 보존
+
+CHANGELOG7줄, journal10줄, resume10줄의 삽입만 확인했다.720의 C11 UI·원285/1 실패·720 test 보강·검증/진행 당시 기록은 지워지지 않았다. 새 상단 기록은 incoming16 exact·frontend 입력 동일·root104와 Dagster collection 제한·새 정확 CI 필요를 구분한다.
+
+incoming 검색3단계·cursor8·451과 별도 채우기 절차가 추가됐으며 기존 UI 승인 동작을 새 backend whole PASS로 바꾸는 merge 문구는 발견하지 않았다. 과거 당시 pending 문구는 역사 기록으로 유지된 것이다.
+
+## 실행·CI와 남은 조건
+
+직접 실행한 것은 Git/hash/archive/전체 inventory 비교, insert-only 판정, protected tree 비교, rank 정수 범위 계산이다. heavy install·test DB·backend 전체·D286 재실행은 NOT_RUN이다.
+
+owner targeted root104PASS/7.29초 log를 직접 읽었다. status는720+pending main merge에서 수행한 precommit 집중 검사로 적혀 있으므로 이를 exact7ce 전체 실행으로 부르지 않는다. root unit/SQL/migration/archive 일부의 근거이며, source16개와 test final blob은 main/7ce 동일함을 별도로 확인했다.
+
+Dagster local targeted log는 ModuleNotFoundError: redis로 collection 실패다. **PASS가 아니다.** 의존성 추가 설치나 실제 Dagster 실행으로 우회하지 않았다.
+
+정확7ce CI6개를 직접 GitHub API로 조회했다. 관찰 당시 모두 queued였다.
+
+- backend ci43097581051
+- frontend43097581136
+- central policy43097581503
+- lint43097581112
+- openapi43097581124
+- docker-images43097581042
+
+따라서 최종 whole CI green 조건은 남는다. 제공된 synthetic checkout d7f00f47514c6429d175a066c9201c00412c8714의 tree가7ce와 동일함은 직접 Git으로 확인했지만 queued 결과를 PASS로 바꾸지 않았다. 향후 실제 CI checkout/log도 이 범위에 맞춰 확인해야 한다.
+
+## evidence/최종 판정
+
+root/review-A-map7ce-main1497-supplement-evidence 아래 observations-start.json, source.patch/docs.patch, independent-proofs.json 및 CI/최종 관찰·report receipt를 보존한다. 원 전달의19blob/13evidence·전체 inventory/archive byte proof·UI 보호 tree·rank bounds가 포함된다.
+
+**신규 finding0, bounded source-merge PASS. 정확7ce whole CI 및 별도 실제 배포 admission은 조건 미완.** 이전 batch1/720/raw는 불변 보존하고, 전체 backend 수용·production migration·공용 인프라 lifecycle 완료로 확대하지 않는다.

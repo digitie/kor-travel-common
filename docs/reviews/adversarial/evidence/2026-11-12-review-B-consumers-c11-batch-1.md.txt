@@ -1,0 +1,93 @@
+# C11 소비자 batch1 — 원 reviewer B 독립 원문
+
+- Reviewer B / Epicurus, packaging/dependency/platform/security/release·CI 전문. 구현 비참여.
+- Run ID `Epicurus-B-consumers-C11-batch1-20261111T192046Z`, 시작 UTC `2026-11-11T19:20:56.705021+00:00`, 종료 UTC `2026-11-11T19:37:30.157073+00:00`.
+- 불변 입력 `review-manifest-consumers-c11-batch-1.json` 실제 SHA256 **`c0affe2a88bf0f176abb0e3df298b0fb2da698f442f74196f00ac3e237f30a4c`**. 시작·종료 동일.
+- 추가 test-only 입력 `review-manifest-map-c11-test-supplement-720.json`, SHA256 **`3dd47b07097f1589da7398fa583bd6ebbc781d2dac1b8b9eeca630d22d5fd6be`**. 본문에서 원 Map6b와 구분한다.
+- Git object에서 본인 격리 snapshot `/tmp/review-b-batch1-20261111T192046Z`에 source를 조립했다. 실제 snapshot의 모든 tracked blob hash를 다시 대조했다. moving workingtree는 감사 기준선이 아니다. source edit/새 install/재pack/production mutation/n150 실행 없음. peer raw/verdict를 읽지 않았다.
+
+## 다섯 repo 명시 판정
+
+**B SOURCE/PACKAGE는 5개 모두 PASS, 신규 P0/P1/P2/P3 finding 0건.** 앱별 최종 실행/배포 gate는 아래와 구분한다. 이 표의 PASS는 불변 source/package 범위이며 미완 CI·브라우저를 완료로 세지 않는다.
+
+| repo / 불변 head | B source/package | 실제 관찰·남은 실행 gate |
+|---|---|---|
+| Geo `12bff3dfc1bc315beedecb9ddbeca4862978c308` | **PASS** | general/OpenAPI/central 모두 SUCCESS, frontend294/type/lint/Doctor/build 성공. 소유자 fresh n15054는 마지막 전달 시 실행 중. 최종 host 수용 CONDITIONAL |
+| Map `6b826a7f1ceafe54e122be919cdbb56da98fde3e` | **PASS**, own2 finding FIXED 유지 | frontend440+marker4/build·central/lint/OpenAPI/docker SUCCESS. general CI의 Python3종 unit+lint는 성공했으나 전체 matrix/API/Dagster는 최종 관찰 IN_PROGRESS. 720 보충 test source PASS, D286은 owner 실행 중. 전체 수용 CONDITIONAL |
+| Weather `2b34884c5b12ea7a696fe331b1cebbf3d3781e25` | **PASS** | CI/central SUCCESS, frontend308/build/Doctor0 및 실제 CI fixture browser20+tiles5 PASS. 별도 owner n150 최종 acceptance 완료 증거는 이번에 관찰하지 않음 |
+| Manager `158db1abad151addcbd75ec2c24fe60ea4f4f449` | **PASS** | exact source와 같은 tree에서 frontend54/build/browser2·backend3726/40skip 성공. postrelease central SUCCESS로 원 조건 CLOSED. SDK source는 별도 본인 source PASS를 재사용. 실제 trusted install/운영은 본인 NOT_RUN |
+| Transport `ef7bd62dd81cb01b3c41b8bb10106c4586bb3bcf` | **PASS**, public/admin 두 표면 | central 두 job·public164/admin356/type/lint/Doctor/build SUCCESS. general backend는 최종 관찰 IN_PROGRESS, live-e2e job SKIPPED. owner fresh browser/build 수용은 별도 PENDING |
+
+Pinvi·Concierge는 **batch1 제외/미승인**이다. 뒤에 전달된 batch2의 source나 승인 결과를 이 원문에 섞지 않는다.
+
+## Foundation·실제 bytes·설치 계약
+
+- 공통 release `e8ed3ae75000be5cd22a3a11492bd97660635d78`와 원 검토 source `2d4579b4cb90a29fd6a3a50b6ceaa1fab2b3db39`는 GitHub compare files0/ahead1/behind0이다. Common7/Scope2 원 source/pack PASS를 같은 bytes로 연결한다.
+- canonical C11 원장 SHA256 **`be0bbaba1b825b33754cdbe4352168265d1ccb71467a1031aa095707b0b5eec8`**를 확인했다. 5repo·**6개 웹 표면**의 원장 packages7개가 canonical과 같고, 실제 vendor **34개 tgz 전체 bytes/SRI**가 고정 C11 archive와 같다. 사용하지 않는 선택적 artifact를 모든 앱에 설치했다고 주장하지 않는다.
+- UI SRI `sha512-BsRRdnJUp6FQ2KWkXtINb7IkrxxwnWFlLP/oVlNN4UXBKren7uTlnYT4iJsdaO98iA4Tn2EMPX06eT2uB5jEDA==`, tokens SRI `sha512-85mqNJXqhTlA4RbtKUhmzx6rH6mOOeNmsXTJtCetQ5y8njLy+5XLZbdT6j1tf3ME9XQA6X63Ah4kmuLdqEZHbA==`다.
+- Scope는 전 표면 runtime direct file **`1.3.1+kortravel.fix.2`**이며 bytes33511/SHA256 `1ca04870692565c243130d99c3dba91f3ac853ab2ec9538fc7b658b17fb7b49a`다. npm root의 `$@radix-ui/react-focus-scope` override, 모든 도달 lock copy의 full version/SRI, CSS override도 대조했다. Map은 root workspace lock과 frontend 상대 vendor 경로를 함께 검사했다.
+- 6표면 workflow의 reusable code/common-ref는 모두 정확 **`55a921b55d248106cbe320e7f5305f3d3cdb60fe`**다. 이 checker bytes는 검토한 Common7 source와 같다. 각 실제 중앙 job 로그에서도 consumer exact head + code55 + **실제 main e8ed 정책** + guard 성공을 직접 확인했다.
+- canonical checker를 source 전체에 실행해 React runtime 물리 그래프·정확 dependency/필수 runtime·forbidden imports·source의 개별 Radix import/re-export 금지를 확인했다. Scope 직접 file 선언 허용과 앱의 개별 primitive source 사용 허용을 혼동하지 않는다.
+- 본인 guard **6개 양성 +24개 음성**이 기대 결과다. 각 표면에서 Scope lock SRI 변조, stock registry 선언, 금지 primitive re-export, local ledger 위조를 거부했다. 실제 snapshot bytes를 복구하고 마지막 blob 검증을 통과했다.
+
+C11 UI/tokens의 runtime/CSS/exports·법적 고지가 전 후보와 동일한117파일이라는 Common7 결과를 재사용한다. 외부 Scope2 runtime은 실제 바뀌므로 과거 C9/C10 browser 성공을 새 앱 acceptance로 바꾸지 않는다.
+
+## 새 source integration·기본값·own closure
+
+### Geo
+
+원 a193 이후 제품 source 변화는 Button/variant의 공통 export 위임과 관련 test다. state/font/map import 경로는 그 외 바뀌지 않았다. wrapper가 loading/disabledReason/ref/asChild·data variant/size를 common API로 일관되게 받는다. client directive는 주석 뒤 directive prologue에 있다.
+
+직접 원 config로 새 Button 계약 **5 PASS**를 실행했다. loading의 포커스·활성화 차단, disabledReason, 기본 type/명시 submit, asChild 링크, ref·Dialog Escape 복귀다. HTML 기본 submit에서 common 기본 button으로 바뀌는 지점은 별도 AST로 살폈고, form 안/associated form의 관찰된9개 Button 호출은 모두 `type`을 명시한다. 이 정적 확인을 전체 host browser54 성공으로 표시하지 않는다.
+
+### Map
+
+- B-CONS-P1-01·B-CONS-P2-02는 별도 b102/f55 closure 원문에서 FIXED이며 **최종6b에서도 직접 재확인**했다. 계약4모듈80 PASS, Geo parser/상수 순수 test 함수4 PASS. source/cache 부족으로 backend package initialization import를 우회한 Geo probe라는 한계는 원문대로 유지한다. 전체 원격 실제 import/unit은 별도 CI다.
+- 변경된 variant test **8 PASS**를 실제 C11 dependency로 실행했다. own fixture의 tsconfig `@/*→src/*` alias를 사용했으며, 미설치 vite-tsconfig-paths를 피한 config 조정만 있다. assertion/제품 source는 변경하지 않았다. React type/default API를 공통 primitive로 위임하고 Map loading/activation/focus 정책만 덧붙인다.
+- 전체526개 docs blob이225280byte 이하이고 e4의 journal220·resume264개 날짜 절이 최종 live+archive에 모두 보존됐다. 상한 검사 source/예외는 바뀌지 않았다. 새 archive link4개도 Git target에 존재한다.
+- 6b는 parent C11 `f56976ec9adf7482e66299195aea0cd381eca667`의 frontend/package/lock/vendor를 그대로 보존한다. 동시에 incoming main **`cb38c33b40d3b041a0b6df3fb50f340d1c98839a`**의 검색2단계 backend도 병합했다. 이 세 backend 파일을 e4와 같다고 주장하지 않는다. production backend tree는 incoming main과 byte-identical이고, dependency/공개 앱 호출 계약의 integration 경계를 확인했다. 검색 순위/DBSCAN/DB 동작 전체를 새로 실행·승인한 것은 아니다. 그 기능의 별도 main 회귀와 현재 전체 CI를 구분한다.
+
+### Weather / Transport
+
+원 consumer1 이후 frontend 제품 source는 그대로이며 C11 package/policy/Scope metadata만 바뀐다. 기존 forms/state/fonts/map adapters의 미변경을 Git diff로 확인했다. Weather와 Transport admin의 VWorld 배포물도 canonical bytes다. Transport의 기록 JSON은 본래 source b327 및 부모 실행 증거를 가리키며 fresh browser는 PENDING_N150_SLOT로 적혀 있다. source불변/과거 backend 성공을 새 Scope2 host browser 성공으로 대체하지 않는다.
+
+### Manager
+
+backend SDK는 `review-B-manager-candidate-final-1.md`의 독립169제품/14공격 검증과 source PASS를 재사용한다. 이 batch에서 반복 구현 감사하지 않았다. C11 metadata/bytes와 실제 postrelease 중앙 CI를 다시 연결했다.
+
+원 raw의 중앙 실패43082059675는 당시 사실 그대로 보존한다. **새 run43084034348/job130743654602**는 consumer158/code55/main e8ed에서 실제 guard SUCCESS다. 따라서 중앙 조건은 이 batch에서 **CLOSED**다. 새 source 변경을 추정하지 않는다. 이어 Manager merge **`9910b9a6dba902c6a59469d3a6f46c6077e78d3f`**를 로컬 Git으로 제한 대조했고 reviewed158과 **tree `dfc650b352a3af77571c0405bfe8052da6a88815` 동일**이다. merge/install 수행은 본인의 행동이 아니다.
+
+## Map720 test-only 보충 — 별도 baseline
+
+불변 before6b → after **`7202653aff29e1d9738a6264aaefa7a3f9c747b0`**는 명시된 journal/resume와 `e2e/features-list.spec.ts` **3파일만 변경**했다. 3개 blob ID·원장 hash를 검증했고 production frontend/root package/lock/vendor/backend 및 B finding 계약 코드는 모두 그대로다. 문서도 상한 이내다.
+
+기존 D285PASS/1FAIL 전달은 `bg-brand` private class assertion과 common `bg-primary`의 차이였으며 그대로 보존한다. 새 test에서 삭제한 기능 assertion은 asc/desc 각각의 `toHaveClass(/bg-brand/)` 두 줄뿐이다. 다음으로 대체한 것은 **source상 타당하며 약화가 아니다**:
+
+- 실제 computed `--brand` 값을 probe로 구하고 빈 값/투명 값을 거부한다. source의 light/dark 모두 `--primary:var(--brand)`이며 common primary 채움과 연결된다.
+- 선택 버튼의 aria-pressed=true·public data-variant=default·실제 background-color 동일성을 함께 검사한다.
+- 비선택 버튼의 aria-pressed=false·outline variant·브랜드와 다른 background를 확인하고 desc 클릭 뒤 두 버튼의 반대 상태도 검사한다.
+- hover 영향을 제거하려고 pointer를 select로 옮긴다. probe는 제거한다. 기존 sort/order/cursor request assertion은 byte 단위 line 대조로 모두 유지됐다. skip/timeout 완화 없음.
+
+**720 보충 test source PASS**, 실제 full D286은 소유자가 실행 중이며 **본인 NOT_RUN/PENDING**이다. 이를 286PASS로 기입하지 않는다. Map의 원 batch source head는6b로 유지하고 이 보충 source를 별도 표기한다.
+
+## 실제 CI 연결과 관찰 한계
+
+모든 PR 합성 checkout을 입력 head로 오인하지 않았다. GitHub compare로 각각 files0·ahead1·behind0임을 확인했다:
+
+| app | 실제 CI checkout |
+|---|---|
+| Geo | `1755c35637de5e8e141ecbf6c668b9bfed1da58b` ≡12bf |
+| Map | `1d60881c75b80763dc3188796270c501f4a15b38` ≡6b |
+| Weather | `706d52a07a97b5856d9af02b9e1fce8a75ba8e4d` ≡2b |
+| Manager | `0d814c4b08aa10c73cf20c58bef8909e0c08b5b9` ≡158 |
+| Transport | `afd7083903babb598365907671c34ffe3e14074b` ≡ef7 |
+
+실제 로그에서 Geo294, Map440+marker4, Weather308+browser20/5, Manager54+browser2, Transport public164/admin356과 각 build/Doctor를 읽었다. 이 숫자는 **원격 직접 관찰**이며 본인 로컬 전체 실행이 아니다. Transport live-e2e는 SKIPPED, Map/Transport의 전체 진행 중 job은 PENDING으로 남긴다. Weather의 CI fixture browser 성공과 n150 최종 검증을 구분한다.
+
+새 대형 install/repack/전체 backend·전체 앱 E2E를 본인이 반복하지 않았다. 본인 실행은 actual bytes/lock/guard30, Geo5/Map8, Map80+Geo4/문서증거, Geo form AST 및 static720 검토다. 나머지 handed-off/n150 상태는 전달·미완료로 명시했다. 최종 배포 수용은 exact CI/browser·해당 리뷰/운영 gate가 충족돼야 한다.
+
+## 원문·증거 보존
+
+기존 consumer1 SHA256 `ce0891714050eb0444e910e8c1d97de4dd3f03d03ec629f3ac0b90c3732c10f9`, Map closure `e8c43a8d24feccc8fca88b827d10e874c1ddb1eec81dff89b11287c65efb95eb`, SDK source `06ce08ca7119acdf2684340a91ea09e106af53f50ed35ac9c7e40fd2e52ab409` 및 Common7/Scope2 원문·과거 실패를 그대로 보존했다. 이 batch1은 Pinvi B finding을 닫거나 Concierge를 승인하지 않는다.
+
+`review-B-consumers-c11-batch-1-evidence/`에 실행시간/명령, 정확 snapshot/blob inventory, per-repo source delta,34tgz SRI와 guard 결과, 본인 test/AST·문서·720 검증 및 원격 API/log/tree 증거를 보존했다. `SHA256SUMS.json`은 증거별 digest다. 본인 temporary snapshot만 정리했다.

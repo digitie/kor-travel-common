@@ -34,6 +34,10 @@ npm run lint, npm run build, npm run check, npm test, npm run doctor, npm run ch
 
 ## Evidence
 
+2026-11-12 후속: common49와 원본4개, Geo631·Map1496·Weather226·Concierge265·Manager588·Pinvi732·Transport181의 주 이관 PR이 모두 머지됐고 최종 전체 tree를 대조했다. 원 A/B 판정과 input2 SDK BLOCK→input3 FIXED, 실제 Mounts 순서 오탐 수정590의 별도 독립 검토·CI를 [원문 정산](../reviews/adversarial/2026-11-12-consumer-sdk-final.md)에 기록한다. 실제 완료 앱은 Manager·Concierge·Pinvi 3개이며 Geo ARM64 이미지 빌드는 exit0으로 끝났다. Weather 우선 적용과 Geo·Map·Transport 배포는 진행 중이다. T-218을 완료로 변경하지 않는다. 모바일 최종 Expo Doctor20/20·React Doctor0, web531·browser209 PASS/4기존 SKIP·API2259 PASS/9 SKIP와 Android/iOS/WebSSR·강제WASM export를 구분하고 실기기/EAS/스토어 출시는 NOT_RUN이다.
+
+이하 이전 checkpoint:
+
 현재 C11은 원본 Scope2 preferred1752a53·고유1.3.1+kortravel.fix.2·고정1ca0487을 공통 정본/세 lock에 연결했다. source38와 Node22 실제 version/SRI/ESM·CJS, 정책175·빌드·Doctor80파일0을 확인했다. 새 packed/browser·두 리뷰·정확 CI/소비자·merge/배포를 진행한다. C10의 Doctor A-P2-11/B-P1-11은5715e94에서 실제3경고→0으로 수정했고 원 재확인을 받는다. 소비자 A/B 원문과 당시 BLOCK은 보존하며 Geo Button43·Concierge checkbox50·Map CI/variant b102/f55·Manager UI 후보 경로b86을 별도 최종 입력에서 수용한다. 후보10과 Scope1/f97을 최종 성공으로 바꾸지 않는다.
 
 이하 이전 checkpoint:

@@ -1,5 +1,15 @@
 # 현재 작업 재개
 
+## 2026-11-12 — 소비자 7개 주 이관 머지·운영 수용 진행
+
+공통·원본 라이브러리 5개와 앱 7개의 주 이관 PR을 모두 머지했고 fetched main의 전체 tree를 최종 검토 입력과 대조했다. [소비자·SDK 검토 기록](reviews/adversarial/2026-11-12-consumer-sdk-final.md)에 원문·불변 입력·SHA256을 보존한다. 이전 BLOCK과 미실행 상태는 당시 기록으로 유지한다.
+
+현재 실제 배포와 정상 계정 수용까지 확인한 앱은 Manager·Concierge·Pinvi 3개다. Concierge는 merged f2db의 새 이미지와 공통263개 파일, 실제 로그인·표·폼·모바일·Pretendard·VWorld34응답200·로그아웃·보호 API401을 확인했다. Pinvi 공식 paired rebuild는 merged dd3b를 committed했고 DB·보존 Map pin·실제 이미지297개 파일을 확인했다. 실제 로그인200·VirtualTable·모바일375/1280·Pretendard·VWorld15응답200·로그아웃204·보호/이전쿠키 API401과 cleanup도 통과했다.
+
+Geo ARM64 이미지 빌드는 exit0으로 끝났다. 다음은 Weather를 우선 배포하고, 나머지 앱 새 이미지·실제 UI/API 수용을 완료하는 일이다. Manager UI candidate589와 Mounts 순서 오탐590은 두 독립 SOURCE PASS·정확 CI 후 머지했다. source 검토·SDK 설치·실제 앱 수용을 구분한다. T-218은 IN_PROGRESS를 유지한다. 모바일 Expo SDK58 네 패치와 필수 Expo Doctor는 [필수 라이브러리](standards/frontend-libraries.md)에 추가했고 C11 산출물 bytes는 유지한다.
+
+이하 시점별 스냅샷:
+
 ## 2026-11-12 — Common49와 FocusScope2 원본 머지·최종 독립 증거
 
 - Common exact2d4579b의 원 A/B COMMON7은 모두 PASS·신규0이며 Doctor finding은 각 원 리뷰어가 FIXED를 확인했다. 정확 frontend/docs/packages/selftest/Python workflow가 모두 성공했다. 실제 C11 packed browser65·두 builder 및 UI/tokens 전체 SRI 일치를 확인했다.

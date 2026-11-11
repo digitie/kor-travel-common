@@ -28,3 +28,11 @@ docs/reviews/adversarial/evidence/2026-09-08-t102-final-reviewer-b.md -text -eol
 docs/reviews/adversarial/evidence/2026-09-08-t102-final2-reviewer-b.md -text -eol -whitespace
 # mixed-line-ending manifest 원본의 SHA·공백을 바이트 그대로 보존한다.
 docs/reviews/adversarial/evidence/2026-09-07-t005c-post3d-manifest.md -text -eol -whitespace
+
+# 소비자·SDK reviewer 원문 6개의 CRLF·EOF bytes와 SHA256을 보존한다.
+docs/reviews/adversarial/evidence/2026-11-12-review-B-consumers-528-followup.md.txt -text -eol whitespace=cr-at-eol,-blank-at-eof
+docs/reviews/adversarial/evidence/2026-11-12-review-B-map-c11-7ce-main-supplement.md.txt -text -eol whitespace=cr-at-eol,-blank-at-eof
+docs/reviews/adversarial/evidence/2026-11-12-review-B-transport-c11-4e25-supplement.md.txt -text -eol whitespace=cr-at-eol,-blank-at-eof
+docs/reviews/adversarial/evidence/2026-11-12-review-B-manager-component-ui-final-2.md.txt -text -eol whitespace=cr-at-eol,-blank-at-eof
+docs/reviews/adversarial/evidence/2026-11-12-review-B-manager-component-ui-final-3.md.txt -text -eol whitespace=cr-at-eol,-blank-at-eof
+docs/reviews/adversarial/evidence/2026-11-12-review-B-manager-mount-order-final-1.md.txt -text -eol whitespace=cr-at-eol,-blank-at-eof
