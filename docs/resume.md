@@ -1,6 +1,6 @@
 # 현재 작업 재개
 
-2026-11-12: [T-218](tasks/T-218-radix-library-unification.md)을 계속 진행한다. 긴 Dialog/AlertDialog의 viewport·크기·표현 계약과 최신 CSS 단일 산출물 정책을 통합했다. source670a753의 UI101·정책41·tokens9·타입·lint·빌드·예시·Doctor0을 확인하고 integration-8-review UI/tokens 및 지도3개·CSS fix.4의 단일 pack 원장을 frontend-artifacts.json에 고정했다. 최초 공통 리뷰21건은 두 원 리뷰어가 FIXED를 확인했고, 후속 focus P2·고지 P3도 구현했으나 최종 source/pack 재검토는 남아 있다. 소비자 최종 pack 채택·원격 CI·독립2리뷰·머지·배포는 진행 중이며 완료로 집계하지 않는다.
+2026-11-12: [T-218](tasks/T-218-radix-library-unification.md)을 계속 진행한다. 공통 후보9의 단일 pack·정확 버전·SHA512는 frontend-artifacts.json에 고정했다. 후보8의 UI101·tokens9·실제 packed browser65·두 production builder와 같은 실행 코드/CSS이며 checker만 갱신했다. 정책68 및 archive/비공개 검사 도구379실행(378 PASS/1 SKIP), 발견0·정확 hash/rule 예외32/4를 확인했다. source3의 두 원 리뷰어 BLOCK과 신규 finding은 보존하고 수정 후 source4 확인을 기다린다. 지도32·serde1은 각각 검증 범위의 두 리뷰/CI 후 머지했다. 앱별 최종 수용·PR·새 배포는 진행 중이다.
 
 이하 이전 작업 이력:
 

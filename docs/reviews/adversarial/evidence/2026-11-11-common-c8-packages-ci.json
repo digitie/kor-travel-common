@@ -1,0 +1,19 @@
+{
+  "repository": "digitie/kor-travel-common",
+  "source": "00ddd65be56a1955a4cee1a458a8cc274946fbe1",
+  "run": 43050853120,
+  "job": 130627252820,
+  "conclusion": "success",
+  "url": "https://github.com/digitie/kor-travel-common/actions/runs/43050853120/job/130627252820",
+  "scope": "packages job only; docs/tools/secret scanners not yet accepted",
+  "lines": [
+    "2026-11-11T15:42:28.2570391Z Playwright 1.65.0 Chromium 158.0.8127.18 /ms-playwright/chromium-1254/chrome-linux64/chrome",
+    "2026-11-11T15:42:29.7846132Z # tests 9",
+    "2026-11-11T15:42:49.6534964Z       Tests  101 passed (101)",
+    "2026-11-11T15:42:57.2064572Z # tests 41",
+    "2026-11-11T15:43:01.2525380Z @kor-travel/tokens: sha512-juHDU+d/0GtLmylPyx9kDur2GwnzV5izAtRpzfqhxvbMjPlVfrbEanLBcdqC+EdmifO7StrMlcQJso239gv5PA==",
+    "2026-11-11T15:43:01.2527071Z @kor-travel/ui: sha512-RaBKVxmLJi7ZoQZqs28BaTmXzxpHsihV7D/VvR/vnDeqXtOvtiZawAo6K3CtbuZ37daKqMhGCG5hC5p42pI3Ug==",
+    "2026-11-11T15:43:36.9506444Z Running 65 tests using 1 worker",
+    "2026-11-11T15:44:16.8824044Z   65 passed (41.0s)"
+  ]
+}

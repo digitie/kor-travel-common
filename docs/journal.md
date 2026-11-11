@@ -1,3 +1,7 @@
+# 2026-11-12 — 후보9 검사기·archive 감사 통합
+
+2c1182e의 모듈 구문/linked workspace 회귀68개와97ccc97의 도구379실행(378 PASS/1 SKIP)·두 정보 유출 검사 발견0을 확인했다. 후보9는 UI/tokens checker만 바꾸고 실행 코드·CSS·metadata117개의 원문을 유지한다. 중앙 단일 원장과 원 리뷰3차 BLOCK/후속 수정 원문을 보존하며 source4 검토·정확 CI·소비자·운영 gate는 남아 있다.
+
 # 2026-11-12 — 최종 공통 후보8 통합
 
 Dialogd29869a와 CSS 정책256d263/47cca0a/633b4b8/00f0aae를 통합 source670a753으로 고정했다. UI101·정책41·tokens9·타입·빌드·lint·예시·Doctor0·정책 생성 검사를 통과했다. 단일 pack6개의 버전·SHA512·대응 source는 frontend-artifacts.json을 따른다. 소비자 재설치와 최종 독립 리뷰·CI·머지·배포 gate는 남아 있다. 앞선 실패와 불변 후보6/7 evidence는 보존했다.

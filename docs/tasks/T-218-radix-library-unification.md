@@ -34,7 +34,7 @@ npm run lint, npm run build, npm run check, npm test, npm run doctor, npm run ch
 
 ## Evidence
 
-2026-11-12 통합 source670a753의 UI101·정책41·tokens9 시험과 타입·예시·빌드·lint·Doctor0을 확인했다. integration-8-review는 UI/tokens·지도3개·Lightning CSS fix.4의 단일 bytes를 frontend-artifacts.json에 기록하며, 이전 후보6/7와 원 리뷰를 보존한다. 소비자 검증·리뷰·PR·이미지 배포는 진행 중이다. 최종 근거는 Geo 저장소 docs/kor-travel-common-library-review.md에 하나로 기록한다. 미실행 gate는 통과로 간주하지 않는다.
+2026-11-12 후보8 UI101·tokens9·타입·예시·두 production builder·lint·Doctor0·실제 packed browser65를 확인했다. 후보9 source2c1182e는 checker 두 파일만 바꾸며 실행 코드/CSS/metadata117개가 같다. 정책68 및 source97ccc97의 도구379실행(378 PASS/1 SKIP)·정보 유출 발견0을 확인했다. integration-9-review의 단일 bytes는 frontend-artifacts.json에 기록하며 이전 후보와 원 BLOCK·수정 후 판정을 보존한다. 소비자 검증·리뷰·PR·이미지 배포는 진행 중이다. 최종 근거는 Geo 저장소 docs/kor-travel-common-library-review.md에 하나로 기록한다. 미실행 gate는 통과로 간주하지 않는다.
 
 ## Rollback과 release 차단
 
