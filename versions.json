@@ -605,6 +605,15 @@
       "checked": false,
       "source": "2026-11-11 사용자 승인 원본 수정; vendor/README.md 출처·해시",
       "note": "웹·모바일 공통 빌드/개발 도구. 생성 정책이 정확 build metadata와 동일 tarball bytes를 검사한다."
+    },
+    "@radix-ui/react-focus-scope": {
+      "ecosystem": "npm",
+      "floor": null,
+      "recommended": null,
+      "exact": "1.3.1+kortravel.fix.1",
+      "checked": false,
+      "source": "사용자 승인 원본 Radix FocusScope 수정; upstream eb3a2b7, fork source706e27a; vendor/README.md",
+      "note": "공통 UI를 사용하는 웹의 패치 엔진. 앱은 개별 Radix를 직접 import하지 않고 exact vendor/override 및 모든 도달 copy의 bytes를 검사한다."
     }
   },
   "actions": {
@@ -831,7 +840,8 @@
       "vworld-map-core",
       "vworld-map-web",
       "vworld-map-rn",
-      "lightningcss"
+      "lightningcss",
+      "@radix-ui/react-focus-scope"
     ],
     "profiles": {
       "web": {
@@ -849,7 +859,8 @@
           "pretendard",
           "eslint",
           "react-doctor",
-          "lightningcss"
+          "lightningcss",
+          "@radix-ui/react-focus-scope"
         ],
         "runtimeRequired": [
           "next",
@@ -860,7 +871,8 @@
           "react-hook-form",
           "zod",
           "zustand",
-          "pretendard"
+          "pretendard",
+          "@radix-ui/react-focus-scope"
         ]
       },
       "mobile": {
@@ -904,6 +916,7 @@
       "@kor-travel/ui",
       "@next/eslint-plugin-next",
       "@playwright/test",
+      "@radix-ui/react-focus-scope",
       "@tailwindcss/postcss",
       "@tanstack/react-query",
       "@tanstack/react-table",
@@ -962,6 +975,9 @@
       "vworld-map-web",
       "zod",
       "zustand"
+    ],
+    "patchedRadixPackages": [
+      "@radix-ui/react-focus-scope"
     ]
   }
 }

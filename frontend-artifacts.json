@@ -5,7 +5,8 @@
     "common": "2c1182e765bb2bc53e01e0962cf2a73683891e1d",
     "maplibre-vworld-react": "9a7a348b02d61969b394c681b024d5851eef836b",
     "lightningcss": "748651cbd845971e65c411166ddee101745dab21",
-    "serde-content": "18e53fcf6f8ace093a292891b34fa3411192617d"
+    "serde-content": "18e53fcf6f8ace093a292891b34fa3411192617d",
+    "radix-ui-primitives": "706e27aaf87bda2df7bbb9da60cc01cebc9ff064"
   },
   "packages": {
     "@kor-travel/tokens": {
@@ -37,6 +38,11 @@
       "version": "1.0.3",
       "filename": "vworld-map-web-1.0.3.tgz",
       "integrity": "sha512-HPXZcz/wP6tFsCZqlAbansWNICcZPubC+/V7rDWXYTQVlOBLl9cZQ1HSMJd25c2CZoMNreVFTQA0vzkVglkS1w=="
+    },
+    "@radix-ui/react-focus-scope": {
+      "version": "1.3.1+kortravel.fix.1",
+      "filename": "radix-ui-react-focus-scope-1.3.1+kortravel.fix.1.tgz",
+      "integrity": "sha512-550B+tdvg3N/tsIzOFA8zRhoMxGnPeBRl65Wg+9kY2VEEf6TW7RZKBWckVToLNuALHYZR8J9zG8GUP7DROBflg=="
     }
   }
 }

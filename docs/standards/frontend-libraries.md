@@ -8,6 +8,8 @@ Geo·Map·Weather·Concierge·Docker Manager·Pinvi 웹/관리자·Transport 웹
 
 공통 컴포넌트는 shadcn/ui Radix, 표는 TanStack Table9·Virtual3의 VirtualTable이다. React Hook Form·Zod는 입력 등록과 검증에, Zustand는 실제 화면 상태에 적용한다. 기본 로그인은 인스턴스별 저장소를 사용하고 비밀번호를 전역 상태에 넣지 않는다. 권한·API·인증 저장소는 앱 소유다. Radix가 내부적으로 사용하는 Floating UI는 전이 의존성이며 앱에서 별도 overlay 엔진을 직접 구현하지 않는다.
 
+Radix FocusScope의 재현된 초기패널 Shift+Tab 결함은 원본 수정1.3.1+kortravel.fix.1의 단일 배포물로 적용한다. 웹의 직접 file 의존성·root override는 엔진을 같은 bytes로 공급하는 예외이며 앱에서 개별 Radix를 import하는 예외가 아니다. patchedRadixPackages의 각 이름은 공식 scoped 이름·exact 축·artifact 목록과 연결되어야 하고 잘못된 설정은 생성 전에 거부한다. [고정 출처·빌드·라이선스](../../vendor/README.md)를 따른다.
+
 지도는 maplibre-vworld-react GitHub의 정확 커밋에서 core/web/RN을 빌드한다. 이동하는 main 참조와 개발자별 재포장은 배포 참조로 사용하지 않는다. 라이브러리의 재현된 결함은 원 저장소에서 수정·검증한 후 같은 산출물을 소비한다.
 
 ## 버전 표
@@ -24,6 +26,7 @@ Geo·Map·Weather·Concierge·Docker Manager·Pinvi 웹/관리자·Transport 웹
 | @kor-travel/ui | 0.2.0 |
 | @next/eslint-plugin-next | 16.4.6 |
 | @playwright/test | 1.65.0 |
+| @radix-ui/react-focus-scope | 1.3.1+kortravel.fix.1 |
 | @tailwindcss/postcss | 4.3.5 |
 | @tanstack/react-query | 5.107.1 |
 | @tanstack/react-table | 9.3.1 |
@@ -103,7 +106,7 @@ common root와 실제 Next smoke/example의 설치 정의도 같은 tarball과 r
 
 웹은 @kor-travel/ui/check-dependencies.mjs, 모바일은 @kor-travel/tokens/check-dependencies.mjs를 check:dependencies 및 CI에서 실행한다. --profile mobile, --package, --lock, --workspace로 대상 frontend를 지정하고 --artifacts common-artifacts.json을 반드시 전달한다. 필수 직접 의존성·정확 선언·workspace lock의 실제 버전·공통 파일과 원장 및 lock SHA512가 다르면 실패한다.
 
-중앙 reusable CI의 실행 코드는 검토한 common40자리 커밋으로 고정한다. 비교할 버전·산출물 데이터는 현재 common main의 단일 정본을 읽고 실제 관찰 SHA를 기록한다. 이 main은 배포 파일 참조가 아닌 검증 정책 데이터다. 앱이 오래된 workflow/내장 정책을 유지해도 최신 정본과 다른 버전·해시는 중앙 CI에서 실패한다. 앱이 vendor 파일·원장·lock을 함께 바꿔 자체 검사만 통과하는 차이를 차단한다. 로컬 검사에서는 --canonical 경로를 추가해 같은 검증을 실행할 수 있다.
+중앙 reusable CI의 실행 코드는 검토한 common40자리 커밋으로 고정한다. 비교할 버전·산출물 데이터는 현재 common main의 단일 정본을 읽고 실제 관찰 SHA를 기록한다. 이 main은 배포 파일 참조가 아닌 검증 정책 데이터다. 앱이 오래된 workflow/내장 정책을 유지해도 최신 정본과 다른 버전·해시는 중앙 CI에서 실패한다. 앱이 vendor 파일·원장·lock을 함께 바꿔 자체 검사만 통과하는 차이를 차단한다. 루트뿐 아니라 실제 런타임·빌드와 도달한 linked workspace 개발 그래프의 모든 공통 산출물 복사본을 version/integrity로 검사한다. 무관 workspace와 설치되지 않은 registry 개발 그래프는 제외한다. 로컬 검사에서는 --canonical 경로를 추가해 같은 검증을 실행할 수 있다.
 
 소스 경로는 --source를 반복 지정하거나 앱의 src/app/components/lib에서 자동 검색한다. 소스가 없으면 실패한다. 개별 table/Table 마크업과 Base UI/Floating UI 직접 구현의 재도입도 검사한다. 동적 마크업까지 증명하는 정적 분석기는 아니므로 공개 API 계약 시험과 코드 리뷰를 함께 유지한다.
 

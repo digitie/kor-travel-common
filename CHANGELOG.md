@@ -33,6 +33,12 @@ public center/sheet처럼 기존 표현을 소유하는 어댑터는 unstyled와
 
 Lightning CSS의 원본 수정 단일 산출물을 웹·모바일의 개발 의존성으로 고정한다. exact SemVer build metadata, 공유 vendor 상대 경로, 개발 그래프의 중첩 bytes, root·Next smoke/example의 lock 및 CI 복사 경로를 함께 검사한다. [정책](docs/standards/frontend-libraries.md)과 [동봉 고지](vendor/README.md)를 따른다. 기존 UI/tokens 등 산출물 재생성과 소비자 반영은 부모 통합 단계다.
 
+### 원본 FocusScope와 전체 전이 산출물 고정
+
+초기 패널의 Shift+Tab 역진입은 원본 Radix 수정1.3.1+kortravel.fix.1의 단일 MIT 배포물로 연결한다. 웹은 file 직접 의존성과 root override로 같은 엔진을 공급하고 앱 source의 개별 Radix import 금지는 유지한다. patchedRadixPackages를 exact 축·artifact에 연결하고 생성 전에 스키마를 검증한다.
+
+루트뿐 아니라 도달한 런타임·빌드·linked workspace 개발 그래프의 모든 공통 artifact 복사본에 동일 version/integrity를 요구한다. 정책175개와 원본 Scope26개·source browser9개, 실제 NPM 버전/ESM/CJS를 확인했다. 최종 공통 packed browser·소비자·독립 리뷰·CI·배포는 해당 입력에서 별도 검증한다. UI/tokens는 미출시0.2.0/0.1.1의 최종 후보를 한 번 pack하며 출시된 같은 버전을 다른 bytes로 재발행하지 않는다.
+
 ## 2026-10-25 — 남은 높이 지도 작업면 후보
 
 UI dev.8에 opt-in MapWorkspace·MapFilterPanel·MapStage와 상세 header/접기를 추가했다. 기존 dev.7 기본값과 스타일은 유지한다. [계약](docs/standards/map-controls.md).

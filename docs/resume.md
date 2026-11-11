@@ -1,6 +1,8 @@
 # 현재 작업 재개
 
-2026-11-12: [T-218](tasks/T-218-radix-library-unification.md)을 계속 진행한다. 공통 후보9의 단일 pack·정확 버전·SHA512는 frontend-artifacts.json에 고정했다. 후보8의 UI101·tokens9·실제 packed browser65·두 production builder와 같은 실행 코드/CSS이며 checker만 갱신했다. 정책68 및 archive/비공개 검사 도구379실행(378 PASS/1 SKIP), 발견0·정확 hash/rule 예외32/4를 확인했다. source3의 두 원 리뷰어 BLOCK과 신규 finding은 보존하고 수정 후 source4 확인을 기다린다. 지도32·serde1은 각각 검증 범위의 두 리뷰/CI 후 머지했다. 앱별 최종 수용·PR·새 배포는 진행 중이다.
+2026-11-12: [T-218](tasks/T-218-radix-library-unification.md)을 계속 진행한다. 후보9 UI0.2.0/tokens0.1.1·지도3종·CSSfix.4의 단일 bytes/SRI를 frontend-artifacts.json에 고정했고 7개 소비자 원 A/B 최종 리뷰가 진행 중이다. source4의2ec 정확 CI는 모두 성공, A/B는 기존 정책·scanner finding을 FIXED로 확인했다. 신규 A-P2-10 연결 gzip metadata는f8643d5에서 단일 완결 member 검사로 수정했다. 집중9 PASS, 전체391실행=390 PASS/1 SKIP, 두 scanner 발견0·예외32/4, 문서819/링크3138오류0. 원 A 재확인과 exact4479073 CI는 진행 중이다. B 원문은 불변 commit에 보존하고 공개 compiler 상수 두 개만 설명으로 바꾼 B 작성 publication 사본과 구분한다.
+
+지도32·serde1·Lightning1은 각 두 독립 리뷰/CI 후 mergeae1e209/21d1c7/f24bb66, reviewed tree 동일성을 확인했다. 앱 머지·운영 신규 배포는0건이다. Pinvi fix.4 native Android/iOS·WebSSR35·강제WASM iOS export는 모두 PASS이나 최종 unit520/1·browser207/2/4 중 Radix FocusScope1.3.1 초기패널 ShiftTab 원본 결함이 남았다. Harvey가 원본 Radix 수정/고유 patch pack을, 공통 담당자가 같은 버전·bytes의 fleet 정책을 준비한다. 공통/앱 node_modules 직접 수정·자체 Tabtrap·기대 하향은 하지 않는다. UI/tokens0.2.0/0.1.1은 미출시이므로 필요한 정책 payload 변경은 최종 단일 후보10에서 검증하며 출시된 같은 버전을 재발행하지 않는다. 후보10 생성/최종 소비·두 리뷰·CI·PR49/소비자 머지·새 이미지 배포는 후속 gate다.
 
 이하 이전 작업 이력:
 

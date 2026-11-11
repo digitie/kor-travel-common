@@ -19,7 +19,8 @@
     "vworld-map-core",
     "vworld-map-web",
     "vworld-map-rn",
-    "lightningcss"
+    "lightningcss",
+    "@radix-ui/react-focus-scope"
   ],
   "profiles": {
     "web": {
@@ -37,7 +38,8 @@
         "pretendard",
         "eslint",
         "react-doctor",
-        "lightningcss"
+        "lightningcss",
+        "@radix-ui/react-focus-scope"
       ],
       "runtimeRequired": [
         "next",
@@ -48,7 +50,8 @@
         "react-hook-form",
         "zod",
         "zustand",
-        "pretendard"
+        "pretendard",
+        "@radix-ui/react-focus-scope"
       ]
     },
     "mobile": {
@@ -85,6 +88,9 @@
       ]
     }
   },
+  "patchedRadixPackages": [
+    "@radix-ui/react-focus-scope"
+  ],
   "versions": {
     "@axe-core/playwright": "4.14.0",
     "@hookform/resolvers": "7.0.5",
@@ -92,6 +98,7 @@
     "@kor-travel/ui": "0.2.0",
     "@next/eslint-plugin-next": "16.4.6",
     "@playwright/test": "1.65.0",
+    "@radix-ui/react-focus-scope": "1.3.1+kortravel.fix.1",
     "@tailwindcss/postcss": "4.3.5",
     "@tanstack/react-query": "5.107.1",
     "@tanstack/react-table": "9.3.1",
