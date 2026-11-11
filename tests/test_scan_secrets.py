@@ -4,6 +4,7 @@
 
 from pathlib import Path
 import gzip
+import hashlib
 import io
 import tarfile
 from unittest.mock import patch
@@ -19,6 +20,11 @@ SCRIPT = ROOT / "tools/scan_secrets.py"
 POLICY = ".secret-scan-patterns"
 
 
+def fixture_policy(name):
+    """별도 Git fixture에는 저장소 전용 archive 예외를 복제하지 않는다."""
+    return (ROOT / name).read_text(encoding="utf-8").split("\n[[allowlist]]", 1)[0]
+
+
 class RepositoryCase(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="kt-scan-")
@@ -26,7 +32,7 @@ class RepositoryCase(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.git("init", "-q")
         for name in (POLICY, ".prod-redaction-patterns"):
-            self.write(name, (ROOT / name).read_text(encoding="utf-8"))
+            self.write(name, fixture_policy(name))
         self.write("sample.txt", "안전한 문서\n")
         self.git("add", POLICY, ".prod-redaction-patterns", "sample.txt")
         self.commit()
@@ -167,7 +173,7 @@ class SecretScanTests(RepositoryCase):
             path.unlink()
 
     def test_exact_rule_exception_and_bad_allowlist(self):
-        original = (ROOT / POLICY).read_text(encoding="utf-8")
+        original = fixture_policy(POLICY)
         self.write("sample.txt", "api_" + "key=" + "abcdefghijk")
         extra = '\n[[allowlist]]\npath="sample.txt"\nrules=["SECRET-ASSIGNMENT"]\nreason="검사 fixture"\n'
         self.write(POLICY, original + extra)
@@ -347,7 +353,7 @@ class ArchiveSecretScanTests(RepositoryCase):
 
     def test_outer_archive_allowlist_does_not_allow_all_member_values(self):
         self.write("vendor/lib.tgz", archive_bytes([("a.txt", "api_" + "key=" + "generated-sensitive")]))
-        original = (ROOT / POLICY).read_text(encoding="utf-8")
+        original = fixture_policy(POLICY)
         self.write(POLICY, original + '\n[[allowlist]]\npath="vendor/lib.tgz"\nrules=["SECRET-ASSIGNMENT"]\nreason="표면 파일 예외"\n')
         self.assertEqual(self.run_scan().returncode, 1)
 
@@ -378,3 +384,96 @@ class ArchiveSecretScanTests(RepositoryCase):
         text = "pass" + "word=" + json.dumps(marker, ensure_ascii=False)
         self.write("vendor/lib.tgz", archive_bytes([("source/settings.txt", text)]))
         self.assert_private_failure(self.run_scan(), marker, status=1)
+
+
+class ArchiveAllowlistTests(RepositoryCase):
+    def install_exception(self, raw, *, digest=None, path="vendor/lib.tgz!/package/source.tar.gz!/src/ast.rs", rules=None, include_digest=True):
+        source = archive_bytes([("src/ast.rs", raw)])
+        self.write("vendor/lib.tgz", archive_bytes([("package/source.tar.gz", source)]))
+        record = {"path": path, "rules": rules or ["SECRET-ASSIGNMENT"], "reason": "공개 AST 참조의 고정 bytes"}
+        if include_digest:
+            record["sha256"] = digest or hashlib.sha256(raw).hexdigest()
+        policy = fixture_policy(POLICY)
+        self.write(POLICY, policy + "\n[[allowlist]]\n" + "\n".join(
+            key + "=" + json.dumps(value, ensure_ascii=False) for key, value in record.items()) + "\n")
+        return record
+
+    def test_exact_nested_raw_member_rule_and_digest_exception(self):
+        self.install_exception(b"to" + b"ken: TokenValue")
+        result = self.run_scan()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("명시적 예외 1건", result.stdout)
+
+    def test_changed_missing_digest_and_nonexistent_member_fail(self):
+        raw = b"to" + b"ken: TokenValue"
+        for kwargs in ({"digest": "0" * 64}, {"include_digest": False},
+                       {"path": "vendor/lib.tgz!/package/source.tar.gz!/src/missing.rs"},
+                       {"digest": "not-a-digest"}):
+            with self.subTest(case=tuple(kwargs)):
+                self.install_exception(raw, **kwargs)
+                result = self.run_scan()
+                self.assertEqual(result.returncode, 2, result.stdout)
+                self.assertNotIn("Traceback", result.stdout + result.stderr)
+
+    def test_digest_is_of_raw_bytes_not_bom_or_newline_normalized_text(self):
+        raw = b"\xef\xbb\xbf" + b"to" + b"ken: TokenValue\r\n"
+        self.install_exception(raw)
+        self.assertEqual(self.run_scan().returncode, 0)
+        self.install_exception(raw, digest=hashlib.sha256(b"to" + b"ken: TokenValue\n").hexdigest())
+        self.assertEqual(self.run_scan().returncode, 2)
+
+    def test_changed_member_rejected_even_if_new_text_has_no_finding(self):
+        record = self.install_exception(b"to" + b"ken: TokenValue")
+        changed = archive_bytes([("src/ast.rs", "안전한 새 본문")])
+        self.write("vendor/lib.tgz", archive_bytes([("package/source.tar.gz", changed)]))
+        self.assertEqual(self.run_scan().returncode, 2)
+        self.assertEqual(len(record["sha256"]), 64)
+
+    def test_artifact_nested_archive_and_all_rule_exemptions_are_rejected(self):
+        raw = b"to" + b"ken: TokenValue"
+        for kwargs in ({"path": "vendor/lib.tgz"},
+                       {"path": "vendor/lib.tgz!/package/source.tar.gz"},
+                       {"rules": ["SECRET-ASSIGNMENT", "GITHUB-TOKEN"]},
+                       {"path": "vendor/*.tgz!/src/ast.rs"}):
+            with self.subTest(kind=tuple(kwargs)):
+                self.install_exception(raw, **kwargs)
+                self.assertEqual(self.run_scan().returncode, 2)
+
+    def test_header_same_rule_and_other_binary_rules_remain_scanned(self):
+        raw = b"to" + b"ken: TokenValue"
+        self.install_exception(raw)
+        marker = "generated-" + "header-sensitive"
+        info = tarfile.TarInfo("src/ast.rs")
+        info.pax_headers = {"comment": "api_" + "key=" + marker}
+        source = archive_bytes([(info, raw)])
+        self.write("vendor/lib.tgz", archive_bytes([("package/source.tar.gz", source)]))
+        result = self.run_scan()
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertNotIn(marker, result.stdout + result.stderr)
+        payload = wasm_bytes(b"\0" + ("gh" + "p_" + "A" * 36).encode() + b"\0")
+        source = archive_bytes([("src/ast.rs", raw), ("engine.wasm", payload)])
+        self.write("vendor/lib.tgz", archive_bytes([("package/source.tar.gz", source)]))
+        result = self.run_scan()
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("GITHUB-TOKEN", result.stdout)
+
+    def test_yaml_unquoted_token_is_still_detected(self):
+        self.install_exception(b"to" + b"ken: TokenValue")
+        marker = "generated-" + "yaml-sensitive"
+        self.write("settings.yaml", "to" + "ken: " + marker)
+        result = self.run_scan()
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertNotIn(marker, result.stdout + result.stderr)
+        self.assertIn('"path": "settings.yaml"', result.stdout)
+
+
+    def test_archive_exception_policy_and_raw_member_use_the_same_git_snapshot(self):
+        self.install_exception(b"to" + b"ken: TokenValue")
+        self.git("add", "vendor/lib.tgz")
+        self.assertEqual(self.run_scan("--staged").returncode, 1)
+        self.assertEqual(self.run_scan("--all").returncode, 0)
+        self.git("add", POLICY)
+        changed = archive_bytes([("src/ast.rs", "안전한 작업 트리 변경")])
+        self.write("vendor/lib.tgz", archive_bytes([("package/source.tar.gz", changed)]))
+        self.assertEqual(self.run_scan("--staged").returncode, 0)
+        self.assertEqual(self.run_scan("--all").returncode, 2)

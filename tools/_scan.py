@@ -7,6 +7,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 import gzip
+import hashlib
 import io
 import json
 from pathlib import Path, PurePosixPath
@@ -170,12 +171,13 @@ class ScanPart:
     name: str
     value: str
     byte_offset: int | None = None
+    digest: str | None = None
 
 
-def ascii_parts(name: str, data: bytes):
+def ascii_parts(name: str, data: bytes, digest: str | None = None):
     """모든 ASCII 문자열을 검사하며 바이너리 경계를 넘어 합치지 않는다."""
     for match in re.finditer(rb"[\x09\x0a\x0d\x20-\x7e]+", data):
-        yield ScanPart(name, match.group().decode("ascii"), match.start())
+        yield ScanPart(name, match.group().decode("ascii"), match.start(), digest)
 
 
 def known_binary(name: str, data: bytes) -> bool:
@@ -232,10 +234,11 @@ def scan_parts(name: str, data: bytes, patterns, budget: ArchiveBudget, depth: i
     compressed = data.startswith(b"\x1f\x8b")
     archive_input = compressed or name.lower().endswith((".tgz", ".tar.gz", ".tar")) or data[257:262] == b"ustar"
     if not archive_input:
+        digest = hashlib.sha256(data).hexdigest() if depth else None
         if known_binary(name, data):
-            yield from ascii_parts(name, data)
+            yield from ascii_parts(name, data, digest)
         else:
-            yield ScanPart(name, decode(data))
+            yield ScanPart(name, decode(data), digest=digest)
         return
     if depth >= MAX_ARCHIVE_DEPTH or len(data) > MAX_INPUT_BYTES:
         raise ScanError("archive 깊이·입력 크기 제한 초과")
@@ -318,22 +321,46 @@ def policy(snapshot: Snapshot, name: str):
             raise ScanError("빈 문자열에 일치하는 정규식")
         patterns[identifier] = compiled
     allowed = {}
+    archive_digests = {}
+    archive_members = {}
+    archive_budget = ArchiveBudget()
     entries = data.get("allowlist", [])
     if not isinstance(entries, list):
         raise ScanError("allowlist 형식 오류")
     for entry in entries:
-        if not isinstance(entry, dict) or set(entry) != {"path", "rules", "reason"}:
+        if not isinstance(entry, dict) or set(entry) not in ({"path", "rules", "reason"}, {"path", "rules", "reason", "sha256"}):
             raise ScanError("allowlist 항목 형식 오류")
         path = path_name(entry["path"])
         rules, reason = entry["rules"], entry["reason"]
-        if (path not in snapshot.entries or path in allowed or any(c in path for c in "*?[]")
+        if (path in allowed or any(c in path for c in "*?[]")
                 or not isinstance(reason, str) or not reason.strip()
                 or not isinstance(rules, list) or not rules
                 or any(not isinstance(rule, str) or rule not in patterns for rule in rules)
                 or len(set(rules)) != len(rules)):
             raise ScanError("allowlist 경로·규칙·사유 오류")
+        if path in snapshot.entries:
+            if "sha256" in entry:
+                raise ScanError("일반 파일 예외 형식 오류")
+        else:
+            outer, separator, _ = path.partition("!/")
+            digest = entry.get("sha256")
+            if (not separator or outer not in snapshot.entries or len(rules) != 1
+                    or not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest)):
+                raise ScanError("archive member 예외 경로·규칙·SHA256 오류")
+            if outer not in archive_members:
+                members = {}
+                for part in scan_parts(outer, snapshot.read(outer), patterns, archive_budget):
+                    if part.digest is not None:
+                        previous = members.setdefault(part.name, part.digest)
+                        if previous != part.digest:
+                            raise ScanError("archive member 식별자 중복")
+                archive_members[outer] = members
+            actual = archive_members[outer].get(path)
+            if actual is None or actual != digest:
+                raise ScanError("archive member 없음·SHA256 불일치")
+            archive_digests[path] = digest
         allowed[path] = set(rules)
-    return patterns, allowed
+    return patterns, allowed, archive_digests
 
 
 def main(default_patterns: str, argv: list[str] | None = None) -> int:
@@ -348,7 +375,7 @@ def main(default_patterns: str, argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         snapshot = Snapshot(args.root, args.staged, args.base)
-        patterns, allowed = policy(snapshot, args.patterns)
+        patterns, allowed, archive_digests = policy(snapshot, args.patterns)
         if args.scope == ".":
             scope_prefix = ""
         else:
@@ -364,12 +391,17 @@ def main(default_patterns: str, argv: list[str] | None = None) -> int:
         budget = ArchiveBudget()
         for name in sorted(selected):
             for part in scan_parts(name, snapshot.read(name), patterns, budget):
+                pinned = archive_digests.get(part.name) if part.digest is not None else None
+                if pinned is not None and part.digest != pinned:
+                    raise ScanError("archive member SHA256 불일치")
                 for identifier, expression in patterns.items():
                     for match in expression.finditer(part.value):
                         line = part.value.count("\n", 0, match.start()) + 1
                         offset = None if part.byte_offset is None else part.byte_offset + match.start()
-                        if part.name == name and part.byte_offset is None and identifier in allowed.get(name, set()):
-                            exceptions.add((name, line, identifier))
+                        plain_exception = part.name == name and part.byte_offset is None and identifier in allowed.get(name, set())
+                        archive_exception = pinned is not None and identifier in allowed.get(part.name, set())
+                        if plain_exception or archive_exception:
+                            exceptions.add((part.name, line, identifier))
                         else:
                             findings.add((part.name, line, identifier, offset))
         for name, line, identifier, offset in sorted(findings, key=lambda item: (item[:3], -1 if item[3] is None else item[3])):
