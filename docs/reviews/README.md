@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-11-12 | SDK 원문·머지 정산 | [Transport 두 UI 선택](adversarial/2026-11-12-consumer-sdk-final.md), e533/merge508b | 원 A 계약·격리 / 원 B 출처·배포 | 두 COMBINED SOURCE PASS·신규0·정확 CI 성공·실제 Transport 수용 후속 |
 | 2026-11-12 | 문서 출판·사실 정산 | [소비자·SDK와 배포 원문 정산](adversarial/2026-11-12-consumer-sdk-final.md), 입력1/1742·입력2/79ed | 원 A 문서·계약 / 원 B 출처·배포 | 두 입력 모두 두 PASS·신규0, 정확 CI 성공·실제 완료5·Transport 후속 |
 | 2026-11-12 | FULL·원문 정산 | [Common7·Scope2](adversarial/2026-11-12-common7-scope2-final.md), [소비자·SDK](adversarial/2026-11-12-consumer-sdk-final.md) | 원 A UI·계약 / 원 B 패키징·CI | 범위별 SOURCE PASS·자기 지적 FIXED, 이전 BLOCK 보존·실제 배포 별도 |
 | 2026-11-11 | FULL·1차 | [Radix 공통화](adversarial/2026-11-11-radix-unification.md), 789e6d2/7402214 | A UI·접근성 / B 패키징·CI·고지 | 두 BLOCK·수정 및 재검토 중 |

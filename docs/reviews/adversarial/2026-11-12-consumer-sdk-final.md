@@ -44,3 +44,9 @@ Manager 최종 e798의 backend3846 PASS/40 SKIP/1 warning, frontend54 PASS·brow
 ### 입력2 원 두 검토·CI 조건 정산
 
 79ed906f의 사실 delta10개는 원 A/B 모두 DOCS/PROVENANCE PASS·신규0이며 원본7개와 하위23개 실행 증거의 해시 연결을 각각 확인했다. 당시 원문에 남은 docs CI pending은 보존하고, 이후 정확 frontend43114222024·python-package43114221949·docs43114221873 SUCCESS를 별도로 정산한다. [원문3개 archive](evidence/2026-11-12-common-final-docs2-originals.tar.gz)와 [member/전체 SHA256 원장](evidence/2026-11-12-common-final-docs2-closure-receipts.json)에 두 원문과 불변 입력을 bytes 그대로 동봉했다. gzip·tar 내부도 기존 전체 scanner의 검사 대상이며 새 attributes나 탐지 예외는 추가하지 않는다. 이는 원문·disposition·색인만 추가하는 closure artifact다. 새 운영 사실·규범·코드 승인으로 확대하지 않으며 Transport 최종 수용은 계속 후속이다.
+
+### Manager591 두 UI 선택 원 검토·머지 정산
+
+Transport의 기존 core/admin current에서 UI 하나만 선택하는 최종 e533820은 원 A/B COMBINED SOURCE PASS·신규0이다. 원 두 리뷰어는 SDK503개를 각각 직접 통과하고, A는 추가33개와 실제 Compose/fake Engine raw12값, B는 추가25개와 actual create Env8개 경계 대조를 수행했다. 이전478은 A의 PUBLIC ONLY checkpoint이며 B 완료 승인이나 admin 승인으로 확대하지 않는다. [원문·불변 입력6개 archive](evidence/2026-11-12-manager591-originals.tar.gz)와 [member/전체 해시·판정 원장](evidence/2026-11-12-manager591-closure-receipts.json)에 당시 실패·제한·pending을 byte 그대로 남겼다.
+
+정확 CI43114698062는 backend3979 PASS/40 SKIP·frontend54/browser2·Doctor0·lint/type/build 성공이며 중앙43114698466도 성공했다. [PR591](https://github.com/digitie/kor-travel-docker-manager/pull/591)은508b074c로 머지했고 fetched main 전체 tree98f2fefd가 reviewed e533과 같다. 기본 PUBLIC과 등록된 admin-web 선택은 기존 G/frozen/비선택/health/current 경로를 사용한다. 관리자 release 표시 ENV만 승인 source·OCI·image default Env 일치 때 결박하고 인증·세션·지도·DB 환경은 보존한다. 실제 이미지 생성·trusted 설치·운영 적용·UI/API/DB 수용은 source PASS와 별도다. 이 출판으로 Transport 완료를 추가하지 않는다. backend499/schema0042 보존과 사용자 Map 별도 인계도 유지한다.
