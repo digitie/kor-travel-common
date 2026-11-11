@@ -46,6 +46,33 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+function stubVirtualViewport() {
+  vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(160);
+  vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(800);
+  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+    function (this: HTMLElement) {
+      return {
+        x: 0,
+        y: 0,
+        top: 0,
+        left: 0,
+        right: 800,
+        bottom: 40,
+        width: 800,
+        height: this.tagName === "THEAD" ? 40 : 40,
+        toJSON() {},
+      } as DOMRect;
+    },
+  );
+  class Observer {
+    constructor(_callback: ResizeObserverCallback) {}
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  vi.stubGlobal("ResizeObserver", Observer);
+}
+
 describe("VirtualTable 소비자 계약", () => {
   it("기본 서버 정렬은 입력 순서를 보존하며 정렬 상태만 갱신한다", () => {
     render(<VirtualTable data={data} columns={columns} getRowId={getRowId} />);
@@ -135,6 +162,105 @@ describe("VirtualTable 소비자 계약", () => {
     );
     expect(screen.getByRole("checkbox", { name: "가 선택" })).toBeDisabled();
   });
+  it.each([false, true])(
+    "선택 predicate 축소 뒤 bulk 제외와 전체해제는 제어=%s에서도 안전하다",
+    (controlled) => {
+      function SelectionPolicy() {
+        const [onlyB, setOnlyB] = React.useState(false);
+        const [selection, setSelection] = React.useState<
+          Record<string, boolean>
+        >({});
+        return (
+          <>
+            <button onClick={() => setOnlyB(true)}>b만 허용</button>
+            <output data-testid="raw-selection">
+              {JSON.stringify(selection)}
+            </output>
+            <VirtualTable
+              data={data}
+              columns={columns}
+              getRowId={getRowId}
+              enableRowSelection={(row) => !onlyB || row.original.id === "b"}
+              rowSelection={controlled ? selection : undefined}
+              onRowSelectionChange={controlled ? setSelection : undefined}
+              rowSelectionLabel={(item) => item.name}
+              renderBulkActions={(rows) => (
+                <span data-testid="bulk-ids">
+                  {rows.map((row) => row.original.id).join(",")}
+                </span>
+              )}
+            />
+          </>
+        );
+      }
+      render(<SelectionPolicy />);
+      fireEvent.click(screen.getByRole("checkbox", { name: "전체 선택" }));
+      expect(screen.getByTestId("bulk-ids")).toHaveTextContent("a,b");
+      fireEvent.click(screen.getByRole("button", { name: "b만 허용" }));
+      expect(screen.getByTestId("bulk-ids")).toHaveTextContent(/^b$/);
+      const unavailable = screen.getByRole("checkbox", { name: "가 선택" });
+      expect(unavailable).toBeDisabled();
+      expect(unavailable).toHaveAttribute("data-state", "unchecked");
+      expect(
+        screen.getByRole("region", { name: "선택 항목 작업" }),
+      ).toHaveTextContent("1개 선택됨");
+      fireEvent.click(screen.getByRole("checkbox", { name: "전체 선택" }));
+      expect(
+        screen.queryByRole("region", { name: "선택 항목 작업" }),
+      ).not.toBeInTheDocument();
+      expect(screen.getByRole("checkbox", { name: "나 선택" })).toHaveAttribute(
+        "data-state",
+        "unchecked",
+      );
+      if (controlled)
+        expect(screen.getByTestId("raw-selection")).toHaveTextContent("{}");
+    },
+  );
+
+  it.each([false, true])(
+    "본행 x:detail과 x 상세행 key는 가상화=%s에서도 충돌하지 않는다",
+    async (virtualized) => {
+      if (virtualized) stubVirtualViewport();
+      const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+      const collisionData: Item[] = [
+        { id: "x", name: "원본", score: 1 },
+        { id: "x:detail", name: "접미사 행", score: 2 },
+      ];
+      const plainCell = (item: Item) => (
+        <input aria-label={"행 " + item.id} defaultValue={item.name} />
+      );
+      const detail = (item: Item) =>
+        item.id === "x" ? (
+          <input aria-label="상세 x" defaultValue="상세 초기값" />
+        ) : null;
+      const simpleColumns: ColumnDef<Item, unknown>[] = [
+        { id: "name", header: "이름" },
+      ];
+      const view = (items: Item[]) => (
+        <VirtualTable
+          data={items}
+          columns={simpleColumns}
+          getRowId={getRowId}
+          virtualized={virtualized}
+          renderCell={plainCell}
+          renderRowDetails={detail}
+        />
+      );
+      const { rerender } = render(view(collisionData));
+      const input = await screen.findByRole("textbox", { name: "상세 x" });
+      fireEvent.change(input, { target: { value: "편집 보존" } });
+      rerender(view([...collisionData].reverse()));
+      await waitFor(() =>
+        expect(screen.getByRole("textbox", { name: "상세 x" })).toBe(input),
+      );
+      expect(input).toHaveValue("편집 보존");
+      expect(screen.getByRole("textbox", { name: "행 x:detail" })).toHaveValue(
+        "접미사 행",
+      );
+      expect(errors).not.toHaveBeenCalled();
+    },
+  );
+
   it("실제 스크롤 요소의 속성·고정 헤더·표/행 identity를 보존한다", () => {
     render(
       <VirtualTable
@@ -332,30 +458,7 @@ describe("VirtualTable 소비자 계약", () => {
     expect(closes).not.toHaveBeenCalled();
   });
   it("실제 virtualizer가 행 수를 제한하고 스크롤 뒤 identity·상세행을 유지한다", async () => {
-    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(160);
-    vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(800);
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
-      function (this: HTMLElement) {
-        return {
-          x: 0,
-          y: 0,
-          top: 0,
-          left: 0,
-          right: 800,
-          bottom: 40,
-          width: 800,
-          height: this.tagName === "THEAD" ? 40 : 40,
-          toJSON() {},
-        } as DOMRect;
-      },
-    );
-    class Observer {
-      constructor(_callback: ResizeObserverCallback) {}
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    }
-    vi.stubGlobal("ResizeObserver", Observer);
+    stubVirtualViewport();
     const many = Array.from({ length: 100 }, (_, index) => ({
       id: String(index),
       name: "이름" + index,

@@ -181,7 +181,11 @@ export interface DataTableProps<TData extends RowData> {
    *  기본값(true)을 그대로 두고, 서버가 정렬하지 않는 accessor는 enableSorting:false로. */
   manualSorting?: boolean;
   /** 행 선택(opt-in) — 체크박스 컬럼 + 선택 상태. 함수를 주면 행별 선택 가능 여부
-   *  (react-table getCanSelect) — 선택 불가 행은 체크박스 disabled + select-all 제외. */
+   *  (react-table getCanSelect) — 선택 불가 행은 체크박스 disabled + select-all/bulk 대상 제외.
+   *  predicate 변경은 제어 상태를 자동 수정하지 않는다. 소비자가 raw rowSelection을
+   *  별도 작업에 쓸 때도 권한/predicate를 검증해야 한다. 현재 페이지 밖 id는 보존한다.
+   *  헤더 선택은 현재 페이지의 선택 가능 행에 적용하고, 헤더 전체 해제는 stale/페이지 밖
+   *  id까지 포함해 빈 상태를 onRowSelectionChange로 전달한다. */
   enableRowSelection?: boolean | ((row: Row<TData>) => boolean);
   rowSelection?: RowSelectionState;
   onRowSelectionChange?: OnChangeFn<RowSelectionState>;
@@ -308,7 +312,7 @@ function DataTableColumnHeader({
       data-sorted={sorted || undefined}
       data-testid={testId}
       className={cn(
-        "inline-flex h-7 items-center gap-1 rounded-control px-2 text-2xs leading-none font-semibold whitespace-nowrap text-text-secondary transition-[color,background-color,border-color] select-none hover:bg-surface-muted hover:text-text-primary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus active:translate-y-px data-[sorted]:text-text-primary",
+        "inline-flex h-7 items-center gap-1 rounded-kt-control px-2 text-kt-2xs leading-none font-semibold whitespace-nowrap text-kt-text-secondary transition-[color,background-color,border-color] select-none hover:bg-kt-surface-muted hover:text-kt-text-primary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-kt-focus active:translate-y-px data-[sorted]:text-kt-text-primary",
         align === "right" ? "-mr-2 flex-row-reverse" : "-ml-2",
       )}
       onClick={onToggle}
@@ -317,7 +321,7 @@ function DataTableColumnHeader({
       <Glyph
         className={cn(
           "size-3.5 shrink-0",
-          sorted ? "text-brand" : "text-text-tertiary",
+          sorted ? "text-kt-brand" : "text-kt-text-tertiary",
         )}
         aria-hidden="true"
       />
@@ -375,7 +379,16 @@ function handleClickableRowKeyDown<TData extends RowData>(
  *  `transition-colors`가 아니라 `transition-[color,background-color,border-color]`로 열거한다 —
  *  tailwind v4의 `transition-colors`는 `outline-color`를 포함해서 링 색이 100ms 페이드인 된다. */
 const CLICKABLE_ROW_CLASS =
-  "cursor-pointer focus-visible:bg-surface-subtle focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus active:bg-surface-muted";
+  "cursor-pointer focus-visible:bg-kt-surface-subtle focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-kt-focus active:bg-kt-surface-muted";
+
+function pageSelectionState<T extends RowData>(
+  table: TanstackTable<T>,
+): boolean | "indeterminate" {
+  const eligible = table.getRowModel().rows.filter((row) => row.getCanSelect());
+  const selected = eligible.filter((row) => row.getIsSelected()).length;
+  if (selected === 0) return false;
+  return selected === eligible.length ? true : "indeterminate";
+}
 
 /** 선택 열. 행 체크박스 이름은 `rowSelectionLabel`이 있으면 행마다 다르게(`홍길동 선택`),
  *  없으면 기존 계약대로 `행 선택`으로 남는다(호출부 호환). */
@@ -389,16 +402,11 @@ function selectionColumn<TData extends RowData>(
     header: ({ table }) => (
       <Checkbox
         aria-label="전체 선택"
-        checked={
-          table.getIsAllPageRowsSelected()
-            ? true
-            : table.getIsSomePageRowsSelected()
-              ? "indeterminate"
-              : false
-        }
-        onCheckedChange={(checked) =>
-          table.toggleAllPageRowsSelected(!!checked)
-        }
+        checked={pageSelectionState(table)}
+        onCheckedChange={(checked) => {
+          if (checked) table.toggleAllPageRowsSelected(true);
+          else table.resetRowSelection(true);
+        }}
       />
     ),
     cell: ({ row }) => (
@@ -408,7 +416,7 @@ function selectionColumn<TData extends RowData>(
             ? `${rowSelectionLabel(row.original)} 선택`
             : "행 선택"
         }
-        checked={row.getIsSelected()}
+        checked={row.getCanSelect() && row.getIsSelected()}
         disabled={!row.getCanSelect()}
         onCheckedChange={(checked) => row.toggleSelected(!!checked)}
         onClick={(event) => event.stopPropagation()}
@@ -562,7 +570,7 @@ export function VirtualTable<TData extends RowData>({
   const rows = table.getRowModel().rows;
   const colCount = table.getAllLeafColumns().length;
   const selectedRows = enableRowSelection
-    ? table.getSelectedRowModel().rows
+    ? table.getSelectedRowModel().rows.filter((row) => row.getCanSelect())
     : [];
   const resolvedEmpty: DataTableEmptyState = emptyState ?? {
     title: emptyMessage,
@@ -571,7 +579,7 @@ export function VirtualTable<TData extends RowData>({
   const bulkBar =
     enableRowSelection && renderBulkActions && selectedRows.length > 0 ? (
       <div
-        className="flex flex-wrap items-center gap-2 rounded-control bg-brand-tint px-3 py-2 text-xs text-text-primary"
+        className="flex flex-wrap items-center gap-2 rounded-kt-control bg-kt-brand-tint px-3 py-2 text-xs text-kt-text-primary"
         data-slot="bulk-actions"
         role="region"
         aria-label="선택 항목 작업"
@@ -914,7 +922,8 @@ function TableHeaders<T extends RowData>({
       ref={headRef}
       role={role("rowgroup")}
       className={cn(
-        (virtualized || stickyHeader) && "sticky top-0 z-10 bg-surface-subtle",
+        (virtualized || stickyHeader) &&
+          "sticky top-0 z-10 bg-kt-surface-subtle",
         virtualized && "grid",
       )}
     >
@@ -1072,7 +1081,9 @@ function dataRowProps<T extends RowData>(
     rowProps,
   }: RowDisplayProps<T>,
 ) {
-  const active = row.getIsSelected() || isRowActive?.(row.original) === true;
+  const active =
+    (row.getCanSelect() && row.getIsSelected()) ||
+    isRowActive?.(row.original) === true;
   const props = rowProps?.(row.original) ?? {};
   return {
     ...props,
@@ -1178,10 +1189,10 @@ function surfaceEntries<T extends RowData>(
   const entries: SurfaceEntry<T>[] = [];
   if (!isLoading)
     for (const row of rows) {
-      entries.push({ key: row.id, row });
+      entries.push({ key: JSON.stringify(["row", row.id]), row });
       const detail = renderRowDetails?.(row.original);
       if (detail !== null && detail !== undefined && detail !== false)
-        entries.push({ key: row.id + ":detail", row, detail });
+        entries.push({ key: JSON.stringify(["detail", row.id]), row, detail });
     }
 
   return entries;
