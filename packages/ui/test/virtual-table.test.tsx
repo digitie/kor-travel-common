@@ -64,12 +64,13 @@ describe("VirtualTable 소비자 계약", () => {
   it("실제 스크롤 요소의 속성·고정 헤더·표/행 identity를 보존한다", () => {
     render(<VirtualTable data={data} columns={columns} getRowId={getRowId}
       containerTestId="scroll" containerClassName="max-h-80" containerStyle={{ maxHeight: 320 }}
-      tableTestId="table" stickyHeader rowIdentity={item => item.id} rowTestId={item => "row-" + item.id} />);
+      tableTestId="table" tableSlot="runtime-table" stickyHeader rowIdentity={item => item.id} rowTestId={item => "row-" + item.id} />);
     const scroll = screen.getByTestId("scroll");
     expect(scroll).toHaveAttribute("data-slot", "table-container");
     expect(scroll).toHaveClass("max-h-80");
     expect(scroll).toHaveStyle({ maxHeight: "320px" });
     expect(scroll).toContainElement(screen.getByTestId("table"));
+    expect(screen.getByTestId("table")).toHaveAttribute("data-slot", "runtime-table");
     expect(screen.getByTestId("row-a")).toHaveAttribute("data-row-identity", "a");
     expect(screen.getByRole("columnheader", { name: "이름" })).toHaveStyle({ width: "180px" });
     expect(screen.getByTestId("table").querySelector("thead")).toHaveClass("sticky");

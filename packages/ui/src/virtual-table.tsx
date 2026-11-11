@@ -163,6 +163,7 @@ export interface DataTableProps<TData extends RowData> {
   containerStyle?: React.CSSProperties
   containerTestId?: string
   tableTestId?: string
+  tableSlot?: string
   sortButtonTestIdPrefix?: string
   rowProps?: (row: TData) => React.ComponentProps<"tr">
   renderCell?: (row: TData, columnId: string) => React.ReactNode
@@ -416,7 +417,7 @@ export function VirtualTable<TData extends RowData>({
   ariaLabel,
   caption, hideHeader, wrapCells, height,
   stickyHeader = false,
-  containerStyle, containerTestId, tableTestId, sortButtonTestIdPrefix,
+  containerStyle, containerTestId, tableTestId, tableSlot = "table", sortButtonTestIdPrefix,
   rowProps, renderRowDetails, renderCell,
 }: DataTableProps<TData>) {
   "use no memo"
@@ -486,7 +487,7 @@ export function VirtualTable<TData extends RowData>({
         virtualized={virtualized} estimateRowSize={estimateRowSize} overscan={overscan}
         onRowClick={onRowClick} isRowActive={isRowActive} rowTestId={rowTestId} rowIdentity={rowIdentity}
         containerClassName={containerClassName} containerStyle={containerStyle}
-        containerTestId={containerTestId} tableTestId={tableTestId} ariaLabel={ariaLabel}
+        containerTestId={containerTestId} tableTestId={tableTestId} tableSlot={tableSlot} ariaLabel={ariaLabel}
         caption={caption} hideHeader={hideHeader} wrapCells={wrapCells} height={height}
         stickyHeader={stickyHeader} sortButtonTestIdPrefix={sortButtonTestIdPrefix}
         rowProps={rowProps} renderRowDetails={renderRowDetails} renderCell={renderCell}
@@ -559,7 +560,7 @@ function TableSurface<T extends RowData>({
   table, rows, colCount, isLoading, emptyState, skeletonRowCount,
   virtualized, estimateRowSize, overscan, onRowClick, isRowActive,
   rowTestId, rowIdentity, containerClassName, containerStyle, containerTestId,
-  tableTestId, ariaLabel, stickyHeader, sortButtonTestIdPrefix, rowProps, renderRowDetails, renderCell,
+  tableTestId, tableSlot, ariaLabel, stickyHeader, sortButtonTestIdPrefix, rowProps, renderRowDetails, renderCell,
   caption, hideHeader, wrapCells, height,
 }: {
   table: TanstackTable<T>; rows: Row<T>[]; colCount: number;
@@ -567,7 +568,7 @@ function TableSurface<T extends RowData>({
   virtualized: boolean; estimateRowSize: number; overscan: number;
 } & Pick<DataTableProps<T>, "onRowClick" | "isRowActive" | "rowTestId" | "rowIdentity"
  | "containerClassName" | "containerStyle" | "containerTestId" | "tableTestId"
- | "caption" | "hideHeader" | "wrapCells" | "height" | "ariaLabel" | "stickyHeader" | "sortButtonTestIdPrefix" | "rowProps" | "renderRowDetails" | "renderCell">) {
+ | "caption" | "hideHeader" | "wrapCells" | "height" | "tableSlot" | "ariaLabel" | "stickyHeader" | "sortButtonTestIdPrefix" | "rowProps" | "renderRowDetails" | "renderCell">) {
   "use no memo"
   const { scrollRef, headRef, entries, items, totalSize, measure } = useSurfaceWindow({
     rows, isLoading, renderRowDetails, virtualized, estimateRowSize, overscan,
@@ -578,7 +579,7 @@ function TableSurface<T extends RowData>({
   return (
     <Table containerRef={scrollRef} containerClassName={cn("relative overflow-auto", containerClassName)}
       containerStyle={{ height, ...containerStyle }} containerTestId={containerTestId}
-      data-testid={tableTestId} aria-label={ariaLabel} aria-busy={isLoading || undefined}
+      data-slot={tableSlot} data-testid={tableTestId} aria-label={ariaLabel} aria-busy={isLoading || undefined}
       role={role("table")} aria-rowcount={virtualized ? entries.length + groups.length : undefined}
       aria-colcount={virtualized ? colCount : undefined}
       className={cn("tabular-nums", virtualized && "grid")}
