@@ -187,6 +187,7 @@ jobs:
           persist-credentials: false
       - name: 검사 source SHA 확인
         run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
           printf '검사 source: `%s`\n' "$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
       - name: Node.js 설치
