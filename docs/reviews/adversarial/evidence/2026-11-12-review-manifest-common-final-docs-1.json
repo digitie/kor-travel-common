@@ -1,0 +1,296 @@
+{
+  "createdUTC": "2026-11-11T22:27:54.713276+00:00",
+  "repository": "kor-travel-common",
+  "PR": 50,
+  "base": "e8ed3ae75000be5cd22a3a11492bd97660635d78",
+  "head": "1742c3756b8f28a685741eb2f88d3bef49c5cafc",
+  "scope": "docs-only final source evidence publication, exact mobileExpo SDK docs, immutable originalraw bytes, narrow sixCRLF attributes, all7 primary appmerges, four actual deployments snapshot; Map furtherbuild/deploy excludedbylatestuser",
+  "notClaimed": "allruntimecomplete; Geoactualacceptance/Transportpending; nativeDevice/EAS/StoreNOT_RUN",
+  "verification": {
+    "links": "840 documents 3192 targets errors0",
+    "plan": "111 tasks errors0",
+    "pythonUnittest": "400run399PASS1SKIP",
+    "fullScans": "1419 files secret0/redaction0",
+    "stagedScans": "35 changedfiles secret0/redaction0",
+    "originalRawBytes": "26 records exact stagedGitblob SHA256",
+    "packagesVersionsVendorCodeWorkflows": "unchanged from released e8ed main"
+  },
+  "files": [
+    {
+      "path": ".gitattributes",
+      "blob": "38a50f3b3f65e2199f12162f05ba7722978cd342",
+      "sha256": "9392f22b1b86e58bb95e9642e5634387ca75a4ec1f6a618f4c2c48b32ab83c50",
+      "bytes": 2373
+    },
+    {
+      "path": "CHANGELOG.md",
+      "blob": "6d023be7e6f55e56ecdfcfbe57ff94dd22ab04fb",
+      "sha256": "8ce3c5366bad1e05776bfe76553b028d273991e5d98a0c0a7de476031fc211d6",
+      "bytes": 23907
+    },
+    {
+      "path": "docs/journal.md",
+      "blob": "a48bca7794324805f23b791e9734f41b7581d4e2",
+      "sha256": "eecef212c9e52ddb326098682a7a10e93b103206a5ce83689e39f55b63e10fcf",
+      "bytes": 105557
+    },
+    {
+      "path": "docs/resume.md",
+      "blob": "0a8797120edec0afcbc64f0ecd31e38a5fd9980c",
+      "sha256": "2a287b07825ac984384d79aea14e6a80cffe6fedaed2851a1cbf753c2a643a87",
+      "bytes": 34802
+    },
+    {
+      "path": "docs/reviews/README.md",
+      "blob": "e5a45b6570cd8a5e0d09b4fa24ec2d79787392c7",
+      "sha256": "aeba90667fe3c8801b2bbf41fef6f02574d141ead9f16dd8cf98c778d645e228",
+      "bytes": 17747
+    },
+    {
+      "path": "docs/reviews/adversarial/2026-11-12-common7-scope2-final.md",
+      "blob": "e0967b53af9c530ce9d534e64a81952a3999ed7f",
+      "sha256": "afa60c23517df2385f6a6853ea3d5879503b7471defefa72e93032d5d1da4522",
+      "bytes": 2943
+    },
+    {
+      "path": "docs/reviews/adversarial/2026-11-12-consumer-sdk-final.md",
+      "blob": "73320defb8f1f40004648244e277858bd9e36315",
+      "sha256": "5f30ffabd9f2c759f60f94a61fef51c24e38d2c908443050622c74a3a34448c3",
+      "bytes": 6235
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-common7-scope2-original-receipts.json",
+      "blob": "b5c9b475fc54b7b1d7aa7440d19742f19b22f263",
+      "sha256": "bca6e2986dea09c7dbc2b4a4c848c0b8df03692e32e88919a7f4c77049295d1c",
+      "bytes": 2526
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-consumer-sdk-original-receipts.json",
+      "blob": "4d2e98fe347f42935670ad3a1bfcb3e289a711ac",
+      "sha256": "ccb592792dfd2e6b37d67ed61bcdf0b8960780e3d4e44e3ae19b12338e4c1aa3",
+      "bytes": 7808
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-A-common-doctor-postfix-571.md",
+      "blob": "4c47e604d5ba8815a0a0629792ba6f19d8a8e6f2",
+      "sha256": "189276cea7da974b01bfb53e3fc31a99715d4d078589fd9a5fb4aa194c47de11",
+      "bytes": 5224
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-A-common-final-7.md",
+      "blob": "429116644b8d0a0e9bc831d51016c58d078d6e96",
+      "sha256": "dca427bdc67a7b56dff9e1338096a536edbfb85a35cf028b9b7740ce7519e34b",
+      "bytes": 11137
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-A-consumer-map-postfix-f55.md",
+      "blob": "7e3f77aee4bac10bcb25d8c2970cc2404b823238",
+      "sha256": "a0db6026acc8b207395e971a69307aed9eb95d3eac4e6b6d05d8ea97947d7404",
+      "bytes": 4731
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-A-consumers-528-followup.md.txt",
+      "blob": "e96eaf0c841a4c39e0b05ec1b59a5dd7cf304f65",
+      "sha256": "da9285423c7bcaa80269dc452705758404900e223a864c6dacad80a6bb88f716",
+      "bytes": 10897
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-A-consumers-c11-batch-1.md.txt",
+      "blob": "f700622f07ff53568918869fc53909fef8bc6bd5",
+      "sha256": "a8b93cef62bffe0d8fe6c66a428a9aa55451e7f1c8e3c72ae9ab9e1a5a03f553",
+      "bytes": 9120
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-A-consumers-c11-batch-2.md.txt",
+      "blob": "ebeaddc4a884e3e544f1c424735973b73327cb16",
+      "sha256": "2b100b0c969d3abdcd38a7cb93f4be2596d7c0ff23e14841828b9e5ef9d9e5b4",
+      "bytes": 12370
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-A-consumers-geoconcierge-postfix-1.md",
+      "blob": "2ae93ec854484bf90f8cd82e92d7cdef9527a4fd",
+      "sha256": "24a7cdad5ca61b4907f4794a82d7cb7f600ea4039bd364ea276f49d71452369b",
+      "bytes": 11440
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-A-manager-component-ui-final-1.md.txt",
+      "blob": "b3a2acad90fdf566fcde85242b06cfffdc23a4a9",
+      "sha256": "346c0367e66fd56fff31be65bb8a80d90c183c7bc4140decb408c029ba889f6a",
+      "bytes": 11244
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-A-manager-component-ui-final-2.md.txt",
+      "blob": "bfd38f91e117ca6b5b5bc164ef7b98f95f32696a",
+      "sha256": "6012a8ddb46e0213f2d307a068a54456dcb7c7a35521320e07612cc1d45621f4",
+      "bytes": 11092
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-A-manager-component-ui-final-3.md.txt",
+      "blob": "f1bf8d20ce11a641aadace28e7c2fc6c170768d2",
+      "sha256": "b6a187b5b1c31324205c253be6491877a3f9fba5634ef43dbd4f68ee292f0771",
+      "bytes": 9171
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-A-manager-mount-order-final-1.md.txt",
+      "blob": "965c0b14a8c615cb270e7ed77b9bdc11f7b28768",
+      "sha256": "b731d91fb57f84a8fe976e23c23978497697c877f2a209a47e2f6e69eb558fe1",
+      "bytes": 8099
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-A-map-c11-7ce-main-supplement.md.txt",
+      "blob": "cf498ad8faee354ca6d9e521b6f344d3148f7cda",
+      "sha256": "5e3d1529511c3e102d667db0e9ca59ee272262ef66a084c6343929458701fb54",
+      "bytes": 8240
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-A-radix-focus-scope-final-2.md",
+      "blob": "375700a78252a87c450ddd354636584915fa138b",
+      "sha256": "2ce0afa107393343a36fa7f7312a256db7d94473cd1e167d68df1e0e4e929f21",
+      "bytes": 12817
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-A-transport-c11-4e25-supplement.md.txt",
+      "blob": "85c4a35acc048816ca4e89590045b49f855fc14a",
+      "sha256": "553dd6e3428cc95bf5a24b017645263f46eeac936fbe85a3b0d139035c3a3d57",
+      "bytes": 5981
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-B-common-final-7.md",
+      "blob": "bad24f6a1a0dd8aeb6072ff82c7cf22c1c5d7a4f",
+      "sha256": "7345fe7c9eb7d2fa9bbda14e7b1497bf98a8f8f3d8df1ea1709a100927674374",
+      "bytes": 10113
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-B-consumers-528-followup.md.txt",
+      "blob": "eff6e160d42d403881a81827c6a6dc5d1ec6a847",
+      "sha256": "9a4438996ae9ead4dd7cde7347b5f26e938f49718a4dde51d98d230381bb679d",
+      "bytes": 8812
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-B-consumers-c11-batch-1.md.txt",
+      "blob": "d42d4a26d3a9a0fa055ad14a1276ad6169f0bd66",
+      "sha256": "ce4ff6265a106d8634b4a13de3b6afc99f67f51702e517061a940b773032218a",
+      "bytes": 12808
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-B-consumers-c11-batch-2.md.txt",
+      "blob": "9dc6e7b26a00128cb38f136acb47b2471ab9b209",
+      "sha256": "0fde4f4ad57717467a3d70152f46db126eb726b253a56f14db741ea0521cf9d0",
+      "bytes": 15289
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-B-manager-component-ui-final-1.md.txt",
+      "blob": "2320d35d92471f88888edc8f2e2e65907b330f9a",
+      "sha256": "833adcb2de10f4b973f072f8eb574a59a921744824a1d31c345aa8b6185b94bf",
+      "bytes": 13013
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-B-manager-component-ui-final-2.md.txt",
+      "blob": "b127a27671b8fc2387be8bebdb17417a6c8a1479",
+      "sha256": "143ea12067a46ee3470485b369eb84d3346bd24c272cdb357b92ddbc462a3e8f",
+      "bytes": 9733
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-B-manager-component-ui-final-3.md.txt",
+      "blob": "5da9a420ff4a5a095a710e5b2fd50f8f2b78aadb",
+      "sha256": "a8185beed315af2263bab8fea337be03e90b9cad6a8ec827bde3fab242d6af44",
+      "bytes": 8738
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-B-manager-mount-order-final-1.md.txt",
+      "blob": "c7afd863caf060b5a3f7751eece4366712c1654d",
+      "sha256": "5c12cbcca5f1538cee0de4e6aeb6c5bfd3e98055fc3a562b04720ba26baaeac3",
+      "bytes": 8618
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-B-map-c11-7ce-main-supplement.md.txt",
+      "blob": "800f33f4df11d0bcad37a36141c36f7496fc6447",
+      "sha256": "dcf7e005d670b1245141a60bf56f4966541c2950540570f6e9dca57b5eff49a9",
+      "bytes": 6365
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-B-radix-focus-scope-final-2.md",
+      "blob": "149df3a2310f6983fe5104738c9855c8ad39e99a",
+      "sha256": "314713873ae382352e06d08fad53d3cf786255b316e179d735004f78bceb04b6",
+      "bytes": 10744
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-B-transport-c11-4e25-supplement.md.txt",
+      "blob": "2f703aebf74a6d39333a2fe0762484315c626bf0",
+      "sha256": "07897b60a4c01cb5153172f4cab4c92d1e049b6c9600f1823f1d661a1f3cf966",
+      "bytes": 5402
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-manifest-common-7.json",
+      "blob": "b35a5334edc9b1d62dadfb4057378ee158f93c07",
+      "sha256": "623ff78af00acc287d215a4684267104d8dca1c7b20228d147089b5dd2986ae6",
+      "bytes": 6111
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-manifest-consumers-c11-batch-1.json",
+      "blob": "67d8d2ebe8d7e9d58a5da0cd9f29650aeb72a819",
+      "sha256": "c0affe2a88bf0f176abb0e3df298b0fb2da698f442f74196f00ac3e237f30a4c",
+      "bytes": 6504
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-manifest-consumers-c11-batch-2.json",
+      "blob": "219994db4a3a046a029189c894db9be21e785d20",
+      "sha256": "bcf2aff18fb8a82b1e89753ca68185a378ad26849058ec977323e1db6414160b",
+      "bytes": 1979
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-manifest-manager-component-ui-1.json",
+      "blob": "3057fe200c488c41b13b8486824d8445b0570855",
+      "sha256": "ee5688ab6783bb535a88160726fb07721ff3c266c40f4629dc8ee9588eb577fd",
+      "bytes": 4224
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-manifest-manager-component-ui-2.json",
+      "blob": "679f8e519e6bfd8f28db21c8c96181cdd8e5e24c",
+      "sha256": "aa1d5838ab0d7f9c37f723028b216664ecaa3e35e4be92f6e34895bf91ae84f3",
+      "bytes": 4677
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-manifest-manager-component-ui-3.json",
+      "blob": "6cefa13fbdc7a3a44c90d3c8608fc674a2afc182",
+      "sha256": "aba6f9351bba4ce15e87a8a2642e13c9634dd65d77e69c6b28822362506c0cb2",
+      "bytes": 4014
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-manifest-manager-mount-order-1.json",
+      "blob": "e149bb24a20ea5a746adfd43a9fcec6c79fc41f6",
+      "sha256": "24ce04472e44b587659ede8c81db0cab052132194e873fc889777e47d6454a91",
+      "bytes": 10850
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-manifest-map-c11-main1497-supplement-7ce.json",
+      "blob": "be13873166749a7a704cbc3bd223d5846262d173",
+      "sha256": "8cc46f10fc13d2c05dbd0821acbe8c42e4dae4dc9b1cab9344bf8d4c2f74dfc0",
+      "bytes": 13948
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-manifest-radix-focus-scope-2.json",
+      "blob": "4ee8014a3b122a76d82ab09fd3c2b2fa73efd23a",
+      "sha256": "d4df7d2898a8a36f70821314afb9fd254d03d94187269246f55894ecf475ca01",
+      "bytes": 4243
+    },
+    {
+      "path": "docs/reviews/adversarial/evidence/2026-11-12-review-manifest-transport-c11-delta-4e25c98.json",
+      "blob": "3491ef6590a459e0944d8634463a3dd29b14f102",
+      "sha256": "8b23b0ada68cd5c7e48f7de08d8ca54e1572a66059b89c036e196ba9fdca1ea8",
+      "bytes": 31003
+    },
+    {
+      "path": "docs/standards/frontend-libraries.md",
+      "blob": "98c11a917499e70ffcdce06c77a59bce57b573c3",
+      "sha256": "d9b151a3998c1dd445760c2d5b6336e2483fe4eb0c77d06bd41bb9878d3acc54",
+      "bytes": 10686
+    },
+    {
+      "path": "docs/tasks/T-218-radix-library-unification.md",
+      "blob": "5b4b44ea11966f3abbcf58b71e9598a858efa54b",
+      "sha256": "8e072c279f0160b08af44093816a7c80bc803499549068bae7584a6263174b5f",
+      "bytes": 4987
+    }
+  ]
+}

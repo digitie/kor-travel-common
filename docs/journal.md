@@ -1,3 +1,7 @@
+## 2026-11-12 — 문서 입력1 두 PASS·Geo 실제 수용 추가
+
+1742c375의46개 문서/증거/attributes를 원 A/B가 독립 검토해 두 PASS·신규0을 확인했고, 정확3개 workflow와 docs6개 job 모두 성공했다. 원문·불변 입력을 byte 그대로 별도 receipt에 보존했다. 이후 Geo image82c7/common263의 공식4단계 exit0과 실제 표37행·지오코딩 후보1·타일9응답200·정상 로그아웃/보호401까지 확인하여 실제 완료5개다. 새 공개 JSON에는 별도 과거 공유PG 설정1차이 미확정과 Geo 검증기 실패/재시도를 보존한다. Transport/Map/native 한계를 완료로 바꾸지 않는다. source 정책·패키지·버전·vendor·workflow 변경0이며 이 사실 delta의 원 두 검토와 정확 CI는 후속이다.
+
 ## 2026-11-12 — 소비자 7개 머지와 독립 source 증거 출판
 
 공통·fork 5개와 소비자 주 이관 PR 7개의 정확 CI·두 독립 리뷰·fetched main tree를 확인했다. 소비자와 Manager candidate SDK의 원 A/B 보고서18개 및 불변 입력8개를 원문 bytes 그대로 보존하고 SHA256 원장으로 연결했다. SDK 입력2의 raw 달러 BLOCK은 입력3의 자기 지적 FIXED와 별개로 유지한다. Mounts 최상위 순서만 정규화한590도 원 두 SOURCE PASS·backend3931 PASS/40 SKIP·frontend54/browser2·정책 CI 성공 후 ca1d32b로 머지했고 전체 tree가 같다.

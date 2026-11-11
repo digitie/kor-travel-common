@@ -34,3 +34,9 @@ Manager 최종 e798의 backend3846 PASS/40 SKIP/1 warning, frontend54 PASS·brow
 실제 Weather 공식 dry-run에서 발견한 Mounts 최상위 열거 순서 오탐은 별도 [PR590](https://github.com/digitie/kor-travel-docker-manager/pull/590)으로 수정했다. 기존432와 신규85가 모두 통과했고 원 A는 추가48을 포함한565 PASS, 원 B는517 및 추가24개 공격을 확인했다. 정확 CI43106671432는 backend3931 PASS/40 SKIP, frontend54·browser2 PASS이며 중앙 정책43106671905도 성공했다. CI synthetic merge d4e25bc의 전체 tree와 reviewed ac4가 같다. 최종 merge ca1d32b의 fetched main 전체 tree도 같았다. 이 source 판정과 실제 SDK 설치·Weather UI 수용은 구분한다.
 
 이 출판 정리는 C11의 UI0.2.0·tokens0.1.1 및 동결한 7종 산출물을 다시 만들지 않는다. 앱별 새 이미지와 실제 운영 수용의 최종 결과는 통합 배포 기록에서 별도로 확정한다.
+
+## 문서 출판·규약 입력1의 독립 검토와 실제 배포 후속
+
+원 A/B는 같은1742c375의46개 문서/증거/attributes를 Git object에서 독립 검토하여 두 PASS·신규0으로 판정했다. [원 A](evidence/2026-11-12-review-A-common-final-docs-1.md.txt)·[원 B](evidence/2026-11-12-review-B-common-final-docs-1.md.txt)·[불변 입력](evidence/2026-11-12-review-manifest-common-final-docs-1.json)·[원문 해시](evidence/2026-11-12-common-final-docs-original-receipts.json)를 보존한다. 원문은 당시 네 앱 완료 snapshot을 유지한다. 정확1742의 frontend43111997734·python-package43111997752·docs43111997774와 docs6개 job이 모두 성공했다. Python workflow의 dependency recovery job 성공을 전체 Python 기능 시험 재실행으로 확대하지 않는다.
+
+이후 Geo의 공식 UI 교체와 실제 수용을 완료하여 현재 배포 완료는5개다. [공개 배포 정산 JSON](evidence/2026-11-12-frontend-deployment-receipt.json)에 실제 source/image/common파일·정상 로그인/표/폰트/모바일/지도/로그아웃·미완료·사용자 제외 경계를 기록한다. 비공개 원본 영수증은 파일명·크기·SHA256으로 연결하고 운영 주소·키·계정 값은 출판하지 않는다. 이 후속 사실 delta와 원문 출판은 새로운 문서 입력에서 다시 검토한다. Transport는 진행 중, Map은 사용자/Claude 별도 범위이고 native 기기/EAS/스토어는 NOT_RUN이다.

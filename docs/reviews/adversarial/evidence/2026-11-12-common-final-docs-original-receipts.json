@@ -1,0 +1,26 @@
+{
+  "records": [
+    {
+      "originalName": "review-A-common-final-docs-1.md",
+      "publishedPath": "2026-11-12-review-A-common-final-docs-1.md.txt",
+      "sha256": "809fbe8c8f0ae06c8868fff808d09bc3a9527a370010a6173081920743a14990",
+      "bytes": 9732,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-B-common-final-docs-1.md",
+      "publishedPath": "2026-11-12-review-B-common-final-docs-1.md.txt",
+      "sha256": "856acad4dc62b6febcb86b9aa7250db6b006e98a6c333dcc4c343c19ced05294",
+      "bytes": 9025,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-manifest-common-final-docs-1.json",
+      "publishedPath": "2026-11-12-review-manifest-common-final-docs-1.json",
+      "sha256": "852069ed9adf00b7bd5cd64f8dc1eccf346b55abfafe4d3d296efa28ae20ec4f",
+      "bytes": 13312,
+      "byteIdentical": true
+    }
+  ],
+  "scope": "문서 출판·규약 입력1 원문 그대로, 이후 운영 수용은 별도 JSON"
+}

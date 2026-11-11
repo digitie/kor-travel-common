@@ -1,0 +1,148 @@
+{
+  "observedUTC": "2026-11-11T22:43:03.394156+00:00",
+  "scope": "공통 C11 1단계 배포 수용 정산; 전체 후속 CI 정비 완료 선언 아님",
+  "fullyAcceptedAppCount": 5,
+  "apps": {
+    "manager": {
+      "state": "DEPLOYED_VERIFIED",
+      "frontendSource": "9910b9a6dba902c6a59469d3a6f46c6077e78d3f",
+      "delivery": "기존 systemd frontend 새 build1",
+      "actualCommonFiles": 153,
+      "SDKBothHosts": "ca1d32b05f7a8418708bdd4f84449d79df57a102",
+      "realLoginTableFontMobileLogout": true,
+      "webSocket30SecondsNoReconnect": true,
+      "separateHistoricalObservation": "공유PG 설정 fingerprint1 차이는 원인 미확정이며 복원하지 않음. 이미지·시작·재시작 identity는 보존됨. 모든 이전 설정이 같다고 확대하지 않음",
+      "evidence": [
+        {
+          "localEvidenceName": "production-completion-receipt.json",
+          "sha256": "a714c74bf89b38da9c3b39fc8543ac080ef50aba6db4ab0260c7107a6f620607",
+          "bytes": 5433
+        },
+        {
+          "localEvidenceName": "final-receipt.json",
+          "sha256": "f08f9b89f7c1987c136eb4f7049729a460636731b2452f2926619a4d3d2129d4",
+          "bytes": 1593
+        },
+        {
+          "localEvidenceName": "final-receipt.json",
+          "sha256": "d13ee40d9a395caadde796f2f9a183869141ad486088be470ebcb30b78319eb0",
+          "bytes": 2243
+        }
+      ]
+    },
+    "concierge": {
+      "state": "DEPLOYED_VERIFIED",
+      "mergedSource": "f2db107cc4bfb58115b890ea6198a2fe0c321e17",
+      "imageID": "sha256:77de763323a8b08881d1b5398c64533940c31a7ab68c0449fc569dba9621bc1c",
+      "actualCommonFiles": 263,
+      "normalLoginHTTP": 200,
+      "normalLogoutHTTP": 200,
+      "protectedAPIHTTP": 200,
+      "protectedAfterLogoutHTTP": 401,
+      "realVWorldHTTP200": 34,
+      "tableFontMobile": true,
+      "pageErrors": 0,
+      "accountOrPasswordReplacement": false,
+      "evidence": [
+        {
+          "localEvidenceName": "acceptance.json",
+          "sha256": "bfe23ea74f931cf5999eb7c04ea1a361ae6f717cda5bf5a818e99c74b090ff48",
+          "bytes": 3074
+        }
+      ]
+    },
+    "pinvi": {
+      "state": "DEPLOYED_VERIFIED",
+      "mergedSource": "dd3bcd18ce573e6ddf784864d63901352e7e05d3",
+      "imageID": "sha256:a029e906dfd0ae534c75bf638e3af292e9fa6a3dfc4357e79e0640696f0bcb6e",
+      "actualCommonFiles": 297,
+      "normalLoginHTTP": 200,
+      "normalLogoutHTTP": 204,
+      "protectedAPIHTTP": 200,
+      "protectedAfterLogoutHTTP": 401,
+      "realVWorldHTTP200": 15,
+      "tableFontMobile": true,
+      "pageErrors": 0,
+      "accountOrPasswordReplacement": false,
+      "evidence": [
+        {
+          "localEvidenceName": "final-deployment-acceptance-manifest.json",
+          "sha256": "b36cc4e2d9aa77056dd6dbbce3fce2d6a70a5c3820168e8da117898e2f644c88",
+          "bytes": 3975
+        }
+      ],
+      "pairedMapOldPinPreserved": "fd1d770162e8253020a936ec552a4395500f444e",
+      "oldCookieReplayHTTP": 401
+    },
+    "weather": {
+      "state": "DEPLOYED_VERIFIED",
+      "mergedSource": "faca2ceee39a116dfea0680e2a5e1d8ced198cf1",
+      "imageID": "sha256:e8abd9f4af7ff79fff64d869bd4d98338143cb17d9fbe874556abfabaa9f7d7b",
+      "actualCommonFiles": 263,
+      "normalLoginHTTP": 200,
+      "normalLogoutHTTP": 200,
+      "protectedAPIHTTP": 200,
+      "protectedAfterLogoutHTTP": 401,
+      "realVWorldHTTP200": 40,
+      "tableFontMobile": true,
+      "pageErrors": 0,
+      "accountOrPasswordReplacement": false,
+      "evidence": [
+        {
+          "localEvidenceName": "weather-final-deployment-acceptance-manifest.json",
+          "sha256": "8ff348b3465a590e2784c88b1ee9bc492a1782069c368961d147e8643a2d4bd4",
+          "bytes": 2264
+        }
+      ]
+    },
+    "geo": {
+      "state": "DEPLOYED_VERIFIED",
+      "mergedSource": "786dae25f0a1927a98cbc66e6e8c86987da0a42f",
+      "imageID": "sha256:82c7c354dd2fb3af1c54f70e42abaf5b42c0e31c8aa2b74cde937e5cdd8b11c7",
+      "actualCommonFiles": 263,
+      "normalLoginHTTP": 200,
+      "normalLogoutHTTP": 200,
+      "protectedAPIHTTP": 200,
+      "protectedAfterLogoutHTTP": 401,
+      "realVWorldHTTP200": 9,
+      "tableFontMobile": true,
+      "pageErrors": 0,
+      "accountOrPasswordReplacement": false,
+      "evidence": [
+        {
+          "localEvidenceName": "final-deployment-acceptance-manifest.json",
+          "sha256": "49170c6b3365032c13f829a8e60e2e16cf859967d8840ac696b455367a882258",
+          "bytes": 2663
+        }
+      ],
+      "officialDryrunConfirmCurrentVerifyExits": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "oldEnvironmentExactlyPreserved": true,
+      "nonselectedContainersPreserved": 54,
+      "tableRows": 37,
+      "geocodeHTTP": 200,
+      "geocodeCandidates": 1,
+      "domainWrites": 0,
+      "priorHarnessFailuresPreserved": "검증기 module path·Fetch.status()·실제 v1 경로/locator 보정 이력 보존. 최종 제품 source 수정·재빌드 없음. 정상 로그인/cleanup과 최종 UI 로그아웃을 구분하며 반복 시도를 숨기지 않음"
+    }
+  },
+  "map": {
+    "state": "USER_HANDOFF_NO_FURTHER_BUILD_DEPLOY",
+    "primaryMerge": "f347b353fb13fe83ffbdfdacb894b2bfa9ebcb87",
+    "primaryPR": 1496,
+    "owner": "사용자/Claude 별도 빌드",
+    "oursAfterHandoff": "소스·이미지·current·pin 추가 변경 없음"
+  },
+  "transport": {
+    "state": "BUILDING_PENDING_APPLY_ACCEPTANCE",
+    "primaryMerge": "936fdb90b0ee9f6392d2f888255053ee1f4066b2",
+    "primaryPR": 181,
+    "scope": "새 공개/admin 이미지와 UI-only 경로·실제 수용 진행 중, DB0042·기존 backend 보존"
+  },
+  "sameVersionArtifactRepacked": false,
+  "nativeDeviceEASStore": "NOT_RUN"
+}
