@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, renameSync, symlinkSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, renameSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -28,7 +28,7 @@ function fixture(change, {profile="web",workspace="",canonical=false,policyOverr
    }
   }
   const canonicalArtifacts=structuredClone(artifacts);
-  change?.({dependencies,devDependencies,packages,artifacts,root,manifest});
+  change?.({dependencies,devDependencies,packages,artifacts,canonicalArtifacts,root,manifest});
   writeFileSync(join(root,packageDirectory,"package.json"),JSON.stringify(manifest));
   writeFileSync(join(root,"package-lock.json"),JSON.stringify({lockfileVersion:3,packages}));
   writeFileSync(join(root,"common-artifacts.json"),JSON.stringify(artifacts));
@@ -265,3 +265,154 @@ for (const extension of ["mjs","cjs","mts","cts"]) {
   writeFileSync(join(root,"src/legacy-map."+extension),'export * from "maplibre-vworld-react/packages/web/src/index";');
  }),"금지 패키지 import"));
 }
+
+// 미래 정책의 정확한 단일 엔진만 fixture에 주입한다. 실제 버전·원장은 변경하지 않는다.
+const patchedEngine = "@radix-ui/react-focus-scope", patchedVersion = "1.1.0+focus.fixture";
+function addArtifact(context, name, version=policy.versions[name]) {
+ const {dependencies,packages,artifacts,canonicalArtifacts,root}=context;
+ const prefix=name.startsWith("@")?name.slice(1).replace("/","-"):name;
+ const filename=prefix+"-"+version+".tgz", bytes=Buffer.from("canonical fixture "+name);
+ const integrity="sha512-"+createHash("sha512").update(bytes).digest("base64");
+ writeFileSync(join(root,"vendor",filename),bytes);
+ dependencies[name]="file:vendor/"+filename;
+ packages["node_modules/"+name]={version,integrity};
+ artifacts.packages[name]={version,integrity};
+ canonicalArtifacts.packages[name]={version,integrity};
+}
+function patchedFixture(change, policyChange=()=>{}) {
+ return fixture(context=>{
+  addArtifact(context,patchedEngine,patchedVersion);
+  context.packages["node_modules/@kor-travel/ui"].dependencies={[patchedEngine]:patchedVersion};
+  change?.(context);
+ },{canonical:true,policyOverride:value=>{
+  value.patchedRadixPackages=[patchedEngine];
+  value.artifactPackages.push(patchedEngine);
+  value.versions[patchedEngine]=patchedVersion;
+  policyChange(value);
+ }});
+}
+test("패치 엔진의 정확한 직접 vendor·중앙 bytes는 허용",()=>{
+ const result=patchedFixture();assert.equal(result.status,0,result.stderr);
+});
+for (const missing of ["list","artifact","version"]) {
+ test("패치 엔진의 "+missing+" 정책 등록이 없으면 개별 Radix 선언을 거부",()=>{
+  const result=patchedFixture(undefined,value=>{
+   if(missing==="list")delete value.patchedRadixPackages;
+   if(missing==="artifact")value.artifactPackages=value.artifactPackages.filter(name=>name!==patchedEngine);
+   if(missing==="version")delete value.versions[patchedEngine];
+  });
+  rejected(result,"개별 Radix");
+ });
+}
+test("패치 엔진 목록은 다른 개별 primitive 직접 선언을 허용하지 않는다",()=>{
+ rejected(patchedFixture(({dependencies})=>dependencies["@radix-ui/react-dialog"]="1.0.0"),"개별 Radix");
+});
+for (const [label,code] of [["정적 import",path=>"import { Root } from "+JSON.stringify(path)+";"],...moduleForms]) {
+ test("패치 엔진을 승인해도 앱 소스의 "+label+"는 계속 거부",()=>{
+  rejected(patchedFixture(({root})=>writeFileSync(join(root,"src/engine.ts"),code(patchedEngine))),"공통 Radix 외 overlay 구현");
+ });
+}
+for (const changed of ["metadata-version","metadata-missing","canonical-version","canonical-bytes","file-bytes","lock-version","lock-bytes"]) {
+ test("패치 엔진의 "+changed+" 불일치는 거부",()=>{
+  const result=patchedFixture(({root,packages,artifacts,canonicalArtifacts,dependencies})=>{
+   if(changed==="metadata-version")artifacts.packages[patchedEngine].version="0.0.0";
+   if(changed==="metadata-missing")delete artifacts.packages[patchedEngine];
+   if(changed==="canonical-version")canonicalArtifacts.packages[patchedEngine].version="0.0.0";
+   if(changed==="canonical-bytes")canonicalArtifacts.packages[patchedEngine].integrity="sha512-other";
+   if(changed==="file-bytes")writeFileSync(join(root,dependencies[patchedEngine].slice(5)),"다른 bytes");
+   if(changed==="lock-version")packages["node_modules/"+patchedEngine].version="1.1.0";
+   if(changed==="lock-bytes")packages["node_modules/"+patchedEngine].integrity="sha512-stock";
+  });
+  assert.equal(result.status,1,result.stderr);
+ });
+}
+test("패치 엔진은 원장과 중앙 version을 같이 바꿔도 정책 버전이 다르면 거부",()=>{
+ rejected(patchedFixture(({artifacts,canonicalArtifacts})=>{
+  artifacts.packages[patchedEngine].version="0.0.0";
+  canonicalArtifacts.packages[patchedEngine].version="0.0.0";
+ }),"원장 버전");
+});
+test("패치 엔진의 전이 설치가 있어도 직접 고정이 없으면 거부",()=>{
+ rejected(patchedFixture(({dependencies})=>delete dependencies[patchedEngine]),"직접 의존성");
+});
+
+function reachedArtifact(context,name,edge="runtime") {
+ const {dependencies,devDependencies,packages,manifest}=context;
+ if(edge==="linked-dev") {
+  manifest.private=true;manifest.workspaces=["tools/*"];
+  devDependencies["artifact-helper"]="*";
+  packages["node_modules/artifact-helper"]={resolved:"tools/artifact-helper",link:true};
+  packages["tools/artifact-helper"]={name:"artifact-helper",version:"1.0.0",devDependencies:{[name]:"*"}};
+  const key="tools/artifact-helper/node_modules/"+name;
+  packages[key]={...packages["node_modules/"+name]};return key;
+ }
+ (edge==="runtime"?dependencies:devDependencies)["artifact-helper"]="1.0.0";
+ packages["node_modules/artifact-helper"]={version:"1.0.0",dependencies:{"artifact-bridge":"1.0.0"}};
+ packages["node_modules/artifact-helper/node_modules/artifact-bridge"]={version:"1.0.0",dependencies:{[name]:"*"}};
+ const key="node_modules/artifact-helper/node_modules/artifact-bridge/node_modules/"+name;
+ packages[key]={...packages["node_modules/"+name]};return key;
+}
+const managedNames=[patchedEngine,"vworld-map-web","@kor-travel/ui","@kor-travel/tokens"];
+function managedFixture(name,change) {
+ if(name===patchedEngine)return patchedFixture(change);
+ return fixture(context=>{
+  if(!context.dependencies[name])addArtifact(context,name);
+  change(context);
+ },{canonical:true});
+}
+for (const name of managedNames) {
+ for(const edge of ["runtime","build","linked-dev"]) {
+  test("관리 산출물 "+name+" "+edge+"의 동일 version·bytes는 허용",()=>{
+   const result=managedFixture(name,context=>reachedArtifact(context,name,edge));
+   assert.equal(result.status,0,result.stderr);
+  });
+  for(const changed of ["version","integrity"]) {
+   test("관리 산출물 "+name+" "+edge+"의 전이 "+changed+" 불일치를 거부",()=>{
+    const result=managedFixture(name,context=>{
+     const key=reachedArtifact(context,name,edge);
+     context.packages[key][changed]=changed==="version"?"0.0.0":"sha512-stock-bytes";
+    });
+    rejected(result,"빌드 전이 버전·bytes 불일치");
+   });
+  }
+ }
+}
+for (const edge of ["runtime","build","linked-dev"]) {
+ test("관리 산출물 "+edge+" 전이 설치의 직접 선언 누락을 거부",()=>{
+  rejected(managedFixture("vworld-map-web",context=>{
+   reachedArtifact(context,"vworld-map-web",edge);
+   delete context.dependencies["vworld-map-web"];
+  }),"직접 의존성");
+ });
+ test("관리 산출물 "+edge+"의 미해결 전이 항목도 직접 고정 누락을 거부",()=>{
+  rejected(managedFixture("vworld-map-web",context=>{
+   const key=reachedArtifact(context,"vworld-map-web",edge);
+   delete context.dependencies["vworld-map-web"];
+   delete context.packages[key];delete context.packages["node_modules/vworld-map-web"];
+  }),"직접 의존성");
+ });
+}
+for(const name of managedNames) {
+ test("관리 산출물 "+name+"의 무관 workspace·registry 개발 전이는 제외",()=>{
+  const result=managedFixture(name,({devDependencies,packages})=>{
+   devDependencies["registry-artifact-helper"]="1.0.0";
+   packages["node_modules/registry-artifact-helper"]={version:"1.0.0",devDependencies:{[name]:"*"}};
+   packages["node_modules/registry-artifact-helper/node_modules/"+name]={version:"0.0.0",integrity:"무관"};
+   packages["tools/unused"]={name:"unused",version:"1.0.0",devDependencies:{[name]:"*"}};
+   packages["tools/unused/node_modules/"+name]={version:"0.0.0",integrity:"무관"};
+  });
+  assert.equal(result.status,0,result.stderr);
+ });
+}
+test("관리 산출물 검사는 도달한 alias의 실제 package identity도 확인",()=>{
+ rejected(managedFixture("vworld-map-web",({dependencies,packages})=>{
+  dependencies.widget="1.0.0";
+  packages["node_modules/widget"]={version:"1.0.0",dependencies:{"map-alias":"*"}};
+  packages["node_modules/widget/node_modules/map-alias"]={name:"vworld-map-web",version:policy.versions["vworld-map-web"],integrity:"sha512-stock"};
+ }),"빌드 전이 버전·bytes 불일치");
+});
+test("관리 산출물 source·UI·tokens 배포 checker bytes는 동일",()=>{
+ const source=readFileSync(new URL("../../../tools/check_frontend_dependencies.mjs",import.meta.url));
+ assert.deepEqual(readFileSync(new URL("../check-dependencies.mjs",import.meta.url)),source);
+ assert.deepEqual(readFileSync(new URL("../../tokens/check-dependencies.mjs",import.meta.url)),source);
+});
