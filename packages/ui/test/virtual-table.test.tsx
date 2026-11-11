@@ -130,7 +130,25 @@ describe("VirtualTable 소비자 계약", () => {
     expect(screen.getAllByRole("rowheader")[0]).toHaveAttribute("scope", "row");
     expect(screen.getAllByRole("cell")[0]).toHaveClass("whitespace-normal");
     expect(screen.getByTestId("geo-scroll")).toHaveStyle({ height: "320px" });
-    expect(screen.getByRole("columnheader", { name: "이름" }).closest("thead")).toHaveClass("sr-only");
+    expect(screen.queryByRole("columnheader")).not.toBeInTheDocument();
+    expect(screen.getByRole("table").querySelector("thead")).toBeNull();
+  });
+  it("직접 셀 renderer는 무관한 열 배열 교체 뒤에도 스트림 소유 셀을 재마운트하지 않는다", () => {
+    const opens = vi.fn();
+    const closes = vi.fn();
+    function StreamCell({ id }: { id: string }) {
+      React.useEffect(() => { opens(id); return () => { closes(id); }; }, [id]);
+      return <span>{id} 스트림</span>;
+    }
+    const freshColumns = (): ColumnDef<Item, unknown>[] => [
+      { id: "stream", cell: ({ row }) => <StreamCell id={row.original.id} /> },
+    ];
+    const direct = (item: Item) => <StreamCell id={item.id} />;
+    const { rerender } = render(<VirtualTable data={data} columns={freshColumns()} getRowId={getRowId} renderCell={direct} />);
+    expect(opens).toHaveBeenCalledTimes(2);
+    rerender(<VirtualTable data={[...data]} columns={freshColumns()} getRowId={getRowId} renderCell={direct} />);
+    expect(opens).toHaveBeenCalledTimes(2);
+    expect(closes).not.toHaveBeenCalled();
   });
   it("실제 virtualizer가 행 수를 제한하고 스크롤 뒤 identity·상세행을 유지한다", async () => {
     vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(160);

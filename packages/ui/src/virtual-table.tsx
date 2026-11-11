@@ -165,6 +165,7 @@ export interface DataTableProps<TData extends RowData> {
   tableTestId?: string
   sortButtonTestIdPrefix?: string
   rowProps?: (row: TData) => React.ComponentProps<"tr">
+  renderCell?: (row: TData, columnId: string) => React.ReactNode
   renderRowDetails?: (row: TData) => React.ReactNode
 }
 
@@ -416,7 +417,7 @@ export function VirtualTable<TData extends RowData>({
   caption, hideHeader, wrapCells, height,
   stickyHeader = false,
   containerStyle, containerTestId, tableTestId, sortButtonTestIdPrefix,
-  rowProps, renderRowDetails,
+  rowProps, renderRowDetails, renderCell,
 }: DataTableProps<TData>) {
   "use no memo"
 
@@ -488,7 +489,7 @@ export function VirtualTable<TData extends RowData>({
         containerTestId={containerTestId} tableTestId={tableTestId} ariaLabel={ariaLabel}
         caption={caption} hideHeader={hideHeader} wrapCells={wrapCells} height={height}
         stickyHeader={stickyHeader} sortButtonTestIdPrefix={sortButtonTestIdPrefix}
-        rowProps={rowProps} renderRowDetails={renderRowDetails}
+        rowProps={rowProps} renderRowDetails={renderRowDetails} renderCell={renderCell}
       />
     </div>
   )
@@ -558,7 +559,7 @@ function TableSurface<T extends RowData>({
   table, rows, colCount, isLoading, emptyState, skeletonRowCount,
   virtualized, estimateRowSize, overscan, onRowClick, isRowActive,
   rowTestId, rowIdentity, containerClassName, containerStyle, containerTestId,
-  tableTestId, ariaLabel, stickyHeader, sortButtonTestIdPrefix, rowProps, renderRowDetails,
+  tableTestId, ariaLabel, stickyHeader, sortButtonTestIdPrefix, rowProps, renderRowDetails, renderCell,
   caption, hideHeader, wrapCells, height,
 }: {
   table: TanstackTable<T>; rows: Row<T>[]; colCount: number;
@@ -566,7 +567,7 @@ function TableSurface<T extends RowData>({
   virtualized: boolean; estimateRowSize: number; overscan: number;
 } & Pick<DataTableProps<T>, "onRowClick" | "isRowActive" | "rowTestId" | "rowIdentity"
  | "containerClassName" | "containerStyle" | "containerTestId" | "tableTestId"
- | "caption" | "hideHeader" | "wrapCells" | "height" | "ariaLabel" | "stickyHeader" | "sortButtonTestIdPrefix" | "rowProps" | "renderRowDetails">) {
+ | "caption" | "hideHeader" | "wrapCells" | "height" | "ariaLabel" | "stickyHeader" | "sortButtonTestIdPrefix" | "rowProps" | "renderRowDetails" | "renderCell">) {
   "use no memo"
   const scrollRef = React.useRef<HTMLDivElement>(null)
   const headRef = React.useRef<HTMLTableSectionElement>(null)
@@ -599,7 +600,7 @@ function TableSurface<T extends RowData>({
     scrollMargin: headHeight,
     measureElement: element => element.getBoundingClientRect().height,
   })
-  const groups = table.getHeaderGroups()
+  const groups = hideHeader ? [] : table.getHeaderGroups()
   const virtualItems = virtualizer.getVirtualItems()
   const items = virtualized
     ? virtualItems.flatMap(item => {
@@ -619,8 +620,8 @@ function TableSurface<T extends RowData>({
       className={cn("tabular-nums", virtualized && "grid")}
       style={virtualized ? { minWidth: totalWidth } : undefined}>
       {caption ? <TableCaption>{caption}</TableCaption> : null}
-      <TableHeader ref={headRef} role={role("rowgroup")}
-        className={cn(hideHeader && "sr-only", (virtualized || stickyHeader) && "sticky top-0 z-10 bg-surface-subtle", virtualized && "grid")}>
+      {!hideHeader ? <TableHeader ref={headRef} role={role("rowgroup")}
+        className={cn((virtualized || stickyHeader) && "sticky top-0 z-10 bg-surface-subtle", virtualized && "grid")}>
         {groups.map((group, groupIndex) => (
           <TableRow key={group.id} role={role("row")}
             aria-rowindex={virtualized ? groupIndex + 1 : undefined}
@@ -640,7 +641,7 @@ function TableSurface<T extends RowData>({
             })}
           </TableRow>
         ))}
-      </TableHeader>
+      </TableHeader> : null}
       <TableBody role={role("rowgroup")} className={virtualized ? "relative grid" : undefined}
         style={virtualized && !isLoading && entries.length
           ? { height: virtualizer.getTotalSize(), width: "100%" } : undefined}>
@@ -692,7 +693,7 @@ function TableSurface<T extends RowData>({
                     className={cn(alignClass(meta.align), virtualized && "flex items-center",
                       virtualized && flexAlignClass(meta.align), (meta.wrap || wrapCells) && "whitespace-normal",
                       meta.className, meta.cellClassName)}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {renderCell && cell.column.id !== "__select__" ? renderCell(row.original, cell.column.id) : flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </BodyCell>
                 })}
               </TableRow>
