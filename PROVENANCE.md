@@ -50,7 +50,7 @@
 | PV-036 | `packages/ui/src/separator.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/separator.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
 | PV-037 | `packages/ui/src/skeleton.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/skeleton.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
 | PV-038 | `packages/ui/src/switch.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/switch.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
-| PV-039 | `packages/ui/src/table.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/table.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-039 | `packages/ui/src/table.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/table.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결; TableRow 색상 전환에서 outline 제외 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
 | PV-040 | `packages/ui/src/tabs.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/tabs.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
 | PV-041 | `packages/ui/src/textarea.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/textarea.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
 | PV-042 | `packages/ui/src/tooltip.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/tooltip.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
@@ -84,3 +84,7 @@ PV-018·PV-019의 원천 헤더를 보존한 채 common 고유의 opt-in 높이 
 ### 2026-11-11 shadcn Radix와 공통 VirtualTable
 
 공식 Radix Nova MIT 원문을 packages/ui/src에 이관했다. URL·조회본 SHA256·컴포넌트별 위치는 [원장](shadcn-sources.json), MIT 전문은 [고지](packages/ui/SHADCN_LICENSE)에 보존한다. 변경은 내부 import·Lucide 자리표시자 해소·로딩 계약·컨테이너 속성이다. VirtualTable 원천은 kor-travel-map@32668d003ea6a259468e03970bd167359c19ecdb의 packages/kor-travel-map-admin/frontend/src/components/ui/data-table.tsx이며 TanStack9·공통 계약으로 이관한다.
+
+### 2026-11-11 공통 CSS 빌드 산출물
+
+사용자 승인으로 vendor의 고정 Lightning CSS tarball을 root·웹·모바일에서 같은 빌드 의존성으로 사용한다. 상류 원본 source 1d680fa14e9a089c92dc0929f869d6757ae91c30, 수정 684c528b2d16c581c99cf829f9a4988985488d5f 및 serde-content 수정 67fe4a9c5b4595433a731b70dbe31412721bea8c를 [vendor provenance](vendor/lightningcss-provenance.json)와 [고지/소스 위치](vendor/README.md)에 보존한다. tarball bytes를 변경하지 않으며 common 소스 이식 행으로 등록하지 않는다.

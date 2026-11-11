@@ -2,19 +2,19 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, renameSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import policy from "../dependency-policy.json" with { type: "json" };
-function fixture(change, {profile="web",workspace="",canonical=false,policyOverride,requireCanonical=false}={}) {
+function fixture(change, {profile="web",workspace="",canonical=false,policyOverride,requireCanonical=false,packageDirectory=""}={}) {
  const root=mkdtempSync(join(tmpdir(),"kt-policy-"));
  try {
   const dependencies={}, devDependencies={}, packages={}, artifacts={packages:{}};
   mkdirSync(join(root,"vendor"));
-  mkdirSync(join(root,"src"));
+  mkdirSync(join(root,packageDirectory,"src"),{recursive:true});
   for(const name of policy.profiles[profile].required) {
    const version=policy.versions[name] ?? "1.0.0";
    dependencies[name]=version; packages["node_modules/"+name]={version};
@@ -28,12 +28,12 @@ function fixture(change, {profile="web",workspace="",canonical=false,policyOverr
   }
   const canonicalArtifacts=structuredClone(artifacts);
   change?.({dependencies,devDependencies,packages,artifacts,root});
-  writeFileSync(join(root,"package.json"),JSON.stringify({dependencies,devDependencies}));
+  writeFileSync(join(root,packageDirectory,"package.json"),JSON.stringify({dependencies,devDependencies}));
   writeFileSync(join(root,"package-lock.json"),JSON.stringify({lockfileVersion:3,packages}));
   writeFileSync(join(root,"common-artifacts.json"),JSON.stringify(artifacts));
   if(canonical) writeFileSync(join(root,"canonical.json"),JSON.stringify(canonicalArtifacts));
   if(policyOverride) { const externalPolicy=structuredClone(policy);policyOverride(externalPolicy);writeFileSync(join(root,"policy.json"),JSON.stringify(externalPolicy)); }
-  return spawnSync(process.execPath,[fileURLToPath(new URL("../check-dependencies.mjs",import.meta.url)),"--artifacts","common-artifacts.json","--profile",profile,"--workspace",workspace,...(canonical?["--canonical","canonical.json"]:[]),...(policyOverride?["--policy","policy.json"]:[])],{cwd:root,encoding:"utf8",env:{...process.env,...(requireCanonical?{KT_REQUIRE_CANONICAL:"1"}:{})}});
+  return spawnSync(process.execPath,[fileURLToPath(new URL("../check-dependencies.mjs",import.meta.url)),"--package",join(packageDirectory,"package.json"),"--artifacts","common-artifacts.json","--profile",profile,"--workspace",workspace,...(canonical?["--canonical","canonical.json"]:[]),...(policyOverride?["--policy","policy.json"]:[])],{cwd:root,encoding:"utf8",env:{...process.env,...(requireCanonical?{KT_REQUIRE_CANONICAL:"1"}:{})}});
  } finally {rmSync(root,{recursive:true,force:true});}
 }
 test("동일 선언·lock·산출물은 통과",()=>{const result=fixture();assert.equal(result.status,0,result.stderr);});
@@ -105,4 +105,85 @@ test("중앙 CI는 정책과 산출물의 외부 정본 입력을 요구",()=>re
 test("중앙 CI의 동일 최신 정책·산출물은 통과",()=>{
  const result=fixture(undefined,{canonical:true,policyOverride:()=>{},requireCanonical:true});
  assert.equal(result.status,0,result.stderr);
+});
+
+for (const profile of ["web", "mobile"]) {
+ test(profile + "의 Lightning CSS는 개발 의존성으로 허용", () => {
+  const result=fixture(({dependencies,devDependencies})=>{
+   devDependencies.lightningcss=dependencies.lightningcss;
+   delete dependencies.lightningcss;
+  },{profile,canonical:true});
+  assert.equal(result.status,0,result.stderr);
+ });
+}
+test("Lightning CSS build metadata가 다른 lock 버전은 거부",()=>rejected(fixture(({packages})=>{
+ packages["node_modules/lightningcss"].version="1.33.0+nativecss.fix.2";
+}),"lock 설치 버전"));
+test("Lightning CSS registry 선언으로 vendor를 우회하면 거부",()=>rejected(fixture(({dependencies})=>{
+ dependencies.lightningcss=policy.versions.lightningcss;
+}),"공통 vendor 산출물 참조 불일치"));
+test("Lightning CSS의 파일·원장·lock을 함께 바꿔도 중앙 bytes가 다르면 거부",()=>rejected(fixture(({root,packages,artifacts})=>{
+ const bytes=Buffer.from("변경된 CSS compiler"),integrity="sha512-"+createHash("sha512").update(bytes).digest("base64");
+ writeFileSync(join(root,"vendor/lightningcss-"+policy.versions.lightningcss+".tgz"),bytes);
+ packages["node_modules/lightningcss"].integrity=integrity;
+ artifacts.packages.lightningcss.integrity=integrity;
+},{canonical:true,profile:"mobile"}),"중앙 산출물 정본과 다름"));
+for (const changed of ["version","integrity"]) {
+ test("개발 도구 아래 Lightning CSS의 다른 "+changed+"는 거부",()=>rejected(fixture(({devDependencies,packages})=>{
+  devDependencies.builder="1.0.0";
+  packages["node_modules/builder"]={version:"1.0.0",dependencies:{lightningcss:policy.versions.lightningcss}};
+  packages["node_modules/builder/node_modules/lightningcss"]={...packages["node_modules/lightningcss"],
+   [changed]:changed==="version"?"1.33.0":"sha512-변경된bytes"};
+ }),"빌드 전이 버전·bytes 불일치"));
+}
+test("연결되지 않은 다른 workspace의 CSS는 현재 앱의 판정 밖",()=>{
+ const result=fixture(({packages})=>{
+  packages["apps/other/node_modules/lightningcss"]={version:"1.30.1",integrity:"다른 앱"};
+ });
+ assert.equal(result.status,0,result.stderr);
+});
+function sharedVendor({dependencies,root},prefix) {
+ mkdirSync(join(root,"apps/web"),{recursive:true});
+ renameSync(join(root,"vendor"),join(root,"apps/web/vendor"));
+ for(const name of Object.keys(dependencies)) if(policy.artifactPackages.includes(name)) {
+  const filename=dependencies[name].slice("file:vendor/".length);
+  dependencies[name]="file:"+prefix+filename;
+ }
+}
+test("root가 workspace 안의 공통 vendor 파일을 직접 참조해도 허용",()=>{
+ const result=fixture(data=>sharedVendor(data,"apps/web/vendor/"),{canonical:true});
+ assert.equal(result.status,0,result.stderr);
+});
+test("모바일의 형제 workspace vendor 상대 경로를 허용",()=>{
+ const result=fixture(data=>sharedVendor(data,"../web/vendor/"),{
+  profile:"mobile",workspace:"apps/mobile",packageDirectory:"apps/mobile",canonical:true});
+ assert.equal(result.status,0,result.stderr);
+});
+test("lock 루트 밖의 vendor 참조는 거부",()=>rejected(fixture(({dependencies})=>{
+ dependencies.lightningcss="file:../외부/vendor/lightningcss-"+policy.versions.lightningcss+".tgz";
+}),"공통 vendor 산출물 참조 불일치"));
+test("절대 vendor 경로는 같은 파일이어도 거부",()=>rejected(fixture(({dependencies,root})=>{
+ dependencies.lightningcss="file:"+join(root,"vendor/lightningcss-"+policy.versions.lightningcss+".tgz");
+}),"공통 vendor 산출물 참조 불일치"));
+test("vendor symlink가 lock 루트를 벗어나면 거부",()=>{
+ const outside=mkdtempSync(join(tmpdir(),"kt-css-outside-"));
+ try {
+  const result=fixture(({root})=>{
+   renameSync(join(root,"vendor"),join(root,"saved-vendor"));
+   symlinkSync(outside,join(root,"vendor"),"junction");
+   writeFileSync(join(outside,"lightningcss-"+policy.versions.lightningcss+".tgz"),Buffer.from("lightningcss"));
+  });
+  rejected(result,"공통 vendor 산출물 참조 불일치");
+ } finally {rmSync(outside,{recursive:true,force:true});}
+});
+
+test("루트 밖 선언이 symlink로 안으로 돌아와도 비이식 경로이므로 거부",()=>{
+ const outside=mkdtempSync(join(tmpdir(),"kt-css-return-"));
+ try {
+  const result=fixture(({dependencies,root})=>{
+   symlinkSync(root,join(outside,"return"),"junction");
+   dependencies.lightningcss="file:"+relative(root,join(outside,"return/vendor/lightningcss-"+policy.versions.lightningcss+".tgz"));
+  });
+  rejected(result,"공통 vendor 산출물 참조 불일치");
+ } finally {rmSync(outside,{recursive:true,force:true});}
 });

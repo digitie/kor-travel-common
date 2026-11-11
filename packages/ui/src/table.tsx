@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2023 shadcn; 2026 Youn-sok Choi (digitie)
 // Origin: shadcn-ui/ui@dd41d19e2f80ff6891951f7ced74c2c9a650b065 apps/v4/registry/bases/radix/ui/table.tsx (MIT)
 // Derived-From: shadcn/ui Radix Nova
-// Modified: 2026-11-11 — 공통 패키지 경로·아이콘·표현 계약 연결
+// Modified: 2026-11-11 — 공통 패키지 경로·아이콘·표현 계약 연결; TableRow 전환에서 outline 제외
 "use client";
 
 import * as React from "react"
@@ -69,7 +69,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
+        "border-b transition-[color,background-color,border-color,text-decoration-color,fill,stroke] hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
         className
       )}
       {...props}

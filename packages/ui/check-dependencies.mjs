@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 // SPDX-License-Identifier: GPL-3.0-or-later
-import { readFileSync, existsSync, readdirSync } from "node:fs";
-import { resolve, dirname } from "node:path";
+import { readFileSync, existsSync, readdirSync, realpathSync } from "node:fs";
+import { resolve, dirname, basename, relative, isAbsolute, sep } from "node:path";
 import { createHash } from "node:crypto";
 import { parseArgs } from "node:util";
 import { createRequire } from "node:module";
@@ -71,14 +71,38 @@ for (let index = 0; index < runtime.length; index++) {
  }
 }
 for (const [name, locations] of reactLocations) if (locations.size > 1) errors.push(name + ": 런타임 중복 인스턴스 " + [...locations].join(", "));
+const artifactPaths = new Map();
+const artifactRoot = realpathSync(dirname(lockPath));
 for (const [name, spec] of Object.entries(deps)) {
  const wanted = policy.versions[name];
  if (!wanted) continue;
  if (artifactNames.has(name)) {
-  if (spec !== "file:vendor/" + (name.startsWith("@") ? name.slice(1).replace("/", "-") : name) + "-" + wanted + ".tgz") errors.push(name + ": 공통 vendor 산출물 참조 불일치");
+  const filename = (name.startsWith("@") ? name.slice(1).replace("/", "-") : name) + "-" + wanted + ".tgz";
+  const path = spec.startsWith("file:") ? resolve(dirname(packagePath), spec.slice(5)) : null;
+  const locations = path ? [relative(dirname(lockPath), path), relative(artifactRoot, existsSync(path) ? realpathSync(path) : path)] : [];
+  if (!path || isAbsolute(spec.slice(5)) || basename(path) !== filename || basename(dirname(path)) !== "vendor"
+    || locations.some(location => location === ".." || location.startsWith(".." + sep) || isAbsolute(location)))
+    errors.push(name + ": 공통 vendor 산출물 참조 불일치");
+  else artifactPaths.set(name, path);
  } else if (spec !== wanted) errors.push(name + ": 선언 " + spec + " != " + wanted);
  const got = installed(name);
  if (got?.version !== wanted) errors.push(name + ": lock 설치 버전 " + got?.version + " != " + wanted);
+}
+// CSS는 빌드/개발 의존성에서도 실행되므로 해당 앱의 개발 그래프까지 같은 bytes를 확인한다.
+const cssCopies = new Map(), buildVisited = new Set();
+const build = [{ location: values.workspace, entry: manifest }];
+for (let index = 0; index < build.length; index++) {
+ const { location, entry } = build[index];
+ const dependencies = { ...entry.dependencies, ...entry.optionalDependencies, ...entry.peerDependencies,
+  ...(index === 0 ? manifest.devDependencies : {}) };
+ for (const name of Object.keys(dependencies)) {
+  const found = resolveInstalled(name, location);
+  if (!found) continue;
+  if ((found.entry.name ?? name) === "lightningcss") cssCopies.set(found.location, found.entry);
+  if (!buildVisited.has(found.location)) {
+   buildVisited.add(found.location); build.push(found);
+  }
+ }
 }
 // 체크인한 산출물 원장은 실제 bytes와 lock integrity를 함께 검증한다.
 if (!values.artifacts) errors.push("--artifacts 공통 산출물 원장이 필요함");
@@ -93,10 +117,15 @@ else {
   if (canonical && (canonical.packages?.[name]?.integrity !== artifact?.integrity
     || canonical.packages?.[name]?.version !== artifact?.version)) errors.push(name + ": 중앙 산출물 정본과 다름");
   if (!artifact?.integrity || !spec.startsWith("file:")) { errors.push(name + ": 산출물 무결성 원장 누락"); continue; }
-  const path = resolve(dirname(packagePath), spec.slice(5));
+  const path = artifactPaths.get(name);
+  if (!path) continue;
   if (!existsSync(path)) { errors.push(name + ": 산출물 파일 없음"); continue; }
   const actual = "sha512-" + createHash("sha512").update(readFileSync(path)).digest("base64");
   if (artifact.integrity !== actual || installed(name)?.integrity !== actual) errors.push(name + ": 파일·원장·lock 해시 불일치");
+  if (name === "lightningcss") for (const [location, entry] of cssCopies) {
+   if (entry.version !== policy.versions[name] || entry.integrity !== actual)
+    errors.push(name + ": 빌드 전이 버전·bytes 불일치 " + location);
+  }
  }
 }
 function scan(path) {

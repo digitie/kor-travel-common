@@ -39,3 +39,7 @@ Thumbs.db
 
 # Next가 빌드 때 생성하는 타입 참조
 next-env.d.ts
+
+# root vendor 원본에서 준비 스크립트가 복사하는 CSS 산출물
+/packages/ui/smoke/next-app/vendor/
+/packages/ui/examples/next-app/vendor/

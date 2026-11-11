@@ -229,7 +229,7 @@
   "scripts": {
     "build": "node scripts/sync-policy.mjs && tsc -p tsconfig.json && node scripts/check-package.mjs",
     "check": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run && node --test test/dependency-policy.node.test.mjs",
+    "test": "vitest run && node --test test/dependency-policy.node.test.mjs test/native-css-policy.node.test.mjs",
     "prepack": "npm run build",
     "check:examples": "tsc -p tsconfig.examples.json",
     "pretest": "npm run build",

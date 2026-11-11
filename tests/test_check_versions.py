@@ -1469,6 +1469,51 @@ class CheckVersionsTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 CV.Registry.load(self.registry_path)
 
+
+    def test_explicit_semver_axis_accepts_stable_and_build_metadata(self):
+        for version in ("0.0.0", "1.33.0", "1.33.0+nativecss.fix.3",
+                        "1.33.0+001", "5.0.0-rc.1+build.001", "1.0.0-alpha-beta+linux-x64"):
+            with self.subTest(version=version):
+                data = json.loads(json.dumps(REGISTRY))
+                data["axes"]["lightningcss"] = {"ecosystem": "npm", "recommended": None,
+                                              "exact": version, "checked": False}
+                self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+                self.assertEqual(CV.Registry.load(self.registry_path).axes["lightningcss"]["exact"], version)
+
+    def test_explicit_semver_axis_rejects_malformed_versions(self):
+        for version in ("01.33.0", "1.033.0", "1.33.00", "1.33.0-rc.01", "1.33.0-01+fix",
+                        "1.33.0+", "1.33.0+fix..3", "1.33.0+fix_3", "1.33.0+한글",
+                        "1.33.0+fix/3", "v1.33.0+fix.3", ">=1.33.0", "1.3٣.0", "1.33.0+fix.3\n"):
+            with self.subTest(version=version):
+                data = json.loads(json.dumps(REGISTRY))
+                data["axes"]["lightningcss"] = {"ecosystem": "npm", "recommended": None,
+                                              "exact": version, "checked": False}
+                self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    CV.Registry.load(self.registry_path)
+
+    def test_explicit_semver_axis_keeps_prefix_checker_disabled(self):
+        for change in ({"checked": True}, {"recommended": "1.33.0"},
+                       {"ecosystem": "pypi"}, {"exact": 133}, {"exact": None}):
+            with self.subTest(change=change):
+                data = json.loads(json.dumps(REGISTRY))
+                data["axes"]["lightningcss"] = {"ecosystem": "npm", "recommended": None,
+                                              "exact": "1.33.0+nativecss.fix.3", "checked": False}
+                data["axes"]["lightningcss"].update(change)
+                self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    CV.Registry.load(self.registry_path)
+
+    def test_css_artifact_is_required_for_web_and_mobile_builds(self):
+        data = CV.Registry.load(SCRIPT.parents[1] / "versions.json").data
+        policy = data["frontendPolicy"]
+        self.assertIn("lightningcss", policy["artifactPackages"])
+        self.assertIn("lightningcss", policy["packages"])
+        self.assertIn("+", data["axes"]["lightningcss"]["exact"])
+        for profile in ("web", "mobile"):
+            self.assertIn("lightningcss", policy["profiles"][profile]["required"])
+            self.assertNotIn("lightningcss", policy["profiles"][profile]["runtimeRequired"])
+
     def test_frontend_profile_versions_and_forbidden_are_connected(self):
         original = json.loads((SCRIPT.parents[1] / "versions.json").read_text())
         for mutation in ("unknown_required", "forbidden_required", "unknown_artifact"):

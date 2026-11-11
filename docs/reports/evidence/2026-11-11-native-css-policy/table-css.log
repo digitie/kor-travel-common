@@ -1,0 +1,3 @@
+Tailwind 클래스: transition-[color,background-color,border-color,text-decoration-color,fill,stroke]
+생성 transition-property: color,background-color,border-color,text-decoration-color,fill,stroke
+outline 제외: PASS; 실제 computed style/포커스 판정은 A/B 브라우저 delta 리뷰

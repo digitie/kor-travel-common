@@ -46,6 +46,7 @@ Geo·Map·Weather·Concierge·Docker Manager·Pinvi 웹/관리자·Transport 웹
 | eslint-plugin-react-hooks | 7.1.1 |
 | eslint-plugin-react-x | 5.30.1 |
 | jsdom | 31.0.0 |
+| lightningcss | versions.json의 exact 및 고정 vendor 원장 |
 | lucide-react | 1.72.0 |
 | maplibre-gl | 6.17.0 |
 | nativewind | 5.0.0-rc.1 |
@@ -81,6 +82,14 @@ Geo·Map·Weather·Concierge·Docker Manager·Pinvi 웹/관리자·Transport 웹
 | zustand | 5.1.0 |
 
 TypeScript는 OpenAPI 생성기와 typescript-eslint peer 범위 때문에 5.9.3, Node 타입은 Node22 실행환경에 맞춘다. NativeWind RC는 사용자 승인에 따른 것으로 대응 엔진과 함께 고정한다. stable로 표시하지 않는다.
+
+## CSS compiler의 공통 bytes
+
+Lightning CSS는 웹과 모바일 모두 필수인 **빌드/개발 의존성**이다. runtimeRequired에는 넣지 않는다. 승인한 stable SemVer의 build metadata를 포함한 전체 문자열과 단일 vendor SHA512를 대조하며, metadata가 다른 같은 기본 버전도 같은 후보로 취급하지 않는다. 원본 수정과 라이선스/소스 동봉은 [vendor 고지](../../vendor/README.md)를 따른다.
+
+앱 root나 모바일 workspace가 같은 물리 파일을 공유할 수 있다. file:vendor/...뿐 아니라 file:apps/web/vendor/...와 file:../web/vendor/...도 허용한다. 대상은 lock 루트 내부의 vendor 디렉터리와 정규 산출물 파일명이어야 한다. 절대 경로·루트 밖 경로·밖으로 나가는 symlink는 거부하며, 파일·원장·lock·중앙 SHA512 검증은 유지한다. 해당 앱이 실제로 참조하는 개발 그래프의 중첩 Lightning CSS도 같은 버전/bytes여야 한다. 연결되지 않은 다른 workspace의 설치본은 현재 앱 판정에 섞지 않는다.
+
+common root와 실제 Next smoke/example의 설치 정의도 같은 tarball과 root override를 사용한다. 새 패키지 설치 전에 준비 스크립트가 생성 vendor를 복사하며 CI 경로에서도 이를 보존한다. 소비자별 로컬 재빌드/재포장으로 동일 버전의 다른 bytes를 만들지 않는다.
 
 ## CSS와 글꼴
 

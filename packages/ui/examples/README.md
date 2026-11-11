@@ -26,6 +26,7 @@
 ```bash
 npm ci
 npm run build -w packages/ui
+node packages/ui/smoke/prepare-lock.mjs --css-only
 npm ci --prefix packages/ui/examples/next-app
 npm run dev --prefix packages/ui/examples/next-app
 ```
@@ -49,3 +50,5 @@ npm run build --prefix packages/ui/smoke/next-app
 매 실행에서 생성하는 두 로컬 tarball은 checkout의 줄바꿈·파일 모드에 따라 digest가 달라질 수 있다. 준비 스크립트는 명시한 두 `file:` 경로의 integrity만 실제 생성물에서 갱신한다. registry 의존의 버전·URL·integrity는 고정 lockfile 그대로 `npm ci`가 검증한다. 이 개발 fixture의 갱신 방식은 발행된 패키지의 digest 검증을 대체하지 않는다.
 
 Geo 입력 경계도 원천의 text-secondary 색을 사용해 3:1 비텍스트 대비를 확보한다. axe의 텍스트 대비 검사와 입력 경계 대비 실측은 별개로 검증한다.
+
+두 Next 설치 경로의 Lightning CSS는 root의 고정 vendor 파일을 준비 단계에서 복사한다. CSS 원장·lock integrity가 다르면 갱신하지 않고 실패하며 [빌드 의존성 고지](../../../vendor/README.md)를 따른다.

@@ -3,7 +3,9 @@
   "candidate": "integration-7-review",
   "sources": {
     "common": "5e064808fabd3a54968dd20910eaccd04eba9f38",
-    "maplibre-vworld-react": "9a7a348b02d61969b394c681b024d5851eef836b"
+    "maplibre-vworld-react": "9a7a348b02d61969b394c681b024d5851eef836b",
+    "lightningcss": "684c528b2d16c581c99cf829f9a4988985488d5f",
+    "serde-content": "67fe4a9c5b4595433a731b70dbe31412721bea8c"
   },
   "packages": {
     "@kor-travel/ui": {
@@ -30,6 +32,11 @@
       "version": "1.0.1",
       "filename": "vworld-map-rn-1.0.1.tgz",
       "integrity": "sha512-lgDBasKIEG2ElQ9jnHDB9pA+x04Xge9yzBb1NPPw1auyvlkQvxsq4NfRPIrw1VWiutcGiIefySLiVaZDUkO69Q=="
+    },
+    "lightningcss": {
+      "version": "1.33.0+nativecss.fix.3",
+      "filename": "lightningcss-1.33.0+nativecss.fix.3.tgz",
+      "integrity": "sha512-Q6DDVLGjtJ2zcOkvV2+bKcTAb8dB+HJXgDYAm9mrGL2Og2HBMCRzMaeOpGB8IgAxu11if506Wm6X3Dd+Rk+T7A=="
     }
   }
 }

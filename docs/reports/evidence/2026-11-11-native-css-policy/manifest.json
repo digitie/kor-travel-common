@@ -1,0 +1,30 @@
+{
+  "base": "8dad71a50f9f8f12f0e3ba1c913a93e404dabfed",
+  "branch": "agent/codex-native-css-policy",
+  "tests": {
+    "schema": 8,
+    "node_policy_and_preparation": 40,
+    "vendor_source_notices": 2,
+    "skipped": 0
+  },
+  "artifact": {
+    "version": "1.33.0+nativecss.fix.3",
+    "filename": "lightningcss-1.33.0+nativecss.fix.3.tgz",
+    "integrity": "sha512-Q6DDVLGjtJ2zcOkvV2+bKcTAb8dB+HJXgDYAm9mrGL2Og2HBMCRzMaeOpGB8IgAxu11if506Wm6X3Dd+Rk+T7A=="
+  },
+  "checks": {
+    "typecheck": "PASS",
+    "tailwind_outline_excluded": "PASS",
+    "full_ui_browser": "NOT_RUN(부모 A/B 3차 delta)",
+    "full_new_install": "NOT_RUN(읽기 전용 node_modules 공유)",
+    "spdx": "PASS(198개 파일, 오류 0)",
+    "document_links": "PASS(798개 문서, 오류 0)",
+    "generated_policy_copies": "PASS(root/UI/tokens 일치)",
+    "lock_change_scope": "PASS(CSS 직접 항목·stock platform 제거 외 차이 없음)"
+  },
+  "review_fixes": [
+    "B 신규 P3 tokens 고지 모순",
+    "A-P2-08 TableRow outline 전환"
+  ],
+  "parent_scope": "8개 산출물 refresh, 독립 2인 최종 delta, 전체 CI"
+}

@@ -25,6 +25,10 @@ public center/sheet처럼 기존 표현을 소유하는 어댑터는 unstyled와
 기존 폭 체계의320px/1280px로 연결하고, lg/xl/full도 viewport 양옆16px 여백을 보존한다.
 소비자 className의 일반·반응형 최대 폭은 마지막에 적용한다.
 
+### CSS 빌드 정책 후속 후보
+
+Lightning CSS의 원본 수정 단일 산출물을 웹·모바일의 개발 의존성으로 고정한다. exact SemVer build metadata, 공유 vendor 상대 경로, 개발 그래프의 중첩 bytes, root·Next smoke/example의 lock 및 CI 복사 경로를 함께 검사한다. [정책](docs/standards/frontend-libraries.md)과 [동봉 고지](vendor/README.md)를 따른다. 기존 UI/tokens 등 산출물 재생성과 소비자 반영은 부모 통합 단계다.
+
 ## 2026-10-25 — 남은 높이 지도 작업면 후보
 
 UI dev.8에 opt-in MapWorkspace·MapFilterPanel·MapStage와 상세 header/접기를 추가했다. 기존 dev.7 기본값과 스타일은 유지한다. [계약](docs/standards/map-controls.md).
@@ -55,6 +59,8 @@ UI dev.8에 opt-in MapWorkspace·MapFilterPanel·MapStage와 상세 header/접�
 ### ui
 
 #### Fixed
+
+- TableRow의 색상 전환에서 outline을 제외해 포커스 표시에 전환 지연이 적용되지 않게 한다. 고지의 shadcn CSS 동봉 설명을 실제 상태와 맞춘다. 실제 브라우저 delta 판정은 독립 리뷰에서 확인한다.
 
 - 개발 후보 dev.9의 LoginForm은 SSR·초기 hydration 중 입력과 submit을 native disabled로 닫는다. client handler 준비 후 기존 비동기 pending 포커스·오류·재시도 계약을 유지한다. 공개 props·슬롯·인증 정책은 바뀌지 않는다. [T-217](docs/tasks/T-217-login-hydration-readiness.md).
 

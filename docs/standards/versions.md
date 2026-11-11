@@ -39,6 +39,8 @@
 
 근거: map의 exact 핀 + 상수 검증(`verify-*.mjs`), pinvi lock 무결성 검사, weather `--locked`, dm SHA 핀이 각각 다른 계층을 이미 강제하고 있어(`vm` §3.6·§7.2 P3) 하나로 통일하면 어느 쪽이든 큰 이동이 필요하다. 전면 정확 핀(P1)은 봇 없이 유지 불가, caret+lock(P2)만으로는 매니페스트만 봐서 판정 불가라 기각했다.
 
+프론트엔드의 승인 exact 축은 정식 SemVer 전체(안정 버전, prerelease, build metadata)를 허용한다. 숫자 core와 prerelease 숫자의 선행 0, 빈 식별자, ASCII 밖 문자는 거부한다. build 숫자 식별자의 선행 0은 SemVer 규칙대로 허용한다. 이 축은 checked: false와 recommended: null로 기존 접두 버전 검사에서 제외하고, 생성 프론트엔드 정책이 metadata까지 정확 문자열 및 산출물 bytes를 검사한다. Lightning CSS 적용과 공유 vendor 경로는 [프론트엔드 라이브러리](frontend-libraries.md)의 CSS compiler 규칙을 따른다.
+
 ### 3.2 lockfile 의무
 
 - npm: `package-lock.json` **lockfileVersion 3** 커밋. CI·Docker는 `npm ci`. lockfileVersion 1·2는 `NO_LOCK`으로 본다. `npm-shrinkwrap.json`이 함께 있으면 npm이 이를 우선하므로, 미지원 shrinkwrap 대신 package-lock을 신뢰하지 않고 `NO_LOCK`으로 보고한다.

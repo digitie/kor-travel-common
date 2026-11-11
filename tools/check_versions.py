@@ -327,11 +327,11 @@ class Registry:
                     raise ValueError(f"{path}: axes.{key}.{field_name} 버전 오류")
             if "exact" in axis:
                 exact = axis["exact"]
-                # 승인 RC의 정확 비교는 JS 정책 검사기가 담당한다.
+                # 정확 SemVer의 비교와 산출물 bytes는 JS 정책 검사기가 담당한다.
                 if (axis["ecosystem"] != "npm" or axis.get("checked") is not False
                         or axis.get("recommended") is not None or not isinstance(exact, str)
-                        or not re.fullmatch(r"(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*", exact)):
-                    raise ValueError(f"{path}: axes.{key}.exact 승인 prerelease 계약 오류")
+                        or not re.fullmatch(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?", exact)):
+                    raise ValueError(f"{path}: axes.{key}.exact 승인 SemVer 계약 오류")
             floor, recommended, maximum = (parse_version(axis.get(n)) for n in ("floor", "recommended", "max"))
             if ((floor is not None and recommended is not None and below(recommended, floor))
                     or (maximum is not None and any(v is not None and at_or_above(v, maximum)

@@ -192,7 +192,9 @@ jobs:
       - name: npm 고정 버전 설치
         run: npm install -g npm@11.19.1
       - name: workspace 의존성 설치
-        run: npm ci --no-audit --no-fund
+        run: |
+          node packages/ui/smoke/prepare-lock.mjs --css-only
+          npm ci --no-audit --no-fund
       - name: tokens 패키지 빌드·검사·테스트
         run: |
           npm run lint --if-present --workspace packages/tokens
@@ -217,6 +219,7 @@ jobs:
           trap 'rm -rf "$smoke_dir"' EXIT
           smoke_app="$smoke_dir/packages/ui/smoke/next-app"
           mkdir -p "$smoke_app" "$smoke_dir/test-results/ui-pack"
+          # 준비 단계가 복사한 동일 CSS vendor도 격리된 smoke 트리에 포함한다.
           tar --exclude=node_modules --exclude=.next -C packages/ui/smoke/next-app -cf - . | tar -C "$smoke_app" -xf -
           cp test-results/ui-pack/*.tgz "$smoke_dir/test-results/ui-pack/"
           npm ci --prefix "$smoke_app" --no-audit --no-fund

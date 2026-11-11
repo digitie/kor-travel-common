@@ -17,7 +17,8 @@
     "@kor-travel/tokens",
     "vworld-map-core",
     "vworld-map-web",
-    "vworld-map-rn"
+    "vworld-map-rn",
+    "lightningcss"
   ],
   "profiles": {
     "web": {
@@ -34,7 +35,8 @@
         "zustand",
         "pretendard",
         "eslint",
-        "react-doctor"
+        "react-doctor",
+        "lightningcss"
       ],
       "runtimeRequired": [
         "next",
@@ -62,7 +64,8 @@
         "pretendard",
         "eslint",
         "react-doctor",
-        "@kor-travel/tokens"
+        "@kor-travel/tokens",
+        "lightningcss"
       ],
       "runtimeRequired": [
         "react",
@@ -112,6 +115,7 @@
     "eslint-plugin-react-hooks": "7.1.1",
     "eslint-plugin-react-x": "5.30.1",
     "jsdom": "31.0.0",
+    "lightningcss": "1.33.0+nativecss.fix.3",
     "lucide-react": "1.72.0",
     "maplibre-gl": "6.17.0",
     "nativewind": "5.0.0-rc.1",
