@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2023 shadcn; 2026 Youn-sok Choi (digitie)
 // Origin: shadcn-ui/ui@dd41d19e2f80ff6891951f7ced74c2c9a650b065 apps/v4/registry/bases/radix/ui/dialog.tsx (MIT)
 // Derived-From: shadcn/ui Radix Nova
-// Modified: 2026-11-11 — 공통 패키지 경로·아이콘·표현 계약 연결
+// Modified: 2026-11-11 — 공통 경로·아이콘 연결; 2026-11-12 — viewport 스크롤·반응형 폭·overlay 전달·표현 opt-in
 "use client";
 
 import { XIcon } from "lucide-react";
@@ -16,6 +16,15 @@ import { cn } from "./utils.js"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { Button } from "./button.js"
+
+const dialogSizeClasses = {
+  sm: "max-w-xs",
+  md: "max-w-sm",
+  lg: "max-w-3xl",
+  xl: "max-w-5xl",
+  "2xl": "max-w-7xl",
+  full: "max-w-none",
+} as const
 
 function Dialog({
   ...props
@@ -43,13 +52,14 @@ function DialogClose({
 
 function DialogOverlay({
   className,
+  unstyled = false,
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+}: React.ComponentProps<typeof DialogPrimitive.Overlay> & { unstyled?: boolean }) {
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        !unstyled && "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}
@@ -59,22 +69,26 @@ function DialogOverlay({
 
 function DialogContent({
   className,
+  overlayProps,
+  unstyled = false,
   children,
   showCloseButton = true,
   size = "md",
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
+  overlayProps?: React.ComponentProps<typeof DialogPrimitive.Overlay> & { "data-testid"?: string }
+  unstyled?: boolean
   size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full"
   showCloseButton?: boolean
 }) {
   return (
     <DialogPortal>
-      <DialogOverlay />
+      <DialogOverlay {...overlayProps} unstyled={unstyled} />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
-          size === "full" ? "max-w-[calc(100%-2rem)]" : size === "xl" ? "sm:max-w-5xl" : size === "lg" ? "sm:max-w-3xl" : undefined,
+          !unstyled && "fixed top-1/2 left-1/2 z-50 grid max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          !unstyled && dialogSizeClasses[size],
           className
         )}
         {...props}

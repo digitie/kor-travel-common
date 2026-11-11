@@ -5,7 +5,7 @@ const app = process.env.SMOKE_APP;
 if (!app) throw new Error("SMOKE_APP 격리 설치 경로 필요");
 export default defineConfig({
   testDir: ".",
-  testMatch: "radix-browser.spec.ts",
+  testMatch: ["radix-browser.spec.ts", "dialog-browser.spec.ts"],
   workers: 1,
   use: { baseURL: "http://127.0.0.1:13010" },
   webServer: {

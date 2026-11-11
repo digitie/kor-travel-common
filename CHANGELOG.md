@@ -8,6 +8,23 @@
 
 폼·상태·글꼴 공통 경로와 선언·workspace lock·산출물 무결성 검사기를 추가했다. 현재는 소비자 검증과 독립 리뷰 전 후보이며 릴리스·배포 완료가 아니다.
 
+### Fixed
+
+- 긴 Dialog·AlertDialog는 viewport에서 상하 여백을 확보하고 내부에서 스크롤한다.
+  끝의 생성·이동·승인 버튼과 상단 닫기에 접근하고, Radix 포털·포커스 복원을 유지한다.
+- DialogContent·AlertDialogContent의 overlayProps는 내부 단일 Overlay에 소비자의
+  ref·이벤트·className·testid를 전달한다. unstyled(기본 false)는 Content와 내부 Overlay의
+  기본 CSS 레시피만 생략하며 Radix 모달·초점·해제 동작과 슬롯은 유지한다.
+
+### 이관
+
+기존 관리자 화면의 별도 viewport 높이 제한은 공통 기본값으로 대체할 수 있다.
+public center/sheet처럼 기존 표현을 소유하는 어댑터는 unstyled와 className/overlayProps로
+배치·배경·폭·본문 스크롤을 정하고, 취소/진행 중 정책은 기존 Radix 이벤트에서 유지한다.
+기본 md의 최대384px을 유지하고, 화면이 좁으면 양옆16px 여백 안으로 줄어든다. sm/2xl의 누락된 최대 폭은
+기존 폭 체계의320px/1280px로 연결하고, lg/xl/full도 viewport 양옆16px 여백을 보존한다.
+소비자 className의 일반·반응형 최대 폭은 마지막에 적용한다.
+
 ## 2026-10-25 — 남은 높이 지도 작업면 후보
 
 UI dev.8에 opt-in MapWorkspace·MapFilterPanel·MapStage와 상세 header/접기를 추가했다. 기존 dev.7 기본값과 스타일은 유지한다. [계약](docs/standards/map-controls.md).
