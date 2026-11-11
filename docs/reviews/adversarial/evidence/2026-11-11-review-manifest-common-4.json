@@ -1,0 +1,107 @@
+{
+  "scope": "공통 후보9 동일 원 리뷰어 4차 — 정책 우회·archive·문서 정본",
+  "createdAt": "2026-11-11T16:59:42.934945+00:00",
+  "repositories": [
+    {
+      "name": "kor-travel-common",
+      "base": "c289b4624c8640eb918cc915803e72ae754e58fb",
+      "head": "2ec519255ec1af9fca18856d980e968ee15b80a8",
+      "previousReviewHead": "7e3f33e0391990b9312fee513de581e28035aa8b"
+    },
+    {
+      "name": "maplibre-vworld-react",
+      "base": "9c46c57181d433c91f7e8837c4e4396204e9b583",
+      "head": "9a7a348b02d61969b394c681b024d5851eef836b",
+      "previousReviewHead": "9a7a348b02d61969b394c681b024d5851eef836b",
+      "mergedAs": "ae1e209967b3be7a3918f44e4df278add9f1376c",
+      "mainTreeEqualsHead": true
+    }
+  ],
+  "artifacts": {
+    "status": "CANDIDATE_NOT_RELEASED",
+    "candidate": "integration-9-review",
+    "sources": {
+      "common": "2c1182e765bb2bc53e01e0962cf2a73683891e1d",
+      "maplibre-vworld-react": "9a7a348b02d61969b394c681b024d5851eef836b",
+      "lightningcss": "748651cbd845971e65c411166ddee101745dab21",
+      "serde-content": "18e53fcf6f8ace093a292891b34fa3411192617d"
+    },
+    "packages": {
+      "@kor-travel/tokens": {
+        "version": "0.1.1",
+        "filename": "kor-travel-tokens-0.1.1.tgz",
+        "integrity": "sha512-+JglXOZhP11afRr/upKHWz7cjsj4IPIKYkoVh8lq9IcJTKU8zIHA8pirC1IOS1++gqOmMCnPkj1oi8EzJsTUyQ=="
+      },
+      "@kor-travel/ui": {
+        "version": "0.2.0",
+        "filename": "kor-travel-ui-0.2.0.tgz",
+        "integrity": "sha512-buhlDym3/Id355Cse+lwBsFk3G1nz3dY2XviAA+X82TZPXmcujYGxItRZafsY0t4xsWkiQ3jAxtCYjFZ7JsbEQ=="
+      },
+      "lightningcss": {
+        "version": "1.33.0+nativecss.fix.4",
+        "filename": "lightningcss-1.33.0+nativecss.fix.4.tgz",
+        "integrity": "sha512-zDQ03VJE37OlyBrLsRcsEdIVu0T4BXJKDH5y9//To6GlGN2UrKQGERFVAFblkPQ5ZEbhuOp5wpXxGARZNdbQLA=="
+      },
+      "vworld-map-core": {
+        "version": "1.0.1",
+        "filename": "vworld-map-core-1.0.1.tgz",
+        "integrity": "sha512-Djm14Arr7U0r7Sabj6P0V57CdzWIGaJmecklmY1hwrq1QUZJjMUFgkZfGRFalUo6AFzHEwwzOEzbJPMifGhINw=="
+      },
+      "vworld-map-rn": {
+        "version": "1.0.1",
+        "filename": "vworld-map-rn-1.0.1.tgz",
+        "integrity": "sha512-lgDBasKIEG2ElQ9jnHDB9pA+x04Xge9yzBb1NPPw1auyvlkQvxsq4NfRPIrw1VWiutcGiIefySLiVaZDUkO69Q=="
+      },
+      "vworld-map-web": {
+        "version": "1.0.3",
+        "filename": "vworld-map-web-1.0.3.tgz",
+        "integrity": "sha512-HPXZcz/wP6tFsCZqlAbansWNICcZPubC+/V7rDWXYTQVlOBLl9cZQ1HSMJd25c2CZoMNreVFTQA0vzkVglkS1w=="
+      }
+    }
+  },
+  "artifactDirectory": "/home/digitie/dev/common-unification-20261111/artifacts/integration-9-review",
+  "validation": {
+    "policy": "실제 기존11실패와 확장자4실패 보존; source2c의 정책68 PASS. version 문서 단독drift·registry변경·marker유실3 FAIL-before/PASS-after.",
+    "scanner": "source97의 전체도구379실행378PASS/1SKIP; 공개 archive의 exact member+rule+SHA256예외32/4로 두스캔발견0. 원binary/UTF8오류와 falsepositive logs보존.",
+    "source4Publish": "813문서3125targets0errors; 새rawarchive포함1351files 두스캔0findings32/4exceptions. metadata문서의후속5파일commit2ec는3단위PASS/checkpolicyPASS, 전체CI새로요청.",
+    "runtime": "UI101/tokens9/packedChromium65+Turbo10/webpack+Turbopack는source3실제c8. c9는 UI94/tokens25 중 checker2개만달라서 runtime/CSS/metadata117개전부동일;2c의새checker가c9에실제포함.",
+    "foundation": "VWorldPR32 merged ae1,SerdePR1 merged21d; fetchmain treeequalsreviewed9a/18e. NativeCSS35 MacIntel/Linux/Win/sourcegateCIallSUCCESS separateNative3manifest.",
+    "remoteCI": "Common2ec 방금push; 정확source4원격결과아직미수용. 공통3e/00ddd/7e이전CI는대체하지않음."
+  },
+  "limits": [
+    "기존source3/원review/원manifest3를수정하지않았다. 원finding의closure는동일원reviewer의재확인후기록한다.",
+    "source4의원격CI·최종소비자독립review·앱새이미지배포는각각별도gate다.",
+    "VWorld는source3과같은9a bytes이며mergedmain ae와tree동일, 별도再빌드로표시하지않는다."
+  ],
+  "evidence": {
+    "common-policy-source3-before.log": "9d654d49b7c24beeb111bf26df2549bfbceea3cf294fbb7363d3328c923ef9db",
+    "common-policy-source3-after.log": "c98f06f97a060dc26f99d23b0fbd012a6f272d464fb53877813b7532e470b187",
+    "common-policy-source3-after-extensions.log": "4a927d8f205d00c806f887937c3b5c5e40aa0e4ebecb1ec328f006baa3936900",
+    "common-policy-docs-before.log": "ad0b368522a52852b9311c4064540ff3295af6a56f78f06d4f8d594a31ced244",
+    "common-policy-docs-after.log": "69bbe55c8b887d8e19600cff7d0867c2dd7824bceffc52f6fb1fb6bda2f854f2",
+    "common-c9-publish-secrets.log": "eb657f75050436b71e9a48df2b3beef195d3fad9dd5185370b25cf4403f56b9d",
+    "common-c9-publish-prod.log": "67e2afa5d356bce0779eff06d3a9067e2892c5497a48a55475c9aaa8f8365eeb",
+    "common-c9-publish-links.log": "c5c95a842ecf9d85adb30c7903da0cf4c6b780bfea2d9701b065f0b86ceda034"
+  },
+  "previousManifestSHA256": "047ae6686cf8a08515a1e20b97147c218d5278823e976a6022aad34097021cd6",
+  "runtimeEquivalence": {
+    "source": "2c1182e765bb2bc53e01e0962cf2a73683891e1d",
+    "candidate": "integration-9-review",
+    "comparison": {
+      "@kor-travel/tokens": {
+        "fileCount": 25,
+        "changed": [
+          "package/check-dependencies.mjs"
+        ],
+        "allRuntimeCssMetadataIdentical": true
+      },
+      "@kor-travel/ui": {
+        "fileCount": 94,
+        "changed": [
+          "package/check-dependencies.mjs"
+        ],
+        "allRuntimeCssMetadataIdentical": true
+      }
+    }
+  }
+}

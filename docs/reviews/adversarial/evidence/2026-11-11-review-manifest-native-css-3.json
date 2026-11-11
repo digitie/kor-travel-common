@@ -1,0 +1,168 @@
+{
+  "scope": "NativeCSS 동일 원 리뷰어 3차 — Mac 실제 host 및 CI metadata 한정",
+  "createdAt": "2026-11-11T16:59:42.934945+00:00",
+  "previousManifestSHA256": "1215c43638009758821f3ec29bdce037513e5c01f6aa76d3839820802ef5428c",
+  "repositories": [
+    {
+      "name": "lightningcss-fix",
+      "repository": "digitie/lightningcss",
+      "base": "1d680fa14e9a089c92dc0929f869d6757ae91c30",
+      "previousReviewHead": "748651cbd845971e65c411166ddee101745dab21",
+      "head": "35fc16b023a9cfb75bad7a311f37780c24961724",
+      "sourceBuiltAt": "1e94372a6da4a55eac4a6dc3ff9cdeec103e8ac1",
+      "pullRequest": "https://github.com/digitie/lightningcss/pull/1",
+      "baseBranch": "release/1.33.0"
+    },
+    {
+      "name": "serde-content-fix",
+      "repository": "digitie/serde-content",
+      "base": "bb5066da57fb0d76a981dbbef04b68f2aff90a3f",
+      "previousReviewHead": "18e53fcf6f8ace093a292891b34fa3411192617d",
+      "head": "18e53fcf6f8ace093a292891b34fa3411192617d",
+      "pullRequest": "https://github.com/digitie/serde-content/pull/1",
+      "baseBranch": "main",
+      "mergedAs": "21d1c7d3f184e362e0a90905939962d43824e0dd",
+      "mainTreeEqualsHead": true
+    }
+  ],
+  "artifactDirectory": "/home/digitie/dev/common-unification-20261111/artifacts/native-css-fix4",
+  "artifact": {
+    "file": "lightningcss-1.33.0+nativecss.fix.4.tgz",
+    "size": 15376394,
+    "integrity": "sha512-zDQ03VJE37OlyBrLsRcsEdIVu0T4BXJKDH5y9//To6GlGN2UrKQGERFVAFblkPQ5ZEbhuOp5wpXxGARZNdbQLA==",
+    "sha256": "12c8326428a56e38231f7b5b376df0c6882e3492da794f3499269628edcaccf0",
+    "provenance": {
+      "rustInputSHA256": "23cc04bc2587fe044f8e4fdf21690eb8fa7a4ebedbc388a06cb3602aac426c75",
+      "nativeBuild": {
+        "revision": "684c528b2d16c581c99cf829f9a4988985488d5f",
+        "rustc": "rustc 1.92.0 (ded5c06cf 2025-12-08)",
+        "binarySHA256": "8a38620c1bbf54acfb12f40b3180ce4e8510a5fb952e9173a3b7fe0b676ecbd6",
+        "wasmSHA256": "4c2a5251dac4f47ebdadce39579febee5e12e00a3c892e5719e2a46ffa535a27",
+        "rawWasmSHA256": "d392deef78bf3cd0026c9e05fab68d3b185a561e89240e5e875f5c6a82f8d443",
+        "buildImage": "node@sha256:0557ac14e0d45d02ed563067b82856ca5e7aa3437fa28d98d4350ea9c3d9494a",
+        "policy": "Reuse only when the complete Rust/Cargo/vendor input digest matches this compiled revision. Adapter is always rebuilt from current JavaScript sources."
+      },
+      "adapterBuild": {
+        "inputs": {
+          "wasm/wasm-node.mjs": "f323ed09d4c8a41063a30b810a553328bd92db2e846cbb625a170a7892131146",
+          "wasm/async.mjs": "f382a5e94e0d871d41123dfe87f53715a762e5bc271c4dcaef71766123075cfb",
+          "wasm/import.meta.url-polyfill.js": "5332931b99940a1dd41c0ecd9b3dc375fd0f0fa0551146a30b91a24b2b0ab02a",
+          "node/browserslistToTargets.js": "18b2c767c8623273e0c5ead5bb8e09f3f843d8401aaa6518dbdd20337849f37b",
+          "node/flags.js": "646027f1c0977cf151916b221edf51c2b4287ff5b5028c60243f6b014e9a388d",
+          "node/composeVisitors.js": "0d5aeaeaf42ccc6c64d10add07aa243102cdc8c6c25c3e2ebb1b01c46a1356f5",
+          "scripts/build-candidate-wasm.mjs": "3c59f42526f94cd0fa0c9977be377b462b2a1379957ea4136dd72db1f33f83e6",
+          "scripts/native-css-inputs.mjs": "44c37b339f0a1de76a93dd0e8c91749883c9e04e9deb2430ea3f60916d960ce4",
+          "vendor/napi-wasm-NOTICE": "09e89cb0d17df0766d3b99937e6f39dc96d795fe455757a023d0c85febb22978",
+          "vendor/napi-wasm-package.json": "979a10d090dc49549d31ee206b60863950712145a3bebf9fe21a0919e8ca77a1"
+        },
+        "esbuild": "0.28.2",
+        "napiWasm": "1.1.3",
+        "napiWasmInputSHA256": "0108dc67b01e6f4e8493720a51f58747f5318ff13294bb4636fce108515e0101",
+        "rawWasmSHA256": "d392deef78bf3cd0026c9e05fab68d3b185a561e89240e5e875f5c6a82f8d443",
+        "adapterSHA256": "9aacec17ea517e31eaf39cecb60eada7cfa637ec3f4629c04ff0af9e63148d90",
+        "wasmSHA256": "4c2a5251dac4f47ebdadce39579febee5e12e00a3c892e5719e2a46ffa535a27"
+      },
+      "base": "1d680fa14e9a089c92dc0929f869d6757ae91c30",
+      "revision": "1e94372a6da4a55eac4a6dc3ff9cdeec103e8ac1",
+      "target": "x86_64-unknown-linux-gnu + wasm32-unknown-unknown",
+      "version": "1.33.0+nativecss.fix.4",
+      "rustc": "rustc 1.92.0 (ded5c06cf 2025-12-08)",
+      "binarySHA256": "8a38620c1bbf54acfb12f40b3180ce4e8510a5fb952e9173a3b7fe0b676ecbd6",
+      "sourceSHA256": "e36a53d7dac040b249399c73d7079d4c9d2769d221746891294e06c46ed14f89",
+      "cargoLockSHA256": "aa5fe01e8cecd9c200eabdf6f3028bc717b1d1959c4e19b61e05ae7152eb55b2",
+      "adapterSHA256": "9aacec17ea517e31eaf39cecb60eada7cfa637ec3f4629c04ff0af9e63148d90",
+      "wasmSHA256": "4c2a5251dac4f47ebdadce39579febee5e12e00a3c892e5719e2a46ffa535a27",
+      "platformPolicy": "Embedded GNU native on Linux x64 glibc >=2.35; bundled patched WASM on other Node hosts, or when LIGHTNINGCSS_FORCE_WASM=1; no stock optional-package fallback."
+    }
+  },
+  "verification": {
+    "version": "1.33.0+nativecss.fix.4",
+    "lightningHead": "748651cbd845971e65c411166ddee101745dab21",
+    "packSourceRevision": "1e94372a6da4a55eac4a6dc3ff9cdeec103e8ac1",
+    "serdeHeadUnchanged": "18e53fcf6f8ace093a292891b34fa3411192617d",
+    "commonPolicyHead": "00f0aae0b19236ad4355569eb01bd0e5288a858b",
+    "packSHA256": "12c8326428a56e38231f7b5b376df0c6882e3492da794f3499269628edcaccf0",
+    "integrity": "sha512-zDQ03VJE37OlyBrLsRcsEdIVu0T4BXJKDH5y9//To6GlGN2UrKQGERFVAFblkPQ5ZEbhuOp5wpXxGARZNdbQLA==",
+    "sourceArchiveBytes": 7674965,
+    "correspondingSourceFiles": 284,
+    "localTests": {
+      "sourceGate": "PASS",
+      "sourceNegativeUnit": 4,
+      "lightningSerde": 2,
+      "vendorSerdeIntegration": 65,
+      "vendorSerdeDoctest": 1,
+      "nodeNative": 90,
+      "nodeWasm": 90,
+      "physicalSpecialPaths": 4,
+      "syntheticIRCasesPerBackend": 8,
+      "syntheticCssClasses": 5,
+      "pureVisitorPerBackend": 10,
+      "commonSchemaBeforeMapAddition": 8,
+      "commonPolicyAfterMapAddition": 41,
+      "commonSchemaAfterMapAddition": 3,
+      "commonVendorAudit": 2
+    },
+    "pending": [
+      "exact fix4 Linux/macOS/Windows remote host CI + source CI",
+      "new common packages container remote CI",
+      "parent adoption/export + independent A/B delta review"
+    ],
+    "freeBytes": {
+      "root": 1121456128,
+      "tmp": 3442335744
+    },
+    "evidenceSHA256": {
+      "fix4-common-policy.log": "df97f15d0ac2c642631a8f417ee5863a72320a97921ac5ad34fdc151367420da",
+      "final-static-audit.json": "d6f1fb61796dc8a92dbaafdcdcb36e8da6f621665044ade7523bfc60ea6b0879",
+      "fix4-vendor-doctest.log": "d50503739b7c0adb4ee87e1aa29f945b5d7e79b9413e368e0b06037735c1dc3a",
+      "fix4-lightning-rust.log": "8e2286f7a9c973b805e772f61e081d1414722f0763c78f078db5727ebfee2e1e",
+      "fix4-packed-tests.log": "5437b54cbc9d06212ef6d88e24ea0bc8665aaba7c9922b4a580c4f6eeaabc34e",
+      "fix4-pack.log": "586da0e4869bc7229299bc6e5147eec0d53757032c747ca3ee4eb7fa25529523",
+      "fix4-common-vendor.log": "5d1389717665d1a4d3e6af1fe5911029fbc0b99167bdb3ee7043ef2cce8991a9",
+      "pack-result.json": "f5fa309d0c6e32dcc8386d90a51dd54bb19a0bf11387ca6b6b7573f657e6b417",
+      "fix4-special-path-fix3-red.log": "68e12e943309592243b23b6ed484ee9371311221171fa314190a575709042bb2",
+      "manifest-fix4.json": "810dd7eee43d23d88c02d8bc4f515e32432b89e41144fda3609c2b3529a5e41b",
+      "source-gate.log": "305364aad7149f93a07c4613d1f8d805d1201adbaa692d63d4998d9e51e87866",
+      "fix4-vendor-rust.log": "472bcad77bb03f57ca127774f7ffc85406b09afeedf17672d477c3568110d388",
+      "fix4-adapter-build.log": "4378dc327d1cfbb50fddea4b84880432633aa33947730760a4f425b7c6a640b5",
+      "own-cleanup.json": "7eed8f117ed1e04c8fbef6225929ea90a994e29eab0c4add419ba0d12eef7f79",
+      "fix4-common-schema.log": "d1737db24da81b3c3a0b18702ce65bfadfb6524254e681f8bc84ee0e82703fbb",
+      "fix4-common-map-policy.log": "ac9714da584ec4695f0b8198567d1acbae4e05f3302580f6201e830fb1c0a1a6",
+      "fix4-common-map-schema.log": "372ee57a30b8a8b17bb056a0814266786a922da7dcf4139f4f9a2457745d6424"
+    }
+  },
+  "handoff": "native-css-fix4-handoff.md",
+  "limits": [
+    "同じfix4pack/runtime/Rust/JS/adapterである。Rust/native/WASMrebuildとは言わない。",
+    "MacIntelを実行した。oldARM64cancelledをPASSとして数えない。",
+    "現source-gateのmetadata除外3filesを含め、既存findingの元reviewer再確認が必要。common/app/新deployは別gate。"
+  ],
+  "validation": {
+    "exactHead": "35fc16b023a9cfb75bad7a311f37780c24961724",
+    "workflowRun": 43059600512,
+    "jobs": {
+      "source-gate": 130658227924,
+      "windows-2025": 130658228329,
+      "macos-15-intel": 130658228472,
+      "ubuntu-24.04": 130658228591
+    },
+    "allConclusions": "SUCCESS",
+    "local": "sourcegate6 PASS andactualgatePASS/Rustinput23cc unchanged. Beforetests/hostworkflowdiff failurepreserved. Packexactfix4sameSHA25612c832...",
+    "infrastructure": "旧748macos15arm64 runner_id0,2attempts CANCELLED未実行. GitHubannotations:hostedrunnerunacquired,arm64capacityconstraints. Officialactions/runner-imagesREADME macos15Intel supported; currentMacIntelrealhostSuccess."
+  },
+  "ciMetadataReview": {
+    "changedTrackedFiles": [
+      ".github/workflows/fixed-pack.yml",
+      "scripts/check-native-css-source.py",
+      "scripts/test-native-css-source.py",
+      "fixtures/nativewind5/README.md"
+    ],
+    "newNonBuildExclusions": [
+      ".github/workflows/fixed-pack.yml",
+      "scripts/check-native-css-source.py",
+      "scripts/test-native-css-source.py"
+    ],
+    "retained": "Allothercheckout/sourcearchivebytes;Rust/Cargo/vendor digest vsactualbuild;loader/adapterinputreceipt;binary/WASMhash;otherbuildworkflows/pack scripts. Metadataindividualhashesprintedbygate.",
+    "reason": "HosttestCI/verifierarenotproducerinput. Avoidreissuingidenticalruntimepackage solelyforrunnercapacity.CIcompareclassificationrequiresindependentreview."
+  }
+}
