@@ -34,7 +34,7 @@ npm run lint, npm run build, npm run check, npm test, npm run doctor, npm run ch
 
 ## Evidence
 
-2026-11-12 후속: common49와 원본4개, Geo631·Map1496·Weather226·Concierge265·Manager588·Pinvi732·Transport181의 주 이관 PR이 모두 머지됐고 최종 전체 tree를 대조했다. 원 A/B 판정과 input2 SDK BLOCK→input3 FIXED, 실제 Mounts 순서 오탐 수정590의 별도 독립 검토·CI를 [원문 정산](../reviews/adversarial/2026-11-12-consumer-sdk-final.md)에 기록한다. 실제 완료 앱은 Manager·Concierge·Pinvi 3개이며 Geo ARM64 이미지 빌드는 exit0으로 끝났다. Weather 우선 적용과 Geo·Map·Transport 배포는 진행 중이다. T-218을 완료로 변경하지 않는다. 모바일 최종 Expo Doctor20/20·React Doctor0, web531·browser209 PASS/4기존 SKIP·API2259 PASS/9 SKIP와 Android/iOS/WebSSR·강제WASM export를 구분하고 실기기/EAS/스토어 출시는 NOT_RUN이다.
+2026-11-12 후속: common49와 원본4개, Geo631·Map1496·Weather226·Concierge265·Manager588·Pinvi732·Transport181의 주 이관 PR이 모두 머지됐고 최종 전체 tree를 대조했다. 원 A/B 판정과 input2 SDK BLOCK→input3 FIXED, 실제 Mounts 순서 오탐 수정590의 별도 독립 검토·CI를 [원문 정산](../reviews/adversarial/2026-11-12-consumer-sdk-final.md)에 기록한다. 실제 완료 앱은 Manager·Concierge·Pinvi·Weather 4개이며 Geo ARM64 이미지 빌드는 exit0으로 끝났다. Weather 실제 수용은 완료했으며 Geo·Transport 배포는 진행 중이다. Map의 추가 빌드·배포는 최신 사용자 지시로 Claude의 별도 작업에 맡긴다. 이미 머지한 Map1496은 되돌리지 않는다. T-218을 완료로 변경하지 않는다. 모바일 최종 Expo Doctor20/20·React Doctor0, web531·browser209 PASS/4기존 SKIP·API2259 PASS/9 SKIP와 Android/iOS/WebSSR·강제WASM export를 구분하고 실기기/EAS/스토어 출시는 NOT_RUN이다.
 
 이하 이전 checkpoint:
 

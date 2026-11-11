@@ -2,7 +2,7 @@
 
 공통·fork 5개와 소비자 주 이관 PR 7개의 정확 CI·두 독립 리뷰·fetched main tree를 확인했다. 소비자와 Manager candidate SDK의 원 A/B 보고서18개 및 불변 입력8개를 원문 bytes 그대로 보존하고 SHA256 원장으로 연결했다. SDK 입력2의 raw 달러 BLOCK은 입력3의 자기 지적 FIXED와 별개로 유지한다. Mounts 최상위 순서만 정규화한590도 원 두 SOURCE PASS·backend3931 PASS/40 SKIP·frontend54/browser2·정책 CI 성공 후 ca1d32b로 머지했고 전체 tree가 같다.
 
-실제 완료 수용은 Manager·Concierge·Pinvi 3개이며 나머지 앱은 배포·수용 진행 중이다. Geo ARM64 빌드 exit0 후 Weather를 우선 배포한다는 최신 지시를 반영했다. Pinvi 모바일의 Expo 네 patch와 필수 Doctor를 문서에 정리했다. UI0.2.0/tokens0.1.1 및 7종 동결 산출물·버전 정책 코드·lock·vendor bytes는 변경하지 않았다. 이 문서 후속 PR의 독립 출판/규약 검토·CI와 전체 배포 완료는 별도다. 실패·SKIP·native 실기기 NOT_RUN을 성공에 합산하지 않는다.
+실제 완료 수용은 Manager·Concierge·Pinvi·Weather 4개이며 나머지 앱은 배포·수용 진행 중이다. Geo ARM64 빌드 exit0 후 Weather 우선 배포와 실제 수용을 마쳤다. 이후 사용자 지시로 Map 추가 빌드·배포는 Claude에 맡기고 Map 소스·이미지·current·pin의 추가 변경을 중단한다. Pinvi 모바일의 Expo 네 patch와 필수 Doctor를 문서에 정리했다. UI0.2.0/tokens0.1.1 및 7종 동결 산출물·버전 정책 코드·lock·vendor bytes는 변경하지 않았다. 이 문서 후속 PR의 독립 출판/규약 검토·CI와 전체 배포 완료는 별도다. 실패·SKIP·native 실기기 NOT_RUN을 성공에 합산하지 않는다.
 
 ## 2026-11-12 — Common49와 FocusScope2 원본 머지·최종 독립 증거
 
