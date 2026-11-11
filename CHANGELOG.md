@@ -25,6 +25,10 @@ public center/sheet처럼 기존 표현을 소유하는 어댑터는 unstyled와
 기존 폭 체계의320px/1280px로 연결하고, lg/xl/full도 viewport 양옆16px 여백을 보존한다.
 소비자 className의 일반·반응형 최대 폭은 마지막에 적용한다.
 
+### 정책 우회 회귀 수정
+
+정적 재export·타입 참조·리터럴 지연 import/require와 확장 모듈 소스에도 같은 금지 경로 계약을 적용한다. 도달한 linked workspace의 개발 CSS compiler도 버전·bytes를 검사하며 무관한 workspace와 registry 자체의 개발 목록은 섞지 않는다. 기존 실패11개와 추가 확장자 실패4개를 재현하고 정책68개를 통과했다. UI/CSS 실행 파일은 이 수정에서 바뀌지 않는다.
+
 ### CSS 빌드 정책 후속 후보
 
 Lightning CSS의 원본 수정 단일 산출물을 웹·모바일의 개발 의존성으로 고정한다. exact SemVer build metadata, 공유 vendor 상대 경로, 개발 그래프의 중첩 bytes, root·Next smoke/example의 lock 및 CI 복사 경로를 함께 검사한다. [정책](docs/standards/frontend-libraries.md)과 [동봉 고지](vendor/README.md)를 따른다. 기존 UI/tokens 등 산출물 재생성과 소비자 반영은 부모 통합 단계다.

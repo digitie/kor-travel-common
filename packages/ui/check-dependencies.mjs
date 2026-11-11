@@ -45,7 +45,7 @@ function resolveInstalled(name, directory = values.workspace) {
   if (!entry) continue;
   if (entry.link) {
    const location = entry.resolved?.replace(/^file:/, "");
-   return location && lock.packages?.[location] ? { location, entry: lock.packages[location] } : undefined;
+   return location && lock.packages?.[location] ? { location, entry: lock.packages[location], workspace: true } : undefined;
   }
   return { location: key, entry };
  }
@@ -93,9 +93,10 @@ for (const [name, spec] of Object.entries(deps)) {
 const cssCopies = new Map(), buildVisited = new Set();
 const build = [{ location: values.workspace, entry: manifest }];
 for (let index = 0; index < build.length; index++) {
- const { location, entry } = build[index];
+ const { location, entry, workspace } = build[index];
+ // 연결된 로컬 workspace의 개발 도구도 앱 빌드에서 실행된다. registry의 개발 의존성은 설치 그래프가 아니다.
  const dependencies = { ...entry.dependencies, ...entry.optionalDependencies, ...entry.peerDependencies,
-  ...(index === 0 ? manifest.devDependencies : {}) };
+  ...(index === 0 || workspace ? entry.devDependencies : {}) };
  for (const name of Object.keys(dependencies)) {
   const found = resolveInstalled(name, location);
   if (!found) continue;
@@ -129,26 +130,38 @@ else {
   }
  }
 }
+// 정적 재export·외부 TS import·타입 참조와 literal 지연 로딩도 같은 모듈 경로 계약을 따른다.
+function importedModule(node) {
+ let specifier;
+ if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) specifier = node.moduleSpecifier;
+ else if (ts.isImportEqualsDeclaration(node) && ts.isExternalModuleReference(node.moduleReference))
+  specifier = node.moduleReference.expression;
+ else if (ts.isImportTypeNode(node) && ts.isLiteralTypeNode(node.argument)) specifier = node.argument.literal;
+ else if (ts.isCallExpression(node) && (node.expression.kind === ts.SyntaxKind.ImportKeyword
+  || (ts.isIdentifier(node.expression) && node.expression.text === "require"))) specifier = node.arguments[0];
+ return specifier && (ts.isStringLiteral(specifier) || ts.isNoSubstitutionTemplateLiteral(specifier)) ? specifier.text : undefined;
+}
 function scan(path) {
  if (!existsSync(path)) { errors.push(path + ": 검사할 소스 경로 없음"); return; }
  for (const entry of readdirSync(path, { withFileTypes: true })) {
   if (skippedDirectories.has(entry.name)) continue;
   const file = resolve(path, entry.name);
   if (entry.isDirectory()) scan(file);
-  else if (/\.[jt]sx?$/.test(entry.name) && !/\.(test|spec)\./.test(entry.name)) {
+  else if (/\.(?:[cm]?[jt]s|[jt]sx)$/.test(entry.name) && !/\.(test|spec)\./.test(entry.name)) {
    const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
    function visit(node) {
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
      const tag = node.tagName.getText(source);
      if (tag === "table" || tag === "Table") errors.push(file + ": 공통 VirtualTable 외 표 구현");
     }
-    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
-     const imported = node.moduleSpecifier.text;
+    const imported = importedModule(node);
+    if (imported !== undefined) {
      if ([...forbidden].some(name => imported === name || imported.startsWith(name + "/")))
       errors.push(file + ": 공통 정책의 금지 패키지 import: " + imported);
+     if (imported === "@base-ui/react" || imported.startsWith("@base-ui/react/")
+      || imported.startsWith("@floating-ui/") || imported.startsWith("@radix-ui/react-"))
+      errors.push(file + ": 공통 Radix 외 overlay 구현");
     }
-    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)
-      && (node.moduleSpecifier.text.startsWith("@base-ui/react") || node.moduleSpecifier.text.startsWith("@floating-ui/") || node.moduleSpecifier.text.startsWith("@radix-ui/react-"))) errors.push(file + ": 공통 Radix 외 overlay 구현");
     ts.forEachChild(node, visit);
    }
    visit(source);

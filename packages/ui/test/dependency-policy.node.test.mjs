@@ -13,6 +13,7 @@ function fixture(change, {profile="web",workspace="",canonical=false,policyOverr
  const root=mkdtempSync(join(tmpdir(),"kt-policy-"));
  try {
   const dependencies={}, devDependencies={}, packages={}, artifacts={packages:{}};
+  const manifest={dependencies,devDependencies};
   mkdirSync(join(root,"vendor"));
   mkdirSync(join(root,packageDirectory,"src"),{recursive:true});
   for(const name of policy.profiles[profile].required) {
@@ -27,8 +28,8 @@ function fixture(change, {profile="web",workspace="",canonical=false,policyOverr
    }
   }
   const canonicalArtifacts=structuredClone(artifacts);
-  change?.({dependencies,devDependencies,packages,artifacts,root});
-  writeFileSync(join(root,packageDirectory,"package.json"),JSON.stringify({dependencies,devDependencies}));
+  change?.({dependencies,devDependencies,packages,artifacts,root,manifest});
+  writeFileSync(join(root,packageDirectory,"package.json"),JSON.stringify(manifest));
   writeFileSync(join(root,"package-lock.json"),JSON.stringify({lockfileVersion:3,packages}));
   writeFileSync(join(root,"common-artifacts.json"),JSON.stringify(artifacts));
   if(canonical) writeFileSync(join(root,"canonical.json"),JSON.stringify(canonicalArtifacts));
@@ -196,3 +197,71 @@ test("옛 private 지도 mono-root 직접 설치와 root/private source import�
  const adjacent=fixture(({root})=>writeFileSync(join(root,"src/map.tsx"),"import { Map } from 'maplibre-vworld-react-extra';"));
  assert.equal(adjacent.status,0,adjacent.stderr);
 });
+
+
+// 원 리뷰어의 실제 우회 구문을 같은 CLI 입력에서 거부해야 한다.
+const moduleForms = [
+ ["재export", path => "export { Map } from " + JSON.stringify(path) + ";"],
+ ["전체 재export", path => "export * from " + JSON.stringify(path) + ";"],
+ ["지연 import", path => "export const load = () => import(" + JSON.stringify(path) + ");"],
+ ["문자열 템플릿 import", path => "export const load = () => import(" + String.fromCharCode(96) + path + String.fromCharCode(96) + ");"],
+ ["CommonJS require", path => "export const Map = require(" + JSON.stringify(path) + ");"],
+ ["문자열 템플릿 require", path => "export const Map = require(" + String.fromCharCode(96) + path + String.fromCharCode(96) + ");"],
+ ["TS 외부 import", path => "import Map = require(" + JSON.stringify(path) + ");"],
+ ["타입 import", path => "export type Model = import(" + JSON.stringify(path) + ").Model;"],
+];
+for (const [label, code] of moduleForms) {
+ test("금지 private 지도 경로의 " + label + "도 거부", () => rejected(fixture(({root}) => {
+  writeFileSync(join(root,"src/legacy-map.ts"),code("maplibre-vworld-react/packages/web/src/index"));
+ }),"금지 패키지 import"));
+ test("인접한 다른 지도 패키지의 " + label + "는 허용", () => {
+  const result=fixture(({root}) => writeFileSync(join(root,"src/map.ts"),code("maplibre-vworld-react-extra/packages/web/src/index")));
+  assert.equal(result.status,0,result.stderr);
+ });
+}
+test("개별 Radix의 CommonJS require도 거부",()=>rejected(fixture(({root})=>{
+ writeFileSync(join(root,"src/overlay.ts"),'const Dialog = require("@radix-ui/react-dialog");');
+}),"공통 Radix 외 overlay 구현"));
+test("금지 모듈을 언급한 문자열·주석은 실제 import로 오인하지 않는다",()=>{
+ const result=fixture(({root})=>writeFileSync(join(root,"src/note.ts"),'// import("maplibre-vworld-react")\nexport const note = "require(legacy)";'));
+ assert.equal(result.status,0,result.stderr);
+});
+
+function linkedBuildTool({manifest,devDependencies,packages}, cssEntry) {
+ manifest.private=true;manifest.workspaces=["tools/*"];
+ devDependencies["build-helper"]="*";
+ packages["node_modules/build-helper"]={resolved:"tools/build-helper",link:true};
+ packages["tools/build-helper"]={name:"build-helper",version:"1.0.0",devDependencies:{lightningcss:cssEntry.version}};
+ packages["tools/build-helper/node_modules/lightningcss"]=cssEntry;
+}
+test("도달한 linked workspace 빌드 helper의 개발 stock CSS를 거부",()=>rejected(fixture(context=>{
+ linkedBuildTool(context,{version:"1.33.0",integrity:"stock-bytes"});
+}),"빌드 전이 버전·bytes 불일치 tools/build-helper/node_modules/lightningcss"));
+test("linked workspace에서 버전만 같고 bytes가 다른 CSS도 거부",()=>rejected(fixture(context=>{
+ linkedBuildTool(context,{...context.packages["node_modules/lightningcss"],integrity:"다른-bytes"});
+}),"빌드 전이 버전·bytes 불일치 tools/build-helper/node_modules/lightningcss"));
+test("linked workspace의 동일 compiler bytes는 허용",()=>{
+ const result=fixture(context=>linkedBuildTool(context,{...context.packages["node_modules/lightningcss"]}));
+ assert.equal(result.status,0,result.stderr);
+});
+test("연결되지 않은 다른 workspace의 stock CSS는 현재 앱 빌드 그래프 밖",()=>{
+ const result=fixture(({packages})=>{
+  packages["tools/unused"]={name:"unused",version:"1.0.0",devDependencies:{lightningcss:"1.33.0"}};
+  packages["tools/unused/node_modules/lightningcss"]={version:"1.33.0",integrity:"무관한-bytes"};
+ });
+ assert.equal(result.status,0,result.stderr);
+});
+test("공개 registry 도구의 미설치 개발 의존성은 앱의 설치 그래프가 아니다",()=>{
+ const result=fixture(({devDependencies,packages})=>{
+  devDependencies["registry-helper"]="1.0.0";
+  packages["node_modules/registry-helper"]={version:"1.0.0",devDependencies:{lightningcss:"1.33.0"}};
+  packages["node_modules/registry-helper/node_modules/lightningcss"]={version:"1.33.0",integrity:"미설치-개발-bytes"};
+ });
+ assert.equal(result.status,0,result.stderr);
+});
+
+for (const extension of ["mjs","cjs","mts","cts"]) {
+ test(extension + " 소스의 금지 private 지도 경로도 검사",()=>rejected(fixture(({root})=>{
+  writeFileSync(join(root,"src/legacy-map."+extension),'export * from "maplibre-vworld-react/packages/web/src/index";');
+ }),"금지 패키지 import"));
+}
