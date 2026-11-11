@@ -108,3 +108,5 @@ common root와 실제 Next smoke/example의 설치 정의도 같은 tarball과 r
 ## 현재 수용 상태
 
 이 변경은 구현 후보이며 최종 배포 수용을 뜻하지 않는다. 최종 source commit·산출물 해시·앱별 테스트·리뷰·PR·이미지 digest·배포 결과는 Geo의 단일 통합 보고서에서 기록한다.
+
+옛 private mono-root인 maplibre-vworld-react 직접 설치를 모든 프로필에서 금지한다. 기존 source AST 검사도 정본 forbidden 목록의 정확한 package root와 / 하위 경로 import를 거부한다. 지도는 공개 core/web/RN 배포물을 사용하며 node_modules/maplibre-vworld-react/packages/* source alias로 되돌리지 않는다.

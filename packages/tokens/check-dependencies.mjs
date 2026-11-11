@@ -34,7 +34,8 @@ for (const name of profile.required) {
  if (!policy.versions[name]) errors.push(name + ": 필수 항목의 정확 버전 정본 없음");
 }
 for (const name of profile.runtimeRequired ?? []) if (!(name in (manifest.dependencies ?? {}))) errors.push(name + ": dependencies에 필수 런타임 선언 필요");
-for (const name of new Set([...policy.forbidden, ...(profile.forbidden ?? [])])) if (name in deps) errors.push(name + ": 공통 Radix 구현으로 이관 필요");
+const forbidden = new Set([...policy.forbidden, ...(profile.forbidden ?? [])]);
+for (const name of forbidden) if (name in deps) errors.push(name + ": " + (name === "maplibre-vworld-react" ? "공개 core/web/RN 배포물로 이관 필요" : "공통 Radix 구현으로 이관 필요"));
 function resolveInstalled(name, directory = values.workspace) {
  const parts = directory.split("/").filter(Boolean);
  for (let i = parts.length; i >= 0; i--) {
@@ -140,6 +141,11 @@ function scan(path) {
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
      const tag = node.tagName.getText(source);
      if (tag === "table" || tag === "Table") errors.push(file + ": 공통 VirtualTable 외 표 구현");
+    }
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+     const imported = node.moduleSpecifier.text;
+     if ([...forbidden].some(name => imported === name || imported.startsWith(name + "/")))
+      errors.push(file + ": 공통 정책의 금지 패키지 import: " + imported);
     }
     if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)
       && (node.moduleSpecifier.text.startsWith("@base-ui/react") || node.moduleSpecifier.text.startsWith("@floating-ui/") || node.moduleSpecifier.text.startsWith("@radix-ui/react-"))) errors.push(file + ": 공통 Radix 외 overlay 구현");

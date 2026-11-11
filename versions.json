@@ -817,7 +817,8 @@
       "@base-ui/react",
       "@floating-ui/react",
       "@floating-ui/dom",
-      "@radix-ui/react-dropdown-menu"
+      "@radix-ui/react-dropdown-menu",
+      "maplibre-vworld-react"
     ],
     "exceptions": {
       "typescript": "openapi-typescript는 ^5.x, typescript-eslint는 <6.1을 요구하므로 5.9.3",

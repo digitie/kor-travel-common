@@ -187,3 +187,12 @@ test("루트 밖 선언이 symlink로 안으로 돌아와도 비이식 경로이
   rejected(result,"공통 vendor 산출물 참조 불일치");
  } finally {rmSync(outside,{recursive:true,force:true});}
 });
+
+test("옛 private 지도 mono-root 직접 설치와 root/private source import를 거부",()=>{
+ for (const profile of ["web", "mobile"])
+  rejected(fixture(({dependencies})=>dependencies["maplibre-vworld-react"]="1.0.0",{profile}),"공개 core/web/RN 배포물로 이관 필요");
+ for (const imported of ["maplibre-vworld-react", "maplibre-vworld-react/packages/web/src/index"])
+  rejected(fixture(({root})=>writeFileSync(join(root,"src/map.tsx"),"import { Map } from '"+imported+"';")),"금지 패키지 import");
+ const adjacent=fixture(({root})=>writeFileSync(join(root,"src/map.tsx"),"import { Map } from 'maplibre-vworld-react-extra';"));
+ assert.equal(adjacent.status,0,adjacent.stderr);
+});
