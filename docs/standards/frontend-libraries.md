@@ -8,7 +8,7 @@ Geo·Map·Weather·Concierge·Docker Manager·Pinvi 웹/관리자·Transport 웹
 
 공통 컴포넌트는 shadcn/ui Radix, 표는 TanStack Table9·Virtual3의 VirtualTable이다. React Hook Form·Zod는 입력 등록과 검증에, Zustand는 실제 화면 상태에 적용한다. 기본 로그인은 인스턴스별 저장소를 사용하고 비밀번호를 전역 상태에 넣지 않는다. 권한·API·인증 저장소는 앱 소유다. Radix가 내부적으로 사용하는 Floating UI는 전이 의존성이며 앱에서 별도 overlay 엔진을 직접 구현하지 않는다.
 
-Radix FocusScope의 재현된 초기패널 Shift+Tab 결함은 원본 수정1.3.1+kortravel.fix.1의 단일 배포물로 적용한다. 웹의 직접 file 의존성·root override는 엔진을 같은 bytes로 공급하는 예외이며 앱에서 개별 Radix를 import하는 예외가 아니다. patchedRadixPackages의 각 이름은 공식 scoped 이름·exact 축·artifact 목록과 연결되어야 하고 잘못된 설정은 생성 전에 거부한다. [고정 출처·빌드·라이선스](../../vendor/README.md)를 따른다.
+Radix FocusScope의 초기패널 Shift+Tab과 disabled fieldset 상속 결함은 원본 수정1.3.1+kortravel.fix.2의 단일 배포물로 적용한다. 웹의 직접 file 의존성·root override는 엔진을 같은 bytes로 공급하는 예외이며 앱에서 개별 Radix를 import하는 예외가 아니다. patchedRadixPackages의 각 이름은 공식 scoped 이름·exact 축·artifact 목록과 연결되어야 하고 잘못된 설정은 생성 전에 거부한다. [고정 출처·빌드·라이선스](../../vendor/README.md)를 따른다.
 
 지도는 maplibre-vworld-react GitHub의 정확 커밋에서 core/web/RN을 빌드한다. 이동하는 main 참조와 개발자별 재포장은 배포 참조로 사용하지 않는다. 라이브러리의 재현된 결함은 원 저장소에서 수정·검증한 후 같은 산출물을 소비한다.
 
@@ -26,7 +26,7 @@ Radix FocusScope의 재현된 초기패널 Shift+Tab 결함은 원본 수정1.3.
 | @kor-travel/ui | 0.2.0 |
 | @next/eslint-plugin-next | 16.4.6 |
 | @playwright/test | 1.65.0 |
-| @radix-ui/react-focus-scope | 1.3.1+kortravel.fix.1 |
+| @radix-ui/react-focus-scope | 1.3.1+kortravel.fix.2 |
 | @tailwindcss/postcss | 4.3.5 |
 | @tanstack/react-query | 5.107.1 |
 | @tanstack/react-table | 9.3.1 |

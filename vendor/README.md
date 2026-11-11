@@ -37,7 +37,19 @@ Linux x64/glibc >=2.35는 내장 GNU native를 사용한다. 다른 Node >=18 �
 fix.4 source archive는 .gitattributes에 따라 fixture vendor의 역사 tgz를 제외한다. Rust/Cargo/vendor/wasm/build script 대응 source는 계속 포함한다. package/wasm/ADAPTER-BUILD.json은 실제 JS 입력과 번들 출력 hash를 기록한다.
 
 
-## Radix FocusScope 원본 수정
+## Radix FocusScope 현재 정본 — fix.2
+
+원 A가 재현한 disabled fieldset의 후보 선별까지 원본에서 수정한 @radix-ui/react-focus-scope1.3.1+kortravel.fix.2를 사용한다. :disabled와 모든 disabled fieldset 조상을 확인하며 각 first legend의 예외를 보존한다. plain-container 역진입과 upstream Git의 IME guard도 유지한다. stock registry와 Git eb3는 IME 코드가 다르므로 같은 source라고 단순화하지 않는다.
+
+- preferred source·producer: [1752a539c8d5ae57961a0fa2702d2573d48fefe7](https://github.com/digitie/radix-primitives/tree/1752a539c8d5ae57961a0fa2702d2573d48fefe7).
+- 고정 파일: radix-ui-react-focus-scope-1.3.1+kortravel.fix.2.tgz, 33,511bytes.
+- SHA256: 1ca04870692565c243130d99c3dba91f3ac853ab2ec9538fc7b658b17fb7b49a.
+- [출처 사본](radix-focus-scope-provenance-fix2.json)에 Node24.22.2·pnpm11.5.0·esbuild/tsup/TypeScript 버전, lock hash, preferred source와 dist 해시를 기록한다. 실제 tar15파일의 원 MIT·src·타입·ESM/CJS·재현 절차를 동봉한다.
+- 원본 단위38개, 실제 Node22 NPM 설치/전체 버전·SRI·동일5개 ESM/CJS export를 확인했다. source/packed browser, 원 A/B 재확인, 정확 fork CI 및 최종 C11 앱 수용은 별도 gate다.
+
+fix.1/f97과 fix.2/1ca 파일은 서로 다른 고유 버전이다. 아래1차 이력과 C10은 보존하고 같은 버전의 다른 bytes로 덮어쓰지 않는다. C11의 UI/tokens는 미출시0.2.0/0.1.1 정책의 최종 엔진 버전만 갱신하며 source component/CSS와 배포 checker는 C10과 같다.
+
+## Radix FocusScope 원본 수정1차 — 후보10 보존
 
 Pinvi의 초기 패널에 포커스를 둔 뒤 Shift+Tab을 누르면 마지막 tabbable로 이동하지 않는 결함을 원본 source에서 수정했다. 공식 이름 @radix-ui/react-focus-scope를 유지하고 고유 미출시 패치 버전1.3.1+kortravel.fix.1로 고정한다. 앱의 자체 Tabtrap이나 설치 후 node_modules 변경으로 대체하지 않는다.
 

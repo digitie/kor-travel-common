@@ -18,14 +18,14 @@
     "check:policy": "node tools/sync_frontend_policy.mjs --check"
   },
   "devDependencies": {
-    "@mdx-js/mdx": "3.1.1",
-    "eslint": "10.14.0",
     "@eslint/js": "10.0.1",
-    "typescript-eslint": "8.72.2",
-    "react-doctor": "0.9.22",
+    "@mdx-js/mdx": "3.1.1",
     "@playwright/test": "1.65.0",
+    "@radix-ui/react-focus-scope": "file:vendor/radix-ui-react-focus-scope-1.3.1+kortravel.fix.2.tgz",
+    "eslint": "10.14.0",
     "lightningcss": "file:vendor/lightningcss-1.33.0+nativecss.fix.4.tgz",
-    "@radix-ui/react-focus-scope": "file:vendor/radix-ui-react-focus-scope-1.3.1+kortravel.fix.1.tgz"
+    "react-doctor": "0.9.22",
+    "typescript-eslint": "8.72.2"
   },
   "overrides": {
     "lightningcss": "$lightningcss",

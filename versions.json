@@ -610,9 +610,9 @@
       "ecosystem": "npm",
       "floor": null,
       "recommended": null,
-      "exact": "1.3.1+kortravel.fix.1",
+      "exact": "1.3.1+kortravel.fix.2",
       "checked": false,
-      "source": "사용자 승인 원본 Radix FocusScope 수정; upstream eb3a2b7, fork source706e27a; vendor/README.md",
+      "source": "사용자 승인 원본 Radix FocusScope 수정; upstream eb3a2b7, fork source1752a53; vendor/README.md",
       "note": "공통 UI를 사용하는 웹의 패치 엔진. 앱은 개별 Radix를 직접 import하지 않고 exact vendor/override 및 모든 도달 copy의 bytes를 검사한다."
     }
   },

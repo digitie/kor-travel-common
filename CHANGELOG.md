@@ -35,9 +35,9 @@ Lightning CSS의 원본 수정 단일 산출물을 웹·모바일의 개발 의�
 
 ### 원본 FocusScope와 전체 전이 산출물 고정
 
-초기 패널의 Shift+Tab 역진입은 원본 Radix 수정1.3.1+kortravel.fix.1의 단일 MIT 배포물로 연결한다. 웹은 file 직접 의존성과 root override로 같은 엔진을 공급하고 앱 source의 개별 Radix import 금지는 유지한다. patchedRadixPackages를 exact 축·artifact에 연결하고 생성 전에 스키마를 검증한다.
+초기 패널의 Shift+Tab 역진입은 원본 Radix 수정1.3.1+kortravel.fix.2의 단일 MIT 배포물로 연결한다. 웹은 file 직접 의존성과 root override로 같은 엔진을 공급하고 앱 source의 개별 Radix import 금지는 유지한다. patchedRadixPackages를 exact 축·artifact에 연결하고 생성 전에 스키마를 검증한다.
 
-루트뿐 아니라 도달한 런타임·빌드·linked workspace 개발 그래프의 모든 공통 artifact 복사본에 동일 version/integrity를 요구한다. 정책175개와 원본 Scope26개·source browser9개, 실제 NPM 버전/ESM/CJS를 확인했다. 최종 공통 packed browser·소비자·독립 리뷰·CI·배포는 해당 입력에서 별도 검증한다. UI/tokens는 미출시0.2.0/0.1.1의 최종 후보를 한 번 pack하며 출시된 같은 버전을 다른 bytes로 재발행하지 않는다.
+루트뿐 아니라 도달한 런타임·빌드·linked workspace 개발 그래프의 모든 공통 artifact 복사본에 동일 version/integrity를 요구한다. 정책175개와 1차 원본 Scope26개·source browser9개에 이어2차 disabled-fieldset·legend 원본38개와 실제 NPM 버전/ESM/CJS를 확인했다. 1차 결과를2차 packed browser 성공으로 합산하지 않는다. 최종 공통 packed browser·소비자·독립 리뷰·CI·배포는 해당 입력에서 별도 검증한다. UI/tokens는 미출시0.2.0/0.1.1의 최종 후보를 한 번 pack하며 출시된 같은 버전을 다른 bytes로 재발행하지 않는다.
 
 ## 2026-10-25 — 남은 높이 지도 작업면 후보
 

@@ -1,0 +1,71 @@
+{
+  "createdAt": "2026-11-11T17:52:46.001654+00:00",
+  "scope": "Radix 원본 FocusScope 수정과 실제 고정 tgz의 독립A/B source/package 검토. common C10 정책·앱 수용·전체배포는 별도 finaldelta 입력. 상대raw/verdict열람금지.",
+  "repository": "/home/digitie/dev/common-unification-20261111/radix-primitives-focus-scope",
+  "upstream": "eb3a2b7091293e27df8f9ba906632d8daa3d81a3",
+  "head": "706e27aaf87bda2df7bbb9da60cc01cebc9ff064",
+  "artifact": {
+    "sourceRepository": "https://github.com/digitie/radix-primitives",
+    "upstreamRepository": "https://github.com/radix-ui/primitives",
+    "upstreamCommit": "eb3a2b7091293e27df8f9ba906632d8daa3d81a3",
+    "upstreamPackage": {
+      "name": "@radix-ui/react-focus-scope",
+      "version": "1.3.1"
+    },
+    "patchedPackage": {
+      "name": "@radix-ui/react-focus-scope",
+      "version": "1.3.1+kortravel.fix.1"
+    },
+    "sourceCommit": "706e27aaf87bda2df7bbb9da60cc01cebc9ff064",
+    "license": "MIT",
+    "packageManager": "pnpm@11.5.0",
+    "sourceSha256": {
+      "src/index.ts": "2ccb67b49cdfb382f31511ffc4c7e312a6fad1483287d63831c4ac5027daca3d",
+      "src/focus-scope.tsx": "14cf3e40d2b97a6d2ab04bbcac56b5b7debaa3d24d7bee7a821b1beddfc93332",
+      "src/focus-scope.test.tsx": "16ce2c892cbd03a24b0ad7cc0f6e8d5fe1e2244941466a170828a8655ae7a939",
+      "tsconfig.json": "6dd4478cc31e52cc11b417074c9ff358b73690876faa7d79f791d45a55e3866d"
+    },
+    "filename": "radix-ui-react-focus-scope-1.3.1+kortravel.fix.1.tgz",
+    "bytes": 31214,
+    "integrity": "sha512-550B+tdvg3N/tsIzOFA8zRhoMxGnPeBRl65Wg+9kY2VEEf6TW7RZKBWckVToLNuALHYZR8J9zG8GUP7DROBflg==",
+    "sha256": "f97c1dd4851fd1dc7b75bfbe9ce7e2d68bbd32e225b9ff52954c683fd4c7081d"
+  },
+  "artifactPath": "/home/digitie/dev/common-unification-20261111/artifacts/radix-focus-scope-fix1/radix-ui-react-focus-scope-1.3.1+kortravel.fix.1.tgz",
+  "stockBaseline": "/home/digitie/dev/common-unification-20261111/artifacts/radix-focus-scope-stock-registry-1.3.1",
+  "evidence": [
+    "consumer-tools/radix-focus-before-unit.log",
+    "consumer-tools/radix-focus-after-unit.log",
+    "consumer-tools/radix-focus-evidence/before-browser.log",
+    "consumer-tools/radix-focus-evidence/after-browser.log",
+    "consumer-tools/radix-focus-evidence/npm-actual-install.json",
+    "consumer-tools/radix-focus-build.log",
+    "consumer-tools/radix-focus-pack-final.log"
+  ],
+  "reportedTests": {
+    "sourceUnitBefore": {
+      "pass": 22,
+      "fail": 4
+    },
+    "sourceUnitAfter": {
+      "pass": 26,
+      "fail": 0
+    },
+    "sourceBrowserBefore": {
+      "pass": 5,
+      "fail": 4
+    },
+    "sourceBrowserAfter": {
+      "pass": 9,
+      "fail": 0
+    },
+    "actualPackedNpmInstall": "version+lockSRI+ESM/CJS5exports PASS",
+    "packedInitialPanelBrowser": "PENDING commonC10/Pinvi originalregression, sourceBrowser9 is notpackedBrowser9"
+  },
+  "requirements": [
+    "원본 조건부 수정의 loop/trapped/disabled/hidden/empty/nested pause·restore semantics 직접 확인",
+    "패키지 이름·fullmetadata·MIT/src/provenance/4exports·types·publicdepversions·buildrecipe/sourceCommit 관계 확인",
+    "실제 stockregistry1.3.1 vsGitHubeb3 범위 구분, 불필요 API break/registry devtool 버전 강제없음",
+    "upstream R의 CI workflow 포함; sourceHead/subsequentCI-only 변경시 source/artifact 임의재발행금지",
+    "원문 root/review-A-radix-focus-scope-final-1.md 및 review-B-radix-focus-scope-final-1.md. 고정입력범위PASS/조건/새finding 구분; actualrun vs증거참조/NOT_RUN 명확히."
+  ]
+}

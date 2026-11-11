@@ -34,6 +34,10 @@ npm run lint, npm run build, npm run check, npm test, npm run doctor, npm run ch
 
 ## Evidence
 
+현재 C11은 원본 Scope2 preferred1752a53·고유1.3.1+kortravel.fix.2·고정1ca0487을 공통 정본/세 lock에 연결했다. source38와 Node22 실제 version/SRI/ESM·CJS, 정책175·빌드·Doctor80파일0을 확인했다. 새 packed/browser·두 리뷰·정확 CI/소비자·merge/배포를 진행한다. C10의 Doctor A-P2-11/B-P1-11은5715e94에서 실제3경고→0으로 수정했고 원 재확인을 받는다. 소비자 A/B 원문과 당시 BLOCK은 보존하며 Geo Button43·Concierge checkbox50·Map CI/variant b102/f55·Manager UI 후보 경로b86을 별도 최종 입력에서 수용한다. 후보10과 Scope1/f97을 최종 성공으로 바꾸지 않는다.
+
+이하 이전 checkpoint:
+
 2026-11-12 후보8 UI101·tokens9·타입·예시·두 production builder·lint·Doctor0·실제 packed browser65를 확인했다. 후보9 source2c1182e는 checker 두 파일만 바꾸며 실행 코드/CSS/metadata117개가 같다. 정책68 및 source97ccc97의 도구379실행(378 PASS/1 SKIP)·정보 유출 발견0을 확인했다. integration-9-review의 단일 bytes는 frontend-artifacts.json에 기록하며 이전 후보와 원 BLOCK·수정 후 판정을 보존한다. 소비자 검증·리뷰·PR·이미지 배포는 진행 중이다. 최종 근거는 Geo 저장소 docs/kor-travel-common-library-review.md에 하나로 기록한다. 미실행 gate는 통과로 간주하지 않는다.
 
 ## Rollback과 release 차단
