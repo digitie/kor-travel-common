@@ -1,3 +1,20 @@
+# COMMON4 B 공개 아카이브용 사본 — publication copy
+
+이 파일은 원 리뷰어 B / Epicurus가 작성한 원문의 공개용 파생 사본이다. 새 source 리뷰나 finding 변경이 아니다.
+
+- 생성 UTC: `2026-11-11T17:25:19.210713+00:00`
+- 원문: `review-B-common-postfix-4.md` — 무수정 보존.
+- 원문 SHA256: `cf8046ea52667f93158f727dafa0b179f35c8a1a11a2d1a55116253c8be16d22`
+- 원문 불변 Git commit: `d1fe0a34ed720e4511a0612265e949632623a8dd`
+- 원문 Git 경로: `docs/reviews/adversarial/evidence/2026-11-11-review-B-common-postfix-4.md`
+- 원문 Git blob: `60112c9cbb4a43bbe73903366a66e63765d0027a` — 로컬 원문과 bytes 전체 동일성 직접 확인.
+- 원문 출처: [불변 Git 원문](https://github.com/digitie/kor-travel-common/blob/d1fe0a34ed720e4511a0612265e949632623a8dd/docs/reviews/adversarial/evidence/2026-11-11-review-B-common-postfix-4.md) (commit은 작성 시점 로컬 확인, 원격 push 완료를 주장하지 않음).
+- 기준 manifest: `review-manifest-common-4.json`, SHA256 `e5c7101e4130b4bf66c90a8ef2e54f3c672c5a79f0eeb8216bfc9ebcaa85c951` — 무수정.
+- 변환 범위: 원문 34행의 공개 compiler 상수 리터럴 두 개만 한국어 설명으로 치환했다. scanner 오탐을 피하기 위한 게시 표기 변경이며 allowlist·탐지 규칙을 바꾸지 않았다.
+- 아래 본문의 PASS, finding closure, 증거, 한계 및 다른 모든 bytes는 두 치환 외에 원문과 같다.
+
+---
+
 # COMMON4 원 리뷰어 B 수정 후 재검토 원문
 
 - reviewer: **B / Epicurus**, 구현 비참여. packaging/dependency/lock/CI/license 관점의 독립 read-only 리뷰.
@@ -31,7 +48,7 @@ B2-P3-01 tokens 고지 FIXED와 최초 B-P0-01/B-P1-01~07/B-P2-01~03의 기존11
 예외 수32/4를 예외 항목 수와 혼동하지 않았다. 실제 TOML은 secrets24개 member/rule 항목, prod4개 항목이며 secrets의 여러 일치 행이32건으로 집계된다. 28개 항목 모두 raw member digest를 직접 재계산했다.
 
 - secrets의 허용 대상 실제 일치 구문은 Token/visitor/parser 변수·타입 참조다. 일치하는 원문 행을 공개 base `1d680fa14e9a089c92dc0929f869d6757ae91c30`의 해당 행과 직접 대조했다. 전체 파일이 수정된 경우에는 파일 전체가 upstream과 동일하다고 주장하지 않고 해당 일치 행의 동일성만 확인했다.
-- native/WASM의 INTERNAL-HOST 일치는 공개 compiler 오류 문장 경계에서 생긴 `consumed.internal error` 및 `selector order.local(` 상수 인접 배치다. 실제 고정 binary member를 확인했고 운영 hostname으로 판정할 근거가 없다. 원문 값은 보고서에 옮기지 않았다.
+- native/WASM의 INTERNAL-HOST 일치는 공개 compiler 오류 문장 경계에서 생긴 `토큰 소비 오류문·내부 오류 접두의 연결` 및 `선택자 순서 경고문·로컬 함수 키워드의 연결` 상수 인접 배치다. 실제 고정 binary member를 확인했고 운영 hostname으로 판정할 근거가 없다. 원문 값은 보고서에 옮기지 않았다.
 - 예외는 exact outer/member, 단일 rule, 원문 SHA256에 묶인다. glob/전체 archive·전체 규칙 예외를 추가하지 않았다. gzip/tar header metadata와 다른 rule은 계속 검사한다. 알 수 없는 binary·서명 불일치·잘못된 UTF-8, link/sparse/중복/경로 탈출, 압축 크기/깊이/항목 수 한계도 회귀에서 실패 처리된다.
 - B 독립 공격4개: 실제 허용 member는 허용; 새 비밀이 없어도 member byte 변경은 reject; member 유실은 reject; 허용 member 옆의 다른 rule PRIVATE-KEY는 탐지. `common-independent-attacks.json`과 재현 스크립트에 보존했다.
 - B 독립 lock 공격7개: 원 stock/같은 버전 다른 bytes/두 linked helper chain 거부3개; canonical bytes/무관 workspace/registry dev/별도 dev React18 허용4개. 원 source3의 false PASS가 사라졌다. 이 최소 lock 모델은 신규 npm ci로 생성한 전체 설치가 아니며, 앱 export 성공을 뜻하지 않는다.

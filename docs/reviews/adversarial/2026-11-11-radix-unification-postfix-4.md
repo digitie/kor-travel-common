@@ -14,5 +14,5 @@ A-P2-10은 현재 고정 vendor에 실제 비밀이 있다는 주장이 아니�
 ## 원문과 해시
 
 - [review-A-common-postfix-4.md](evidence/2026-11-11-review-A-common-postfix-4.md): SHA256 25df57642d2a8d8cd29d62e8e5aa7707599525a884e629af9d66ad7c6a0396ba
-- [review-B-common-postfix-4.md](evidence/2026-11-11-review-B-common-postfix-4.md): SHA256 cf8046ea52667f93158f727dafa0b179f35c8a1a11a2d1a55116253c8be16d22
+- [review-B-common-postfix-4-publication.md](evidence/2026-11-11-review-B-common-postfix-4-publication.md): 공개용 사본 SHA256 eda110bea6f96e3916c65f32310435680d4eb8a0bc0b70e044f10eb3aed5b081. 원문 SHA256 cf8046ea52667f93158f727dafa0b179f35c8a1a11a2d1a55116253c8be16d22는 [불변 Git 원문](https://github.com/digitie/kor-travel-common/blob/d1fe0a34ed720e4511a0612265e949632623a8dd/docs/reviews/adversarial/evidence/2026-11-11-review-B-common-postfix-4.md)에 byte 동일 보존한다. 원 B가 공개 compiler 상수 리터럴 두 개만 설명으로 바꿨으며 판정·finding은 같다. 새 scanner 예외를 만들지 않았다.
 - [review-manifest-common-4.json](evidence/2026-11-11-review-manifest-common-4.json): SHA256 e5c7101e4130b4bf66c90a8ef2e54f3c672c5a79f0eeb8216bfc9ebcaa85c951
