@@ -569,45 +569,10 @@ function TableSurface<T extends RowData>({
  | "containerClassName" | "containerStyle" | "containerTestId" | "tableTestId"
  | "caption" | "hideHeader" | "wrapCells" | "height" | "ariaLabel" | "stickyHeader" | "sortButtonTestIdPrefix" | "rowProps" | "renderRowDetails" | "renderCell">) {
   "use no memo"
-  const scrollRef = React.useRef<HTMLDivElement>(null)
-  const headRef = React.useRef<HTMLTableSectionElement>(null)
-  const [headHeight, setHeadHeight] = React.useState(0)
-  React.useEffect(() => {
-    const element = headRef.current
-    if (!element || !virtualized) return
-    const update = () => setHeadHeight(element.getBoundingClientRect().height)
-    update()
-    if (typeof ResizeObserver === "undefined") return
-    const observer = new ResizeObserver(update)
-    observer.observe(element)
-    return () => observer.disconnect()
-  }, [virtualized])
-
-  const entries: SurfaceEntry<T>[] = []
-  if (!isLoading) for (const row of rows) {
-    entries.push({ key: row.id, row })
-    const detail = renderRowDetails?.(row.original)
-    if (detail !== null && detail !== undefined && detail !== false)
-      entries.push({ key: row.id + ":detail", row, detail })
-  }
-  const virtualizer = useVirtualizer({
-    enabled: virtualized && !isLoading,
-    count: entries.length,
-    getScrollElement: () => scrollRef.current,
-    estimateSize: () => estimateRowSize,
-    getItemKey: index => entries[index]?.key ?? index,
-    overscan,
-    scrollMargin: headHeight,
-    measureElement: element => element.getBoundingClientRect().height,
+  const { scrollRef, headRef, entries, items, totalSize, measure } = useSurfaceWindow({
+    rows, isLoading, renderRowDetails, virtualized, estimateRowSize, overscan,
   })
   const groups = hideHeader ? [] : table.getHeaderGroups()
-  const virtualItems = virtualizer.getVirtualItems()
-  const items = virtualized
-    ? virtualItems.flatMap(item => {
-        const entry = entries[item.index]
-        return entry ? [{ entry, index: item.index, start: item.start - headHeight }] : []
-      })
-    : entries.map((entry, index) => ({ entry, index, start: 0 }))
   const role = (value: "table" | "rowgroup" | "row" | "columnheader" | "rowheader" | "cell") =>
     virtualized ? value : undefined
   const totalWidth = table.getTotalSize()
@@ -620,7 +585,41 @@ function TableSurface<T extends RowData>({
       className={cn("tabular-nums", virtualized && "grid")}
       style={virtualized ? { minWidth: totalWidth } : undefined}>
       {caption ? <TableCaption>{caption}</TableCaption> : null}
-      {!hideHeader ? <TableHeader ref={headRef} role={role("rowgroup")}
+      {!hideHeader ? <TableHeaders table={table} headRef={headRef} virtualized={virtualized}
+        stickyHeader={stickyHeader} sortButtonTestIdPrefix={sortButtonTestIdPrefix} /> : null}
+      <TableBody role={role("rowgroup")} className={virtualized ? "relative grid" : undefined}
+        style={virtualized && !isLoading && entries.length
+          ? { height: totalSize, width: "100%" } : undefined}>
+        {isLoading ? <SkeletonRows columns={table.getAllLeafColumns()} rowCount={skeletonRowCount}
+          virtualized={virtualized} /> : rows.length === 0 ?
+          <TableRow role={role("row")} className={virtualized ? "flex" : undefined}>
+            <TableCell role={role("cell")} colSpan={colCount} className="w-full whitespace-normal">
+              <EmptyState {...emptyState} />
+            </TableCell>
+          </TableRow> :
+          items.map(item => <SurfaceEntryRow key={item.entry.key} {...item}
+            virtualized={virtualized} headerRowCount={groups.length} colCount={colCount}
+            measure={measure} onRowClick={onRowClick} isRowActive={isRowActive}
+            rowTestId={rowTestId} rowIdentity={rowIdentity} rowProps={rowProps}
+            wrapCells={wrapCells} renderCell={renderCell} />)}
+
+      </TableBody>
+    </Table>
+  )
+}
+
+function structuralRole(virtualized: boolean) {
+  return (value: "table" | "rowgroup" | "row" | "columnheader" | "rowheader" | "cell") =>
+    virtualized ? value : undefined
+}
+
+function TableHeaders<T extends RowData>({ table, headRef, virtualized, stickyHeader, sortButtonTestIdPrefix }: {
+  table: TanstackTable<T>; headRef: React.Ref<HTMLTableSectionElement>; virtualized: boolean;
+} & Pick<DataTableProps<T>, "stickyHeader" | "sortButtonTestIdPrefix">) {
+  const role = structuralRole(virtualized)
+  const groups = table.getHeaderGroups()
+  return (
+<TableHeader ref={headRef} role={role("rowgroup")}
         className={cn((virtualized || stickyHeader) && "sticky top-0 z-10 bg-surface-subtle", virtualized && "grid")}>
         {groups.map((group, groupIndex) => (
           <TableRow key={group.id} role={role("row")}
@@ -641,50 +640,74 @@ function TableSurface<T extends RowData>({
             })}
           </TableRow>
         ))}
-      </TableHeader> : null}
-      <TableBody role={role("rowgroup")} className={virtualized ? "relative grid" : undefined}
-        style={virtualized && !isLoading && entries.length
-          ? { height: virtualizer.getTotalSize(), width: "100%" } : undefined}>
-        {isLoading ? <SkeletonRows columns={table.getAllLeafColumns()} rowCount={skeletonRowCount}
-          virtualized={virtualized} /> : rows.length === 0 ?
-          <TableRow role={role("row")} className={virtualized ? "flex" : undefined}>
-            <TableCell role={role("cell")} colSpan={colCount} className="w-full whitespace-normal">
-              <EmptyState {...emptyState} />
-            </TableCell>
-          </TableRow> :
-          items.map(({ entry, index, start }) => {
+      </TableHeader>
+
+  )
+}
+
+type RowDisplayProps<T extends RowData> = Pick<DataTableProps<T>,
+  "onRowClick" | "isRowActive" | "rowTestId" | "rowIdentity" | "rowProps" | "wrapCells" | "renderCell">
+
+function SurfaceEntryRow<T extends RowData>({ entry, index, start, virtualized, headerRowCount, colCount,
+  measure, onRowClick, isRowActive, rowTestId, rowIdentity, rowProps, wrapCells, renderCell }: {
+  entry: SurfaceEntry<T>; index: number; start: number; virtualized: boolean;
+  headerRowCount: number; colCount: number; measure: (node: HTMLTableRowElement | null) => void;
+} & RowDisplayProps<T>) {
+  const role = structuralRole(virtualized)
             const { row } = entry
             const positioning: React.CSSProperties | undefined = virtualized
               ? { position: "absolute", display: "flex", width: "100%", transform: `translateY(${start}px)` }
               : undefined
-            const measureRef = virtualized ? virtualizer.measureElement : undefined
+            const measureRef = virtualized ? measure : undefined
             if (entry.detail !== undefined) return (
               <TableRow key={entry.key} role={role("row")} data-index={index} ref={measureRef}
-                style={positioning} aria-rowindex={virtualized ? index + groups.length + 1 : undefined}>
+                style={positioning} aria-rowindex={virtualized ? index + headerRowCount + 1 : undefined}>
                 <TableCell role={role("cell")} colSpan={colCount} className="w-full whitespace-normal">
                   {entry.detail}
                 </TableCell>
               </TableRow>
             )
-            const active = row.getIsSelected() || isRowActive?.(row.original) === true
-            const props = rowProps?.(row.original) ?? {}
             return (
-              <TableRow {...props} key={entry.key} role={role("row")} data-index={index} ref={measureRef}
-                data-row-identity={rowIdentity?.(row.original)}
-                data-testid={rowTestId?.(row.original)}
-                data-state={active ? "selected" : undefined}
-                aria-rowindex={virtualized ? index + groups.length + 1 : undefined}
-                aria-selected={props["aria-selected"] ?? (onRowClick ? active : undefined)}
-                className={cn(onRowClick && CLICKABLE_ROW_CLASS, props.className)}
-                style={{ ...props.style, ...positioning }}
-                tabIndex={props.tabIndex ?? (onRowClick ? 0 : undefined)}
-                onClick={props.onClick ?? (onRowClick ? event => {
-                  if (!(event.target instanceof Element) ||
-                    !event.target.closest("button,a,input,select,textarea,[data-row-action]"))
-                    onRowClick(row.original)
-                } : undefined)}
-                onKeyDown={props.onKeyDown ?? (onRowClick
-                  ? event => handleClickableRowKeyDown(event, row.original, onRowClick) : undefined)}>
+              <TableRow {...dataRowProps(row, virtualized, index + headerRowCount + 1, positioning, {
+                onRowClick, isRowActive, rowTestId, rowIdentity, rowProps,
+              })} key={entry.key} data-index={index} ref={measureRef}>
+                <DataCells row={row} virtualized={virtualized} wrapCells={wrapCells} renderCell={renderCell} />
+
+              </TableRow>
+            )
+}
+
+function dataRowProps<T extends RowData>(row: Row<T>, virtualized: boolean, rowIndex: number,
+  positioning: React.CSSProperties | undefined, {onRowClick, isRowActive, rowTestId, rowIdentity, rowProps}: RowDisplayProps<T>) {
+  const active = row.getIsSelected() || isRowActive?.(row.original) === true
+  const props = rowProps?.(row.original) ?? {}
+  return {
+    ...props,
+    role: virtualized ? "row" : undefined,
+    "data-row-identity": rowIdentity?.(row.original),
+    "data-testid": rowTestId?.(row.original),
+    "data-state": active ? "selected" : undefined,
+    "aria-rowindex": virtualized ? rowIndex : undefined,
+    "aria-selected": props["aria-selected"] ?? (onRowClick ? active : undefined),
+    className: cn(onRowClick && CLICKABLE_ROW_CLASS, props.className),
+    style: { ...props.style, ...positioning },
+    tabIndex: props.tabIndex ?? (onRowClick ? 0 : undefined),
+    onClick: props.onClick ?? (onRowClick ? (event: React.MouseEvent<HTMLTableRowElement>) => {
+      if (!(event.target instanceof Element) ||
+        !event.target.closest("button,a,input,select,textarea,[data-row-action]"))
+        onRowClick(row.original)
+    } : undefined),
+    onKeyDown: props.onKeyDown ?? (onRowClick
+      ? (event: React.KeyboardEvent<HTMLTableRowElement>) => handleClickableRowKeyDown(event, row.original, onRowClick)
+      : undefined),
+  }
+}
+
+function DataCells<T extends RowData>({row, virtualized, wrapCells, renderCell}: {
+  row: Row<T>; virtualized: boolean;
+} & Pick<DataTableProps<T>, "wrapCells" | "renderCell">) {
+  const role = structuralRole(virtualized)
+  return <>
                 {row.getVisibleCells().map(cell => {
                   const meta = columnMeta(cell.column)
                   const BodyCell = meta.rowHeader ? TableHead : TableCell
@@ -695,11 +718,64 @@ function TableSurface<T extends RowData>({
                       meta.className, meta.cellClassName)}>
                     {renderCell && cell.column.id !== "__select__" ? renderCell(row.original, cell.column.id) : flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </BodyCell>
-                })}
-              </TableRow>
-            )
-          })}
-      </TableBody>
-    </Table>
-  )
+                })}</>
+}
+
+function useHeaderHeight(virtualized: boolean) {
+  const headRef = React.useRef<HTMLTableSectionElement>(null)
+  const [headHeight, setHeadHeight] = React.useState(0)
+  React.useEffect(() => {
+    const element = headRef.current
+    if (!element || !virtualized) return
+    const update = () => setHeadHeight(element.getBoundingClientRect().height)
+    update()
+    if (typeof ResizeObserver === "undefined") return
+    const observer = new ResizeObserver(update)
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [virtualized])
+
+  return { headRef, headHeight }
+}
+
+function surfaceEntries<T extends RowData>(rows: Row<T>[], isLoading: boolean | undefined,
+  renderRowDetails: DataTableProps<T>["renderRowDetails"]) {
+  const entries: SurfaceEntry<T>[] = []
+  if (!isLoading) for (const row of rows) {
+    entries.push({ key: row.id, row })
+    const detail = renderRowDetails?.(row.original)
+    if (detail !== null && detail !== undefined && detail !== false)
+      entries.push({ key: row.id + ":detail", row, detail })
+  }
+
+  return entries
+}
+
+function useSurfaceWindow<T extends RowData>({ rows, isLoading, renderRowDetails, virtualized, estimateRowSize, overscan }: {
+  rows: Row<T>[]; isLoading?: boolean; virtualized: boolean; estimateRowSize: number; overscan: number;
+} & Pick<DataTableProps<T>, "renderRowDetails">) {
+  "use no memo"
+  const scrollRef = React.useRef<HTMLDivElement>(null)
+  const { headRef, headHeight } = useHeaderHeight(virtualized)
+
+  const entries = surfaceEntries(rows, isLoading, renderRowDetails)
+  const virtualizer = useVirtualizer({
+    enabled: virtualized && !isLoading,
+    count: entries.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => estimateRowSize,
+    getItemKey: index => entries[index]?.key ?? index,
+    overscan,
+    scrollMargin: headHeight,
+    measureElement: element => element.getBoundingClientRect().height,
+  })
+  const virtualItems = virtualizer.getVirtualItems()
+  const items = virtualized
+    ? virtualItems.flatMap(item => {
+        const entry = entries[item.index]
+        return entry ? [{ entry, index: item.index, start: item.start - headHeight }] : []
+      })
+    : entries.map((entry, index) => ({ entry, index, start: 0 }))
+
+  return { scrollRef, headRef, entries, items, totalSize: virtualizer.getTotalSize(), measure: virtualizer.measureElement }
 }
