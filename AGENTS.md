@@ -14,7 +14,7 @@ kor-travel-common은 kor-travel 제품군의 UI·백엔드 공통 코드와 공�
 | 규칙 문서 | `docs/standards/*` | 토큰·UX·반응형·프론트/백엔드 스택·UI 계약·OpenAPI·CI·라이선스·버전·에이전트 규약 |
 | 템플릿·레지스트리·도구 | `templates/*`, `versions.json`, `tools/*.py` | 소비자 설정 조각, 버전 floor/recommended/exceptions, 검사 도구 |
 
-소비자는 kor-travel-airport(Admin 포함)·kor-travel-concierge·kor-travel-docker-manager·kor-travel-geo·kor-travel-map·kor-travel-weather·pinvi(PinVi Admin 포함; 사용자 웹·모바일은 규칙만) 7개 저장소다. 의존 방향은 앱 → ui → tokens, 앱 → py 단방향이다. 소비자 목록·표면·채택 순서는 [consumers](docs/architecture/consumers.md)가 정본이다.
+[ADR-017](docs/adr/017-shadcn-radix-shared-components.md)·[T-218](docs/tasks/T-218-radix-library-unification.md)의 현재 프론트 공통화 대상은 Geo·Map·Weather·Concierge·Docker Manager·Pinvi·Transport 7개 저장소의 9개 표면이다. 웹/관리자는 UI·tokens를 실제 소비하고 Pinvi 모바일은 tokens와 네이티브에 맞는 공통 버전의 라이브러리를 소비한다. 의존 방향은 앱 → ui → tokens, 앱 → py 단방향이다. 현재 승인 범위와 과거 조사·단계별 선행 조건은 [consumers](docs/architecture/consumers.md)에서 구분한다.
 
 - 소비자 한 곳에 있다는 이유만으로 공통화하지 않는다. 승격 근거는 조사 문서의 사실(여러 앱의 관찰 또는 저장소 간 계약 비용)과 채택 PR의 실측이다.
 - common은 독립 실행 시스템이나 인증 서비스·사용자 DB·외부 IdP를 갖지 않는다. 다만 여러 소비자가 재사용하는 로그인 위젯·인증 계약과 주입형 프리미티브(비밀번호·세션/토큰·CSRF·JWT·RBAC)는 공용 라이브러리로 제공한다. 앱별 저장소·운영 비밀·역할 정책·배포는 소비자가 소유한다. 앱 도메인 모듈, 지도 엔진(`maplibre-vworld-react`·`maplibre-vworld-js`), provider 라이브러리(`python-*-api`·`python-kraddr-base`)는 기존 공유 라이브러리와 중복하지 않고 의존만 한다([ADR-015](docs/adr/015-common-shared-systems-scope.md)).

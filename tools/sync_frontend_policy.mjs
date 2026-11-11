@@ -24,6 +24,18 @@ for (const dependency of metadata.artifactPackages)
 const generated = { generatedFrom: "versions.json", ...metadata, versions };
 const target = new URL("../frontend-dependencies.json", import.meta.url);
 const content = JSON.stringify(generated, null, 2) + "\n";
-if (process.argv.includes("--check")) {
-  if (readFileSync(target, "utf8") !== content) throw new Error("frontend-dependencies.json 생성물이 정본과 다름");
-} else writeFileSync(target, content);
+const documentTarget = new URL("../docs/standards/frontend-libraries.md", import.meta.url);
+const document = readFileSync(documentTarget, "utf8");
+const start = "<!-- frontend-library-versions:start -->", end = "<!-- frontend-library-versions:end -->";
+const first = document.indexOf(start), last = document.indexOf(end);
+if (first < 0 || last < first || first !== document.lastIndexOf(start) || last !== document.lastIndexOf(end))
+  throw new Error("라이브러리 문서의 단일 생성 영역 표시가 필요함");
+const table = ["| 라이브러리 | 정확 버전 |", "|---|---|",
+  ...Object.keys(versions).sort().map(name => "| " + name + " | " + versions[name] + " |")].join("\n");
+const generatedDocument = document.slice(0, first + start.length) + "\n\n" + table + "\n\n" + document.slice(last);
+const outputs = [[target, content], [documentTarget, generatedDocument]];
+for (const [path, expected] of outputs) {
+  if (process.argv.includes("--check")) {
+    if (readFileSync(path, "utf8") !== expected) throw new Error(path.pathname + ": 생성물이 versions.json 정본과 다름");
+  } else writeFileSync(path, expected);
+}

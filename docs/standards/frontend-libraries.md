@@ -12,7 +12,9 @@ Geo·Map·Weather·Concierge·Docker Manager·Pinvi 웹/관리자·Transport 웹
 
 ## 버전 표
 
-다음 표는 생성 정책의 검토용 표현이다.
+다음 표는 versions.json에서 자동 생성하며 JSON 정책과 함께 CI에서 동일성을 검사한다.
+
+<!-- frontend-library-versions:start -->
 
 | 라이브러리 | 정확 버전 |
 |---|---|
@@ -46,7 +48,7 @@ Geo·Map·Weather·Concierge·Docker Manager·Pinvi 웹/관리자·Transport 웹
 | eslint-plugin-react-hooks | 7.1.1 |
 | eslint-plugin-react-x | 5.30.1 |
 | jsdom | 31.0.0 |
-| lightningcss | versions.json의 exact 및 고정 vendor 원장 |
+| lightningcss | 1.33.0+nativecss.fix.4 |
 | lucide-react | 1.72.0 |
 | maplibre-gl | 6.17.0 |
 | nativewind | 5.0.0-rc.1 |
@@ -80,6 +82,8 @@ Geo·Map·Weather·Concierge·Docker Manager·Pinvi 웹/관리자·Transport 웹
 | vworld-map-web | 1.0.3 |
 | zod | 4.6.7 |
 | zustand | 5.1.0 |
+
+<!-- frontend-library-versions:end -->
 
 TypeScript는 OpenAPI 생성기와 typescript-eslint peer 범위 때문에 5.9.3, Node 타입은 Node22 실행환경에 맞춘다. NativeWind RC는 사용자 승인에 따른 것으로 대응 엔진과 함께 고정한다. stable로 표시하지 않는다.
 

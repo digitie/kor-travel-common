@@ -1,8 +1,15 @@
 # 소비자
 
+## 0. 현재 프론트 공통화 승인 범위 — 2026-11-12
+
+[ADR-017](../adr/017-shadcn-radix-shared-components.md)과 [T-218](../tasks/T-218-radix-library-unification.md)의 사용자 지시로 Geo·Map·Weather·Concierge·Docker Manager·Pinvi·Transport를 실제 공통 라이브러리 소비 대상으로 승인했다. 웹8개 표면은 UI/tokens, Pinvi 모바일은 tokens·NativeWind5 RC·대응 네이티브 라이브러리를 사용한다. 필요한 목록은 [라이브러리 규약](../standards/frontend-libraries.md), 버전 정본은 [versions.json](../../versions.json), 배포물 bytes는 [중앙 원장](../../frontend-artifacts.json)이다. 실제 검증·머지·배포 수용은 T-218에서 별도 정산한다.
+
+아래 §1~7의 표·선행 조건은 2026-09 조사와 단계 계획의 이력이다. 당시 Pinvi 사용자 표면·모바일과 Transport 이전 이름의 범위를 현재 프론트 승인·배포 상태와 구분해서 읽는다.
+
+
 > airport의 WIP·Admin 범위는 조사 이후 변경됐다. [인계 시점 재확인](../plan/handoff-verification.md)과 T-430의 현재 SHA·잔여 gate 대조를 먼저 적용한다. 아래 조사 기준 표를 최신 배포 상태로 해석하지 않는다.
 
-- 정본 지위: 소비자 7(+pinvi 표면 3)의 현재 상태·채택 순서·선행 조건의 정본(초안). §5 채택 버전 표는 T-012부터 [통합 지도](../integration-map.md)(생성물)가 정본이 되고 여기서는 링크만 남긴다. 확정 task: T-008(설계 초기판)·T-011·T-012. 라이선스 선행 상태 갱신: 2026-09-08.
+- 2026-09 조사 시점 정본 지위: 소비자 7(+pinvi 표면 3)의 당시 상태·채택 순서·선행 조건의 정본(초안). §5 채택 버전 표는 T-012부터 [통합 지도](../integration-map.md)(생성물)가 정본이 되고 여기서는 링크만 남긴다. 확정 task: T-008(설계 초기판)·T-011·T-012. 라이선스 선행 상태 갱신: 2026-09-08.
 - 근거: [브리프](../plan/design-brief.md) §0·D-16·D-19·D-20·D-23·D-28·D-29, `docs/survey/README.md` §2.1(기준 커밋)·§6.2(정정값), `docs/survey/commonality-matrix.md` §1.5·§3.2·§3.3·§4.1, `docs/survey/cross/licensing.md` §3.6, `docs/survey/cross/version-matrix.md` §1.1·§2.1·§3.2, `docs/survey/cross/ci-deploy.md` §1.1·§1.2, `docs/survey/cross/backend.md` §5.1.
 
 이 문서는 [아키텍처 개요](README.md) §1의 소비자를 저장소 단위로 펼친다. gate 판정은 [채택 준비 기준](adoption-readiness.md), 이관 절차는 [consumer adoption runbook](../runbooks/consumer-adoption.md), 앱별 task는 [tasks](../tasks.md) T-4xx가 정본이다. 아래 사실은 조사 기준 커밋에 고정된 관찰이며 저장소가 바뀌어도 본문을 고치지 않고 분기 감사(T-506)에서 기준 커밋을 갱신한 절로만 확장한다.
