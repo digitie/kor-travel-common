@@ -573,8 +573,7 @@ function TableSurface<T extends RowData>({
     rows, isLoading, renderRowDetails, virtualized, estimateRowSize, overscan,
   })
   const groups = hideHeader ? [] : table.getHeaderGroups()
-  const role = (value: "table" | "rowgroup" | "row" | "columnheader" | "rowheader" | "cell") =>
-    virtualized ? value : undefined
+  const role = structuralRole(virtualized)
   const totalWidth = table.getTotalSize()
   return (
     <Table containerRef={scrollRef} containerClassName={cn("relative overflow-auto", containerClassName)}
@@ -588,8 +587,7 @@ function TableSurface<T extends RowData>({
       {!hideHeader ? <TableHeaders table={table} headRef={headRef} virtualized={virtualized}
         stickyHeader={stickyHeader} sortButtonTestIdPrefix={sortButtonTestIdPrefix} /> : null}
       <TableBody role={role("rowgroup")} className={virtualized ? "relative grid" : undefined}
-        style={virtualized && !isLoading && entries.length
-          ? { height: totalSize, width: "100%" } : undefined}>
+        style={surfaceBodyStyle(virtualized, isLoading, entries.length, totalSize)}>
         {isLoading ? <SkeletonRows columns={table.getAllLeafColumns()} rowCount={skeletonRowCount}
           virtualized={virtualized} /> : rows.length === 0 ?
           <TableRow role={role("row")} className={virtualized ? "flex" : undefined}>
@@ -632,7 +630,7 @@ function TableHeaders<T extends RowData>({ table, headRef, virtualized, stickyHe
               return <TableHead key={header.id} colSpan={header.colSpan}
                 role={role("columnheader")} aria-sort={canSort ? ariaSort(sorted) : undefined}
                 style={{ ...(virtualized ? { width: header.getSize(), flexShrink: 0 } : {}),
-                  ...meta.headerStyle }}
+                  textAlign: meta.align, ...meta.headerStyle }}
                 className={cn(alignClass(meta.align), virtualized && "flex items-center",
                   virtualized && flexAlignClass(meta.align), meta.className, meta.headerClassName)}>
                 {renderHeadCellContent(header, sorted, canSort, sortButtonTestIdPrefix)}
@@ -712,7 +710,7 @@ function DataCells<T extends RowData>({row, virtualized, wrapCells, renderCell}:
                   const meta = columnMeta(cell.column)
                   const BodyCell = meta.rowHeader ? TableHead : TableCell
                   return <BodyCell key={cell.id} role={role(meta.rowHeader ? "rowheader" : "cell")} scope={meta.rowHeader ? "row" : undefined}
-                    style={virtualized ? { width: cell.column.getSize(), flexShrink: 0 } : undefined}
+                    style={{ ...(virtualized ? { width: cell.column.getSize(), flexShrink: 0 } : {}), textAlign: meta.align }}
                     className={cn(alignClass(meta.align), virtualized && "flex items-center",
                       virtualized && flexAlignClass(meta.align), (meta.wrap || wrapCells) && "whitespace-normal",
                       meta.className, meta.cellClassName)}>
@@ -778,4 +776,8 @@ function useSurfaceWindow<T extends RowData>({ rows, isLoading, renderRowDetails
     : entries.map((entry, index) => ({ entry, index, start: 0 }))
 
   return { scrollRef, headRef, entries, items, totalSize: virtualizer.getTotalSize(), measure: virtualizer.measureElement }
+}
+
+function surfaceBodyStyle(virtualized: boolean, isLoading: boolean | undefined, count: number, totalSize: number) {
+  return virtualized && !isLoading && count ? { height: totalSize, width: "100%" } : undefined
 }
