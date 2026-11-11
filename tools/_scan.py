@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
-import gzip
 import hashlib
 import io
 import json
@@ -246,8 +245,15 @@ def scan_parts(name: str, data: bytes, patterns, budget: ArchiveBudget, depth: i
         if compressed:
             yield from gzip_header_parts(name, data)
             limit = min(MAX_ARCHIVE_BYTES, MAX_EXPANDED_BYTES - budget.expanded)
-            with gzip.GzipFile(fileobj=io.BytesIO(data)) as stream:
-                raw = stream.read(limit + 1)
+            # GzipFile의 후속 member 자동 해제를 피하고 단일 header/CRC/trailer만 허용한다.
+            if limit < 0:
+                raise ScanError("archive 압축 해제 크기 제한 초과")
+            stream = zlib.decompressobj(16 + zlib.MAX_WBITS)
+            raw = stream.decompress(data, limit + 1)
+            if len(raw) > limit:
+                raise ScanError("archive 압축 해제 크기 제한 초과")
+            if not stream.eof or stream.unused_data or stream.unconsumed_tail:
+                raise ScanError("gzip은 후행 바이트 없는 단일 완결 member만 지원함")
         else:
             raw = data
         if len(raw) > MAX_ARCHIVE_BYTES or budget.expanded + len(raw) > MAX_EXPANDED_BYTES:
@@ -290,7 +296,7 @@ def scan_parts(name: str, data: bytes, patterns, budget: ArchiveBudget, depth: i
                 yield ScanPart(name + "!/@metadata", decode((key + "=" + value).encode("utf-8")))
         if raw[end:].strip(b"\0"):
             raise ScanError("archive 종료 뒤 비어 있지 않은 입력")
-    except (tarfile.TarError, gzip.BadGzipFile, EOFError, OverflowError, RecursionError, UnicodeError, zlib.error):
+    except (tarfile.TarError, EOFError, OverflowError, RecursionError, UnicodeError, zlib.error):
         raise ScanError("archive 읽기·형식 오류") from None
 
 
