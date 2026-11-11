@@ -601,7 +601,7 @@
       "ecosystem": "npm",
       "floor": null,
       "recommended": null,
-      "exact": "1.33.0+nativecss.fix.3",
+      "exact": "1.33.0+nativecss.fix.4",
       "checked": false,
       "source": "2026-11-11 사용자 승인 원본 수정; vendor/README.md 출처·해시",
       "note": "웹·모바일 공통 빌드/개발 도구. 생성 정책이 정확 build metadata와 동일 tarball bytes를 검사한다."

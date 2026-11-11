@@ -32,11 +32,21 @@ class NativeCssVendorTests(unittest.TestCase):
             self.assertFalse(any(field in metadata for field in ("os", "cpu", "libc")))
             self.assertEqual(package.extractfile("package/LICENSE").read(),
                              (ROOT / "LICENSES/upstream/lightningcss-1.33.0.txt").read_bytes())
-            self.assertEqual(provenance, json.loads((ROOT / "vendor/lightningcss-provenance.json").read_text()))
+            self.assertEqual(provenance, json.loads((ROOT / "vendor/lightningcss-provenance-fix4.json").read_text()))
             notice = package.extractfile("package/wasm/NAPI-WASM-NOTICE").read().decode()
             self.assertIn("MIT", notice)
             self.assertIn("Devon Govett", notice)
             self.assertIn("upstream npm package", notice)
+            self.assertIn("Permission is hereby granted", notice)
+            self.assertIn("this permission notice shall be included", notice)
+            self.assertIn('THE SOFTWARE IS PROVIDED "AS IS"', notice)
+            dependency = json.load(package.extractfile("package/wasm/napi-wasm-package.json"))
+            self.assertEqual((dependency["version"], dependency["author"], dependency["license"]),
+                             ("1.1.3", "Devon Govett <devongovett@gmail.com>", "MIT"))
+            receipt = json.load(package.extractfile("package/wasm/ADAPTER-BUILD.json"))
+            self.assertEqual(receipt, provenance["adapterBuild"])
+            self.assertEqual(hashlib.sha256(package.extractfile("package/wasm/wasm-node.cjs").read()).hexdigest(),
+                             provenance["adapterSHA256"])
             source = package.extractfile("package/native-source.tar.gz").read()
             self.assertEqual(hashlib.sha256(source).hexdigest(), provenance["sourceSHA256"])
             for path, key in (("package/lightningcss.linux-x64-gnu.node", "binarySHA256"),
@@ -48,6 +58,14 @@ class NativeCssVendorTests(unittest.TestCase):
                          "vendor/serde-content/LICENSE-APACHE", "vendor/serde-content/UPSTREAM.md"):
                 self.assertIn(name, members)
             self.assertFalse(any(name.endswith("pinvi-native-postcss.css") for name in members))
+            self.assertFalse(any(name.startswith("fixtures/nativewind5/vendor/") and name.endswith(".tgz") for name in members))
+            for name in ("scripts/pack-native-candidate.mjs", "scripts/build-candidate-wasm.mjs",
+                         "scripts/check-native-css-source.py", "wasm/import.meta.url-polyfill.js",
+                         "vendor/napi-wasm-NOTICE", "vendor/napi-wasm-package.json"):
+                self.assertIn(name, members)
+            self.assertEqual(archive.extractfile("vendor/napi-wasm-NOTICE").read().decode(), notice)
+            self.assertIn(b"pathToFileURL(__filename).href",
+                          archive.extractfile("wasm/import.meta.url-polyfill.js").read())
         self.assertEqual(len([name for name in names if name.endswith(".node")]), 1)
         self.assertEqual(len([name for name in names if name.endswith(".wasm")]), 1)
 

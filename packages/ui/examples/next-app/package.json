@@ -20,7 +20,7 @@
     "@types/node": "22.20.5",
     "@tailwindcss/postcss": "4.3.5",
     "tailwindcss": "4.3.5",
-    "lightningcss": "file:vendor/lightningcss-1.33.0+nativecss.fix.3.tgz"
+    "lightningcss": "file:vendor/lightningcss-1.33.0+nativecss.fix.4.tgz"
   },
   "overrides": {
     "lightningcss": "$lightningcss"

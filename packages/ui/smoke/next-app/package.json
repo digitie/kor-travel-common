@@ -20,7 +20,7 @@
     "@types/react-dom": "19.3.0",
     "tailwindcss": "4.3.5",
     "typescript": "5.9.3",
-    "lightningcss": "file:vendor/lightningcss-1.33.0+nativecss.fix.3.tgz"
+    "lightningcss": "file:vendor/lightningcss-1.33.0+nativecss.fix.4.tgz"
   },
   "overrides": {
     "lightningcss": "$lightningcss"

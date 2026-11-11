@@ -34,9 +34,9 @@
       "integrity": "sha512-lgDBasKIEG2ElQ9jnHDB9pA+x04Xge9yzBb1NPPw1auyvlkQvxsq4NfRPIrw1VWiutcGiIefySLiVaZDUkO69Q=="
     },
     "lightningcss": {
-      "version": "1.33.0+nativecss.fix.3",
-      "filename": "lightningcss-1.33.0+nativecss.fix.3.tgz",
-      "integrity": "sha512-Q6DDVLGjtJ2zcOkvV2+bKcTAb8dB+HJXgDYAm9mrGL2Og2HBMCRzMaeOpGB8IgAxu11if506Wm6X3Dd+Rk+T7A=="
+      "version": "1.33.0+nativecss.fix.4",
+      "filename": "lightningcss-1.33.0+nativecss.fix.4.tgz",
+      "integrity": "sha512-zDQ03VJE37OlyBrLsRcsEdIVu0T4BXJKDH5y9//To6GlGN2UrKQGERFVAFblkPQ5ZEbhuOp5wpXxGARZNdbQLA=="
     }
   }
 }

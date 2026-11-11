@@ -1471,7 +1471,7 @@ class CheckVersionsTests(unittest.TestCase):
 
 
     def test_explicit_semver_axis_accepts_stable_and_build_metadata(self):
-        for version in ("0.0.0", "1.33.0", "1.33.0+nativecss.fix.3",
+        for version in ("0.0.0", "1.33.0", "1.33.0+nativecss.fix.4",
                         "1.33.0+001", "5.0.0-rc.1+build.001", "1.0.0-alpha-beta+linux-x64"):
             with self.subTest(version=version):
                 data = json.loads(json.dumps(REGISTRY))
@@ -1498,7 +1498,7 @@ class CheckVersionsTests(unittest.TestCase):
             with self.subTest(change=change):
                 data = json.loads(json.dumps(REGISTRY))
                 data["axes"]["lightningcss"] = {"ecosystem": "npm", "recommended": None,
-                                              "exact": "1.33.0+nativecss.fix.3", "checked": False}
+                                              "exact": "1.33.0+nativecss.fix.4", "checked": False}
                 data["axes"]["lightningcss"].update(change)
                 self.registry_path.write_text(json.dumps(data), encoding="utf-8")
                 with self.assertRaises(ValueError):
