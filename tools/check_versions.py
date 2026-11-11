@@ -270,7 +270,7 @@ class Registry:
             date.fromisoformat(value)
 
         fields(data, {"schema", "baseline", "updated", "next_review", "policy", "source",
-                      "semantics", "axes", "actions", "exceptions", "blocked", "consumers", "providers"},
+                      "semantics", "axes", "actions", "exceptions", "blocked", "consumers", "providers", "frontendPolicy"},
                "registry", {"schema", "axes"})
         if data.get("schema") != REGISTRY_SCHEMA:
             raise ValueError(f"{path}: schema가 {REGISTRY_SCHEMA}가 아님: {data.get('schema')!r}")
@@ -316,7 +316,7 @@ class Registry:
         registry = cls(data, path, axes)
         for key, axis in axes.items():
             fields(axis, {"ecosystem", "packages", "floor", "recommended", "max", "image", "check",
-                          "checked", "note", "source"}, f"axes.{key}", {"ecosystem"})
+                          "checked", "note", "source", "exact"}, f"axes.{key}", {"ecosystem"})
             if axis["ecosystem"] not in {"runtime", "npm", "pypi", "image", "tool", "db"}:
                 raise ValueError(f"{path}: axes.{key}.ecosystem 오류")
             strings(axis, ("image", "check", "note", "source"), f"axes.{key}")
@@ -325,6 +325,13 @@ class Registry:
                 if value is not None and (parse_version(value) is None
                         or ("-" in value and axis["ecosystem"] != "image")):
                     raise ValueError(f"{path}: axes.{key}.{field_name} 버전 오류")
+            if "exact" in axis:
+                exact = axis["exact"]
+                # 승인 RC의 정확 비교는 JS 정책 검사기가 담당한다.
+                if (axis["ecosystem"] != "npm" or axis.get("checked") is not False
+                        or axis.get("recommended") is not None or not isinstance(exact, str)
+                        or not re.fullmatch(r"(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*", exact)):
+                    raise ValueError(f"{path}: axes.{key}.exact 승인 prerelease 계약 오류")
             floor, recommended, maximum = (parse_version(axis.get(n)) for n in ("floor", "recommended", "max"))
             if ((floor is not None and recommended is not None and below(recommended, floor))
                     or (maximum is not None and any(v is not None and at_or_above(v, maximum)
@@ -340,6 +347,30 @@ class Registry:
                 if identity in registry.by_package:
                     raise ValueError(f"{path}: 패키지 축 중복 {name}")
                 registry.by_package[identity] = key
+        if "frontendPolicy" in data:
+            policy = data["frontendPolicy"]
+            fields(policy, {"schema", "forbidden", "exceptions", "artifactPackages", "profiles", "packages"},
+                   "frontendPolicy", {"schema", "forbidden", "exceptions", "artifactPackages", "profiles", "packages"})
+            if policy["schema"] != 1:
+                raise ValueError(f"{path}: frontendPolicy.schema 오류")
+            for name in ("forbidden", "artifactPackages", "packages"):
+                value = policy[name]
+                if (not isinstance(value, list) or not value
+                        or any(not isinstance(item, str) or not item for item in value)
+                        or len(value) != len(set(value))):
+                    raise ValueError(f"{path}: frontendPolicy.{name} 목록 오류")
+            for name in policy["packages"]:
+                if ("npm", name) not in registry.by_package:
+                    raise ValueError(f"{path}: frontendPolicy 패키지 축 없음: {name}")
+            if not isinstance(policy["exceptions"], dict):
+                raise ValueError(f"{path}: frontendPolicy.exceptions 객체 오류")
+            strings(policy["exceptions"], policy["exceptions"], "frontendPolicy.exceptions")
+            fields(policy["profiles"], {"web", "mobile"}, "frontendPolicy.profiles", {"web", "mobile"})
+            for name, profile in policy["profiles"].items():
+                fields(profile, {"required"}, f"frontendPolicy.profiles.{name}", {"required"})
+                if (not isinstance(profile["required"], list) or not profile["required"]
+                        or any(not isinstance(item, str) or not item for item in profile["required"])):
+                    raise ValueError(f"{path}: frontendPolicy.profiles.{name}.required 목록 오류")
         consumers = data.get("consumers", {})
         if not isinstance(consumers, dict):
             raise ValueError(f"{path}: consumers는 객체여야 함")

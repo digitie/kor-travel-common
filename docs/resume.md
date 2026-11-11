@@ -1,3 +1,9 @@
+# 현재 작업 재개
+
+2026-11-11: 사용자 재개 지시에 따라 [T-218](tasks/T-218-radix-library-unification.md)을 진행한다. 공통 Radix 부품·VirtualTable·RHF/Zod/Zustand 로그인·토큰 bridge·동일 버전/파일 검사기를 구현했다. UI91·정책8·타입·lint·빌드·예시·Doctor0을 확인했다. 다음 작업은 단일 후보 산출물을 모든 앱에서 재검증하고 동일 커밋 기준의 독립2리뷰로 넘기는 것이다. PR·배포 수용은 아직 완료가 아니다.
+
+이하 이전 작업 이력:
+
 ## 2026-10-27 — Common47 병합·소비자 후보 UI32 수용
 
 Common47 최종44d7 CI8 SUCCESS·J/W 독립 두 리뷰와 main aa232ad의 전체 tree 동일성을 확인했다.
@@ -261,7 +267,7 @@ Common a960bdb, Map 1a3c467, PinVi 0058369의 제품113파일 두 독립 FULL �
 
 T-319의 공용 `dagster_health`는 proxy SERVING 뒤 실제 `ListRepositoriesResponse` protobuf/JSON을 검증한다. Map 최신 main의 substring 점검이 빈/잘못된 reply를 정상으로 판정한 독립 적대 리뷰 반례를 반영했다. 전체 Dagster import 없이 설치된 생성 protobuf를 사용하며 각 RPC 4초·수신 4MiB·channel 정리와 fail-closed를 적용한다. [가이드 §10](runbooks/dagster-adoption.md#10-code-server-자식-로딩을-확인하는-경량-건강-점검)에 소비자 채택·재시작 정책 경계를 기록했다. 새 고정 후보 2인 리뷰·CI·실제 paired 재구축/live는 진행 중이다.
 
-# 현재 상태와 다음 한 작업
+## 현재 상태와 다음 한 작업
 
 ## 2026-10-05 — Map·PinVi HTTP 최종 독립 리뷰
 

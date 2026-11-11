@@ -54,6 +54,7 @@ describe("로그인 hydration 준비", () => {
     form.addEventListener("submit", event => { nativeSubmits += 1; event.preventDefault(); });
     // 브라우저 자동완성처럼 값이 있어도 초기 HTML의 제약 자체가 제출을 닫아야 한다.
     field.value = "example";
+    expect(username).toHaveValue("admin");
     expect(username).toBeDisabled();
     expect(field).toBeDisabled();
     expect(button).toBeDisabled();

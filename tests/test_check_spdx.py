@@ -48,6 +48,12 @@ class SpdxTests(unittest.TestCase):
                    f"{license_text} | {modified} | 검증 |\n")
         return HEADER + f"# Origin: {repo}@{SHA} src/sample.py\n"
 
+    def test_shadcn_mit_derivative_with_preserved_provenance(self):
+        text = self.port(repo="shadcn-ui/ui", license_text="MIT 파생")
+        text = text.replace("SPDX-License-Identifier: GPL-3.0-or-later", "SPDX-License-Identifier: GPL-3.0-or-later AND MIT")
+        text += "# Derived-From: shadcn/ui Radix\n# Modified: 2026-11-11 — 공통 패키지 경로 연결\n"
+        self.assertEqual(self.errors(text), [])
+
     def test_cli_pass_and_read_only(self):
         path = self.write("tools/sample.py", HEADER + "print(1)\n")
         before = hashlib.sha256(path.read_bytes()).digest()

@@ -1,5 +1,15 @@
 ## 2026-10-25 — 남은 높이 지도 작업면 후보
 
+## 0.2.0 구현 후보 — 2026-11-11
+
+### Breaking
+
+공통 UI의 primitive 엔진을 shadcn/ui Radix로 바꾸고 TanStack9 VirtualTable을 제공한다. Base UI render 합성은 Radix asChild로 이관한다. 공통 표는 가상화 모드에도 의미 있는 table 구조와 ARIA를 유지한다. 기존 Geo div-grid 마크업에 의존한 선택자는 table 계약으로 이관하며 서버 정렬·클라이언트 정렬 의미와 cell 인스턴스 수명을 보존한다. 토큰0.1.1과 정확 React19.3.1을 소비한다.
+
+### 변경
+
+폼·상태·글꼴 공통 경로와 선언·workspace lock·산출물 무결성 검사기를 추가했다. 현재는 소비자 검증과 독립 리뷰 전 후보이며 릴리스·배포 완료가 아니다.
+
 UI dev.8에 opt-in MapWorkspace·MapFilterPanel·MapStage와 상세 header/접기를 추가했다. 기존 dev.7 기본값과 스타일은 유지한다. [계약](docs/standards/map-controls.md).
 
 실제 소비자에서 요약35%가 가격을 가리는 후속을 재현해 자연 높이와 상세 동작 최소공간으로

@@ -48,6 +48,7 @@ try {
     if (!hasTouch) assert.equal(Math.round(selectBox.width), 176);
     const expandedStage = await stage.boundingBox();
     for (const value of ["키 없음", "WebGL 불가", "조회 중", "자료 없음"]) {
+      // react-doctor-disable-next-line react-doctor/async-await-in-loop -- 한 페이지의 상태 전환과 측정을 순서대로 실행해야 한다.
       await select.selectOption(value);
       assert.equal(Math.round((await stage.boundingBox()).height), Math.round(expandedStage.height), "상태별 작업면 높이 보존");
     }

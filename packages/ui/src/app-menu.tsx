@@ -22,6 +22,13 @@ export interface AppMenuProps {
   testId?: string;
 }
 
+function DisabledMenuLink({ label, className, children }: { label: string; className: string; children: ReactNode }) {
+  return (
+    // react-doctor-disable-next-line react-doctor/prefer-tag-over-role -- 비활성 링크는 href·탭 정지 없이 링크의 비활성 의미만 보존한다.
+    <span data-slot="app-menu-link" role="link" aria-disabled="true" aria-label={label} className={className}>{children}</span>
+  );
+}
+
 export function AppMenu({ groups, pathname = "/", activeItemId, label = "주 메뉴", linkComponent, testId }: AppMenuProps) {
   const id = useId();
   const Link = linkComponent ?? "a";
@@ -43,7 +50,7 @@ export function AppMenu({ groups, pathname = "/", activeItemId, label = "주 메
           const children = <>{item.icon ? <span aria-hidden="true" className="shrink-0">{item.icon}</span> : null}<span className="whitespace-nowrap lg:whitespace-normal lg:break-words">{item.label}</span>{item.hint ? <kbd aria-hidden="true" className="ml-auto text-kt-2xs">{item.hint}</kbd> : null}</>;
           return <li key={item.id} data-slot="app-menu-item">
             {item.href !== undefined ? item.disabled
-              ? <span data-slot="app-menu-link" role="link" aria-disabled="true" aria-label={item.label} className={className}>{children}</span>
+              ? <DisabledMenuLink label={item.label} className={className}>{children}</DisabledMenuLink>
               : <Link data-slot="app-menu-link" href={item.href} aria-label={item.label} aria-current={selected ? "page" : undefined} className={className}>{children}</Link>
               : <button data-slot="app-menu-action" type="button" disabled={item.disabled} aria-label={item.label}
                 onClick={item.onSelect} className={`${className} border-0 bg-transparent text-left`}>{children}</button>}

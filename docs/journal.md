@@ -1,3 +1,7 @@
+# 2026-11-11 Radix 공통 라이브러리 구현 후보
+
+[T-218](tasks/T-218-radix-library-unification.md)에 따라 UI0.2.0·tokens0.1.1 후보를 구성하고 공유 정책·lock/bytes·소스 재도입 검사를 추가했다. common lint/type/build/UI91/정책8/Doctor0을 확인했으며 소비자·리뷰·배포 gate는 진행 중이다.
+
 ## 2026-10-27 — T-217 병합과 실제 소비자 후보 정산
 
 Common47의 main aa232ad/최종44d7 전체 tree 동일, CI8 SUCCESS 및 J/W 제품·최종 delta PASS를 저장 원장과 Git/GitHub로 대조했다. Transport6913의 실제 UI32 PASS26.014초·SSR script 보류8·인증 cookie·tile40/API10·도메인 쓰기0·정리를 [정산 보고서](reports/2026-10-27-common47-consumer-ui-closure.md)에 기록했다.
@@ -406,7 +410,7 @@ T-319의 공용 `dagster_health`는 proxy SERVING 뒤 실제 `ListRepositoriesRe
 
 [최종 판정](reviews/adversarial/2026-10-05-pinvi-common.md)에 두 독립 code PASS·최초 조건부 원문/closure·SHA와 실제 PinVi N150 live 4PASS를 연결했다. dev.4 cap 미확인 모델·nullable schedule migration·소비자 actual autodiscovery gate를 가이드에 기록했다. UI50/check/build/tarball smoke, 기존337 tool tests·문서 gate PASS. 운영 shared daemon/worker kill/RSS는 NOT_RUN이다. CodeGraph index empty는 manual module/caller trace fallback으로 명시한다. 원본 T-301 checkout은 보존했다. 최종 CI 후 PR #27 merge다.
 
-# kor-travel-common 작업 일지
+## kor-travel-common 작업 일지
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 

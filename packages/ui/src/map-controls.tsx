@@ -5,9 +5,9 @@
 // Modified: 2026-10-25 — 기존 계약을 보존하고 남은 높이 작업면·접기·상세 슬롯 추가
 "use client";
 
-import { Tabs } from "@base-ui/react/tabs";
+import { Tabs } from "radix-ui";
 import { ChevronDownIcon, ChevronUpIcon, ListIcon, MapIcon, Maximize2Icon, Minimize2Icon, XIcon } from "lucide-react";
-import { createContext, useContext, useEffect, useId, useImperativeHandle, useRef, useState, type ComponentProps, type ReactNode, type Ref, type RefObject } from "react";
+import { createContext, useContext, useEffect, useId, useImperativeHandle, useMemo, useRef, useState, type ComponentProps, type ReactNode, type Ref, type RefObject } from "react";
 
 const WorkspaceExpansion = createContext<{
   enabled: boolean; expanded: boolean; toggle: () => void; id: string; trigger: RefObject<HTMLButtonElement | null>;
@@ -32,10 +32,14 @@ export function MapWorkspace({ className = "", expandable = false, id, onKeyDown
       (target ?? workspace.current)?.focus({ preventScroll: true });
     }
   }, [expanded]);
-  return <WorkspaceExpansion.Provider value={{ enabled: expandable, expanded, id: workspaceId, trigger, toggle: () => {
-    if (expanded) close(); else setLocalExpanded(true);
-  } }}>
-    <div {...props} ref={workspace} tabIndex={tabIndex ?? (expandable ? -1 : undefined)} id={workspaceId} className={`kt-map-workspace ${className}`} data-slot="map-workspace" data-expanded={expanded} onKeyDown={(event) => {
+  const expansion = useMemo(() => ({
+    enabled: expandable, expanded, id: workspaceId, trigger, toggle: () => {
+      if (expanded) { restoreFocus.current = true; setLocalExpanded(false); }
+      else setLocalExpanded(true);
+    },
+  }), [expandable, expanded, workspaceId]);
+  return <WorkspaceExpansion.Provider value={expansion}>
+    <div role="group" aria-label="지도 작업면" {...props} ref={workspace} tabIndex={tabIndex ?? (expandable ? -1 : undefined)} id={workspaceId} className={`kt-map-workspace ${className}`} data-slot="map-workspace" data-expanded={expanded} onKeyDown={(event) => {
       onKeyDown?.(event);
       if (!event.defaultPrevented && event.key === "Escape" && expanded) {
         event.preventDefault(); event.stopPropagation(); close();
@@ -138,9 +142,10 @@ export function MapKindFilter({ options, value, onToggle, onReset, resetDisabled
   onToggle: (value: string) => void; onReset?: () => void;
   resetDisabled?: boolean; resetTitle?: string; label?: string; ariaLabel?: string; testId?: string;
 }) {
+  const selected = new Set(value);
   return <MapFilterField label={label} className="kt-map-kind-field">
     <div className="kt-map-kinds" role="group" aria-label={ariaLabel} data-testid={testId}>
-      {options.map((option) => <button key={option.value} type="button" aria-pressed={value.includes(option.value)} onClick={() => onToggle(option.value)}>
+      {options.map((option) => <button key={option.value} type="button" aria-pressed={selected.has(option.value)} onClick={() => onToggle(option.value)}>
         {option.icon}<span>{option.label}</span>
       </button>)}
       {onReset ? <button type="button" className="kt-map-kind-reset" disabled={resetDisabled} title={resetTitle} onClick={onReset}><XIcon aria-hidden="true" />초기화</button> : null}
@@ -148,12 +153,12 @@ export function MapKindFilter({ options, value, onToggle, onReset, resetDisabled
   </MapFilterField>;
 }
 
-export function MapTabs({ className = "", ...props }: Tabs.Root.Props) {
-  return <Tabs.Root {...props} className={(state) => `kt-map-tabs ${typeof className === "function" ? className(state) ?? "" : className}`} data-slot="tabs" />;
+export function MapTabs({ className = "", ...props }: ComponentProps<typeof Tabs.Root>) {
+  return <Tabs.Root {...props} className={`kt-map-tabs ${className}`} data-slot="tabs" />;
 }
 
-export function MapTabPanel({ className = "", ...props }: Tabs.Panel.Props) {
-  return <Tabs.Panel {...props} className={(state) => `kt-map-tab-panel ${typeof className === "function" ? className(state) ?? "" : className}`} data-slot="tabs-content" />;
+export function MapTabPanel({ className = "", ...props }: ComponentProps<typeof Tabs.Content>) {
+  return <Tabs.Content {...props} className={`kt-map-tab-panel ${className}`} data-slot="tabs-content" />;
 }
 
 export type MapViewportReadout = { longitude: number; latitude: number; zoom: number };
@@ -171,8 +176,8 @@ export function MapViewTabs({ viewport, count, status, listValue = "list", listL
 }) {
   return <div className="kt-map-view-header">
     <Tabs.List className="kt-map-view-tabs" aria-label={ariaLabel} data-slot="tabs-list">
-      <Tabs.Tab value="map" data-slot="tabs-trigger"><MapIcon aria-hidden="true" />지도</Tabs.Tab>
-      <Tabs.Tab value={listValue} data-slot="tabs-trigger"><ListIcon aria-hidden="true" />{listLabel}</Tabs.Tab>
+      <Tabs.Trigger value="map" data-slot="tabs-trigger"><MapIcon aria-hidden="true" />지도</Tabs.Trigger>
+      <Tabs.Trigger value={listValue} data-slot="tabs-trigger"><ListIcon aria-hidden="true" />{listLabel}</Tabs.Trigger>
     </Tabs.List>
     <MapReadout viewport={viewport} count={count} status={status} />
   </div>;

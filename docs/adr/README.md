@@ -34,3 +34,5 @@ kor-travel-common의 구조적 결정은 파일당 하나의 ADR로 둔다. 파�
 | [ADR-014](014-common-implementation-without-registry-publishing.md) | npm·PyPI 미게시와 common 구현·외부 릴리스 분리 | accepted |
 | [ADR-015](015-common-shared-systems-scope.md) | 공용 시스템 범위(위젯·토큰·코어 로직·로그인) | accepted |
 | [ADR-016](016-mdx-parser-for-ux-lint.md) | UX 검사기의 MDX 문법 해석을 표준 파서에 위임 | accepted |
+
+- [ADR-017: 공통 shadcn Radix·VirtualTable 및 의존성 일치](017-shadcn-radix-shared-components.md)

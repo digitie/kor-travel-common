@@ -1,0 +1,331 @@
+[
+  {
+    "component": "alert-dialog",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/alert-dialog.json",
+    "sha256": "dd761aac823fe89513e44f917b26691bfd20c0f31de717fb42450540dade2e9e",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": [
+      "button"
+    ],
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/alert-dialog.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "alert",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/alert.json",
+    "sha256": "f253568242c1c69b343f12474002fdbe229f603158171c59e21c491ab79f2e6e",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/alert.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "badge",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/badge.json",
+    "sha256": "59953420d01d23d172b4e32583426db153ff09226e2d460d53526b9f25282801",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/badge.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "breadcrumb",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/breadcrumb.json",
+    "sha256": "4676c0c62a5699ed4f6b5079cb4e912149307d1150cb0d474c30bbc6e1817feb",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/breadcrumb.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "button",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/button.json",
+    "sha256": "08e5f87833c5db8436e89337ebde0f776bcdbf649d3de69fb89be6441ca2e366",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/button.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "card",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/card.json",
+    "sha256": "645c3d73e387a99f1492220cc619453b0c7f5454134ee3cd548be7a80f7eccde",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/card.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "checkbox",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/checkbox.json",
+    "sha256": "038e8d38fbea4d1c2f602938b00b095171d40a8371d7b60f772260c2eb8cb2cf",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/checkbox.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "collapsible",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/collapsible.json",
+    "sha256": "c6598e5584f4258b5d9fefadbc5ad6a66888ad58729f4b634a0bb2d9c513188b",
+    "dependencies": null,
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/collapsible.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "dialog",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/dialog.json",
+    "sha256": "9a4690ab16c37b62c2dd5c023c28fb0fbb262e21fa981f07c679e53e8155acc3",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": [
+      "button"
+    ],
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/dialog.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "dropdown-menu",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/dropdown-menu.json",
+    "sha256": "19964ff76e458e9ffd22da3e9669449e2ed044902a70fef88b957e20ddc5b314",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/dropdown-menu.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "input",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/input.json",
+    "sha256": "75418e030b2a54dd017ac0f4588db4bbdbabca7525e88bbc9d84cb3e18bcb905",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/input.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "label",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/label.json",
+    "sha256": "344bde38b8531615dbf8e14af3895517c24d8ef6ce56ddeda7e2e6fe4b5d0c00",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/label.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "native-select",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/native-select.json",
+    "sha256": "17552c2df3b8f5ee44675979c3c29a02f48454e9204f2a02b64f4b7f28bdfc2c",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/native-select.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "popover",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/popover.json",
+    "sha256": "61be62a441fb6b90e26ceaf93353f57411a4d114f305e0417b8f1122750b9018",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/popover.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "progress",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/progress.json",
+    "sha256": "11470bfbc6c80a4b198a1c00b6ea6300f5b29990fdd2ac36921d1f30eb2d4aa4",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/progress.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "select",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/select.json",
+    "sha256": "d5b78764549e83e4f0deb49b1eb409b94aaa8d7eaca5edb659b6fde79701ff26",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/select.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "separator",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/separator.json",
+    "sha256": "b5b5460e5337c2d5f361c1512001615b2e5eacb38c7449a4418bb9ddb47c4bba",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/separator.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "skeleton",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/skeleton.json",
+    "sha256": "4c2af7fa9c645358a0fb188779deab6f0b981733b62befc25e18aaebea1350dc",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/skeleton.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "switch",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/switch.json",
+    "sha256": "afd5b6e6b9c2bcd42ee164a39ca18c342b2d7a2dfedd29da3065dc37021090e8",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/switch.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "table",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/table.json",
+    "sha256": "749b0501e97591f8d7c9ef81366d636e4b47857a15a28e6cf3b87841232e74bf",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/table.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "tabs",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/tabs.json",
+    "sha256": "b977274550595594055d850a16775c75761765e1cd76b4827e101c2f432762df",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/tabs.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "textarea",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/textarea.json",
+    "sha256": "82601c91ffc6c727d924162c78d7cb853114bcced4e2eb922a68ca12d4239c0f",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/textarea.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "tooltip",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/tooltip.json",
+    "sha256": "e94530dd6877132d5eda73f6fb0d217f345477232f140f2ca6e024d790177f6a",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/tooltip.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "scroll-area",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/scroll-area.json",
+    "sha256": "436777583f300e9fb0ca9df97ce9d1ca45443b7513273f39d27c6183b99db396",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/scroll-area.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "accordion",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/accordion.json",
+    "sha256": "832d6737d43aa9c1457adb9c40d48a668d8a22263a0c77261bb378313b5c081a",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/accordion.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "field",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/field.json",
+    "sha256": "a5deef8fa6d55baa9fa25d0e068137ef9db45b660d01a423321ddfc9c7cf3c7c",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": [
+      "label",
+      "separator"
+    ],
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/field.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "empty",
+    "source": "https://ui.shadcn.com/r/styles/radix-nova/empty.json",
+    "sha256": "5cac88b6f80f40cf4aa5e4c3d5a6810f43e132a24032d1c55a7aecdae446cf15",
+    "dependencies": [
+      "cn"
+    ],
+    "registryDependencies": null,
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "apps/v4/registry/bases/radix/ui/empty.tsx",
+    "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  }
+]

@@ -1,5 +1,7 @@
 # 프론트엔드 스택 규약 — 표준 구성 파일·품질 게이트·`kt-`·`cn`·금지 사항
 
+2026-11-11 현재 라이브러리·Radix 공통화·NativeWind5 RC·ESLint10의 정확 계약은 [라이브러리 규약](frontend-libraries.md)과 [ADR-017](../adr/017-shadcn-radix-shared-components.md)이 우선한다. 아래 조사 기준의 예외·단계별 수용 표는 최종 이관 결과로 갱신 중이다.
+
 - 정본 지위: 이 문서는 프론트엔드 앱의 **구성 파일 형태·게이트·네임스페이스·금지 사항**의 정본이다. 버전 **값**(floor/recommended/exceptions)은 [versions.md](versions.md)와 `versions.json`이 정본이며 여기서는 인용만 한다. 토큰은 [design-tokens](design-tokens.md), UI 계약은 [ui-contract](ui-contract.md).
 - 확정 task: **T-107**(구성 조각 `templates/eslint/*.mjs`·tsconfig base·postcss·`components.json` 산출과 함께 확정). 마지막 갱신: 2026-09-06.
 - 근거 약칭: `vm` = [version-matrix 조사](../survey/cross/version-matrix.md), `ui` = [ui-components 조사](../survey/cross/ui-components.md), `dt` = [design-tokens 조사](../survey/cross/design-tokens.md), `inv/<app>` = [인벤토리](../survey/README.md) §3.1.
@@ -14,7 +16,7 @@
 | 프레임워크 | Next.js 16 App Router + React 19 | 16.3.4 / 19.2.8 | React 18(geo·ktdm)은 tokens만 채택, ui는 React 19 승격 후(O-25, T-443·T-470) |
 | 언어 | TypeScript 5.9 | 5.9.3 | TS 7은 typescript-eslint peer(`<6.1.0`) 밖 → airport 예외(O-6, T-433) |
 | 스타일 | Tailwind CSS v4 + `@tailwindcss/postcss` | 4.3.3 | CSS-first(§4). pinvi mobile Tailwind 3은 열림 O-8 |
-| 컴포넌트 | shadcn `base-nova` + `@base-ui/react`(overlay만) + native 요소 | shadcn CLI 4.21.x(devDependencies), base-ui 1.8.0 | D-09. geo radix → base-ui 이관은 T-444 |
+| 컴포넌트 | common shadcn radix-nova + radix-ui | 정확 버전은 frontend-dependencies.json | ADR-017 사용자 지시 |
 | 클래스 유틸 | `class-variance-authority` + `clsx` + `tailwind-merge`(`extendTailwindMerge`) | 0.7.1 / 2.1.1 / 3.6.0 | npm `cn` 패키지 금지(§5) |
 | 아이콘 | `lucide-react`(앱) | 1.x | `@kor-travel/ui`는 인라인 SVG로 lucide peer를 두지 않는다(D-01) |
 | 표·가상화 | `@tanstack/react-table` 8.21 + `react-virtual` 3.14 | 8.21.x / 3.14.x | react-table 9는 미조사(T-507) |

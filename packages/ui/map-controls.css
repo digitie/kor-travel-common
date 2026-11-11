@@ -24,7 +24,7 @@
 .kt-map-view-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; min-width: 0; }
 .kt-map-view-tabs { display: inline-flex; flex-shrink: 0; align-items: center; gap: .125rem; height: var(--kt-control-h); padding: .125rem; box-sizing: border-box; border-radius: var(--kt-radius-control); background: var(--kt-surface-subtle); }
 .kt-map-view-tabs > button { display: inline-flex; align-items: center; justify-content: center; gap: .375rem; height: 100%; min-height: 0; padding: 0 .625rem; border: 1px solid transparent; border-radius: var(--kt-radius-control); background: transparent; color: var(--kt-text-secondary); font: 500 var(--text-kt-sm)/1.5 var(--kt-font-sans); cursor: pointer; }
-.kt-map-view-tabs > button[data-active] { border-color: var(--kt-border); background: var(--kt-surface-card); color: var(--kt-text-primary); }
+.kt-map-view-tabs > button[data-state="active"] { border-color: var(--kt-border); background: var(--kt-surface-card); color: var(--kt-text-primary); }
 .kt-map-view-tabs svg { width: 1rem; height: 1rem; flex-shrink: 0; }
 .kt-map-readout { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; min-width: 0; color: var(--kt-text-secondary); font: 400 var(--text-kt-2xs)/1.5 var(--kt-font-mono); font-variant-numeric: tabular-nums; }
 .kt-map-count { padding: .125rem .375rem; border-radius: var(--kt-radius-control); background: var(--kt-surface-subtle); font-family: var(--kt-font-sans); }

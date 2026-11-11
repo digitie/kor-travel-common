@@ -1449,6 +1449,26 @@ class CheckVersionsTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertNotIn(marker, result.stdout + result.stderr)
 
+    def test_frontend_policy_rejects_unknown_fields(self):
+        data = json.loads((SCRIPT.parents[1] / "versions.json").read_text())
+        data["frontendPolicy"]["unexpected"] = True
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+        with self.assertRaises(ValueError):
+            CV.Registry.load(self.registry_path)
+
+    def test_explicit_prerelease_axis_is_only_for_exact_frontend_checker(self):
+        data = json.loads(json.dumps(REGISTRY))
+        data["axes"]["nativewind"] = {"ecosystem": "npm", "recommended": None,
+                                      "exact": "5.0.0-rc.1", "checked": False}
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+        self.assertEqual(CV.Registry.load(self.registry_path).axes["nativewind"]["exact"], "5.0.0-rc.1")
+        for change in ({"checked": True}, {"exact": "5.0.0-rc.01"}, {"recommended": "5.0.0"}):
+            invalid = json.loads(json.dumps(data))
+            invalid["axes"]["nativewind"].update(change)
+            self.registry_path.write_text(json.dumps(invalid), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                CV.Registry.load(self.registry_path)
+
     def test_repo_registry_values_load(self):
         """저장소 루트 versions.json이 스키마·필수 필드를 만족하고 예외 until이 ISO 날짜다."""
         registry = CV.Registry.load(SCRIPT.parents[1] / "versions.json")
