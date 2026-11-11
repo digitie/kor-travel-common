@@ -1,6 +1,6 @@
 # 현재 작업 재개
 
-2026-11-11: 사용자 재개 지시에 따라 [T-218](tasks/T-218-radix-library-unification.md)을 진행한다. 공통 Radix 부품·VirtualTable·RHF/Zod/Zustand 로그인·토큰 bridge·동일 버전/파일 검사기를 구현했다. UI99·정책21·타입·lint·빌드·예시·Doctor0을 확인했다. 독립2리뷰의 최초 BLOCK과 모든 finding을 보존했고 RSC·표·ARIA·스타일·배포 고지·전이 React·모바일 정책·CI를 보정했다. 다음 작업은 수정 source/pack의 격리 브라우저와 두 원 리뷰어 재검토다. PR·배포 수용은 아직 완료가 아니다.
+2026-11-12: [T-218](tasks/T-218-radix-library-unification.md)을 계속 진행한다. 긴 Dialog/AlertDialog의 viewport·크기·표현 계약과 최신 CSS 단일 산출물 정책을 통합했다. source670a753의 UI101·정책41·tokens9·타입·lint·빌드·예시·Doctor0을 확인하고 integration-8-review UI/tokens 및 지도3개·CSS fix.4의 단일 pack 원장을 frontend-artifacts.json에 고정했다. 최초 공통 리뷰21건은 두 원 리뷰어가 FIXED를 확인했고, 후속 focus P2·고지 P3도 구현했으나 최종 source/pack 재검토는 남아 있다. 소비자 최종 pack 채택·원격 CI·독립2리뷰·머지·배포는 진행 중이며 완료로 집계하지 않는다.
 
 이하 이전 작업 이력:
 

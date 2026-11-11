@@ -1,3 +1,7 @@
+# 2026-11-12 — 최종 공통 후보8 통합
+
+Dialogd29869a와 CSS 정책256d263/47cca0a/633b4b8/00f0aae를 통합 source670a753으로 고정했다. UI101·정책41·tokens9·타입·빌드·lint·예시·Doctor0·정책 생성 검사를 통과했다. 단일 pack6개의 버전·SHA512·대응 source는 frontend-artifacts.json을 따른다. 소비자 재설치와 최종 독립 리뷰·CI·머지·배포 gate는 남아 있다. 앞선 실패와 불변 후보6/7 evidence는 보존했다.
+
 # 2026-11-11 Radix 공통 라이브러리 구현 후보
 
 [T-218](tasks/T-218-radix-library-unification.md)에 따라 UI0.2.0·tokens0.1.1 후보를 구성하고 공유 정책·lock/bytes·소스 재도입 검사를 추가했다. common lint/type/build/UI99/정책21/Doctor0을 확인했으며 소비자·리뷰·배포 gate는 진행 중이다.
