@@ -1456,6 +1456,81 @@ class CheckVersionsTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             CV.Registry.load(self.registry_path)
 
+    def patched_radix_registry(self, name="@radix-ui/react-focus-scope"):
+        data = json.loads((SCRIPT.parents[1] / "versions.json").read_text())
+        for key, axis in list(data["axes"].items()):
+            if axis["ecosystem"] == "npm" and name in axis.get("packages", [key]):
+                del data["axes"][key]
+        data["axes"]["fixture-radix-engine"] = {"ecosystem": "npm", "packages": [name],
+            "exact": "1.1.0+focus.fixture", "recommended": None, "checked": False}
+        policy = data["frontendPolicy"]
+        for field in ("packages", "artifactPackages"):
+            policy[field] = [item for item in policy[field] if item != name] + [name]
+        policy["patchedRadixPackages"] = [name]
+        return data
+
+    def load_registry_fixture(self, data):
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+        return CV.Registry.load(self.registry_path)
+
+    def test_patched_radix_absent_keeps_legacy_registry(self):
+        data = self.patched_radix_registry()
+        del data["frontendPolicy"]["patchedRadixPackages"]
+        self.assertNotIn("patchedRadixPackages", self.load_registry_fixture(data).data["frontendPolicy"])
+
+    def test_patched_radix_explicit_single_and_empty_lists_are_supported(self):
+        data = self.patched_radix_registry()
+        for names in ([], ["@radix-ui/react-focus-scope"]):
+            with self.subTest(empty=not names):
+                data["frontendPolicy"]["patchedRadixPackages"] = names
+                self.assertEqual(self.load_registry_fixture(data).data["frontendPolicy"]["patchedRadixPackages"], names)
+
+    def test_patched_radix_rejects_malformed_or_duplicate_list(self):
+        engine = "@radix-ui/react-focus-scope"
+        for value in (None, {}, engine, True, 3, [None], [{}], [3], [""], [engine, engine]):
+            with self.subTest(value_type=type(value).__name__):
+                data = self.patched_radix_registry()
+                data["frontendPolicy"]["patchedRadixPackages"] = value
+                with self.assertRaises(ValueError):
+                    self.load_registry_fixture(data)
+
+    def test_patched_radix_rejects_adjacent_scope_subpath_and_nonexplicit_names(self):
+        for name in ("@radix-ui-extra/react-focus-scope", "x@radix-ui/react-focus-scope",
+                     "@radix-ui/react-focus-scope/subpath", "@radix-ui/react-*", "@radix-ui/react-",
+                     "@radix-ui/react-focus_scope", "@radix-ui/react-focus-scope\n",
+                     "@radix-ui/react-Focus-scope", "@radix-ui/react--focus-scope"):
+            with self.subTest(name_kind=name[:12]):
+                with self.assertRaises(ValueError):
+                    self.load_registry_fixture(self.patched_radix_registry(name))
+
+    def test_patched_radix_requires_package_artifact_and_exact_managed_axis(self):
+        engine = "@radix-ui/react-focus-scope"
+        for change in ("package", "artifact", "axis", "ecosystem", "recommended", "unchecked",
+                       "missing-exact", "empty-exact", "null-exact", "blank-exact", "range-exact", "raw-name"):
+            with self.subTest(change=change):
+                data = self.patched_radix_registry()
+                axis = data["axes"]["fixture-radix-engine"]
+                if change == "package": data["frontendPolicy"]["packages"].remove(engine)
+                elif change == "artifact": data["frontendPolicy"]["artifactPackages"].remove(engine)
+                elif change == "axis": del data["axes"]["fixture-radix-engine"]
+                elif change == "ecosystem": axis["ecosystem"] = "pypi"; axis.pop("exact")
+                elif change == "recommended": axis.pop("exact"); axis["recommended"] = "1.1.0"
+                elif change == "unchecked": axis["checked"] = True
+                elif change == "missing-exact": axis.pop("exact")
+                elif change == "empty-exact": axis["exact"] = ""
+                elif change == "null-exact": axis["exact"] = None
+                elif change == "blank-exact": axis["exact"] = " "
+                elif change == "range-exact": axis["exact"] = "^1.1.0"
+                elif change == "raw-name": axis["packages"] = [" " + engine]
+                with self.assertRaises(ValueError):
+                    self.load_registry_fixture(data)
+
+    def test_patched_radix_does_not_allow_unknown_policy_fields(self):
+        data = self.patched_radix_registry()
+        data["frontendPolicy"]["patchedRadixPackagesExtra"] = []
+        with self.assertRaises(ValueError):
+            self.load_registry_fixture(data)
+
     def test_explicit_prerelease_axis_is_only_for_exact_frontend_checker(self):
         data = json.loads(json.dumps(REGISTRY))
         data["axes"]["nativewind"] = {"ecosystem": "npm", "recommended": None,

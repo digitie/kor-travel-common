@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { readFileSync, writeFileSync } from "node:fs";
 const registry = JSON.parse(readFileSync(new URL("../versions.json", import.meta.url), "utf8"));
+const allowedPolicyFields = new Set(["schema", "forbidden", "exceptions", "artifactPackages", "profiles", "packages", "patchedRadixPackages"]);
+if (!registry.frontendPolicy || typeof registry.frontendPolicy !== "object" || Array.isArray(registry.frontendPolicy)
+ || Object.keys(registry.frontendPolicy).some(name => !allowedPolicyFields.has(name)))
+ throw new Error("프런트 정책 객체·미지 필드 오류");
 const { packages, ...metadata } = registry.frontendPolicy;
 const versions = {};
 for (const name of packages) {
@@ -10,6 +14,22 @@ for (const name of packages) {
   const values = new Set(axes.map(([, axis]) => (axis.exact ?? axis.recommended)));
   if (values.size !== 1 || ![...values][0]) throw new Error(name + ": 정확 버전 정본을 찾을 수 없음");
   versions[name] = [...values][0];
+}
+// 선택 목록이 없으면 기존 정책을 유지하고, 명시하면 독립 생성에서도 같은 좁은 계약을 적용한다.
+const patched = Object.hasOwn(metadata, "patchedRadixPackages") ? metadata.patchedRadixPackages : [];
+if (!Array.isArray(patched) || patched.some(name => typeof name !== "string"
+ || !/^@radix-ui\/react-[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name) || name.trim() !== name)
+ || new Set(patched).size !== patched.length)
+ throw new Error("patchedRadixPackages 목록 오류");
+const exactSemVer = /^(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
+for (const name of patched) {
+ const axes = Object.entries(registry.axes).filter(([key, axis]) =>
+  axis.ecosystem === "npm" && (axis.packages ?? [key]).includes(name));
+ const axis = axes.length === 1 ? axes[0][1] : null;
+ if (!packages.includes(name) || !metadata.artifactPackages.includes(name) || !axis
+  || axis.checked !== false || axis.recommended != null || typeof axis.exact !== "string"
+  || axis.exact.trim() !== axis.exact || !exactSemVer.test(axis.exact))
+  throw new Error("patchedRadixPackages 정확 관리 축·산출물 연결 오류");
 }
 for (const [name, profile] of Object.entries(metadata.profiles)) {
   const required = new Set(profile.required);

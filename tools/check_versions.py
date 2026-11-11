@@ -349,7 +349,7 @@ class Registry:
                 registry.by_package[identity] = key
         if "frontendPolicy" in data:
             policy = data["frontendPolicy"]
-            fields(policy, {"schema", "forbidden", "exceptions", "artifactPackages", "profiles", "packages"},
+            fields(policy, {"schema", "forbidden", "exceptions", "artifactPackages", "profiles", "packages", "patchedRadixPackages"},
                    "frontendPolicy", {"schema", "forbidden", "exceptions", "artifactPackages", "profiles", "packages"})
             if policy["schema"] != 1:
                 raise ValueError(f"{path}: frontendPolicy.schema 오류")
@@ -362,6 +362,21 @@ class Registry:
             for name in policy["packages"]:
                 if ("npm", name) not in registry.by_package:
                     raise ValueError(f"{path}: frontendPolicy 패키지 축 없음: {name}")
+            patched = policy.get("patchedRadixPackages", [])
+            if (not isinstance(patched, list)
+                    or any(not isinstance(name, str)
+                           or not re.fullmatch(r"@radix-ui/react-[a-z0-9]+(?:-[a-z0-9]+)*", name)
+                           for name in patched)
+                    or len(patched) != len(set(patched))):
+                raise ValueError(f"{path}: frontendPolicy.patchedRadixPackages 목록 오류")
+            for name in patched:
+                key = registry.by_package.get(("npm", name))
+                axis = axes.get(key, {})
+                if (name not in policy["packages"] or name not in policy["artifactPackages"]
+                        or name not in axis.get("packages", [key])
+                        or axis.get("ecosystem") != "npm" or axis.get("checked") is not False
+                        or not isinstance(axis.get("exact"), str) or not axis["exact"].strip()):
+                    raise ValueError(f"{path}: frontendPolicy.patchedRadixPackages 정확 관리 축·산출물 연결 오류")
             if not isinstance(policy["exceptions"], dict):
                 raise ValueError(f"{path}: frontendPolicy.exceptions 객체 오류")
             strings(policy["exceptions"], policy["exceptions"], "frontendPolicy.exceptions")
