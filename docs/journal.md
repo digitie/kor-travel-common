@@ -1,3 +1,10 @@
+## 2026-11-12 — 후보10 단일 산출물과 원본 FocusScope 연결
+
+- 원본 수정 Scope1.3.1+kortravel.fix.1의 고정31,214bytes·f97c1dd를 exact axis/직접 vendor/root override로 연결했다. 앱의 개별 Radix source import 금지는 유지한다.
+- 모든 도달 artifact 복사본을 검사하는 정책175, 스키마·생성기 full tools400(399 PASS/1 SKIP), 실제 세 설치 경로의 고정 engine·lock snapshot을 통과했다. 공통 root의 패치 엔진 설치 후 UI101/tokens9·빌드/타입도 통과했다.
+- producer55a921b에서 UI/tokens를 한 번 pack했다. 후보9 대비 checker·정책4파일만 달라115파일 byte 동일, Scope는 실제 runtime 변경이므로 새 packed browser/앱 수용을 요구한다. 기존 지도3/CSSfix.4 bytes는 같다.
+- exact447 전체CI 및 gzip 원 A/B closure를 보존했다. 최종C10 원장·새 두 리뷰·CI·소비자·PR머지·새 배포는 후속 gate다. 상세 계보는 [필수 라이브러리](standards/frontend-libraries.md)와 [vendor 출처](../vendor/README.md)를 따른다.
+
 # 2026-11-12 — 후보9 검사기·archive 감사 통합
 
 2c1182e의 모듈 구문/linked workspace 회귀68개와97ccc97의 도구379실행(378 PASS/1 SKIP)·두 정보 유출 검사 발견0을 확인했다. 후보9는 UI/tokens checker만 바꾸고 실행 코드·CSS·metadata117개의 원문을 유지한다. 중앙 단일 원장과 원 리뷰3차 BLOCK/후속 수정 원문을 보존하며 source4 검토·정확 CI·소비자·운영 gate는 남아 있다.

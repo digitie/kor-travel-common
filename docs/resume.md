@@ -1,8 +1,12 @@
 # 현재 작업 재개
 
-2026-11-12: [T-218](tasks/T-218-radix-library-unification.md)을 계속 진행한다. 후보9 UI0.2.0/tokens0.1.1·지도3종·CSSfix.4의 단일 bytes/SRI를 frontend-artifacts.json에 고정했고 7개 소비자 원 A/B 최종 리뷰가 진행 중이다. source4의2ec 정확 CI는 모두 성공, A/B는 기존 정책·scanner finding을 FIXED로 확인했다. 신규 A-P2-10 연결 gzip metadata는f8643d5에서 단일 완결 member 검사로 수정했다. 집중9 PASS, 전체391실행=390 PASS/1 SKIP, 두 scanner 발견0·예외32/4, 문서819/링크3138오류0. 원 A 재확인과 exact4479073 CI는 진행 중이다. B 원문은 불변 commit에 보존하고 공개 compiler 상수 두 개만 설명으로 바꾼 B 작성 publication 사본과 구분한다.
+2026-11-12: [T-218](tasks/T-218-radix-library-unification.md)을 계속 진행한다. 최종 공통 후보10의 일곱 단일 pack을 frontend-artifacts.json에 고정했다. producer55a921b의 UI0.2.0/tokens0.1.1은 후보9 대비 checker·정책4파일만 다르고 나머지115파일은 byte 동일하다. 실제 modal runtime은 새 원본 수정 FocusScope1.3.1+kortravel.fix.1이므로 이전 브라우저 성공으로 수용하지 않는다.
 
-지도32·serde1·Lightning1은 각 두 독립 리뷰/CI 후 mergeae1e209/21d1c7/f24bb66, reviewed tree 동일성을 확인했다. 앱 머지·운영 신규 배포는0건이다. Pinvi fix.4 native Android/iOS·WebSSR35·강제WASM iOS export는 모두 PASS이나 최종 unit520/1·browser207/2/4 중 Radix FocusScope1.3.1 초기패널 ShiftTab 원본 결함이 남았다. Harvey가 원본 Radix 수정/고유 patch pack을, 공통 담당자가 같은 버전·bytes의 fleet 정책을 준비한다. 공통/앱 node_modules 직접 수정·자체 Tabtrap·기대 하향은 하지 않는다. UI/tokens0.2.0/0.1.1은 미출시이므로 필요한 정책 payload 변경은 최종 단일 후보10에서 검증하며 출시된 같은 버전을 재발행하지 않는다. 후보10 생성/최종 소비·두 리뷰·CI·PR49/소비자 머지·새 이미지 배포는 후속 gate다.
+원본 Scope source706e27a·고정 tgz f97c1dd/31,214bytes를 사용하고 MIT/src/provenance·ESM/CJS/타입을 동봉했다. 원본 단위26·source browser9, 실제 Node22 NPM 설치/버전/해시/ESM·CJS를 통과했다. 공통 root·두 Next fixture의 같은 engine vendor/lock/override 및 전이 bytes를 검증했고 정책175·UI101·tokens9·타입/예시를 통과했다. 최종 metadata에서 full tools400실행=399 PASS/1 SKIP, 두 scanner1366파일 발견0·정확 예외32/4, 문서822/링크3143오류0·생성물 --check를 확인했다. 새 exact CI는 후속 확인한다.
+
+source4 신규 gzip A-P2-10은 f8643d5에서 수정했고 원 A/B 한정 재확인 PASS·신규0이다. exact447의4workflow·docs6jobs 모두 SUCCESS다. 예전 raw CONDITIONAL/BLOCK은 당시 판정으로 보존했다. B 원문은 불변 commit에, 공개 compiler 상수 두 개를 설명으로 바꾼 B 작성 publication은 별도 사본으로 보존한다.
+
+지도32·serde1·Lightning1은 두 독립 리뷰/CI 후 mergeae1e209/21d1c7/f24bb66·reviewed tree 동일성을 확인했다. Scope 원본 PR/최신 검증 head와 공통C10·7repo 소비자 최종 두 독립 리뷰/CI는 진행 중이다. Pinvi의 기존 stockScope520/1·207/2/4는 보존하며 새 fixed artifact의 actual 전체 gate를 수행한다. Map의 stale CI 계약·문서 한계는 B 지적으로 수정 중이고 Manager의 정식 새 UI 후보 적용 경로도 배포 선행으로 구현한다. 앱 머지/운영 신규 배포0건. 미출시 후보의 버전을 출시된 같은 버전 재발행으로 취급하지 않으며 최종 merge 뒤 배포물은 동결한다.
 
 이하 이전 작업 이력:
 
