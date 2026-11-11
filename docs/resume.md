@@ -1,6 +1,6 @@
 # 현재 작업 재개
 
-2026-11-11: 사용자 재개 지시에 따라 [T-218](tasks/T-218-radix-library-unification.md)을 진행한다. 공통 Radix 부품·VirtualTable·RHF/Zod/Zustand 로그인·토큰 bridge·동일 버전/파일 검사기를 구현했다. UI91·정책8·타입·lint·빌드·예시·Doctor0을 확인했다. 다음 작업은 단일 후보 산출물을 모든 앱에서 재검증하고 동일 커밋 기준의 독립2리뷰로 넘기는 것이다. PR·배포 수용은 아직 완료가 아니다.
+2026-11-11: 사용자 재개 지시에 따라 [T-218](tasks/T-218-radix-library-unification.md)을 진행한다. 공통 Radix 부품·VirtualTable·RHF/Zod/Zustand 로그인·토큰 bridge·동일 버전/파일 검사기를 구현했다. UI99·정책16·타입·lint·빌드·예시·Doctor0을 확인했다. 독립2리뷰의 최초 BLOCK과 모든 finding을 보존했고 RSC·표·ARIA·스타일·배포 고지·전이 React·모바일 정책·CI를 보정했다. 다음 작업은 수정 source/pack의 격리 브라우저와 두 원 리뷰어 재검토다. PR·배포 수용은 아직 완료가 아니다.
 
 이하 이전 작업 이력:
 

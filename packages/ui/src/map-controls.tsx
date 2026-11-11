@@ -153,12 +153,23 @@ export function MapKindFilter({ options, value, onToggle, onReset, resetDisabled
   </MapFilterField>;
 }
 
-export function MapTabs({ className = "", ...props }: ComponentProps<typeof Tabs.Root>) {
-  return <Tabs.Root {...props} className={`kt-map-tabs ${className}`} data-slot="tabs" />;
+const MapTabValue = createContext<string | undefined>(undefined);
+
+export function MapTabs({ className = "", value, defaultValue, onValueChange, ...props }: ComponentProps<typeof Tabs.Root>) {
+  const [localValue, setLocalValue] = useState(defaultValue);
+  const activeValue = value === undefined ? localValue : value;
+  return <MapTabValue.Provider value={activeValue}>
+    <Tabs.Root {...props} value={activeValue} onValueChange={next => {
+      if (value === undefined) setLocalValue(next);
+      onValueChange?.(next);
+    }} className={"kt-map-tabs " + className} data-slot="tabs" />
+  </MapTabValue.Provider>;
 }
 
-export function MapTabPanel({ className = "", ...props }: ComponentProps<typeof Tabs.Content>) {
-  return <Tabs.Content {...props} className={`kt-map-tab-panel ${className}`} data-slot="tabs-content" />;
+export function MapTabPanel({ className = "", value, hidden, ...props }: ComponentProps<typeof Tabs.Content>) {
+  const activeValue = useContext(MapTabValue);
+  return <Tabs.Content {...props} value={value} hidden={hidden ?? activeValue !== value}
+    className={"kt-map-tab-panel " + className} data-slot="tabs-content" />;
 }
 
 export type MapViewportReadout = { longitude: number; latitude: number; zoom: number };

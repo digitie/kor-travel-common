@@ -16,7 +16,8 @@
     "@kor-travel/ui",
     "@kor-travel/tokens",
     "vworld-map-core",
-    "vworld-map-web"
+    "vworld-map-web",
+    "vworld-map-rn"
   ],
   "profiles": {
     "web": {
@@ -34,6 +35,17 @@
         "pretendard",
         "eslint",
         "react-doctor"
+      ],
+      "runtimeRequired": [
+        "next",
+        "react",
+        "react-dom",
+        "@kor-travel/ui",
+        "@kor-travel/tokens",
+        "react-hook-form",
+        "zod",
+        "zustand",
+        "pretendard"
       ]
     },
     "mobile": {
@@ -51,6 +63,21 @@
         "eslint",
         "react-doctor",
         "@kor-travel/tokens"
+      ],
+      "runtimeRequired": [
+        "react",
+        "react-native",
+        "nativewind",
+        "react-native-css",
+        "react-hook-form",
+        "zod",
+        "zustand",
+        "pretendard",
+        "@kor-travel/tokens"
+      ],
+      "forbidden": [
+        "@kor-travel/ui",
+        "radix-ui"
       ]
     }
   },
@@ -98,6 +125,7 @@
     "react-doctor": "0.9.22",
     "react-dom": "19.3.1",
     "react-hook-form": "7.92.0",
+    "react-native": "0.88.1",
     "react-native-css": "3.1.0-rc.1",
     "recharts": "3.10.1",
     "shadcn": "4.23.0",
@@ -112,7 +140,8 @@
     "vite": "8.3.8",
     "vite-tsconfig-paths": "6.1.1",
     "vitest": "5.1.0",
-    "vworld-map-core": "1.0.0",
+    "vworld-map-core": "1.0.1",
+    "vworld-map-rn": "1.0.1",
     "vworld-map-web": "1.0.3",
     "zod": "4.6.7",
     "zustand": "5.1.0"

@@ -222,6 +222,8 @@ jobs:
           npm ci --prefix "$smoke_app" --no-audit --no-fund
           npm run build:webpack --prefix "$smoke_app"
           npm run build --prefix "$smoke_app"
+          npm exec -- playwright install --with-deps chromium
+          SMOKE_APP="$smoke_app" npm exec -- playwright test --config packages/ui/smoke/playwright.radix.config.ts
           npm ci --prefix packages/ui/examples/next-app --no-audit --no-fund
           npm run build --prefix packages/ui/examples/next-app
       - name: tarball 설치 스모크

@@ -11,6 +11,16 @@ for (const name of packages) {
   if (values.size !== 1 || ![...values][0]) throw new Error(name + ": 정확 버전 정본을 찾을 수 없음");
   versions[name] = [...values][0];
 }
+for (const [name, profile] of Object.entries(metadata.profiles)) {
+  const required = new Set(profile.required);
+  const forbidden = new Set([...metadata.forbidden, ...(profile.forbidden ?? [])]);
+  for (const dependency of required)
+    if (!versions[dependency] || forbidden.has(dependency)) throw new Error(name + ": 필수 의존성의 버전·금지 조건 충돌");
+  for (const dependency of profile.runtimeRequired ?? [])
+    if (!required.has(dependency)) throw new Error(name + ": 런타임 필수 항목의 선언 누락");
+}
+for (const dependency of metadata.artifactPackages)
+  if (!versions[dependency]) throw new Error(dependency + ": 산출물 정확 버전 누락");
 const generated = { generatedFrom: "versions.json", ...metadata, versions };
 const target = new URL("../frontend-dependencies.json", import.meta.url);
 const content = JSON.stringify(generated, null, 2) + "\n";

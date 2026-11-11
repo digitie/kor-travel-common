@@ -367,10 +367,21 @@ class Registry:
             strings(policy["exceptions"], policy["exceptions"], "frontendPolicy.exceptions")
             fields(policy["profiles"], {"web", "mobile"}, "frontendPolicy.profiles", {"web", "mobile"})
             for name, profile in policy["profiles"].items():
-                fields(profile, {"required"}, f"frontendPolicy.profiles.{name}", {"required"})
+                fields(profile, {"required", "runtimeRequired", "forbidden"}, f"frontendPolicy.profiles.{name}", {"required"})
                 if (not isinstance(profile["required"], list) or not profile["required"]
                         or any(not isinstance(item, str) or not item for item in profile["required"])):
                     raise ValueError(f"{path}: frontendPolicy.profiles.{name}.required 목록 오류")
+                for field_name in ("runtimeRequired", "forbidden"):
+                    values = profile.get(field_name, [])
+                    if (not isinstance(values, list) or any(not isinstance(item, str) or not item for item in values)
+                            or len(values) != len(set(values))):
+                        raise ValueError(f"{path}: frontendPolicy.profiles.{name}.{field_name} 목록 오류")
+                known = set(policy["packages"])
+                required = set(profile["required"])
+                forbidden = set(policy["forbidden"]) | set(profile.get("forbidden", []))
+                if (not required <= known or not set(profile.get("runtimeRequired", [])) <= required
+                        or required & forbidden or not set(policy["artifactPackages"]) <= known):
+                    raise ValueError(f"{path}: frontendPolicy.profiles.{name} 버전 축·금지·필수 연결 오류")
         consumers = data.get("consumers", {})
         if not isinstance(consumers, dict):
             raise ValueError(f"{path}: consumers는 객체여야 함")

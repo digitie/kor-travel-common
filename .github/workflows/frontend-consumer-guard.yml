@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+name: common frontend consumer guard
+on:
+  workflow_call:
+    inputs:
+      common-ref:
+        required: true
+        type: string
+      frontends:
+        description: "package/lock/workspace/profile 경로를 담는 JSON 배열"
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        frontend: ${{ fromJSON(inputs.frontends) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: consumer
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: common
+          repository: digitie/kor-travel-common
+          ref: ${{ inputs.common-ref }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22.23.1'
+      - name: 중앙 검사 환경
+        working-directory: common
+        env:
+          COMMON_REF: ${{ inputs.common-ref }}
+        run: |
+          [[ "$COMMON_REF" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$COMMON_REF"
+          npm install --global npm@11.19.1
+          npm ci --ignore-scripts
+          npm run check:policy
+      - name: 중앙 버전·산출물과 소비자 대조
+        env:
+          FRONTEND: ${{ toJSON(matrix.frontend) }}
+          KT_REQUIRE_CANONICAL: '1'
+        run: |
+          node --input-type=module <<'JS'
+          import { resolve, relative, dirname } from "node:path";
+          import { spawnSync } from "node:child_process";
+          const config = JSON.parse(process.env.FRONTEND);
+          const root = resolve("consumer");
+          function path(value) {
+            if (typeof value !== "string" || !value) throw new Error("검사 경로 누락");
+            const result = resolve(root, value), rel = relative(root, result);
+            if (rel === ".." || rel.startsWith("../")) throw new Error("소비자 밖 검사 경로 거부");
+            return result;
+          }
+          const packagePath = path(config.package), lockPath = path(config.lock);
+          const args = [
+            resolve("common/tools/check_frontend_dependencies.mjs"),
+            "--package", packagePath, "--lock", lockPath,
+            "--workspace", config.workspace ?? "", "--profile", config.profile ?? "web",
+            "--artifacts", resolve(dirname(packagePath), "common-artifacts.json"),
+            "--canonical", resolve("common/frontend-artifacts.json"),
+          ];
+          const result = spawnSync(process.execPath, args, { stdio: "inherit", env: process.env });
+          if (result.error) throw result.error;
+          process.exit(result.status ?? 1);
+          JS

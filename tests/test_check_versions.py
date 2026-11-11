@@ -1469,6 +1469,20 @@ class CheckVersionsTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 CV.Registry.load(self.registry_path)
 
+    def test_frontend_profile_versions_and_forbidden_are_connected(self):
+        original = json.loads((SCRIPT.parents[1] / "versions.json").read_text())
+        for mutation in ("unknown_required", "forbidden_required", "unknown_artifact"):
+            data = json.loads(json.dumps(original))
+            if mutation == "unknown_required":
+                data["frontendPolicy"]["profiles"]["mobile"]["required"].append("unknown")
+            elif mutation == "forbidden_required":
+                data["frontendPolicy"]["forbidden"].append("react")
+            else:
+                data["frontendPolicy"]["artifactPackages"].append("unknown")
+            self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                CV.Registry.load(self.registry_path)
+
     def test_repo_registry_values_load(self):
         """저장소 루트 versions.json이 스키마·필수 필드를 만족하고 예외 until이 ISO 날짜다."""
         registry = CV.Registry.load(SCRIPT.parents[1] / "versions.json")

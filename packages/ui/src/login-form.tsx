@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { createStore } from "zustand/vanilla";
 import { useStore } from "zustand";
-import type { ReactNode } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { LoginError } from "./login-error.js";
 import { sanitizeLocalPath } from "./navigation.js";
 
@@ -46,8 +46,8 @@ export function LoginForm({
   const { submitting, localError } = useStore(store);
   const setSubmitting = (submitting: boolean) => store.setState({ submitting });
   const setLocalError = (localError: string | null) => store.setState({ localError });
-  const { register, handleSubmit, resetField, setFocus } = useForm<LoginCredentials>({ defaultValues: { username: defaultUsername, password: "" } });
-  const schema = z.object({ username: z.string().trim().min(1), password: z.string().min(1) });
+  const { register, handleSubmit, resetField, setFocus, setValue } = useForm<LoginCredentials>({ defaultValues: { username: defaultUsername, password: "" } });
+  const schema = z.object({ username: z.string().trim().min(1), password: (z.string().min(1)) });
   const usernameField = register("username", { onChange: clearError });
   const passwordField = register("password", { onChange: clearError });
   const busy = pending || submitting;
@@ -65,8 +65,9 @@ export function LoginForm({
     const parsed = schema.safeParse(credentials);
     const username = credentials.username.trim();
     if (!parsed.success) {
-      setLocalError(`${usernameLabel}를 입력해 주세요.`);
-      setFocus(username ? "password" : "username");
+      setLocalError(username ? "비밀번호를 입력해 주세요." : `${usernameLabel}를 입력해 주세요.`);
+      if (username) setFocus("password");
+      else setFocus("username");
       return;
     }
     inFlight.current = true;
@@ -86,8 +87,20 @@ export function LoginForm({
     }
   }
 
+  function submitForm(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!ready || pending || inFlight.current) return;
+    // 자동완성이 change 이벤트 없이 바꾼 native 값도 RHF 검증 대상으로 동기화한다.
+    const form = new FormData(event.currentTarget);
+    for (const field of ["username", "password"] as const) {
+      const value = form.get(field);
+      setValue(field, typeof value === "string" ? value : "");
+    }
+    void handleSubmit(submit)(event);
+  }
+
   return <form data-slot="login-form" data-testid={testId} aria-labelledby={`${id}-title`}
-    aria-busy={busy} onSubmit={(event) => { event.preventDefault(); if (!ready || pending || inFlight.current) return; void handleSubmit(submit)(event); }} method="post"
+    aria-busy={busy} onSubmit={submitForm} method="post"
     className="mx-auto flex w-full max-w-sm flex-col gap-4 px-4 py-8 font-kt-sans text-kt-text-primary">
     <div className="space-y-2">
       <p data-slot="login-brand" className="break-words text-kt-xl font-semibold">{brand}</p>

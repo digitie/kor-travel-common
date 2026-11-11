@@ -88,11 +88,11 @@ function DialogContent({
               size="icon-sm"
             >
               <XIcon
-                
-                
-                
-                
-                
+
+
+
+
+
               />
               <span className="sr-only">닫기</span>
             </Button>

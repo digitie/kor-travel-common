@@ -23,3 +23,7 @@ SF Mono, Menlo, Consolas, 시스템 글꼴 이름만 들어 있다. 글꼴 파�
 현재 패키지에는 별도 서드파티 소스 사본이 없으므로 추가 MIT·ISC·OFL 고지
 항목은 없다. 향후 외부 코드를 포함할 때는 해당 버전·커밋·라이선스 전문과
 출처를 이 파일과 `PROVENANCE.md`에 함께 추가한다.
+
+shadcn-tailwind.css는 shadcn/ui MIT 원문에서 가져온 상태 variant·유틸리티다. 공식 eject 방식과 같이 common에 동봉하며 MIT 전문은 SHADCN_LICENSE에 있다. 출처·수정 표기는 파일 헤더와 PROVENANCE를 따른다.
+
+Radix bridge의 애니메이션 유틸리티는 tw-animate-css1.4.0의 공개 CSS를 의존성으로 가져온다. 해당 MIT 고지는 배포 의존성 패키지에 포함된다.

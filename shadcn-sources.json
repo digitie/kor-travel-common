@@ -327,5 +327,13 @@
     "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
     "repositoryPath": "apps/v4/registry/bases/radix/ui/empty.tsx",
     "sourceRelationship": "공식 Radix 기반 템플릿과 radix-nova 배포 레지스트리 생성본; 배포 원문은 source URL과 SHA256으로 별도 고정"
+  },
+  {
+    "component": "tailwind-css",
+    "source": "https://raw.githubusercontent.com/shadcn-ui/ui/dd41d19e2f80ff6891951f7ced74c2c9a650b065/packages/shadcn/src/tailwind.css",
+    "sha256": "4c371f7a1ff5d219ae2f7ff28bd256b4346fd546fe46fbae22092e57db2f0fae",
+    "repositoryCommit": "dd41d19e2f80ff6891951f7ced74c2c9a650b065",
+    "repositoryPath": "packages/shadcn/src/tailwind.css",
+    "sourceRelationship": "원문 CSS에 SPDX·출처 헤더만 추가"
   }
 ]

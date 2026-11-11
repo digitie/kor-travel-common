@@ -558,7 +558,7 @@
     "vworld-map-core": {
       "ecosystem": "npm",
       "floor": null,
-      "recommended": "1.0.0",
+      "recommended": "1.0.1",
       "source": "ADR-017; 2026-11-11 npm registry/peer 검증"
     },
     "vworld-map-web": {
@@ -584,6 +584,18 @@
       "exact": "3.1.0-rc.1",
       "checked": false,
       "note": "승인 RC의 semver exact는 프론트엔드 검사기로 검증한다. 기존 접두 범위 검사에는 투입하지 않는다."
+    },
+    "vworld-map-rn": {
+      "ecosystem": "npm",
+      "floor": null,
+      "recommended": "1.0.1",
+      "source": "GitHub 원본의 라이선스·소스 동봉 패치"
+    },
+    "react-native": {
+      "ecosystem": "npm",
+      "floor": null,
+      "recommended": "0.88.1",
+      "source": "2026-11-11 npm latest, Expo58 호환 검증 대상"
     }
   },
   "actions": {
@@ -807,7 +819,8 @@
       "@kor-travel/ui",
       "@kor-travel/tokens",
       "vworld-map-core",
-      "vworld-map-web"
+      "vworld-map-web",
+      "vworld-map-rn"
     ],
     "profiles": {
       "web": {
@@ -825,6 +838,17 @@
           "pretendard",
           "eslint",
           "react-doctor"
+        ],
+        "runtimeRequired": [
+          "next",
+          "react",
+          "react-dom",
+          "@kor-travel/ui",
+          "@kor-travel/tokens",
+          "react-hook-form",
+          "zod",
+          "zustand",
+          "pretendard"
         ]
       },
       "mobile": {
@@ -842,6 +866,21 @@
           "eslint",
           "react-doctor",
           "@kor-travel/tokens"
+        ],
+        "runtimeRequired": [
+          "react",
+          "react-native",
+          "nativewind",
+          "react-native-css",
+          "react-hook-form",
+          "zod",
+          "zustand",
+          "pretendard",
+          "@kor-travel/tokens"
+        ],
+        "forbidden": [
+          "@kor-travel/ui",
+          "radix-ui"
         ]
       }
     },
@@ -889,6 +928,7 @@
       "react-doctor",
       "react-dom",
       "react-hook-form",
+      "react-native",
       "react-native-css",
       "recharts",
       "shadcn",
@@ -904,6 +944,7 @@
       "vite-tsconfig-paths",
       "vitest",
       "vworld-map-core",
+      "vworld-map-rn",
       "vworld-map-web",
       "zod",
       "zustand"

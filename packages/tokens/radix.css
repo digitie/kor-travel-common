@@ -1,7 +1,10 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later
  * SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
  */
+@import "tw-animate-css";
 @import "./shadcn.css";
+@import "./shadcn-tailwind.css";
+@custom-variant dark (&:is(.dark *));
 
 /* 공통 Radix/shadcn 부품이 쓰는 Tailwind4 어휘를 의미 토큰에 연결한다. */
 @theme inline {

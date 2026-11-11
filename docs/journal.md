@@ -1,6 +1,6 @@
 # 2026-11-11 Radix 공통 라이브러리 구현 후보
 
-[T-218](tasks/T-218-radix-library-unification.md)에 따라 UI0.2.0·tokens0.1.1 후보를 구성하고 공유 정책·lock/bytes·소스 재도입 검사를 추가했다. common lint/type/build/UI91/정책8/Doctor0을 확인했으며 소비자·리뷰·배포 gate는 진행 중이다.
+[T-218](tasks/T-218-radix-library-unification.md)에 따라 UI0.2.0·tokens0.1.1 후보를 구성하고 공유 정책·lock/bytes·소스 재도입 검사를 추가했다. common lint/type/build/UI99/정책16/Doctor0을 확인했으며 소비자·리뷰·배포 gate는 진행 중이다.
 
 ## 2026-10-27 — T-217 병합과 실제 소비자 후보 정산
 

@@ -93,11 +93,11 @@ function BreadcrumbSeparator({
     >
       {children ?? (
         <ChevronRightIcon
-          
-          
-          
-          
-          
+
+
+
+
+
           className="cn-rtl-flip"
         />
       )}
@@ -121,11 +121,11 @@ function BreadcrumbEllipsis({
       {...props}
     >
       <MoreHorizontalIcon
-        
-        
-        
-        
-        
+
+
+
+
+
       />
       <span className="sr-only">더 보기</span>
     </span>

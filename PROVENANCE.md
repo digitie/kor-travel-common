@@ -58,6 +58,9 @@
 | PV-044 | `packages/ui/src/accordion.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/accordion.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
 | PV-045 | `packages/ui/src/field.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/field.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
 | PV-046 | `packages/ui/src/empty.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/empty.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-047 | `packages/tokens/shadcn-tailwind.css` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `packages/shadcn/src/tailwind.css` | MIT 파생 | 공식 eject 원문 CSS에 출처 헤더만 추가 | [MIT 고지](packages/tokens/SHADCN_LICENSE) |
+| PV-048 | `packages/ui/src/button-variants.ts` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/button.tsx` | MIT 파생 | 순수 CVA 정의를 서버용 모듈로 분리 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-049 | `packages/ui/src/badge-variants.ts` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/badge.tsx` | MIT 파생 | 순수 CVA 정의를 서버용 모듈로 분리 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
 
 | PV-015 | `packages/ui/src/dagster-operations.tsx` | kor-travel-weather | `5da6e15` | `packages/kor-travel-weather-admin/frontend/app/admin/dagster/page.tsx` | GPL-3.0-or-later | 날씨 조회·label·URL·페이지 헤더를 제거하고 주입형 표시 컴포넌트와 자체 실행 상한 판정으로 추출(2026-10-04) | [T-216](docs/tasks/T-216-dagster-operations.md) |
 | PV-016 | `packages/ui/src/dagster-model.ts` | kor-travel-weather | `5da6e15` | `packages/kor-travel-weather-admin/frontend/lib/dagster.ts` | GPL-3.0-or-later | provider label·HTTP 조회를 제외하고 공용 타입/표시 함수와 선택 실행 상한으로 추출(2026-10-04) | [T-216](docs/tasks/T-216-dagster-operations.md) |

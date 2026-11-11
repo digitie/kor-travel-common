@@ -59,6 +59,7 @@ Geo·Map·Weather·Concierge·Docker Manager·Pinvi 웹/관리자·Transport 웹
 | react-doctor | 0.9.22 |
 | react-dom | 19.3.1 |
 | react-hook-form | 7.92.0 |
+| react-native | 0.88.1 |
 | react-native-css | 3.1.0-rc.1 |
 | recharts | 3.10.1 |
 | shadcn | 4.23.0 |
@@ -73,7 +74,8 @@ Geo·Map·Weather·Concierge·Docker Manager·Pinvi 웹/관리자·Transport 웹
 | vite | 8.3.8 |
 | vite-tsconfig-paths | 6.1.1 |
 | vitest | 5.1.0 |
-| vworld-map-core | 1.0.0 |
+| vworld-map-core | 1.0.1 |
+| vworld-map-rn | 1.0.1 |
 | vworld-map-web | 1.0.3 |
 | zod | 4.6.7 |
 | zustand | 5.1.0 |
@@ -82,11 +84,13 @@ TypeScript는 OpenAPI 생성기와 typescript-eslint peer 범위 때문에 5.9.3
 
 ## CSS와 글꼴
 
-웹은 Tailwind4, tokens/theme.css, tokens/radix.css, tokens/font.css를 가져오고 UI dist를 Tailwind source에 포함한다. radix.css는 공통 부품의 Tailwind 어휘를 의미 토큰에 연결하는 선택형 bridge다. 앱의 지역 색상은 그 뒤 같은 의미 토큰을 오버라이드한다. Pretendard는 로컬 자산을 제공하며 모바일은 네이티브 font loader로 실제 파일을 로드한다. CSS import만으로 모바일 글꼴이 적용되었다고 보지 않는다.
+웹은 Tailwind4, tokens/theme.css, tokens/radix.css, tokens/font.css를 가져오고 UI dist를 Tailwind source에 포함한다. radix.css는 공통 부품의 Tailwind 어휘를 의미 토큰에 연결하고 공식 shadcn 상태 variant를 포함하는 선택형 bridge다. [공식 eject 절차](https://ui.shadcn.com/docs/changelog/2026-05-shadcn-eject)에 따라 CSS 원문·MIT 고지를 동봉하여 CLI 전체를 실행 의존성으로 넣지 않는다. 앱의 지역 색상은 그 뒤 같은 의미 토큰을 오버라이드한다. Pretendard는 로컬 자산을 제공하며 모바일은 네이티브 font loader로 실제 파일을 로드한다. CSS import만으로 모바일 글꼴이 적용되었다고 보지 않는다.
 
 ## 검사와 갱신
 
 웹은 @kor-travel/ui/check-dependencies.mjs, 모바일은 @kor-travel/tokens/check-dependencies.mjs를 check:dependencies 및 CI에서 실행한다. --profile mobile, --package, --lock, --workspace로 대상 frontend를 지정하고 --artifacts common-artifacts.json을 반드시 전달한다. 필수 직접 의존성·정확 선언·workspace lock의 실제 버전·공통 파일과 원장 및 lock SHA512가 다르면 실패한다.
+
+중앙 reusable CI는 고정 common 커밋의 frontend-artifacts.json과도 대조한다. 앱이 vendor 파일·원장·lock을 함께 바꿔 자체 검사만 통과하는 차이를 차단한다. 로컬 검사에서는 --canonical 경로를 추가해 같은 검증을 실행할 수 있다.
 
 소스 경로는 --source를 반복 지정하거나 앱의 src/app/components/lib에서 자동 검색한다. 소스가 없으면 실패한다. 개별 table/Table 마크업과 Base UI/Floating UI 직접 구현의 재도입도 검사한다. 동적 마크업까지 증명하는 정적 분석기는 아니므로 공개 API 계약 시험과 코드 리뷰를 함께 유지한다.
 

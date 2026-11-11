@@ -7,6 +7,20 @@ import axe from "axe-core";
 import { LoginForm, LoginStatus, AppMenu } from "../src/index.js";
 
 describe("로그인", () => {
+  it("이벤트 없는 자동완성 값을 제출 직전에 RHF로 동기화한다", async () => {
+    const submit=vi.fn();
+    const {container}=render(<LoginForm defaultUsername="admin" onSubmit={submit}/>);
+    const field=screen.getByLabelText("비밀번호") as HTMLInputElement;
+    field.value="synthetic";
+    fireEvent.submit(container.querySelector("form")!);
+    await waitFor(()=>expect(submit).toHaveBeenCalledTimes(1));
+    const request=submit.mock.calls[0]![0];
+    expect(request.credentials.username).toBe("admin");
+    expect(request.credentials.password).toBe("synthetic");
+    expect(request.nextPath).toBe("/");
+    expect(field).toHaveValue("");
+  });
+
   it("라벨·자동완성·오류 슬롯을 유지하고 비밀번호를 그대로 제출한다", async () => {
     const submit = vi.fn();
     const { container } = render(<LoginForm onSubmit={submit} nextPath="//outside.invalid" />);

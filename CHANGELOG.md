@@ -1,5 +1,3 @@
-## 2026-10-25 — 남은 높이 지도 작업면 후보
-
 ## 0.2.0 구현 후보 — 2026-11-11
 
 ### Breaking
@@ -9,6 +7,8 @@
 ### 변경
 
 폼·상태·글꼴 공통 경로와 선언·workspace lock·산출물 무결성 검사기를 추가했다. 현재는 소비자 검증과 독립 리뷰 전 후보이며 릴리스·배포 완료가 아니다.
+
+## 2026-10-25 — 남은 높이 지도 작업면 후보
 
 UI dev.8에 opt-in MapWorkspace·MapFilterPanel·MapStage와 상세 header/접기를 추가했다. 기존 dev.7 기본값과 스타일은 유지한다. [계약](docs/standards/map-controls.md).
 
