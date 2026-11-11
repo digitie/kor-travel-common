@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 // Derived-From: digitie/kor-travel-map@32668d003ea6a259468e03970bd167359c19ecdb packages/kor-travel-map-admin/frontend/src/components/ui/data-table.tsx
 // Modified: 2026-11-11 TanStack 9 API와 공통 소비자 계약
 "use client"
-// Hallmark · genre: editorial-utilitarian · macrostructure: Rail-Workbench · design-system: design.md · designed-as-app
 
 // 공용 headless VirtualTable — @tanstack/react-table v9 기능 등록 기반. admin/ops UI의 모든
 // 테이블이 본 컴포넌트로 통일된다(ADR/마이그레이션 2026-06-17). 기본은 semantic
@@ -23,7 +23,7 @@
 
 import * as React from "react"
 import {
- type Cell as CoreCell, type Column as CoreColumn, type ColumnDef as CoreColumnDef,
+ type CellContext as CoreCellContext, type HeaderContext as CoreHeaderContext, type Cell as CoreCell, type Column as CoreColumn, type ColumnDef as CoreColumnDef,
  type Header as CoreHeader, type Table as CoreTable, type Row as CoreRow,
  type RowData, type OnChangeFn, type RowSelectionState, type SortingState,
  flexRender, useTable, tableFeatures, createSortedRowModel, sortFns,
@@ -38,6 +38,8 @@ export type ColumnDef<T extends RowData, V = unknown> = CoreColumnDef<typeof fea
 export type Column<T extends RowData, V = unknown> = CoreColumn<typeof features, T, V>
 export type Header<T extends RowData, V = unknown> = CoreHeader<typeof features, T, V>
 export type Cell<T extends RowData, V = unknown> = CoreCell<typeof features, T, V>
+export type CellContext<T extends RowData, V = unknown> = CoreCellContext<typeof features, T, V>
+export type HeaderContext<T extends RowData, V = unknown> = CoreHeaderContext<typeof features, T, V>
 export type Row<T extends RowData> = CoreRow<typeof features, T>
 export type Table<T extends RowData> = CoreTable<typeof features, T>
 type TanstackTable<T extends RowData> = Table<T>
