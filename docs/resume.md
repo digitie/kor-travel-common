@@ -1,5 +1,15 @@
 # 현재 작업 재개
 
+## 2026-11-12 — Common49와 FocusScope2 원본 머지·최종 독립 증거
+
+- Common exact2d4579b의 원 A/B COMMON7은 모두 PASS·신규0이며 Doctor finding은 각 원 리뷰어가 FIXED를 확인했다. 정확 frontend/docs/packages/selftest/Python workflow가 모두 성공했다. 실제 C11 packed browser65·두 builder 및 UI/tokens 전체 SRI 일치를 확인했다.
+- Common PR49 mergee8ed3ae, Scope PR1 merge408bb40을 fetch해 reviewed source/delivery와 각각 전체 tree 동일을 검증했다. UI0.2.0/tokens0.1.1은 이제 출시 산출물이므로 같은 버전의 다른 bytes 재발행을 금지한다.
+- Scope source1752/delivery01e의 원 A/B input2도 모두 PASS·신규0이다. source38·Storybook17, actual packed17, 원 A actual browser20 및 원 B CJS/ESM38 각각의 범위를 구분한다. Build·집중 regression·SSR·Chromatic 모두 SUCCESS다.
+- 원문·불변 입력을 byte 동일하게 보존하고 각각 SHA256 receipt를 추가했다. 이전 Common6 Doctor BLOCK/CONDITIONAL·Scope1 fieldset CONDITIONAL은 역사 그대로 유지한다. Geo43/Concierge50/Mapf55의 원 A source finding도 후속 직접 검증으로 FIXED다.
+- 앱별 C11 최종 브라우저·CI·새 Manager 공식 candidate SDK 원 A/B 검토·각 앱 PR 머지·merged SHA 이미지와 실제 화면 수용은 계속 진행 중이다. 운영 신규 배포는 아직0건이다.
+
+이하 당시 스냅샷과 이전 이력:
+
 2026-11-12: [T-218](tasks/T-218-radix-library-unification.md)을 계속 진행한다. C10/2d의 일반 정책175·UI101·tokens9·도구400(399 PASS/1 SKIP)과 packed browser 증거를 보존했다. 원 A/B가 required Doctor의 반복 includes3경고를 지적해5715e94의 사전 Set/Map으로 수정했다. 같은80파일3 warning/exit1→0/exit0, prepare41/실제3lock 경로 PASS이며 원 A/B bounded closure와 새 exact CI는 후속이다.
 
 원 Scope1/f97의 plain9 실제 packed browser는 원 A/B가 확인했지만 A-SCOPE-P2-01 disabled-fieldset 잔여를 정식 연기하지 않고 fix.2로 수정했다. 새 preferred source1752a53·고유1.3.1+kortravel.fix.2·33,511bytes·SHA2561ca0487·SRIv3Xwe를 동결한다. MIT/src/provenance/전체 dist hash와 Node22 실제 NPM 버전/ESM/CJS를 확인했고 원본38 PASS다. fix1과C10은 보존하며2차 source/packed browser·두 리뷰·fork CI와 실제 앱 수용은 별도 gate다. C11은 producera354813에서 새 engine2와 UI/tokens policy 버전만 갱신하여 한 번 pack했다. 정책175/UI101/tokens9/Doctor80파일0/도구400(399 PASS·1 SKIP), scanner1380발견0·정확예외32/4, 문서831/링크3152오류0을 확인했다. UI/tokens 자체 실행/CSS·checker는 C10과 같지만 외부 엔진은 변경되므로 최종 새 modal 검증이 필요하다.

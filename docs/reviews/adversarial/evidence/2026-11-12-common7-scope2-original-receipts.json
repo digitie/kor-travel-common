@@ -1,0 +1,56 @@
+[
+  {
+    "sourceFile": "review-A-common-final-7.md",
+    "publicationPath": "docs/reviews/adversarial/evidence/2026-11-12-review-A-common-final-7.md",
+    "sha256": "dca427bdc67a7b56dff9e1338096a536edbfb85a35cf028b9b7740ce7519e34b",
+    "byteIdentical": true
+  },
+  {
+    "sourceFile": "review-B-common-final-7.md",
+    "publicationPath": "docs/reviews/adversarial/evidence/2026-11-12-review-B-common-final-7.md",
+    "sha256": "7345fe7c9eb7d2fa9bbda14e7b1497bf98a8f8f3d8df1ea1709a100927674374",
+    "byteIdentical": true
+  },
+  {
+    "sourceFile": "review-manifest-common-7.json",
+    "publicationPath": "docs/reviews/adversarial/evidence/2026-11-12-review-manifest-common-7.json",
+    "sha256": "623ff78af00acc287d215a4684267104d8dca1c7b20228d147089b5dd2986ae6",
+    "byteIdentical": true
+  },
+  {
+    "sourceFile": "review-A-radix-focus-scope-final-2.md",
+    "publicationPath": "docs/reviews/adversarial/evidence/2026-11-12-review-A-radix-focus-scope-final-2.md",
+    "sha256": "2ce0afa107393343a36fa7f7312a256db7d94473cd1e167d68df1e0e4e929f21",
+    "byteIdentical": true
+  },
+  {
+    "sourceFile": "review-B-radix-focus-scope-final-2.md",
+    "publicationPath": "docs/reviews/adversarial/evidence/2026-11-12-review-B-radix-focus-scope-final-2.md",
+    "sha256": "314713873ae382352e06d08fad53d3cf786255b316e179d735004f78bceb04b6",
+    "byteIdentical": true
+  },
+  {
+    "sourceFile": "review-manifest-radix-focus-scope-2.json",
+    "publicationPath": "docs/reviews/adversarial/evidence/2026-11-12-review-manifest-radix-focus-scope-2.json",
+    "sha256": "d4df7d2898a8a36f70821314afb9fd254d03d94187269246f55894ecf475ca01",
+    "byteIdentical": true
+  },
+  {
+    "sourceFile": "review-A-common-doctor-postfix-571.md",
+    "publicationPath": "docs/reviews/adversarial/evidence/2026-11-12-review-A-common-doctor-postfix-571.md",
+    "sha256": "189276cea7da974b01bfb53e3fc31a99715d4d078589fd9a5fb4aa194c47de11",
+    "byteIdentical": true
+  },
+  {
+    "sourceFile": "review-A-consumers-geoconcierge-postfix-1.md",
+    "publicationPath": "docs/reviews/adversarial/evidence/2026-11-12-review-A-consumers-geoconcierge-postfix-1.md",
+    "sha256": "24a7cdad5ca61b4907f4794a82d7cb7f600ea4039bd364ea276f49d71452369b",
+    "byteIdentical": true
+  },
+  {
+    "sourceFile": "review-A-consumer-map-postfix-f55.md",
+    "publicationPath": "docs/reviews/adversarial/evidence/2026-11-12-review-A-consumer-map-postfix-f55.md",
+    "sha256": "a0db6026acc8b207395e971a69307aed9eb95d3eac4e6b6d05d8ea97947d7404",
+    "byteIdentical": true
+  }
+]
