@@ -2,7 +2,7 @@
 
 2026-11-12: [T-218](tasks/T-218-radix-library-unification.md)을 계속 진행한다. C10/2d의 일반 정책175·UI101·tokens9·도구400(399 PASS/1 SKIP)과 packed browser 증거를 보존했다. 원 A/B가 required Doctor의 반복 includes3경고를 지적해5715e94의 사전 Set/Map으로 수정했다. 같은80파일3 warning/exit1→0/exit0, prepare41/실제3lock 경로 PASS이며 원 A/B bounded closure와 새 exact CI는 후속이다.
 
-원 Scope1/f97의 plain9 실제 packed browser는 원 A/B가 확인했지만 A-SCOPE-P2-01 disabled-fieldset 잔여를 정식 연기하지 않고 fix.2로 수정했다. 새 preferred source1752a53·고유1.3.1+kortravel.fix.2·33,511bytes·SHA2561ca0487·SRIv3Xwe를 동결한다. MIT/src/provenance/전체 dist hash와 Node22 실제 NPM 버전/ESM/CJS를 확인했고 원본38 PASS다. fix1과C10은 보존하며2차 source/packed browser·두 리뷰·fork CI와 실제 앱 수용은 별도 gate다. 현재 C11은 새 engine2와 UI/tokens policy 버전만 갱신하여 한 번 pack한다. UI/tokens 자체 실행/CSS·checker는 C10과 같지만 외부 엔진은 변경되므로 최종 새 modal 검증이 필요하다.
+원 Scope1/f97의 plain9 실제 packed browser는 원 A/B가 확인했지만 A-SCOPE-P2-01 disabled-fieldset 잔여를 정식 연기하지 않고 fix.2로 수정했다. 새 preferred source1752a53·고유1.3.1+kortravel.fix.2·33,511bytes·SHA2561ca0487·SRIv3Xwe를 동결한다. MIT/src/provenance/전체 dist hash와 Node22 실제 NPM 버전/ESM/CJS를 확인했고 원본38 PASS다. fix1과C10은 보존하며2차 source/packed browser·두 리뷰·fork CI와 실제 앱 수용은 별도 gate다. C11은 producera354813에서 새 engine2와 UI/tokens policy 버전만 갱신하여 한 번 pack했다. 정책175/UI101/tokens9/Doctor80파일0/도구400(399 PASS·1 SKIP), scanner1380발견0·정확예외32/4, 문서831/링크3152오류0을 확인했다. UI/tokens 자체 실행/CSS·checker는 C10과 같지만 외부 엔진은 변경되므로 최종 새 modal 검증이 필요하다.
 
 원 소비자1 A/B BLOCK은 그대로 보존했다. Geo43c4a7f Button 위임은5회귀3 FAIL→5 PASS·전체294, Concierge50e707b checkbox identity는2 FAIL→2 PASS·Chromium4·전체396, Mapb102/f55는 stale CI/문서 보관과 Button 전달을 수정했다. 각 원 리뷰어 재확인·최종 C11 실제파일/guard/build/browser/CI가 필요하다. Managerb86e6aa의 UI-only 후보 적용은 배포 선행이며 두 독립 source검토·full backend CI 후 공식 경로로 설치/배포한다.
 
