@@ -1,0 +1,127 @@
+{
+  "createdAt": "2026-11-11T18:07:11.991979+00:00",
+  "common": {
+    "base": "c289b4624c8640eb918cc915803e72ae754e58fb",
+    "previousFullReview": "2ec519255ec1af9fca18856d980e968ee15b80a8",
+    "previousScannerReview": "f8643d56bd8ce4cc7ff3d730b31173a8583593a4",
+    "previousAllGreen": "447907385d724e9758c511ffc97d39a266262e47",
+    "head": "2d70461a7873d73ec2b278709cef1fba832134cc",
+    "producer": "55a921b55d248106cbe320e7f5305f3d3cdb60fe",
+    "newPolicyCommits": [
+      "096370575be262329091399806603bdd8b5d84a3",
+      "0ab15231414fd1b9712ba724866f5fab37dadcee",
+      "ab0f82aed8d59ac806c1f958f7f624ee962c65b8"
+    ]
+  },
+  "scope": "두 원 A/B의 공통 후보10 최종 delta: optional patchedRadixPackages의 schema/generator/공통checker와 모든 도달 managedartifact·3설치경로prepare; 실제7배포물·axis/필수문서·lock. 과거 source4/5 raw 판정 유지. docs/reviews와 peer raw는 source감사에서 제외. 구현비참여·동일입력·상대raw/verdict열람금지.",
+  "artifacts": {
+    "status": "CANDIDATE_NOT_RELEASED",
+    "candidate": "integration-10-review",
+    "sources": {
+      "common": "55a921b55d248106cbe320e7f5305f3d3cdb60fe",
+      "maplibre-vworld-react": "9a7a348b02d61969b394c681b024d5851eef836b",
+      "lightningcss": "748651cbd845971e65c411166ddee101745dab21",
+      "serde-content": "18e53fcf6f8ace093a292891b34fa3411192617d",
+      "radix-ui-primitives": "706e27aaf87bda2df7bbb9da60cc01cebc9ff064"
+    },
+    "packages": {
+      "@kor-travel/tokens": {
+        "version": "0.1.1",
+        "filename": "kor-travel-tokens-0.1.1.tgz",
+        "integrity": "sha512-ope7vHGRynjiTDllGJj/qqVz6kmQ/NIsQr4+GnFmyh7jB2rdoTJI3UXU7S+CN5Z8sDMamQ1ez253+Y3ShXoqeQ=="
+      },
+      "@kor-travel/ui": {
+        "version": "0.2.0",
+        "filename": "kor-travel-ui-0.2.0.tgz",
+        "integrity": "sha512-avvikdgmPcgNQ8otiKOPRb/fCRSLRIEyV1dudqM4BsKfExScssK+NM7IirvH78lekd7xtEduReQ8/pyqD1BdNg=="
+      },
+      "lightningcss": {
+        "version": "1.33.0+nativecss.fix.4",
+        "filename": "lightningcss-1.33.0+nativecss.fix.4.tgz",
+        "integrity": "sha512-zDQ03VJE37OlyBrLsRcsEdIVu0T4BXJKDH5y9//To6GlGN2UrKQGERFVAFblkPQ5ZEbhuOp5wpXxGARZNdbQLA=="
+      },
+      "vworld-map-core": {
+        "version": "1.0.1",
+        "filename": "vworld-map-core-1.0.1.tgz",
+        "integrity": "sha512-Djm14Arr7U0r7Sabj6P0V57CdzWIGaJmecklmY1hwrq1QUZJjMUFgkZfGRFalUo6AFzHEwwzOEzbJPMifGhINw=="
+      },
+      "vworld-map-rn": {
+        "version": "1.0.1",
+        "filename": "vworld-map-rn-1.0.1.tgz",
+        "integrity": "sha512-lgDBasKIEG2ElQ9jnHDB9pA+x04Xge9yzBb1NPPw1auyvlkQvxsq4NfRPIrw1VWiutcGiIefySLiVaZDUkO69Q=="
+      },
+      "vworld-map-web": {
+        "version": "1.0.3",
+        "filename": "vworld-map-web-1.0.3.tgz",
+        "integrity": "sha512-HPXZcz/wP6tFsCZqlAbansWNICcZPubC+/V7rDWXYTQVlOBLl9cZQ1HSMJd25c2CZoMNreVFTQA0vzkVglkS1w=="
+      },
+      "@radix-ui/react-focus-scope": {
+        "version": "1.3.1+kortravel.fix.1",
+        "filename": "radix-ui-react-focus-scope-1.3.1+kortravel.fix.1.tgz",
+        "integrity": "sha512-550B+tdvg3N/tsIzOFA8zRhoMxGnPeBRl65Wg+9kY2VEEf6TW7RZKBWckVToLNuALHYZR8J9zG8GUP7DROBflg=="
+      }
+    }
+  },
+  "artifactDirectory": "/home/digitie/dev/common-unification-20261111/artifacts/integration-10-review",
+  "scopeOriginalReviewInput": "review-manifest-radix-focus-scope-1.json",
+  "runtimeProof": "validation/common-c9-c10-runtime-equivalence.json",
+  "actualTests": {
+    "dependencyAndPreparePolicy": {
+      "pass": 175,
+      "fail": 0,
+      "skip": 0
+    },
+    "uiUnitFixedScopeInstalled": {
+      "pass": 101,
+      "fail": 0
+    },
+    "tokens": {
+      "pass": 9,
+      "fail": 0
+    },
+    "pythonToolsFinalMetadata": {
+      "run": 400,
+      "pass": 399,
+      "skip": 1,
+      "fail": 0
+    },
+    "schemaCheckVersions": 101,
+    "generator": 6,
+    "buildTypeExamples": "PASS",
+    "secretScan": {
+      "files": 1366,
+      "findings": 0,
+      "exceptions": 32
+    },
+    "prodScan": {
+      "files": 1366,
+      "findings": 0,
+      "exceptions": 4
+    },
+    "links": {
+      "documents": 822,
+      "targets": 3143,
+      "errors": 0
+    },
+    "rootSmokeExampleFixedEnginePrepare": "actual7metadata/real3NPMlocks Scope+CSS PASS",
+    "packedCommonBrowser": "PENDING exact2d GitHub packages expected65; no reuse of c9 runtime acceptance for newScope"
+  },
+  "evidence": [
+    "validation/common-c10-build",
+    "validation/common-patched-radix-policy",
+    "validation/common-patched-radix-schema",
+    "validation/common-fixed-engine-prepare",
+    "validation/common-gzip-member",
+    "artifacts/radix-focus-scope-fix1"
+  ],
+  "outputs": {
+    "A": "review-A-common-final-6.md",
+    "B": "review-B-common-final-6.md"
+  },
+  "notes": [
+    "UI94/tokens25 regular files, checker+dependency-policy total4 changed vsC9,115identical; externalScope runtimeHASchanged so newmodalbrowseracceptance required.",
+    "SourceScopeR706 product+pack frozen f97; currentforkCC metadata/producer/verification/e2e-route delta to be reviewed separate immutableScope2 after implementer finalhandoff. No sameversionpack overwrite.",
+    "Previous447 all4workflows+docs6jobsSUCCESS. New2d workflows pending. No consumer/app merge/deployment approval implicit.",
+    "Canonical C10 UIavvik/tokensope7, exactScope550B, VWorld3/CSSfix4unchanged. All7consumerC10adoption inparallel source7oldreviewbase preserved, finalnewconsumer manifest willfollow."
+  ]
+}

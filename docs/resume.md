@@ -1,3 +1,15 @@
+# 현재 작업 재개
+
+2026-11-12: [T-218](tasks/T-218-radix-library-unification.md)을 계속 진행한다. C10/2d의 일반 정책175·UI101·tokens9·도구400(399 PASS/1 SKIP)과 packed browser 증거를 보존했다. 원 A/B가 required Doctor의 반복 includes3경고를 지적해5715e94의 사전 Set/Map으로 수정했다. 같은80파일3 warning/exit1→0/exit0, prepare41/실제3lock 경로 PASS이며 원 A/B bounded closure와 새 exact CI는 후속이다.
+
+원 Scope1/f97의 plain9 실제 packed browser는 원 A/B가 확인했지만 A-SCOPE-P2-01 disabled-fieldset 잔여를 정식 연기하지 않고 fix.2로 수정했다. 새 preferred source1752a53·고유1.3.1+kortravel.fix.2·33,511bytes·SHA2561ca0487·SRIv3Xwe를 동결한다. MIT/src/provenance/전체 dist hash와 Node22 실제 NPM 버전/ESM/CJS를 확인했고 원본38 PASS다. fix1과C10은 보존하며2차 source/packed browser·두 리뷰·fork CI와 실제 앱 수용은 별도 gate다. C11은 producera354813에서 새 engine2와 UI/tokens policy 버전만 갱신하여 한 번 pack했다. 정책175/UI101/tokens9/Doctor80파일0/도구400(399 PASS·1 SKIP), scanner1380발견0·정확예외32/4, 문서831/링크3152오류0을 확인했다. UI/tokens 자체 실행/CSS·checker는 C10과 같지만 외부 엔진은 변경되므로 최종 새 modal 검증이 필요하다.
+
+원 소비자1 A/B BLOCK은 그대로 보존했다. Geo43c4a7f Button 위임은5회귀3 FAIL→5 PASS·전체294, Concierge50e707b checkbox identity는2 FAIL→2 PASS·Chromium4·전체396, Mapb102/f55는 stale CI/문서 보관과 Button 전달을 수정했다. 각 원 리뷰어 재확인·최종 C11 실제파일/guard/build/browser/CI가 필요하다. Managerb86e6aa의 UI-only 후보 적용은 배포 선행이며 두 독립 source검토·full backend CI 후 공식 경로로 설치/배포한다.
+
+지도32·serde1·Lightning1은 두 독립 리뷰/CI 후 mergeae1e209/21d1c7/f24bb66·reviewed tree 동일을 확인했다. Scope fork와common49·앱은 미머지, 운영 신규 배포0건이다. 출시된 같은 버전 재발행은 금지하며 미출시 UI0.2.0/tokens0.1.1의 최종 merge 뒤 artifacts를 동결한다.
+
+이하 이전 작업 이력:
+
 ## 2026-10-27 — Common47 병합·소비자 후보 UI32 수용
 
 Common47 최종44d7 CI8 SUCCESS·J/W 독립 두 리뷰와 main aa232ad의 전체 tree 동일성을 확인했다.
@@ -261,7 +273,7 @@ Common a960bdb, Map 1a3c467, PinVi 0058369의 제품113파일 두 독립 FULL �
 
 T-319의 공용 `dagster_health`는 proxy SERVING 뒤 실제 `ListRepositoriesResponse` protobuf/JSON을 검증한다. Map 최신 main의 substring 점검이 빈/잘못된 reply를 정상으로 판정한 독립 적대 리뷰 반례를 반영했다. 전체 Dagster import 없이 설치된 생성 protobuf를 사용하며 각 RPC 4초·수신 4MiB·channel 정리와 fail-closed를 적용한다. [가이드 §10](runbooks/dagster-adoption.md#10-code-server-자식-로딩을-확인하는-경량-건강-점검)에 소비자 채택·재시작 정책 경계를 기록했다. 새 고정 후보 2인 리뷰·CI·실제 paired 재구축/live는 진행 중이다.
 
-# 현재 상태와 다음 한 작업
+## 현재 상태와 다음 한 작업
 
 ## 2026-10-05 — Map·PinVi HTTP 최종 독립 리뷰
 

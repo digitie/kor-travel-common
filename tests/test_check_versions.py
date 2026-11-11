@@ -1449,6 +1449,160 @@ class CheckVersionsTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertNotIn(marker, result.stdout + result.stderr)
 
+    def test_frontend_policy_rejects_unknown_fields(self):
+        data = json.loads((SCRIPT.parents[1] / "versions.json").read_text())
+        data["frontendPolicy"]["unexpected"] = True
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+        with self.assertRaises(ValueError):
+            CV.Registry.load(self.registry_path)
+
+    def patched_radix_registry(self, name="@radix-ui/react-focus-scope"):
+        data = json.loads((SCRIPT.parents[1] / "versions.json").read_text())
+        for key, axis in list(data["axes"].items()):
+            if axis["ecosystem"] == "npm" and name in axis.get("packages", [key]):
+                del data["axes"][key]
+        data["axes"]["fixture-radix-engine"] = {"ecosystem": "npm", "packages": [name],
+            "exact": "1.1.0+focus.fixture", "recommended": None, "checked": False}
+        policy = data["frontendPolicy"]
+        for field in ("packages", "artifactPackages"):
+            policy[field] = [item for item in policy[field] if item != name] + [name]
+        policy["patchedRadixPackages"] = [name]
+        return data
+
+    def load_registry_fixture(self, data):
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+        return CV.Registry.load(self.registry_path)
+
+    def test_patched_radix_absent_keeps_legacy_registry(self):
+        data = self.patched_radix_registry()
+        del data["frontendPolicy"]["patchedRadixPackages"]
+        self.assertNotIn("patchedRadixPackages", self.load_registry_fixture(data).data["frontendPolicy"])
+
+    def test_patched_radix_explicit_single_and_empty_lists_are_supported(self):
+        data = self.patched_radix_registry()
+        for names in ([], ["@radix-ui/react-focus-scope"]):
+            with self.subTest(empty=not names):
+                data["frontendPolicy"]["patchedRadixPackages"] = names
+                self.assertEqual(self.load_registry_fixture(data).data["frontendPolicy"]["patchedRadixPackages"], names)
+
+    def test_patched_radix_rejects_malformed_or_duplicate_list(self):
+        engine = "@radix-ui/react-focus-scope"
+        for value in (None, {}, engine, True, 3, [None], [{}], [3], [""], [engine, engine]):
+            with self.subTest(value_type=type(value).__name__):
+                data = self.patched_radix_registry()
+                data["frontendPolicy"]["patchedRadixPackages"] = value
+                with self.assertRaises(ValueError):
+                    self.load_registry_fixture(data)
+
+    def test_patched_radix_rejects_adjacent_scope_subpath_and_nonexplicit_names(self):
+        for name in ("@radix-ui-extra/react-focus-scope", "x@radix-ui/react-focus-scope",
+                     "@radix-ui/react-focus-scope/subpath", "@radix-ui/react-*", "@radix-ui/react-",
+                     "@radix-ui/react-focus_scope", "@radix-ui/react-focus-scope\n",
+                     "@radix-ui/react-Focus-scope", "@radix-ui/react--focus-scope"):
+            with self.subTest(name_kind=name[:12]):
+                with self.assertRaises(ValueError):
+                    self.load_registry_fixture(self.patched_radix_registry(name))
+
+    def test_patched_radix_requires_package_artifact_and_exact_managed_axis(self):
+        engine = "@radix-ui/react-focus-scope"
+        for change in ("package", "artifact", "axis", "ecosystem", "recommended", "unchecked",
+                       "missing-exact", "empty-exact", "null-exact", "blank-exact", "range-exact", "raw-name"):
+            with self.subTest(change=change):
+                data = self.patched_radix_registry()
+                axis = data["axes"]["fixture-radix-engine"]
+                if change == "package": data["frontendPolicy"]["packages"].remove(engine)
+                elif change == "artifact": data["frontendPolicy"]["artifactPackages"].remove(engine)
+                elif change == "axis": del data["axes"]["fixture-radix-engine"]
+                elif change == "ecosystem": axis["ecosystem"] = "pypi"; axis.pop("exact")
+                elif change == "recommended": axis.pop("exact"); axis["recommended"] = "1.1.0"
+                elif change == "unchecked": axis["checked"] = True
+                elif change == "missing-exact": axis.pop("exact")
+                elif change == "empty-exact": axis["exact"] = ""
+                elif change == "null-exact": axis["exact"] = None
+                elif change == "blank-exact": axis["exact"] = " "
+                elif change == "range-exact": axis["exact"] = "^1.1.0"
+                elif change == "raw-name": axis["packages"] = [" " + engine]
+                with self.assertRaises(ValueError):
+                    self.load_registry_fixture(data)
+
+    def test_patched_radix_does_not_allow_unknown_policy_fields(self):
+        data = self.patched_radix_registry()
+        data["frontendPolicy"]["patchedRadixPackagesExtra"] = []
+        with self.assertRaises(ValueError):
+            self.load_registry_fixture(data)
+
+    def test_explicit_prerelease_axis_is_only_for_exact_frontend_checker(self):
+        data = json.loads(json.dumps(REGISTRY))
+        data["axes"]["nativewind"] = {"ecosystem": "npm", "recommended": None,
+                                      "exact": "5.0.0-rc.1", "checked": False}
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+        self.assertEqual(CV.Registry.load(self.registry_path).axes["nativewind"]["exact"], "5.0.0-rc.1")
+        for change in ({"checked": True}, {"exact": "5.0.0-rc.01"}, {"recommended": "5.0.0"}):
+            invalid = json.loads(json.dumps(data))
+            invalid["axes"]["nativewind"].update(change)
+            self.registry_path.write_text(json.dumps(invalid), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                CV.Registry.load(self.registry_path)
+
+
+    def test_explicit_semver_axis_accepts_stable_and_build_metadata(self):
+        for version in ("0.0.0", "1.33.0", "1.33.0+nativecss.fix.4",
+                        "1.33.0+001", "5.0.0-rc.1+build.001", "1.0.0-alpha-beta+linux-x64"):
+            with self.subTest(version=version):
+                data = json.loads(json.dumps(REGISTRY))
+                data["axes"]["lightningcss"] = {"ecosystem": "npm", "recommended": None,
+                                              "exact": version, "checked": False}
+                self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+                self.assertEqual(CV.Registry.load(self.registry_path).axes["lightningcss"]["exact"], version)
+
+    def test_explicit_semver_axis_rejects_malformed_versions(self):
+        for version in ("01.33.0", "1.033.0", "1.33.00", "1.33.0-rc.01", "1.33.0-01+fix",
+                        "1.33.0+", "1.33.0+fix..3", "1.33.0+fix_3", "1.33.0+한글",
+                        "1.33.0+fix/3", "v1.33.0+fix.3", ">=1.33.0", "1.3٣.0", "1.33.0+fix.3\n"):
+            with self.subTest(version=version):
+                data = json.loads(json.dumps(REGISTRY))
+                data["axes"]["lightningcss"] = {"ecosystem": "npm", "recommended": None,
+                                              "exact": version, "checked": False}
+                self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    CV.Registry.load(self.registry_path)
+
+    def test_explicit_semver_axis_keeps_prefix_checker_disabled(self):
+        for change in ({"checked": True}, {"recommended": "1.33.0"},
+                       {"ecosystem": "pypi"}, {"exact": 133}, {"exact": None}):
+            with self.subTest(change=change):
+                data = json.loads(json.dumps(REGISTRY))
+                data["axes"]["lightningcss"] = {"ecosystem": "npm", "recommended": None,
+                                              "exact": "1.33.0+nativecss.fix.4", "checked": False}
+                data["axes"]["lightningcss"].update(change)
+                self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    CV.Registry.load(self.registry_path)
+
+    def test_css_artifact_is_required_for_web_and_mobile_builds(self):
+        data = CV.Registry.load(SCRIPT.parents[1] / "versions.json").data
+        policy = data["frontendPolicy"]
+        self.assertIn("lightningcss", policy["artifactPackages"])
+        self.assertIn("lightningcss", policy["packages"])
+        self.assertIn("+", data["axes"]["lightningcss"]["exact"])
+        for profile in ("web", "mobile"):
+            self.assertIn("lightningcss", policy["profiles"][profile]["required"])
+            self.assertNotIn("lightningcss", policy["profiles"][profile]["runtimeRequired"])
+
+    def test_frontend_profile_versions_and_forbidden_are_connected(self):
+        original = json.loads((SCRIPT.parents[1] / "versions.json").read_text())
+        for mutation in ("unknown_required", "forbidden_required", "unknown_artifact"):
+            data = json.loads(json.dumps(original))
+            if mutation == "unknown_required":
+                data["frontendPolicy"]["profiles"]["mobile"]["required"].append("unknown")
+            elif mutation == "forbidden_required":
+                data["frontendPolicy"]["forbidden"].append("react")
+            else:
+                data["frontendPolicy"]["artifactPackages"].append("unknown")
+            self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                CV.Registry.load(self.registry_path)
+
     def test_repo_registry_values_load(self):
         """저장소 루트 versions.json이 스키마·필수 필드를 만족하고 예외 until이 ISO 날짜다."""
         registry = CV.Registry.load(SCRIPT.parents[1] / "versions.json")

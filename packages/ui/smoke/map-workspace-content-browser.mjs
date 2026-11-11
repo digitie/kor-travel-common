@@ -16,6 +16,7 @@ try {
       document.getElementById("content-shell-header").style.flexBasis = `${height - 16 - target}px`;
     }, { height, target, font });
     for (const selected of [false, true]) {
+      // react-doctor-disable-next-line react-doctor/async-await-in-loop -- 한 페이지의 상태 전환과 측정을 순서대로 실행해야 한다.
       if (selected) await page.getByRole("button", { name: "선택 상세 전환" }).click();
       const result = await page.evaluate(() => {
         function visible(element) {

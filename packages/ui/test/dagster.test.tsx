@@ -70,7 +70,9 @@ test("동명 스케줄도 repository별로 확장과 링크를 구별한다", as
     scheduleUrl={(name, repository) => `/${repository.locationName}/${name}`} />);
   expect(screen.getByTestId("dagster")).toHaveAttribute("data-slot", "dagster-operations");
   expect(screen.getByRole("columnheader", { name: "상세" })).toBeVisible();
-  await userEvent.click(screen.getByRole("button", { name: "collect" }));
+  const toggle = screen.getByRole("button", { name: "collect" });
+  await userEvent.click(toggle);
+  expect(toggle).toHaveFocus();
   expect(screen.getByRole("button", { name: "collect_geo" })).toHaveAttribute("aria-expanded", "false");
   expect(screen.getByRole("link", { name: /스케줄 열기/ })).toHaveAttribute("href", "/transport/hourly");
 });
@@ -125,7 +127,9 @@ test("센서와 스케줄의 실패 tick 및 시간대를 표시한다", async (
     sensors: [{ name: "recovery", status: "RUNNING", lastTick: { status: "FAILURE", timestamp: 2, errorMessage: "sensor tick 실패" } }]
   }] }} onRefresh={vi.fn()} runUrl={() => "#"} scheduleUrl={() => "#"} />);
   expect(screen.getByRole("region", { name: "Dagster 센서 표" })).toHaveTextContent("sensor tick 실패");
-  await userEvent.click(screen.getByRole("button", { name: "collect" }));
+  const toggle = screen.getByRole("button", { name: "collect" });
+  await userEvent.click(toggle);
+  expect(toggle).toHaveFocus();
   expect(screen.getByText("Asia/Seoul")).toBeVisible();
   expect(screen.getByText("schedule tick 실패")).toBeVisible();
   expect(screen.getByText("조회 시점에 예정된 tick이 지연되었습니다.")).toBeVisible();

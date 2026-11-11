@@ -7,18 +7,24 @@
     "build:webpack": "next build --webpack"
   },
   "dependencies": {
-    "@kor-travel/tokens": "file:../../../../test-results/ui-pack/kor-travel-tokens-0.1.0.tgz",
-    "@kor-travel/ui": "file:../../../../test-results/ui-pack/kor-travel-ui-0.1.0-dev.9.tgz",
-    "next": "16.3.6",
-    "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "@kor-travel/tokens": "file:../../../../test-results/ui-pack/kor-travel-tokens-0.1.1.tgz",
+    "@kor-travel/ui": "file:../../../../test-results/ui-pack/kor-travel-ui-0.2.0.tgz",
+    "@radix-ui/react-focus-scope": "file:vendor/radix-ui-react-focus-scope-1.3.1+kortravel.fix.2.tgz",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "4.3.3",
-    "@types/node": "22.19.0",
-    "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4",
-    "tailwindcss": "4.3.3",
+    "@tailwindcss/postcss": "4.3.5",
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "lightningcss": "file:vendor/lightningcss-1.33.0+nativecss.fix.4.tgz",
+    "tailwindcss": "4.3.5",
     "typescript": "5.9.3"
+  },
+  "overrides": {
+    "lightningcss": "$lightningcss",
+    "@radix-ui/react-focus-scope": "$@radix-ui/react-focus-scope"
   }
 }

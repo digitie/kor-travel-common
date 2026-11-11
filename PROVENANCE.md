@@ -31,6 +31,36 @@
 | PV-012 | `templates/agent-config/gemini.mcp.json` | kor-travel-geo | `1d9d74d3a852bbaaa09144b75bb69b99a58a6002` | `antigravity.json` | GPL-3.0-only | filesystem 항목 제거 (2026-09-07 확인) | [설정 고지](templates/agent-config/README.md) |
 | PV-013 | `packages/tokens/tokens.css` | kor-travel-map | `c494e227e010565be295de3f9670b2f7c8c20944` | `packages/kor-travel-map-admin/frontend/src/app/globals.css` | GPL-3.0-or-later | semantic 토큰·다크 값·형태·모션 값을 추출해 `--kt-*` 이름과 공개 패키지 계약에 맞게 재구성. 의미·접근성 규칙은 같은 커밋의 `packages/kor-travel-map-admin/frontend/design.md`와 대조 (2026-09-07) | [T-101](docs/tasks/T-101-tokens-package.md), [디자인 토큰 조사](docs/survey/cross/design-tokens.md) §3.2·§3.6 |
 | PV-014 | `packages/tokens/examples/weather-overrides.css` | kor-travel-weather | `6003da995fa4b35799f9dadc406c6ba2878bfbae` | `packages/kor-travel-weather-admin/frontend/app/tokens.css` | GPL-3.0-or-later | weather light/dark 값을 `--kt-*` 앱 오버라이드와 비배포 `--space-*` 호환 예제로 재표현. 원천 파일은 수정하지 않으며 실제 이관·6폭 diff는 T-461 범위 (2026-09-07) | [T-102](docs/tasks/T-102-map-vocabulary-shim.md), [weather 토큰 조사](docs/survey/inventory/kor-travel-weather.md) §3.1 |
+| PV-020 | `packages/ui/src/alert-dialog.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/alert-dialog.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결; 2026-11-12 viewport 제한·내부 스크롤·단일 overlay 전달·unstyled 표현 선택 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-021 | `packages/ui/src/alert.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/alert.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-022 | `packages/ui/src/badge.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/badge.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-023 | `packages/ui/src/breadcrumb.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/breadcrumb.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-024 | `packages/ui/src/button.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/button.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-025 | `packages/ui/src/card.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/card.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-026 | `packages/ui/src/checkbox.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/checkbox.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-027 | `packages/ui/src/collapsible.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/collapsible.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-028 | `packages/ui/src/dialog.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/dialog.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결; 2026-11-12 viewport 제한·내부 스크롤·반응형 크기별 폭·단일 overlay 전달·unstyled 표현 선택 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-029 | `packages/ui/src/dropdown-menu.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/dropdown-menu.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-030 | `packages/ui/src/input.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/input.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-031 | `packages/ui/src/label.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/label.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-032 | `packages/ui/src/native-select.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/native-select.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-033 | `packages/ui/src/popover.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/popover.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-034 | `packages/ui/src/progress.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/progress.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-035 | `packages/ui/src/select.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/select.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-036 | `packages/ui/src/separator.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/separator.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-037 | `packages/ui/src/skeleton.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/skeleton.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-038 | `packages/ui/src/switch.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/switch.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-039 | `packages/ui/src/table.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/table.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결; TableRow 색상 전환에서 outline 제외 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-040 | `packages/ui/src/tabs.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/tabs.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-041 | `packages/ui/src/textarea.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/textarea.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-042 | `packages/ui/src/tooltip.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/tooltip.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-043 | `packages/ui/src/scroll-area.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/scroll-area.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-044 | `packages/ui/src/accordion.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/accordion.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-045 | `packages/ui/src/field.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/field.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-046 | `packages/ui/src/empty.tsx` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/empty.tsx` | MIT 파생 | 공통 경로·아이콘·계약 연결 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-047 | `packages/tokens/shadcn-tailwind.css` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `packages/shadcn/src/tailwind.css` | MIT 파생 | 공식 eject 원문 CSS에 출처 헤더만 추가 | [MIT 고지](packages/tokens/SHADCN_LICENSE) |
+| PV-048 | `packages/ui/src/button-variants.ts` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/button.tsx` | MIT 파생 | 순수 CVA 정의를 서버용 모듈로 분리 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
+| PV-049 | `packages/ui/src/badge-variants.ts` | shadcn-ui/ui | `dd41d19e2f80ff6891951f7ced74c2c9a650b065` | `apps/v4/registry/bases/radix/ui/badge.tsx` | MIT 파생 | 순수 CVA 정의를 서버용 모듈로 분리 | [MIT 고지](packages/ui/SHADCN_LICENSE) |
 
 | PV-015 | `packages/ui/src/dagster-operations.tsx` | kor-travel-weather | `5da6e15` | `packages/kor-travel-weather-admin/frontend/app/admin/dagster/page.tsx` | GPL-3.0-or-later | 날씨 조회·label·URL·페이지 헤더를 제거하고 주입형 표시 컴포넌트와 자체 실행 상한 판정으로 추출(2026-10-04) | [T-216](docs/tasks/T-216-dagster-operations.md) |
 | PV-016 | `packages/ui/src/dagster-model.ts` | kor-travel-weather | `5da6e15` | `packages/kor-travel-weather-admin/frontend/lib/dagster.ts` | GPL-3.0-or-later | provider label·HTTP 조회를 제외하고 공용 타입/표시 함수와 선택 실행 상한으로 추출(2026-10-04) | [T-216](docs/tasks/T-216-dagster-operations.md) |
@@ -50,3 +80,11 @@ PV-007~012는 T-013에 이미 들어 있던 geo 설정 사본을 원본과 대�
 PV-018·PV-019의 원천 헤더를 보존한 채 common 고유의 opt-in 높이 전달·모바일 필터 접기·
 상세 header/body 슬롯과 초점 복원을 추가했다. 추가 소비자·지도 SDK/provider 코드는 반입하지 않았다.
 [공개 계약](docs/standards/map-controls.md)을 따른다.
+
+### 2026-11-11 shadcn Radix와 공통 VirtualTable
+
+공식 Radix Nova MIT 원문을 packages/ui/src에 이관했다. URL·조회본 SHA256·컴포넌트별 위치는 [원장](shadcn-sources.json), MIT 전문은 [고지](packages/ui/SHADCN_LICENSE)에 보존한다. 변경은 내부 import·Lucide 자리표시자 해소·로딩 계약·컨테이너 속성이다. VirtualTable 원천은 kor-travel-map@32668d003ea6a259468e03970bd167359c19ecdb의 packages/kor-travel-map-admin/frontend/src/components/ui/data-table.tsx이며 TanStack9·공통 계약으로 이관한다.
+
+### 2026-11-11 공통 CSS 빌드 산출물
+
+사용자 승인으로 vendor의 고정 Lightning CSS tarball을 root·웹·모바일에서 같은 빌드 의존성으로 사용한다. 상류 원본 source 1d680fa14e9a089c92dc0929f869d6757ae91c30, fix.4 수정 1e94372a6da4a55eac4a6dc3ff9cdeec103e8ac1 및 serde-content 수정 67fe4a9c5b4595433a731b70dbe31412721bea8c를 [vendor provenance](vendor/lightningcss-provenance-fix4.json)와 [고지/소스 위치](vendor/README.md)에 보존한다. tarball bytes를 변경하지 않으며 common 소스 이식 행으로 등록하지 않는다.

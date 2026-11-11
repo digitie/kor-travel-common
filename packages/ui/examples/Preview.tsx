@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useMemo, useCallback } from "react";
 import type { CSSProperties } from "react";
 import * as icons from "lucide-react";
 import { AppMenu, LoginForm, LoginStatus } from "@kor-travel/ui";
@@ -41,7 +41,7 @@ function ProjectPreview({ project }: { project: (typeof projects)[number] }) {
   const [notice, setNotice] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<"success" | "error">("error");
-  const allItems = project.groups.flatMap(group => group.items);
+  const allItems = useMemo(() => project.groups.flatMap(group => group.items), [project.groups]);
   const selected = allItems.find(item => item.id === activeId)!;
   const groups: AppMenuGroup[] = project.groups.map(group => ({
     id: group.id, label: group.label ?? undefined,
@@ -53,10 +53,10 @@ function ProjectPreview({ project }: { project: (typeof projects)[number] }) {
       };
     }),
   }));
-  function navigate(href: string) {
+  const navigate = useCallback((href: string) => {
     const item = allItems.find(candidate => "href" in candidate && candidate.href === href);
     if (item) { setActiveId(item.id); setView("menu"); }
-  }
+  }, [allItems]);
   const railStyle = project.rail ? {
     background: project.rail.background, color: project.rail.foreground,
     "--kt-text-secondary": project.rail.muted, "--kt-text-primary": project.rail.foreground,

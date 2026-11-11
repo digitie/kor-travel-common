@@ -1,7 +1,7 @@
 {
   "name": "@kor-travel/ui",
-  "version": "0.1.0-dev.9",
-  "description": "kor-travel 공용 로그인과 탐색 메뉴",
+  "version": "0.2.0",
+  "description": "kor-travel 공용 Radix UI·가상 테이블·폼과 지도 작업면",
   "license": "GPL-3.0-or-later",
   "author": "Youn-sok Choi (digitie)",
   "type": "module",
@@ -14,7 +14,10 @@
     "map-controls.css",
     "LICENSE",
     "NOTICE",
-    "THIRD_PARTY_NOTICES.md"
+    "THIRD_PARTY_NOTICES.md",
+    "dependency-policy.json",
+    "check-dependencies.mjs",
+    "SHADCN_LICENSE"
   ],
   "exports": {
     "./map-controls": {
@@ -59,38 +62,177 @@
       "types": "./dist/login-messages.d.ts",
       "import": "./dist/login-messages.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./scroll-area": {
+      "types": "./dist/scroll-area.d.ts",
+      "import": "./dist/scroll-area.js"
+    },
+    "./alert-dialog": {
+      "types": "./dist/alert-dialog.d.ts",
+      "import": "./dist/alert-dialog.js"
+    },
+    "./select": {
+      "types": "./dist/select.d.ts",
+      "import": "./dist/select.js"
+    },
+    "./field": {
+      "types": "./dist/field.d.ts",
+      "import": "./dist/field.js"
+    },
+    "./table": {
+      "types": "./dist/table.d.ts",
+      "import": "./dist/table.js"
+    },
+    "./accordion": {
+      "types": "./dist/accordion.d.ts",
+      "import": "./dist/accordion.js"
+    },
+    "./input": {
+      "types": "./dist/input.d.ts",
+      "import": "./dist/input.js"
+    },
+    "./separator": {
+      "types": "./dist/separator.d.ts",
+      "import": "./dist/separator.js"
+    },
+    "./alert": {
+      "types": "./dist/alert.d.ts",
+      "import": "./dist/alert.js"
+    },
+    "./tooltip": {
+      "types": "./dist/tooltip.d.ts",
+      "import": "./dist/tooltip.js"
+    },
+    "./popover": {
+      "types": "./dist/popover.d.ts",
+      "import": "./dist/popover.js"
+    },
+    "./breadcrumb": {
+      "types": "./dist/breadcrumb.d.ts",
+      "import": "./dist/breadcrumb.js"
+    },
+    "./checkbox": {
+      "types": "./dist/checkbox.d.ts",
+      "import": "./dist/checkbox.js"
+    },
+    "./collapsible": {
+      "types": "./dist/collapsible.d.ts",
+      "import": "./dist/collapsible.js"
+    },
+    "./textarea": {
+      "types": "./dist/textarea.d.ts",
+      "import": "./dist/textarea.js"
+    },
+    "./empty": {
+      "types": "./dist/empty.d.ts",
+      "import": "./dist/empty.js"
+    },
+    "./skeleton": {
+      "types": "./dist/skeleton.d.ts",
+      "import": "./dist/skeleton.js"
+    },
+    "./progress": {
+      "types": "./dist/progress.d.ts",
+      "import": "./dist/progress.js"
+    },
+    "./label": {
+      "types": "./dist/label.d.ts",
+      "import": "./dist/label.js"
+    },
+    "./badge": {
+      "types": "./dist/badge.d.ts",
+      "import": "./dist/badge.js"
+    },
+    "./native-select": {
+      "types": "./dist/native-select.d.ts",
+      "import": "./dist/native-select.js"
+    },
+    "./switch": {
+      "types": "./dist/switch.d.ts",
+      "import": "./dist/switch.js"
+    },
+    "./tabs": {
+      "types": "./dist/tabs.d.ts",
+      "import": "./dist/tabs.js"
+    },
+    "./button": {
+      "types": "./dist/button.d.ts",
+      "import": "./dist/button.js"
+    },
+    "./dropdown-menu": {
+      "types": "./dist/dropdown-menu.d.ts",
+      "import": "./dist/dropdown-menu.js"
+    },
+    "./card": {
+      "types": "./dist/card.d.ts",
+      "import": "./dist/card.js"
+    },
+    "./dialog": {
+      "types": "./dist/dialog.d.ts",
+      "import": "./dist/dialog.js"
+    },
+    "./primitives": {
+      "types": "./dist/primitives.d.ts",
+      "import": "./dist/primitives.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "import": "./dist/utils.js"
+    },
+    "./virtual-table": {
+      "types": "./dist/virtual-table.d.ts",
+      "import": "./dist/virtual-table.js"
+    },
+    "./button-variants": {
+      "types": "./dist/button-variants.d.ts",
+      "import": "./dist/button-variants.js"
+    },
+    "./badge-variants": {
+      "types": "./dist/badge-variants.d.ts",
+      "import": "./dist/badge-variants.js"
+    },
+    "./check-dependencies.mjs": "./check-dependencies.mjs"
   },
   "dependencies": {
-    "lucide-react": "1.41.0"
+    "radix-ui": "1.8.1",
+    "@tanstack/react-table": "9.3.1",
+    "@tanstack/react-virtual": "3.14.26",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "tailwind-merge": "3.7.0",
+    "lucide-react": "1.72.0",
+    "react-hook-form": "7.92.0",
+    "@hookform/resolvers": "7.0.5",
+    "zod": "4.6.7",
+    "zustand": "5.1.0"
   },
   "peerDependencies": {
-    "@base-ui/react": "^1.8.0",
-    "@kor-travel/tokens": "~0.1.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "@kor-travel/tokens": "0.1.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@base-ui/react": "1.8.0",
     "@testing-library/jest-dom": "7.0.1",
-    "@testing-library/react": "16.3.2",
-    "@testing-library/user-event": "14.6.5",
-    "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.9",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "axe-core": "4.12.0",
-    "jsdom": "30.0.1",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "jsdom": "31.0.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "typescript": "5.9.3",
-    "vitest": "4.1.11",
-    "tailwindcss": "4.3.3"
+    "vitest": "5.1.0",
+    "tailwindcss": "4.3.5",
+    "@testing-library/dom": "10.4.2"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && node scripts/check-package.mjs",
+    "build": "node scripts/sync-policy.mjs && tsc -p tsconfig.json && node scripts/check-package.mjs",
     "check": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run",
+    "test": "vitest run && node --test test/dependency-policy.node.test.mjs test/native-css-policy.node.test.mjs",
     "prepack": "npm run build",
     "check:examples": "tsc -p tsconfig.examples.json",
-    "pretest": "npm run build"
+    "pretest": "npm run build",
+    "doctor": "react-doctor --scope full --no-score --no-telemetry --blocking warning ."
   }
 }

@@ -1,12 +1,26 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import axe from "axe-core";
 import { LoginForm, LoginStatus, AppMenu } from "../src/index.js";
 
 describe("로그인", () => {
+  it("이벤트 없는 자동완성 값을 제출 직전에 RHF로 동기화한다", async () => {
+    const submit=vi.fn();
+    const {container}=render(<LoginForm defaultUsername="admin" onSubmit={submit}/>);
+    const field=screen.getByLabelText("비밀번호") as HTMLInputElement;
+    field.value="synthetic";
+    fireEvent.submit(container.querySelector("form")!);
+    await waitFor(()=>expect(submit).toHaveBeenCalledTimes(1));
+    const request=submit.mock.calls[0]![0];
+    expect(request.credentials.username).toBe("admin");
+    expect(request.credentials.password).toBe("synthetic");
+    expect(request.nextPath).toBe("/");
+    expect(field).toHaveValue("");
+  });
+
   it("라벨·자동완성·오류 슬롯을 유지하고 비밀번호를 그대로 제출한다", async () => {
     const submit = vi.fn();
     const { container } = render(<LoginForm onSubmit={submit} nextPath="//outside.invalid" />);
@@ -33,7 +47,7 @@ describe("로그인", () => {
     button.focus();
     fireEvent.submit(container.querySelector("form")!);
     fireEvent.submit(container.querySelector("form")!);
-    expect(submit).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
     expect(button).toHaveFocus();
     expect(button).not.toBeDisabled();
     expect(button).toHaveAttribute("aria-disabled", "true");
@@ -66,12 +80,12 @@ describe("로그인", () => {
     await userEvent.type(screen.getByLabelText("아이디"), "d");
     expect(clear).toHaveBeenCalled();
   });
-  it("공백 아이디에 포커스를 이동한다", () => {
+  it("공백 아이디에 포커스를 이동한다", async () => {
     const submit = vi.fn();
     const { container } = render(<LoginForm onSubmit={submit} defaultUsername="   " />);
     fireEvent.submit(container.querySelector("form")!);
     expect(submit).not.toHaveBeenCalled();
-    expect(screen.getByLabelText("아이디")).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText("아이디")).toHaveFocus());
   });
   it("복수 폼의 id가 충돌하지 않는다", () => {
     render(<><LoginForm onSubmit={vi.fn()} /><LoginForm onSubmit={vi.fn()} /></>);

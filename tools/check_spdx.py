@@ -15,7 +15,7 @@ SUFFIXES = {".ts", ".tsx", ".js", ".mjs", ".cjs", ".css", ".py", ".toml",
             ".yml", ".yaml", ".sh"}
 EXCLUDED_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", "dist",
                  "build", ".next", ".turbo", "coverage", "LICENSES"}
-LICENSES = {"GPL-3.0-or-later", "GPL-3.0-only",
+LICENSES = {"GPL-3.0-or-later", "GPL-3.0-only", "GPL-3.0-or-later AND MIT",
             "GPL-3.0-or-later AND GPL-3.0-only"}
 ORIGIN = re.compile(r"(?P<repo>[\w.-]+(?:/[\w.-]+)?)@(?P<sha>[0-9a-f]{7,40}) "
                     r"(?P<path>[^\s()]+)(?: \((?P<license>[^()]+)\))?")

@@ -242,3 +242,19 @@ test("패키지에는 금지된 앱 접두가 없다", () => {
     assert.doesNotMatch(css, /--(?:ktc|ui|pv|color-admin)-/);
   }
 });
+
+test("Radix의 Tailwind4 색상·형태는 의미 토큰으로 연결한다", () => {
+  const bridge = read("radix.css");
+  assert.match(bridge, /@import "\.\/shadcn\.css"/);
+  assert.match(bridge, /--color-primary:\s*var\(--primary\)/);
+  assert.match(bridge, /--radius-md:\s*var\(--kt-radius-control\)/);
+  assert.match(bridge, /--font-sans:\s*var\(--kt-font-sans\)/);
+});
+
+test("공식 shadcn 상태 variant가 Radix 상태와 연결된다", () => {
+  const source = read("shadcn-tailwind.css");
+  assert.match(source, /@custom-variant data-active/);
+  assert.match(source, /data-state="active"/);
+  assert.match(source, /data-orientation="vertical"/);
+  assert.match(read("radix.css"), /shadcn-tailwind\.css/);
+});

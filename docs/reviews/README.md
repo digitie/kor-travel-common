@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-11-11 | FULL·1차 | [Radix 공통화](adversarial/2026-11-11-radix-unification.md), 789e6d2/7402214 | A UI·접근성 / B 패키징·CI·고지 | 두 BLOCK·수정 및 재검토 중 |
 | 2026-10-23 | FULL·소스 정산 | [workspace metadata 갱신 주기](adversarial/2026-10-23-workspace-refresh-closure.md), 89ea368 | A 실행·복구 / B SDK·패키징 | 두 SOURCE PASS·OPEN0·CI8SUCCESS·소비자/운영 별도 |
 | 2026-10-18 | FULL·통합 delta | [daemon 풀·영속 webserver 합집합](adversarial/2026-10-18-daemon-pool-union-closure.md), ff849ea | A 계약·의존성 / B 설치·패키징 | 두 SOURCE PASS·P3 FIXED·CI14SUCCESS·운영 별도 |
 | 2026-10-18 | FULL·반복 post-fix | [영속 Dagster 제출·PG 연결 정책](adversarial/2026-10-18-native-submit-closure.md), 제품89291f3 / 문서7d46df6 | B PG·패키징 / C native 계약·경합 | 두 SOURCE PASS·P1/P2 FIXED·CI14SUCCESS·운영 별도 |
@@ -90,3 +91,5 @@
 [적대적 리뷰 템플릿](adversarial/TEMPLATE.md)을 복사해 새 파일을 만들고, [agent workflow](../runbooks/agent-workflow.md)의 2인 리뷰 gate를 따른다. 일반 작업 시작 시 이 아카이브 전체를 읽지 않는다.
 
 - [2026-10-05 PinVi 채택 후속](adversarial/2026-10-05-pinvi-common.md): runtime cap 미확인·nullable migration, 두 독립 post-fix PASS와 소비자 live 4PASS.
+
+- [2026-11-11 Radix 수정 후 재리뷰2차](adversarial/2026-11-11-radix-unification-postfix-2.md): A/B CONDITIONAL, 최초21건 FIXED·새P2/P3각1건 OPEN.

@@ -12,9 +12,23 @@
   "scripts": {
     "build": "npm run build --workspace packages/tokens && npm run build --workspace packages/ui",
     "check": "npm run check --workspace packages/tokens && npm run check --workspace packages/ui",
-    "test": "npm test --workspace packages/tokens && npm test --workspace packages/ui"
+    "test": "npm test --workspace packages/tokens && npm test --workspace packages/ui",
+    "lint": "eslint packages/ui/src packages/ui/examples",
+    "doctor": "npm run doctor --workspace packages/ui",
+    "check:policy": "node tools/sync_frontend_policy.mjs --check"
   },
   "devDependencies": {
-    "@mdx-js/mdx": "3.1.1"
+    "@eslint/js": "10.0.1",
+    "@mdx-js/mdx": "3.1.1",
+    "@playwright/test": "1.65.0",
+    "@radix-ui/react-focus-scope": "file:vendor/radix-ui-react-focus-scope-1.3.1+kortravel.fix.2.tgz",
+    "eslint": "10.14.0",
+    "lightningcss": "file:vendor/lightningcss-1.33.0+nativecss.fix.4.tgz",
+    "react-doctor": "0.9.22",
+    "typescript-eslint": "8.72.2"
+  },
+  "overrides": {
+    "lightningcss": "$lightningcss",
+    "@radix-ui/react-focus-scope": "$@radix-ui/react-focus-scope"
   }
 }

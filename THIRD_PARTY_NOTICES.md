@@ -38,3 +38,7 @@
 [LICENSES 안내](LICENSES/README.md)는 원문 확보·digest·참조용 SPDX 전문을 연결한다. 일반 MIT/ISC 전문의 자리표시자는 각 구성요소의 저작권 고지를 대신하지 않는다. 패키지를 실제로 만들 때 이 문서와 해당 `LICENSES/upstream/*` 사본을 함께 동봉하고 수령자가 상대 링크를 따라갈 수 있는지 tarball·wheel 설치 gate에서 확인한다(T-101·T-201·T-302).
 
 common이 배포하지 않는 provider·지도 공유 라이브러리·외부 스킬 본문은 이식 고지 목록에 포함하지 않는다. 빌드 도구·peer라도 실제 번들에 코드가 포함되면 채택 task가 고지를 추가한다. 추출 허용 여부와 파일 헤더는 [licensing](docs/standards/licensing.md)이 정본이다.
+
+## 공통 CSS 빌드 의존성의 배포 사본
+
+Lightning CSS의 사용자 승인 원본 수정 tarball을 빌드/개발 의존성으로 동봉한다. 버전·원본 source SHA·고정 bytes·MPL-2.0 사본·동봉 source/serde-content MIT·Apache-2.0/napi-wasm MIT 고지는 [vendor 고지](vendor/README.md)에 연결한다. common 소스로 재선언하거나 소비자별로 재포장하지 않는다.

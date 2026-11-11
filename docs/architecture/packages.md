@@ -10,7 +10,7 @@
 | 배포 단위 | 이름 | 경로 | 채널·태그 | peer | 1차 소비자 |
 |---|---|---|---|---|---|
 | tokens | `@kor-travel/tokens` | `packages/tokens` | GitHub Release `tokens-vX.Y.Z`, 자산 `kor-travel-tokens-X.Y.Z.tgz` + `SHA256SUMS` | 없음(`theme.css`는 소비자 Tailwind ≥4.3.0 빌드 컨텍스트 필요) | map·weather → pinvi admin(L6)·airport(WIP 병합 후) |
-| ui | `@kor-travel/ui` | `packages/ui` | `ui-vX.Y.Z`, 자산 `kor-travel-ui-X.Y.Z.tgz` + `SHA256SUMS` | `react`·`react-dom` `^19.0.0`, `@kor-travel/tokens`의 호환 minor 하나, `@base-ui/react` ≥1.6(권장 1.8), `@tanstack/react-table` ^8.21·`@tanstack/react-virtual` ^3.14(DataTable subpath만) | map·pinvi admin(L6) 또는 airport 소형 부품 |
+| ui | `@kor-travel/ui` | `packages/ui` | `ui-vX.Y.Z`, 자산 `kor-travel-ui-X.Y.Z.tgz` + `SHA256SUMS` | React/DOM19.3.1·tokens0.1.1 peer, Radix와 TanStack9/Virtual3 정확 버전은 [정본](../../versions.json) | map·pinvi admin(L6) 또는 airport 소형 부품 |
 | py | Python 배포 이름 `kor-travel-common`, import `kortravelcommon` | `packages/py/kor-travel-common` | git 태그 `py-vX.Y.Z` + wheel 자산; 소비자는 `git+https://github.com/digitie/kor-travel-common.git@py-vX.Y.Z#subdirectory=packages/py/kor-travel-common`(lock sha) | `requires-python >=3.11`; core는 pydantic만, 나머지는 extras | map-api·weather-api·airport → geo → pinvi·concierge·ktdm(L8 후) |
 | 규칙 문서 | `docs/standards/*` | `docs/standards` | common 태그와 동반(문서 자체는 버전 없음, 규칙 ID 불변) | — | 전 소비자 |
 | 템플릿 | `templates/*` | `templates` | 복사 시점의 common 커밋을 앱이 기록 | — | 전 소비자 |
@@ -63,13 +63,13 @@ tarball에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 동봉, `package.json` 
 - 형태: ESM + d.ts + Tailwind 소스 클래스(`kt-` 접두 유틸리티만), `'use client'`·`'use no memo'` 지시문 보존, `noUncheckedIndexedAccess: true` 타입 검사, 인라인 SVG 아이콘.
 - exports: 루트 barrel + 컴포넌트 그룹별 subpath(예: `./button`, `./data-table`, `./cn`, `./overlay`). DataTable·Pager처럼 무거운 peer가 필요한 항목은 별도 subpath로 두어 루트 import가 `@tanstack/*`를 요구하지 않게 한다.
 - `@kor-travel/ui/cn` = `clsx` + `extendTailwindMerge`(`kt-` 그룹 등록). `clsx`·`tailwind-merge`는 dependencies(peer 아님).
-- 엔진: overlay(Dialog·AlertDialog·Popover·Tooltip·Tabs·Breadcrumb·HelpTip)만 `@base-ui/react`; 비-overlay(Button·Checkbox·Input·Textarea·NativeSelect·Separator·Badge)는 native 요소 + `useRender`로 `render` 합성 선택 지원(D-09).
-- UI 0.1·0.2의 tokens peer는 모두 `~0.1.0`이다. 독립 패키지의 minor 번호를 일치시키지 않으며 변경은 [ADR-013](../adr/013-package-release-execution-contract.md)을 따른다. Base UI `useRender` helper는 0.1부터 peer·개발 의존에 필요하고 overlay 구현은 0.2에서 추가한다.
+- 엔진: [ADR-017](../adr/017-shadcn-radix-shared-components.md)에 따라 shadcn/ui Radix를 사용한다. primitive는 각 subpath와 primitives barrel로 제공하고 합성은 Radix의 asChild 계약을 따른다. 표는 공통 VirtualTable을 사용한다.
+- 현재 UI0.2.0 후보의 tokens peer는0.1.1이다. 공통 산출물은 같은 bytes와 lock integrity로 소비하며 정확 버전은 [라이브러리 규약](../standards/frontend-libraries.md)을 따른다.
 - 릴리스 단위: `v0.1.0` = 소형 13종(Badge·Skeleton·Separator·Card·Alert·Input·Textarea·NativeSelect·Field·EmptyState·SectionCard·FilterBar·StatStrip, T-203), `v0.2.0` = Button·AppErrorPanel·overlay 세트·Table·Checkbox·DataTable·Pager·CopyButton·JsonViewer·DetailList·StatusBadge·AdminPageHeader·AdminSkipLink·AdminRailGrid·Form*(T-205~T-210), 로그인 위젯 계약은 T-214 별도 minor 단위로 확정한다.
 - 테스트 하네스: vitest + RTL + jsdom, axe opt-in, showcase 없음(consumer-smoke 대체, D-33).
-- base-ui 미확인 3건(Button `type` 기본, Checkbox hidden input, Toast API)은 T-201에서 소스 확인 전 릴리스 금지.
+- 기존 Base UI 전용 미확인 항목은 ADR-017로 대체했다. 현재 Radix·SSR·표 공개 계약의 시험과 소비자 gate를 통과해야 릴리스한다.
 
-T-215는 사용자 요청에 따라 로그인·메뉴 native 부품만 먼저 구현한 개발 후보다. 현재 exports·의존은 패키지 실물을 따른다. `cn`·Base UI 합성·전체 소형 부품은 위 T-201 이후 계획으로 남으며 개발 후보는 정식 UI 0.1의 완료를 의미하지 않는다. 예시의 실제 메뉴·색상은 소비자 설정이며 common의 기본 메뉴·브랜드로 승격하지 않는다.
+T-215는 사용자 요청에 따라 로그인·메뉴 native 부품만 먼저 구현한 개발 후보다. 현재 exports·의존은 패키지 실물을 따른다. 이후 Radix·공통표 이관은 T-218에서 검증하며 개발 후보는 정식 UI 0.1의 완료를 의미하지 않는다. 예시의 실제 메뉴·색상은 소비자 설정이며 common의 기본 메뉴·브랜드로 승격하지 않는다.
 
 ### 3.2 공개 계약(SemVer 대상)
 
@@ -88,7 +88,7 @@ React 18 앱(geo·ktdm)은 tokens부터 채택하고 React 19 업그레이드(T-
 
 ### 3.3 검증·동봉
 
-common CI `packages` job: build → `npm pack` → tarball 설치 → webpack·Turbopack 양쪽 `next build` 스모크. tarball에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 동봉(shadcn/ui MIT·@base-ui/react MIT·cva Apache-2.0 고지). `tools/ui_drift.py`(T-211)가 npm 소비자의 로컬 우회 패치를 탐지한다.
+common CI `packages` job: build → `npm pack` → tarball 설치 → webpack·Turbopack 양쪽 `next build` 스모크. tarball에 `LICENSE`·`NOTICE`·`THIRD_PARTY_NOTICES.md` 동봉(shadcn/ui MIT 원문과 Radix·cva 의존성 고지). `tools/ui_drift.py`(T-211)가 npm 소비자의 로컬 우회 패치를 탐지한다.
 
 ## 4. `kor-travel-common`(Python)
 

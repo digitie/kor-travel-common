@@ -2,7 +2,11 @@
 // SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState, useSyncExternalStore } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { createStore } from "zustand/vanilla";
+import { useStore } from "zustand";
 import type { FormEvent, ReactNode } from "react";
 import { LoginError } from "./login-error.js";
 import { sanitizeLocalPath } from "./navigation.js";
@@ -23,6 +27,10 @@ export interface LoginFormProps {
   testId?: string;
 }
 
+const subscribeReady = () => () => {};
+const clientReady = () => true;
+const serverReady = () => false;
+
 const inputClass = "min-h-11 w-full rounded-kt-control border border-kt-control-line bg-kt-surface-page px-3 py-2 text-kt-sm text-kt-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kt-focus read-only:bg-kt-surface-subtle";
 
 export function LoginForm({
@@ -33,29 +41,33 @@ export function LoginForm({
   const id = useId();
   const passwordRef = useRef<HTMLInputElement>(null);
   const inFlight = useRef(false);
-  const [ready, setReady] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [localError, setLocalError] = useState<string | null>(null);
+  const ready = useSyncExternalStore(subscribeReady, clientReady, serverReady);
+  const [store] = useState(() => createStore<{ submitting: boolean; localError: string | null }>(() => ({ submitting: false, localError: null })));
+  const { submitting, localError } = useStore(store);
+  const setSubmitting = (submitting: boolean) => store.setState({ submitting });
+  const setLocalError = (localError: string | null) => store.setState({ localError });
+  const { register, handleSubmit, resetField, setFocus, setValue } = useForm<LoginCredentials>({ defaultValues: { username: defaultUsername, password: "" } });
+  const schema = z.object({ username: z.string().trim().min(1), password: (z.string().min(1)) });
+  const usernameField = register("username", { onChange: clearError });
+  const passwordField = register("password", { onChange: clearError });
   const busy = pending || submitting;
   const message = localError || error;
 
   // SSR와 최초 client 렌더를 같은 disabled HTML로 유지하고 handler 준비 뒤 연다.
-  useEffect(() => { setReady(true); }, []);
 
   function clearError() {
     setLocalError(null);
     if (error) onClearError?.();
   }
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function submit(credentials: LoginCredentials) {
     if (!ready || pending || inFlight.current) return;
-    const form = event.currentTarget;
-    const data = new FormData(form);
-    const username = String(data.get("username") ?? "").trim();
-    if (!username) {
-      setLocalError(`${usernameLabel}를 입력해 주세요.`);
-      form.querySelector<HTMLInputElement>("[name=username]")?.focus();
+    const parsed = schema.safeParse(credentials);
+    const username = credentials.username.trim();
+    if (!parsed.success) {
+      setLocalError(username ? "비밀번호를 입력해 주세요." : `${usernameLabel}를 입력해 주세요.`);
+      if (username) setFocus("password");
+      else setFocus("username");
       return;
     }
     inFlight.current = true;
@@ -63,19 +75,32 @@ export function LoginForm({
     setLocalError(null);
     try {
       onClearError?.();
-      await onSubmit({ credentials: { username, password: String(data.get("password") ?? "") }, nextPath: sanitizeLocalPath(nextPath) });
+      await onSubmit({ credentials: parsed.data, nextPath: sanitizeLocalPath(nextPath) });
     } catch {
       // 콜백의 오류 원문(비밀·서버 상세 포함 가능)을 렌더링하거나 로그에 남기지 않는다.
       setLocalError("로그인하지 못했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
+      resetField("password");
       if (passwordRef.current) passwordRef.current.value = "";
       inFlight.current = false;
       setSubmitting(false);
     }
   }
 
+  function submitForm(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!ready || pending || inFlight.current) return;
+    // 자동완성이 change 이벤트 없이 바꾼 native 값도 RHF 검증 대상으로 동기화한다.
+    const form = new FormData(event.currentTarget);
+    for (const field of ["username", "password"] as const) {
+      const value = form.get(field);
+      setValue(field, typeof value === "string" ? value : "");
+    }
+    void handleSubmit(submit)(event);
+  }
+
   return <form data-slot="login-form" data-testid={testId} aria-labelledby={`${id}-title`}
-    aria-busy={busy} onSubmit={submit} method="post"
+    aria-busy={busy} onSubmit={submitForm} method="post"
     className="mx-auto flex w-full max-w-sm flex-col gap-4 px-4 py-8 font-kt-sans text-kt-text-primary">
     <div className="space-y-2">
       <p data-slot="login-brand" className="break-words text-kt-xl font-semibold">{brand}</p>
@@ -84,15 +109,15 @@ export function LoginForm({
     </div>
     <div className="space-y-2">
       <label htmlFor={`${id}-username`} className="text-kt-sm">{usernameLabel}</label>
-      <input id={`${id}-username`} data-slot="login-username" name="username" type="text"
+      <input id={`${id}-username`} data-slot="login-username" defaultValue={defaultUsername} {...usernameField} type="text"
         autoComplete="username" autoCapitalize="none" spellCheck={false} required
-        defaultValue={defaultUsername} disabled={!ready} readOnly={busy} onChange={clearError}
+        disabled={!ready} readOnly={busy}
         aria-describedby={message ? `${id}-error` : undefined} className={inputClass} />
     </div>
     <div className="space-y-2">
       <label htmlFor={`${id}-password`} className="text-kt-sm">비밀번호</label>
-      <input ref={passwordRef} id={`${id}-password`} data-slot="login-password" name="password" type="password"
-        autoComplete="current-password" required disabled={!ready} readOnly={busy} onChange={clearError}
+      <input {...passwordField} ref={(element) => { passwordField.ref(element); passwordRef.current = element; }} id={`${id}-password`} data-slot="login-password" type="password"
+        autoComplete="current-password" required disabled={!ready} readOnly={busy}
         aria-describedby={message ? `${id}-error` : undefined} className={inputClass} />
     </div>
     <LoginError id={`${id}-error`} error={message} />

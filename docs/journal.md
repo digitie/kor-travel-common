@@ -1,3 +1,31 @@
+## 2026-11-12 — Scope2 최종 후보11 동결
+
+- preferred source1752a53·고유1.3.1+kortravel.fix.2·고정1ca0487을 common exact 축과 세 설치 경로에 연결했다. 원본38·NPM/ESM/CJS, 공통 actual engine2에서 정책175·UI101·tokens9·빌드·Doctor80파일0·도구400(399 PASS/1 SKIP)을 확인했다.
+- producera354813에서 UI0.2.0/tokens0.1.1을 한 번 pack했다. C10 대비 정책 JSON 두 파일만 달라 나머지117개 파일이 동일하다. 외부 Scope는 실제 변경이므로 새 packed/browser·소비자 검증을 요구한다.
+- 원 A/B의 C10 Doctor 차단과 Scope1 fieldset 잔여를 당시 판정으로 보존했다. helper5715e94에서 Set/Map으로3경고→0을 확인했고 최종 C11/fix2 입력으로 같은 원 리뷰어 재확인·정확 CI를 수행한다. 기존 지적을 문서만으로 자동 닫지 않는다.
+- scanner1380파일 발견0·정확 예외32/4, 문서831/링크3152오류0이다. 앱·fork/common PR merge와 새 운영 배포는 후속 gate다.
+
+## 2026-11-12 — 후보10 단일 산출물과 원본 FocusScope 연결
+
+- 원본 수정 Scope1.3.1+kortravel.fix.1의 고정31,214bytes·f97c1dd를 exact axis/직접 vendor/root override로 연결했다. 앱의 개별 Radix source import 금지는 유지한다.
+- 모든 도달 artifact 복사본을 검사하는 정책175, 스키마·생성기 full tools400(399 PASS/1 SKIP), 실제 세 설치 경로의 고정 engine·lock snapshot을 통과했다. 공통 root의 패치 엔진 설치 후 UI101/tokens9·빌드/타입도 통과했다.
+- producer55a921b에서 UI/tokens를 한 번 pack했다. 후보9 대비 checker·정책4파일만 달라115파일 byte 동일, Scope는 실제 runtime 변경이므로 새 packed browser/앱 수용을 요구한다. 기존 지도3/CSSfix.4 bytes는 같다.
+- exact447 전체CI 및 gzip 원 A/B closure를 보존했다. 최종C10 원장·새 두 리뷰·CI·소비자·PR머지·새 배포는 후속 gate다. 상세 계보는 [필수 라이브러리](standards/frontend-libraries.md)와 [vendor 출처](../vendor/README.md)를 따른다.
+
+# 2026-11-12 — 후보9 검사기·archive 감사 통합
+
+2c1182e의 모듈 구문/linked workspace 회귀68개와97ccc97의 도구379실행(378 PASS/1 SKIP)·두 정보 유출 검사 발견0을 확인했다. 후보9는 UI/tokens checker만 바꾸고 실행 코드·CSS·metadata117개의 원문을 유지한다. 중앙 단일 원장과 원 리뷰3차 BLOCK/후속 수정 원문을 보존하며 source4 검토·정확 CI·소비자·운영 gate는 남아 있다.
+
+# 2026-11-12 — 최종 공통 후보8 통합
+
+Dialogd29869a와 CSS 정책256d263/47cca0a/633b4b8/00f0aae를 통합 source670a753으로 고정했다. UI101·정책41·tokens9·타입·빌드·lint·예시·Doctor0·정책 생성 검사를 통과했다. 단일 pack6개의 버전·SHA512·대응 source는 frontend-artifacts.json을 따른다. 소비자 재설치와 최종 독립 리뷰·CI·머지·배포 gate는 남아 있다. 앞선 실패와 불변 후보6/7 evidence는 보존했다.
+
+# 2026-11-11 Radix 공통 라이브러리 구현 후보
+
+[T-218](tasks/T-218-radix-library-unification.md)에 따라 UI0.2.0·tokens0.1.1 후보를 구성하고 공유 정책·lock/bytes·소스 재도입 검사를 추가했다. common lint/type/build/UI99/정책21/Doctor0을 확인했으며 소비자·리뷰·배포 gate는 진행 중이다.
+
+중앙 reusable CI는 실행 코드를 정확 커밋에 고정하고 최신 main의 정책 데이터와 단일 산출물 원장을 별도로 읽어 비교한다. --policy/--canonical 외부 정본 누락, 오래된 내장 정책, 개별 Radix 선언/import를 거부하는 회귀를 포함해 정책21개가 통과했다. 독립 재리뷰와 소비자 최종 산출물 갱신은 아직 남아 있다.
+
 ## 2026-10-27 — T-217 병합과 실제 소비자 후보 정산
 
 Common47의 main aa232ad/최종44d7 전체 tree 동일, CI8 SUCCESS 및 J/W 제품·최종 delta PASS를 저장 원장과 Git/GitHub로 대조했다. Transport6913의 실제 UI32 PASS26.014초·SSR script 보류8·인증 cookie·tile40/API10·도메인 쓰기0·정리를 [정산 보고서](reports/2026-10-27-common47-consumer-ui-closure.md)에 기록했다.
@@ -406,7 +434,7 @@ T-319의 공용 `dagster_health`는 proxy SERVING 뒤 실제 `ListRepositoriesRe
 
 [최종 판정](reviews/adversarial/2026-10-05-pinvi-common.md)에 두 독립 code PASS·최초 조건부 원문/closure·SHA와 실제 PinVi N150 live 4PASS를 연결했다. dev.4 cap 미확인 모델·nullable schedule migration·소비자 actual autodiscovery gate를 가이드에 기록했다. UI50/check/build/tarball smoke, 기존337 tool tests·문서 gate PASS. 운영 shared daemon/worker kill/RSS는 NOT_RUN이다. CodeGraph index empty는 manual module/caller trace fallback으로 명시한다. 원본 T-301 checkout은 보존했다. 최종 CI 후 PR #27 merge다.
 
-# kor-travel-common 작업 일지
+## kor-travel-common 작업 일지
 
 이 문서는 작업 재현 정보(기준선·명령·결과·미실행·도구 fallback·소비 저장소 상태)의 역시간순 기록이다([documentation maintenance §4](runbooks/documentation-maintenance.md)). 최신 항목을 위에 추가하고 기존 항목은 사실 오류 correction 외에 수정하지 않는다. 현재 상태와 다음 작업은 [resume](resume.md)가 정본이다.
 

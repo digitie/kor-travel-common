@@ -1,0 +1,63 @@
+{
+  "scope": "공통 라이브러리·지도 원본 동일 원 리뷰어 수정 후 재검토 2차",
+  "createdAt": "2026-11-11T14:05:12.374055+00:00",
+  "repositories": [
+    {
+      "name": "kor-travel-common",
+      "base": "c289b4624c8640eb918cc915803e72ae754e58fb",
+      "head": "8dad71a50f9f8f12f0e3ba1c913a93e404dabfed",
+      "previousReviewHead": "789e6d2e179a055b3cd793fb886083543244089c"
+    },
+    {
+      "name": "maplibre-vworld-react",
+      "base": "9c46c57181d433c91f7e8837c4e4396204e9b583",
+      "head": "9a7a348b02d61969b394c681b024d5851eef836b",
+      "previousReviewHead": "7402214b9d4829f1f73f80ac29f68d22e2809254"
+    }
+  ],
+  "artifacts": {
+    "status": "CANDIDATE_NOT_RELEASED",
+    "candidate": "integration-7-review",
+    "sources": {
+      "common": "5e064808fabd3a54968dd20910eaccd04eba9f38",
+      "maplibre-vworld-react": "9a7a348b02d61969b394c681b024d5851eef836b"
+    },
+    "packages": {
+      "@kor-travel/ui": {
+        "version": "0.2.0",
+        "filename": "kor-travel-ui-0.2.0.tgz",
+        "integrity": "sha512-pS+5hTlV0oR2MjkEjFr1dwoMLWHO7Gr2a9mb7I24/nyRH+t9furJxpijkqUVL6UabeZQ5mGdTZOHfuMVDcTrhg=="
+      },
+      "@kor-travel/tokens": {
+        "version": "0.1.1",
+        "filename": "kor-travel-tokens-0.1.1.tgz",
+        "integrity": "sha512-5eo1J4vMQ4r+sMfRdG1wTe4oDkUanTRhFSNHcEeb19oFcbdNnk8Q155ZzLkIF7s13g6PfOwJ4gzwvTbnDzKj8w=="
+      },
+      "vworld-map-core": {
+        "version": "1.0.1",
+        "filename": "vworld-map-core-1.0.1.tgz",
+        "integrity": "sha512-Djm14Arr7U0r7Sabj6P0V57CdzWIGaJmecklmY1hwrq1QUZJjMUFgkZfGRFalUo6AFzHEwwzOEzbJPMifGhINw=="
+      },
+      "vworld-map-web": {
+        "version": "1.0.3",
+        "filename": "vworld-map-web-1.0.3.tgz",
+        "integrity": "sha512-HPXZcz/wP6tFsCZqlAbansWNICcZPubC+/V7rDWXYTQVlOBLl9cZQ1HSMJd25c2CZoMNreVFTQA0vzkVglkS1w=="
+      },
+      "vworld-map-rn": {
+        "version": "1.0.1",
+        "filename": "vworld-map-rn-1.0.1.tgz",
+        "integrity": "sha512-lgDBasKIEG2ElQ9jnHDB9pA+x04Xge9yzBb1NPPw1auyvlkQvxsq4NfRPIrw1VWiutcGiIefySLiVaZDUkO69Q=="
+      }
+    }
+  },
+  "artifactDirectory": "/home/digitie/dev/common-unification-20261111/artifacts/integration-7-review",
+  "validation": {
+    "common": "UI99 + tokens7 + 정책21 PASS; lint/type/build/examples/Doctor0/SPDX196/links3089 PASS; Python 도구 340PASS/1SKIP/0FAIL. 원격1ea5c2f CI15 PASS, source5e 새CI 실행중.",
+    "c6PackedBrowser": "root node_modules 없이 실제c6 tarball webpack+Turbopack RSC routes 및 상태CSS·키보드·focus 브라우저PASS. c7과c6는 checker단일파일만 다르고 runtime/CSS 전부동일: validation/common-c6-c7-runtime-equivalence.json",
+    "vworld": "9a7 전체type/build/lint(기존warnings별도)/RN21/sourcebrowser19/packedbrowser19/고지packCI 모두PASS"
+  },
+  "limits": [
+    "이 manifest는 common/VWorld 범위다. 소비자와 네이티브CSS 수정 라이브러리의 최종 리뷰·배포 gate를 대신하지 않는다.",
+    "최초 두 리뷰 원문은 수정하지 않았고 P0/P1의 원 리뷰어 재확인 전 완료로 닫지 않는다."
+  ]
+}

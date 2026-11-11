@@ -170,6 +170,11 @@ jobs:
   packages:
     name: packages
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.0-noble@sha256:bc4fbb329a25287ed23e9216c97063646abdd1bf2da669a9895fa3e2078b2302
+      options: --init --ipc=host
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
     timeout-minutes: 15
     defaults:
       run:
@@ -182,6 +187,7 @@ jobs:
           persist-credentials: false
       - name: 검사 source SHA 확인
         run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
           printf '검사 source: `%s`\n' "$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
       - name: Node.js 설치
@@ -192,7 +198,31 @@ jobs:
       - name: npm 고정 버전 설치
         run: npm install -g npm@11.19.1
       - name: workspace 의존성 설치
-        run: npm ci --no-audit --no-fund
+        run: |
+          node packages/ui/smoke/prepare-lock.mjs --css-only
+          npm ci --no-audit --no-fund
+      - name: 사전 설치 Playwright 버전·실행 파일·시스템 의존성 확인
+        run: |
+          node --input-type=module - <<'NODE'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { createRequire } from 'node:module';
+          import { chromium } from '@playwright/test';
+          const require = createRequire(import.meta.url);
+          const expected = require('./frontend-dependencies.json').versions['@playwright/test'];
+          assert.equal(require('@playwright/test/package.json').version, expected);
+          assert.equal(process.env.PLAYWRIGHT_BROWSERS_PATH, '/ms-playwright');
+          const executable = chromium.executablePath();
+          assert.ok(executable.startsWith('/ms-playwright/'), executable);
+          fs.accessSync(executable, fs.constants.X_OK);
+          const browser = await chromium.launch({headless: true});
+          try {
+            console.log('Playwright', expected, 'Chromium', browser.version(), path.resolve(executable));
+          } finally {
+            await browser.close();
+          }
+          NODE
       - name: tokens 패키지 빌드·검사·테스트
         run: |
           npm run lint --if-present --workspace packages/tokens
@@ -217,11 +247,13 @@ jobs:
           trap 'rm -rf "$smoke_dir"' EXIT
           smoke_app="$smoke_dir/packages/ui/smoke/next-app"
           mkdir -p "$smoke_app" "$smoke_dir/test-results/ui-pack"
+          # 준비 단계가 복사한 동일 CSS vendor도 격리된 smoke 트리에 포함한다.
           tar --exclude=node_modules --exclude=.next -C packages/ui/smoke/next-app -cf - . | tar -C "$smoke_app" -xf -
           cp test-results/ui-pack/*.tgz "$smoke_dir/test-results/ui-pack/"
           npm ci --prefix "$smoke_app" --no-audit --no-fund
           npm run build:webpack --prefix "$smoke_app"
           npm run build --prefix "$smoke_app"
+          SMOKE_APP="$smoke_app" npm exec -- playwright test --config packages/ui/smoke/playwright.radix.config.ts
           npm ci --prefix packages/ui/examples/next-app --no-audit --no-fund
           npm run build --prefix packages/ui/examples/next-app
       - name: tarball 설치 스모크

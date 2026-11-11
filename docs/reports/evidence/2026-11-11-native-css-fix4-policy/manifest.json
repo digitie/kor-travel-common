@@ -1,0 +1,15 @@
+{
+  "basePolicy": "256d263e83fdf8a159c200f436e96fe3dacb4416",
+  "version": "1.33.0+nativecss.fix.4",
+  "integrity": "sha512-zDQ03VJE37OlyBrLsRcsEdIVu0T4BXJKDH5y9//To6GlGN2UrKQGERFVAFblkPQ5ZEbhuOp5wpXxGARZNdbQLA==",
+  "tests": {
+    "schema": 8,
+    "policy": 40,
+    "vendor": 2
+  },
+  "logs": {
+    "fix4-common-policy.log": "df97f15d0ac2c642631a8f417ee5863a72320a97921ac5ad34fdc151367420da",
+    "fix4-common-vendor.log": "5d1389717665d1a4d3e6af1fe5911029fbc0b99167bdb3ee7043ef2cce8991a9",
+    "fix4-common-schema.log": "d1737db24da81b3c3a0b18702ce65bfadfb6524254e681f8bc84ee0e82703fbb"
+  }
+}

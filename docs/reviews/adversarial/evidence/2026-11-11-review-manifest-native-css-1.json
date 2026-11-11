@@ -1,0 +1,66 @@
+{
+  "scope": "NativeWind 5 이관을 위한 Lightning CSS / serde-content 원본 수정 독립 리뷰",
+  "createdAt": "2026-11-11T14:20:52.486316+00:00",
+  "repositories": [
+    {
+      "name": "lightningcss-fix",
+      "repository": "digitie/lightningcss",
+      "base": "1d680fa14e9a089c92dc0929f869d6757ae91c30",
+      "head": "8a03050a00a30932fe49d2ca98f5f324a7f938a3",
+      "sourceBuiltAt": "684c528b2d16c581c99cf829f9a4988985488d5f",
+      "pullRequest": "https://github.com/digitie/lightningcss/pull/1",
+      "baseBranch": "release/1.33.0"
+    },
+    {
+      "name": "serde-content-fix",
+      "repository": "digitie/serde-content",
+      "base": "bb5066da57fb0d76a981dbbef04b68f2aff90a3f",
+      "head": "67fe4a9c5b4595433a731b70dbe31412721bea8c",
+      "pullRequest": "https://github.com/digitie/serde-content/pull/1",
+      "baseBranch": "main"
+    }
+  ],
+  "artifact": {
+    "file": "lightningcss-1.33.0+nativecss.fix.3.tgz",
+    "size": 15309655,
+    "integrity": "sha512-Q6DDVLGjtJ2zcOkvV2+bKcTAb8dB+HJXgDYAm9mrGL2Og2HBMCRzMaeOpGB8IgAxu11if506Wm6X3Dd+Rk+T7A==",
+    "sha256": "862366190cfecbfbf770a4ef4ca9807a69f14d656f8ab5c9f64e85c428ee875c",
+    "provenance": {
+      "base": "1d680fa14e9a089c92dc0929f869d6757ae91c30",
+      "revision": "684c528b2d16c581c99cf829f9a4988985488d5f",
+      "target": "x86_64-unknown-linux-gnu + wasm32-unknown-unknown",
+      "version": "1.33.0+nativecss.fix.3",
+      "rustc": "rustc 1.92.0 (ded5c06cf 2025-12-08)",
+      "binarySHA256": "8a38620c1bbf54acfb12f40b3180ce4e8510a5fb952e9173a3b7fe0b676ecbd6",
+      "sourceSHA256": "ef4e34efadd688ae5d626154811d2da0d726cfaa34ef9832cc9712b16c33e7f2",
+      "cargoLockSHA256": "aa5fe01e8cecd9c200eabdf6f3028bc717b1d1959c4e19b61e05ae7152eb55b2",
+      "wasmSHA256": "4c2a5251dac4f47ebdadce39579febee5e12e00a3c892e5719e2a46ffa535a27",
+      "platformPolicy": "Embedded GNU native on Linux x64 glibc >=2.35; bundled patched WASM on other Node hosts, or when LIGHTNINGCSS_FORCE_WASM=1; no stock optional-package fallback."
+    },
+    "tests": {
+      "serde_content": 126,
+      "node_native": 90,
+      "node_wasm": 90,
+      "ir_baseline": "1.30.1",
+      "ir_cases": 8,
+      "app_css_bytes": 14772,
+      "app_classes": 113,
+      "runtime_images": [
+        "node@sha256:6c74791e557ce11fc957704f6d4fe134a7bc8d6f5ca4403205b2966bd488f6b3",
+        "node:22.23.1-alpine"
+      ]
+    }
+  },
+  "handoff": "native-css-fix-handoff.md",
+  "actualEvidence": "artifacts/native-css-fix/",
+  "validation": {
+    "library": "serde-content Rust126; packed GNU native90; packed forcedWASM90; private actual app CSS113classes fullIR8cases equals1.30.1; Node22Bookworm(native+WASM)/Alpine(autoWASM) PASS",
+    "parentHarness": "validation/lightningcss-fixed-pack-synthetic-local.log: 전달pack과대응source/binary/WASM해시+90native/90WASM+공개합성CSS5classes의전체IR8cases+최소재현PASS. 도구는기존consumer.fixture모듈을읽기전용symlink참조(새cleaninstall아님). 최초harnesscwd실패는firstfailurelog별도보존.",
+    "remoteCI": "LightningCSS 새forkPR1의Linux/macOS/Windows actualpack host검증 queued. serde-content forkCI 아직run없음/조사중. NOT_PASS.",
+    "limits": [
+      "실제Pinvi Android/iOS export는Harvey진행중이며본scope와별도",
+      "macOS/Windows/EAS actual결과확인전호환PASS로간주하지않음",
+      "원common source2와다른별도scope, common후속policy는아직미포함"
+    ]
+  }
+}

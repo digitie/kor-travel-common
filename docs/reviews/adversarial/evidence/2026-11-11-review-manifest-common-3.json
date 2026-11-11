@@ -1,0 +1,85 @@
+{
+  "scope": "공통 라이브러리·지도 원본 동일 원 리뷰어 최종 후보8 재검토 3차",
+  "createdAt": "2026-11-11T15:33:34.716774+00:00",
+  "repositories": [
+    {
+      "name": "kor-travel-common",
+      "base": "c289b4624c8640eb918cc915803e72ae754e58fb",
+      "head": "7e3f33e0391990b9312fee513de581e28035aa8b",
+      "previousReviewHead": "8dad71a50f9f8f12f0e3ba1c913a93e404dabfed"
+    },
+    {
+      "name": "maplibre-vworld-react",
+      "base": "9c46c57181d433c91f7e8837c4e4396204e9b583",
+      "head": "9a7a348b02d61969b394c681b024d5851eef836b",
+      "previousReviewHead": "9a7a348b02d61969b394c681b024d5851eef836b"
+    }
+  ],
+  "artifacts": {
+    "status": "CANDIDATE_NOT_RELEASED",
+    "candidate": "integration-8-review",
+    "sources": {
+      "common": "670a753bc17f956f71bdc28385d6241a6e4ee017",
+      "maplibre-vworld-react": "9a7a348b02d61969b394c681b024d5851eef836b",
+      "lightningcss": "748651cbd845971e65c411166ddee101745dab21",
+      "serde-content": "18e53fcf6f8ace093a292891b34fa3411192617d"
+    },
+    "packages": {
+      "@kor-travel/tokens": {
+        "version": "0.1.1",
+        "filename": "kor-travel-tokens-0.1.1.tgz",
+        "integrity": "sha512-juHDU+d/0GtLmylPyx9kDur2GwnzV5izAtRpzfqhxvbMjPlVfrbEanLBcdqC+EdmifO7StrMlcQJso239gv5PA=="
+      },
+      "@kor-travel/ui": {
+        "version": "0.2.0",
+        "filename": "kor-travel-ui-0.2.0.tgz",
+        "integrity": "sha512-RaBKVxmLJi7ZoQZqs28BaTmXzxpHsihV7D/VvR/vnDeqXtOvtiZawAo6K3CtbuZ37daKqMhGCG5hC5p42pI3Ug=="
+      },
+      "lightningcss": {
+        "version": "1.33.0+nativecss.fix.4",
+        "filename": "lightningcss-1.33.0+nativecss.fix.4.tgz",
+        "integrity": "sha512-zDQ03VJE37OlyBrLsRcsEdIVu0T4BXJKDH5y9//To6GlGN2UrKQGERFVAFblkPQ5ZEbhuOp5wpXxGARZNdbQLA=="
+      },
+      "vworld-map-core": {
+        "version": "1.0.1",
+        "filename": "vworld-map-core-1.0.1.tgz",
+        "integrity": "sha512-Djm14Arr7U0r7Sabj6P0V57CdzWIGaJmecklmY1hwrq1QUZJjMUFgkZfGRFalUo6AFzHEwwzOEzbJPMifGhINw=="
+      },
+      "vworld-map-rn": {
+        "version": "1.0.1",
+        "filename": "vworld-map-rn-1.0.1.tgz",
+        "integrity": "sha512-lgDBasKIEG2ElQ9jnHDB9pA+x04Xge9yzBb1NPPw1auyvlkQvxsq4NfRPIrw1VWiutcGiIefySLiVaZDUkO69Q=="
+      },
+      "vworld-map-web": {
+        "version": "1.0.3",
+        "filename": "vworld-map-web-1.0.3.tgz",
+        "integrity": "sha512-HPXZcz/wP6tFsCZqlAbansWNICcZPubC+/V7rDWXYTQVlOBLl9cZQ1HSMJd25c2CZoMNreVFTQA0vzkVglkS1w=="
+      }
+    }
+  },
+  "artifactDirectory": "/home/digitie/dev/common-unification-20261111/artifacts/integration-8-review",
+  "validation": {
+    "common": "Source670a753: UI101+tokens9+policy41 PASS;build,type,lint,examples,Doctor0,policy sync PASS. Python346PASS/1SKIP/0FAIL; docs804/targets3114errors0; plan111errors0. Exact7e3 CI justpushed,notyetaccepted.",
+    "vworld": "Exact9a7 type/build/lint(existingwarningsseparate)/RN21/sourcebrowser19/packedbrowser19/licensepack remoteCI SUCCESS. All3bytesunchanged frompreviousreview.",
+    "nativeCss": "NativeCSS immutablemanifest2 separate, exact748 sourcegate+Linux+Windows CI SUCCESS/macOSqueued. AoriginalfindingFIXED;Breviewpending. Common policy now actuallyrequiresexactfix4andvendorbytesweb/mobile; originalsourcefindingclosureseparate.",
+    "limits": "Source pack built670a753;7e3 adds onlyledger/docs. NewDialog browserd298 workerproof tofollow;exactPRremoteCI includesDialogspec with realpackedbrowser. No consumerfinalsuccess/merge/deploymentclaims."
+  },
+  "limits": [
+    "이 manifest는 common/VWorld 범위다. 소비자와 네이티브CSS 수정 라이브러리의 최종 리뷰·배포 gate를 대신하지 않는다.",
+    "최초 두 리뷰 원문은 수정하지 않았고 P0/P1의 원 리뷰어 재확인 전 완료로 닫지 않는다."
+  ],
+  "evidence": {
+    "common-integrated-build.log": "7cf5e865540e325f77acbfc925fd2692562b40bdfb98a769b988566559c26910",
+    "common-integrated-doctor.log": "e8198f43a46469409f74c01957a718850818eead5643792cbb8496c9ac5865ca",
+    "common-integrated-examples.log": "834f01b15aa3eefd526b4e5b8161728636d77a924a9130654f47b8248aa5a9da",
+    "common-integrated-install.log": "06619c9bba8407d81cd231cae83656c6c2f49da7cfc704fc0345d6dbb0629fda",
+    "common-integrated-links.log": "394aa0b4636d5d8a7d6f10a6dd7f2c5ca40bf81b26ae1fde154f2551aee82ead",
+    "common-integrated-lint.log": "6dee5dff22397f4b15ad73a6ef0d5e1c675a6780151c20322d0c8a0312b857fd",
+    "common-integrated-plan.log": "167ffd44078b01d16db8ef8c292a67057cf37828751f3ad6f47e866d10db4d4f",
+    "common-integrated-policy.log": "936bd53ecb0f47e2f46c3c8d47fae9ec22af3bb58b54c66251e4ebe2bf9f36a5",
+    "common-integrated-python-tools.log": "0e244db3ddd4dcda2501caed9020a07bd86871ec59940f064445badea61f090a",
+    "common-integrated-types.log": "adf86d9757c17686a2bdc8746cc099d618ab32647a34a65a9666d12f2ab399c1",
+    "common-integrated-unit.log": "b8911452d73e14f0086f03418a663a6e692f4c2987be7f2e80dfa6d107c78d47",
+    "common-integrated-vendor.log": "61bb7a48a2c5c68848789ad31300432420e0c0cfe93182a832de3b8de819f386"
+  }
+}

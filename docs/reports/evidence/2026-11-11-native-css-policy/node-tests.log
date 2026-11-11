@@ -1,0 +1,250 @@
+TAP version 13
+# Subtest: 동일 선언·lock·산출물은 통과
+ok 1 - 동일 선언·lock·산출물은 통과
+  ---
+  duration_ms: 257.245641
+  type: 'test'
+  ...
+# Subtest: lock 버전만 달라도 실패
+ok 2 - lock 버전만 달라도 실패
+  ---
+  duration_ms: 234.94148
+  type: 'test'
+  ...
+# Subtest: 같은 버전의 다른 bytes를 거부
+ok 3 - 같은 버전의 다른 bytes를 거부
+  ---
+  duration_ms: 225.617268
+  type: 'test'
+  ...
+# Subtest: Base UI 직접 의존을 거부
+ok 4 - Base UI 직접 의존을 거부
+  ---
+  duration_ms: 225.805229
+  type: 'test'
+  ...
+# Subtest: 네이티브 표 재도입을 거부
+ok 5 - 네이티브 표 재도입을 거부
+  ---
+  duration_ms: 258.513035
+  type: 'test'
+  ...
+# Subtest: 개별 floating 구현을 거부
+ok 6 - 개별 floating 구현을 거부
+  ---
+  duration_ms: 217.556114
+  type: 'test'
+  ...
+# Subtest: 설명 주석의 표 예시는 구현으로 오인하지 않는다
+ok 7 - 설명 주석의 표 예시는 구현으로 오인하지 않는다
+  ---
+  duration_ms: 230.180541
+  type: 'test'
+  ...
+# Subtest: 모바일 workspace의 Tailwind4가 root의 다른 버전보다 우선한다
+ok 8 - 모바일 workspace의 Tailwind4가 root의 다른 버전보다 우선한다
+  ---
+  duration_ms: 219.757548
+  type: 'test'
+  ...
+# Subtest: 중앙 원장과 같은 bytes는 통과
+ok 9 - 중앙 원장과 같은 bytes는 통과
+  ---
+  duration_ms: 206.354116
+  type: 'test'
+  ...
+# Subtest: 앱 파일·원장·lock을 함께 바꿔도 중앙 정본 차이는 거부
+ok 10 - 앱 파일·원장·lock을 함께 바꿔도 중앙 정본 차이는 거부
+  ---
+  duration_ms: 206.687983
+  type: 'test'
+  ...
+# Subtest: 운영 선언을 개발 선언으로 덮어쓰는 중복은 거부
+ok 11 - 운영 선언을 개발 선언으로 덮어쓰는 중복은 거부
+  ---
+  duration_ms: 191.054803
+  type: 'test'
+  ...
+# Subtest: 전이 의존성의 다른 React 설치는 거부
+ok 12 - 전이 의존성의 다른 React 설치는 거부
+  ---
+  duration_ms: 208.036586
+  type: 'test'
+  ...
+# Subtest: 동일 버전도 별도 물리 React 인스턴스면 거부
+ok 13 - 동일 버전도 별도 물리 React 인스턴스면 거부
+  ---
+  duration_ms: 208.908433
+  type: 'test'
+  ...
+# Subtest: 별도 workspace와 독립 개발 도구의 React는 런타임 판정 밖
+ok 14 - 별도 workspace와 독립 개발 도구의 React는 런타임 판정 밖
+  ---
+  duration_ms: 203.715486
+  type: 'test'
+  ...
+# Subtest: 모바일 React Native wildcard와 lock 누락은 거부
+ok 15 - 모바일 React Native wildcard와 lock 누락은 거부
+  ---
+  duration_ms: 205.045773
+  type: 'test'
+  ...
+# Subtest: 모바일에 DOM 공통 UI를 추가하면 거부
+ok 16 - 모바일에 DOM 공통 UI를 추가하면 거부
+  ---
+  duration_ms: 226.97775
+  type: 'test'
+  ...
+# Subtest: 개별 Radix 직접 선언은 공통 경로로 이관해야 한다
+ok 17 - 개별 Radix 직접 선언은 공통 경로로 이관해야 한다
+  ---
+  duration_ms: 228.338546
+  type: 'test'
+  ...
+# Subtest: 개별 Radix 전이 경로 직접 import도 거부
+ok 18 - 개별 Radix 전이 경로 직접 import도 거부
+  ---
+  duration_ms: 213.64
+  type: 'test'
+  ...
+# Subtest: 내장 정책이 오래되어도 중앙 최신 정책을 대조한다
+ok 19 - 내장 정책이 오래되어도 중앙 최신 정책을 대조한다
+  ---
+  duration_ms: 218.946785
+  type: 'test'
+  ...
+# Subtest: 중앙 CI는 정책과 산출물의 외부 정본 입력을 요구
+ok 20 - 중앙 CI는 정책과 산출물의 외부 정본 입력을 요구
+  ---
+  duration_ms: 204.701042
+  type: 'test'
+  ...
+# Subtest: 중앙 CI의 동일 최신 정책·산출물은 통과
+ok 21 - 중앙 CI의 동일 최신 정책·산출물은 통과
+  ---
+  duration_ms: 188.676088
+  type: 'test'
+  ...
+# Subtest: web의 Lightning CSS는 개발 의존성으로 허용
+ok 22 - web의 Lightning CSS는 개발 의존성으로 허용
+  ---
+  duration_ms: 199.894045
+  type: 'test'
+  ...
+# Subtest: mobile의 Lightning CSS는 개발 의존성으로 허용
+ok 23 - mobile의 Lightning CSS는 개발 의존성으로 허용
+  ---
+  duration_ms: 201.02008
+  type: 'test'
+  ...
+# Subtest: Lightning CSS build metadata가 다른 lock 버전은 거부
+ok 24 - Lightning CSS build metadata가 다른 lock 버전은 거부
+  ---
+  duration_ms: 192.921141
+  type: 'test'
+  ...
+# Subtest: Lightning CSS registry 선언으로 vendor를 우회하면 거부
+ok 25 - Lightning CSS registry 선언으로 vendor를 우회하면 거부
+  ---
+  duration_ms: 203.893596
+  type: 'test'
+  ...
+# Subtest: Lightning CSS의 파일·원장·lock을 함께 바꿔도 중앙 bytes가 다르면 거부
+ok 26 - Lightning CSS의 파일·원장·lock을 함께 바꿔도 중앙 bytes가 다르면 거부
+  ---
+  duration_ms: 211.16627
+  type: 'test'
+  ...
+# Subtest: 개발 도구 아래 Lightning CSS의 다른 version는 거부
+ok 27 - 개발 도구 아래 Lightning CSS의 다른 version는 거부
+  ---
+  duration_ms: 208.849282
+  type: 'test'
+  ...
+# Subtest: 개발 도구 아래 Lightning CSS의 다른 integrity는 거부
+ok 28 - 개발 도구 아래 Lightning CSS의 다른 integrity는 거부
+  ---
+  duration_ms: 192.998198
+  type: 'test'
+  ...
+# Subtest: 연결되지 않은 다른 workspace의 CSS는 현재 앱의 판정 밖
+ok 29 - 연결되지 않은 다른 workspace의 CSS는 현재 앱의 판정 밖
+  ---
+  duration_ms: 206.421895
+  type: 'test'
+  ...
+# Subtest: root가 workspace 안의 공통 vendor 파일을 직접 참조해도 허용
+ok 30 - root가 workspace 안의 공통 vendor 파일을 직접 참조해도 허용
+  ---
+  duration_ms: 200.102996
+  type: 'test'
+  ...
+# Subtest: 모바일의 형제 workspace vendor 상대 경로를 허용
+ok 31 - 모바일의 형제 workspace vendor 상대 경로를 허용
+  ---
+  duration_ms: 228.740623
+  type: 'test'
+  ...
+# Subtest: lock 루트 밖의 vendor 참조는 거부
+ok 32 - lock 루트 밖의 vendor 참조는 거부
+  ---
+  duration_ms: 223.750589
+  type: 'test'
+  ...
+# Subtest: 절대 vendor 경로는 같은 파일이어도 거부
+ok 33 - 절대 vendor 경로는 같은 파일이어도 거부
+  ---
+  duration_ms: 218.530733
+  type: 'test'
+  ...
+# Subtest: vendor symlink가 lock 루트를 벗어나면 거부
+ok 34 - vendor symlink가 lock 루트를 벗어나면 거부
+  ---
+  duration_ms: 239.777919
+  type: 'test'
+  ...
+# Subtest: 루트 밖 선언이 symlink로 안으로 돌아와도 비이식 경로이므로 거부
+ok 35 - 루트 밖 선언이 symlink로 안으로 돌아와도 비이식 경로이므로 거부
+  ---
+  duration_ms: 216.98027
+  type: 'test'
+  ...
+# Subtest: CSS 준비는 두 Next 경로에 동일 bytes를 복사하고 고정 lock을 바꾸지 않는다
+ok 36 - CSS 준비는 두 Next 경로에 동일 bytes를 복사하고 고정 lock을 바꾸지 않는다
+  ---
+  duration_ms: 42.248376
+  type: 'test'
+  ...
+# Subtest: 기본 준비는 common 개발 pack 해시만 갱신하고 CSS 정본은 유지
+ok 37 - 기본 준비는 common 개발 pack 해시만 갱신하고 CSS 정본은 유지
+  ---
+  duration_ms: 43.019477
+  type: 'test'
+  ...
+# Subtest: root CSS vendor 재포장은 복사 전에 거부
+ok 38 - root CSS vendor 재포장은 복사 전에 거부
+  ---
+  duration_ms: 43.2383
+  type: 'test'
+  ...
+# Subtest: 별도 Next lock의 중첩 stock CSS는 거부
+ok 39 - 별도 Next lock의 중첩 stock CSS는 거부
+  ---
+  duration_ms: 43.749751
+  type: 'test'
+  ...
+# Subtest: 고정 CSS lock integrity를 원본 bytes로 조용히 갱신하지 않는다
+ok 40 - 고정 CSS lock integrity를 원본 bytes로 조용히 갱신하지 않는다
+  ---
+  duration_ms: 42.584299
+  type: 'test'
+  ...
+1..40
+# tests 40
+# suites 0
+# pass 40
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 7625.820555

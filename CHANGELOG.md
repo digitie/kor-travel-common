@@ -1,3 +1,44 @@
+## 0.2.0 구현 후보 — 2026-11-11
+
+### Breaking
+
+공통 UI의 primitive 엔진을 shadcn/ui Radix로 바꾸고 TanStack9 VirtualTable을 제공한다. Base UI render 합성은 Radix asChild로 이관한다. 공통 표는 가상화 모드에도 의미 있는 table 구조와 ARIA를 유지한다. 기존 Geo div-grid 마크업에 의존한 선택자는 table 계약으로 이관하며 서버 정렬·클라이언트 정렬 의미와 cell 인스턴스 수명을 보존한다. 토큰0.1.1과 정확 React19.3.1을 소비한다.
+
+### 변경
+
+폼·상태·글꼴 공통 경로와 선언·workspace lock·산출물 무결성 검사기를 추가했다. 현재는 소비자 검증과 독립 리뷰 전 후보이며 릴리스·배포 완료가 아니다.
+
+### Fixed
+
+- 긴 Dialog·AlertDialog는 viewport에서 상하 여백을 확보하고 내부에서 스크롤한다.
+  끝의 생성·이동·승인 버튼과 상단 닫기에 접근하고, Radix 포털·포커스 복원을 유지한다.
+- DialogContent·AlertDialogContent의 overlayProps는 내부 단일 Overlay에 소비자의
+  ref·이벤트·className·testid를 전달한다. unstyled(기본 false)는 Content와 내부 Overlay의
+  기본 CSS 레시피만 생략하며 Radix 모달·초점·해제 동작과 슬롯은 유지한다.
+
+### 이관
+
+기존 관리자 화면의 별도 viewport 높이 제한은 공통 기본값으로 대체할 수 있다.
+public center/sheet처럼 기존 표현을 소유하는 어댑터는 unstyled와 className/overlayProps로
+배치·배경·폭·본문 스크롤을 정하고, 취소/진행 중 정책은 기존 Radix 이벤트에서 유지한다.
+기본 md의 최대384px을 유지하고, 화면이 좁으면 양옆16px 여백 안으로 줄어든다. sm/2xl의 누락된 최대 폭은
+기존 폭 체계의320px/1280px로 연결하고, lg/xl/full도 viewport 양옆16px 여백을 보존한다.
+소비자 className의 일반·반응형 최대 폭은 마지막에 적용한다.
+
+### 정책 우회 회귀 수정
+
+정적 재export·타입 참조·리터럴 지연 import/require와 확장 모듈 소스에도 같은 금지 경로 계약을 적용한다. 도달한 linked workspace의 개발 CSS compiler도 버전·bytes를 검사하며 무관한 workspace와 registry 자체의 개발 목록은 섞지 않는다. 기존 실패11개와 추가 확장자 실패4개를 재현하고 정책68개를 통과했다. UI/CSS 실행 파일은 이 수정에서 바뀌지 않는다.
+
+### CSS 빌드 정책 후속 후보
+
+Lightning CSS의 원본 수정 단일 산출물을 웹·모바일의 개발 의존성으로 고정한다. exact SemVer build metadata, 공유 vendor 상대 경로, 개발 그래프의 중첩 bytes, root·Next smoke/example의 lock 및 CI 복사 경로를 함께 검사한다. [정책](docs/standards/frontend-libraries.md)과 [동봉 고지](vendor/README.md)를 따른다. 기존 UI/tokens 등 산출물 재생성과 소비자 반영은 부모 통합 단계다.
+
+### 원본 FocusScope와 전체 전이 산출물 고정
+
+초기 패널의 Shift+Tab 역진입은 원본 Radix 수정1.3.1+kortravel.fix.2의 단일 MIT 배포물로 연결한다. 웹은 file 직접 의존성과 root override로 같은 엔진을 공급하고 앱 source의 개별 Radix import 금지는 유지한다. patchedRadixPackages를 exact 축·artifact에 연결하고 생성 전에 스키마를 검증한다.
+
+루트뿐 아니라 도달한 런타임·빌드·linked workspace 개발 그래프의 모든 공통 artifact 복사본에 동일 version/integrity를 요구한다. 정책175개와 1차 원본 Scope26개·source browser9개에 이어2차 disabled-fieldset·legend 원본38개와 실제 NPM 버전/ESM/CJS를 확인했다. 1차 결과를2차 packed browser 성공으로 합산하지 않는다. 최종 공통 packed browser·소비자·독립 리뷰·CI·배포는 해당 입력에서 별도 검증한다. UI/tokens는 미출시0.2.0/0.1.1의 최종 후보를 한 번 pack하며 출시된 같은 버전을 다른 bytes로 재발행하지 않는다.
+
 ## 2026-10-25 — 남은 높이 지도 작업면 후보
 
 UI dev.8에 opt-in MapWorkspace·MapFilterPanel·MapStage와 상세 header/접기를 추가했다. 기존 dev.7 기본값과 스타일은 유지한다. [계약](docs/standards/map-controls.md).
@@ -28,6 +69,8 @@ UI dev.8에 opt-in MapWorkspace·MapFilterPanel·MapStage와 상세 header/접�
 ### ui
 
 #### Fixed
+
+- TableRow의 색상 전환에서 outline을 제외해 포커스 표시에 전환 지연이 적용되지 않게 한다. 고지의 shadcn CSS 동봉 설명을 실제 상태와 맞춘다. 실제 브라우저 delta 판정은 독립 리뷰에서 확인한다.
 
 - 개발 후보 dev.9의 LoginForm은 SSR·초기 hydration 중 입력과 submit을 native disabled로 닫는다. client handler 준비 후 기존 비동기 pending 포커스·오류·재시도 계약을 유지한다. 공개 props·슬롯·인증 정책은 바뀌지 않는다. [T-217](docs/tasks/T-217-login-hydration-readiness.md).
 

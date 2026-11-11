@@ -1,0 +1,114 @@
+{
+  "createdAt": "2026-11-11T17:26:00.432220+00:00",
+  "scope": "최종 소비자7repo의 구현·의존성·전이설치·회귀·실제 적용. 독립A frontend/accessibility, 독립B package/platform/security/release. 서로의 raw/verdict 참조 금지. docs/reviews와 타 reviewer raw는 source review에서 제외. 각자 source와 자체 probe로 검증. 부모 선행 foundation 리뷰를 앱 승인으로 확대하지 말 것.",
+  "repositories": {
+    "kor-travel-geo": {
+      "root": "/home/digitie/dev/common-unification-20261111/kor-travel-geo",
+      "base": "eab5f7a7a7f495b32ebffdf201d6326c3ff0034d",
+      "head": "a193fd1762ab7dd1058bf5b85ec2d7c96a1368d1",
+      "workingStatusAtFreeze": []
+    },
+    "kor-travel-map": {
+      "root": "/home/digitie/dev/common-unification-20261111/kor-travel-map",
+      "base": "32668d003ea6a259468e03970bd167359c19ecdb",
+      "head": "925c48c74d46fa9dbe0de53acc6a1cd60ac64f1a",
+      "workingStatusAtFreeze": []
+    },
+    "kor-travel-weather": {
+      "root": "/home/digitie/dev/common-unification-20261111/kor-travel-weather",
+      "base": "b55857f7e40fc4f649e65a57172beafda4af8b62",
+      "head": "d03c1dcbcda0f9f36fb1f9104ca60544d9e8845a",
+      "workingStatusAtFreeze": []
+    },
+    "kor-travel-concierge": {
+      "root": "/home/digitie/dev/common-unification-20261111/kor-travel-concierge",
+      "base": "4438328704be15592c47281cd19b525e91567767",
+      "head": "bcfc1b80b78a47319ddcf4918698f19331fb8206",
+      "workingStatusAtFreeze": []
+    },
+    "kor-travel-docker-manager": {
+      "root": "/home/digitie/dev/common-unification-20261111/kor-travel-docker-manager",
+      "base": "351e15b4d518daca48e83d2436fc8f1bdf39551c",
+      "head": "4f1876b6a03b7c4f326653a4773fe724fae68995",
+      "workingStatusAtFreeze": []
+    },
+    "pinvi": {
+      "root": "/home/digitie/dev/common-unification-20261111/pinvi",
+      "base": "d42ac95300749df955ce9e2bb63ea62eba36da09",
+      "head": "ada425db9deead43a9416d6c761c3fffadd974c1",
+      "workingStatusAtFreeze": []
+    },
+    "kor-travel-transport": {
+      "root": "/home/digitie/dev/common-unification-20261111/kor-travel-transport",
+      "base": "59e1d8213c09a82a4ed9cc4396a6414ef0332b9c",
+      "head": "b327e2a7a2a0389fe95c8396e1dd7334330f490a",
+      "workingStatusAtFreeze": []
+    }
+  },
+  "common": {
+    "head": "d1fe0a34ed720e4511a0612265e949632623a8dd",
+    "runtimeArtifactSource": "2c1182e765bb2bc53e01e0962cf2a73683891e1d",
+    "scannerFix": "f8643d56bd8ce4cc7ff3d730b31173a8583593a4",
+    "canonical": "artifacts/integration-9-review/common-artifacts.json",
+    "runtimeEquivalence": "validation/common-c8-c9-runtime-equivalence.json",
+    "uiRuntimeUnchangedSinceC8": true,
+    "remainingCommonGate": "원A gzip closure·publication copy·정확새CI·PR49 merge"
+  },
+  "mapSource": {
+    "reviewed": "9a7a348b02d61969b394c681b024d5851eef836b",
+    "merged": "ae1e209967b3be7a3918f44e4df278add9f1376c",
+    "treeSame": true
+  },
+  "cssSource": {
+    "reviewed": "35fc16b023a9cfb75bad7a311f37780c24961724",
+    "merged": "f24bb66be48ab39c856107f0ff9698a1d5bf1304",
+    "treeSame": true,
+    "pack": "1.33.0+nativecss.fix.4",
+    "builtRust": "684c528b2d16c581c99cf829f9a4988985488d5f",
+    "archive": "1e94372a6da4a55eac4a6dc3ff9cdeec103e8ac1"
+  },
+  "notes": [
+    "모든HEAD immutable. 이후코드변경시별도delta요청. Pinvi최종검증/인계중이며 HEAD ada425d의 중앙workflow 포함 실제status를 위 repository에 기록했다. 제품코드는 f631334이며 이후workflow/docs-onlydelta별도확인요청.",
+    "c9 UI/tokens94+25파일중checker2만변경;runtime117bytesidentical.각app실제c8runtime수용과c9checker/lock/guard를구분. QA이미지≠운영배포.",
+    "공통main정책데이터아직없어서consumer중앙CI실패는foundationmerge후재실행. 다른실패는개별조사.",
+    "리뷰원문root/review-A-consumers-final-1.md 및review-B-consumers-final-1.md. finding은구체trigger/영향/위치/repro/우선순위, 직접실행과인계증거/NOT_RUN구분."
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/integration-9-review/lightningcss-1.33.0+nativecss.fix.4.tgz",
+      "sha256": "12c8326428a56e38231f7b5b376df0c6882e3492da794f3499269628edcaccf0"
+    },
+    {
+      "path": "artifacts/integration-9-review/vworld-map-rn-1.0.1.tgz",
+      "sha256": "352307615edad047cc100cff6a39c625e778f77434b48475c9930e25ca7b6404"
+    },
+    {
+      "path": "artifacts/integration-9-review/vworld-map-core-1.0.1.tgz",
+      "sha256": "36d3ba16a3ba65f7a460db6027c07e29821f2795b15a526413949210f0ce92b6"
+    },
+    {
+      "path": "artifacts/integration-9-review/kor-travel-ui-0.2.0.tgz",
+      "sha256": "8f63ca4f88da6e5d6637c0d98bcf7d86822376d592bf1a7ffe42f7df3451521d"
+    },
+    {
+      "path": "artifacts/integration-9-review/kor-travel-tokens-0.1.1.tgz",
+      "sha256": "b16ca6c1843af26b255c3f5889d2e798600719e394112838dbbbb0b709406705"
+    },
+    {
+      "path": "artifacts/integration-9-review/vworld-map-web-1.0.3.tgz",
+      "sha256": "1ab9af8794979a5a19e5ac635cd04a9e87b9847058eaf4e9df743143b8ad4104"
+    }
+  ],
+  "evidence": [
+    "validation/geo-c9-20261112/HANDOFF.md",
+    "AGENT-HANDOFF-codex-map-weather.md",
+    "AGENT-HANDOFF-concierge-dedicated.md",
+    "AGENT-HANDOFF-docker-manager-transport.md",
+    "kor-travel-transport/AGENT-HANDOFF-transport-doctor-20261111.md",
+    "validation/weather-final-c9-20261112",
+    "validation/manager-c9-final-20261112",
+    "validation/map",
+    "validation/frontend-library-comparison-c9.json",
+    "validation/map-package-adoption-20261112.json"
+  ]
+}

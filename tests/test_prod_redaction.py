@@ -2,7 +2,10 @@
 # SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 """주소 guard의 대역·예약 호스트·조사 파일 검사를 검증한다."""
 
-from test_scan_secrets import RepositoryCase, ROOT
+import hashlib
+import json
+import tarfile
+from test_scan_secrets import RepositoryCase, ROOT, archive_bytes, wasm_bytes, fixture_policy
 
 
 SCRIPT = ROOT / "tools/check_prod_redaction.py"
@@ -63,3 +66,74 @@ class ProdRedactionTests(RepositoryCase):
                 self.assertEqual(result.returncode, 2)
                 self.assertNotIn(marker, result.stdout + result.stderr)
             path.unlink()
+
+
+class ArchiveProdRedactionTests(RepositoryCase):
+    def test_compressed_text_and_native_ascii_addresses_are_detected_privately(self):
+        address = "192." + "168.7.9"
+        for name, content in (("source.txt", ("연결 " + address).encode()),
+                              ("engine.wasm", wasm_bytes(b"\0" + address.encode() + b"\0"))):
+            nested = archive_bytes([(name, content)])
+            self.write("vendor/lib.tgz", archive_bytes([("package/source.tar.gz", nested)]))
+            result = self.run_scan("--all", script=SCRIPT)
+            self.assertEqual(result.returncode, 1, result.stdout)
+            self.assertNotIn(address, result.stdout + result.stderr)
+            self.assertIn("PRIVATE-IPV4", result.stdout)
+            if name.endswith(".wasm"):
+                self.assertIn('"byte":', result.stdout)
+
+    def test_production_member_name_is_never_disclosed(self):
+        marker = "192." + "168.7.9"
+        self.write("vendor/lib.tgz", archive_bytes([("package/" + marker + "/file.txt", "safe")]))
+        result = self.run_scan(script=SCRIPT)
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn(marker, result.stdout + result.stderr)
+
+    def test_invalid_archive_does_not_disclose_native_string_or_traceback(self):
+        marker = "192." + "168.7.9"
+        self.write("vendor/lib.tgz", b"\x1f\x8b" + marker.encode())
+        result = self.run_scan(script=SCRIPT)
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn(marker, result.stdout + result.stderr)
+        self.assertNotIn("Traceback", result.stdout + result.stderr)
+
+    def test_plain_unknown_binary_remains_failure(self):
+        self.write("unknown.data", b"\xff\xfe")
+        self.assertEqual(self.run_scan(script=SCRIPT).returncode, 2)
+
+
+class ArchiveBinaryAllowlistTests(RepositoryCase):
+    def configure(self, body):
+        self.write("vendor/lib.tgz", archive_bytes([("engine.wasm", body)]))
+        record = {"path": "vendor/lib.tgz!/engine.wasm", "rules": ["INTERNAL-HOST"],
+                  "sha256": hashlib.sha256(body).hexdigest(), "reason": "공개 compiler 상수의 고정 bytes"}
+        self.write(".prod-redaction-patterns", fixture_policy(".prod-redaction-patterns") + "\n[[allowlist]]\n" +
+                   "\n".join(key + "=" + json.dumps(value, ensure_ascii=False) for key, value in record.items()) + "\n")
+
+    def test_binary_digest_bound_exception_is_rule_specific(self):
+        host = "compiler." + "local"
+        body = wasm_bytes(b"\0" + host.encode() + b"\0")
+        self.configure(body)
+        self.assertEqual(self.run_scan(script=SCRIPT).returncode, 0)
+        address = "192." + "168.7.9"
+        body = wasm_bytes(b"\0" + host.encode() + b"\0" + address.encode() + b"\0")
+        self.configure(body)
+        result = self.run_scan(script=SCRIPT)
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("PRIVATE-IPV4", result.stdout)
+        self.assertNotIn(host, result.stdout + result.stderr)
+        self.assertNotIn(address, result.stdout + result.stderr)
+
+    def test_binary_change_and_same_rule_archive_metadata_are_not_exempt(self):
+        host = "compiler." + "local"
+        body = wasm_bytes(b"\0" + host.encode() + b"\0")
+        self.configure(body)
+        self.write("vendor/lib.tgz", archive_bytes([("engine.wasm", wasm_bytes(b"changed"))]))
+        self.assertEqual(self.run_scan(script=SCRIPT).returncode, 2)
+        info = tarfile.TarInfo("engine.wasm")
+        extra = "metadata." + "local"
+        info.pax_headers = {"comment": extra}
+        self.write("vendor/lib.tgz", archive_bytes([(info, body)]))
+        result = self.run_scan(script=SCRIPT)
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertNotIn(extra, result.stdout + result.stderr)

@@ -5,6 +5,7 @@
 export function sanitizeLocalPath(value: string | null | undefined): string {
   if (!value || !value.startsWith("/") || value.startsWith("//")) return "/";
   // 중첩 인코딩은 소비자 라우터의 추가 디코딩 여부와 무관하게 차단한다.
+  // eslint-disable-next-line no-control-regex -- 리다이렉트 입력의 제어문자를 의도적으로 차단한다.
   if (/[\\\u0000-\u0020\u007f]|%(?:2f|5c|0[0-9a-f]|1[0-9a-f]|20|7f|25)/i.test(value)) return "/";
   try {
     const parsed = new URL(value, "https://local.invalid");
