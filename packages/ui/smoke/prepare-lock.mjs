@@ -29,15 +29,24 @@ const patched = Object.hasOwn(registry.frontendPolicy ?? {}, "patchedRadixPackag
 assert.ok(Array.isArray(patched) && patched.every(name => typeof name === "string"
   && /^@radix-ui\/react-[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name) && name.trim() === name)
   && new Set(patched).size === patched.length, "패치 Radix 목록 오류");
+const artifactPackages = new Set(registry.frontendPolicy?.artifactPackages ?? []);
+const managedPackages = new Set(registry.frontendPolicy?.packages ?? []);
+const npmAxesByPackage = new Map();
+for (const [key, axis] of Object.entries(registry.axes)) {
+  if (axis.ecosystem !== "npm") continue;
+  for (const name of axis.packages ?? [key]) {
+    const axes = npmAxesByPackage.get(name) ?? [];
+    axes.push(axis);
+    npmAxesByPackage.set(name, axes);
+  }
+}
 for (const name of patched) {
-  assert.ok(registry.frontendPolicy.artifactPackages?.includes(name)
-    && registry.frontendPolicy.packages?.includes(name), "패치 Radix 정책 등록 불일치");
-  const axes = Object.entries(registry.axes).filter(([key, axis]) =>
-    axis.ecosystem === "npm" && (axis.packages ?? [key]).includes(name));
-  assert.ok(axes.length === 1 && axes[0][1].checked === false
-    && axes[0][1].recommended == null && typeof axes[0][1].exact === "string"
-    && axes[0][1].exact.trim(), "패치 Radix 정확 관리 축·버전 불일치");
-  engines.push(fixedEngine(name, axes[0][1].exact));
+  assert.ok(artifactPackages.has(name) && managedPackages.has(name), "패치 Radix 정책 등록 불일치");
+  const axes = npmAxesByPackage.get(name) ?? [];
+  assert.ok(axes.length === 1 && axes[0].checked === false
+    && axes[0].recommended == null && typeof axes[0].exact === "string"
+    && axes[0].exact.trim(), "패치 Radix 정확 관리 축·버전 불일치");
+  engines.push(fixedEngine(name, axes[0].exact));
 }
 
 // 모든 원본·선언·lock을 먼저 검증한다. 실패하면 어떤 대상의 vendor나 pin도 변경하지 않는다.
