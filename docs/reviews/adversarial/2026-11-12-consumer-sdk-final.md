@@ -95,6 +95,12 @@ PR186의 기존 두 리뷰어는 source2·helper3·최종 실행4 모두 각자 
 
 이는 운영 사실 갱신이며 이 출판 후보의 원 A/B 검토·정확 CI·PR50 머지는 별도 gate다. T-218은 IN_PROGRESS, Map 추가 소스·빌드·이미지·배포는 사용자/Claude 별도 범위, native 실기기/EAS/스토어는 NOT_RUN이다. 다음 순서는 Common50·Geo 단일 MD 마감 → Transport 남은 PR·빌드 체계 → 전체 프로젝트 빌드/CI/테스트 일관화 → CI 실행 순서 최적화(마지막)다. 라이브러리 버전·산출물 bytes·규범·CI·config·scanner 예외는 이번 사실 갱신으로 변경하지 않는다.
 
+### 입력5 최종 사실·출처 검토 정산
+
+정확37a264b의14파일을 기존 원 A/B가 같은 불변 입력으로 독립 검토해 두 PASS·신규0으로 판정했다. [원문·입력·정확 CI6개](evidence/2026-11-12-common-final-docs5-originals.tar.gz)와 [전체/member SHA256](evidence/2026-11-12-common-final-docs5-closure-receipts.json)에 당시 CI pending 문장을 포함해 bytes 그대로 보존한다. 이후 정확37a의 frontend43231784529·python-package43231784453·docs43231784588 및9개 job 모두 attempt1 SUCCESS를 확인했다. 문서 단위는 Ubuntu397 PASS/3 SKIP, Windows398 PASS/2 SKIP이며 로컬399 PASS/1 SKIP과 구분한다. Python recovery3.11/3.13 성공을 전체 Python 기능 시험으로 확대하지 않는다.
+
+이 추가는 원문·disposition·색인 closure artifact이며 규범·운영 사실·산출물을 다시 바꾸지 않는다. 최종 closure head의 정확 CI 확인과 PR50 머지는 별도 마감 gate다.
+
 ### 이전47a 운영 수용 스냅샷
 
 [공개 배포 정산](evidence/2026-11-12-frontend-deployment-receipt.json)의 현재 수용 앱은 Manager·Concierge·Pinvi·Weather·Geo·Transport 6개다. Transport 공개936/image3262는 기존 단계별13개·9세션 결과이며 단일 전체 실행으로 확대하지 않는다. 최종 관리자 [PR183](https://github.com/digitie/kor-travel-transport/pull/183)의 실제 merge47a4719a/tree510888aa로 만든 ARM64 image3f2073의 canonical source907·COPY296·공통6패키지263·compiled32·OCI/default release를 동결 증거로 확인했다. 최초 collector 변수 shadow 실패를 남긴 채 같은 이미지 strict readonly r2가 통과했으며 이를 재빌드·retag로 대체하지 않았다.

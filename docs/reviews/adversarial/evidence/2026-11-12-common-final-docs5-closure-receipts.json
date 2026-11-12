@@ -1,0 +1,48 @@
+{
+  "archive": "2026-11-12-common-final-docs5-originals.tar.gz",
+  "archiveBytes": 15366,
+  "archiveSha256": "14b297aa6168b6a92c39cc64dbc6c9a5d19c3408fee7ebbec3f4805635bfea0e",
+  "members": [
+    {
+      "member": "review-A-common-final-docs-5.md",
+      "bytes": 9445,
+      "sha256": "fc70b4f11bdd72800f9c971a2b8c5f5870742db9b64e3e1e7063921b78e2a36d"
+    },
+    {
+      "member": "review-B-common-final-docs-5.md",
+      "bytes": 8080,
+      "sha256": "6ca5810b6786f66ce5b33887d8c20a6b3cf03a8da15d988e43d43e7d14702ed8"
+    },
+    {
+      "member": "review-manifest-common-final-docs-5.json",
+      "bytes": 4410,
+      "sha256": "50f3faf1904d5a08bf0285715dd489ac6aa497c1dc2c6d93f7e8e59a460c22f2"
+    },
+    {
+      "member": "head37a-exact-CI-receipt.json",
+      "bytes": 1151,
+      "sha256": "d855ab96b19b43ec0782b90fc2c453ee4d7030e1c3897c236e2b9ca9c2aad326"
+    },
+    {
+      "member": "head37a-nine-job-raw-log-index.json",
+      "bytes": 1857,
+      "sha256": "70d11d9972961d8e7f9c0267d2a76e53076535faed9234501006dd8f58f43242"
+    },
+    {
+      "member": "head37a-all-success-API.json",
+      "bytes": 82052,
+      "sha256": "064874073353f0c0ba8524c263e09640775d93cc09a98ecf8267730867ebed16"
+    }
+  ],
+  "candidate": "37a264b34b0a9ed4189f62a271722dbdc6b8235a",
+  "sourceTree": "1af715361dec570135adeac25e39f6b4a5d759f7",
+  "originalReviewers": {
+    "A": "PASS/new0",
+    "B": "PASS/new0"
+  },
+  "rawPendingObservationsRetained": true,
+  "candidateExactCI": "3workflows9jobsSUCCESS_attempt1",
+  "finalClosureHeadExactCI": "REQUIRED_BEFORE_MERGE_NOT_CLAIMED_BY_THIS_ARCHIVE",
+  "libraryPayloadRulesChanged": false,
+  "closureArtifactOnly": true
+}
