@@ -1,3 +1,12 @@
+## 2026-11-13 — 공식 INI·shell 경계·기본 registry 후보3
+
+A2/B2의 INI 인용 key·section·전역 shadow, shell 단일 & 및 alias 기본 registry 반례를
+기존 helper에서 62 PASS/11 FAIL로 보존했다. 수기 INI 해석은 제거하고 npm12가 사용하는
+공식 ini의 root private 정확 dependency만 승인된 예외로 추가한다. canonical lock-only 생성과
+공식 SRI를 대조하며 기존 lock 항목·public C11/소비자 graph는 보존한다. Node 내장 runner도
+해당 설치 dependency가 필요하다. e1d0/62/CI·원 두 BLOCK을 유지하며 후보3의 실제 결과는
+별도 receipt와 원 reviewer 재검토로 정산한다. build/repack/운영 변경은 하지 않는다.
+
 ## 2026-11-13 — 도구 guard 후보2·A의 네 P2 수정
 
 c4cc와 원 CI47을 유지하고 같은 확정 공격7을 47 PASS/7 FAIL로 재현했다.

@@ -46,9 +46,8 @@ common은 canview ADR-003 계열의 **임시 worktree 프로필**을 쓴다(`doc
 
 private root의 `packageManager`·`engines.node`·`engines.npm`, `.nvmrc`와 `.npmrc`의
 `engine-strict=true`는 [도구 선택 규약](standards/versions.md#311-빌드테스트-도구-선택adr-018)을
-따른다. `npm run check:toolchain`은 runtime까지, `npm run test:toolchain`은 설치 없이
-Node 내장 음성 대조를 실행한다. 다른 Node로 수행한 구조 테스트를 정본 runtime PASS로
-표시하지 않는다. 기존 공개 workspace 패키지·C11 산출물은 수정·재pack하지 않는다.
+따른다. `npm ci --ignore-scripts --engine-strict`로 잠긴 private 도구 의존성(공식 INI 포함)을 준비한다. `npm run check:toolchain`은 runtime까지, `npm run test:toolchain`은 Node 내장 runner와 해당 dependency로 음성 대조를 실행한다. 다른 Node로 수행한 구조 테스트를 정본 runtime PASS로
+표시하지 않는다. 공식 INI 1개 private root 추가만 허용하며, 기존 공개 workspace 패키지·C11 산출물·소비자 graph는 수정·재pack하지 않는다.
 
 루트 `package.json`은 `workspaces: ["packages/*"]`이며 `package-lock.json`(v3)을 커밋한다(T-101에서 생성). Python 패키지는 hatchling + uv다(T-302). 패키지별 스크립트와 빌드 산출물은 [packages](architecture/packages.md)가 정본이다.
 

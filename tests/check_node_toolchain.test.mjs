@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, cpSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -262,6 +262,7 @@ test("미지원 heredoc·escape를 거부하고 기본 backslash 지시문은 �
 
 test("B-BUILD-P2-02 direct·symlink·preserve-symlinks-main CLI는 모두 같은 잘못된 anchor를 거부한다", t => {
   const f = fixture(t); f.put(".npmrc", "engine-strict=false\n");
+  cpSync(resolve(dirname(fileURLToPath(import.meta.url)), "../node_modules/ini"), join(f.root, "node_modules/ini"), { recursive: true });
   const alias = join(f.root, "checker-alias.mjs");
   try { symlinkSync(checker, alias); }
   catch (error) { throw new Error("NOT_RUN: CLI alias 경계 시험에 symlink 기능이 필요합니다", { cause: error }); }
@@ -277,4 +278,75 @@ test("checker API import는 잘못된 cwd에서도 자동 CLI 검사를 실행�
   f.put("import-only.mjs", `import { checkToolchain } from ${JSON.stringify(pathToFileURL(checker).href)};\nif (typeof checkToolchain !== "function") throw Error("API");\nprocess.stdout.write("IMPORTED\\n");\n`);
   const q = spawnSync(process.execPath, [join(f.root, "import-only.mjs")], { cwd: f.root, encoding: "utf8" });
   assert.equal(q.status, 0); assert.equal(q.stdout, "IMPORTED\n"); assert.equal(q.stderr, "");
+});
+
+
+for (const [name, rc] of [
+  ["A2 인용 force key", 'engine-strict=true\n"force"=true\n'],
+  ["A2 작은따옴표 force key", "engine-strict=true\n'force'=true\n"],
+  ["A2 section 내부 strict만 존재", "[unrelated]\nengine-strict=true\n"],
+  ["B2 인용 strict false", 'engine-strict=true\n"engine-strict"=false\n'],
+  ["B2 작은따옴표 strict false", "engine-strict=true\n'engine-strict'=false\n"],
+  ["B2 section은 root force를 덮지 않음", "engine-strict=true\nforce=true\n[shadow]\nforce=false\n"],
+  ["B2 section은 root strict를 덮지 않음", "engine-strict=false\n[shadow]\nengine-strict=true\n"],
+]) {
+  test(name, t => { const f = fixture(t); f.put(".npmrc", rc); assert.equal(f.run().ok, false); });
+}
+for (const [name, tail] of [
+  ["A2 shell background", "& npm install --global npm@11.19.1"],
+  ["A2 shell redirection", "> /tmp/ignored"],
+  ["A2 shell 제어 문자", "\x01"],
+]) {
+  test(name, t => {
+    const f = fixture(t); f.put("Dockerfile", attackFrom + attackPin + "RUN npm run build -- " + tail + "\nRUN npm ci --engine-strict\n");
+    assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, false);
+  });
+}
+test("B2 alias default registry는 실제 checker 데이터에 고정하고 명시 override는 유지한다", t => {
+  const f = fixture(t), alias = join(f.root, "alias-site/bin/checker.mjs");
+  cpSync(resolve(dirname(fileURLToPath(import.meta.url)), "../node_modules/ini"), join(f.root, "node_modules/ini"), { recursive: true });
+  mkdirSync(dirname(alias), { recursive: true });
+  try { symlinkSync(checker, alias); }
+  catch (error) { throw new Error("NOT_RUN: default registry alias 시험에 symlink 기능이 필요합니다", { cause: error }); }
+  const other = { axes: { node: { recommended: "24.15.0" }, npm: { recommended: "11.19.1" } } };
+  const variants = [[[], checker], [[], alias], [["--preserve-symlinks-main"], alias]];
+  const results = [];
+  for (const fakeExists of [true, false]) {
+    if (fakeExists) f.put("alias-site/versions.json", other);
+    else rmSync(join(f.root, "alias-site/versions.json"));
+    for (const good of [true, false]) {
+      const selected = good ? { node, npm } : { node: "24.15.0", npm: "11.19.1" };
+      f.put("package.json", { private: true, packageManager: "npm@" + selected.npm, engines: selected }); f.put(".nvmrc", selected.node);
+      results.push(variants.map(([flags, entry]) => spawnSync(process.execPath, [...flags, entry, "--root", f.root], { encoding: "utf8", cwd: f.root }).status));
+    }
+  }
+  assert.deepEqual(results, [[0,0,0],[1,1,1],[0,0,0],[1,1,1]]);
+  f.put("alias-site/versions.json", other);
+  for (const [flags, entry] of variants) {
+    const q = spawnSync(process.execPath, [...flags, entry, "--root", f.root, "--registry", join(f.root, "alias-site/versions.json")], { encoding: "utf8", cwd: f.root });
+    assert.equal(q.status, 0);
+  }
+});
+
+
+test("공식 INI 전역 boolean·인용 key·section 비간섭과 중복을 수용한다", t => {
+  const f = fixture(t);
+  for (const rc of [
+    '"engine-strict"=true\n"force"=false\n', "'engine-strict'=true\n'force'=false\n",
+    "engine-strict=true\nforce=false\n[unrelated]\nengine-strict=false\nforce=true\n",
+    "engine-strict=false\nengine-strict=true\nforce=true\nforce=false\nlegacy-peer-deps=true\nignore-scripts=true\n",
+  ]) { f.put(".npmrc", rc); assert.equal(f.run().ok, true); }
+});
+test("공식 INI의 배열·객체·null·비boolean 값은 strict/force로 승인하지 않는다", t => {
+  const f = fixture(t);
+  for (const rc of ["engine-strict[]=true\n", "[engine-strict]\nvalue=true\n", "engine-strict=null\n", "engine-strict=yes\n", "engine-strict=true\nforce[]=false\n", "engine-strict=true\n[force]\nvalue=false\n", "engine-strict=true\nforce=null\n", "engine-strict=true\nforce=unknown\n"]) {
+    f.put(".npmrc", rc); assert.equal(f.run().ok, false);
+  }
+});
+test("지원 && 연결은 유지하고 JSON exec의 제어기호 인수는 shell로 재해석하지 않는다", t => {
+  const f = fixture(t);
+  f.put("Dockerfile", attackFrom + `RUN npm install --global npm@${npm} && npm ci --engine-strict && npm run build -- --flag\n`);
+  assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, true);
+  f.put("Dockerfile", attackFrom + attackPin + 'RUN ["npm","run","build","--","&",">","|","literal"]\n');
+  assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, true);
 });

@@ -5,6 +5,7 @@ import { existsSync, lstatSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, isAbsolute, matchesGlob, relative, resolve, sep } from "node:path";
 import { parseArgs } from "node:util";
 import { fileURLToPath } from "node:url";
+import ini from "ini";
 
 class InputError extends Error {}
 const object = value => value !== null && typeof value === "object" && !Array.isArray(value);
@@ -53,18 +54,8 @@ function workspaceMember(rootPackage, folder) {
 }
 
 function strictEngineConfig(path) {
-  let selected, force = false;
-  for (const raw of readFileSync(path, "utf8").split(/\r?\n/u)) {
-    const line = raw.split(/[;#]/u, 1)[0].trim();
-    if (!/^(?:engine-strict|force)(?:\s|=|\[|$)/iu.test(line)) continue;
-    const match = /^(engine-strict|force)(?:\s*=\s*(.*))?$/iu.exec(line);
-    if (!match) return false;
-    const value = (match[2] ?? "true").trim().replace(/^(['"])(.*)\1$/u, "$2").toLowerCase();
-    if (!["true", "false"].includes(value)) return false;
-    if (match[1].toLowerCase() === "force") force = value === "true";
-    else selected = value === "true";
-  }
-  return selected === true && !force;
+  const config = ini.parse(readFileSync(path, "utf8"));
+  return config["engine-strict"] === true && (config.force === undefined || config.force === false);
 }
 
 function pathList(value, label, nonempty = false) {
@@ -84,7 +75,7 @@ function npmCommand(command, stage, npm, label, errors) {
     }
   } else {
     // 이 검사는 실제 저장소의 단순 npm/npx 명령만 지원한다. shell 제어·치환은 실행하지 않는다.
-    if (/[|;$`]/u.test(command)) { errors.push(label + " npm 명령의 동적 shell 형식은 지원하지 않습니다"); return; }
+    if (/[|;$`<>\x00-\x1f\x7f]|(?:^|[^&])&(?:[^&]|$)/u.test(command)) { errors.push(label + " npm 명령의 동적 shell 형식은 지원하지 않습니다"); return; }
     words = command.trim().split(/\s+/u).map(word => word.replace(/^(['"])(.*)\1$/u, "$2"));
   }
   if (words.some(word => word === "-f" || /^(?:--force|--legacy-peer-deps)(?:=|$)/u.test(word))) {
@@ -272,7 +263,7 @@ if (process.argv[1] && existsSync(process.argv[1])
   try {
     const { values } = parseArgs({ options: {
       root: { type: "string", default: "." },
-      registry: { type: "string", default: resolve(dirname(fileURLToPath(import.meta.url)), "../versions.json") },
+      registry: { type: "string", default: resolve(dirname(realpathSync(fileURLToPath(import.meta.url))), "../versions.json") },
       manifest: { type: "string", multiple: true },
       dockerfile: { type: "string", multiple: true },
       manifests: { type: "string", default: "[]" },

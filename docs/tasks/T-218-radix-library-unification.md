@@ -33,8 +33,8 @@ Geo·Map·Weather·Concierge·Docker Manager·Pinvi 웹/모바일·Transport를 
 [ADR-018](../adr/018-exact-node-npm-build-toolchain.md)과 [버전 규약](../standards/versions.md)에
 따라 private anchor·selector·engine-strict·실제 Node/npm·Node Dockerfile 경로를 검사한다.
 
-- root package/lock metadata 외 graph/version/SRI와 `packages/**`·7개 C11 pack·프론트엔드 정책은 불변이다.
-- `npm run test:toolchain`은 경로 이탈/외부 symlink·잘못된 목록·workspace 상속·비정상 이미지·runtime 불일치를 실제 거부한다.
+- Common private root 도구에는 공식 INI dependency 1개만 승인한다. 기존 lock entry는 모두 deep-equal이며 새 ini node의 정확 버전/SRI를 검증한다. 소비자 graph/version/SRI와 `packages/**`·7개 C11 pack·65개 프론트 버전/정책은 불변이다.
+- Common npm ci로 잠긴 공식 INI를 준비한 뒤 `npm run test:toolchain`은 인용 key/section·shell 제어문자·physical registry alias 및 경로 이탈/외부 symlink·잘못된 목록·workspace 상속·비정상 이미지·runtime 불일치를 실제 거부한다.
 - `npm run check:toolchain`은 정본 runtime에서 실행하고 reusable guard는 기존 `frontends`와 선택 추가 manifest/Dockerfile을 live 축으로 대조한다.
 - 소비자 실제 설치·build·원2리뷰·CI는 앱별 증거로 수용한다. 미실행은 NOT_RUN이며 이 후보만으로 native 실기기/EAS/스토어·T-218을 완료하지 않는다.
 - CI 순서/needs/fail-fast 감사·최적화는 마지막 별도 단계이며 이 후속은 기존 step 상대 순서를 유지한다.
