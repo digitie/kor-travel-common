@@ -1,0 +1,92 @@
+{
+  "archive": "2026-11-12-transport182-originals.tar.gz",
+  "archiveBytes": 36657,
+  "archiveSha256": "b3a1a951f9b8df9ab18f22a08242be3146ea1657e3708307437f32776b9cf463",
+  "members": [
+    {
+      "original": "review-A-transport-admin-preservation-e2a925.md",
+      "member": "review-A-transport-admin-preservation-e2a925.md",
+      "bytes": 15732,
+      "sha256": "489b0cb8d344297867986a921e76160bde5f1b9a8a02619c5e3d41b7b57cc07b"
+    },
+    {
+      "original": "review-B-transport-admin-preservation-e2a925.md",
+      "member": "review-B-transport-admin-preservation-e2a925.md",
+      "bytes": 14983,
+      "sha256": "f8ee357e7b0aab88b0f3261c464e50abc58ab9e8b51500afef068e694a02a2f1"
+    },
+    {
+      "original": "review-A-transport-admin-preservation-c3da263.md",
+      "member": "review-A-transport-admin-preservation-c3da263.md",
+      "bytes": 17124,
+      "sha256": "0a5f55a4998502eddc383c38ec388d020d4035fb5b60af57a6a4114fee50c476"
+    },
+    {
+      "original": "review-B-transport-admin-preservation-c3da263.md",
+      "member": "review-B-transport-admin-preservation-c3da263.md",
+      "bytes": 15131,
+      "sha256": "291f96c4bf06a1ce577819af0c924049deb57e61aeb0ef497adbfca097564c5f"
+    },
+    {
+      "original": "review-A-transport-admin-c3-execution-final-1.md",
+      "member": "review-A-transport-admin-c3-execution-final-1.md",
+      "bytes": 7543,
+      "sha256": "888827d347f6624dbfef2375c3e5fc6025f22a938d1a94c94b95fda53b8f647c"
+    },
+    {
+      "original": "review-B-transport-admin-c3-execution-final-1.md",
+      "member": "review-B-transport-admin-c3-execution-final-1.md",
+      "bytes": 6750,
+      "sha256": "c96e48c2f8790f24b7487c214927b0dbcf0e785b28703c51ecc32d9649b19d6f"
+    },
+    {
+      "original": "validation/review-transport-admin-preservation-e2a925086925/manifest.json",
+      "member": "review-manifest-transport-admin-preservation-input1.json",
+      "bytes": 16255,
+      "sha256": "0721412625b76db6ee1eda5c789ab319b6a20950f5ac630c94afad9ac1a6e136"
+    },
+    {
+      "original": "validation/review-transport-admin-preservation-c3da263-input2/manifest.json",
+      "member": "review-manifest-transport-admin-preservation-input2.json",
+      "bytes": 19624,
+      "sha256": "70ce298c0c57efbb3016665b3cf3ca13924354000115c51802cc34b07dca4473"
+    },
+    {
+      "original": "validation/review-transport-admin-c3-execution-final-1/manifest.json",
+      "member": "review-manifest-transport-admin-execution-final.json",
+      "bytes": 4037,
+      "sha256": "32ad35db674592834cdd74be247b6ddf65f69c3df22ab398c81acc5cae92bd2d"
+    },
+    {
+      "original": "validation/transport-pr182-merge-and-tree-receipt-20261112.json",
+      "member": "transport182-parent-merge-receipt.json",
+      "bytes": 1606,
+      "sha256": "bee3fb6261be8fda0b1fb0b17b562298626f5444c80d183147b52c81eeee5208"
+    }
+  ],
+  "source": "c3da2632101c347a5e4fc288762de635c9c255b5",
+  "merge": "6b75c3b3d1e6dec8fc346a847428f15e4f3153b4",
+  "fullTree": "077e7c14f87aa55fe1774c0a706bcf9f1e3e509c",
+  "reviewedCIAndMergedTreeEqual": true,
+  "verdictBoundary": "입력1 원 A/B BLOCK을 그대로 보존한다. 입력2 양쪽 SOURCE PASS·자기 지적 FIXED·신규0, 실행3 양쪽 PREMERGE SOURCE+QA PASS·신규0. 실제 관리자 이미지·공식 배포·정상 운영 수용은 이 승인 범위 밖이다.",
+  "exactCI": {
+    "43130997296": "SUCCESS",
+    "43130998009": "SUCCESS"
+  },
+  "tests": {
+    "backendPassed": 1548,
+    "backendSkipped": 2,
+    "backendWarnings": 6,
+    "publicPassed": 164,
+    "adminPassed": 432,
+    "nativeAlpineBrowserPassed": 56,
+    "browserSkipped": 0,
+    "browserFlaky": 0,
+    "browserUnexpected": 0,
+    "doctorDiagnostics": 0,
+    "liveE2EWorkflowJob": "SKIPPED not PASS"
+  },
+  "actualNewAdminAcceptance": false,
+  "rawHistoricalFailuresPendingAndLimitsPreserved": true,
+  "libraryPayloadOrRulesChanged": false
+}

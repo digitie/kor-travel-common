@@ -50,3 +50,11 @@ Manager 최종 e798의 backend3846 PASS/40 SKIP/1 warning, frontend54 PASS·brow
 Transport의 기존 core/admin current에서 UI 하나만 선택하는 최종 e533820은 원 A/B COMBINED SOURCE PASS·신규0이다. 원 두 리뷰어는 SDK503개를 각각 직접 통과하고, A는 추가33개와 실제 Compose/fake Engine raw12값, B는 추가25개와 actual create Env8개 경계 대조를 수행했다. 이전478은 A의 PUBLIC ONLY checkpoint이며 B 완료 승인이나 admin 승인으로 확대하지 않는다. [원문·불변 입력6개 archive](evidence/2026-11-12-manager591-originals.tar.gz)와 [member/전체 해시·판정 원장](evidence/2026-11-12-manager591-closure-receipts.json)에 당시 실패·제한·pending을 byte 그대로 남겼다.
 
 정확 CI43114698062는 backend3979 PASS/40 SKIP·frontend54/browser2·Doctor0·lint/type/build 성공이며 중앙43114698466도 성공했다. [PR591](https://github.com/digitie/kor-travel-docker-manager/pull/591)은508b074c로 머지했고 fetched main 전체 tree98f2fefd가 reviewed e533과 같다. 기본 PUBLIC과 등록된 admin-web 선택은 기존 G/frozen/비선택/health/current 경로를 사용한다. 관리자 release 표시 ENV만 승인 source·OCI·image default Env 일치 때 결박하고 인증·세션·지도·DB 환경은 보존한다. 실제 이미지 생성·trusted 설치·운영 적용·UI/API/DB 수용은 source PASS와 별도다. 이 출판으로 Transport 완료를 추가하지 않는다. backend499/schema0042 보존과 사용자 Map 별도 인계도 유지한다.
+
+### Transport182 기존 관리자 기능 보존의 원 검토·머지 정산
+
+실제 관리자6bd와 공개936의 기능 분기를 대조한 후 [PR182](https://github.com/digitie/kor-travel-transport/pull/182)에서 주차장·철도 시간표와 공식 안내·전화·지도 이동을 유지하고, 원 두 검토의 지적을 수정했다. 원 A의 A-TRANSPORT-P2-01은 미지원 fuel/regions 경로의 허위 성공 시험, A-TRANSPORT-P2-03은 가변 cluster key의 DOM·포커스 손실, A-TRANSPORT-P3-02는 수집 작업 한국어 label 누락이다. 원 B의 B-TR-P2-01은 공식 안내·전화 링크 누락, B-TR-P3-02는 같은 작업 label 누락이다. 입력1의 두 BLOCK을 지우지 않고 입력2에서 각 원 리뷰어가 자기 지적 FIXED·SOURCE PASS·신규0으로 재확인했다. 실행3도 양쪽 PREMERGE SOURCE+QA PASS·신규0이다.
+
+[원문·불변 입력·머지 증거10개 archive](evidence/2026-11-12-transport182-originals.tar.gz)와 [member/전체 해시·판정 원장](evidence/2026-11-12-transport182-closure-receipts.json)에 원문 bytes와 당시 pending을 보존한다. 정확 c3da263 CI43130997296·정책43130998009가 성공했고 backend1548 PASS/2기존 SKIP/6warnings, 공개164·관리자432 PASS와 Doctor0을 확인했다. 별도 native/Alpine 브라우저는 각각 기존18·검토회귀4·기능6, 합계56 PASS이며 skip/flaky/unexpected/report error0이다. workflow의 live-e2e SKIPPED를 PASS로 집계하지 않는다.
+
+실제 merge6b75c3b3의 전체 tree077e7c14는 검토 source와 CI synthetic merge072c51d1의 tree와 같다. 이는 소스·검증·머지 정산이다. 실제 merged source ARM 이미지, 공식 관리자 단독 교체와 정상 계정 UI 수용은 별도 후속이며 이 기록으로 Transport 전체 배포 완료를 추가하지 않는다. backend499/schema0042와 공개936의 보존 경계도 유지한다. 라이브러리·규범·산출물 bytes는 변경하지 않는다.
