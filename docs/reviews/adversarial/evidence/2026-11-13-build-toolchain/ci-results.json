@@ -1,0 +1,1981 @@
+{
+  "kind": "한국어 공개 사실 정산; 원 수집 receipt를 편집한 원문이 아님",
+  "generations": [
+    {
+      "source": "c4cc78781638808490c0ea540fbb38200b577346",
+      "generation": "c4cc",
+      "collectorOriginal": {
+        "name": "final-receipt.json",
+        "bytes": 13461,
+        "sha256": "7e1739064a4c68ca17e6c154482cc0469cae6c581d86fe0b5fb8c9e376239f63"
+      },
+      "status": "ALL_FOUR_PR_WORKFLOWS_AND_FIFTEEN_JOBS_SUCCESS",
+      "workflowRuns": [
+        {
+          "id": 43262391314,
+          "name": "workflows selftest",
+          "head_sha": "c4cc78781638808490c0ea540fbb38200b577346",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43262391314",
+          "created_at": "2026-11-12T16:46:55Z",
+          "updated_at": "2026-11-12T16:47:23Z"
+        },
+        {
+          "id": 43262390921,
+          "name": "python-package",
+          "head_sha": "c4cc78781638808490c0ea540fbb38200b577346",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43262390921",
+          "created_at": "2026-11-12T16:46:55Z",
+          "updated_at": "2026-11-12T16:49:50Z"
+        },
+        {
+          "id": 43262390894,
+          "name": "common frontend",
+          "head_sha": "c4cc78781638808490c0ea540fbb38200b577346",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43262390894",
+          "created_at": "2026-11-12T16:46:55Z",
+          "updated_at": "2026-11-12T16:49:18Z"
+        },
+        {
+          "id": 43262391046,
+          "name": "docs",
+          "head_sha": "c4cc78781638808490c0ea540fbb38200b577346",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43262391046",
+          "created_at": "2026-11-12T16:46:55Z",
+          "updated_at": "2026-11-12T16:56:19Z"
+        }
+      ],
+      "jobs": [
+        {
+          "jobId": 131336839840,
+          "jobName": "frontend",
+          "runId": 43262390894,
+          "bytes": 119912,
+          "sha256": "84e5eec7a0ccdc2ad6f5b119365e341442180b32b5157964c99938143bf79f4e",
+          "nodeTestSuites": [
+            {
+              "tests": 47,
+              "pass": 47,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 9,
+              "pass": 9,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 175,
+              "pass": 175,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [
+            101
+          ],
+          "playwrightPassed": [],
+          "runtimeCanonicalPass": true,
+          "syntheticCheckoutSeen": true,
+          "headCheckoutSeen": false
+        },
+        {
+          "jobId": 131336839719,
+          "jobName": "recovery (3.13)",
+          "runId": 43262390921,
+          "bytes": 26793,
+          "sha256": "0092526ed5dc4dd4daeb82a7c8fbf58a37ad606b5b132874130003b579dc36bd",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [
+            661
+          ],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "runtimeCanonicalPass": false,
+          "syntheticCheckoutSeen": true,
+          "headCheckoutSeen": false
+        },
+        {
+          "jobId": 131336839810,
+          "jobName": "recovery (3.11)",
+          "runId": 43262390921,
+          "bytes": 26969,
+          "sha256": "aa3d1420a541d8e0df1320c5bda00cb4150b2263de8751570903a7100541e6b1",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [
+            661
+          ],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "runtimeCanonicalPass": false,
+          "syntheticCheckoutSeen": true,
+          "headCheckoutSeen": false
+        },
+        {
+          "jobId": 131336844161,
+          "jobName": "contrast-python / contrast (python fixture)",
+          "runId": 43262391314,
+          "bytes": 46268,
+          "sha256": "7f4eeafec0666d72dd8b47d5dd1c6709b339021eb6fa66474da889983de64b65",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "runtimeCanonicalPass": false,
+          "syntheticCheckoutSeen": false,
+          "headCheckoutSeen": true
+        },
+        {
+          "jobId": 131336844479,
+          "jobName": "docs-node / docs (node fixture)",
+          "runId": 43262391314,
+          "bytes": 43534,
+          "sha256": "430ca7207b45379d438e16d4b00fa09f05f26e230e45c82a275234293b7f1a71",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "runtimeCanonicalPass": false,
+          "syntheticCheckoutSeen": false,
+          "headCheckoutSeen": true
+        },
+        {
+          "jobId": 131336844605,
+          "jobName": "versions-node / versions (node fixture)",
+          "runId": 43262391314,
+          "bytes": 45791,
+          "sha256": "7b273446e3ef930e0a1fc775789272684a692b874c72fbd67da673d8b0c35bc5",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "runtimeCanonicalPass": false,
+          "syntheticCheckoutSeen": false,
+          "headCheckoutSeen": true
+        },
+        {
+          "jobId": 131336844721,
+          "jobName": "contrast-node / contrast (node fixture)",
+          "runId": 43262391314,
+          "bytes": 46675,
+          "sha256": "b0058e6bb05248f33663101f7638c227c3d1ba285246222c619149d68963e3ed",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "runtimeCanonicalPass": false,
+          "syntheticCheckoutSeen": false,
+          "headCheckoutSeen": true
+        },
+        {
+          "jobId": 131336844930,
+          "jobName": "docs-python / docs (python fixture)",
+          "runId": 43262391314,
+          "bytes": 43544,
+          "sha256": "c8ccbb6415862c3e4ab18321d40b08da979b85f52f4edd3b4d9ca6ed023a9610",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "runtimeCanonicalPass": false,
+          "syntheticCheckoutSeen": false,
+          "headCheckoutSeen": true
+        },
+        {
+          "jobId": 131336844970,
+          "jobName": "versions-python / versions (python fixture)",
+          "runId": 43262391314,
+          "bytes": 45754,
+          "sha256": "b447bed6e23b205c6fc4f03ec72b2f967fad4251531fff4f3d2794cffd4261b1",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "runtimeCanonicalPass": false,
+          "syntheticCheckoutSeen": false,
+          "headCheckoutSeen": true
+        },
+        {
+          "jobId": 131336840972,
+          "jobName": "packages",
+          "runId": 43262391046,
+          "bytes": 170290,
+          "sha256": "8f26e5bb5368a6b51de3074bc84369345de4af87a11b3c96f3396e3756f7603a",
+          "nodeTestSuites": [
+            {
+              "tests": 47,
+              "pass": 47,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 9,
+              "pass": 9,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 175,
+              "pass": 175,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [
+            101
+          ],
+          "playwrightPassed": [
+            65
+          ],
+          "runtimeCanonicalPass": true,
+          "syntheticCheckoutSeen": false,
+          "headCheckoutSeen": true
+        },
+        {
+          "jobId": 131336841484,
+          "jobName": "tools (ubuntu-24.04)",
+          "runId": 43262391046,
+          "bytes": 50338,
+          "sha256": "f8b10d8cce1f93fa5bb515b2915ad3ed80691c4fa3135384031837bba962da3b",
+          "nodeTestSuites": [
+            {
+              "tests": 47,
+              "pass": 47,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "skip": 3,
+              "pass": 397
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "runtimeCanonicalPass": true,
+          "syntheticCheckoutSeen": false,
+          "headCheckoutSeen": true
+        },
+        {
+          "jobId": 131336841554,
+          "jobName": "tools (windows-2025)",
+          "runId": 43262391046,
+          "bytes": 52769,
+          "sha256": "80b358f047b382d6195c8e83f04ee04536015e55b35dd5c4d80d01f46118c331",
+          "nodeTestSuites": [
+            {
+              "tests": 47,
+              "pass": 47,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "skip": 2,
+              "pass": 398
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "runtimeCanonicalPass": true,
+          "syntheticCheckoutSeen": false,
+          "headCheckoutSeen": true
+        },
+        {
+          "jobId": 131336841589,
+          "jobName": "secret-scan",
+          "runId": 43262391046,
+          "bytes": 24159,
+          "sha256": "a730cc60f61d7c8e54542ac120bfb800b1fe61f5219c4ecc0e4e4fa35ac1996f",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "runtimeCanonicalPass": false,
+          "syntheticCheckoutSeen": false,
+          "headCheckoutSeen": true
+        },
+        {
+          "jobId": 131336841636,
+          "jobName": "docs",
+          "runId": 43262391046,
+          "bytes": 51746,
+          "sha256": "9d697d25c16f9de2e5efb06584e8f8a67b56db4d50284e1b53536f0847517b9a",
+          "nodeTestSuites": [
+            {
+              "tests": 47,
+              "pass": 47,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "skip": 3,
+              "pass": 397
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "runtimeCanonicalPass": true,
+          "syntheticCheckoutSeen": false,
+          "headCheckoutSeen": true
+        },
+        {
+          "jobId": 131336841783,
+          "jobName": "check-versions",
+          "runId": 43262391046,
+          "bytes": 28745,
+          "sha256": "4add776966a062cac1ec5a088488da945dbe5a8b54a0c906affdd4eeff635685",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "runtimeCanonicalPass": false,
+          "syntheticCheckoutSeen": false,
+          "headCheckoutSeen": true
+        }
+      ],
+      "jobFailures": 0,
+      "jobSkipped": 0,
+      "jobCancelled": 0,
+      "selftestSkippedSteps": [
+        {
+          "jobId": 131336844479,
+          "job": "docs-node / docs (node fixture)",
+          "step": "task 원장 검사"
+        },
+        {
+          "jobId": 131336844930,
+          "job": "docs-python / docs (python fixture)",
+          "step": "task 원장 검사"
+        }
+      ],
+      "sourceBridge": {
+        "head": "c4cc78781638808490c0ea540fbb38200b577346",
+        "synthetic": "99155e3234a38e7c7240d27aaaab3bc481dad51d",
+        "sameTree": "3e7334d476d36c55eaf14b37d32a6f5c9856b5ef",
+        "sevenCanonicalRuntimeInputsEqualCommitBytes": {
+          "package.json": "1458d9732b1b824536f210efce9eb16a29e1e01dccb99911c8b55ce58d809430",
+          "package-lock.json": "3b02855a83e6656a710c8568728175eae12f1219f23fce8c68b3b838e46cc80d",
+          ".nvmrc": "7d2df647f25529bd87500319c41564e032e2be642e565350fa6136d7a1ec4d10",
+          ".npmrc": "7151cf397def0c2cb0ab65643701d27d335a72c90f775675b5f826bc7005818a",
+          "versions.json": "39fae4d28f0533d835f99339ee70e01ff36af0aaefce1d5bc5f3489bb765b04b",
+          "tools/check_node_toolchain.mjs": "989bc5929fcdb0e53e5ea20254a3ee5d52e7990ea666d7f621829e04e1e16595",
+          "tests/check_node_toolchain.test.mjs": "06c23a5c1c592acb4b758ba40670fb866fadf087edffd4a03ba99ddb94942c71"
+        },
+        "canonicalRuntimeReceiptSHA256": "70867b76f506eda17afefcc1d16131bf49e49638d0e8275a4bd969291a1fa75a",
+        "runtimeExitCodes": {
+          "node-version": 0,
+          "npm-version": 0,
+          "runtime": 0,
+          "builtin": 0
+        },
+        "actualNode": "22.23.1",
+        "actualNpm": "12.0.1",
+        "tests": 47
+      },
+      "rawIndex": {
+        "name": "final-index.json",
+        "sha256": "e3f442eb2899c8358ed952cd7fa30ae78ff860442f10e9250f8863437c1c4d23",
+        "members": 42
+      },
+      "scope": "해당 source의 소유자 수집 원문에서 공개 안전한 실행·해시 필드만 정산. 원 로그·private paths/환경은 출판하지 않는다.",
+      "contrastReport": {
+        "scope": "수집 원문에서 수치 미관측",
+        "allPairsPassed": "NOT_ASSERTED"
+      }
+    },
+    {
+      "source": "e1d0f01ef05b913e5f311a4d3ae2922a25a676c3",
+      "generation": "e1d0",
+      "collectorOriginal": {
+        "name": "final-receipt.json",
+        "bytes": 13351,
+        "sha256": "69c81287b5287db732cae595943208263977dcf2a645f1d686a53dc471cdc0a2"
+      },
+      "status": "ALL_FOUR_PR_WORKFLOWS_AND_FIFTEEN_JOBS_SUCCESS",
+      "workflowRuns": [
+        {
+          "id": 43268086175,
+          "name": "workflows selftest",
+          "head_sha": "e1d0f01ef05b913e5f311a4d3ae2922a25a676c3",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43268086175",
+          "created_at": "2026-11-12T17:18:49Z",
+          "updated_at": "2026-11-12T17:19:16Z"
+        },
+        {
+          "id": 43268085968,
+          "name": "common frontend",
+          "head_sha": "e1d0f01ef05b913e5f311a4d3ae2922a25a676c3",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43268085968",
+          "created_at": "2026-11-12T17:18:48Z",
+          "updated_at": "2026-11-12T17:20:24Z"
+        },
+        {
+          "id": 43268085715,
+          "name": "python-package",
+          "head_sha": "e1d0f01ef05b913e5f311a4d3ae2922a25a676c3",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43268085715",
+          "created_at": "2026-11-12T17:18:48Z",
+          "updated_at": "2026-11-12T17:21:36Z"
+        },
+        {
+          "id": 43268085933,
+          "name": "docs",
+          "head_sha": "e1d0f01ef05b913e5f311a4d3ae2922a25a676c3",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43268085933",
+          "created_at": "2026-11-12T17:18:48Z",
+          "updated_at": "2026-11-12T17:23:42Z"
+        }
+      ],
+      "jobs": [
+        {
+          "jobId": 131356955965,
+          "jobName": "frontend",
+          "runId": 43268085968,
+          "bytes": 125535,
+          "sha256": "99f931d097cf7027b3afae2cd17b304c9d5f81558f1d78237c758a0133ed03c0",
+          "nodeTestSuites": [
+            {
+              "tests": 62,
+              "pass": 62,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 9,
+              "pass": 9,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 175,
+              "pass": 175,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [
+            101
+          ],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true
+        },
+        {
+          "jobId": 131356958860,
+          "jobName": "docs-node / docs (node fixture)",
+          "runId": 43268086175,
+          "bytes": 43541,
+          "sha256": "cb7d061abb5299860aee889b79ae3206634bb43395f685d379e32437f1e81474",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131356959559,
+          "jobName": "contrast-node / contrast (node fixture)",
+          "runId": 43268086175,
+          "bytes": 46680,
+          "sha256": "dbccdf8c645a8fb876aff7ea01255e075a2f809c5357d7b9caa30f2174ff56ab",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131356959572,
+          "jobName": "docs-python / docs (python fixture)",
+          "runId": 43268086175,
+          "bytes": 43546,
+          "sha256": "80460dbf67004a09237ea6fd4050a41b22c6ebeb28591d4af9bcf6481ebac9fb",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131356959720,
+          "jobName": "contrast-python / contrast (python fixture)",
+          "runId": 43268086175,
+          "bytes": 46271,
+          "sha256": "78535d2dfa8ae82a97d5e1cb4ed09d448cea16e7cb486d9f8ed529ab3b02c8da",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131356959986,
+          "jobName": "versions-node / versions (node fixture)",
+          "runId": 43268086175,
+          "bytes": 45789,
+          "sha256": "da976209f61b00a9ab41206a081ad93204dda361c4ba0218d3c04c0cceb02b82",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131356961504,
+          "jobName": "versions-python / versions (python fixture)",
+          "runId": 43268086175,
+          "bytes": 45756,
+          "sha256": "b755c9306bf3820579722c5c28fce184eff8e4f4bff59d23fc1d5974db8d8d22",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131356955381,
+          "jobName": "recovery (3.13)",
+          "runId": 43268085715,
+          "bytes": 26992,
+          "sha256": "ce94a373d7bf5ae80612561e77c0ed3b80891ce486d8a8273b2f58e20a7c1530",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [
+            661
+          ],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131356956172,
+          "jobName": "recovery (3.11)",
+          "runId": 43268085715,
+          "bytes": 26771,
+          "sha256": "de8b9f500b4876085a2caf213b7f661e5c63a4f19cdbb96faffa0aa241ed5dfc",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [
+            661
+          ],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131356956531,
+          "jobName": "check-versions",
+          "runId": 43268085933,
+          "bytes": 28746,
+          "sha256": "249710d25f531c85b452e455a2379431e227cae22f1d6b25ffe7764734701cc6",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131356957022,
+          "jobName": "packages",
+          "runId": 43268085933,
+          "bytes": 175774,
+          "sha256": "a8cbf71bdd82888dee99ea01735ea8d6bd537cd549825a61bf80e2c6a670fb17",
+          "nodeTestSuites": [
+            {
+              "tests": 62,
+              "pass": 62,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 9,
+              "pass": 9,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 175,
+              "pass": 175,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [
+            101
+          ],
+          "playwrightPassed": [
+            65
+          ],
+          "canonicalRuntimePass": true
+        },
+        {
+          "jobId": 131356957156,
+          "jobName": "secret-scan",
+          "runId": 43268085933,
+          "bytes": 24157,
+          "sha256": "2c559187cc9031fd05f1ffa9e49b0c616834840320b79b0c149f675353cf9d4b",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131356957297,
+          "jobName": "tools (ubuntu-24.04)",
+          "runId": 43268085933,
+          "bytes": 56281,
+          "sha256": "ea437db3582fba847cfac83c1c5cb58a73a2ee33afdafe9d30777e7ee71b14e2",
+          "nodeTestSuites": [
+            {
+              "tests": 62,
+              "pass": 62,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "pass": 397,
+              "skip": 3
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true
+        },
+        {
+          "jobId": 131356957352,
+          "jobName": "docs",
+          "runId": 43268085933,
+          "bytes": 57677,
+          "sha256": "0076588386a9e6dd01f06be926a48b19aefdca67d658f9845853cf7bda489e6f",
+          "nodeTestSuites": [
+            {
+              "tests": 62,
+              "pass": 62,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "pass": 397,
+              "skip": 3
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true
+        },
+        {
+          "jobId": 131356957498,
+          "jobName": "tools (windows-2025)",
+          "runId": 43268085933,
+          "bytes": 58664,
+          "sha256": "1ab4c775bab7bc6c0a21bb8314c8b6cd016d45464a956b27cabae749a345196e",
+          "nodeTestSuites": [
+            {
+              "tests": 62,
+              "pass": 62,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "pass": 398,
+              "skip": 2
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true
+        }
+      ],
+      "jobFailures": 0,
+      "jobSkipped": 0,
+      "jobCancelled": 0,
+      "selftestSkippedSteps": [
+        {
+          "jobId": 131356958860,
+          "job": "docs-node / docs (node fixture)",
+          "step": "task 원장 검사"
+        },
+        {
+          "jobId": 131356959572,
+          "job": "docs-python / docs (python fixture)",
+          "step": "task 원장 검사"
+        }
+      ],
+      "sourceBridge": {
+        "head": "e1d0f01ef05b913e5f311a4d3ae2922a25a676c3",
+        "synthetic": "12a34fd9c5990d251f6a7b33aeb4802f36973a7c",
+        "headTree": "aea8c2ad8a7b6ffc6550d7a576c01d50551b8bb1",
+        "syntheticTree": "aea8c2ad8a7b6ffc6550d7a576c01d50551b8bb1",
+        "wholeTreeEqual": true,
+        "syntheticParents": [
+          "678a5bcf0150ac0386bfa86106e7e0f4f77e8639",
+          "e1d0f01ef05b913e5f311a4d3ae2922a25a676c3"
+        ]
+      },
+      "rawIndex": {
+        "name": "final-index.json",
+        "sha256": "225b833690de3882039ef01970d0293cba40610186a73498029f9fcf02e46c15",
+        "members": 46
+      },
+      "scope": "해당 source의 소유자 수집 원문에서 공개 안전한 실행·해시 필드만 정산. 원 로그·private paths/환경은 출판하지 않는다.",
+      "contrastReport": {
+        "scope": "해당 수집 원문에 기록된 report 수치이며 새 실행으로 복사·확대하지 않음",
+        "observations": [
+          {
+            "jobId": 131356959559,
+            "mode": "light",
+            "reportStatus": "PASS",
+            "pairs": 27,
+            "failedPairs": 8
+          },
+          {
+            "jobId": 131356959720,
+            "mode": "dark",
+            "reportStatus": "PASS",
+            "pairs": 27,
+            "failedPairs": 0
+          }
+        ],
+        "meaning": "report 모드 job 성공은 failedPairs0이나 모든 pair 통과의 뜻이 아니다."
+      }
+    },
+    {
+      "source": "404a586ece08ca0050d844cbe0eee4df5a79f899",
+      "generation": "404a",
+      "collectorOriginal": {
+        "name": "final-receipt.json",
+        "bytes": 14327,
+        "sha256": "f7334f1a1dfe7d12308b8864438c3b29bedbeb1baacfc6c94d8e0c97029c6301"
+      },
+      "status": "ALL_FOUR_PR_WORKFLOWS_AND_FIFTEEN_JOBS_SUCCESS",
+      "workflowRuns": [
+        {
+          "id": 43276648117,
+          "name": "workflows selftest",
+          "head_sha": "404a586ece08ca0050d844cbe0eee4df5a79f899",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43276648117",
+          "created_at": "2026-11-12T18:08:05Z",
+          "updated_at": "2026-11-12T18:08:28Z"
+        },
+        {
+          "id": 43276647780,
+          "name": "common frontend",
+          "head_sha": "404a586ece08ca0050d844cbe0eee4df5a79f899",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43276647780",
+          "created_at": "2026-11-12T18:08:05Z",
+          "updated_at": "2026-11-12T18:10:31Z"
+        },
+        {
+          "id": 43276647744,
+          "name": "python-package",
+          "head_sha": "404a586ece08ca0050d844cbe0eee4df5a79f899",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43276647744",
+          "created_at": "2026-11-12T18:08:05Z",
+          "updated_at": "2026-11-12T18:11:13Z"
+        },
+        {
+          "id": 43276647768,
+          "name": "docs",
+          "head_sha": "404a586ece08ca0050d844cbe0eee4df5a79f899",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43276647768",
+          "created_at": "2026-11-12T18:08:05Z",
+          "updated_at": "2026-11-12T18:17:10Z"
+        }
+      ],
+      "jobs": [
+        {
+          "jobId": 131386697374,
+          "jobName": "packages",
+          "runId": 43276647768,
+          "bytes": 180416,
+          "sha256": "2473292c208e7f9e03d237d32132e0de9c59673d8224b26dd1f0bf28556c46b4",
+          "nodeTestSuites": [
+            {
+              "tests": 76,
+              "pass": 76,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 9,
+              "pass": 9,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 175,
+              "pass": 175,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [
+            101
+          ],
+          "playwrightPassed": [
+            65
+          ],
+          "canonicalRuntimePass": true,
+          "observedCheckout": "exactHead"
+        },
+        {
+          "jobId": 131386697854,
+          "jobName": "tools (windows-2025)",
+          "runId": 43276647768,
+          "bytes": 63192,
+          "sha256": "994e424f439656abd868ae1a9ec5f034028e64562a864f214549c06a4aecff72",
+          "nodeTestSuites": [
+            {
+              "tests": 76,
+              "pass": 76,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "pass": 398,
+              "skip": 2
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true,
+          "observedCheckout": "exactHead"
+        },
+        {
+          "jobId": 131386697933,
+          "jobName": "tools (ubuntu-24.04)",
+          "runId": 43276647768,
+          "bytes": 60544,
+          "sha256": "a8a91d0a49c952eb3e5c38a6a8c81c1309c0a6ad3ff7429760422b72545397f9",
+          "nodeTestSuites": [
+            {
+              "tests": 76,
+              "pass": 76,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "pass": 397,
+              "skip": 3
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true,
+          "observedCheckout": "exactHead"
+        },
+        {
+          "jobId": 131386697981,
+          "jobName": "docs",
+          "runId": 43276647768,
+          "bytes": 61950,
+          "sha256": "b71d3753abc3a97be555b74203b2a06fb5a36078c1e5504ae9e286599b04b2ae",
+          "nodeTestSuites": [
+            {
+              "tests": 76,
+              "pass": 76,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "pass": 397,
+              "skip": 3
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true,
+          "observedCheckout": "exactHead"
+        },
+        {
+          "jobId": 131386698064,
+          "jobName": "secret-scan",
+          "runId": 43276647768,
+          "bytes": 24163,
+          "sha256": "ae90228a8649cb2940bb439d2f43e076fea68dd9b2f54c8b4ea9dbb33eac1a9a",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false,
+          "observedCheckout": "exactHead"
+        },
+        {
+          "jobId": 131386698084,
+          "jobName": "check-versions",
+          "runId": 43276647768,
+          "bytes": 28744,
+          "sha256": "74457161e1df63e45697ad0ed4c912c5e267029537925bde7393cbbb901cc60e",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false,
+          "observedCheckout": "exactHead"
+        },
+        {
+          "jobId": 131386700322,
+          "jobName": "contrast-python / contrast (python fixture)",
+          "runId": 43276648117,
+          "bytes": 46269,
+          "sha256": "321ed2c9787ee0c996b533f3a0caf6ab3ccd8e9e1c7e5ffaacd5280ea06bec8c",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false,
+          "observedCheckout": "exactHead"
+        },
+        {
+          "jobId": 131386700827,
+          "jobName": "versions-python / versions (python fixture)",
+          "runId": 43276648117,
+          "bytes": 45752,
+          "sha256": "98c54a48461b564c48fe1e192d4a79d0a3462e531d643230a14f7a1d99d55a6d",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false,
+          "observedCheckout": "exactHead"
+        },
+        {
+          "jobId": 131386700946,
+          "jobName": "docs-python / docs (python fixture)",
+          "runId": 43276648117,
+          "bytes": 43542,
+          "sha256": "7bd521d70726f27e5e1f6c76fa5f43fc503be39ecd117391f498b99e1bbcaccb",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false,
+          "observedCheckout": "exactHead"
+        },
+        {
+          "jobId": 131386701077,
+          "jobName": "contrast-node / contrast (node fixture)",
+          "runId": 43276648117,
+          "bytes": 46678,
+          "sha256": "8d5d8c31bc89c84b880cc41e58c19278fbb779f95d87674bfd13a4ae7fe89eeb",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false,
+          "observedCheckout": "exactHead"
+        },
+        {
+          "jobId": 131386701107,
+          "jobName": "versions-node / versions (node fixture)",
+          "runId": 43276648117,
+          "bytes": 45789,
+          "sha256": "7cddefc0b7f01e2380f6158bb1b9ba7fe49880d4a26fe03bedd263f3a3b54d09",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false,
+          "observedCheckout": "exactHead"
+        },
+        {
+          "jobId": 131386701238,
+          "jobName": "docs-node / docs (node fixture)",
+          "runId": 43276648117,
+          "bytes": 43535,
+          "sha256": "571dbdb843f451ad9cd988390174e5243bb5d623adc4877038fcb53a6d3b9376",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false,
+          "observedCheckout": "exactHead"
+        },
+        {
+          "jobId": 131386697246,
+          "jobName": "frontend",
+          "runId": 43276647780,
+          "bytes": 130058,
+          "sha256": "6114bf6d7df4a89c49b670a7bbef08af0420d967ccb8d6682619296e3ed55644",
+          "nodeTestSuites": [
+            {
+              "tests": 76,
+              "pass": 76,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 9,
+              "pass": 9,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 175,
+              "pass": 175,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [
+            101
+          ],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true,
+          "observedCheckout": "synthetic"
+        },
+        {
+          "jobId": 131386696932,
+          "jobName": "recovery (3.13)",
+          "runId": 43276647744,
+          "bytes": 26992,
+          "sha256": "d0fa565f00c31a2dd6d629d823cc0fd54e558fa5fa2c45fe50d0b77f2e70b505",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [
+            661
+          ],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false,
+          "observedCheckout": "synthetic"
+        },
+        {
+          "jobId": 131386697621,
+          "jobName": "recovery (3.11)",
+          "runId": 43276647744,
+          "bytes": 26967,
+          "sha256": "ff76e6eec0899faa21079fd4895cda13db07770d8ceb9f0852696eebc8db032a",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [
+            661
+          ],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false,
+          "observedCheckout": "synthetic"
+        }
+      ],
+      "jobFailures": 0,
+      "jobSkipped": 0,
+      "jobCancelled": 0,
+      "selftestSkippedSteps": [
+        {
+          "jobId": 131386700946,
+          "job": "docs-python / docs (python fixture)",
+          "step": "task 원장 검사"
+        },
+        {
+          "jobId": 131386701238,
+          "job": "docs-node / docs (node fixture)",
+          "step": "task 원장 검사"
+        }
+      ],
+      "sourceBridge": {
+        "head": "404a586ece08ca0050d844cbe0eee4df5a79f899",
+        "synthetic": "0a5fe47fb118b1a5e2fb19435f3bdef0e0e68b17",
+        "headTree": "1d7fb1c650d0c5d7104aa08277696b56008a1832",
+        "syntheticTree": "1d7fb1c650d0c5d7104aa08277696b56008a1832",
+        "wholeTreeEqual": true,
+        "syntheticParents": [
+          "678a5bcf0150ac0386bfa86106e7e0f4f77e8639",
+          "404a586ece08ca0050d844cbe0eee4df5a79f899"
+        ]
+      },
+      "rawIndex": {
+        "name": "final-index.json",
+        "sha256": "8279167469b43cfbb638d42c4b9838571a78936aecf8d87d643b6881fed8f2fb",
+        "members": 40
+      },
+      "scope": "해당 source의 소유자 수집 원문에서 공개 안전한 실행·해시 필드만 정산. 원 로그·private paths/환경은 출판하지 않는다.",
+      "contrastReport": {
+        "scope": "수집 원문에서 수치 미관측",
+        "allPairsPassed": "NOT_ASSERTED"
+      }
+    },
+    {
+      "source": "8a2c7daaf906097937426e81f1bdd69ce0bdd389",
+      "generation": "8a2c",
+      "collectorOriginal": {
+        "name": "final-receipt.json",
+        "bytes": 13592,
+        "sha256": "bb53d5ac8292523f93e0fdf5bd8f1d70c51d194aca51cb03a520cc6d6f735626"
+      },
+      "status": "ALL_FOUR_PR_WORKFLOWS_AND_FIFTEEN_JOBS_SUCCESS",
+      "workflowRuns": [
+        {
+          "id": 43279055483,
+          "name": "workflows selftest",
+          "head_sha": "8a2c7daaf906097937426e81f1bdd69ce0bdd389",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43279055483",
+          "created_at": "2026-11-12T18:21:58Z",
+          "updated_at": "2026-11-12T18:22:27Z"
+        },
+        {
+          "id": 43279055143,
+          "name": "common frontend",
+          "head_sha": "8a2c7daaf906097937426e81f1bdd69ce0bdd389",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43279055143",
+          "created_at": "2026-11-12T18:21:58Z",
+          "updated_at": "2026-11-12T18:23:32Z"
+        },
+        {
+          "id": 43279055160,
+          "name": "docs",
+          "head_sha": "8a2c7daaf906097937426e81f1bdd69ce0bdd389",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43279055160",
+          "created_at": "2026-11-12T18:21:58Z",
+          "updated_at": "2026-11-12T18:29:44Z"
+        },
+        {
+          "id": 43279055250,
+          "name": "python-package",
+          "head_sha": "8a2c7daaf906097937426e81f1bdd69ce0bdd389",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43279055250",
+          "created_at": "2026-11-12T18:21:58Z",
+          "updated_at": "2026-11-12T18:25:10Z"
+        }
+      ],
+      "jobs": [
+        {
+          "jobId": 131395147595,
+          "jobName": "secret-scan",
+          "runId": 43279055160,
+          "bytes": 24151,
+          "sha256": "8ad0981162bc9e290ff88defd3e1a5d26e4a87311d8c3e1a712ba62b1f17e9f5",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131395148333,
+          "jobName": "docs",
+          "runId": 43279055160,
+          "bytes": 64561,
+          "sha256": "29ef38c71ab694bf30a8fba465b2ae6fc526961cd11d09f376177bcc55bc17ff",
+          "nodeTestSuites": [
+            {
+              "tests": 81,
+              "pass": 81,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "pass": 397,
+              "skip": 3
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true
+        },
+        {
+          "jobId": 131395148336,
+          "jobName": "check-versions",
+          "runId": 43279055160,
+          "bytes": 28733,
+          "sha256": "a35b0c04920923a602cbae7db9d53f5d3b363487c8895de2ec85501e7c624dab",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131395148356,
+          "jobName": "tools (windows-2025)",
+          "runId": 43279055160,
+          "bytes": 65557,
+          "sha256": "0809fe7f904a781419ca9646e2fc4f8364c1660006430411ba3276178a428b31",
+          "nodeTestSuites": [
+            {
+              "tests": 81,
+              "pass": 81,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "pass": 398,
+              "skip": 2
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true
+        },
+        {
+          "jobId": 131395148376,
+          "jobName": "packages",
+          "runId": 43279055160,
+          "bytes": 182640,
+          "sha256": "2afb159157aeb5f9d82d96ab0ceadc43e2468bd04749d512d582a74b5b0657ce",
+          "nodeTestSuites": [
+            {
+              "tests": 81,
+              "pass": 81,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 9,
+              "pass": 9,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 175,
+              "pass": 175,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [
+            101
+          ],
+          "playwrightPassed": [
+            65
+          ],
+          "canonicalRuntimePass": true
+        },
+        {
+          "jobId": 131395148435,
+          "jobName": "tools (ubuntu-24.04)",
+          "runId": 43279055160,
+          "bytes": 63153,
+          "sha256": "ba4229aa2f13885a3725d15090efdb431e4569f45ea772853f64d30118eafa55",
+          "nodeTestSuites": [
+            {
+              "tests": 81,
+              "pass": 81,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "pass": 397,
+              "skip": 3
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true
+        },
+        {
+          "jobId": 131395147096,
+          "jobName": "recovery (3.13)",
+          "runId": 43279055250,
+          "bytes": 26791,
+          "sha256": "b8494e20c1c9d774385ededa312040ed91d377ae05f6a283efb64fa117eb7563",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [
+            661
+          ],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131395147943,
+          "jobName": "recovery (3.11)",
+          "runId": 43279055250,
+          "bytes": 26769,
+          "sha256": "d2efe849775e6da17b6f59670e7ba4680bb5e1b6fc36fc08d436314503e7587c",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [
+            661
+          ],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131395157729,
+          "jobName": "versions-python / versions (python fixture)",
+          "runId": 43279055483,
+          "bytes": 45728,
+          "sha256": "ba61bac3070f0526298c51318fad17d8826a87d8bfbc16d1445099c8de33e12b",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131395158128,
+          "jobName": "contrast-python / contrast (python fixture)",
+          "runId": 43279055483,
+          "bytes": 46245,
+          "sha256": "6f5dda21da190cb73a2b277e25c676d53a209f99cc531fab35ecae76ae0367eb",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131395158338,
+          "jobName": "contrast-node / contrast (node fixture)",
+          "runId": 43279055483,
+          "bytes": 46647,
+          "sha256": "f98c27baeec81af056bfd259f03ce9eae38c37dca9ddafe36f7c42d932280618",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131395158353,
+          "jobName": "docs-python / docs (python fixture)",
+          "runId": 43279055483,
+          "bytes": 43518,
+          "sha256": "3abd717be8d29d060b743b222654ddab48acdaa202c209ab5ee84ab9050f2643",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131395158388,
+          "jobName": "versions-node / versions (node fixture)",
+          "runId": 43279055483,
+          "bytes": 45763,
+          "sha256": "8175c7b02a40054166a6e86c2e2c096b944e811a6855ab0ce91e3433324d5a84",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131395158970,
+          "jobName": "docs-node / docs (node fixture)",
+          "runId": 43279055483,
+          "bytes": 43509,
+          "sha256": "e0dd5680b2bf526b5f8288c0c26e7a065ffa473d1016b86c7e55f093ffc71a58",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131395147171,
+          "jobName": "frontend",
+          "runId": 43279055143,
+          "bytes": 132169,
+          "sha256": "0304e72d8f57bd7e21830325ef817472bb2f7b13af011faee81471a903ff9ec3",
+          "nodeTestSuites": [
+            {
+              "tests": 81,
+              "pass": 81,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 9,
+              "pass": 9,
+              "fail": 0,
+              "skipped": 0
+            },
+            {
+              "tests": 175,
+              "pass": 175,
+              "fail": 0,
+              "skipped": 0
+            }
+          ],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [
+            101
+          ],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true
+        }
+      ],
+      "jobFailures": 0,
+      "jobSkipped": 0,
+      "jobCancelled": 0,
+      "selftestSkippedSteps": [
+        {
+          "jobId": 131395158353,
+          "job": "docs-python / docs (python fixture)",
+          "step": "task 원장 검사"
+        },
+        {
+          "jobId": 131395158970,
+          "job": "docs-node / docs (node fixture)",
+          "step": "task 원장 검사"
+        }
+      ],
+      "sourceBridge": {
+        "head": "8a2c7daaf906097937426e81f1bdd69ce0bdd389",
+        "synthetic": "1e07d8523b67bb5c5d2a2ffdde609e830c3848f3",
+        "headTree": "88ed0d5bf807081732ecc6619d8e553b6abd1047",
+        "syntheticTree": "88ed0d5bf807081732ecc6619d8e553b6abd1047",
+        "wholeTreeEqual": true,
+        "syntheticParents": [
+          "678a5bcf0150ac0386bfa86106e7e0f4f77e8639",
+          "8a2c7daaf906097937426e81f1bdd69ce0bdd389"
+        ]
+      },
+      "rawIndex": {
+        "name": "final-index.json",
+        "sha256": "2b0543cad4156e973fb168317e20da0c5d3973803d96be46dffbd10683ef7939",
+        "members": 38
+      },
+      "scope": "해당 source의 소유자 수집 원문에서 공개 안전한 실행·해시 필드만 정산. 원 로그·private paths/환경은 출판하지 않는다.",
+      "contrastReport": {
+        "scope": "수집 원문에서 수치 미관측",
+        "allPairsPassed": "NOT_ASSERTED"
+      }
+    },
+    {
+      "source": "941d18408c82532e4dc0145daf2f6b3228fd4d4b",
+      "generation": "941d",
+      "collectorOriginal": {
+        "name": "final-receipt.json",
+        "bytes": 14696,
+        "sha256": "ccab2c055cab87f2148ce6bcbdcb60684320190ba5db3c430c881778b1081eac"
+      },
+      "status": "ALL_FOUR_PR_WORKFLOWS_AND_FIFTEEN_JOBS_SUCCESS",
+      "workflowRuns": [
+        {
+          "id": 43283729131,
+          "name": "workflows selftest",
+          "head_sha": "941d18408c82532e4dc0145daf2f6b3228fd4d4b",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43283729131",
+          "created_at": "2026-11-12T18:48:54Z",
+          "updated_at": "2026-11-12T18:49:24Z"
+        },
+        {
+          "id": 43283729146,
+          "name": "common frontend",
+          "head_sha": "941d18408c82532e4dc0145daf2f6b3228fd4d4b",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43283729146",
+          "created_at": "2026-11-12T18:48:54Z",
+          "updated_at": "2026-11-12T18:50:29Z"
+        },
+        {
+          "id": 43283728935,
+          "name": "python-package",
+          "head_sha": "941d18408c82532e4dc0145daf2f6b3228fd4d4b",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43283728935",
+          "created_at": "2026-11-12T18:48:54Z",
+          "updated_at": "2026-11-12T18:52:09Z"
+        },
+        {
+          "id": 43283729576,
+          "name": "docs",
+          "head_sha": "941d18408c82532e4dc0145daf2f6b3228fd4d4b",
+          "event": "pull_request",
+          "run_attempt": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/digitie/kor-travel-common/actions/runs/43283729576",
+          "created_at": "2026-11-12T18:48:54Z",
+          "updated_at": "2026-11-12T18:58:00Z"
+        }
+      ],
+      "jobs": [
+        {
+          "jobId": 131411479773,
+          "jobName": "tools (windows-2025)",
+          "runId": 43283729576,
+          "bytes": 68988,
+          "sha256": "797531a21ac4e9df901358c9ed3497a2b7d9128ff6956755ba63d97dd530258a",
+          "nodeTestSuites": [
+            {
+              "tests": 90,
+              "pass": 90,
+              "fail": 0,
+              "skip": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "pass": 398,
+              "skip": 2
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true
+        },
+        {
+          "jobId": 131411480167,
+          "jobName": "tools (ubuntu-24.04)",
+          "runId": 43283729576,
+          "bytes": 66290,
+          "sha256": "5a02047f6e36ea2f869df1b089a2822d1155dd1b1747348ce1e43e907fd8b02e",
+          "nodeTestSuites": [
+            {
+              "tests": 90,
+              "pass": 90,
+              "fail": 0,
+              "skip": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "pass": 397,
+              "skip": 3
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true
+        },
+        {
+          "jobId": 131411480208,
+          "jobName": "secret-scan",
+          "runId": 43283729576,
+          "bytes": 24155,
+          "sha256": "1c35aed94e6d29337e84a46fed90ed70f28222e7ae418d50b6515775f77bd747",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131411480303,
+          "jobName": "check-versions",
+          "runId": 43283729576,
+          "bytes": 28744,
+          "sha256": "419be75331831e99609c5b07827bfcc9801607130f3e5f6c0d74b8cd0c4fdf73",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131411480325,
+          "jobName": "docs",
+          "runId": 43283729576,
+          "bytes": 67689,
+          "sha256": "224b35b5ceb822e0c9710d433ea5f3493fe1b02e876cf3c051e96f616f13c572",
+          "nodeTestSuites": [
+            {
+              "tests": 90,
+              "pass": 90,
+              "fail": 0,
+              "skip": 0
+            }
+          ],
+          "pythonUnittest": [
+            {
+              "run": 400,
+              "pass": 397,
+              "skip": 3
+            }
+          ],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true
+        },
+        {
+          "jobId": 131411480510,
+          "jobName": "packages",
+          "runId": 43283729576,
+          "bytes": 186335,
+          "sha256": "7fe7df00f0eddef8649db3763cfbb51c9e622090a479ff24cccba2628e8fcc36",
+          "nodeTestSuites": [
+            {
+              "tests": 90,
+              "pass": 90,
+              "fail": 0,
+              "skip": 0
+            },
+            {
+              "tests": 9,
+              "pass": 9,
+              "fail": 0,
+              "skip": 0
+            },
+            {
+              "tests": 175,
+              "pass": 175,
+              "fail": 0,
+              "skip": 0
+            }
+          ],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [
+            101
+          ],
+          "playwrightPassed": [
+            65
+          ],
+          "canonicalRuntimePass": true
+        },
+        {
+          "jobId": 131411483039,
+          "jobName": "contrast-python / contrast (python fixture)",
+          "runId": 43283729131,
+          "bytes": 46267,
+          "sha256": "7825b9848cc357e4c6a0d9c2c2dd0c9bdfec349839c09d30d77154f01ac523fc",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131411483392,
+          "jobName": "docs-node / docs (node fixture)",
+          "runId": 43283729131,
+          "bytes": 43531,
+          "sha256": "8249854b36c3be9293a018a66f9dfa753c7e765ea117cf0581ef3283050b58f6",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131411483479,
+          "jobName": "docs-python / docs (python fixture)",
+          "runId": 43283729131,
+          "bytes": 43542,
+          "sha256": "8f4e34d9ce3e0f6d6133166212c070af7af1615740287f038696884554652858",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131411483702,
+          "jobName": "versions-python / versions (python fixture)",
+          "runId": 43283729131,
+          "bytes": 45749,
+          "sha256": "de33a909e56875c9c4e91aea4081e330fa33808f7daea06f6935c319d651a7fd",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131411483811,
+          "jobName": "contrast-node / contrast (node fixture)",
+          "runId": 43283729131,
+          "bytes": 46669,
+          "sha256": "ec958b2fb1b02c3052c56e30a7c0da551b76a07cdd807d39581577fc4e2fc1b1",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131411483934,
+          "jobName": "versions-node / versions (node fixture)",
+          "runId": 43283729131,
+          "bytes": 45785,
+          "sha256": "fbfb0ab3ab7c2e715606ddb1cbb60c3a1f3fa07da3101724bc0274241d93fc49",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131411478605,
+          "jobName": "frontend",
+          "runId": 43283729146,
+          "bytes": 135485,
+          "sha256": "45473d1d6bdcbf64ae889437b8eeae5984a2e6c5c878b46c03961c6b1c33d57c",
+          "nodeTestSuites": [
+            {
+              "tests": 90,
+              "pass": 90,
+              "fail": 0,
+              "skip": 0
+            },
+            {
+              "tests": 9,
+              "pass": 9,
+              "fail": 0,
+              "skip": 0
+            },
+            {
+              "tests": 175,
+              "pass": 175,
+              "fail": 0,
+              "skip": 0
+            }
+          ],
+          "pythonUnittest": [],
+          "pytestPassed": [],
+          "vitestPassed": [
+            101
+          ],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": true
+        },
+        {
+          "jobId": 131411478294,
+          "jobName": "recovery (3.13)",
+          "runId": 43283728935,
+          "bytes": 26793,
+          "sha256": "8aee2e8a698ba03afdacf5b05395244e2127fd9ed44434a23a3d0d5718888bd7",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [
+            661
+          ],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        },
+        {
+          "jobId": 131411479052,
+          "jobName": "recovery (3.11)",
+          "runId": 43283728935,
+          "bytes": 26967,
+          "sha256": "e476bd315f69846b01dc64bdca73c7d12b523785480ce93da19fd1c78cdf675a",
+          "nodeTestSuites": [],
+          "pythonUnittest": [],
+          "pytestPassed": [
+            661
+          ],
+          "vitestPassed": [],
+          "playwrightPassed": [],
+          "canonicalRuntimePass": false
+        }
+      ],
+      "jobFailures": 0,
+      "jobSkipped": 0,
+      "jobCancelled": 0,
+      "selftestSkippedSteps": [
+        {
+          "jobId": 131411483392,
+          "job": "docs-node / docs (node fixture)",
+          "step": "task 원장 검사"
+        },
+        {
+          "jobId": 131411483479,
+          "job": "docs-python / docs (python fixture)",
+          "step": "task 원장 검사"
+        }
+      ],
+      "sourceBridge": {
+        "head": "941d18408c82532e4dc0145daf2f6b3228fd4d4b",
+        "synthetic": "e7d2611e7146a7658e13eb7ab6879145f1e8a16f",
+        "headTree": "7f6684127ee884d0ab98469c15688c23b4c2044f",
+        "syntheticTree": "7f6684127ee884d0ab98469c15688c23b4c2044f",
+        "wholeTreeEqual": true,
+        "syntheticParents": [
+          "678a5bcf0150ac0386bfa86106e7e0f4f77e8639",
+          "941d18408c82532e4dc0145daf2f6b3228fd4d4b"
+        ]
+      },
+      "rawIndex": {
+        "name": "final-index.json",
+        "sha256": "f5976e4d0ede7a0c4a1337b3713ea069d9ecb65f3d38c95ef6569ace29bfa4aa",
+        "members": 45
+      },
+      "scope": "해당 source의 소유자 수집 원문에서 공개 안전한 실행·해시 필드만 정산. 원 로그·private paths/환경은 출판하지 않는다.",
+      "contrastReport": {
+        "scope": "수집 원문에서 수치 미관측",
+        "allPairsPassed": "NOT_ASSERTED"
+      }
+    }
+  ],
+  "contrastReportScope": "report fixture의 job 성공은 모든 대비 pair 통과를 뜻하지 않는다. source별 원 수집 증거가 구분한 수치/미관측을 유지하며 원본 SHA로 연결한다.",
+  "closureHeadCI": "아직 실행하지 않음. 부모 push 뒤 최종 closure head에 대한 실제 exact CI를 별도로 수집한다."
+}

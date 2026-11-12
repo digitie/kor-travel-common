@@ -1,0 +1,175 @@
+{
+  "state": "IDENTICAL_ORIGINAL_AB_CANDIDATE4_INPUT",
+  "source": "8a2c7daaf906097937426e81f1bdd69ce0bdd389",
+  "base": "678a5bcf0150ac0386bfa86106e7e0f4f77e8639",
+  "previousBlockedSource": "404a586ece08ca0050d844cbe0eee4df5a79f899",
+  "tree": "88ed0d5bf807081732ecc6619d8e553b6abd1047",
+  "paths": [
+    {
+      "path": ".github/workflows/consumer-smoke.yml",
+      "bytes": 6098,
+      "sha256": "f499c6f7ab4f7e1efae50a905f63f454f880c38c8aaac8d99643eb2698d510e4",
+      "blob": "2a06c0b49c69a35cb26019fba0d072ccb9ff3de6"
+    },
+    {
+      "path": ".github/workflows/docs.yml",
+      "bytes": 12998,
+      "sha256": "cc901d23c936901d16c22dd752e83bf2a4bff6adc29fe28cf7a7a8a6433bd8d7",
+      "blob": "ace69178a5f0d5d87dcb75e6eca9f97ceceb5eab"
+    },
+    {
+      "path": ".github/workflows/frontend-consumer-guard.yml",
+      "bytes": 4765,
+      "sha256": "b81bfd43f82dfc57b0fa9816dc3aa441dc081e1353a5d8c23a332823f9656863",
+      "blob": "97f2feebb96dbacacc763830db53664095b9c321"
+    },
+    {
+      "path": ".github/workflows/frontend.yml",
+      "bytes": 1062,
+      "sha256": "34189a5d831031f1f6b8774e0a3460b8f493c7add748205f6da23f0e63d79e9a",
+      "blob": "e712b22bc9fa85a0af1b57504d0f0b1d28a89cb0"
+    },
+    {
+      "path": ".npmrc",
+      "bytes": 19,
+      "sha256": "7151cf397def0c2cb0ab65643701d27d335a72c90f775675b5f826bc7005818a",
+      "blob": "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad"
+    },
+    {
+      "path": "docs/adr/018-exact-node-npm-build-toolchain.md",
+      "bytes": 3230,
+      "sha256": "a4ab779b13941f1710258e342d1712649302d153c95e2638792df6141d7e1c89",
+      "blob": "f496c4526680763e8564162634f851ec11914f1b"
+    },
+    {
+      "path": "docs/adr/README.md",
+      "bytes": 5340,
+      "sha256": "09edf3bd2caad5631e6343e3a80176d8f0a1688d19fc79881f3874ec5ccefb4e",
+      "blob": "5f1fa91109a49183f2d4bd53f92ad10885dbfdd9"
+    },
+    {
+      "path": "docs/dev-environment.md",
+      "bytes": 11738,
+      "sha256": "6f215ba54386e5926a0a93e903a3494bb1d57220a728b193920fafdfbe6f56ac",
+      "blob": "32b86b771c6f94f9affcd134c27d8c203f609f17"
+    },
+    {
+      "path": "docs/journal.md",
+      "bytes": 110410,
+      "sha256": "06883650b0108c94367e28aaee9a17c2f12caed6c2384f49676d5d6b861555e5",
+      "blob": "e7081b724ca12412be5a80a3801b1c1c397f0f45"
+    },
+    {
+      "path": "docs/resume.md",
+      "bytes": 38319,
+      "sha256": "f488c702b2771a902a4b03d5eba345ec713347a773678d3b4ca609a9516e7404",
+      "blob": "d0c0311978d9a4d3f5f6de014c257c28111b2a2b"
+    },
+    {
+      "path": "docs/standards/ci-deploy.md",
+      "bytes": 35960,
+      "sha256": "803ca81065264a6e51eb5141329f93e6e6a46c83c31358e6de473cf302a00695",
+      "blob": "9ef1c48c0bb315839de3737b2107024467f137fa"
+    },
+    {
+      "path": "docs/standards/frontend-stack.md",
+      "bytes": 20839,
+      "sha256": "d4999a777755eb4aa31f5bd0e592f56c49590124eed94f38ec78d4d963aa04d2",
+      "blob": "f16dc7f6bbc8a9958ce3da3ba2ffa6a056889ad1"
+    },
+    {
+      "path": "docs/standards/versions.md",
+      "bytes": 37818,
+      "sha256": "50a1183f2f663d01fca51b16fa068c20ccdd62c8a735988fec56a9420d8fb172",
+      "blob": "318de1461b4c1611c945b39951b757687c99e4ba"
+    },
+    {
+      "path": "docs/tasks/T-218-radix-library-unification.md",
+      "bytes": 7744,
+      "sha256": "3549bd08018c61aa3a84e9dcc73dac7fd7a29006ec344a018620d34e2718bfaa",
+      "blob": "1ce502fb35581ea67d52dd256ebe405043e670cd"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 329530,
+      "sha256": "dd86452678bbf343e7110e40a1ddbdded414e6ae3d4d1ceba0b6f85d68486c29",
+      "blob": "29f1679fedb5e063b47321945ee44aed98c09556"
+    },
+    {
+      "path": "package.json",
+      "bytes": 1411,
+      "sha256": "7d0bfcdc70e00af90d90a1b114350a9bf9ff7ee925b3a8b305c7c4af506d7b2c",
+      "blob": "4a763e1cb0015fc143d6cd19ffe95aa1afebcccc"
+    },
+    {
+      "path": "templates/consumer-adoption-checklist.md",
+      "bytes": 4938,
+      "sha256": "9b2e39b7551692e79efd088474b97f141833d86abb0c91d6636b19e728799926",
+      "blob": "96af609dce9270fe71bd850a86cd6f3dde49e916"
+    },
+    {
+      "path": "tests/check_node_toolchain.test.mjs",
+      "bytes": 24751,
+      "sha256": "932ee056ed08bf6d7d55d095bd78ba122bc4f83fd0f1583456ad95a5eb9fbdc8",
+      "blob": "8e867598aaf770ecd0853e42204cf7ff91e9cf5f"
+    },
+    {
+      "path": "tools/README.md",
+      "bytes": 7565,
+      "sha256": "7f65af294352898a7b92114ec72c7cdaad5f23162089fd392a8ce04a794b8400",
+      "blob": "5b58c39bec3dc9f39d8115fb34fc72f08c42129a"
+    },
+    {
+      "path": "tools/check_node_toolchain.mjs",
+      "bytes": 15036,
+      "sha256": "0b610814968955c6c822553316ac034cad28ee9415695894b38ef17a1932c226",
+      "blob": "acdbcbe361d78a73fa4f09c3f9c4aab049fdde62"
+    },
+    {
+      "path": "versions.json",
+      "bytes": 26838,
+      "sha256": "39fae4d28f0533d835f99339ee70e01ff36af0aaefce1d5bc5f3489bb765b04b",
+      "blob": "e5cc1ac8b0b414859f8930863f75f0783aee63b4"
+    }
+  ],
+  "postfixPaths": [
+    "docs/journal.md",
+    "tests/check_node_toolchain.test.mjs",
+    "tools/check_node_toolchain.mjs"
+  ],
+  "ownerEvidence": "validation/common-cache-path-followup-404a-20261113",
+  "dependencySnapshot": "validation/phase2-common-build-rules-candidate3-20261113/immutable-3cdaeb79f759",
+  "dependency": {
+    "scope": "Common private root only; not added to apps/public packages",
+    "version": "ini@7.0.0",
+    "license": "ISC",
+    "SRI": "sha512-ifK0CgjALofS5bkrcTy4RaQ9Vx2Knf/eLeIO+NaswQEpH1UblrtTSCIvN71qQDMq0PeQ/SSPojvEJp9vvvfr+w==",
+    "metadataSourceRef": {
+      "file": "validation/phase2-build-toolchain-20261113/ini-official-latest-metadata.json",
+      "sha256": "15cacf3f1bc210d92adc057c8477569fe3c01e5696cf823c7442c6236f5c5673"
+    },
+    "verifiedInstalledFiles": {
+      "README.md": "8d1844511493947f9be309d2eb6db97b3ecc83840009aef4f3dfcf920df8bc4c",
+      "package.json": "8fa8b0d70252d57858bae47eae4d4b8d19c83f316dddd0d4565f5626cc51e194",
+      "LICENSE": "4ec3d4c66cd87f5c8d8ad911b10f99bf27cb00cdfcff82621956e379186b016b",
+      "lib/ini.js": "007123836ffec243f41c8b35584fb3db0498aa12a440a9e0efc675d0000f4c32"
+    },
+    "actualNpm12BundledParserSame": {
+      "version": "7.0.0",
+      "bundledNpm12ParserSHA256": "007123836ffec243f41c8b35584fb3db0498aa12a440a9e0efc675d0000f4c32",
+      "sameAsRegistryPackage": true
+    },
+    "manualINILexerOrFallback": false,
+    "fixtureInstructions": "source·package/lock·node_modules/ini 4개 파일을 같은 snapshot 구조로 사용한다. npm ci 또는 SRI 검증된 package 설치가 필요하며, builtin runner만으로 dependency 없는 실행이라고 주장하지 않는다."
+  },
+  "parentVerified": {
+    "canonicalSourceAndDependencyInputs": 11,
+    "logs": 4,
+    "sameConsumerStaticInputs": 7,
+    "fullThreePathDeltaRead": true
+  },
+  "priorABVerdicts": "BLOCK_PRESERVED",
+  "newVerdicts": "PENDING",
+  "workflowOrderOptimization": "NOT_STARTED",
+  "canonical81Bridge": "Source7 and installedINI4 match immutable Git/snapshot; actual22.23.1/npm12 four logs verified; allseven unchanged consumer inputs pass static; not app/newimage/runtime acceptance"
+}

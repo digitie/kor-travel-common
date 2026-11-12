@@ -1,0 +1,290 @@
+{
+  "kind": "원문 신원과 한국어 공개 정산의 보존 원장",
+  "source": "941d18408c82532e4dc0145daf2f6b3228fd4d4b",
+  "reviewerOriginals": [
+    {
+      "reviewer": "A",
+      "generation": "c4cc",
+      "source": "c4cc78781638808490c0ea540fbb38200b577346",
+      "originalName": "review-A-common-build-rules-c4cc-1.md",
+      "bytes": 12287,
+      "sha256": "87ceded53ac283ec11a6f39092778c8279dc0a1489b12abd23ff82eb876fbff2",
+      "sameManifestSHA256": "97c799ad0a4da4a2c1ca2056625a19450d894c09f94c5f5c1af0f8ec1883d5d3",
+      "publicOriginal": {
+        "file": "review-A-common-build-rules-c4cc-1.md",
+        "bytes": 12287,
+        "sha256": "87ceded53ac283ec11a6f39092778c8279dc0a1489b12abd23ff82eb876fbff2"
+      },
+      "publication": "원문 bytes 그대로 공개 보존",
+      "normalizedVerdict": "BLOCK"
+    },
+    {
+      "reviewer": "B",
+      "generation": "c4cc",
+      "source": "c4cc78781638808490c0ea540fbb38200b577346",
+      "originalName": "review-B-common-build-rules-c4cc-1.md",
+      "bytes": 13238,
+      "sha256": "1b4cb2d6be65b7c07e5554b5a67bd6ae8a7926edf2943ef3aee7cf3c0abd16f5",
+      "sameManifestSHA256": "97c799ad0a4da4a2c1ca2056625a19450d894c09f94c5f5c1af0f8ec1883d5d3",
+      "publicOriginal": {
+        "file": "review-B-common-build-rules-c4cc-1.md",
+        "bytes": 13238,
+        "sha256": "1b4cb2d6be65b7c07e5554b5a67bd6ae8a7926edf2943ef3aee7cf3c0abd16f5"
+      },
+      "publication": "원문 bytes 그대로 공개 보존",
+      "normalizedVerdict": "BLOCK"
+    },
+    {
+      "reviewer": "A",
+      "generation": "e1d0",
+      "source": "e1d0f01ef05b913e5f311a4d3ae2922a25a676c3",
+      "originalName": "review-A-common-build-rules-e1d0-2.md",
+      "bytes": 11546,
+      "sha256": "2946611646e7b69de45ef4d8373228da7daff215e6b25a434f6d5c2f18d0856b",
+      "sameManifestSHA256": "5b391bc0200766c2cb9ed68fb4940924ccdd2f545b729aa9455e857d8af944f8",
+      "publicOriginal": {
+        "file": "review-A-common-build-rules-e1d0-2.md",
+        "bytes": 11546,
+        "sha256": "2946611646e7b69de45ef4d8373228da7daff215e6b25a434f6d5c2f18d0856b"
+      },
+      "publication": "원문 bytes 그대로 공개 보존",
+      "normalizedVerdict": "BLOCK"
+    },
+    {
+      "reviewer": "B",
+      "generation": "e1d0",
+      "source": "e1d0f01ef05b913e5f311a4d3ae2922a25a676c3",
+      "originalName": "review-B-common-build-rules-e1d0-2.md",
+      "bytes": 12250,
+      "sha256": "93035c446b6cc75dca38e4170328e51cc9c342ddfc3400180de9a6aa84f3b00d",
+      "sameManifestSHA256": "5b391bc0200766c2cb9ed68fb4940924ccdd2f545b729aa9455e857d8af944f8",
+      "publicOriginal": {
+        "file": "review-B-common-build-rules-e1d0-2.md",
+        "bytes": 12250,
+        "sha256": "93035c446b6cc75dca38e4170328e51cc9c342ddfc3400180de9a6aa84f3b00d"
+      },
+      "publication": "원문 bytes 그대로 공개 보존",
+      "normalizedVerdict": "BLOCK"
+    },
+    {
+      "reviewer": "A",
+      "generation": "404a",
+      "source": "404a586ece08ca0050d844cbe0eee4df5a79f899",
+      "originalName": "review-A-common-build-rules-404a-3.md",
+      "bytes": 13283,
+      "sha256": "07937849d26beb960b2965a375dc0ff10c3a70c9d3ffc009510cedd45ee36c85",
+      "sameManifestSHA256": "8f490c18ac2db2bbe7249d3b5b1a58f196875ea90300a77e8ad851b23cc56732",
+      "publicOriginal": {
+        "file": "review-A-common-build-rules-404a-3.md",
+        "bytes": 13283,
+        "sha256": "07937849d26beb960b2965a375dc0ff10c3a70c9d3ffc009510cedd45ee36c85"
+      },
+      "publication": "원문 bytes 그대로 공개 보존",
+      "normalizedVerdict": "BLOCK"
+    },
+    {
+      "reviewer": "B",
+      "generation": "404a",
+      "source": "404a586ece08ca0050d844cbe0eee4df5a79f899",
+      "originalName": "review-B-common-build-rules-404a-3.md",
+      "bytes": 12829,
+      "sha256": "d7fd177d748de6ca1d8616321a21cc13743eddfd307b8d8811e62075ec999e5f",
+      "sameManifestSHA256": "8f490c18ac2db2bbe7249d3b5b1a58f196875ea90300a77e8ad851b23cc56732",
+      "publicOriginal": {
+        "file": "review-B-common-build-rules-404a-3.md",
+        "bytes": 12829,
+        "sha256": "d7fd177d748de6ca1d8616321a21cc13743eddfd307b8d8811e62075ec999e5f"
+      },
+      "publication": "원문 bytes 그대로 공개 보존",
+      "normalizedVerdict": "BLOCK"
+    },
+    {
+      "reviewer": "A",
+      "generation": "8a2c",
+      "source": "8a2c7daaf906097937426e81f1bdd69ce0bdd389",
+      "originalName": "review-A-common-build-rules-8a2c-4.md",
+      "bytes": 9907,
+      "sha256": "55d45db3eafc7375085d3caa4de02b662e85e050f71cbe144800bf59dac535b1",
+      "sameManifestSHA256": "116da46fb3b94f0d3c49ec7fdc40e8e993abd719327131ba69d24190392c9e9a",
+      "publicOriginal": {
+        "file": "review-A-common-build-rules-8a2c-4.md",
+        "bytes": 9907,
+        "sha256": "55d45db3eafc7375085d3caa4de02b662e85e050f71cbe144800bf59dac535b1"
+      },
+      "publication": "원문 bytes 그대로 공개 보존",
+      "normalizedVerdict": "BLOCK"
+    },
+    {
+      "reviewer": "B",
+      "generation": "8a2c",
+      "source": "8a2c7daaf906097937426e81f1bdd69ce0bdd389",
+      "originalName": "review-B-common-build-rules-8a2c-4.md",
+      "bytes": 8747,
+      "sha256": "27ec815f13f8c3dbdb284416dd0b80ba3b635cda53ab4491d86aa12a4dc5ef33",
+      "sameManifestSHA256": "116da46fb3b94f0d3c49ec7fdc40e8e993abd719327131ba69d24190392c9e9a",
+      "publicOriginal": {
+        "file": "review-B-common-build-rules-8a2c-4.md",
+        "bytes": 8747,
+        "sha256": "27ec815f13f8c3dbdb284416dd0b80ba3b635cda53ab4491d86aa12a4dc5ef33"
+      },
+      "publication": "원문 bytes 그대로 공개 보존",
+      "normalizedVerdict": "CONDITIONAL"
+    },
+    {
+      "reviewer": "A",
+      "generation": "941d",
+      "source": "941d18408c82532e4dc0145daf2f6b3228fd4d4b",
+      "originalName": "review-A-common-build-rules-941d-5.md",
+      "bytes": 11025,
+      "sha256": "1d3b3b2d5b53b52756f273a2c6ae8b8827d91bce83bdd5e33ab146eee88f70ba",
+      "sameManifestSHA256": "f36116ef4cdbafb54b386db5f1db0e0da0ee976d3a9affc78f16f35710bb9f3b",
+      "publication": "비공개 원문 불변 보존; 공개 SHA와 한국어 정산",
+      "reason": "별도 진행 중인 프로젝트의 독립 검토 관찰·로컬 증거 참조가 함께 있어 범위 밖 공개와 검토 간 정보 공유를 막는다. 원문에 마스킹·수정을 가하지 않는다.",
+      "publicNote": "reviewer-A-941d-public-note.md",
+      "normalizedVerdict": "SOURCE_PASS"
+    },
+    {
+      "reviewer": "B",
+      "generation": "941d",
+      "source": "941d18408c82532e4dc0145daf2f6b3228fd4d4b",
+      "originalName": "review-B-common-build-rules-941d-5.md",
+      "bytes": 8565,
+      "sha256": "bedf32722e6e43e6a56327eb851b23e7c04a98e7cff631bc33466ca0a86bcb48",
+      "sameManifestSHA256": "f36116ef4cdbafb54b386db5f1db0e0da0ee976d3a9affc78f16f35710bb9f3b",
+      "publication": "비공개 원문 불변 보존; 공개 SHA와 한국어 정산",
+      "reason": "별도 진행 중인 프로젝트의 독립 검토 관찰·로컬 증거 참조가 함께 있어 범위 밖 공개와 검토 간 정보 공유를 막는다. 원문에 마스킹·수정을 가하지 않는다.",
+      "publicNote": "reviewer-B-941d-public-note.md",
+      "normalizedVerdict": "SOURCE_PASS"
+    }
+  ],
+  "sameReviewManifests": [
+    {
+      "file": "manifest-c4cc.json",
+      "bytes": 5107,
+      "sha256": "97c799ad0a4da4a2c1ca2056625a19450d894c09f94c5f5c1af0f8ec1883d5d3",
+      "source": "c4cc78781638808490c0ea540fbb38200b577346",
+      "tree": "3e7334d476d36c55eaf14b37d32a6f5c9856b5ef",
+      "kind": "동일 원 A/B에게 전달한 manifest 원본; 당시 pending을 수정하지 않음"
+    },
+    {
+      "file": "manifest-e1d0.json",
+      "bytes": 5252,
+      "sha256": "5b391bc0200766c2cb9ed68fb4940924ccdd2f545b729aa9455e857d8af944f8",
+      "source": "e1d0f01ef05b913e5f311a4d3ae2922a25a676c3",
+      "tree": "aea8c2ad8a7b6ffc6550d7a576c01d50551b8bb1",
+      "kind": "동일 원 A/B에게 전달한 manifest 원본; 당시 pending을 수정하지 않음"
+    },
+    {
+      "file": "manifest-404a.json",
+      "bytes": 7345,
+      "sha256": "8f490c18ac2db2bbe7249d3b5b1a58f196875ea90300a77e8ad851b23cc56732",
+      "source": "404a586ece08ca0050d844cbe0eee4df5a79f899",
+      "tree": "1d7fb1c650d0c5d7104aa08277696b56008a1832",
+      "kind": "동일 원 A/B에게 전달한 manifest 원본; 당시 pending을 수정하지 않음"
+    },
+    {
+      "file": "manifest-8a2c.json",
+      "bytes": 7081,
+      "sha256": "116da46fb3b94f0d3c49ec7fdc40e8e993abd719327131ba69d24190392c9e9a",
+      "source": "8a2c7daaf906097937426e81f1bdd69ce0bdd389",
+      "tree": "88ed0d5bf807081732ecc6619d8e553b6abd1047",
+      "kind": "동일 원 A/B에게 전달한 manifest 원본; 당시 pending을 수정하지 않음"
+    },
+    {
+      "file": "manifest-941d.json",
+      "bytes": 7337,
+      "sha256": "f36116ef4cdbafb54b386db5f1db0e0da0ee976d3a9affc78f16f35710bb9f3b",
+      "source": "941d18408c82532e4dc0145daf2f6b3228fd4d4b",
+      "tree": "7f6684127ee884d0ab98469c15688c23b4c2044f",
+      "kind": "동일 원 A/B에게 전달한 manifest 원본; 당시 pending을 수정하지 않음"
+    }
+  ],
+  "safeImmutableProofs": [
+    {
+      "file": "runtime90-source-proof.json",
+      "bytes": 3016,
+      "sha256": "a6622f94f2a8b33539d85bf22a18c256f5c2b8b05a4d863f24fc08c9bdb93b5d"
+    },
+    {
+      "file": "shell-quote-dependency-proof.json",
+      "bytes": 1988,
+      "sha256": "c62da1032ce5572a6c13c22483b407b650ec094576ed82827a6566f69bb945c5"
+    },
+    {
+      "file": "ini-dependency-proof.json",
+      "bytes": 838,
+      "sha256": "70bf7c6940202cec9115cd52e1dd13a15a94728dcfcf8806d1b6f5b44544917a"
+    },
+    {
+      "file": "public193-invariance-proof.json",
+      "bytes": 31518,
+      "sha256": "ac57c41d58e99cf899c1dacf5bd838563ccf89d90fdfaabb9a4e3d7c6968845a"
+    }
+  ],
+  "canonicalEvidence": [
+    {
+      "tests": "47",
+      "originalName": "canonical-final47-receipt.json",
+      "bytes": 1211,
+      "sha256": "70867b76f506eda17afefcc1d16131bf49e49638d0e8275a4bd969291a1fa75a",
+      "kind": "private 실행 원본의 신원; 실제 경로는 비공개"
+    },
+    {
+      "tests": "76",
+      "originalName": "canonical-runtime-receipt.json",
+      "bytes": 3977,
+      "sha256": "71962713f06c46da179624ac2b7254442132b28037abdafa71e4cf38b2de7a59",
+      "kind": "private 실행 원본의 신원; 실제 경로는 비공개"
+    },
+    {
+      "tests": "81",
+      "originalName": "canonical81-receipt.json",
+      "bytes": 2357,
+      "sha256": "5d71205c2cfb7c62b192280a4a2756ccfbb5d637af6217c8a102b656fba53066",
+      "kind": "private 실행 원본의 신원; 실제 경로는 비공개"
+    },
+    {
+      "tests": "90",
+      "originalName": "canonical90-r2-receipt.json",
+      "bytes": 3353,
+      "sha256": "015cbccecfb7013a95c73ae2b8eff103469570afa3443b5a03f67ef1757aab46",
+      "kind": "private 실행 원본의 신원; 실제 경로는 비공개"
+    },
+    {
+      "tests": "62",
+      "collectorBoundProof": {
+        "head": "e1d0f01ef05b913e5f311a4d3ae2922a25a676c3",
+        "sevenSourceInputHashesEqual": {
+          "package.json": "1458d9732b1b824536f210efce9eb16a29e1e01dccb99911c8b55ce58d809430",
+          "package-lock.json": "3b02855a83e6656a710c8568728175eae12f1219f23fce8c68b3b838e46cc80d",
+          ".nvmrc": "7d2df647f25529bd87500319c41564e032e2be642e565350fa6136d7a1ec4d10",
+          ".npmrc": "7151cf397def0c2cb0ab65643701d27d335a72c90f775675b5f826bc7005818a",
+          "versions.json": "39fae4d28f0533d835f99339ee70e01ff36af0aaefce1d5bc5f3489bb765b04b",
+          "tools/check_node_toolchain.mjs": "231dbc30b3596a29dc54d368b3c806a650166905bd143b54ec1f268b0dd40106",
+          "tests/check_node_toolchain.test.mjs": "7468f0dfa5bfd1506fb952ade2ff2b51e2273f729d2381810d521511da6b21a5"
+        },
+        "runtime": "Node22.23.1/npm12.0.1 actual npm run PASS",
+        "tests": {
+          "pass": 62,
+          "fail": 0,
+          "skip": 0
+        },
+        "canonicalReceiptSHA256": "93736ec9637ece7a6b355f46cc398ac6f9128230ec74b01a9fc873610594b977",
+        "canonicalLogsSHA256": {
+          "node-version": "b8139b18707113247bd3eba5bff8ee50ed8f6bfd5076113805af4e414abfdf23",
+          "npm-version": "3ff126c75050b6f2b69c7ca88bd8a0e76d36646db66f52245e32be93d09273aa",
+          "runtime": "dd4f8090a36091005a24fccfbcd9d54ca94423770d308778017a62d3ae718482",
+          "builtin": "ed0a1943ebd39d2fbf9c91ce6e72a6f4a5eed987c0149b63380548ef27dfa0cc"
+        }
+      },
+      "kind": "해당 source collector가 canonical 실행에 결합한 입력·로그 해시. CI 자체 실행과 분리"
+    }
+  ],
+  "latestCIOriginal": {
+    "sha256": "ccab2c055cab87f2148ce6bcbdcb60684320190ba5db3c430c881778b1081eac",
+    "rawMembers": 45,
+    "jobLogs": 15
+  },
+  "languageNote": "공개된 review 원문의 영어·한자 표현은 인용 원문 그대로다. 적용·판정과 비공개 사유는 한국어 통합 보고서/메모에서 설명한다.",
+  "retention": "원본10개는 SHA별 byte 불변. 공개8개·비공개2개, 동일 manifest5개는 공개 byte-copy. 과거 BLOCK/CONDITIONAL/pending을 후속 PASS로 덮어쓰지 않는다."
+}

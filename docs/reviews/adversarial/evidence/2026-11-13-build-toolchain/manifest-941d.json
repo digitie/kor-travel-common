@@ -1,0 +1,191 @@
+{
+  "state": "IDENTICAL_ORIGINAL_AB_CANDIDATE5_INPUT",
+  "source": "941d18408c82532e4dc0145daf2f6b3228fd4d4b",
+  "tree": "7f6684127ee884d0ab98469c15688c23b4c2044f",
+  "base": "678a5bcf0150ac0386bfa86106e7e0f4f77e8639",
+  "previousBlockedSource": "8a2c7daaf906097937426e81f1bdd69ce0bdd389",
+  "paths": [
+    {
+      "path": ".github/workflows/consumer-smoke.yml",
+      "bytes": 6098,
+      "sha256": "f499c6f7ab4f7e1efae50a905f63f454f880c38c8aaac8d99643eb2698d510e4",
+      "blob": "2a06c0b49c69a35cb26019fba0d072ccb9ff3de6"
+    },
+    {
+      "path": ".github/workflows/docs.yml",
+      "bytes": 12998,
+      "sha256": "cc901d23c936901d16c22dd752e83bf2a4bff6adc29fe28cf7a7a8a6433bd8d7",
+      "blob": "ace69178a5f0d5d87dcb75e6eca9f97ceceb5eab"
+    },
+    {
+      "path": ".github/workflows/frontend-consumer-guard.yml",
+      "bytes": 4765,
+      "sha256": "b81bfd43f82dfc57b0fa9816dc3aa441dc081e1353a5d8c23a332823f9656863",
+      "blob": "97f2feebb96dbacacc763830db53664095b9c321"
+    },
+    {
+      "path": ".github/workflows/frontend.yml",
+      "bytes": 1062,
+      "sha256": "34189a5d831031f1f6b8774e0a3460b8f493c7add748205f6da23f0e63d79e9a",
+      "blob": "e712b22bc9fa85a0af1b57504d0f0b1d28a89cb0"
+    },
+    {
+      "path": ".npmrc",
+      "bytes": 19,
+      "sha256": "7151cf397def0c2cb0ab65643701d27d335a72c90f775675b5f826bc7005818a",
+      "blob": "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad"
+    },
+    {
+      "path": "docs/adr/018-exact-node-npm-build-toolchain.md",
+      "bytes": 3280,
+      "sha256": "b0fb4fa592a744e31eb729895953694b315588a030a62459d072e48382a26cb1",
+      "blob": "d97bf9244985ea4cdcf0cc48cbe2906c16311e3a"
+    },
+    {
+      "path": "docs/adr/README.md",
+      "bytes": 5340,
+      "sha256": "09edf3bd2caad5631e6343e3a80176d8f0a1688d19fc79881f3874ec5ccefb4e",
+      "blob": "5f1fa91109a49183f2d4bd53f92ad10885dbfdd9"
+    },
+    {
+      "path": "docs/dev-environment.md",
+      "bytes": 11781,
+      "sha256": "a668bbbea5cb2241494e0559b33154a49ba90c7489e76c089beba3955b751678",
+      "blob": "fc823b65d37317eed5026dba5aec8afde2bbf628"
+    },
+    {
+      "path": "docs/journal.md",
+      "bytes": 111338,
+      "sha256": "3cecd3a2fc6bf97b84346a18f5bd800f0e4be83f1c57db356095f1cb2a3ee0c1",
+      "blob": "6e01dd09a74ae276b739e1ad0ff85b597e5d06e2"
+    },
+    {
+      "path": "docs/resume.md",
+      "bytes": 38823,
+      "sha256": "b17a6eb56c85103d7758e43d8a6a763f49442e3591bcfa3adeda0373dc339207",
+      "blob": "103e3de3c6356d33643a6489c3e8573cb1fe4f0b"
+    },
+    {
+      "path": "docs/standards/ci-deploy.md",
+      "bytes": 35960,
+      "sha256": "803ca81065264a6e51eb5141329f93e6e6a46c83c31358e6de473cf302a00695",
+      "blob": "9ef1c48c0bb315839de3737b2107024467f137fa"
+    },
+    {
+      "path": "docs/standards/frontend-stack.md",
+      "bytes": 20839,
+      "sha256": "d4999a777755eb4aa31f5bd0e592f56c49590124eed94f38ec78d4d963aa04d2",
+      "blob": "f16dc7f6bbc8a9958ce3da3ba2ffa6a056889ad1"
+    },
+    {
+      "path": "docs/standards/versions.md",
+      "bytes": 38477,
+      "sha256": "c814d57396c594900d25dd7c995649ee084927e9297928087d3d327d428d1b40",
+      "blob": "2f92100d2ad3bb1b69c9f73e1b8a66351758bbb8"
+    },
+    {
+      "path": "docs/tasks/T-218-radix-library-unification.md",
+      "bytes": 7780,
+      "sha256": "fd792553f5e736d9e497e1cfedc5e4b8b44bde65e097c906e44a2c16f50f31ee",
+      "blob": "3cd2b0845d1348efb0eedb82a9de50d9d69505e7"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 330009,
+      "sha256": "1176f4554c1a537a03e565c8364ab23861dba36bfed15ad03e1768865580d128",
+      "blob": "ecae1fc3734008fce5234da20108239d598ed45b"
+    },
+    {
+      "path": "package.json",
+      "bytes": 1440,
+      "sha256": "6d3f78e5bc4f2545416425159eb6fae67222e108583ce0862baa3ff67fccd477",
+      "blob": "394518b147f373bd6a3f8503de1efbc21c1da3b4"
+    },
+    {
+      "path": "templates/consumer-adoption-checklist.md",
+      "bytes": 4938,
+      "sha256": "9b2e39b7551692e79efd088474b97f141833d86abb0c91d6636b19e728799926",
+      "blob": "96af609dce9270fe71bd850a86cd6f3dde49e916"
+    },
+    {
+      "path": "tests/check_node_toolchain.test.mjs",
+      "bytes": 27978,
+      "sha256": "e234a00e150bbf1527c1a59b230d41bdbf7ea806e5168cadb52734b0c40a83ab",
+      "blob": "14befcf454282eb952a3cfab1a36629e9f65105e"
+    },
+    {
+      "path": "tools/README.md",
+      "bytes": 8091,
+      "sha256": "211f808947c0511b34d372d9939c23e82c544ef1b0ec01f29c74e8df33e56ac4",
+      "blob": "c72d68f92095247c262129fd4549bca1fd561e0c"
+    },
+    {
+      "path": "tools/check_node_toolchain.mjs",
+      "bytes": 16559,
+      "sha256": "0405b663f822fd3dca718de9c44b2cec2759d775e922ba3b568e4ed4be6b3163",
+      "blob": "4991bf56ddc3e6675dd316d51b5c73aef61283b7"
+    },
+    {
+      "path": "versions.json",
+      "bytes": 26838,
+      "sha256": "39fae4d28f0533d835f99339ee70e01ff36af0aaefce1d5bc5f3489bb765b04b",
+      "blob": "e5cc1ac8b0b414859f8930863f75f0783aee63b4"
+    }
+  ],
+  "postfixPaths": [
+    "docs/adr/018-exact-node-npm-build-toolchain.md",
+    "docs/dev-environment.md",
+    "docs/journal.md",
+    "docs/resume.md",
+    "docs/standards/versions.md",
+    "docs/tasks/T-218-radix-library-unification.md",
+    "package-lock.json",
+    "package.json",
+    "tests/check_node_toolchain.test.mjs",
+    "tools/README.md",
+    "tools/check_node_toolchain.mjs"
+  ],
+  "ownerEvidence": "validation/common-command-data-candidate5-20261113",
+  "dependencySnapshot": "validation/review-common-build-rules-941d-20261113/locked-deps",
+  "dependencies": [
+    {
+      "name": "ini",
+      "version": "7.0.0",
+      "license": "ISC",
+      "files": 4
+    },
+    {
+      "name": "shell-quote",
+      "version": "1.12.0",
+      "license": "MIT",
+      "files": 11,
+      "integrity": "sha512-PcByqNyT/38F2kDNi006HAMRJaULuBzq/FOsw3qdZvX/GA9W/jamDaRskgHjubHiftXK5sIFxLNkvrXUwcof6Q==",
+      "metadata": "validation/phase2-build-toolchain-20261113/shell-quote-official-latest-metadata.json"
+    }
+  ],
+  "parentVerified": {
+    "sourceAndDependencyInputs": 22,
+    "canonicalLogs": 4,
+    "shellQuoteSRIAnd11TarMembers": true,
+    "otherRootLockFullDeepEqual8a2": true,
+    "full11PathDeltaRead": true,
+    "publicPackageAndVendorPathsDisjoint": true
+  },
+  "canonicalTests": {
+    "node": "22.23.1",
+    "npm": "12.0.1",
+    "pass": 90,
+    "fail": 0,
+    "skip": 0,
+    "receipt": "canonical90-r2-receipt.json",
+    "oldR1Retained": true
+  },
+  "boundaries": [
+    "Private-root tool dependencies2 only; public193/C11/consumergraphs unchanged",
+    "official INI globaltypedbool; shell-quote executable/data tokens; wholeRUN allowed&& operators before selecting segments; JSONargv literaldata",
+    "hostENV not expanded/executed; opaque variable only utilitydata, npm variable selectors rejected",
+    "literalnon-npm allowlistnode/mkdir/chown/echo/printf/rm; sh or/bin/sh absolute literal.sh opaque; arbitraryscriptbody/fullDocker/runtime outside staticmodel",
+    "actual new image ABI/auth/production deploy separate; CIorder optimization NOT_STARTED"
+  ],
+  "reviewTask": "Same originalA/B own8a2 findings closure+new regressions/officialmodule/graph/license evidence. No other currentraw; noimplementation. Results validation/review-{AorB}-common-build-rules-941d-5.md with immutable raw/hash/limits. BfinishTransportbdbcurrentraw orsafecheckpointbefore switch; originalTransportworkpreserve."
+}

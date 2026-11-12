@@ -1,0 +1,63 @@
+{
+  "name": "shell-quote",
+  "version": "1.12.0",
+  "license": "MIT",
+  "runtimeDependencies": {},
+  "integrity": "sha512-PcByqNyT/38F2kDNi006HAMRJaULuBzq/FOsw3qdZvX/GA9W/jamDaRskgHjubHiftXK5sIFxLNkvrXUwcof6Q==",
+  "tarSHA256": "3cdb295c8aa0565ff782e8e3e482a83caba67110857ac3b74aad4312407898a6",
+  "installedFiles": {
+    "LICENSE": {
+      "bytes": 1109,
+      "sha256": "8bb16db1b047019e4395965f2cf3611b06c34bf86dc2d0210b3c3f91b53c21fe"
+    },
+    "index.js": {
+      "bytes": 87,
+      "sha256": "6dba443a976bcfdb5972a479c5c43c298e96bdef471c1629844ce9d6b31f5b68"
+    },
+    "parse.js": {
+      "bytes": 10098,
+      "sha256": "3bb9b3a081ec5ff21425b87bbc542f143ec866b2a461fcf27c51d67aa5f31a45"
+    },
+    "quote.js": {
+      "bytes": 2103,
+      "sha256": "1cb19d10c297a40f166b157d7b227a309f64f5e6252d84c439e71c3f0998d60d"
+    },
+    "package.json": {
+      "bytes": 2062,
+      "sha256": "fef9e75a4b1b4e3ee6e7b500c30b626d629e27d21c4c3c4ab270b500f64ce993"
+    },
+    "tsconfig.json": {
+      "bytes": 123,
+      "sha256": "9fc194b35c4578503db2e415266293f0886ce04aff360f4cf796079f8b59745c"
+    },
+    "README.md": {
+      "bytes": 6903,
+      "sha256": "c7f3f746d309ce0c1bc6d74113d3d73d59df5e608465fc0d12f4dfff91ab9ad1"
+    },
+    "index.d.ts": {
+      "bytes": 873,
+      "sha256": "9662f0c5d566400bd966954513836ca3c52ba478b2915d63a2e0247970da6357"
+    },
+    "parse.d.ts": {
+      "bytes": 1849,
+      "sha256": "75ceaceceb2da480892b764aab1042213cb0eb626f420c1ab65f210ea3368c15"
+    },
+    "quote.d.ts": {
+      "bytes": 559,
+      "sha256": "0b85b063e7306f60c60151de3504cb141807f233b5e87cfe15d9ad6a28b493d8"
+    },
+    ".github/FUNDING.yml": {
+      "bytes": 582,
+      "sha256": "c7a193a356c0b26fa9b1951da9e2d96667f29d90e69cac03c63246a5d4d0e53b"
+    }
+  },
+  "packageFiles": 11,
+  "otherLockEntriesDeepEqual": true,
+  "onlyChanges": [
+    "root.devDependencies.shell-quote",
+    "node_modules/shell-quote"
+  ],
+  "canonicalLockOnlyExit": 0,
+  "fullInstall": 0,
+  "publicRepack": 0
+}
