@@ -6,7 +6,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync } from "node
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { checkToolchain } from "../tools/check_node_toolchain.mjs";
 
 const node = "22.23.1", npm = "12.0.1", digest = "a".repeat(64);
@@ -180,3 +180,101 @@ for (const flags of [["--force", "--force=true", "--force=false", "-f"], ["--leg
     }
   });
 }
+
+
+const attackFrom = `FROM node:${node}-alpine@sha256:${digest} AS deps\n`;
+const attackPin = `RUN npm install --global npm@${npm}\n`;
+for (const [name, docker, npmrc] of [
+  ["A-COMMON-P2-01 force 설정", null, "engine-strict=true\nforce=true\n"],
+  ["A-COMMON-P2-02 strict false", attackFrom + attackPin + "RUN npm ci --engine-strict --engine-strict=false\n"],
+  ["A-COMMON-P2-02 strict 부정", attackFrom + attackPin + "RUN npm ci --engine-strict --no-engine-strict\n"],
+  ["A-COMMON-P2-03 heredoc", attackFrom + "RUN <<EOF\nnpm install --global npm@11.19.1\nnpm ci --force\nEOF\n"],
+  ["A-COMMON-P2-03 backtick escape", "# escape=`\n" + attackFrom + `FROM \x60\nnode:24.15.0-alpine@sha256:${digest}\n`],
+  ["A-COMMON-P2-04 location 재선택", attackFrom + attackPin + "RUN npm install --location=global npm@11.19.1\nRUN npm ci --engine-strict\n"],
+  ["A-COMMON-P2-04 npx package 재선택", attackFrom + attackPin + "RUN npx --yes --package=npm@11.19.1 npm ci --engine-strict\n"],
+]) {
+  test(name, t => {
+    const f = fixture(t);
+    if (npmrc) f.put(".npmrc", npmrc);
+    if (docker !== null) f.put("Dockerfile", docker);
+    assert.equal(f.run({ dockerfiles: docker === null ? [] : ["Dockerfile"] }).ok, false);
+  });
+}
+
+
+test("force 유효 마지막 값을 읽고 무관한 peer·lifecycle 설정은 보존한다", t => {
+  const f = fixture(t);
+  for (const rc of [
+    "engine-strict=true\nforce=true\nforce=false\n",
+    'engine-strict=true\nforce="false"\nlegacy-peer-deps=true\nignore-scripts=true\nfund=false\n',
+  ]) { f.put(".npmrc", rc); assert.equal(f.run().ok, true); }
+  for (const rc of ["engine-strict=true\nforce=false\nforce=true\n", 'engine-strict=true\nforce="true"\n', "engine-strict=true\nforce\n", "engine-strict=true\nforce=${UNKNOWN}\n"]) {
+    f.put(".npmrc", rc); reject(f.run(), /force=false/u);
+  }
+});
+for (const exec of [false, true]) {
+  test(`strict 해제·분리 false·중복 해제는 ${exec ? "exec JSON" : "shell"} 모두 거부한다`, t => {
+    const f = fixture(t);
+    for (const flags of [
+      ["--engine-strict", "--engine-strict=false"], ["--engine-strict", "--no-engine-strict"],
+      ["--engine-strict", "false"], ["--engine-strict=true", "--engine-strict", "false"],
+      ["--engine-strict", "--no-engine-strict=false"], ["--engine-strict", ""], ["--engine-stric=false"],
+    ]) {
+      const argv = ["npm", "ci", ...flags];
+      const command = exec ? JSON.stringify(argv) : argv.map(word => word || "''").join(" ");
+      f.put("Dockerfile", attackFrom + attackPin + "RUN " + command + "\n");
+      assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, false, JSON.stringify(flags));
+    }
+  });
+}
+test("명시 true 동등 표기와 실제 앱 명령의 stage·전달 인수는 수용한다", t => {
+  const f = fixture(t);
+  for (const flags of ["--engine-strict", "--engine-strict=true", "--engine-strict true", "--engine-strict --engine-strict=true"]) {
+    f.put("Dockerfile", attackFrom + attackPin + `RUN npm ci ${flags} --ignore-scripts --no-audit --no-fund\nFROM deps AS build\nRUN npm run build\nCMD ["npm","run","start","--","--hostname","0.0.0.0","--port","12305"]\n`);
+    assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, true, flags);
+  }
+  f.put("Dockerfile", attackFrom + `RUN npx --yes npm@${npm} ci --engine-strict\nRUN npx --yes npm@${npm} --workspace apps/web run build\n`);
+  assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, true);
+});
+test("전역 pin 뒤에도 package·exec·prefix·global selector alias는 거부한다", t => {
+  const f = fixture(t);
+  for (const command of [
+    "npx -p npm@11.19.1 npm ci --engine-strict", "npx --package npm@11.19.1 npm ci --engine-strict",
+    "npx --yes --package=npm@11.19.1 npm ci --engine-strict", "npx npm ci --engine-strict",
+    "npm exec --package=npm@11.19.1 -- npm ci --engine-strict", "npm x -- npm ci --engine-strict",
+    "npm --global install npm@11.19.1", "npm -g install npm@11.19.1", "npm --prefix /tmp/else ci --engine-strict",
+    "npm ci --engine-strict --prefix=/tmp/else", "npm ci --engine-strict --userconfig=/tmp/else",
+    "npm install --location global npm@11.19.1", "npm ci --engine-strict --loc=global",
+  ]) {
+    f.put("Dockerfile", attackFrom + attackPin + "RUN " + command + "\n");
+    assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, false, command);
+  }
+});
+test("미지원 heredoc·escape를 거부하고 기본 backslash 지시문은 수용한다", t => {
+  const f = fixture(t);
+  for (const text of [attackFrom + "RUN \\\n <<EOF\nnpm ci\nEOF\n", attackFrom + "RUN <<-EOF\nnpm ci\nEOF\n", attackFrom + "COPY <<EOF /tmp/file\nhello\nEOF\n", "# ESCAPE=`\n" + attackFrom, "# escape=unknown\n" + attackFrom]) {
+    f.put("Dockerfile", text); assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, false);
+  }
+  f.put("Dockerfile", "# escape=\\\n" + attackFrom + attackPin + "RUN npm ci --engine-strict\n");
+  assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, true);
+});
+
+
+test("B-BUILD-P2-02 direct·symlink·preserve-symlinks-main CLI는 모두 같은 잘못된 anchor를 거부한다", t => {
+  const f = fixture(t); f.put(".npmrc", "engine-strict=false\n");
+  const alias = join(f.root, "checker-alias.mjs");
+  try { symlinkSync(checker, alias); }
+  catch (error) { throw new Error("NOT_RUN: CLI alias 경계 시험에 symlink 기능이 필요합니다", { cause: error }); }
+  const results = [];
+  for (const [flags, entry] of [[[], checker], [[], alias], [["--preserve-symlinks-main"], alias]]) {
+    const q = spawnSync(process.execPath, [...flags, entry, "--root", f.root, "--registry", f.options.registry], { encoding: "utf8", cwd: f.root });
+    results.push({ status: q.status, strictError: q.stderr.includes("engine-strict") });
+  }
+  assert.deepEqual(results, Array.from({ length: 3 }, () => ({ status: 1, strictError: true })));
+});
+test("checker API import는 잘못된 cwd에서도 자동 CLI 검사를 실행하지 않는다", t => {
+  const f = fixture(t); f.put(".npmrc", "engine-strict=false\n");
+  f.put("import-only.mjs", `import { checkToolchain } from ${JSON.stringify(pathToFileURL(checker).href)};\nif (typeof checkToolchain !== "function") throw Error("API");\nprocess.stdout.write("IMPORTED\\n");\n`);
+  const q = spawnSync(process.execPath, [join(f.root, "import-only.mjs")], { cwd: f.root, encoding: "utf8" });
+  assert.equal(q.status, 0); assert.equal(q.stdout, "IMPORTED\n"); assert.equal(q.stderr, "");
+});

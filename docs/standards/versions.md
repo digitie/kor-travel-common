@@ -47,7 +47,7 @@
 `axes.node.recommended`·`axes.npm.recommended`의 정확 patch가 정본이며 private 앱
 anchor의 `packageManager`, `engines.node`, `engines.npm`을 그 값과 일치시킨다.
 저장소 `.nvmrc`도 같은 Node를 선택하며 `.node-version`이 있으면 일치해야 한다.
-anchor 옆 `.npmrc`는 기존 설정을 보존하면서 `engine-strict=true`를 둔다.
+anchor 옆 `.npmrc`는 기존 설정을 보존하면서 유효 `engine-strict=true`와 `force=false`(미선언 기본값 포함)를 요구한다. 같은 key가 반복되면 마지막 boolean 값을 사용한다. 무관한 peer·lifecycle 설정은 바꾸지 않는다.
 workspace 멤버는 private root anchor를 상속하므로 공개 library manifest를 수정하지 않는다.
 독립 앱·테스트 프로젝트는 별도 private anchor로 검사한다. floor는 호환 하한으로 유지하며
 정확 선택을 위해 floor를 올리거나 라이브러리 의존성 graph를 재해석하지 않는다.
@@ -66,9 +66,10 @@ Node 실행 버전과 npm run의 user agent를 검사하므로 `node` 직접 실
 literal `npm install --global npm@<정본>` 또는 호출별 `npx --yes npm@<정본>`만 지원한다.
 전역 pin은 동일 stage와 FROM 상속에만 적용하며 fresh Node stage의 bare npm/npx는 거부한다.
 node만 실행하는 runtime에는 불필요한 npm 설치를 요구하지 않는다. shell 치환·간접 wrapper의
-npm 명령은 정적으로 검증하지 못하므로 명시 literal로 통일하거나 실패로 남긴다.
+npm 명령은 정적으로 검증하지 못하므로 명시 literal로 통일하거나 실패로 남긴다. Docker heredoc과 기본 backslash 이외 escape 지시문은 해석하지 않고 거부한다.
 임의 shell script 내부 동작·실제 build context·이미지 런타임은 이 정적 검사의 보증 범위 밖이다.
-`npm ci`에는 명시 `--engine-strict`를 요구하며 검사하는 Docker npm 명령의 `--force`/`-f`·`--legacy-peer-deps`(등호형 포함)는 거부한다. digest 존재·형식 검사는 registry에서 digest가 실제 tag와
+지원 npm 명령은 canonical 전역 install, ci·run·start·prune·버전 조회와 workspace 선택으로 한정한다. npm exec·다른 install 형식·package/prefix/location/global selector 및 미지원 자체 옵션은 pin 이후에도 거부한다. npm 자체 옵션은 engine-strict·ignore-scripts·no-audit·no-fund·prefer-offline·if-present·omit·workspace/workspaces만 지원한다. run/start의 `--` 뒤 앱 인수는 npm selector로 해석하지 않는다.
+`npm ci`에는 명시 `--engine-strict` 또는 true 동등 표기를 요구하며 모순·해제·분리 false는 shell/exec JSON 모두 거부한다. 또한 검사하는 Docker npm 명령의 `--force`/`-f`·`--legacy-peer-deps`(등호형 포함)는 거부한다. digest 존재·형식 검사는 registry에서 digest가 실제 tag와
 일치함을 증명하지 않으므로 앱 image 선정 시 별도로 검증한다.
 
 재사용 `frontend-consumer-guard.yml`은 기존 `frontends` matrix의 패키지와 선택 입력
@@ -77,7 +78,7 @@ npm 명령은 정적으로 검증하지 못하므로 명시 literal로 통일하
 일반 파일·저장소 내부 경로만 허용하며 절대 경로·상위 경로·외부 symlink는 거부한다.
 고정 common 코드가 기존 frontend 검사를 통과시킨 뒤 live common-policy `versions.json`의
 도구 축으로 runtime gate를 실행한다. 정책만 새로워진 경우도 불일치를 실패로 드러낸다.
-소비자 연결은 이 입력을 실제 제공하는 리뷰·머지된 불변 code ref로만 한다.
+소비자 연결은 이 입력을 실제 제공하는 리뷰·머지된 불변 code ref로만 한다. consumer-smoke와 새 guard가 checkout하는 common-ref에도 `check:toolchain` script가 있어야 한다. SHA/tag 입력 형식의 허용은 구 ref의 실행 호환성을 뜻하지 않으며, script가 없는 구 ref는 fallback 없이 실패한다.
 C11 공개 패키지·산출물·프론트엔드 정책을 재발행하지 않는다.
 
 ### 3.2 lockfile 의무

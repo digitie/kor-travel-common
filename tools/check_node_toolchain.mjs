@@ -53,15 +53,18 @@ function workspaceMember(rootPackage, folder) {
 }
 
 function strictEngineConfig(path) {
-  let selected;
+  let selected, force = false;
   for (const raw of readFileSync(path, "utf8").split(/\r?\n/u)) {
     const line = raw.split(/[;#]/u, 1)[0].trim();
-    if (!/^engine-strict\s*=/iu.test(line)) continue;
-    const match = /^engine-strict\s*=\s*(true|false)\s*$/iu.exec(line);
+    if (!/^(?:engine-strict|force)(?:\s|=|\[|$)/iu.test(line)) continue;
+    const match = /^(engine-strict|force)(?:\s*=\s*(.*))?$/iu.exec(line);
     if (!match) return false;
-    selected = match[1].toLowerCase() === "true";
+    const value = (match[2] ?? "true").trim().replace(/^(['"])(.*)\1$/u, "$2").toLowerCase();
+    if (!["true", "false"].includes(value)) return false;
+    if (match[1].toLowerCase() === "force") force = value === "true";
+    else selected = value === "true";
   }
-  return selected === true;
+  return selected === true && !force;
 }
 
 function pathList(value, label, nonempty = false) {
@@ -90,32 +93,77 @@ function npmCommand(command, stage, npm, label, errors) {
   if (!stage.node || !["npm", "npx"].includes(words[0])) {
     errors.push(label + " 정적으로 검증 가능한 Node npm/npx 명령이 필요합니다"); return;
   }
-  const install = words[0] === "npm" && ["install", "i"].includes(words[1])
-    && words.some(word => ["-g", "--global"].includes(word));
-  if (install) {
-    if (words.length !== 4 || !["-g", "--global"].includes(words[2]) || words[3] !== "npm@" + npm) {
+  let args = words.slice(1), explicit = false;
+  if (words[0] === "npx") {
+    while (["--yes", "-y"].includes(args[0])) args.shift();
+    const target = args.shift();
+    if (!target || target.startsWith("-") || target === "npm"
+      || target.startsWith("npm@") && target !== "npm@" + npm) {
+      errors.push(label + " npx의 미지원 selector·npm 재선택은 허용하지 않습니다"); return;
+    }
+    explicit = target === "npm@" + npm;
+    if (!explicit) {
+      if (!stage.pinned) errors.push(label + " fresh Node stage의 npm/npx 명시 선택이 필요합니다");
+      return; // 실행 파일 뒤의 -p 등은 npm selector가 아닌 앱 인수다.
+    }
+  }
+  while (args[0] === "--workspace" || args[0] === "-w" || /^--workspace=.+$/u.test(args[0] ?? "")) {
+    const option = args.shift();
+    if (!option.includes("=") && (!args[0] || args.shift().startsWith("-"))) {
+      errors.push(label + " workspace 명령 인수가 올바르지 않습니다"); return;
+    }
+  }
+  const commandName = args.shift();
+  if (["install", "i"].includes(commandName)) {
+    if (args.length !== 2 || !["-g", "--global"].includes(args[0]) || args[1] !== "npm@" + npm) {
       errors.push(label + " 전역 npm 설치는 정본 exact literal만 지원합니다"); return;
     }
     stage.pinned = true; return;
   }
-  const explicit = words[0] === "npx" && words.slice(1).find(word => !["--yes", "-y"].includes(word));
-  if (explicit && explicit.startsWith("npm@") && explicit !== "npm@" + npm) {
-    errors.push(label + " 명시 npm CLI 버전 불일치"); return;
+  if (!["ci", "run", "start", "prune", "--version", "-v"].includes(commandName)) {
+    errors.push(label + " npm exec·prefix 옵션 등 미지원 명령 형식은 거부합니다"); return;
   }
-  if (!stage.pinned && explicit !== "npm@" + npm) {
-    errors.push(label + " fresh Node stage의 npm/npx 명시 선택이 필요합니다");
+  const separator = args.indexOf("--");
+  if (separator !== -1 && !["run", "start"].includes(commandName)) {
+    errors.push(label + " 이 npm 명령은 전달 인수 구분자를 지원하지 않습니다"); return;
   }
-  if (words.includes("ci") && !words.includes("--engine-strict")) {
-    errors.push(label + " npm ci --engine-strict가 필요합니다");
+  const cli = separator === -1 ? args : args.slice(0, separator);
+  // npm 자체 옵션만 검사한다. 임의 selector/약어·설정 파일 경로는 pin 뒤에도 허용하지 않는다.
+  const allowed = /^(?:--engine-strict(?:=true)?|--ignore-scripts(?:=(?:true|false))?|--no-audit|--no-fund|--prefer-offline|--if-present|--omit=(?:dev|optional|peer)|--workspace(?:=.+)?|--workspaces|-w)$/u;
+  let strict = false;
+  for (let i = 0; i < cli.length; i += 1) {
+    const word = cli[i];
+    if (word.startsWith("-") && !allowed.test(word)) {
+      errors.push(label + " npm 미지원·strict 해제 옵션은 허용하지 않습니다"); return;
+    }
+    if (word === "--engine-strict") {
+      if (cli[i + 1] !== undefined && !cli[i + 1].startsWith("-")) {
+        if (cli[++i] !== "true") {
+          errors.push(label + " engine-strict의 분리값은 true여야 합니다"); return;
+        }
+      }
+      strict = true;
+    } else if (word === "--engine-strict=true") strict = true;
   }
+  if (!stage.pinned && !explicit) errors.push(label + " fresh Node stage의 npm/npx 명시 선택이 필요합니다");
+  if (commandName === "ci" && !strict) errors.push(label + " npm ci --engine-strict가 필요합니다");
+
 }
 
 function nodeImages(text, node, npm, label, errors) {
+  const physicalLines = text.split(/\r?\n/u);
+  if (physicalLines.some(line => /^\s*#\s*escape\s*=/iu.test(line)
+    && !/^\s*#\s*escape\s*=\s*\\\s*$/iu.test(line))) {
+    errors.push(label + " 기본 backslash 이외 Docker escape 지시문은 지원하지 않습니다"); return 0;
+  }
   const args = new Map(), stages = new Map();
   let count = 0, inStage = false, stage = { node: false, pinned: false };
   // FROM의 전역 ARG만 해석한다. stage 내부 ARG는 다음 FROM 기본값을 바꾸지 않는다.
   const lines = text.split(/\r?\n/u).filter(line => !line.trim().startsWith("#"))
     .join("\n").replace(/\\\n/gu, " ").split("\n");
+  if (lines.some(line => /^\s*(?:RUN|COPY|ADD)\b.*<</iu.test(line))) {
+    errors.push(label + " Docker heredoc은 지원하지 않습니다"); return 0;
+  }
   for (const [index, raw] of lines.entries()) {
     const line = raw.trim();
     if (!line || line.startsWith("#")) continue;
@@ -198,7 +246,7 @@ export function checkToolchain(options) {
       if (data.packageManager !== "npm@" + npm) errors.push(name + " packageManager 선언 누락·불일치");
       if (data.engines?.node !== node || data.engines?.npm !== npm) errors.push(name + " engines Node/npm 선언 누락·불일치");
       const config = bounded(root, relative(root, resolve(dirname(path), ".npmrc")).split(sep).join("/"));
-      if (!strictEngineConfig(config)) errors.push(name + " engine-strict=true가 필요합니다");
+      if (!strictEngineConfig(config)) errors.push(name + " engine-strict=true 및 유효 force=false가 필요합니다");
     }
     let checkedNodeImages = 0;
     for (const name of pathList(options.dockerfiles === undefined ? [] : options.dockerfiles, "Dockerfile")) {
@@ -219,7 +267,8 @@ export function checkToolchain(options) {
   }
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && existsSync(process.argv[1])
+  && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   try {
     const { values } = parseArgs({ options: {
       root: { type: "string", default: "." },

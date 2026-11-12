@@ -1,3 +1,10 @@
+## 2026-11-13 — 도구 guard 후보2·A의 네 P2 수정
+
+c4cc와 원 CI47을 유지하고 같은 확정 공격7을 47 PASS/7 FAIL로 재현했다.
+`.npmrc` 유효 force, strict 해제 옵션, 미지원 Docker heredoc/escape와 npm 재선택을
+fail-closed로 보완한다. 무관한 peer/lifecycle 설정과 공개 C11·graph는 유지하며
+후보2의 테스트/runtime·독립 재검토·새 CI는 c4cc 성공과 구분한다. 이후 부모가 전달한 B의 symlink entry false PASS도 원문을 보존하고, argv/module URL 양쪽 실제 경로 일치와 direct/alias/preserve-main 및 import 대조로 조치한다.
+
 ## 2026-11-13 — private Node/npm 선택·경로/runtime guard 후보
 
 parent의 checker 초안을 보존하고 목록/경로/Node 이미지 검증과 Node 내장 음성 대조를 추가했다.

@@ -6,7 +6,7 @@
 Node 내장 회귀 테스트·reusable 선택 입력을 구현한다. C11/공개 패키지·의존성 graph는 보존한다.
 로컬 freeze commit은 검토 입력이며 publish·merge는 독립2리뷰·정확 CI gate 완료까지 보류한다. 설치·전체 build는 저용량 환경에서 실행하지 않는다.
 현재 사실 출판/운영 수용 기록과 미실행 native/EAS/store는 아래 이력대로 보존한다.
-CI 순서 정비는 마지막 별도 작업이다.
+CI 순서 정비는 마지막 별도 작업이다. c4cc의 원 CI47과 A의 P2 네 건·확정 공격7 RED를 보존하고, 유효 force/strict와 미지원 Docker·selector 거부의 후보2를 별도 검토한다.
 
 ## 2026-11-12 — Transport Geo형 메뉴·지도 운영 수용 후 최종 문서 출판
 
