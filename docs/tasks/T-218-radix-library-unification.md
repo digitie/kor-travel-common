@@ -34,6 +34,10 @@ npm run lint, npm run build, npm run check, npm test, npm run doctor, npm run ch
 
 ## Evidence
 
+2026-11-12 최신: 주 이관 PR과 원본 라이브러리 머지는 완료했다. 현재 운영 수용6개와 Transport의 최신 PR184·185·186, 실제 mergef30/image0ac의 정상9개 수용·Geo형 PC 세로 메뉴·실제 PNG decode2+2·zoom7→8은 [원문 정산](../reviews/adversarial/2026-11-12-consumer-sdk-final.md#최종-운영-수용-6개-정산) 및 [배포 정산](../reviews/adversarial/evidence/2026-11-12-frontend-deployment-receipt.json)을 따른다. 과거184/185 실패와 새5초 피드백/60초 bootstrap 계약을 구분한다. 현재 사실 출판의 원2검토·정확 CI·Common50·Geo 단일 MD 출판을 마감한 뒤 Transport 남은 PR/빌드 체계, 전체 프로젝트 규칙 일관화, 마지막 CI 순서 최적화를 진행한다. T-218은 IN_PROGRESS이며 Map 추가 소스·빌드·이미지·배포는 사용자/Claude 범위, native 실기기/EAS/스토어는 NOT_RUN이다.
+
+이전47a 시점 스냅샷:
+
 2026-11-12 후속: common49와 원본4개, Geo631·Map1496·Weather226·Concierge265·Manager588·Pinvi732·Transport181의 주 이관 PR이 모두 머지됐고 최종 전체 tree를 대조했다. 원 A/B 판정과 input2 SDK BLOCK→input3 FIXED, 실제 Mounts 순서 오탐 수정590의 별도 독립 검토·CI를 [원문 정산](../reviews/adversarial/2026-11-12-consumer-sdk-final.md)에 기록한다. 실제 완료 앱은 Manager·Concierge·Pinvi·Weather·Geo·Transport 6개다. Transport는 공개936/image3262의 단계별13개 수용과 관리자47a/image3f207의 공식 SDK508 단독 교체·단일 정상 세션9개 수용을 완료했다. 실제 PNG36·decode2+2·zoom7→8·7폭/9행·폰트·로그아웃303→보호401과 비선택54 불변을 확인했다. 이전6b75 첫76건 미분류·후속36건 XML 및 모든 source/CI/review snapshot은 [배포 정산](../reviews/adversarial/evidence/2026-11-12-frontend-deployment-receipt.json)의 priorHistory에 보존한다. Map의 추가 빌드·배포는 최신 사용자 지시로 Claude의 별도 작업에 맡긴다. 이미 머지한 Map1496은 되돌리지 않는다. toolchain·build ecosystem·CI_LAST 후속과 이 facts3의 원2검토·정확 CI·출판은 별도이며 T-218을 완료로 변경하지 않는다. 모바일 최종 Expo Doctor20/20·React Doctor0, web531·browser209 PASS/4기존 SKIP·API2259 PASS/9 SKIP와 Android/iOS/WebSSR·강제WASM export를 구분하고 실기기/EAS/스토어 출시는 NOT_RUN이다.
 
 이하 이전 checkpoint:

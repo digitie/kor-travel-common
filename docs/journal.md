@@ -1,3 +1,9 @@
+## 2026-11-12 — Transport Geo형 메뉴·지도 실제 수용 후 문서 마감 후보
+
+Transport184의 PC 왼쪽256px 세로 메뉴·모바일 왼쪽296px 드로어, 185의 서버 frame·포커스 보존, 186의 잘린 사용자 로더 수정을 반영했다. 실제 mergef30의 정상 ARM image0ac을 SDK508로 관리자만 교체하고 첫 정상 세션9 PASS·PNG decode2+2·zoom7→8·9폭/11행·폰트·로그아웃 후 보호401을 확인했다. 부모가 동결63개와 실제 화면4개를 직접 확인했다. 184 운영 연락처 실패와185 최초 canvas5초 실패·진단 실패는 보존하며 새 피드백5초/전체 bootstrap60초 계약과 동등하다고 주장하지 않는다.
+
+Common50에 기존 원 두 reviewer의 원문·CI·실제 merged ARM/SDK/정상 수용 정산을 byte 그대로 추가한다. 패키지·버전·CI·scanner 예외·동결 산출물은 변경하지 않는다. 문서 출판의 원2검토·정확 CI 후 Common50, 이어 Geo 단일 MD를 마감한다. Transport 남은 PR/빌드 체계와 전체 프로젝트 규칙 일관화는 그 이후, CI 순서 최적화는 가장 마지막이다. Map 추가 소스·빌드·이미지·배포는 제외하고 native 실기기/EAS/스토어는 NOT_RUN으로 유지한다. 현재 근거는 [최종 정산](reviews/adversarial/2026-11-12-consumer-sdk-final.md#최종-운영-수용-6개-정산)이다.
+
 ## 2026-11-12 — 문서 입력1 두 PASS·Geo 실제 수용 추가
 
 1742c375의46개 문서/증거/attributes를 원 A/B가 독립 검토해 두 PASS·신규0을 확인했고, 정확3개 workflow와 docs6개 job 모두 성공했다. 원문·불변 입력을 byte 그대로 별도 receipt에 보존했다. 이후 Geo image82c7/common263의 공식4단계 exit0과 실제 표37행·지오코딩 후보1·타일9응답200·정상 로그아웃/보호401까지 확인하여 실제 완료5개다. 새 공개 JSON에는 별도 과거 공유PG 설정1차이 미확정과 Geo 검증기 실패/재시도를 보존한다. Transport/Map/native 한계를 완료로 바꾸지 않는다. source 정책·패키지·버전·vendor·workflow 변경0이며 이 사실 delta의 원 두 검토와 정확 CI는 후속이다.

@@ -1,5 +1,15 @@
 # 현재 작업 재개
 
+## 2026-11-12 — Transport Geo형 메뉴·지도 운영 수용 후 최종 문서 출판
+
+현재 실제 수용 앱은 Manager·Concierge·Pinvi·Weather·Geo·Transport 6개다. Transport 최신 PR186의 mergef30/image0ac은 공식 SDK508 관리자 단독 교체와 첫 정상 세션9개를 통과했다. PC 왼쪽256px 세로 메뉴·모바일 왼쪽296px 드로어, 실제 PNG decode2+2·zoom7→8·9폭/11행·Pretendard·로그아웃 후 보호401을 확인했다. [최종 정산](reviews/adversarial/2026-11-12-consumer-sdk-final.md#최종-운영-수용-6개-정산)과 [배포 영수증](reviews/adversarial/evidence/2026-11-12-frontend-deployment-receipt.json)이 현재 근거이며 이전184/185 실패는 원문 그대로 보존한다.
+
+다음 작업은 이 사실 delta의 동일 원 A/B 독립 검토·정확 CI·Common PR50 마감, 이어 Geo의 단일 MD 최종 PR 마감이다. 이후 Transport 남은 PR·빌드 체계를 Map 수준으로 정리하고 전체 프로젝트 빌드·CI·테스트를 일관화한다. CI 실행 순서 최적화는 가장 마지막에 한다. T-218은 IN_PROGRESS다. 시작 파일은 [최종 정산](reviews/adversarial/2026-11-12-consumer-sdk-final.md)이며 문서 검증4종을 실행한다. 원2리뷰·정확 CI가 미완료면 출판하지 않는다.
+
+Map 추가 소스·빌드·이미지·배포는 사용자/Claude 별도 범위다. native 실기기/EAS/스토어는 NOT_RUN이다. C11 UI0.2.0/tokens0.1.1과 기존 산출물은 재발행하지 않는다. toolchain 차이와 실제 ARM 영수증 필드 차이는 후속 일관화에서 조치한다.
+
+이하 이전47a 시점 재개 스냅샷:
+
 ## 2026-11-12 — 소비자 7개 주 이관 머지·운영 6개 수용
 
 공통·원본 라이브러리 5개와 앱 7개의 주 이관 PR을 모두 머지했고 fetched main의 전체 tree를 최종 검토 입력과 대조했다. [소비자·SDK 검토 기록](reviews/adversarial/2026-11-12-consumer-sdk-final.md)에 원문·불변 입력·SHA256을 보존한다. 이전 BLOCK과 미실행 상태는 당시 기록으로 유지한다.

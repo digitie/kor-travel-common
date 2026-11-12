@@ -73,6 +73,30 @@ Transport의 기존 core/admin current에서 UI 하나만 선택하는 최종 e5
 
 ## 최종 운영 수용 6개 정산
 
+[공개 배포 정산](evidence/2026-11-12-frontend-deployment-receipt.json)의 현재 수용 앱은 Manager·Concierge·Pinvi·Weather·Geo·Transport 6개다. Transport 공개936/image3262의 기존 단계별13개·9세션 결과는 유지한다. 최신 관리자 [PR186](https://github.com/digitie/kor-travel-transport/pull/186)의 실제 mergef30dbd82와 ARM64 image0ac648f8을 사용한다. reviewed bd08·실제 CI checkout8303·mergef30의 전체 tree4fec4f76 일치를 확인했다. QA sourceb43과 bd08의 차이는 문서2줄이며 나머지908개 항목은 같다. QA의 전체 source를 merged source로 바꾸어 표기하지 않는다.
+
+사용자가 지정한 Geo형 메뉴는 [PR184](https://github.com/digitie/kor-travel-transport/pull/184)에서 PC 왼쪽256px 세로 메뉴·모바일 왼쪽296px 드로어로 반영했다. [PR185](https://github.com/digitie/kor-travel-transport/pull/185)의 서버 지도 frame·포커스 보존에 이어 PR186에서 앱의 사용자 지정 지도 로더가 padding box 밖에 잘리는 문제를 수정했다. 이전184의 운영8 PASS/1 FAIL(연락처 영역)과 별도 진단 FAIL, 이전185의 운영8 PASS/1 FAIL 및 PNG 진단 FAIL(최초 canvas5초)을 그대로 보존한다. [184 원문](evidence/2026-11-12-transport184-originals.tar.gz)·[184 해시](evidence/2026-11-12-transport184-closure-receipts.json), [185 원문](evidence/2026-11-12-transport185-originals.tar.gz)·[185 해시](evidence/2026-11-12-transport185-closure-receipts.json)에 단계별 실패·미도달·검토·실행 범위를 남긴다.
+
+PR186의 기존 두 리뷰어는 source2·helper3·최종 실행4 모두 각자 PASS·신규0을 확인했다. 입력1의 P3 문서 표현은 bd08의 문서2줄로 수정했고, 미실행59a의 실제 동색 재현을 주장하지 않는다. 정확 bd08의 PR43215261871·push43215254241·정책43215262267은 모두 첫 attempt SUCCESS다. PR/push 각각 공개164·관리자458 PASS·Doctor0, backend1548 PASS/2 기존 SKIP/6 warnings이며 live-e2e 두 SKIPPED는 PASS가 아니다. 최초 b43 CI의 superseded 수동 취소1과 완료된 부분 결과도 보존한다.
+
+격리 b43 검증은 native43·Alpine43 PASS, skip/flaky/unexpected/report errors0이다. 새 NoJS 로더2개는 native43에 포함하며 별도 가산하지 않는다. 이전 M9의 같은 검사는2 FAIL, 새 검사는2 PASS(PC1280·모바일375, 가시 면적 비율1)이고 부모가 두 화면을 직접 확인했다. 실제 지도 수용은 명시적인 새 계약(의미 있는 로딩 피드백5초·최초 전체 bootstrap60초)으로 수행했다. 이전 최초 canvas5초 계약과 동등하지 않으며, 이전 실패를 성공으로 다시 집계하거나 지연 원인을 확정하지 않는다. 실제 관측은 피드백2808.995ms·bootstrap5644.271ms였다.
+
+실제 merged f30의 정상 ARM 빌드는 별도로 완료했고 retag가 아니다. canonical source909·COPY298·공통6패키지263·compiled32·OCI/default release·키와 환경 digest를 검증했다. 부모는 동결16개를 local·remote 모두 SHA256/bytes/mode로 확인했다. producer의 actualMergedNormalBuildCompleted와 operator의 normalDockerBuild 필드 차이는 기존 영수증을 보존한 호환 복사본의 필드1개로 연결했으며 빌드·소스·SDK를 바꾸지 않았다. 이 스키마 차이는 후속 빌드 체계 일관화 대상이다.
+
+공식 SDK508 관리자 단독 dry-run1·confirm1, healthy/current/postproof가 통과했다. 부모는 운영 동결44개 전체를 remote에서, 다운로드한18개를 local에서도 확인했다. 나머지26개는 local 미다운로드이며 전부 local 검증했다고 주장하지 않는다. 선택 Transport current만 최신 관리자 source/image로 갱신했고 공개936/image3262·backend499/schema0042·비선택54·기존 인증/세션/root/pins와 다른 앱 current는 보존했다.
+
+실제 f30 정상 수용은 첫 단일 세션9 PASS·실패0, 로그인1/로그아웃1과 보호 API401→로그인 후200→로그아웃303→401이다. bounded PNG40개(확대 전20·후20)는 승인 키 일치·HTTP200·PNG signature·IHDR256이며 그중 실제 bitmap decode2+2와 camera7→8이 통과했다. 전체 observer112개 중77개는 signature/크기 판정 이미지200·HTTP실패0이고 나머지35개는 미분류다. 40개나77개 전체를 실제 bitmap decode로 확대하지 않는다.
+
+실제9개 폭·왕복11행, 메뉴·표·팝오버·연락처 API200/65개·주차장·철도·Pretendard12행이 통과했다. PC256px 세로 메뉴·모바일296px 왼쪽 드로어, 높이 변화 rail delta0·문서 scroll100→100·포커스 보존을 확인했다. 부모는 실제 지도 전체 화면1개와 PC 메뉴1개·모바일 메뉴2개를 직접 열어 한국 지도 도로·지명·지형과 메뉴 배치를 확인했다. 부모는 최종 동결63개 local SHA256/bytes/mode 전부를 대조했고 browser·프로세스·port·heavy·미정리 decoder0을 확인했다. 추가 로그인·운영 재실행은 없다.
+
+[186 원문·실행 정산48개](evidence/2026-11-12-transport186-originals.tar.gz)와 [전체/member 해시](evidence/2026-11-12-transport186-closure-receipts.json)는 두 원 검토·불변 입력·CI·머지·실제 ARM·SDK·정상 수용·부모 대조를 연결한다. 원문 bytes와 과거 pending/FAIL을 유지하고 비공개 입력과 PNG binary는 출판하지 않는다. 기존47a의 실제 수용은 아래 당시 스냅샷으로 보존한다.
+
+이전 문서 입력3/4의 [원문6개](evidence/2026-11-12-common-final-docs34-originals.tar.gz)와 [해시 원장](evidence/2026-11-12-common-final-docs34-closure-receipts.json)도 별도 보존한다. 당시 판정은 현재 M30 사실 후보의 승인으로 확대하지 않는다.
+
+이는 운영 사실 갱신이며 이 출판 후보의 원 A/B 검토·정확 CI·PR50 머지는 별도 gate다. T-218은 IN_PROGRESS, Map 추가 소스·빌드·이미지·배포는 사용자/Claude 별도 범위, native 실기기/EAS/스토어는 NOT_RUN이다. 다음 순서는 Common50·Geo 단일 MD 마감 → Transport 남은 PR·빌드 체계 → 전체 프로젝트 빌드/CI/테스트 일관화 → CI 실행 순서 최적화(마지막)다. 라이브러리 버전·산출물 bytes·규범·CI·config·scanner 예외는 이번 사실 갱신으로 변경하지 않는다.
+
+### 이전47a 운영 수용 스냅샷
+
 [공개 배포 정산](evidence/2026-11-12-frontend-deployment-receipt.json)의 현재 수용 앱은 Manager·Concierge·Pinvi·Weather·Geo·Transport 6개다. Transport 공개936/image3262는 기존 단계별13개·9세션 결과이며 단일 전체 실행으로 확대하지 않는다. 최종 관리자 [PR183](https://github.com/digitie/kor-travel-transport/pull/183)의 실제 merge47a4719a/tree510888aa로 만든 ARM64 image3f2073의 canonical source907·COPY296·공통6패키지263·compiled32·OCI/default release를 동결 증거로 확인했다. 최초 collector 변수 shadow 실패를 남긴 채 같은 이미지 strict readonly r2가 통과했으며 이를 재빌드·retag로 대체하지 않았다.
 
 정상 SDK508 admin-only dry-run1·confirm1 healthy와 current/postproof를 완료했다. 운영 receipt135fa3ba와 frozen37 member6d375b9f의 실제 해시 불일치0을 확인했다. 선택 Transport current는 새 관리자 source/image로 갱신했으며, 공개 current936/image3262·backend499/schema0042·비선택54·기존 인증/세션/root/pins와 다른 앱 current는 보존했다. 승인된 Geo 실사용 키는 Transport 등록 웹 build 입력에만 반영했다. 초기 operator launcher 문법 오류는 confirm 호출 전이며 실제 confirm은1회다. 키·접속주소·계정·원시 응답본문은 이 문서에 넣지 않는다.

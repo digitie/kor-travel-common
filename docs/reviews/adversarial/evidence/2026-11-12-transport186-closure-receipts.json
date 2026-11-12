@@ -1,0 +1,250 @@
+{
+  "archive": "2026-11-12-transport186-originals.tar.gz",
+  "archiveBytes": 65735,
+  "archiveSha256": "105d6b083da094b32b822fdee59e49fe00b3195816a7026fe30eda672c4d8089",
+  "members": [
+    {
+      "member": "closure-disposition.json",
+      "bytes": 2927,
+      "sha256": "eae230d0198bce104ace50a377ac3ddf007fe81a00a3c3174320af5e8b0db650"
+    },
+    {
+      "member": "closure-index.json",
+      "bytes": 9568,
+      "sha256": "fcc492f95bf3a7456b93294bc2bd45727f7750b9e402b1b79dd1a2aef3789933"
+    },
+    {
+      "member": "review-A-transport-map-loading-b43-source-1.md",
+      "bytes": 8483,
+      "sha256": "e0db4955c43cc76f830198d3e16ea3fe93c2d6ea54935dc6c09d81c504be0018"
+    },
+    {
+      "member": "review-A-transport-map-loading-bd08-final-execution-4.md",
+      "bytes": 9254,
+      "sha256": "2f9d6a99530fa173343c8ad4c953580d68a1d20def28bedf602725a7e4db59d6"
+    },
+    {
+      "member": "review-A-transport-map-loading-bd08-source-2.md",
+      "bytes": 2510,
+      "sha256": "dfdfe75134d30c693572ecfd9d87d4bcb4b973db838ce44dacffc47cf563a24e"
+    },
+    {
+      "member": "review-A-transport-png-bootstrap-v3-helper-3.md",
+      "bytes": 8928,
+      "sha256": "8e27b025ac94a113efa1ac23440657d59a9f1362a7ed87abf05ad0776093b310"
+    },
+    {
+      "member": "review-B-transport-map-loading-b43-source-1.md",
+      "bytes": 8450,
+      "sha256": "d6c20e321d646884695263c2c3c7e09cb3c303151a540cefdf7fe617a3d3a34b"
+    },
+    {
+      "member": "review-B-transport-map-loading-bd08-final-execution-4.md",
+      "bytes": 8411,
+      "sha256": "f7380572ecdb9b8e4b96fb3d9f064f78b83c19d7c47fe9a12a31a25e864a84cc"
+    },
+    {
+      "member": "review-B-transport-map-loading-bd08-source-2.md",
+      "bytes": 1958,
+      "sha256": "d3c93410d483742d07b7be036bd751569a8ddbd18f9fee60969375ce3af7ba88"
+    },
+    {
+      "member": "review-B-transport-png-bootstrap-v3-helper-3.md",
+      "bytes": 8882,
+      "sha256": "c1c7403616939daf5ab1ae00301c100cdd9363168cbbdd1d652b73b6ee4af762"
+    },
+    {
+      "member": "review-manifest-transport-map-loading-b43-source-1.json",
+      "bytes": 3816,
+      "sha256": "adb4a8e693107f9270a7d85385c38a667bb08969b5d1e44f51158fe710bf7b7c"
+    },
+    {
+      "member": "review-manifest-transport-map-loading-bd08-final-execution-4.json",
+      "bytes": 7533,
+      "sha256": "a574561afcd7d68ae485e064eacc3234c1cb35ef57efc2899f83a8e598c2e5c6"
+    },
+    {
+      "member": "review-manifest-transport-map-loading-bd08-source-2.json",
+      "bytes": 1321,
+      "sha256": "2e7dc10ff51984eb5d6811f70f4917e26ec05be0757638634f3b21277a06a6c0"
+    },
+    {
+      "member": "review-manifest-transport-png-bootstrap-v3-helper-3.json",
+      "bytes": 4795,
+      "sha256": "c9352664899147136dc544ff29788f8a0aa6371830ce6e44ffe65de5442c2c0e"
+    },
+    {
+      "member": "validation/transport-M186-f30-parent-visual-20261112/parent-actual9-and-visual-verification.json",
+      "bytes": 3216,
+      "sha256": "1ad91d29904da6b3583672b4628bc8f2fb04d2846effcfd751b063525f8fbfe0"
+    },
+    {
+      "member": "validation/transport-M186-f30-v3-actual-runtime-20261112/actual-input-index7.json",
+      "bytes": 4088,
+      "sha256": "bda47078a3adb8fff05d4b9cf59b0ff645ce3cb25a1747afbda8ddf378edc68e"
+    },
+    {
+      "member": "validation/transport-M186-f30-v3-actual-runtime-20261112/closure-handoff.json",
+      "bytes": 3434,
+      "sha256": "03f94c9b21556101903c93dce2fb7a37536634829cd84b5e15bb1341fdb4894f"
+    },
+    {
+      "member": "validation/transport-M186-f30-v3-actual-runtime-20261112/final-receipt.json",
+      "bytes": 10712,
+      "sha256": "da70de7864e05c85b51525bbb568f08a568196a3e99c03414febe9048310b250"
+    },
+    {
+      "member": "validation/transport-M186-f30-v3-actual-runtime-20261112/parent-frozen63-final-verification.json",
+      "bytes": 508,
+      "sha256": "1897961b145b8ed289a2c19c2aaaab823de0df7b98cac3cd813f7982c11dc2f1"
+    },
+    {
+      "member": "validation/transport-M186-f30-v3-actual-runtime-20261112/parent-prebound7-verification.json",
+      "bytes": 748,
+      "sha256": "8a1fbf5fe4b5592575126539e7a9a083ebdf30ef89187492fd77123e90cb4012"
+    },
+    {
+      "member": "validation/transport-M186-f30-v3-actual-runtime-20261112/prelaunch-manifest.json",
+      "bytes": 3549,
+      "sha256": "30b8be04afbc21984d09fa62e4d89ab5d09d6dce6cdf4503099736a8829129e3"
+    },
+    {
+      "member": "validation/transport-M186-v3-actual-preparation-20261112/preparation-manifest.json",
+      "bytes": 5165,
+      "sha256": "5100531c6ffcef340add214d0a04bb01172da259efd91c4f92e0f93fb5160a6b"
+    },
+    {
+      "member": "validation/transport-M186-v3-actual-preparation-20261112/readonly-preflight/n150-node-pw-chromium-proof.json",
+      "bytes": 1173,
+      "sha256": "c1e782051f4d94cdef06ccf995df4c24ce2a35ebed63e5bdb606601f1ba805bb"
+    },
+    {
+      "member": "validation/transport-map-loading-admin-Mf30dbd82-deployment-20261112/final-receipt.json",
+      "bytes": 2907,
+      "sha256": "e1bd23d162807f6638d9e041a5ff027fdc05f9974f73c26a0025452070e2c7f4"
+    },
+    {
+      "member": "validation/transport-map-loading-admin-Mf30dbd82-deployment-20261112/parent-official-ready44-verification.json",
+      "bytes": 1035,
+      "sha256": "6b4a380cf49b4a88d8a5285bf0b69bfe52dd535472e63b5bf4ed52ea31717176"
+    },
+    {
+      "member": "validation/transport-map-loading-arm-20261112/candidate-b43feae2/final-receipt.json",
+      "bytes": 2120,
+      "sha256": "0a3a21bb13455f68621dc2553ad189250f361073b27739f41714718ff81e4c98"
+    },
+    {
+      "member": "validation/transport-map-loading-arm-20261112/candidate-b43feae2/frozen-hash-index.json",
+      "bytes": 2987,
+      "sha256": "567afea854f6dbe95b76d1d401dad4749a3a762807250094d61366c92f08361a"
+    },
+    {
+      "member": "validation/transport-map-loading-arm-20261112/candidate-b43feae2/parent-candidate-local-remote16-verification.json",
+      "bytes": 404,
+      "sha256": "9ae3448d4675f9c05e236f25a55a25367fcf31fafdf7099d349e4812d583ccf7"
+    },
+    {
+      "member": "validation/transport-map-loading-arm-20261112/merged-f30dbd82/final-receipt.json",
+      "bytes": 2110,
+      "sha256": "0ce254a5d09b6afb6a92dc43abc36e5d299e898c864d61c7fabb573ad31e1e72"
+    },
+    {
+      "member": "validation/transport-map-loading-arm-20261112/merged-f30dbd82/parent-actualM-local-remote16-verification.json",
+      "bytes": 602,
+      "sha256": "7ef8193b9f0dd4efd5bec2ee730000a952d0aed28aa21c89b1ceeb6e0e5ee678"
+    },
+    {
+      "member": "validation/transport-map-loading-arm-20261112/merged-f30dbd82/parent-sdk-receipt-compatibility-verification.json",
+      "bytes": 467,
+      "sha256": "1bcff553ea717e7642ab3966c25a4f30d25947883ce8086e5c11e69cc4efa748"
+    },
+    {
+      "member": "validation/transport-map-loading-b43-candidate-20261112/ci-final-bd08/ci-final-api.json",
+      "bytes": 47983,
+      "sha256": "ef14d238ac3a1f59b9fe1100efb70caae08294c09de9b4986fd1014e2433eede"
+    },
+    {
+      "member": "validation/transport-map-loading-b43-candidate-20261112/ci-final-bd08/ci-final-index.json",
+      "bytes": 1145,
+      "sha256": "0b87ccef9300d9963dde2536a4dbc42922f5d687003deaae2247d9af1f96d488"
+    },
+    {
+      "member": "validation/transport-map-loading-b43-candidate-20261112/ci-final-bd08/ci-source-tree-bridge.json",
+      "bytes": 987,
+      "sha256": "795a7a075bf5c5742cae4cabe5eeb8e5d1cb8b050c79cf73757e01d879f85877"
+    },
+    {
+      "member": "validation/transport-map-loading-b43-candidate-20261112/ci-final-bd08/final-receipt.json",
+      "bytes": 1884,
+      "sha256": "7ce3008093b43ad6b9effad21361b01157ea072ab82dd90ad73f286005091ff0"
+    },
+    {
+      "member": "validation/transport-map-loading-b43-candidate-20261112/doc-only-bd08-input-bridge.json",
+      "bytes": 685,
+      "sha256": "02c764673e2e885a4059abe39cc0f296735c1790229f488f64ed8f1fc4998247"
+    },
+    {
+      "member": "validation/transport-map-loading-b43-candidate-20261112/merge186-tree-bridge.json",
+      "bytes": 1032,
+      "sha256": "970dfbfdf43fc4f803114a00bd87e55f5413e2bfffcae4a26972d21babeb7abc"
+    },
+    {
+      "member": "validation/transport-map-loading-b43-candidate-20261112/parent-new-readiness-contract-decision.json",
+      "bytes": 2242,
+      "sha256": "f72b3605d513ebfe201fe581eebde5c0a39e2051d08be2f6e427bf55bfc467bd"
+    },
+    {
+      "member": "validation/transport-map-loading-b43-local-qa-20261112/final-receipt.json",
+      "bytes": 11099,
+      "sha256": "74943b35d82ad59bcd04dabf20430e6d3777d4d7989f89289b7077c2a39c35df"
+    },
+    {
+      "member": "validation/transport-map-loading-b43-local-qa-20261112/frozen-evidence-members.json",
+      "bytes": 26469,
+      "sha256": "26335858cd4420a6aeb4749cf366582015e0d2e42ecac2d175d783af69f16650"
+    },
+    {
+      "member": "validation/transport-map-loading-b43-local-qa-20261112/parent-frozen-124-verification.json",
+      "bytes": 302,
+      "sha256": "9846f53ce5ef68ec1bc3e96aa7259b3e63f9a4181789a327eb6ed7b79d446957"
+    },
+    {
+      "member": "validation/transport-map-loading-b43-local-qa-20261112/parent-nojs-visual-verification.json",
+      "bytes": 995,
+      "sha256": "7c8e8e6634f89eab59f9df22ea20286a6a761058a00051913843552014436020"
+    },
+    {
+      "member": "validation/transport-png-bootstrap-v3-parent-candidate-20261112/candidate-receipt.json",
+      "bytes": 2171,
+      "sha256": "6533a066c810b750d69e20f32cae7c1d9448b9dd9cb36e48972d1ff348b6a09b"
+    },
+    {
+      "member": "validation/transport-png-bootstrap-v3-parent-candidate-20261112/quality-and-caller-proof.json",
+      "bytes": 758,
+      "sha256": "62c00d57bb6281e985182ca7544d2b5ccd0ca82ff0083f55f3b02f2f2ccb8264"
+    },
+    {
+      "member": "validation/transport-png-bootstrap-v3-runtime-review-bundle-20261112/bundle-manifest.json",
+      "bytes": 2887,
+      "sha256": "931c89c9ab4e0ae18428f01b806abf4e82c79c402373cc3a9e29ad3f13d2cfd3"
+    },
+    {
+      "member": "validation/transport-png-v3-identity-binding-candidate-20261112/bind_qa_identity.py",
+      "bytes": 2255,
+      "sha256": "793fb71da177bcb198049f442e879788faddce1ab8b4b9232e283edc413a593c"
+    },
+    {
+      "member": "validation/transport-png-v3-identity-binding-candidate-20261112/candidate-receipt.json",
+      "bytes": 1234,
+      "sha256": "349c6af0cc57b64f87b16292a9250a01db8e6ea090f3532fabdae3b161ce83ac"
+    },
+    {
+      "member": "validation/transport-png-v3-identity-binding-candidate-20261112/test_binding.py",
+      "bytes": 1695,
+      "sha256": "0038b136cd8767f7458b39c33340a9e86c142b8387928afb2c0e5f035b54f37f"
+    }
+  ],
+  "originalMemberBytesVerified": true,
+  "libraryPayloadOrRulesChanged": false,
+  "historicalFailuresRetained": true
+}
