@@ -1,3 +1,10 @@
+## 2026-11-13 — private Node/npm 선택·경로/runtime guard 후보
+
+parent의 checker 초안을 보존하고 목록/경로/Node 이미지 검증과 Node 내장 음성 대조를 추가했다.
+root toolchain metadata와 기존 CI step 내 명시 npm 선택/guard를 연결했다.
+C11/public packages와 graph/SRI는 변경하지 않으며 runtime 실측·검증 결과는 별도 증거로 정산한다.
+로컬 freeze commit은 독립 검토 입력이며 push·repack·운영 변경은 보류한다.
+
 ## 2026-11-12 — Transport Geo형 메뉴·지도 실제 수용 후 문서 마감 후보
 
 Transport184의 PC 왼쪽256px 세로 메뉴·모바일 왼쪽296px 드로어, 185의 서버 frame·포커스 보존, 186의 잘린 사용자 로더 수정을 반영했다. 실제 mergef30의 정상 ARM image0ac을 SDK508로 관리자만 교체하고 첫 정상 세션9 PASS·PNG decode2+2·zoom7→8·9폭/11행·폰트·로그아웃 후 보호401을 확인했다. 부모가 동결63개와 실제 화면4개를 직접 확인했다. 184 운영 연락처 실패와185 최초 canvas5초 실패·진단 실패는 보존하며 새 피드백5초/전체 bootstrap60초 계약과 동등하다고 주장하지 않는다.

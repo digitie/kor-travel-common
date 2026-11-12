@@ -96,6 +96,10 @@ jobs:
 
 ### 3.4 앱별 도입 변경점(`ci` §2.2 요약)
 
+아래 표는 2026-09 조사 기준선의 도입 계획이다. 당시 npm11/Node20 표기는 현행 선택값이
+아니며 현재 Node/npm은 [ADR-018](../adr/018-exact-node-npm-build-toolchain.md)과
+`versions.json`의 정확 권고 patch·private anchor·engine-strict를 따른다.
+
 | 앱 | 유지할 앱 고유 job | 재사용 워크플로 | 선행 변경 | task |
 |---|---|---|---|---|
 | airport | `live-e2e`(required 제외 권고) | python-quality(uv, alembic ON)·node-quality(22)·openapi-drift·docs-check | ruff 설정 신설, prod 도메인 placeholder 치환, `*.local.md` gitignore | T-433·T-482 |
@@ -245,7 +249,7 @@ exit 0은 선택 범위의 패턴 일치가 없거나 명시적 예외로 처리
 | `docs` | PR, push `main`·`codex/release-*` | `validate_document_links.py` → `validate_plan.py` → `unittest discover -s tests -p "test_*.py"` → `git diff --check` → redaction 전체 트리(CI-40) | ubuntu-24.04 | T-002·T-009 |
 | `tools` | PR, push `main`·`codex/release-*` | validator·unittest·check_versions 자체 검사·SPDX·secret/redaction(토큰 도구는 T-103 구현 후) | ubuntu-24.04 + windows-2025 매트릭스(D-03) | T-009 |
 | `workflows-selftest` | PR(`.github/**`) | 재사용 워크플로를 fixture로 호출 | ubuntu-24.04 | T-010 |
-| `packages` | PR, push `main`·`codex/release-*` | `npm install -g npm@11.19.1` → `npm ci` → **커밋 생성물 `check`** → build → `check` → 생성물 Git diff → test → `npm pack` → 임시 디렉터리 tarball 설치. UI가 추가되면 T-201 승인 범위에서 webpack·Turbopack `next build` 스모크를 덧붙인다(D-10) | ubuntu-24.04 | T-101·T-201 |
+| `packages` | PR, push `main`·`codex/release-*` | `npm install -g npm@12.0.1` → `npm ci --engine-strict` → `npm run check:toolchain` → **커밋 생성물 `check`** → build → `check` → 생성물 Git diff → test → `npm pack` → 임시 디렉터리 tarball 설치. UI가 추가되면 T-201 승인 범위에서 webpack·Turbopack `next build` 스모크를 덧붙인다(D-10) | ubuntu-24.04 | T-101·T-201 |
 | `python-package` | PR, push `main`·`codex/release-*` | `uv build` → wheel 설치 → import 스모크 → starlette 0.4x/1.6 매트릭스 | ubuntu-24.04 | T-302 |
 | `consumer-smoke` | `workflow_dispatch`; 주간은 T-010a 검증 뒤 활성화 | `consumers.pins.json`(role·url·revision, ktdm runtime pin 형식) 패키지별 승인 소비자의 pinned SHA 체크아웃 → tarball 설치 → type-check + `next build` | ubuntu-24.04 | 실행기 T-010, 외부 dispatch T-010a |
 | `secret-scan` | PR, push `main`·`codex/release-*` | CI-42 패턴 | ubuntu-24.04 | T-009 |

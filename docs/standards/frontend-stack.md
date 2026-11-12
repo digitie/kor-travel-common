@@ -12,7 +12,7 @@
 
 | 축 | 표준 | 권장(2026-09) | 비고 |
 |---|---|---|---|
-| Node / npm | Node 22 LTS, npm 11 + `package-lock.json` v3 | 22.23.x / 11.19.x | `engines.node ^22.12.0`, `.nvmrc`; Node 20 CI는 22로(T-403). map npm 12.0.1 exact는 예외 |
+| Node / npm | private anchor의 정확 선택 + `package-lock.json` v3 | `versions.json` Node/npm 권고 exact patch | [ADR-018](../adr/018-exact-node-npm-build-toolchain.md): engines·packageManager·selector·engine-strict·실행 CLI 일치. 일반 floor와 구분 |
 | 프레임워크 | Next.js 16 App Router + React 19 | 16.3.4 / 19.2.8 | React 18(geo·ktdm)은 tokens만 채택, ui는 React 19 승격 후(O-25, T-443·T-470) |
 | 언어 | TypeScript 5.9 | 5.9.3 | TS 7은 typescript-eslint peer(`<6.1.0`) 밖 → airport 예외(O-6, T-433) |
 | 스타일 | Tailwind CSS v4 + `@tailwindcss/postcss` | 4.3.3 | CSS-first(§4). pinvi mobile Tailwind 3은 열림 O-8 |
@@ -222,8 +222,8 @@ lockfile은 의무(`package-lock.json` v3, D-07)이며 `check_versions.py`가 �
 | O-3 | UI 배포 방식 | npm 1차, 레지스트리는 셸·템플릿 채널만 |
 | O-5 | 패키지 식별자 | [ADR-014](../adr/014-common-implementation-without-registry-publishing.md)로 확정. 공개 registry 이름 확보 제외 |
 | O-6 | TS 기준선·airport 7.0.2 | 5.9.3 + airport 예외 |
-| O-8 | pinvi mobile Tailwind 3 | 미등록(사용자 승인 대기) |
-| O-10 | Node/npm | Node 22 + npm 11.19 권장 |
+| O-8 | pinvi mobile | 승인된 NativeWind5 RC·Tailwind4/C11 사용, 실기기/EAS/스토어는 NOT_RUN |
+| O-10 | Node/npm | [ADR-018](../adr/018-exact-node-npm-build-toolchain.md)로 확정. 값은 versions.json 권고 exact patch |
 | O-25 | geo React 19 | 승인 기본값, 별도 PR 실검증 |
 | — | ESLint 프로필 조각 이름(`next-minimal`/`next-strict`/`kt-guards`) | 후보, T-107 확정 |
 

@@ -19,11 +19,12 @@ jobs:
           cache: npm
       - name: 설치
         run: |
-          npm install --global npm@11.19.1
+          npm install --global npm@12.0.1
           node packages/ui/smoke/prepare-lock.mjs --css-only
           npm ci --engine-strict
       - name: 정본·코드·계약 검사
         run: |
+          npm run check:toolchain
           npm run check:policy
           npm run lint
           npm run build

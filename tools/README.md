@@ -37,3 +37,11 @@ python3 -B -X utf8 tools/check_versions.py <consumer-repo-root> \
 모든 도구는 Python 3.11+ 표준 라이브러리만 사용하며 Windows Python에서도 동작해야 한다([개발 환경](../docs/dev-environment.md) Tier 2).
 
 `check_versions.py --self-check`는 입력 레지스트리만 검사한다. 소비자 실행에서 검사 범위가 없거나 입력 형식이 잘못되면 exit 2이며, 설치 버전을 해석하지 못하면 NO_LOCK이다. 자체 검사 성공은 소비자 버전 정렬 성공이 아니다.
+
+## Node/npm 도구 선택 검사
+
+`npm run check:toolchain`은 [버전 규약](../docs/standards/versions.md)의 private anchor와 실제
+Node/npm을 검사한다. `npm run test:toolchain`은 Node 내장 테스트로 경로·입력·runtime 음성 대조를
+실행한다. CLI는 `--root`, `--registry`, 반복 `--manifest`/`--dockerfile`과 추가 JSON 배열
+`--manifests`/`--dockerfiles`를 지원한다. `--runtime` 실행은 npm run을 통해 수행한다.
+공개 workspace manifest는 private root를 상속하므로 재발행하지 않는다.

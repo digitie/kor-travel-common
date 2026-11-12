@@ -41,6 +41,45 @@
 
 프론트엔드의 승인 exact 축은 정식 SemVer 전체(안정 버전, prerelease, build metadata)를 허용한다. 숫자 core와 prerelease 숫자의 선행 0, 빈 식별자, ASCII 밖 문자는 거부한다. build 숫자 식별자의 선행 0은 SemVer 규칙대로 허용한다. 이 축은 checked: false와 recommended: null로 기존 접두 버전 검사에서 제외하고, 생성 프론트엔드 정책이 metadata까지 정확 문자열 및 산출물 bytes를 검사한다. Lightning CSS 적용과 공유 vendor 경로는 [프론트엔드 라이브러리](frontend-libraries.md)의 CSS compiler 규칙을 따른다.
 
+### 3.1.1 빌드·테스트 도구 선택(ADR-018)
+
+일반 버전 report의 floor·권고 판정과 별도로 빌드·테스트 도구 선택은 강제한다.
+`axes.node.recommended`·`axes.npm.recommended`의 정확 patch가 정본이며 private 앱
+anchor의 `packageManager`, `engines.node`, `engines.npm`을 그 값과 일치시킨다.
+저장소 `.nvmrc`도 같은 Node를 선택하며 `.node-version`이 있으면 일치해야 한다.
+anchor 옆 `.npmrc`는 기존 설정을 보존하면서 `engine-strict=true`를 둔다.
+workspace 멤버는 private root anchor를 상속하므로 공개 library manifest를 수정하지 않는다.
+독립 앱·테스트 프로젝트는 별도 private anchor로 검사한다. floor는 호환 하한으로 유지하며
+정확 선택을 위해 floor를 올리거나 라이브러리 의존성 graph를 재해석하지 않는다.
+
+각 Node job과 fresh Docker build stage는 npm 정본 버전을 명시 선택하고
+`npm ci --engine-strict`를 사용한다. 기존 peer·lifecycle flag를 보존한다.
+`npx npm@<정본> ci`는 해당 호출만 선택하며 이후 bare npm의 버전까지 보장하지 않는다.
+Node Dockerfile은 정확 Node tag와 SHA256 digest를 핀한다. 배포판·libc는 앱별로
+보존하며 중앙 레지스트리는 공통 digest 값을 강제하지 않는다.
+
+[`check_node_toolchain.mjs`](../../tools/check_node_toolchain.mjs)는 선언·selector·경로·
+Docker 기본값과 실제 Node/npm을 검사한다. `npm run check:toolchain`의 `--runtime`은
+Node 실행 버전과 npm run의 user agent를 검사하므로 `node` 직접 실행만으로 runtime gate를
+대체하지 않는다. Node 이미지 ARG는 전역 기본값과 stage 별칭만 정적으로 해석하며
+해석할 수 없는 FROM은 실패한다. Docker npm 선택 검사는 단순 RUN/CMD/ENTRYPOINT의
+literal `npm install --global npm@<정본>` 또는 호출별 `npx --yes npm@<정본>`만 지원한다.
+전역 pin은 동일 stage와 FROM 상속에만 적용하며 fresh Node stage의 bare npm/npx는 거부한다.
+node만 실행하는 runtime에는 불필요한 npm 설치를 요구하지 않는다. shell 치환·간접 wrapper의
+npm 명령은 정적으로 검증하지 못하므로 명시 literal로 통일하거나 실패로 남긴다.
+임의 shell script 내부 동작·실제 build context·이미지 런타임은 이 정적 검사의 보증 범위 밖이다.
+`npm ci`에는 명시 `--engine-strict`를 요구하며 검사하는 Docker npm 명령의 `--force`/`-f`·`--legacy-peer-deps`(등호형 포함)는 거부한다. digest 존재·형식 검사는 registry에서 digest가 실제 tag와
+일치함을 증명하지 않으므로 앱 image 선정 시 별도로 검증한다.
+
+재사용 `frontend-consumer-guard.yml`은 기존 `frontends` matrix의 패키지와 선택 입력
+`toolchain-manifests`(추가 경로 JSON 배열), `node-dockerfiles`(생산 Node Dockerfile JSON 배열)를
+검사한다. 기본값은 각각 빈 배열이며 frontend 패키지 검사는 생략되지 않는다.
+일반 파일·저장소 내부 경로만 허용하며 절대 경로·상위 경로·외부 symlink는 거부한다.
+고정 common 코드가 기존 frontend 검사를 통과시킨 뒤 live common-policy `versions.json`의
+도구 축으로 runtime gate를 실행한다. 정책만 새로워진 경우도 불일치를 실패로 드러낸다.
+소비자 연결은 이 입력을 실제 제공하는 리뷰·머지된 불변 code ref로만 한다.
+C11 공개 패키지·산출물·프론트엔드 정책을 재발행하지 않는다.
+
 ### 3.2 lockfile 의무
 
 - npm: `package-lock.json` **lockfileVersion 3** 커밋. CI·Docker는 `npm ci`. lockfileVersion 1·2는 `NO_LOCK`으로 본다. `npm-shrinkwrap.json`이 함께 있으면 npm이 이를 우선하므로, 미지원 shrinkwrap 대신 package-lock을 신뢰하지 않고 `NO_LOCK`으로 보고한다.
@@ -90,7 +129,7 @@
 - 예외는 `exceptions[]` 한 항목 = 저장소 1 × 축 1 × 설치본 접두 1. 여섯 필드(`repo`·`key`·`installed`·`reason`·`until`·`review`) 모두 필수이며 `until`은 ISO 날짜, `review`는 재판정 task ID(또는 열린 결정 O-n)와 조사 근거다.
 - `until`이 없는 예외는 등록할 수 없다(레지스트리 로더가 거부). 기본 만료는 다음 분기 감사(`next_review` 2026-12, T-506). 만료되면 `EXEMPT_EXPIRED`로 `::error::`가 뜨며, 연장은 새 `until`과 갱신된 `reason`으로 common PR을 낸다.
 - 예외는 **위반을 없애지 않는다**. 원 판정이 비고에 남고 [adoption-readiness](../architecture/adoption-readiness.md)의 gate 표에 집계된다.
-- 사용자 승인 대기 항목은 예외로 등록하지 않는다: pinvi mobile Tailwind 3(NativeWind 4)은 **O-8 사용자 승인 전까지 미등록**이며 report에 `BELOW_FLOOR`로 그대로 보인다(브리프 §7). 승인 시 `installed: "3.4"`, `until`: NativeWind 5 GA 재평가 시점으로 등록한다.
+- 사용자 승인 대기 항목은 예외로 등록하지 않는다. 현재 Pinvi 모바일은 승인된 NativeWind5 RC·Tailwind4/C11을 사용하므로 과거 Tailwind3 예외 후보를 현행 예외로 취급하지 않는다. 완료된 프론트엔드 이관 예외는 현재 HEAD manifest의 정확 버전 근거로 제거하며, 무관한 Python·airport 예외와 별도 Map 증거가 없는 항목은 보존한다.
 
 ### 3.7 차단 목록
 
@@ -121,6 +160,10 @@
 [T-005 고정 입력 보고](../evidence/t005/README.md)는 7개 소비자의 commit·입력 digest·실행 환경·판정 목록을 보존한다. 값은 해당 commit의 관찰이며 현재 배포 상태나 소비자 빌드 성공을 뜻하지 않는다. report exit 0은 정책 준수 증거가 아니며, 이번 위반 결과로 `clean_runs`나 `enforce`를 올리지 않는다.
 
 ## 6. 전환 트랙(매트릭스 §3.3)
+
+아래 표는 2026-09 조사 기준선의 역사이며 현재 미완료 목록이 아니다. 완료된 C11 프론트엔드
+전환은 [T-218](../tasks/T-218-radix-library-unification.md), 현재 도구 선택은 ADR-018과
+`versions.json`을 따른다. 당시 npm 차이를 현재 예외로 해석하지 않는다.
 
 | 트랙 | 대상 | 근거 | task |
 |---|---|---|---|
@@ -188,8 +231,8 @@ python3 -B -X utf8 tools/check_versions.py /path/to/app --repo wx --today 2027-0
 | O-5 | 패키지 식별자 | [ADR-014](../adr/014-common-implementation-without-registry-publishing.md)로 확정. 공개 registry 이름 확보 제외 |
 | O-6 | TS 기준선·airport 7.0.2 | 5.9.3 + airport 예외(`until` 2026-12-31, T-433) |
 | O-7 | Python 앱 floor 3.12 시점 | common 3.11 호환 유지; 앱 상향은 Phase 4 |
-| O-8 | pinvi mobile Tailwind 3 예외 | **미등록**(사용자 승인 대기). report에 `BELOW_FLOOR`로 표시 |
-| O-10 | Node/npm | Node 22 floor 22.12·recommended 22.23; npm floor 10.9·recommended 11.19; map 12.0.1 예외 |
+| O-8 | pinvi mobile | 승인된 NativeWind5 RC·Tailwind4/C11 사용. 과거 Tailwind3 예외 후보는 현행 예외가 아님 |
+| O-10 | Node/npm | [ADR-018](../adr/018-exact-node-npm-build-toolchain.md)로 확정. 권고 exact patch를 private 빌드·테스트 선택으로 강제하며 일반 floor는 별도 유지 |
 | O-16 | 공유 라이브러리·provider SHA | `providers` 보고만; 정리 요청 T-505 |
 | O-18 | Renovate | 미설치 전제, [`templates/dependabot.yml`](../../templates/dependabot.yml) |
 

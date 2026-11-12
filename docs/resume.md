@@ -1,5 +1,13 @@
 # 현재 작업 재개
 
+## 2026-11-13 — 정확 Node/npm 도구 후보
+
+[ADR-018](adr/018-exact-node-npm-build-toolchain.md)의 private anchor/runtime 검사와
+Node 내장 회귀 테스트·reusable 선택 입력을 구현한다. C11/공개 패키지·의존성 graph는 보존한다.
+로컬 freeze commit은 검토 입력이며 publish·merge는 독립2리뷰·정확 CI gate 완료까지 보류한다. 설치·전체 build는 저용량 환경에서 실행하지 않는다.
+현재 사실 출판/운영 수용 기록과 미실행 native/EAS/store는 아래 이력대로 보존한다.
+CI 순서 정비는 마지막 별도 작업이다.
+
 ## 2026-11-12 — Transport Geo형 메뉴·지도 운영 수용 후 최종 문서 출판
 
 현재 실제 수용 앱은 Manager·Concierge·Pinvi·Weather·Geo·Transport 6개다. Transport 최신 PR186의 mergef30/image0ac은 공식 SDK508 관리자 단독 교체와 첫 정상 세션9개를 통과했다. PC 왼쪽256px 세로 메뉴·모바일 왼쪽296px 드로어, 실제 PNG decode2+2·zoom7→8·9폭/11행·Pretendard·로그아웃 후 보호401을 확인했다. [최종 정산](reviews/adversarial/2026-11-12-consumer-sdk-final.md#최종-운영-수용-6개-정산)과 [배포 영수증](reviews/adversarial/evidence/2026-11-12-frontend-deployment-receipt.json)이 현재 근거이며 이전184/185 실패는 원문 그대로 보존한다.
