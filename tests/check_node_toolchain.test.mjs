@@ -262,7 +262,7 @@ test("미지원 heredoc·escape를 거부하고 기본 backslash 지시문은 �
 
 test("B-BUILD-P2-02 direct·symlink·preserve-symlinks-main CLI는 모두 같은 잘못된 anchor를 거부한다", t => {
   const f = fixture(t); f.put(".npmrc", "engine-strict=false\n");
-  cpSync(resolve(dirname(fileURLToPath(import.meta.url)), "../node_modules/ini"), join(f.root, "node_modules/ini"), { recursive: true });
+  for (const name of ["ini", "shell-quote"]) cpSync(resolve(dirname(fileURLToPath(import.meta.url)), "../node_modules/" + name), join(f.root, "node_modules/" + name), { recursive: true });
   const alias = join(f.root, "checker-alias.mjs");
   try { symlinkSync(checker, alias); }
   catch (error) { throw new Error("NOT_RUN: CLI alias 경계 시험에 symlink 기능이 필요합니다", { cause: error }); }
@@ -304,7 +304,7 @@ for (const [name, tail] of [
 }
 test("B2 alias default registry는 실제 checker 데이터에 고정하고 명시 override는 유지한다", t => {
   const f = fixture(t), alias = join(f.root, "alias-site/bin/checker.mjs");
-  cpSync(resolve(dirname(fileURLToPath(import.meta.url)), "../node_modules/ini"), join(f.root, "node_modules/ini"), { recursive: true });
+  for (const name of ["ini", "shell-quote"]) cpSync(resolve(dirname(fileURLToPath(import.meta.url)), "../node_modules/" + name), join(f.root, "node_modules/" + name), { recursive: true });
   mkdirSync(dirname(alias), { recursive: true });
   try { symlinkSync(checker, alias); }
   catch (error) { throw new Error("NOT_RUN: default registry alias 시험에 symlink 기능이 필요합니다", { cause: error }); }
@@ -382,5 +382,54 @@ test("절대 CLI·wrapper·동적 npm 실행은 cache 경로와 혼동하여 제
   ]) {
     f.put("Dockerfile", attackFrom + attackPin + "RUN " + command + "\n");
     reject(f.run({ dockerfiles: ["Dockerfile"] }), /npm|shell/u);
+  }
+});
+
+for (const [name, command] of [
+  ["bare cache data", "RUN mkdir -p /var/cache/npm /var/cache/npx"],
+  ["chown data", "RUN chown -R node:node /var/cache/npm /home/node/.npx"],
+  ["JSON node data", 'RUN ["node","-e","process.stdout.write(process.argv[1])","npm"]'],
+  ["quoted data", 'RUN echo npm && printf "%s" "npx && npm & literal"'],
+  ["JSON operator data", 'RUN ["node","-e","process.stdout.write(process.argv[1])","npm & npx > literal"]'],
+]) {
+  test("A4/B3 실행 파일과 인수 데이터를 구분한다 " + name, t => {
+    const f = fixture(t); f.put("Dockerfile", attackFrom + command + "\n");
+    assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, true);
+  });
+}
+test("B3 whole RUN의 제어 연산자는 npm 구간 선택 전에 거부한다", t => {
+  const f = fixture(t);
+  for (const tail of ["& node --version", "; node --version", "|| node --version", "| node --version", "> /tmp/data", "< /tmp/data"]) {
+    f.put("Dockerfile", attackFrom + "RUN npm install --global npm@" + npm + " && printf ready " + tail + "\nRUN npm ci --engine-strict\n");
+    reject(f.run({ dockerfiles: ["Dockerfile"] }), /shell/u);
+  }
+  f.put("Dockerfile", attackFrom + "RUN printf ready & node --version\n");
+  reject(f.run({ dockerfiles: ["Dockerfile"] }), /shell/u);
+});
+test("공식 shell token의 인용·escape 실행 파일도 npm pin을 검사한다", t => {
+  const f = fixture(t);
+  for (const cli of ["'npm'", "n\\pm"]) {
+    f.put("Dockerfile", attackFrom + "RUN " + cli + " ci --engine-strict\n");
+    reject(f.run({ dockerfiles: ["Dockerfile"] }), /fresh Node stage/u);
+    f.put("Dockerfile", attackFrom + "RUN " + cli + " install --global npm@" + npm + " && " + cli + " ci --engine-strict\n");
+    assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, true);
+  }
+});
+test("shell 변수는 host 값을 읽지 않고 data로만 보존하며 실행 파일 선택은 거부한다", t => {
+  const f = fixture(t);
+  const key = "KT_TOOLCHAIN_TEST_OPAQUE", old = process.env[key];
+  try {
+    process.env[key] = "npm ci --force & invalid";
+    f.put("Dockerfile", attackFrom + 'RUN echo "$KT_TOOLCHAIN_TEST_OPAQUE" && mkdir -p "$NPM_CONFIG_CACHE"\n');
+    assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, true);
+    f.put("Dockerfile", attackFrom + 'RUN "$KT_TOOLCHAIN_TEST_OPAQUE" ci --engine-strict\n');
+    reject(f.run({ dockerfiles: ["Dockerfile"] }), /npm/u);
+  } finally { if (old === undefined) delete process.env[key]; else process.env[key] = old; }
+});
+test("미지원 command·arithmetic·확장 modifier와 동적 wrapper는 실행하지 않고 거부한다", t => {
+  const f = fixture(t);
+  for (const command of ["echo $(npm --version)", "echo $((1+1))", "echo `npm --version`", 'echo "${CLI:-npm}"', "env npm ci --engine-strict", 'sh -c "npm ci --engine-strict"', '["env","npm","ci","--engine-strict"]', "corepack npm ci --engine-strict", 'npx "$CLI" ci --engine-strict', 'sh "/tmp/$CLI.sh"', "CUSTOM=npm npm ci --engine-strict"]) {
+    f.put("Dockerfile", attackFrom + attackPin + "RUN " + command + "\n");
+    assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, false);
   }
 });

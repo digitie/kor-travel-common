@@ -6,6 +6,7 @@ import { dirname, isAbsolute, matchesGlob, relative, resolve, sep } from "node:p
 import { parseArgs } from "node:util";
 import { fileURLToPath } from "node:url";
 import ini from "ini";
+import shellQuote from "shell-quote";
 
 class InputError extends Error {}
 const object = value => value !== null && typeof value === "object" && !Array.isArray(value);
@@ -66,17 +67,58 @@ function pathList(value, label, nonempty = false) {
   return value;
 }
 
-function npmCommand(command, stage, npm, label, errors) {
-  let words;
-  if (command.startsWith("[")) {
-    try { words = JSON.parse(command); } catch { errors.push(label + " npm 실행 배열을 해석할 수 없습니다"); return; }
-    if (!Array.isArray(words) || words.some(word => typeof word !== "string")) {
-      errors.push(label + " npm 실행 배열이 올바르지 않습니다"); return;
+// 변수는 호스트 환경에서 확장하지 않는다. data 인수의 opaque 표식으로만 보존한다.
+const dynamicWord = "__KT_TOOLCHAIN_VARIABLE__";
+
+function dockerCommands(command, label, errors) {
+  try {
+    if (command.startsWith("[")) {
+      const words = JSON.parse(command);
+      if (!Array.isArray(words) || !words.length || words.some(word => typeof word !== "string")) throw new Error();
+      return [words]; // JSON exec 인수는 shell 연산자로 재해석하지 않는다.
     }
-  } else {
-    // 이 검사는 실제 저장소의 단순 npm/npx 명령만 지원한다. shell 제어·치환은 실행하지 않는다.
-    if (/[|;$`<>\x00-\x1f\x7f]|(?:^|[^&])&(?:[^&]|$)/u.test(command)) { errors.push(label + " npm 명령의 동적 shell 형식은 지원하지 않습니다"); return; }
-    words = command.trim().split(/\s+/u).map(word => word.replace(/^(['"])(.*)\1$/u, "$2"));
+    // 공식 parser도 command/arithmetic substitution을 실행·검증하지 않으므로 지원하지 않는다.
+    if (/[\x00-\x1f\x7f\x60]|\$\(/u.test(command)) throw new Error();
+    const tokens = shellQuote.parse(command, name => {
+      if (!/^[A-Za-z_]\w*$/u.test(name)) throw new Error();
+      return dynamicWord;
+    });
+    const commands = [[]];
+    // npm 구간을 선택하기 전에 RUN 전체를 검사한다. background AND-list도 먼저 거부한다.
+    for (const token of tokens) {
+      if (typeof token === "string") {
+        if (/[\x00-\x1f\x7f]/u.test(token)) throw new Error();
+        commands.at(-1).push(token);
+      } else if (Object.hasOwn(token, "comment")) break;
+      else if (token.op === "&&" && commands.at(-1).length) commands.push([]);
+      else throw new Error();
+    }
+    if (commands.some(words => !words.length)) throw new Error();
+    return commands;
+  } catch {
+    errors.push(label + " Docker shell/exec의 미지원·동적 형식은 거부합니다");
+    return [];
+  }
+}
+
+function inspectDockerCommand(words, stage, npm, label, errors) {
+  const executable = words[0];
+  if (["npm", "npx"].includes(executable)) {
+    npmCommand(words, stage, npm, label, errors);
+    return;
+  }
+  // 현재 소비자의 data 명령만 수용한다. 알려지지 않은 wrapper를 추론하여 통과시키지 않는다.
+  if (["node", "mkdir", "chown", "echo", "printf", "rm"].includes(executable)) return;
+  const staticScript = ["sh", "/bin/sh"].includes(executable)
+    && words[1]?.startsWith("/") && words[1].endsWith(".sh")
+    && !words[1].includes(dynamicWord);
+  if (staticScript) return; // 정적 script 내부의 npm 사용은 별도 script/image 검증 책임이다.
+  errors.push(label + " 정적으로 검증 가능한 Node npm/npx 명령이 필요합니다");
+}
+
+function npmCommand(words, stage, npm, label, errors) {
+  if (words.some(word => word.includes(dynamicWord))) {
+    errors.push(label + " npm 실행·선택 인수의 변수는 지원하지 않습니다"); return;
   }
   if (words.some(word => word === "-f" || /^(?:--force|--legacy-peer-deps)(?:=|$)/u.test(word))) {
     errors.push(label + " force·legacy-peer-deps 우회 옵션은 허용하지 않습니다"); return;
@@ -164,12 +206,10 @@ function nodeImages(text, node, npm, label, errors) {
       continue;
     }
     const run = /^(?:RUN|CMD|ENTRYPOINT)\s+(.+)$/iu.exec(line);
-    // .npm 캐시 경로는 실행 파일이 아니다. 절대 경로 CLI·wrapper 안의 npm/npx 검사는 유지한다.
-    if (run && /(?<![\w.])(?:npm|npx)\b/u.test(run[1])) {
+    if (run) {
       const command = run[1].replace(/^(?:--[\w-]+=\S+\s+)+/u, "");
-      const commands = command.startsWith("[") ? [command] : command.split(/\s*&&\s*/u);
-      for (const part of commands) {
-        if (/(?<![\w.])(?:npm|npx)\b/u.test(part)) npmCommand(part, stage, npm, label, errors);
+      for (const words of dockerCommands(command, label, errors)) {
+        inspectDockerCommand(words, stage, npm, label, errors);
       }
     }
     if (!/^FROM\b/iu.test(line)) continue;

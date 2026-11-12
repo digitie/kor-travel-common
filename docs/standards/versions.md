@@ -66,8 +66,8 @@ Node 실행 버전과 npm run의 user agent를 검사하므로 `node` 직접 실
 literal `npm install --global npm@<정본>` 또는 호출별 `npx --yes npm@<정본>`만 지원한다.
 전역 pin은 동일 stage와 FROM 상속에만 적용하며 fresh Node stage의 bare npm/npx는 거부한다.
 node만 실행하는 runtime에는 불필요한 npm 설치를 요구하지 않는다. shell 치환·간접 wrapper의
-npm 명령은 정적으로 검증하지 못하므로 명시 literal로 통일하거나 실패로 남긴다. Docker heredoc과 기본 backslash 이외 escape 지시문은 해석하지 않고 거부한다. shell 형식의 단일 `&`·리다이렉션·미지원 제어문자는 npm `--` 처리보다 먼저 거부한다. 지원 `&&` 연결과 JSON exec-form의 문자 인수는 구분한다.
-임의 shell script 내부 동작·실제 build context·이미지 런타임은 이 정적 검사의 보증 범위 밖이다.
+npm 명령은 정적으로 검증하지 못하므로 명시 literal로 통일하거나 실패로 남긴다. Docker heredoc과 기본 backslash 이외 escape 지시문은 해석하지 않고 거부한다. shell 형식은 설치된 shell-quote의 token으로 실행 파일과 data 인수를 구분한다. npm 구간 선택보다 먼저 RUN 전체의 연산자를 확인하여 && 외 제어·리다이렉션·glob을 거부하며 JSON exec-form의 문자 인수는 shell로 재해석하지 않는다. command/arithmetic substitution·비단순 변수 확장은 지원하지 않는다. 호스트 환경을 읽지 않는 lookup 표식은 data 인수에만 허용한다.
+지원하는 비-npm 실행 파일은 소비자의 literal node·mkdir·chown·echo·printf·rm이며 그 인수의 npm/npx 문자는 data다. sh 또는 /bin/sh에 절대 literal .sh 경로를 넘기는 기존 정적 script 호출은 opaque로 두고 본문은 검사하지 않는다. 그 외 wrapper·절대 npm/npx CLI·동적 실행 파일 선택은 거부한다. 임의 shell script 내부 동작·실제 build context·이미지 런타임은 이 정적 검사의 보증 범위 밖이다.
 지원 npm 명령은 canonical 전역 install, ci·run·start·prune·버전 조회와 workspace 선택으로 한정한다. npm exec·다른 install 형식·package/prefix/location/global selector 및 미지원 자체 옵션은 pin 이후에도 거부한다. npm 자체 옵션은 engine-strict·ignore-scripts·no-audit·no-fund·prefer-offline·if-present·omit·workspace/workspaces만 지원한다. run/start의 `--` 뒤 앱 인수는 npm selector로 해석하지 않는다.
 `npm ci`에는 명시 `--engine-strict` 또는 true 동등 표기를 요구하며 모순·해제·분리 false는 shell/exec JSON 모두 거부한다. 또한 검사하는 Docker npm 명령의 `--force`/`-f`·`--legacy-peer-deps`(등호형 포함)는 거부한다. digest 존재·형식 검사는 registry에서 digest가 실제 tag와
 일치함을 증명하지 않으므로 앱 image 선정 시 별도로 검증한다.
@@ -80,7 +80,7 @@ npm 명령은 정적으로 검증하지 못하므로 명시 literal로 통일하
 도구 축으로 runtime gate를 실행한다. 정책만 새로워진 경우도 불일치를 실패로 드러낸다.
 기본 registry는 entry와 동일한 physical checker 경로에서 유도한다. alias 부모의 다른/없는 registry로 바뀌지 않으며 명시 `--registry` override는 유지한다.
 소비자 연결은 이 입력을 실제 제공하는 리뷰·머지된 불변 code ref로만 한다. consumer-smoke와 새 guard가 checkout하는 common-ref에도 `check:toolchain` script가 있어야 한다. SHA/tag 입력 형식의 허용은 구 ref의 실행 호환성을 뜻하지 않으며, script가 없는 구 ref는 fallback 없이 실패한다.
-Common private tool의 공식 INI parser 1개 추가만 root graph 예외로 승인한다. 나머지 lock entry의 deep equality와 새 node의 공식 SRI를 검증하며 소비자 graph·C11 공개 패키지·산출물·65개 프론트 버전/정책은 변경·재발행하지 않는다.
+Common private tool의 공식 ini·shell-quote 두 parser dependency만 root graph 예외로 승인한다. 나머지 lock entry의 deep equality와 새 node의 공식 SRI를 검증하며 소비자 graph·C11 공개 패키지·산출물·65개 프론트 버전/정책은 변경·재발행하지 않는다.
 
 ### 3.2 lockfile 의무
 

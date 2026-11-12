@@ -15,7 +15,7 @@ C11 공개 패키지는 이미 불변 릴리스이므로 도구 선택을 위해
 
 정확 선택값은 `versions.json`의 Node/npm 권고 patch가 소유한다. private 앱 anchor와
 workspace private root의 선언·selector·engine-strict 및 실제 실행을 함께 검증한다.
-공개 C11·소비자 의존성 graph/version/SRI를 보존한다. Common private checker의 INI 의미를 npm CLI와 같은 공식 parser에 위임하기 위해 root devDependency의 정확 `ini` 1개만 추가한다. 수기 INI 해석·fallback은 두지 않으며 lock의 기존 항목은 모두 보존하고 새 node만 공식 SRI로 검증한다. 일반 floor는 별도 호환 하한이다.
+공개 C11·소비자 의존성 graph/version/SRI를 보존한다. Common private checker의 INI와 shell token 의미를 공식 parser에 위임하기 위해 root devDependency에 정확한 ini와 shell-quote 두 도구 dependency만 추가한다. 수기 INI 해석·fallback은 두지 않으며 lock의 기존 항목은 모두 보존하고 새 node만 공식 SRI로 검증한다. 일반 floor는 별도 호환 하한이다.
 
 재사용 frontend guard는 기존 검사 뒤 live 중앙 도구 축으로 runtime을 검증한다.
 추가 private manifest와 생산 Node Dockerfile 경로는 선택 JSON 배열로 받되 모든 경로를
@@ -30,7 +30,7 @@ Node 이미지의 배포판/libc는 앱이 보존하고 정확 tag·digest를 �
 
 ## 결과
 
-Node 내장 test runner와 공식 INI dependency를 사용한다. 테스트 전 Common의 잠긴 의존성 설치가 필요하다. 격리 리뷰 fixture는 source/lock과 검증된 설치 module의 동일 bytes를 함께 제공할 수 있으며, public vendor나 수기 parser 복사를 대체 수단으로 쓰지 않는다.
+Node 내장 test runner와 잠긴 공식 INI·shell token dependency를 사용한다. 테스트 전 Common의 잠긴 의존성 설치가 필요하다. 격리 리뷰 fixture는 source/lock과 검증된 설치 module의 동일 bytes를 함께 제공할 수 있으며, public vendor나 수기 parser 복사를 대체 수단으로 쓰지 않는다.
 
 명시 선택·runtime guard는 설치·빌드 증거와 구분한다. 정본 환경이 없으면 해당 실행은
 NOT_RUN이며 주입한 runtime 음성 대조만으로 실제 runtime PASS를 주장하지 않는다.

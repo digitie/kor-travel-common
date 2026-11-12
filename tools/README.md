@@ -41,11 +41,13 @@ python3 -B -X utf8 tools/check_versions.py <consumer-repo-root> \
 ## Node/npm 도구 선택 검사
 
 `npm run check:toolchain`은 [버전 규약](../docs/standards/versions.md)의 private anchor와 실제
-Node/npm을 검사한다. 먼저 Common의 `npm ci --ignore-scripts --engine-strict`로 공식 `ini` 정확 dependency를 설치한다. `npm run test:toolchain`은 Node 내장 runner와 해당 module로 경로·입력·runtime 음성 대조를
+Node/npm을 검사한다. 먼저 Common의 `npm ci --ignore-scripts --engine-strict`로 공식 ini·shell-quote 정확 dependency를 설치한다. `npm run test:toolchain`은 Node 내장 runner와 해당 module로 경로·입력·runtime 음성 대조를
 실행한다. CLI는 `--root`, `--registry`, 반복 `--manifest`/`--dockerfile`과 추가 JSON 배열
 `--manifests`/`--dockerfiles`를 지원한다. `--runtime` 실행은 npm run을 통해 수행한다.
 공개 workspace manifest는 private root를 상속하므로 재발행하지 않는다.
 
 INI 해석은 설치된 공식 package의 전역 typed boolean만 사용하며 수기 parser나 fallback은 없다.
-격리 검토 사본도 root package/lock과 SRI 확인된 `node_modules/ini`의 배포 파일을 함께 둔다.
+격리 검토 사본도 root package/lock과 SRI 확인된 node_modules/ini와 node_modules/shell-quote의 배포 파일을 함께 둔다.
 이 private tool dependency를 앱이나 public C11 package manifest에 추가하지 않는다.
+
+Docker shell의 token 해석은 공식 [shell-quote](https://github.com/ljharb/shell-quote#parsecmd-env) 1.12.0 배포와 lock/SRI로 고정한다(확인: 2026-11-13). 호스트 ENV·shell 실행 없이 whole RUN의 && 외 연산자를 먼저 거부하고 JSON argv는 그대로 검사한다. 지원하는 literal data 명령과 opaque 정적 script 경계는 [버전 규약](../docs/standards/versions.md)에 따른다. 새로운 임의 Docker/shell 해석기를 보증하지 않는다.

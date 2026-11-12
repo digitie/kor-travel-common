@@ -1,3 +1,11 @@
+## 2026-11-13 — 공식 shell token과 전체 RUN 제어 경계 후보5
+
+8a2c의 점 캐시 조치는 유지하되 비점 캐시·node/echo의 npm data 오인과 전체 AND-list background 누락은 미해결임을 보존한다.
+공식 shell-quote 1.12.0을 private 도구에 추가해 실행 파일 위치와 data를 구분하고, npm 구간 선택 전에 전체 RUN의 && 외 연산자를 거부한다.
+호스트 환경·shell은 실행하지 않는다. 정적 script 본문·전체 Docker 동작은 보증하지 않으며 알려지지 않은 wrapper는 추론 승인하지 않는다.
+동일 회귀는 기존 helper에서 81 PASS/9 FAIL을 보존하고 새 후보에서 90 PASS다. 공식 두 parser 외 lock 항목·공개 C11·소비자 graph는 불변이다.
+정본 runtime·7개 소비자·원 두 reviewer·정확 CI의 후속 판정은 각각 별도로 정산한다. 원 source BLOCK과 녹색 CI를 섞지 않는다.
+
 ## 2026-11-13 — npm 캐시 경로와 Docker CLI 감지 구분
 
 404a의 실제 소비자 정적 검사에서 .npm 캐시 디렉터리를 npm 명령으로 오인하여 Geo·Weather·Transport를 거부했다.
