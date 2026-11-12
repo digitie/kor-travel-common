@@ -1,14 +1,14 @@
 {
-  "observedUTC": "2026-11-11T22:43:03.394156+00:00",
+  "observedUTC": "2026-11-12T05:49:58.841228+00:00",
   "scope": "공통 C11 1단계 배포 수용 정산; 전체 후속 CI 정비 완료 선언 아님",
-  "fullyAcceptedAppCount": 5,
+  "fullyAcceptedAppCount": 6,
   "apps": {
     "manager": {
       "state": "DEPLOYED_VERIFIED",
       "frontendSource": "9910b9a6dba902c6a59469d3a6f46c6077e78d3f",
       "delivery": "기존 systemd frontend 새 build1",
       "actualCommonFiles": 153,
-      "SDKBothHosts": "ca1d32b05f7a8418708bdd4f84449d79df57a102",
+      "SDKBothHosts": "508b074cff137e5cca79318f4f99ec7d385e655b",
       "realLoginTableFontMobileLogout": true,
       "webSocket30SecondsNoReconnect": true,
       "separateHistoricalObservation": "공유PG 설정 fingerprint1 차이는 원인 미확정이며 복원하지 않음. 이미지·시작·재시작 identity는 보존됨. 모든 이전 설정이 같다고 확대하지 않음",
@@ -27,8 +27,20 @@
           "localEvidenceName": "final-receipt.json",
           "sha256": "d13ee40d9a395caadde796f2f9a183869141ad486088be470ebcb30b78319eb0",
           "bytes": 2243
+        },
+        {
+          "localEvidenceName": "final-receipt.json",
+          "sha256": "aea882cfde63d2e0f765b3b51f0f4fdb747d40c86e06e6e8d65a322d19cfa6ee",
+          "bytes": 1954
+        },
+        {
+          "localEvidenceName": "final-receipt.json",
+          "sha256": "ead36419dae6d041f454e314d0a6f85a295cc1a977b0db56d9ec2aefa446f20f",
+          "bytes": 2113
         }
-      ]
+      ],
+      "previousSDKBothHosts": "ca1d32b05f7a8418708bdd4f84449d79df57a102",
+      "SDK591InstallOnlyFrontendUnchanged": true
     },
     "concierge": {
       "state": "DEPLOYED_VERIFIED",
@@ -128,6 +140,15 @@
       "geocodeCandidates": 1,
       "domainWrites": 0,
       "priorHarnessFailuresPreserved": "검증기 module path·Fetch.status()·실제 v1 경로/locator 보정 이력 보존. 최종 제품 source 수정·재빌드 없음. 정상 로그인/cleanup과 최종 UI 로그아웃을 구분하며 반복 시도를 숨기지 않음"
+    },
+    "transport": {
+      "state": "DEPLOYED_VERIFIED",
+      "surfaces": [
+        "public",
+        "admin"
+      ],
+      "detailRecord": "transport",
+      "publicAndAdminActualAcceptance": true
     }
   },
   "map": {
@@ -138,11 +159,433 @@
     "oursAfterHandoff": "소스·이미지·current·pin 추가 변경 없음"
   },
   "transport": {
-    "state": "BUILDING_PENDING_APPLY_ACCEPTANCE",
+    "state": "PUBLIC_AND_ADMIN_DEPLOYED_VERIFIED_ACTUAL_ACCEPTANCE_PASS_FROZEN",
     "primaryMerge": "936fdb90b0ee9f6392d2f888255053ee1f4066b2",
     "primaryPR": 181,
-    "scope": "새 공개/admin 이미지와 UI-only 경로·실제 수용 진행 중, DB0042·기존 backend 보존"
+    "adminFeaturePreservationPR": 182,
+    "adminMobileMenuPR": 183,
+    "adminMerge": "47a4719ab772f7d0e7a707df2ed6a6d08b1cc4ea",
+    "adminReviewedSource": "cd4ff768894d29199674c9f540399f7aeaf65170",
+    "adminMergedReviewedAndCIFullTree": "510888aa00fa949531e392c68061ff9ee72a5b83",
+    "scope": "공개936/image3262의 단계별13개 수용과 최종 관리자47a/image3f207의 단일 정상 세션9개 실제 수용을 모두 완료했다. SDK·소스·CI와 운영·브라우저 근거를 구분하며 T-218 및 후속 toolchain/ecosystem/CI_LAST 완료를 선언하지 않는다.",
+    "public": {
+      "state": "DEPLOYED_VERIFIED",
+      "mergedSource": "936fdb90b0ee9f6392d2f888255053ee1f4066b2",
+      "imageID": "sha256:32626dee05553b1d448232b9716c541a3af4f4b55255b016246737f4bfcc545d",
+      "architecture": "arm64",
+      "actualCommonFiles": 153,
+      "officialSDKDryrunAndConfirmAndCurrent": true,
+      "stagedAcceptancePassed": 13,
+      "browserSessions": 9,
+      "singleRunWholeSuiteClaim": false,
+      "realPretendardDesktop1280Mobile375": true,
+      "actualVirtualTableAndCards": true,
+      "observedStaticAssets": 23,
+      "HTTPMIMEConsoleErrors": 0,
+      "pageErrors": 0,
+      "authenticationWrites": 0,
+      "domainWrites": 0,
+      "historyDefaultAirportEmptyPreserved": true,
+      "actualUserICNSelectionPositiveHistoryPoints": 1009,
+      "actualHistoryObservedPoints": 946,
+      "historicalHarnessFailuresPreserved": true,
+      "sourceImageFixOrReapplyForHarness": false,
+      "ownBrowserProcessesRemaining": 0,
+      "evidence": [
+        {
+          "localEvidenceName": "final-receipt.json",
+          "sha256": "0946fb2cc5a2c7005e857459f2a837740fb3702a6bf85141ae8392532070b0ef",
+          "bytes": 1958
+        },
+        {
+          "localEvidenceName": "public-aggregate-acceptance.json",
+          "sha256": "4482143fa58847ff13704d1f8e1f488730ce570ce8ee617f8d13e90fcedfedc6",
+          "bytes": 13192
+        },
+        {
+          "localEvidenceName": "transport-public-aggregate-parent-verification-20261112.json",
+          "sha256": "0b03341d0cd35bc3bc195f9d412fe049450a3b3f2a7d0ef916ed86cfd4aef2dd",
+          "bytes": 3601
+        }
+      ]
+    },
+    "admin": {
+      "state": "DEPLOYED_VERIFIED_ACTUAL_ACCEPTANCE_PASS_FROZEN",
+      "actualAdminAcceptance": true,
+      "mergedSource": "47a4719ab772f7d0e7a707df2ed6a6d08b1cc4ea",
+      "imageID": "sha256:3f2073a3768bc90f07f4ff3ef614c9ceb263fb66b8b63ce125afeead1a58fb09",
+      "architecture": "arm64",
+      "actualCommonPackages": 6,
+      "actualCommonFiles": 263,
+      "sourceGitBlobsExact": 907,
+      "declaredCOPYFilesExact": 296,
+      "compiledOldRoutesPreserved": 32,
+      "officialSDKSource": "508b074cff137e5cca79318f4f99ec7d385e655b",
+      "officialDryrunCalls": 1,
+      "officialConfirmCalls": 1,
+      "extraApplyCalls": 0,
+      "nonselectedContainersPreserved": 54,
+      "nonselectedContainerChanges": 0,
+      "nonselectedAddedOrRemoved": 0,
+      "backend499Schema0042Public936Image3262Preserved": true,
+      "approvedTransportWebBuildInputPreserved": true,
+      "rootGeoMapBackendAuthPinsCurrentChanges": 0,
+      "accountPasswordOrSessionSecretChanges": false,
+      "normalLoginHTTP": 200,
+      "normalLoginPosts": 1,
+      "normalLogoutPosts": 1,
+      "normalLogoutHTTP": 303,
+      "protectedBeforeHTTP": 401,
+      "actualProtectedReleaseMatchesMergedSource": true,
+      "protectedAfterLogoutHTTP": 401,
+      "singleNormalSessionAllChecksPassed": 9,
+      "actualQAZeroFailures": true,
+      "actualQAState": "ACTUAL_NEW_M47A_PRODUCTION_ACCEPTANCE_PASS_FROZEN",
+      "actualBrowserMap": {
+        "boundedActualBrowserPhase": {
+          "observed": 36,
+          "beforeZoom": 16,
+          "afterZoom": 20,
+          "allHTTP200PNGSignatureAndIHDR256": true,
+          "approvedGeoKeyFingerprintMatched": true,
+          "actualBitmapDecodedBefore": 2,
+          "actualBitmapDecodedAfter": 2,
+          "cameraZoom": [
+            7,
+            8
+          ],
+          "decode": "createImageBitmap from actual received PNG bytes; body kept in memory only",
+          "XMLAcceptedAsImage": false
+        },
+        "entireSessionLegacyObserver": {
+          "observed": 96,
+          "validatedImage200": 68,
+          "HTTPFailures": 0,
+          "other28": "not automatically errors; not individually classified by the legacy observer. Do not claim all96 are validated PNGs."
+        }
+      },
+      "menusFontsGeometry": {
+        "uniqueWidths": [
+          320,
+          375,
+          414,
+          768,
+          1023,
+          1024,
+          1280
+        ],
+        "sequence": [
+          1280,
+          320,
+          375,
+          414,
+          768,
+          1023,
+          1024,
+          1023,
+          1280
+        ],
+        "allNineViewportRowsPassed": true,
+        "inlineMenuAndBoundaryBackCross": true,
+        "actualPretendardPlatformGlyphsAtEveryObservedWidth": true,
+        "heightOnlyRail768Delta": 0,
+        "documentHeightOnlyScrollFocus": {
+          "beforeScrollY": 280,
+          "afterScrollY": 280,
+          "focusPreserved": true
+        },
+        "actualProductionScreenshotsCaptured": 0,
+        "visualReference": "Parent already viewed exactsource cd4 native freshpaint PNGs; no second production login for screenshots."
+      },
+      "readonlyBusiness": {
+        "commonVirtualTableAndPopoverEscapeFocus": "PASS",
+        "parkingLotsAndRailTimetablePreservation": "PASS",
+        "actualOfficialAndTelephoneLinksComparedInMemoryOnly": "PASS",
+        "externalContactLinkVisits": 0
+      },
+      "pageErrors": 0,
+      "domainWrites": 0,
+      "duplicateAuth": 0,
+      "routeGuardErrors": 0,
+      "browserClosed": true,
+      "ownHeavy": 0,
+      "ownListeningPorts": 0,
+      "actualProductionScreenshotsCaptured": 0,
+      "rawBodiesCookiesKeyURLsRecorded": false,
+      "approvedGeoKeyActuallyConsumedByBrowser": true,
+      "keyScope": "사용자 명시 승인 Geo 실사용 키를 Transport 등록 웹 build 입력에만 반영. backend·Geo·Map·공용 root 키 변경 없음",
+      "operationalFrozenMembers": 37,
+      "operationalFrozenMemberHashMismatches": 0,
+      "qaFrozenMembers": 13,
+      "qaSourceAndFrozenHashComparisons": 26,
+      "qaFrozenMemberHashMismatches": 0,
+      "referencedReceiptFilesVerified": 5,
+      "imageAuditHarnessFailurePreserved": true,
+      "sameImageReadonlyAuditR2PassedWithoutRebuildOrRetag": true,
+      "evidence": [
+        {
+          "context": "M47a 공식 운영 적용",
+          "localEvidenceName": "final-receipt.json",
+          "sha256": "135fa3ba843b000ffad1293870b90202f79fe2bbc4713da4c2939ca415db8ed3",
+          "bytes": 2273
+        },
+        {
+          "context": "M47a 운영 원본37개",
+          "localEvidenceName": "frozen-evidence-members.json",
+          "sha256": "6d375b9f0b49f7126082a2f3e0c7b8b7df267fb868c84f5db1100eb08b7588e6",
+          "bytes": 6467
+        },
+        {
+          "context": "M47a 단일 정상 실제 QA",
+          "localEvidenceName": "final-receipt.json",
+          "sha256": "e1f61de43e64e33f00aec167485faa86fee7ced82f79f114e44318d2e15ca997",
+          "bytes": 4881
+        },
+        {
+          "context": "M47a QA 원본13개",
+          "localEvidenceName": "frozen-evidence-members.json",
+          "sha256": "23366f0cced2bd8a7d520c84682c781c5dbb43278109601fd390b7d766d0b1ba",
+          "bytes": 5566
+        },
+        {
+          "context": "부모 QA 독립 해시 검증",
+          "localEvidenceName": "parent-actual-qa-verification.json",
+          "sha256": "51edb7da4e1f3de873438eb50a5d58ff0e56c5587dc55719fb4794dd142b3921",
+          "bytes": 527
+        },
+        {
+          "context": "부모 실제 ARM 이미지 독립 검증",
+          "localEvidenceName": "parent-final-image-verification.json",
+          "sha256": "8be1f20421a8297446f073f116a0054bec17ee1dc71467b4b0fc8b84185419be",
+          "bytes": 389
+        },
+        {
+          "context": "실제 M ARM strict r2",
+          "localEvidenceName": "final-audit-r2-receipt.json",
+          "sha256": "89fe5b063f2014663fd619630bbca5a1c14aaae58a9686d6064a87231cb21567",
+          "bytes": 2357
+        }
+      ]
+    },
+    "priorHistory": {
+      "observedUTC": "2026-11-12T04:42:50.356627+00:00",
+      "fullyAcceptedAppCount": 5,
+      "meaning": "아래 source·CI pending·BLOCK·운영 실패는 당시 snapshot이며 현재 승인으로 덮어쓰지 않는다. 첫76건의 MIME 미관측을 나중36건 XML로 소급하지 않는다.",
+      "transport": {
+        "state": "PUBLIC_ACCEPTED_ADMIN_NEW_UI_QA_PASSED_PENDING_CI_MERGE_ARM_AND_ACTUAL_ACCEPTANCE",
+        "primaryMerge": "936fdb90b0ee9f6392d2f888255053ee1f4066b2",
+        "primaryPR": 181,
+        "adminFeaturePreservationPR": 182,
+        "adminMerge": "6b75c3b3d1e6dec8fc346a847428f15e4f3153b4",
+        "adminReviewedSource": "c3da2632101c347a5e4fc288762de635c9c255b5",
+        "adminMergedReviewedAndCIFullTree": "077e7c14f87aa55fe1774c0a706bcf9f1e3e509c",
+        "scope": "공개 화면 새 이미지 수용 완료. 기존 관리자6b75 공식 교체와 운영 보존은 완료했으나 실제 지도 수용은 실패 이력으로 보존한다. 후속 모바일 메뉴 새 소스의 격리 검증과 승인된 웹 키 빌드 입력 갱신을 마쳤으며 최종 CI·머지·ARM·공식 적용·새 키 실제 수용은 별도 남는다. backend499/schema0042/public936 보존.",
+        "public": {
+          "state": "DEPLOYED_VERIFIED",
+          "mergedSource": "936fdb90b0ee9f6392d2f888255053ee1f4066b2",
+          "imageID": "sha256:32626dee05553b1d448232b9716c541a3af4f4b55255b016246737f4bfcc545d",
+          "architecture": "arm64",
+          "actualCommonFiles": 153,
+          "officialSDKDryrunAndConfirmAndCurrent": true,
+          "stagedAcceptancePassed": 13,
+          "browserSessions": 9,
+          "singleRunWholeSuiteClaim": false,
+          "realPretendardDesktop1280Mobile375": true,
+          "actualVirtualTableAndCards": true,
+          "observedStaticAssets": 23,
+          "HTTPMIMEConsoleErrors": 0,
+          "pageErrors": 0,
+          "authenticationWrites": 0,
+          "domainWrites": 0,
+          "historyDefaultAirportEmptyPreserved": true,
+          "actualUserICNSelectionPositiveHistoryPoints": 1009,
+          "actualHistoryObservedPoints": 946,
+          "historicalHarnessFailuresPreserved": true,
+          "sourceImageFixOrReapplyForHarness": false,
+          "ownBrowserProcessesRemaining": 0,
+          "evidence": [
+            {
+              "localEvidenceName": "final-receipt.json",
+              "sha256": "0946fb2cc5a2c7005e857459f2a837740fb3702a6bf85141ae8392532070b0ef",
+              "bytes": 1958
+            },
+            {
+              "localEvidenceName": "public-aggregate-acceptance.json",
+              "sha256": "4482143fa58847ff13704d1f8e1f488730ce570ce8ee617f8d13e90fcedfedc6",
+              "bytes": 13192
+            },
+            {
+              "localEvidenceName": "transport-public-aggregate-parent-verification-20261112.json",
+              "sha256": "0b03341d0cd35bc3bc195f9d412fe049450a3b3f2a7d0ef916ed86cfd4aef2dd",
+              "bytes": 3601
+            }
+          ]
+        },
+        "admin": {
+          "state": "DEPLOYED_OPERATIONALLY_VERIFIED_ACTUAL_ACCEPTANCE_PENDING",
+          "actualAdminAcceptance": false,
+          "mergedSource": "6b75c3b3d1e6dec8fc346a847428f15e4f3153b4",
+          "imageID": "sha256:42b458f5a3b16b813f735b4837afb8009780f31f170f1a0cbeb68676373eb1f1",
+          "architecture": "arm64",
+          "actualCommonFiles": 263,
+          "compiledOldRoutesPreserved": 32,
+          "officialDryrunCalls": 1,
+          "officialConfirmCalls": 1,
+          "nonselectedContainerChanges": 0,
+          "backend499Schema0042Public936Image3262Preserved": true,
+          "normalLoginHTTP": 200,
+          "actualProtectedReleaseMatchesMergedSource": true,
+          "actualTableFontPopoverParkingMetroGeneralRailContactChecksPassed": true,
+          "firstActualRunOutcome": "FAILED at actual-map-tiles; historical raw preserved",
+          "observedTileResponses": 76,
+          "observedTileHTTPFailures": 0,
+          "observedValidTileImages": 0,
+          "tileCause": "Later classified browser samples returned HTTP200 XML InvalidParameterValue with locator=key; original76 not retroactively classified",
+          "firstRunCleanupLogoutHTTP": 303,
+          "firstRunBrowserClosed": true,
+          "pageErrors": 0,
+          "domainWrites": 0,
+          "responsiveFiveWidthsZoomAndFinalProtected401": "NOT_RUN at first failure",
+          "evidence": [
+            {
+              "localEvidenceName": "parent-verification.json",
+              "sha256": "a6aed1ef3e79ddfe6ffdc8c26093c9bd0dd1018c9bfeb2b37303721d77b35b7d",
+              "bytes": 673
+            },
+            {
+              "localEvidenceName": "final-receipt.json",
+              "sha256": "50462d50110f37e76bc46cbd0fea6d1107b240b6bf0d2c912c548fa348596ff9",
+              "bytes": 3561
+            },
+            {
+              "localEvidenceName": "admin-qa-first-failure-addendum.json",
+              "sha256": "d7105ee87092c0db50bd0e68511badfff5cca27b863e5c21cac97593b7104486",
+              "bytes": 1497
+            },
+            {
+              "localEvidenceName": "admin-official-fresh-acceptance.json",
+              "sha256": "ea52001f5130a951fbc82dcb602352def3ae18794e55e04941697dae4ce1ba12",
+              "bytes": 2601
+            },
+            {
+              "localEvidenceName": "parent-operational-and-first-qa-verification.json",
+              "sha256": "3bcddf16c1145673ff0ca249eb3e1c9d0ae8c3757f306117254fe85700d75669",
+              "bytes": 1830
+            },
+            {
+              "localEvidenceName": "actual-qa-final-handoff.json",
+              "sha256": "16cdf75fede1fabd0c5cf26fffb80fabe75cbb6f1c029687bb85d688662d3613",
+              "bytes": 7138
+            },
+            {
+              "localEvidenceName": "final-manifest.json",
+              "sha256": "c6e8fe89d0d0cfed164a6a2013c8b0a6105133f5e5b2e491a91e1544fef914c6",
+              "bytes": 6479
+            },
+            {
+              "localEvidenceName": "key-input-receipt.json",
+              "sha256": "a5f904df14c1fee5383829be6be9265db302a4f37369844a10a2927b52d428d1",
+              "bytes": 2746
+            }
+          ],
+          "firstRunTileCause": "UNCLASSIFIED_IN_ORIGINAL_76_RESPONSE_RUN",
+          "firstRunCredentialsKeysOrSettingsChanged": false,
+          "accountPasswordOrSessionSecretChanges": false,
+          "approvedTransportWebBuildKeyInputChanged": true,
+          "backendGeoMapSharedRootKeysChanged": false,
+          "laterActualRun": {
+            "actualBrowserSamples": 36,
+            "HTTPStatus": 200,
+            "contentType": "application/xml",
+            "imageCount": 0,
+            "XMLLocator": "key",
+            "XMLCode": "InvalidParameterValue",
+            "exactAuthInvalidSubtypeIndependentlyParsed": false,
+            "viewportWidthsPassed": [
+              320,
+              375,
+              414,
+              1280
+            ],
+            "width768": "HARNESS_FAIL_OLD_760_BREAKPOINT_ASSUMPTION; not actual product failure conclusion",
+            "actualCameraZoomPassed": true,
+            "normalLogoutHTTP": 303,
+            "protectedReleaseAfterLogoutHTTP": 401,
+            "ownBrowsersClosed": true,
+            "normalSessionsAcrossBothRuns": 2,
+            "wholeAdminActualAcceptance": false
+          },
+          "nextUI": {
+            "PR": 183,
+            "source": "cd4ff768894d29199674c9f540399f7aeaf65170",
+            "tree": "510888aa00fa949531e392c68061ff9ee72a5b83",
+            "canonicalPattern": "mobile top horizontal strip default; desktop rail at1024; Geo drawer remains permitted option",
+            "sourceReviewOriginals": 2,
+            "sourceReviewVerdict": "bothPASS_new0",
+            "frontendExecutionReviewOriginals": 2,
+            "frontendExecutionReviewVerdict": "bothPASS_new0_fullCIpending_at_observation",
+            "nativePassed": 39,
+            "AlpinePassed": 39,
+            "browserSkipFlakeErrors": 0,
+            "sourceFilesExact": 907,
+            "commonFilesEachExact": 263,
+            "AlpineBuilderCOPYFilesExact": 296,
+            "nativeCompiledRoutes": 32,
+            "initialUnit": "434PASS_plus_fork_worker_bootstrap_error1_missing17_preserved",
+            "boundedRecoveryTarget": 17,
+            "singleFullRecoveryFiles": 62,
+            "singleFullRecoveryPassed": 451,
+            "poolAssertionTimeoutOrSourceChanged": false,
+            "resourceCauseProven": false,
+            "freshNativePaintWidths": [
+              375,
+              768
+            ],
+            "railHeightBothWidths": 171,
+            "height900To1100RailDelta768": 0,
+            "logoLogoutCenterDifferenceBothWidths": 0,
+            "actualPretendardCustomHeaderGlyphsEach": 6,
+            "CSSInjected": false,
+            "actuallyDeployed": false,
+            "backendCI": "IN_PROGRESS_NOT_PASS",
+            "liveE2EWorkflow": "SKIPPED_NOT_PASS"
+          },
+          "approvedKeyInput": {
+            "sourceProject": "Geo",
+            "actualSourceVariable": "KTG_VWORLD_API_KEY",
+            "priorTransportOriginBoundedPNGProbes": 2,
+            "providerHTTPProbe200": true,
+            "actualRegisteredEnvFieldUpdatedOnce": true,
+            "registeredField": "NEXT_PUBLIC_VWORLD_API_KEY",
+            "naturalAndScopedConfigSelectApprovedKey": true,
+            "otherBytesParsedFieldsUidGidModePreserved": true,
+            "privateFullOldBackupMode": "0600",
+            "runtimeContainerCount": 55,
+            "runtimeChangesDuringKeyInput": 0,
+            "rootGeoMapBackendAuthPinsCurrentChanges": 0,
+            "buildsAndAppliesDuringInput": 0,
+            "actuallyDeployedNewKey": false,
+            "actualNewKeyBrowserAcceptance": false
+          }
+        },
+        "evidence": [
+          {
+            "localEvidenceName": "transport-pr182-merge-and-tree-receipt-20261112.json",
+            "sha256": "bee3fb6261be8fda0b1fb0b17b562298626f5444c80d183147b52c81eeee5208",
+            "bytes": 1606
+          }
+        ]
+      }
+    }
   },
   "sameVersionArtifactRepacked": false,
-  "nativeDeviceEASStore": "NOT_RUN"
+  "nativeDeviceEASStore": "NOT_RUN",
+  "taskT218": "IN_PROGRESS",
+  "remainingFollowups": {
+    "toolchain": "후속 정렬·검증은 별도이며 이번 운영 정산으로 완료하지 않음",
+    "buildEcosystem": "일관된 build/CI/test 후속은 별도",
+    "CI_LAST": "후속이며 이 사실 delta의 원2 bounded review·정확 CI·PR50 merge도 별도",
+    "nativeDeviceEASStore": "NOT_RUN",
+    "map": "사용자/Claude 별도 범위, 이번 추가 source/build/apply 없음"
+  }
 }

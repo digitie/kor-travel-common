@@ -2,6 +2,8 @@
 
 원 A/B는 같은 불변 입력을 각각 검토했고 구현에 참여하지 않았다. 각 원문과 실패를 보존하며 이후 조건 충족은 별도 기록한다. 아래 SOURCE PASS는 해당 소스 범위의 판정이며 운영 배포·로그인 수용과 구분한다.
 
+현재 운영 결과는 [최종 운영 수용 6개 정산](#최종-운영-수용-6개-정산)을 따른다. 아래 입력별 원 검토·CI·운영 후속 문장은 각 시점의 prior history다. 당시의 4개·5개 완료, pending·BLOCK·미실행을 이후 성공으로 바꾸지 않는다.
+
 | 입력 | 원 A | 원 B | 현재 판정 |
 |---|---|---|---|
 | C11 소비자1 | [원문](evidence/2026-11-12-review-A-consumers-c11-batch-1.md.txt) | [원문](evidence/2026-11-12-review-B-consumers-c11-batch-1.md.txt) | Geo·Map·Weather·Manager·Transport source/package PASS, 신규0 |
@@ -68,3 +70,15 @@ Transport의 기존 core/admin current에서 UI 하나만 선택하는 최종 e5
 최종 cd4의 native·Alpine 브라우저는 각각39개, 합계78 PASS·skip/flaky/unexpected/report errors0이다. 실제 새 native 화면의 메뉴 높이171px는 768px 화면 높이900→1100에서도 유지되고 로고·로그아웃이 정렬됐다. 실행5의 두 FRONTEND EXEC PASS/CI PENDING 원문을 보존하며, CI종료6의 양쪽 PREMERGE PASS·신규0을 별도로 연결한다. 정확 CI43151188851·정책43151189609가 성공했고 공개164·관리자451·백엔드1548 PASS/기존2 SKIP/6 warnings 및 Doctor0을 확인했다. workflow live-e2e SKIPPED는 PASS가 아니다.
 
 실제 merge47a4719a의 전체 tree510888aa는 reviewed cd4와 실제 CI checkout35045758의 tree와 같다. 이는 소스·검증·머지 정산이며 merged M의 ARM 이미지, 공식 관리자 단독 교체와 새 키·정상 운영 수용은 별도 후속이다. 라이브러리 산출물 bytes·규범·backend499/schema0042/공개936 보존 계약을 바꾸지 않는다.
+
+## 최종 운영 수용 6개 정산
+
+[공개 배포 정산](evidence/2026-11-12-frontend-deployment-receipt.json)의 현재 수용 앱은 Manager·Concierge·Pinvi·Weather·Geo·Transport 6개다. Transport 공개936/image3262는 기존 단계별13개·9세션 결과이며 단일 전체 실행으로 확대하지 않는다. 최종 관리자 [PR183](https://github.com/digitie/kor-travel-transport/pull/183)의 실제 merge47a4719a/tree510888aa로 만든 ARM64 image3f2073의 canonical source907·COPY296·공통6패키지263·compiled32·OCI/default release를 동결 증거로 확인했다. 최초 collector 변수 shadow 실패를 남긴 채 같은 이미지 strict readonly r2가 통과했으며 이를 재빌드·retag로 대체하지 않았다.
+
+정상 SDK508 admin-only dry-run1·confirm1 healthy와 current/postproof를 완료했다. 운영 receipt135fa3ba와 frozen37 member6d375b9f의 실제 해시 불일치0을 확인했다. 공개936/image3262·backend499/schema0042·비선택54·기존 인증/세션/root/pins/current를 보존했고 승인된 Geo 실사용 키는 Transport 등록 웹 build 입력에만 반영했다. 초기 operator launcher 문법 오류는 confirm 호출 전이며 실제 confirm은1회다. 키·접속주소·계정·원시 응답본문은 이 문서에 넣지 않는다.
+
+실제 관리자 QA는 단일 정상 세션9 PASS·실패0·로그인1/로그아웃1/303→보호401이다. bounded map phase36개(zoom 전16·후20)는 모두 HTTP200·PNG signature·IHDR256과 승인 키 일치를 확인했고 실제 bitmap decode2+2·camera7→8이 통과했다. 전체 세션 observer96개 중 legacy image 판정68·HTTP실패0을 별도로 남기며 나머지28개를 오류 또는 정상 이미지로 단정하지 않는다. 실제7개 폭/왕복9행의 메뉴·실제 Pretendard·표·팝오버·주차장/철도/연락처, 높이 변화 시 rail delta0·문서 scroll/focus 보존도 통과했다. 실제 운영 screenshot은0이며 native 격리 화면 증거와 구분한다. browser 종료·프로세스/port/heavy0을 확인했다.
+
+Mendel의 동결 actual QA receipte1f61de4·원본13 member23366f0c를 원본/동결26회 대조하고 참조5개 receipt도 확인했다. 운영37개와 QA13개 원문 bytes는 비공개 증거 위치에 보존하며 공개 JSON은 이름·크기·SHA256만 연결한다. 이전6b75 첫76응답은 당시 MIME/signature 미분류이고 후속 정상 Origin36건만 XML InvalidParameterValue/locator=key로 확인했다. ExceptionText 세부 유형은 독립 분류하지 않았다. 이 실패·이전 source/CI/review pending은 명시적 priorHistory로 그대로 남긴다.
+
+이는 실제 운영 수용의 factual closure다. 기존30730650의 review archives·원문과 closure 판정을 변경하지 않는다. 이 facts3 출판 후보의 동일 원 A/B bounded 검토·정확 CI·PR50 머지는 후속이며 T-218은 IN_PROGRESS다. Map은 사용자/Claude 별도 범위, native 실기기/EAS/스토어는 NOT_RUN이고 toolchain·build ecosystem·CI_LAST 후속도 남는다. 규범·패키지·버전·CI·config·scanner 예외와 동결 배포물 bytes는 변경하지 않는다.
