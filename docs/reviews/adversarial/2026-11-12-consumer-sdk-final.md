@@ -58,3 +58,13 @@ Transport의 기존 core/admin current에서 UI 하나만 선택하는 최종 e5
 [원문·불변 입력·머지 증거10개 archive](evidence/2026-11-12-transport182-originals.tar.gz)와 [member/전체 해시·판정 원장](evidence/2026-11-12-transport182-closure-receipts.json)에 원문 bytes와 당시 pending을 보존한다. 정확 c3da263 CI43130997296·정책43130998009가 성공했고 backend1548 PASS/2기존 SKIP/6warnings, 공개164·관리자432 PASS와 Doctor0을 확인했다. 별도 native/Alpine 브라우저는 각각 기존18·검토회귀4·기능6, 합계56 PASS이며 skip/flaky/unexpected/report error0이다. workflow의 live-e2e SKIPPED를 PASS로 집계하지 않는다.
 
 실제 merge6b75c3b3의 전체 tree077e7c14는 검토 source와 CI synthetic merge072c51d1의 tree와 같다. 이는 소스·검증·머지 정산이다. 실제 merged source ARM 이미지, 공식 관리자 단독 교체와 정상 계정 UI 수용은 별도 후속이며 이 기록으로 Transport 전체 배포 완료를 추가하지 않는다. backend499/schema0042와 공개936의 보존 경계도 유지한다. 라이브러리·규범·산출물 bytes는 변경하지 않는다.
+
+### Transport183 모바일 메뉴 원문과 머지 정산
+
+[PR183](https://github.com/digitie/kor-travel-transport/pull/183)은 공통 기본 상단 가로 탐색과 1024px 데스크톱 레일, 활성 항목·폰트·폭 변경과 문서 세로 위치, 실제 caller origin의 격리 검사를 다룬다. Geo 드로어는 규약의 허용 옵션으로 유지한다. 원 A의 A-TR-MENU-P2-01은 전역 scrollIntoView가 문서 스크롤·입력 위치를 움직이는 문제, 원 B의 B-MENU-P2-01은 환경변수와 실제 caller baseURL이 다를 때 격리 경계가 어긋나는 문제다. 입력1 두 BLOCK을 보존하고 입력2부터 각 원 reviewer가 자기 지적 FIXED·신규0을 확인했다.
+
+[원문·불변 입력·머지·CI 증거21개 archive](evidence/2026-11-12-transport183-originals.tar.gz)와 [member/전체 해시·판정 원장](evidence/2026-11-12-transport183-closure-receipts.json)에 여섯 번의 두 원문과 추가 시각 관찰을 bytes 그대로 동봉했다. b043의 메뉴5실패, db58의 테스트 타입 오류, ee45의 78개 검사 뒤 발견한 시각 여백과 cd4의 최초 작업자 기동 실패를 성공으로 덮지 않는다. cd4는 설정·단언·pool·제한시간을 바꾸지 않고 대상17개와 전체451개를 각각1회 통과한 명시 복구를 보존했다. 자원 원인은 확정하지 않았다.
+
+최종 cd4의 native·Alpine 브라우저는 각각39개, 합계78 PASS·skip/flaky/unexpected/report errors0이다. 실제 새 native 화면의 메뉴 높이171px는 768px 화면 높이900→1100에서도 유지되고 로고·로그아웃이 정렬됐다. 실행5의 두 FRONTEND EXEC PASS/CI PENDING 원문을 보존하며, CI종료6의 양쪽 PREMERGE PASS·신규0을 별도로 연결한다. 정확 CI43151188851·정책43151189609가 성공했고 공개164·관리자451·백엔드1548 PASS/기존2 SKIP/6 warnings 및 Doctor0을 확인했다. workflow live-e2e SKIPPED는 PASS가 아니다.
+
+실제 merge47a4719a의 전체 tree510888aa는 reviewed cd4와 실제 CI checkout35045758의 tree와 같다. 이는 소스·검증·머지 정산이며 merged M의 ARM 이미지, 공식 관리자 단독 교체와 새 키·정상 운영 수용은 별도 후속이다. 라이브러리 산출물 bytes·규범·backend499/schema0042/공개936 보존 계약을 바꾸지 않는다.

@@ -1,0 +1,181 @@
+{
+  "archive": "2026-11-12-transport183-originals.tar.gz",
+  "archiveBytes": 42162,
+  "archiveSha256": "7dd210523ddbb5e4602e0574ce3ffcc261876a7a1233729514d3b011a08880f9",
+  "members": [
+    {
+      "original": "review-A-transport-mobile-menu-b043-source-1.md",
+      "member": "review-A-transport-mobile-menu-b043-source-1.md",
+      "bytes": 12023,
+      "sha256": "1fe986e6350ac9ac4bc3d8125c291f6840377bbd2300958d5ce7833820ccbb5f"
+    },
+    {
+      "original": "review-B-transport-mobile-menu-b043-source-1.md",
+      "member": "review-B-transport-mobile-menu-b043-source-1.md",
+      "bytes": 13653,
+      "sha256": "0449986801c914722cfaf2022afbc678d858d433aadb39a80f3cb30a98e4144e"
+    },
+    {
+      "original": "review-A-transport-mobile-menu-db58-source-2.md",
+      "member": "review-A-transport-mobile-menu-db58-source-2.md",
+      "bytes": 10320,
+      "sha256": "82f53138d34bea8f75d2214c9755c5525901f2a6b1cfb8e763ed2fde79edcfbd"
+    },
+    {
+      "original": "review-B-transport-mobile-menu-db58-source-2.md",
+      "member": "review-B-transport-mobile-menu-db58-source-2.md",
+      "bytes": 10333,
+      "sha256": "adede37a904d766839de3425a9ab7647acd97ea7320836a4ea75e1ec67b2b49f"
+    },
+    {
+      "original": "review-A-transport-mobile-menu-ee45-source-3.md",
+      "member": "review-A-transport-mobile-menu-ee45-source-3.md",
+      "bytes": 7218,
+      "sha256": "81a796a3e7097bab98df5294c864a08e2901b6a97d4f5966e6a10e1703140b2a"
+    },
+    {
+      "original": "review-B-transport-mobile-menu-ee45-source-3.md",
+      "member": "review-B-transport-mobile-menu-ee45-source-3.md",
+      "bytes": 7430,
+      "sha256": "2e10e9ca7701cd447bd8e3a1a320e51aed698ba4e69d0543c800a4c925a19c7d"
+    },
+    {
+      "original": "review-A-transport-mobile-menu-cd4-source-4.md",
+      "member": "review-A-transport-mobile-menu-cd4-source-4.md",
+      "bytes": 3999,
+      "sha256": "efe24af9dd7979f35d52e1949b7f9c2446643d1c57db5cbbdab80e8672e9c14b"
+    },
+    {
+      "original": "review-B-transport-mobile-menu-cd4-source-4.md",
+      "member": "review-B-transport-mobile-menu-cd4-source-4.md",
+      "bytes": 4961,
+      "sha256": "0296a2382f1ccd8b334f7fef573e843e26162aa6f3d930f41e70fc6d2c43df34"
+    },
+    {
+      "original": "review-A-transport-mobile-menu-cd4-execution-5.md",
+      "member": "review-A-transport-mobile-menu-cd4-execution-5.md",
+      "bytes": 5858,
+      "sha256": "5138a9daf2371937459be888b874a6c24eb81fb0deeecd5868221f5abd1c59d4"
+    },
+    {
+      "original": "review-B-transport-mobile-menu-cd4-execution-5.md",
+      "member": "review-B-transport-mobile-menu-cd4-execution-5.md",
+      "bytes": 7075,
+      "sha256": "72ebe848ab6ad7d4fb29811b830df1ea17e03056313b38123b48c9aa0090a333"
+    },
+    {
+      "original": "review-A-transport-mobile-menu-cd4-ci-close-6.md",
+      "member": "review-A-transport-mobile-menu-cd4-ci-close-6.md",
+      "bytes": 2301,
+      "sha256": "f97dd51b72baa5c8a2c1a6e434801da649a2f99a9d9c274458cfe6f4ab8798ff"
+    },
+    {
+      "original": "review-B-transport-mobile-menu-cd4-ci-close-6.md",
+      "member": "review-B-transport-mobile-menu-cd4-ci-close-6.md",
+      "bytes": 1911,
+      "sha256": "00957efb3e42ef3a480b290a664f28f23fe7eed094bc1de980530d76a575a974"
+    },
+    {
+      "original": "review-A-transport-mobile-menu-ee45-layout-observation-1.md",
+      "member": "review-A-transport-mobile-menu-ee45-layout-observation-1.md",
+      "bytes": 2853,
+      "sha256": "4e2a45836351a498e14c86ae3b3a20f10291c6d87852043d631680b392060358"
+    },
+    {
+      "original": "validation/review-transport-mobile-menu-b043-source-input1/manifest.json",
+      "member": "review-manifest-transport-mobile-menu-source1.json",
+      "bytes": 2863,
+      "sha256": "a754a6b88c234a9c928c8393fb1542dd6d1c2698250996a05214336839617079"
+    },
+    {
+      "original": "validation/review-transport-mobile-menu-db58-source-input2/manifest.json",
+      "member": "review-manifest-transport-mobile-menu-source2.json",
+      "bytes": 4091,
+      "sha256": "937c35fbdae1f9b219c1601fc1507efccad90caac9f2636bd6d114748a777939"
+    },
+    {
+      "original": "validation/review-transport-mobile-menu-ee45-source-input3/manifest.json",
+      "member": "review-manifest-transport-mobile-menu-source3.json",
+      "bytes": 2573,
+      "sha256": "d41227e062aac2a3b91876097cd8fd76c0f871c1ff7725bf81bb1af593eae927"
+    },
+    {
+      "original": "validation/review-transport-mobile-menu-cd4-source-input4/manifest.json",
+      "member": "review-manifest-transport-mobile-menu-source4.json",
+      "bytes": 2745,
+      "sha256": "ee4fc31a4b59d124f12b6f06ffb20af5967c85c4b8805347adfc74045b11388d"
+    },
+    {
+      "original": "validation/review-transport-mobile-menu-cd4-execution-input5/manifest.json",
+      "member": "review-manifest-transport-mobile-menu-execution5.json",
+      "bytes": 10049,
+      "sha256": "15562d401152ab9be88629754c9df7b026c07581321eaa18f5a430bbd90f0195"
+    },
+    {
+      "original": "validation/review-transport-mobile-menu-cd4-ci-close-input6/manifest.json",
+      "member": "review-manifest-transport-mobile-menu-ci-close6.json",
+      "bytes": 1584,
+      "sha256": "e4dd72fa709e480069c56175e209f371b51eaa414406d9932e576f4f03a4f6be"
+    },
+    {
+      "original": "validation/transport-pr183-merge-and-tree-receipt-20261112.json",
+      "member": "transport183-parent-merge-receipt.json",
+      "bytes": 1171,
+      "sha256": "949f79c47913e930aa710fa3941c332450c9182fba3e0b2275feabcdbb5d0184"
+    },
+    {
+      "original": "validation/transport-cd4-exact-ci-20261112/all-success-receipt.json",
+      "member": "transport183-exact-ci-receipt.json",
+      "bytes": 2499,
+      "sha256": "eb8fde943d2e3b07475b8a0ec117d6482da51f74b99ffaa6edba97c52c831c80"
+    }
+  ],
+  "source": "cd4ff768894d29199674c9f540399f7aeaf65170",
+  "merge": "47a4719ab772f7d0e7a707df2ed6a6d08b1cc4ea",
+  "fullTree": "510888aa00fa949531e392c68061ff9ee72a5b83",
+  "reviewedCIAndMergedTreeEqual": true,
+  "verdictBoundary": "입력1 원 A/B BLOCK과 입력2 이후 SOURCE PASS, 실행5의 FRONTEND EXEC PASS/CI PENDING, CI종료6의 양쪽 PREMERGE PASS·신규0을 원문대로 보존한다. 실제 ARM 이미지·공식 배포·새 키 정상 운영 수용은 이 소스·검증·머지 정산의 범위 밖이다.",
+  "findingDispositions": {
+    "A-TR-MENU-P2-01": {
+      "originalSeverity": "P2",
+      "originalVerdict": "BLOCK",
+      "disposition": "FIXED",
+      "sourceClosure": "원 A 입력2 이후 수평 컨테이너 이동·폭/폰트 수명 수정 확인",
+      "executionClosure": "원 A 실행5에서 두 환경의 문서 스크롤·입력 포커스 실제 회귀 통과 확인"
+    },
+    "B-MENU-P2-01": {
+      "originalSeverity": "P2",
+      "originalVerdict": "BLOCK",
+      "disposition": "FIXED",
+      "sourceClosure": "원 B 입력2 이후 실제 caller loopback origin 검증·부작용 차단 확인",
+      "executionClosure": "원 B 실행5에서 동일 helper 및 full451/실제 브라우저 실행 연결 확인"
+    }
+  },
+  "historicalValidation": {
+    "b043": "전체435·기존native28 통과 뒤 새 메뉴10 중5실패(중앙오차82~82.5px), Alpine 미시작",
+    "db58": "단위451 등 통과 뒤 테스트 대역 Disposable 타입 오류, native/Alpine 미시작",
+    "ee45": "native39+Alpine39 통과 뒤 별도 시각 검사에서 일반 화면 메뉴 행 확장 발견",
+    "cd4": "원r1 61파일434PASS+작업자 기동 오류1/17미실행을 보존. 같은 설정으로 대상17과 전체62파일451 각각1회 통과. 자원 원인 미확정"
+  },
+  "exactCI": {
+    "43151188851": "SUCCESS",
+    "43151189609": "SUCCESS"
+  },
+  "tests": {
+    "backendPassed": 1548,
+    "backendSkipped": 2,
+    "backendWarnings": 6,
+    "publicPassed": 164,
+    "adminPassed": 451,
+    "nativeAlpineBrowserPassed": 78,
+    "browserSkipped": 0,
+    "browserFlaky": 0,
+    "browserUnexpected": 0,
+    "browserReportErrors": 0,
+    "DoctorIssues": 0,
+    "liveE2EWorkflowJob": "SKIPPED not PASS"
+  },
+  "actualMergedMArmBuildApplyAndNewKeyAcceptanceApprovedByThisClosure": false,
+  "rawHistoricalFailuresPendingAndLimitsPreserved": true,
+  "libraryPayloadOrRulesChanged": false
+}

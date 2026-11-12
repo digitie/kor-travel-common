@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-11-12 | Transport183 모바일 메뉴 원문·정산 | [기록](adversarial/2026-11-12-consumer-sdk-final.md#transport183-모바일-메뉴-원문과-머지-정산), cd4/merge47a | 원 A UI·스크롤 / 원 B 격리·출처 | 원 두 BLOCK 보존 → 자기 지적 FIXED·소스/실행/CI종료 PASS·신규0, 실제 새 키 운영 수용 별도 |
 | 2026-11-12 | Transport182 기존 관리자 기능 보존 원문·정산 | [기록](adversarial/2026-11-12-consumer-sdk-final.md#transport182-기존-관리자-기능-보존의-원-검토머지-정산), c3/merge6b75 | 원 A UI·계약 / 원 B 기능·출처 | 원 두 입력1 BLOCK → 자기 지적 FIXED·소스/실행 PASS, merged tree 일치, 실제 관리자 수용 별도 |
 | 2026-11-12 | SDK 원문·머지 정산 | [Transport 두 UI 선택](adversarial/2026-11-12-consumer-sdk-final.md), e533/merge508b | 원 A 계약·격리 / 원 B 출처·배포 | 두 COMBINED SOURCE PASS·신규0·정확 CI 성공·실제 Transport 수용 후속 |
 | 2026-11-12 | 문서 출판·사실 정산 | [소비자·SDK와 배포 원문 정산](adversarial/2026-11-12-consumer-sdk-final.md), 입력1/1742·입력2/79ed | 원 A 문서·계약 / 원 B 출처·배포 | 두 입력 모두 두 PASS·신규0, 정확 CI 성공·실제 완료5·Transport 후속 |
