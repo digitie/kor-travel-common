@@ -5,9 +5,9 @@
 ## 0. 채택 gate(착수 전)
 
 - [ ] MUST 라이선스 gate: 저장소 루트 `LICENSE`가 GPL-3.0-or-later(또는 호환)이고 `license` 필드가 있다. pinvi는 L6(O-1), ktc·ktdm은 L8(O-2) 결정 전에는 규칙 문서·`tokens.json` 참조까지만.
-- [ ] MUST lockfile: `package-lock.json`(v3)·`uv.lock`이 커밋돼 있고 CI·Docker가 `npm ci` / `uv sync --locked`로 소비한다. Poetry·`requirements.txt`는 uv 전환 task를 먼저 만든다.
+- [ ] MUST lockfile: `package-lock.json`(v3)·`uv.lock`이 커밋돼 있고 CI·Docker가 `npm ci --engine-strict` / `uv sync --locked`로 소비한다. Poetry·`requirements.txt`는 uv 전환 task를 먼저 만든다.
 - [ ] MUST 버전 대조 report: common 체크아웃에서 `python3 -B -X utf8 tools/check_versions.py <repo 경로> --repo <repo>`를 실행하고 `BLOCKED`·`FLOATING_REF`·`EXEMPT_EXPIRED`가 0이다. `BELOW_FLOOR`·`NO_ENGINES`는 예외 등록 또는 선행 task ID를 적는다.
-- [ ] MUST `engines.node`(`>=22.12`) 또는 `requires-python`(`>=3.11`)이 선언돼 있다. Node 20 CI는 22로 올린다(T-403).
+- [ ] MUST Node 앱은 [ADR-018](../docs/adr/018-exact-node-npm-build-toolchain.md)·`versions.json`의 권고 exact Node/npm을 private anchor의 engines·packageManager·selector에 선언하고 `.npmrc` engine-strict 및 실제 job/fresh stage CLI를 일치시킨다. workspace는 private root를 사용하며 공개 library manifest는 수정하지 않는다. Python의 `requires-python >=3.11` 호환 하한은 별도 유지한다.
 - [ ] SHOULD `@main`·branch 참조(패키지·워크플로·provider)가 없다(D-11).
 
 ## 1. 문서·에이전트 규약

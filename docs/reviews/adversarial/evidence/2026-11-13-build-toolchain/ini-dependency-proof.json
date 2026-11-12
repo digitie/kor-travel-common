@@ -1,0 +1,20 @@
+{
+  "version": "7.0.0",
+  "integrity": "sha512-ifK0CgjALofS5bkrcTy4RaQ9Vx2Knf/eLeIO+NaswQEpH1UblrtTSCIvN71qQDMq0PeQ/SSPojvEJp9vvvfr+w==",
+  "tarSHA256": "7e7c8f2d6d0511237ac1d9e728483d8e6c9ecf3c7e16f55e9be4a59782327442",
+  "moduleFiles": {
+    "README.md": "8d1844511493947f9be309d2eb6db97b3ecc83840009aef4f3dfcf920df8bc4c",
+    "package.json": "8fa8b0d70252d57858bae47eae4d4b8d19c83f316dddd0d4565f5626cc51e194",
+    "LICENSE": "4ec3d4c66cd87f5c8d8ad911b10f99bf27cb00cdfcff82621956e379186b016b",
+    "lib/ini.js": "007123836ffec243f41c8b35584fb3db0498aa12a440a9e0efc675d0000f4c32"
+  },
+  "moduleBytes": 12140,
+  "canonicalLockOnlyExit": 0,
+  "otherLockEntriesUnchanged": true,
+  "lockChangesOnly": [
+    "packages[\"\"].devDependencies.ini",
+    "packages[\"node_modules/ini\"]"
+  ],
+  "WSLFullNpmInstall": 0,
+  "copiedVendorSource": 0
+}

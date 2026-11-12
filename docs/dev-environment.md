@@ -35,14 +35,19 @@ common은 canview ADR-003 계열의 **임시 worktree 프로필**을 쓴다(`doc
 | 도구 | 기준 | 정본·근거 |
 |---|---|---|
 | Git | Git for Windows 또는 WSL git. `core.autocrlf=false`. 개행은 `.gitattributes`(`* text=auto eol=lf` + 확장자별 LF, `*.ps1` CRLF, 바이너리 명시)가 결정 | `.gitattributes`, `.editorconfig` |
-| Node.js | 22.x — `.nvmrc` `22.23.1`, `engines.node ^22.12.0`(floor 22.12, recommended 22.23.x). nvm(Linux/WSL) 또는 nvm-windows | D-33·D-06; 값 정본은 `versions.json` |
-| npm | `packageManager: "npm@11.19.1"`. Node 22 동봉 npm은 10.9.x(floor 10.9)이므로 `npm install -g npm@11.19.1` 후 `npm ci`(CI 동일) | D-33; `docs/survey/cross/version-matrix.md` §3.2·§4.4 |
+| Node.js | 정확 선택은 `versions.json` Node 권고 patch와 root private anchor·`.nvmrc`를 일치. nvm(Linux/WSL) 또는 nvm-windows | D-33·D-06; 값 정본은 `versions.json` |
+| npm | 정확 선택은 `versions.json` npm 권고 patch. `npm install -g npm@12.0.1` 후 `npm ci --engine-strict`·`npm run check:toolchain`(CI 동일) | D-33; `docs/survey/cross/version-matrix.md` §3.2·§4.4 |
 | Python | 3.11+(공통 패키지 `requires-python >=3.11`, 3.11 문법). 개발·CI 기본 3.12. 실행은 항상 `python3 -B -X utf8` | D-06·D-15; `.github/workflows/docs.yml` |
 | uv | 0.12.x(floor 0.11). `packages/py/kor-travel-common/uv.lock` + `uv sync --locked` | D-06; `docs/survey/cross/version-matrix.md` §2.1 |
 | CodeGraph | 선택. 설치돼 있고 변경 범위 분석에 유용할 때만 쓴다. 없으면 `rg`·컴파일러·테스트·수동 추적으로 대체하고 한계를 journal에 기록한다. `.codegraph/`는 gitignore | `docs/survey/cross/docs-conventions.md` §1.13(canview 관행) |
 | rg(ripgrep) | 문서·식별자·링크 검색 기본 도구 | `AGENTS.md` §3 토큰 절약 규칙 |
 
 버전 축의 floor/recommended/exceptions 정본은 `versions.json`이고 의미는 [versions 규약](standards/versions.md)에 있다. 이 표는 common 자체 개발에 필요한 값만 옮긴 것이며 값이 다르면 `versions.json`이 맞다.
+
+private root의 `packageManager`·`engines.node`·`engines.npm`, `.nvmrc`와 `.npmrc`의
+`engine-strict=true`는 [도구 선택 규약](standards/versions.md#311-빌드테스트-도구-선택adr-018)을
+따른다. `npm ci --ignore-scripts --engine-strict`로 잠긴 private 도구 의존성(공식 INI·shell token parser 포함)을 준비한다. `npm run check:toolchain`은 runtime까지, `npm run test:toolchain`은 Node 내장 runner와 해당 dependency로 음성 대조를 실행한다. 다른 Node로 수행한 구조 테스트를 정본 runtime PASS로
+표시하지 않는다. 공식 ini·shell-quote 두 private root 도구 dependency만 허용하며, 기존 공개 workspace 패키지·C11 산출물·소비자 graph는 수정·재pack하지 않는다.
 
 루트 `package.json`은 `workspaces: ["packages/*"]`이며 `package-lock.json`(v3)을 커밋한다(T-101에서 생성). Python 패키지는 hatchling + uv다(T-302). 패키지별 스크립트와 빌드 산출물은 [packages](architecture/packages.md)가 정본이다.
 
@@ -54,7 +59,7 @@ Git Bash에서는 bash 표기 명령이 그대로 동작한다(`python3`가 없�
 |---|---|
 | Python 실행 | `py -3 -B -X utf8 tools/validate_document_links.py` |
 | unittest | `py -3 -B -X utf8 -m unittest discover -s tests -p "test_*.py" -v` |
-| Node 버전 | nvm-windows `nvm install 22.23.1` → `nvm use 22.23.1`, 이후 `npm install -g npm@11.19.1` |
+| Node 버전 | nvm-windows `nvm install 22.23.1` → `nvm use 22.23.1`, 이후 `npm install -g npm@12.0.1` |
 | uv | Windows 설치본에서 같은 명령(`uv sync --locked`, `uv run …`) |
 | 개행 | `git config core.autocrlf false`. `.gitattributes`가 LF를 강제하므로 편집기가 CRLF로 저장해도 stage 시 정규화된다. 확인: `git ls-files --eol <path>`의 `i/`가 `lf`. `i/crlf`면 `git add --renormalize <path>` |
 | 편집기 | `.editorconfig`(utf-8·lf·최종 개행·`*.ps1`만 crlf)를 적용한다 |
@@ -65,13 +70,13 @@ Windows에서 통과한 결과는 §6의 1·2층(문서·도구)에만 유효하
 
 변경 범위에 맞는 층만 실행한다. 실제로 실행한 층만 통과로 기록하고 하위 층을 상위 층 결과로 대체하지 않는다(`AGENTS.md` §8). 검증 도구가 통과했다는 사실은 제품 gate 통과를 뜻하지 않는다([tools](../tools/README.md)).
 
-전체 unittest와 MDX UX 검사는 common 루트에서 `npm ci --ignore-scripts`로 잠긴 개발 의존을 먼저 설치한다. 새 detached review worktree에서도 동일하다. 검사 대상 소비자 안에서는 설치하지 않는다. MDX를 검사할 때 Node·파서가 없거나 문법 분석에 실패하면 exit 2이며 stdlib fallback은 없다. MDX가 없는 UX 검사와 나머지 Python 도구는 Node 없이 실행할 수 있다([ADR-016](adr/016-mdx-parser-for-ux-lint.md)).
+전체 unittest와 MDX UX 검사는 common 루트에서 `npm ci --ignore-scripts --engine-strict`로 잠긴 개발 의존을 먼저 설치한다. 새 detached review worktree에서도 동일하다. 검사 대상 소비자 안에서는 설치하지 않는다. MDX를 검사할 때 Node·파서가 없거나 문법 분석에 실패하면 exit 2이며 stdlib fallback은 없다. MDX가 없는 UX 검사와 나머지 Python 도구는 Node 없이 실행할 수 있다([ADR-016](adr/016-mdx-parser-for-ux-lint.md)).
 
 | 층 | 대상 | 명령(bash; Git Bash 동일) | CI job(D-18) |
 |---|---|---|---|
 | 1 문서 | Markdown 링크·task metadata·DAG·validator 회귀·공백 | `python3 -B -X utf8 tools/validate_document_links.py` / `python3 -B -X utf8 tools/validate_plan.py` / `python3 -B -X utf8 -m unittest discover -s tests -p "test_*.py" -v` / `git diff --check` | `docs` |
 | 2 도구 | `tools/*.py` 자기 테스트(ubuntu+windows) | 1층 unittest + 도구별 `tests/test_*.py` | `tools`(T-009) |
-| 3 패키지 빌드·타입 | tokens·ui 빌드, `noUncheckedIndexedAccess` 타입 검사, 단위 테스트(vitest+RTL+jsdom), 생성물 diff | `npm ci` → `npm run build --workspaces` → `npm test --workspaces` | `packages`(T-101·T-201) |
+| 3 패키지 빌드·타입 | tokens·ui 빌드, `noUncheckedIndexedAccess` 타입 검사, 단위 테스트(vitest+RTL+jsdom), 생성물 diff | `npm ci --engine-strict` → `npm run check:toolchain` → `npm run build --workspaces` → `npm test --workspaces` | `packages`(T-101·T-201) |
 | 3' Python | `uv build`·pytest·starlette 0.4x/1.6 매트릭스 | `uv sync --locked --all-extras` → `uv run pytest` → `uv build` | `python-package`(T-302) |
 | 4 산출물 설치 | `npm pack` tarball을 임시 디렉터리에 설치해 import·CSS·d.ts 존재 확인; wheel 설치 | `npm pack -w packages/tokens` 후 임시 프로젝트에서 `npm install <tgz>` | `packages`, `python-package` |
 | 5 소비자 빌드 | 패키지별 승인 소비자 pinned SHA에서 webpack·Turbopack `next build` | `consumer-smoke` dispatch(주간은 외부 검증 뒤 활성화) | 실행기 T-010·외부 검증 T-010a |

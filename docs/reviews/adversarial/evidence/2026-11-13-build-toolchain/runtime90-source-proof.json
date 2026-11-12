@@ -1,0 +1,41 @@
+{
+  "head": "941d18408c82532e4dc0145daf2f6b3228fd4d4b",
+  "input22Hashes": {
+    "package.json": "6d3f78e5bc4f2545416425159eb6fae67222e108583ce0862baa3ff67fccd477",
+    "package-lock.json": "1176f4554c1a537a03e565c8364ab23861dba36bfed15ad03e1768865580d128",
+    ".nvmrc": "7d2df647f25529bd87500319c41564e032e2be642e565350fa6136d7a1ec4d10",
+    ".npmrc": "7151cf397def0c2cb0ab65643701d27d335a72c90f775675b5f826bc7005818a",
+    "versions.json": "39fae4d28f0533d835f99339ee70e01ff36af0aaefce1d5bc5f3489bb765b04b",
+    "tools/check_node_toolchain.mjs": "0405b663f822fd3dca718de9c44b2cec2759d775e922ba3b568e4ed4be6b3163",
+    "tests/check_node_toolchain.test.mjs": "e234a00e150bbf1527c1a59b230d41bdbf7ea806e5168cadb52734b0c40a83ab",
+    "node_modules/ini/LICENSE": "4ec3d4c66cd87f5c8d8ad911b10f99bf27cb00cdfcff82621956e379186b016b",
+    "node_modules/ini/README.md": "8d1844511493947f9be309d2eb6db97b3ecc83840009aef4f3dfcf920df8bc4c",
+    "node_modules/ini/lib/ini.js": "007123836ffec243f41c8b35584fb3db0498aa12a440a9e0efc675d0000f4c32",
+    "node_modules/ini/package.json": "8fa8b0d70252d57858bae47eae4d4b8d19c83f316dddd0d4565f5626cc51e194",
+    "node_modules/shell-quote/.github/FUNDING.yml": "c7a193a356c0b26fa9b1951da9e2d96667f29d90e69cac03c63246a5d4d0e53b",
+    "node_modules/shell-quote/LICENSE": "8bb16db1b047019e4395965f2cf3611b06c34bf86dc2d0210b3c3f91b53c21fe",
+    "node_modules/shell-quote/README.md": "c7f3f746d309ce0c1bc6d74113d3d73d59df5e608465fc0d12f4dfff91ab9ad1",
+    "node_modules/shell-quote/index.d.ts": "9662f0c5d566400bd966954513836ca3c52ba478b2915d63a2e0247970da6357",
+    "node_modules/shell-quote/index.js": "6dba443a976bcfdb5972a479c5c43c298e96bdef471c1629844ce9d6b31f5b68",
+    "node_modules/shell-quote/package.json": "fef9e75a4b1b4e3ee6e7b500c30b626d629e27d21c4c3c4ab270b500f64ce993",
+    "node_modules/shell-quote/parse.d.ts": "75ceaceceb2da480892b764aab1042213cb0eb626f420c1ab65f210ea3368c15",
+    "node_modules/shell-quote/parse.js": "3bb9b3a081ec5ff21425b87bbc542f143ec866b2a461fcf27c51d67aa5f31a45",
+    "node_modules/shell-quote/quote.d.ts": "0b85b063e7306f60c60151de3504cb141807f233b5e87cfe15d9ad6a28b493d8",
+    "node_modules/shell-quote/quote.js": "1cb19d10c297a40f166b157d7b227a309f64f5e6252d84c439e71c3f0998d60d",
+    "node_modules/shell-quote/tsconfig.json": "9fc194b35c4578503db2e415266293f0886ce04aff360f4cf796079f8b59745c"
+  },
+  "allCommitAndInstalledINIShellQuoteBytesMatch": true,
+  "canonicalRuntime": "Node22.23.1/npm12.0.1 actual npm run PASS",
+  "tests": {
+    "pass": 90,
+    "fail": 0,
+    "skip": 0
+  },
+  "canonicalReceiptSHA256": "015cbccecfb7013a95c73ae2b8eff103469570afa3443b5a03f67ef1757aab46",
+  "canonicalLogs": {
+    "node-version": "b8139b18707113247bd3eba5bff8ee50ed8f6bfd5076113805af4e414abfdf23",
+    "npm-version": "3ff126c75050b6f2b69c7ca88bd8a0e76d36646db66f52245e32be93d09273aa",
+    "runtime": "dd4f8090a36091005a24fccfbcd9d54ca94423770d308778017a62d3ae718482",
+    "builtin": "6cff8bebfd97439dd81080e9495e281cdf45320fdb34e05acbe92907d909f996"
+  }
+}

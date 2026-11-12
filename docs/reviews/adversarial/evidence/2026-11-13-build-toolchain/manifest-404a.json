@@ -1,0 +1,185 @@
+{
+  "state": "IDENTICAL_ORIGINAL_AB_CANDIDATE3_INPUT",
+  "source": "404a586ece08ca0050d844cbe0eee4df5a79f899",
+  "base": "678a5bcf0150ac0386bfa86106e7e0f4f77e8639",
+  "previousBlockedSource": "e1d0f01ef05b913e5f311a4d3ae2922a25a676c3",
+  "tree": "1d7fb1c650d0c5d7104aa08277696b56008a1832",
+  "paths": [
+    {
+      "path": ".github/workflows/consumer-smoke.yml",
+      "bytes": 6098,
+      "sha256": "f499c6f7ab4f7e1efae50a905f63f454f880c38c8aaac8d99643eb2698d510e4",
+      "blob": "2a06c0b49c69a35cb26019fba0d072ccb9ff3de6"
+    },
+    {
+      "path": ".github/workflows/docs.yml",
+      "bytes": 12998,
+      "sha256": "cc901d23c936901d16c22dd752e83bf2a4bff6adc29fe28cf7a7a8a6433bd8d7",
+      "blob": "ace69178a5f0d5d87dcb75e6eca9f97ceceb5eab"
+    },
+    {
+      "path": ".github/workflows/frontend-consumer-guard.yml",
+      "bytes": 4765,
+      "sha256": "b81bfd43f82dfc57b0fa9816dc3aa441dc081e1353a5d8c23a332823f9656863",
+      "blob": "97f2feebb96dbacacc763830db53664095b9c321"
+    },
+    {
+      "path": ".github/workflows/frontend.yml",
+      "bytes": 1062,
+      "sha256": "34189a5d831031f1f6b8774e0a3460b8f493c7add748205f6da23f0e63d79e9a",
+      "blob": "e712b22bc9fa85a0af1b57504d0f0b1d28a89cb0"
+    },
+    {
+      "path": ".npmrc",
+      "bytes": 19,
+      "sha256": "7151cf397def0c2cb0ab65643701d27d335a72c90f775675b5f826bc7005818a",
+      "blob": "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad"
+    },
+    {
+      "path": "docs/adr/018-exact-node-npm-build-toolchain.md",
+      "bytes": 3230,
+      "sha256": "a4ab779b13941f1710258e342d1712649302d153c95e2638792df6141d7e1c89",
+      "blob": "f496c4526680763e8564162634f851ec11914f1b"
+    },
+    {
+      "path": "docs/adr/README.md",
+      "bytes": 5340,
+      "sha256": "09edf3bd2caad5631e6343e3a80176d8f0a1688d19fc79881f3874ec5ccefb4e",
+      "blob": "5f1fa91109a49183f2d4bd53f92ad10885dbfdd9"
+    },
+    {
+      "path": "docs/dev-environment.md",
+      "bytes": 11738,
+      "sha256": "6f215ba54386e5926a0a93e903a3494bb1d57220a728b193920fafdfbe6f56ac",
+      "blob": "32b86b771c6f94f9affcd134c27d8c203f609f17"
+    },
+    {
+      "path": "docs/journal.md",
+      "bytes": 109602,
+      "sha256": "8956a1d83f24c02ddbaf554efe0ce0595c8163e35c26a2ef56f629da88872caa",
+      "blob": "ca5c954f966fd9b754f0aa62622a4468bd1421f6"
+    },
+    {
+      "path": "docs/resume.md",
+      "bytes": 38319,
+      "sha256": "f488c702b2771a902a4b03d5eba345ec713347a773678d3b4ca609a9516e7404",
+      "blob": "d0c0311978d9a4d3f5f6de014c257c28111b2a2b"
+    },
+    {
+      "path": "docs/standards/ci-deploy.md",
+      "bytes": 35960,
+      "sha256": "803ca81065264a6e51eb5141329f93e6e6a46c83c31358e6de473cf302a00695",
+      "blob": "9ef1c48c0bb315839de3737b2107024467f137fa"
+    },
+    {
+      "path": "docs/standards/frontend-stack.md",
+      "bytes": 20839,
+      "sha256": "d4999a777755eb4aa31f5bd0e592f56c49590124eed94f38ec78d4d963aa04d2",
+      "blob": "f16dc7f6bbc8a9958ce3da3ba2ffa6a056889ad1"
+    },
+    {
+      "path": "docs/standards/versions.md",
+      "bytes": 37818,
+      "sha256": "50a1183f2f663d01fca51b16fa068c20ccdd62c8a735988fec56a9420d8fb172",
+      "blob": "318de1461b4c1611c945b39951b757687c99e4ba"
+    },
+    {
+      "path": "docs/tasks/T-218-radix-library-unification.md",
+      "bytes": 7744,
+      "sha256": "3549bd08018c61aa3a84e9dcc73dac7fd7a29006ec344a018620d34e2718bfaa",
+      "blob": "1ce502fb35581ea67d52dd256ebe405043e670cd"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 329530,
+      "sha256": "dd86452678bbf343e7110e40a1ddbdded414e6ae3d4d1ceba0b6f85d68486c29",
+      "blob": "29f1679fedb5e063b47321945ee44aed98c09556"
+    },
+    {
+      "path": "package.json",
+      "bytes": 1411,
+      "sha256": "7d0bfcdc70e00af90d90a1b114350a9bf9ff7ee925b3a8b305c7c4af506d7b2c",
+      "blob": "4a763e1cb0015fc143d6cd19ffe95aa1afebcccc"
+    },
+    {
+      "path": "templates/consumer-adoption-checklist.md",
+      "bytes": 4938,
+      "sha256": "9b2e39b7551692e79efd088474b97f141833d86abb0c91d6636b19e728799926",
+      "blob": "96af609dce9270fe71bd850a86cd6f3dde49e916"
+    },
+    {
+      "path": "tests/check_node_toolchain.test.mjs",
+      "bytes": 23179,
+      "sha256": "0d98a75f330e927a5646f52aa8b954d4b61cbf6b4d3381ce1c565f1b9f03c424",
+      "blob": "e43145af2fc530be18621cca3ae9be4f7a3e41c3"
+    },
+    {
+      "path": "tools/README.md",
+      "bytes": 7565,
+      "sha256": "7f65af294352898a7b92114ec72c7cdaad5f23162089fd392a8ce04a794b8400",
+      "blob": "5b58c39bec3dc9f39d8115fb34fc72f08c42129a"
+    },
+    {
+      "path": "tools/check_node_toolchain.mjs",
+      "bytes": 14897,
+      "sha256": "84be4126dbf0389a91693610a23d9dedb2d33b6d3e1aed15ee8fb960038ea8f6",
+      "blob": "1414c906ef26f1e566d3e7423dba1ed0df21174e"
+    },
+    {
+      "path": "versions.json",
+      "bytes": 26838,
+      "sha256": "39fae4d28f0533d835f99339ee70e01ff36af0aaefce1d5bc5f3489bb765b04b",
+      "blob": "e5cc1ac8b0b414859f8930863f75f0783aee63b4"
+    }
+  ],
+  "postfixPaths": [
+    ".github/workflows/consumer-smoke.yml",
+    "docs/adr/018-exact-node-npm-build-toolchain.md",
+    "docs/dev-environment.md",
+    "docs/journal.md",
+    "docs/resume.md",
+    "docs/standards/versions.md",
+    "docs/tasks/T-218-radix-library-unification.md",
+    "package-lock.json",
+    "package.json",
+    "tests/check_node_toolchain.test.mjs",
+    "tools/README.md",
+    "tools/check_node_toolchain.mjs"
+  ],
+  "ownerEvidence": "validation/phase2-common-build-rules-candidate3-20261113",
+  "dependencySnapshot": "validation/phase2-common-build-rules-candidate3-20261113/immutable-3cdaeb79f759",
+  "dependency": {
+    "scope": "Common private root only; not added to apps/public packages",
+    "version": "ini@7.0.0",
+    "license": "ISC",
+    "SRI": "sha512-ifK0CgjALofS5bkrcTy4RaQ9Vx2Knf/eLeIO+NaswQEpH1UblrtTSCIvN71qQDMq0PeQ/SSPojvEJp9vvvfr+w==",
+    "metadataSourceRef": {
+      "file": "validation/phase2-build-toolchain-20261113/ini-official-latest-metadata.json",
+      "sha256": "15cacf3f1bc210d92adc057c8477569fe3c01e5696cf823c7442c6236f5c5673"
+    },
+    "verifiedInstalledFiles": {
+      "README.md": "8d1844511493947f9be309d2eb6db97b3ecc83840009aef4f3dfcf920df8bc4c",
+      "package.json": "8fa8b0d70252d57858bae47eae4d4b8d19c83f316dddd0d4565f5626cc51e194",
+      "LICENSE": "4ec3d4c66cd87f5c8d8ad911b10f99bf27cb00cdfcff82621956e379186b016b",
+      "lib/ini.js": "007123836ffec243f41c8b35584fb3db0498aa12a440a9e0efc675d0000f4c32"
+    },
+    "actualNpm12BundledParserSame": {
+      "version": "7.0.0",
+      "bundledNpm12ParserSHA256": "007123836ffec243f41c8b35584fb3db0498aa12a440a9e0efc675d0000f4c32",
+      "sameAsRegistryPackage": true
+    },
+    "manualINILexerOrFallback": false,
+    "fixtureInstructions": "source·package/lock·node_modules/ini 4개 파일을 같은 snapshot 구조로 사용한다. npm ci 또는 SRI 검증된 package 설치가 필요하며, builtin runner만으로 dependency 없는 실행이라고 주장하지 않는다."
+  },
+  "canonical76Bridge": "only consumer-smoke existing-step locked dependency installation added after 3cda; runtime/test/registry/lock bytes identical",
+  "parentVerified": {
+    "canonicalSourceAndDependencyInputs": 11,
+    "logs": 4,
+    "rawReferences": 26,
+    "priorABRaw": 2,
+    "privateRootINIOnly": true
+  },
+  "priorABVerdicts": "BLOCK_PRESERVED",
+  "newVerdicts": "PENDING",
+  "workflowOrderOptimization": "NOT_STARTED"
+}

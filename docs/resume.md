@@ -1,4 +1,18 @@
+## 2026-11-13 — 공식 shell token 후보5 검증 중
+
+8a2c의 81개/CI 성공과 원 A4/B4의 미해결 BLOCK·CONDITIONAL을 보존한다. 공식 shell-quote의 실행 파일/data token과 whole RUN 연산자 검사를 적용하고 잠긴 두 parser fixture를 동결한다. 정본 runtime·독립 재검토·새 정확 CI 전 merge·도구 ref 소비자 출판은 대기한다. CI 순서 최적화·공개 C11 재pack·운영 적용은 범위 밖이다.
+
 # 현재 작업 재개
+
+## 2026-11-13 — 정확 Node/npm 도구 후보
+
+후보3은 e1d0의 62/CI 성공 및 A2/B2 BLOCK을 보존하고, 공식 INI 전역 boolean·shell 경계·physical 기본 registry를 조치한다. 새 정확 source/lock/module fixture와 정본 runtime·독립 재검토는 이전 결과와 구분한다.
+
+[ADR-018](adr/018-exact-node-npm-build-toolchain.md)의 private anchor/runtime 검사와
+Node 내장 runner와 잠긴 공식 INI·shell parser dependency·reusable 선택 입력을 구현한다. Common private ini·shell-quote 두 도구 dependency 추가 외 기존 lock 항목과 소비자 graph·C11/공개 패키지는 보존한다.
+로컬 freeze commit은 검토 입력이며 publish·merge는 독립2리뷰·정확 CI gate 완료까지 보류한다. 설치·전체 build는 저용량 환경에서 실행하지 않는다.
+현재 사실 출판/운영 수용 기록과 미실행 native/EAS/store는 아래 이력대로 보존한다.
+CI 순서 정비는 마지막 별도 작업이다. c4cc의 원 CI47과 A의 P2 네 건·확정 공격7 RED를 보존하고, 유효 force/strict와 미지원 Docker·selector 거부의 후보2를 별도 검토한다.
 
 ## 2026-11-12 — Transport Geo형 메뉴·지도 운영 수용 후 최종 문서 출판
 

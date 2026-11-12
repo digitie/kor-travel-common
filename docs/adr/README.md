@@ -1,6 +1,6 @@
 # kor-travel-common ADR — Architecture Decision Records
 
-**다음 후보 번호는 ADR-017이다.**
+**다음 후보 번호는 ADR-019이다.**
 
 - 정본 지위: ADR의 단일 색인. 별도 `docs/decisions.md`는 두지 않는다(D-02·D-27, 이중 색인 금지). 확정 task: T-004(★이번 PR). 마지막 갱신: 2026-09-06.
 
@@ -36,3 +36,5 @@ kor-travel-common의 구조적 결정은 파일당 하나의 ADR로 둔다. 파�
 | [ADR-016](016-mdx-parser-for-ux-lint.md) | UX 검사기의 MDX 문법 해석을 표준 파서에 위임 | accepted |
 
 - [ADR-017: 공통 shadcn Radix·VirtualTable 및 의존성 일치](017-shadcn-radix-shared-components.md)
+
+- [ADR-018: private anchor의 정확 Node/npm 빌드·테스트 선택](018-exact-node-npm-build-toolchain.md) — accepted

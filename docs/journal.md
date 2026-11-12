@@ -1,3 +1,42 @@
+## 2026-11-13 — 공식 shell token과 전체 RUN 제어 경계 후보5
+
+8a2c의 점 캐시 조치는 유지하되 비점 캐시·node/echo의 npm data 오인과 전체 AND-list background 누락은 미해결임을 보존한다.
+공식 shell-quote 1.12.0을 private 도구에 추가해 실행 파일 위치와 data를 구분하고, npm 구간 선택 전에 전체 RUN의 && 외 연산자를 거부한다.
+호스트 환경·shell은 실행하지 않는다. 정적 script 본문·전체 Docker 동작은 보증하지 않으며 알려지지 않은 wrapper는 추론 승인하지 않는다.
+동일 회귀는 기존 helper에서 81 PASS/9 FAIL을 보존하고 새 후보에서 90 PASS다. 공식 두 parser 외 lock 항목·공개 C11·소비자 graph는 불변이다.
+정본 runtime·7개 소비자·원 두 reviewer·정확 CI의 후속 판정은 각각 별도로 정산한다. 원 source BLOCK과 녹색 CI를 섞지 않는다.
+
+## 2026-11-13 — npm 캐시 경로와 Docker CLI 감지 구분
+
+404a의 실제 소비자 정적 검사에서 .npm 캐시 디렉터리를 npm 명령으로 오인하여 Geo·Weather·Transport를 거부했다.
+같은 소비자 입력 해시를 유지한 직접 재현과 77 PASS/4 FAIL을 보존하고, 경로의 점 접두사는 CLI 감지에서 제외한다.
+실제 npm/npx의 exact pin·strict 검사와 절대 경로 CLI·wrapper·동적 명령의 기존 거부는 유지한다.
+후속 회귀 81개와 7개 소비자 정적 검사는 통과했으며, 정본 Node/npm 실행과 독립 재검토·새 정확 CI는 각각 별도 증거로 정산한다.
+원 404a의 CI 성공·SOURCE BLOCK 및 이전 c4cc/e1d0 반례·리뷰를 수정하지 않는다. 공개 C11·dependency graph·운영 변경은 없다.
+
+## 2026-11-13 — 공식 INI·shell 경계·기본 registry 후보3
+
+A2/B2의 INI 인용 key·section·전역 shadow, shell 단일 & 및 alias 기본 registry 반례를
+기존 helper에서 62 PASS/11 FAIL로 보존했다. 수기 INI 해석은 제거하고 npm12가 사용하는
+공식 ini의 root private 정확 dependency만 승인된 예외로 추가한다. canonical lock-only 생성과
+공식 SRI를 대조하며 기존 lock 항목·public C11/소비자 graph는 보존한다. Node 내장 runner도
+해당 설치 dependency가 필요하다. e1d0/62/CI·원 두 BLOCK을 유지하며 후보3의 실제 결과는
+별도 receipt와 원 reviewer 재검토로 정산한다. build/repack/운영 변경은 하지 않는다.
+
+## 2026-11-13 — 도구 guard 후보2·A의 네 P2 수정
+
+c4cc와 원 CI47을 유지하고 같은 확정 공격7을 47 PASS/7 FAIL로 재현했다.
+`.npmrc` 유효 force, strict 해제 옵션, 미지원 Docker heredoc/escape와 npm 재선택을
+fail-closed로 보완한다. 무관한 peer/lifecycle 설정과 공개 C11·graph는 유지하며
+후보2의 테스트/runtime·독립 재검토·새 CI는 c4cc 성공과 구분한다. 이후 부모가 전달한 B의 symlink entry false PASS도 원문을 보존하고, argv/module URL 양쪽 실제 경로 일치와 direct/alias/preserve-main 및 import 대조로 조치한다.
+
+## 2026-11-13 — private Node/npm 선택·경로/runtime guard 후보
+
+parent의 checker 초안을 보존하고 목록/경로/Node 이미지 검증과 Node 내장 음성 대조를 추가했다.
+root toolchain metadata와 기존 CI step 내 명시 npm 선택/guard를 연결했다.
+C11/public packages와 graph/SRI는 변경하지 않으며 runtime 실측·검증 결과는 별도 증거로 정산한다.
+로컬 freeze commit은 독립 검토 입력이며 push·repack·운영 변경은 보류한다.
+
 ## 2026-11-12 — Transport Geo형 메뉴·지도 실제 수용 후 문서 마감 후보
 
 Transport184의 PC 왼쪽256px 세로 메뉴·모바일 왼쪽296px 드로어, 185의 서버 frame·포커스 보존, 186의 잘린 사용자 로더 수정을 반영했다. 실제 mergef30의 정상 ARM image0ac을 SDK508로 관리자만 교체하고 첫 정상 세션9 PASS·PNG decode2+2·zoom7→8·9폭/11행·폰트·로그아웃 후 보호401을 확인했다. 부모가 동결63개와 실제 화면4개를 직접 확인했다. 184 운영 연락처 실패와185 최초 canvas5초 실패·진단 실패는 보존하며 새 피드백5초/전체 bootstrap60초 계약과 동등하다고 주장하지 않는다.

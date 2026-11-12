@@ -1,0 +1,142 @@
+{
+  "status": "IMMUTABLE_IDENTICAL_ORIGINAL_AB_INPUT",
+  "source": "c4cc78781638808490c0ea540fbb38200b577346",
+  "base": "678a5bcf0150ac0386bfa86106e7e0f4f77e8639",
+  "tree": "3e7334d476d36c55eaf14b37d32a6f5c9856b5ef",
+  "files": [
+    {
+      "path": ".github/workflows/consumer-smoke.yml",
+      "blob": "672165507746ba027e0407d78a06a763cf780b35",
+      "sha256": "10dd76203e7098f055d483fd781b8f34c1e1625f9196250eb7cbc33f07a9d1b7",
+      "bytes": 6020
+    },
+    {
+      "path": ".github/workflows/docs.yml",
+      "blob": "ace69178a5f0d5d87dcb75e6eca9f97ceceb5eab",
+      "sha256": "cc901d23c936901d16c22dd752e83bf2a4bff6adc29fe28cf7a7a8a6433bd8d7",
+      "bytes": 12998
+    },
+    {
+      "path": ".github/workflows/frontend-consumer-guard.yml",
+      "blob": "97f2feebb96dbacacc763830db53664095b9c321",
+      "sha256": "b81bfd43f82dfc57b0fa9816dc3aa441dc081e1353a5d8c23a332823f9656863",
+      "bytes": 4765
+    },
+    {
+      "path": ".github/workflows/frontend.yml",
+      "blob": "e712b22bc9fa85a0af1b57504d0f0b1d28a89cb0",
+      "sha256": "34189a5d831031f1f6b8774e0a3460b8f493c7add748205f6da23f0e63d79e9a",
+      "bytes": 1062
+    },
+    {
+      "path": ".npmrc",
+      "blob": "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad",
+      "sha256": "7151cf397def0c2cb0ab65643701d27d335a72c90f775675b5f826bc7005818a",
+      "bytes": 19
+    },
+    {
+      "path": "docs/adr/018-exact-node-npm-build-toolchain.md",
+      "blob": "e84203cda3912f5e26f38d375576749ecdc8aeec",
+      "sha256": "5a96c8cfc495a790a542dc4ea3c8c4495ab8d73d1c186979e651edcaa82fb9ad",
+      "bytes": 2623
+    },
+    {
+      "path": "docs/adr/README.md",
+      "blob": "5f1fa91109a49183f2d4bd53f92ad10885dbfdd9",
+      "sha256": "09edf3bd2caad5631e6343e3a80176d8f0a1688d19fc79881f3874ec5ccefb4e",
+      "bytes": 5340
+    },
+    {
+      "path": "docs/dev-environment.md",
+      "blob": "3e2a7142da79e9adcf3b8af10020da65bc75cd51",
+      "sha256": "cb314d82db3df979b36bc3178e107407231ffe7e99ae57dfa9dec5223b011321",
+      "bytes": 11538
+    },
+    {
+      "path": "docs/journal.md",
+      "blob": "d62f948c4e9448e103a6421519a251625d005235",
+      "sha256": "0d7575fa43922c05e4f036702959ec6d0419b1745a93205b66378ab7dd8ff482",
+      "bytes": 108254
+    },
+    {
+      "path": "docs/resume.md",
+      "blob": "faf141002cad6c3b692d1d5bd8abf8f59c3560d8",
+      "sha256": "5a035487508bcd512b142f5745c9d1287d5e0290708ce47b842882b95f1ac248",
+      "bytes": 37818
+    },
+    {
+      "path": "docs/standards/ci-deploy.md",
+      "blob": "9ef1c48c0bb315839de3737b2107024467f137fa",
+      "sha256": "803ca81065264a6e51eb5141329f93e6e6a46c83c31358e6de473cf302a00695",
+      "bytes": 35960
+    },
+    {
+      "path": "docs/standards/frontend-stack.md",
+      "blob": "f16dc7f6bbc8a9958ce3da3ba2ffa6a056889ad1",
+      "sha256": "d4999a777755eb4aa31f5bd0e592f56c49590124eed94f38ec78d4d963aa04d2",
+      "bytes": 20839
+    },
+    {
+      "path": "docs/standards/versions.md",
+      "blob": "1a33772ba716bc693ca575e74c68d50609caab43",
+      "sha256": "2e276e85fdb6b63ad310a068c8de2c3487c6d0c197ed66ced0f9b3f548b78bda",
+      "bytes": 35947
+    },
+    {
+      "path": "docs/tasks/T-218-radix-library-unification.md",
+      "blob": "de1122b4d060407ac2a7ce733101da9847310d28",
+      "sha256": "0d363b636e982ba117458fd7a87643e11464337ced49c6b82e20e44160f582a1",
+      "bytes": 7465
+    },
+    {
+      "path": "package-lock.json",
+      "blob": "03c9088be126385ee87c009535e515d3405d8b90",
+      "sha256": "3b02855a83e6656a710c8568728175eae12f1219f23fce8c68b3b838e46cc80d",
+      "bytes": 329140
+    },
+    {
+      "path": "package.json",
+      "blob": "8c5615d148e4f7aaf9b0d6fe62849ec1f29594df",
+      "sha256": "1458d9732b1b824536f210efce9eb16a29e1e01dccb99911c8b55ce58d809430",
+      "bytes": 1391
+    },
+    {
+      "path": "templates/consumer-adoption-checklist.md",
+      "blob": "96af609dce9270fe71bd850a86cd6f3dde49e916",
+      "sha256": "9b2e39b7551692e79efd088474b97f141833d86abb0c91d6636b19e728799926",
+      "bytes": 4938
+    },
+    {
+      "path": "tests/check_node_toolchain.test.mjs",
+      "blob": "aca0c71bf78c0489cb322aa928eeb2fe30109460",
+      "sha256": "06c23a5c1c592acb4b758ba40670fb866fadf087edffd4a03ba99ddb94942c71",
+      "bytes": 12214
+    },
+    {
+      "path": "tools/README.md",
+      "blob": "e15149c3232831bfecbeca65a00f9c0be24fcafb",
+      "sha256": "22c1521f18b88cbd068839a0dd329a8d1b396c5d785a9b1294e0e364040f6224",
+      "bytes": 7115
+    },
+    {
+      "path": "tools/check_node_toolchain.mjs",
+      "blob": "d5b21c32f5aa4b904faeb3df9662a33b25443411",
+      "sha256": "989bc5929fcdb0e53e5ea20254a3ee5d52e7990ea666d7f621829e04e1e16595",
+      "bytes": 12499
+    },
+    {
+      "path": "versions.json",
+      "blob": "e5cc1ac8b0b414859f8930863f75f0783aee63b4",
+      "sha256": "39fae4d28f0533d835f99339ee70e01ff36af0aaefce1d5bc5f3489bb765b04b",
+      "bytes": 26838
+    }
+  ],
+  "evidenceRoot": "validation/phase2-common-build-rules-20261113",
+  "executablePublicPackagesAndC11": "UNCHANGED_193_HASHES",
+  "originalReviewers": [
+    "A",
+    "B"
+  ],
+  "ciOrderOptimization": "NOT_STARTED_LAST",
+  "sourceReviewVerdict": "PENDING"
+}

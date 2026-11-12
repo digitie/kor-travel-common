@@ -11,6 +11,16 @@ on:
         description: "package/lock/workspace/profile 경로를 담는 JSON 배열"
         required: true
         type: string
+      toolchain-manifests:
+        description: "추가 private anchor 또는 workspace manifest 경로 JSON 배열"
+        required: false
+        default: '[]'
+        type: string
+      node-dockerfiles:
+        description: "생산 Node Dockerfile 경로 JSON 배열"
+        required: false
+        default: '[]'
+        type: string
 permissions:
   contents: read
 jobs:
@@ -58,13 +68,17 @@ jobs:
         run: |
           [[ "$COMMON_REF" =~ ^[0-9a-f]{40}$ ]]
           test "$(git rev-parse HEAD)" = "$COMMON_REF"
-          npm install --global npm@11.19.1
-          npm ci --ignore-scripts
+          npm install --global npm@12.0.1
+          npm ci --ignore-scripts --engine-strict
+          npm run check:toolchain
+          npm run test:toolchain
           npm run check:policy
       - name: 중앙 버전·산출물과 소비자 대조
         env:
           FRONTEND: ${{ toJSON(matrix.frontend) }}
           KT_REQUIRE_CANONICAL: '1'
+          TOOLCHAIN_MANIFESTS: ${{ inputs.toolchain-manifests }}
+          NODE_DOCKERFILES: ${{ inputs.node-dockerfiles }}
         run: |
           node --input-type=module <<'JS'
           import { resolve, relative, dirname } from "node:path";
@@ -88,5 +102,14 @@ jobs:
           ];
           const result = spawnSync(process.execPath, args, { stdio: "inherit", env: process.env });
           if (result.error) throw result.error;
-          process.exit(result.status ?? 1);
+          if (result.status !== 0) process.exit(result.status ?? 1);
+          const toolchain = spawnSync("npm", [
+            "run", "check:toolchain", "--", "--root", root,
+            "--registry", resolve("common-policy/versions.json"),
+            "--manifest", config.package,
+            "--manifests", process.env.TOOLCHAIN_MANIFESTS,
+            "--dockerfiles", process.env.NODE_DOCKERFILES,
+          ], { cwd: resolve("common"), stdio: "inherit", env: process.env });
+          if (toolchain.error) throw toolchain.error;
+          process.exit(toolchain.status ?? 1);
           JS

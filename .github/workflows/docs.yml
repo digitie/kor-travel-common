@@ -40,8 +40,10 @@ jobs:
           node-version-file: .nvmrc
       - name: MDX 검사 고정 의존 설치
         run: |
-          npm install --global npm@11.19.1
-          npm ci --ignore-scripts
+          npm install --global npm@12.0.1
+          npm ci --ignore-scripts --engine-strict
+          npm run check:toolchain
+          npm run test:toolchain
       - name: 문서·계획·회귀 검사
         run: |
           python -B -X utf8 tools/validate_document_links.py
@@ -90,8 +92,10 @@ jobs:
           node-version-file: .nvmrc
       - name: MDX 검사 고정 의존 설치
         run: |
-          npm install --global npm@11.19.1
-          npm ci --ignore-scripts
+          npm install --global npm@12.0.1
+          npm ci --ignore-scripts --engine-strict
+          npm run check:toolchain
+          npm run test:toolchain
       - name: Windows·Ubuntu 도구 검증
         run: |
           python -B -X utf8 tools/validate_document_links.py
@@ -196,11 +200,13 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - name: npm 고정 버전 설치
-        run: npm install -g npm@11.19.1
+        run: npm install -g npm@12.0.1
       - name: workspace 의존성 설치
         run: |
           node packages/ui/smoke/prepare-lock.mjs --css-only
-          npm ci --no-audit --no-fund
+          npm ci --no-audit --no-fund --engine-strict
+          npm run check:toolchain
+          npm run test:toolchain
       - name: 사전 설치 Playwright 버전·실행 파일·시스템 의존성 확인
         run: |
           node --input-type=module - <<'NODE'
@@ -250,11 +256,11 @@ jobs:
           # 준비 단계가 복사한 동일 CSS vendor도 격리된 smoke 트리에 포함한다.
           tar --exclude=node_modules --exclude=.next -C packages/ui/smoke/next-app -cf - . | tar -C "$smoke_app" -xf -
           cp test-results/ui-pack/*.tgz "$smoke_dir/test-results/ui-pack/"
-          npm ci --prefix "$smoke_app" --no-audit --no-fund
+          npm ci --prefix "$smoke_app" --no-audit --no-fund --engine-strict
           npm run build:webpack --prefix "$smoke_app"
           npm run build --prefix "$smoke_app"
           SMOKE_APP="$smoke_app" npm exec -- playwright test --config packages/ui/smoke/playwright.radix.config.ts
-          npm ci --prefix packages/ui/examples/next-app --no-audit --no-fund
+          npm ci --prefix packages/ui/examples/next-app --no-audit --no-fund --engine-strict
           npm run build --prefix packages/ui/examples/next-app
       - name: tarball 설치 스모크
         run: |

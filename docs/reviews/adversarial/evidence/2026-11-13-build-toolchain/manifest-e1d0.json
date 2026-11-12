@@ -1,0 +1,145 @@
+{
+  "state": "IDENTICAL_ORIGINAL_AB_POSTFIX2_INPUT",
+  "source": "e1d0f01ef05b913e5f311a4d3ae2922a25a676c3",
+  "base": "678a5bcf0150ac0386bfa86106e7e0f4f77e8639",
+  "previousBlockedSource": "c4cc78781638808490c0ea540fbb38200b577346",
+  "tree": "aea8c2ad8a7b6ffc6550d7a576c01d50551b8bb1",
+  "paths": [
+    {
+      "path": ".github/workflows/consumer-smoke.yml",
+      "bytes": 6020,
+      "sha256": "10dd76203e7098f055d483fd781b8f34c1e1625f9196250eb7cbc33f07a9d1b7",
+      "blob": "672165507746ba027e0407d78a06a763cf780b35"
+    },
+    {
+      "path": ".github/workflows/docs.yml",
+      "bytes": 12998,
+      "sha256": "cc901d23c936901d16c22dd752e83bf2a4bff6adc29fe28cf7a7a8a6433bd8d7",
+      "blob": "ace69178a5f0d5d87dcb75e6eca9f97ceceb5eab"
+    },
+    {
+      "path": ".github/workflows/frontend-consumer-guard.yml",
+      "bytes": 4765,
+      "sha256": "b81bfd43f82dfc57b0fa9816dc3aa441dc081e1353a5d8c23a332823f9656863",
+      "blob": "97f2feebb96dbacacc763830db53664095b9c321"
+    },
+    {
+      "path": ".github/workflows/frontend.yml",
+      "bytes": 1062,
+      "sha256": "34189a5d831031f1f6b8774e0a3460b8f493c7add748205f6da23f0e63d79e9a",
+      "blob": "e712b22bc9fa85a0af1b57504d0f0b1d28a89cb0"
+    },
+    {
+      "path": ".npmrc",
+      "bytes": 19,
+      "sha256": "7151cf397def0c2cb0ab65643701d27d335a72c90f775675b5f826bc7005818a",
+      "blob": "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad"
+    },
+    {
+      "path": "docs/adr/018-exact-node-npm-build-toolchain.md",
+      "bytes": 2623,
+      "sha256": "5a96c8cfc495a790a542dc4ea3c8c4495ab8d73d1c186979e651edcaa82fb9ad",
+      "blob": "e84203cda3912f5e26f38d375576749ecdc8aeec"
+    },
+    {
+      "path": "docs/adr/README.md",
+      "bytes": 5340,
+      "sha256": "09edf3bd2caad5631e6343e3a80176d8f0a1688d19fc79881f3874ec5ccefb4e",
+      "blob": "5f1fa91109a49183f2d4bd53f92ad10885dbfdd9"
+    },
+    {
+      "path": "docs/dev-environment.md",
+      "bytes": 11538,
+      "sha256": "cb314d82db3df979b36bc3178e107407231ffe7e99ae57dfa9dec5223b011321",
+      "blob": "3e2a7142da79e9adcf3b8af10020da65bc75cd51"
+    },
+    {
+      "path": "docs/journal.md",
+      "bytes": 108880,
+      "sha256": "d35885996eeb4f5d799d0d5871ac674071c7f87026420346979b6c50c01f190c",
+      "blob": "3e335eb57c13805a70a4e7d5daaf13f270ec1b93"
+    },
+    {
+      "path": "docs/resume.md",
+      "bytes": 37983,
+      "sha256": "393f6ac49fc792e4af8ecc8276b8ecc17bd9400e61d360723d928dd5c6ee0b65",
+      "blob": "ebd28bcb051e7b5b1be90cf98ce43794c28d437a"
+    },
+    {
+      "path": "docs/standards/ci-deploy.md",
+      "bytes": 35960,
+      "sha256": "803ca81065264a6e51eb5141329f93e6e6a46c83c31358e6de473cf302a00695",
+      "blob": "9ef1c48c0bb315839de3737b2107024467f137fa"
+    },
+    {
+      "path": "docs/standards/frontend-stack.md",
+      "bytes": 20839,
+      "sha256": "d4999a777755eb4aa31f5bd0e592f56c49590124eed94f38ec78d4d963aa04d2",
+      "blob": "f16dc7f6bbc8a9958ce3da3ba2ffa6a056889ad1"
+    },
+    {
+      "path": "docs/standards/versions.md",
+      "bytes": 37058,
+      "sha256": "4af06faaa499b04f611de02a5531212ecb2bc910c472bffa437a24516a780788",
+      "blob": "b517b9c24fdabd17e4c38a4a4c042f2d80185485"
+    },
+    {
+      "path": "docs/tasks/T-218-radix-library-unification.md",
+      "bytes": 7465,
+      "sha256": "0d363b636e982ba117458fd7a87643e11464337ced49c6b82e20e44160f582a1",
+      "blob": "de1122b4d060407ac2a7ce733101da9847310d28"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 329140,
+      "sha256": "3b02855a83e6656a710c8568728175eae12f1219f23fce8c68b3b838e46cc80d",
+      "blob": "03c9088be126385ee87c009535e515d3405d8b90"
+    },
+    {
+      "path": "package.json",
+      "bytes": 1391,
+      "sha256": "1458d9732b1b824536f210efce9eb16a29e1e01dccb99911c8b55ce58d809430",
+      "blob": "8c5615d148e4f7aaf9b0d6fe62849ec1f29594df"
+    },
+    {
+      "path": "templates/consumer-adoption-checklist.md",
+      "bytes": 4938,
+      "sha256": "9b2e39b7551692e79efd088474b97f141833d86abb0c91d6636b19e728799926",
+      "blob": "96af609dce9270fe71bd850a86cd6f3dde49e916"
+    },
+    {
+      "path": "tests/check_node_toolchain.test.mjs",
+      "bytes": 18663,
+      "sha256": "7468f0dfa5bfd1506fb952ade2ff2b51e2273f729d2381810d521511da6b21a5",
+      "blob": "28cf81213eac1738f6d694c591422c6e104829a8"
+    },
+    {
+      "path": "tools/README.md",
+      "bytes": 7115,
+      "sha256": "22c1521f18b88cbd068839a0dd329a8d1b396c5d785a9b1294e0e364040f6224",
+      "blob": "e15149c3232831bfecbeca65a00f9c0be24fcafb"
+    },
+    {
+      "path": "tools/check_node_toolchain.mjs",
+      "bytes": 15292,
+      "sha256": "231dbc30b3596a29dc54d368b3c806a650166905bd143b54ec1f268b0dd40106",
+      "blob": "ce1888f270559e5ce537bdb786a788bbfabbab33"
+    },
+    {
+      "path": "versions.json",
+      "bytes": 26838,
+      "sha256": "39fae4d28f0533d835f99339ee70e01ff36af0aaefce1d5bc5f3489bb765b04b",
+      "blob": "e5cc1ac8b0b414859f8930863f75f0783aee63b4"
+    }
+  ],
+  "postfixPaths": [
+    "docs/journal.md",
+    "docs/resume.md",
+    "docs/standards/versions.md",
+    "tests/check_node_toolchain.test.mjs",
+    "tools/check_node_toolchain.mjs"
+  ],
+  "ownerEvidence": "validation/phase2-common-build-rules-candidate2-20261113",
+  "priorABVerdicts": "BLOCK_PRESERVED",
+  "newVerdicts": "PENDING"
+}
