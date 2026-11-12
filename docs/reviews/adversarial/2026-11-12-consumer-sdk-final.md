@@ -75,7 +75,7 @@ Transport의 기존 core/admin current에서 UI 하나만 선택하는 최종 e5
 
 [공개 배포 정산](evidence/2026-11-12-frontend-deployment-receipt.json)의 현재 수용 앱은 Manager·Concierge·Pinvi·Weather·Geo·Transport 6개다. Transport 공개936/image3262는 기존 단계별13개·9세션 결과이며 단일 전체 실행으로 확대하지 않는다. 최종 관리자 [PR183](https://github.com/digitie/kor-travel-transport/pull/183)의 실제 merge47a4719a/tree510888aa로 만든 ARM64 image3f2073의 canonical source907·COPY296·공통6패키지263·compiled32·OCI/default release를 동결 증거로 확인했다. 최초 collector 변수 shadow 실패를 남긴 채 같은 이미지 strict readonly r2가 통과했으며 이를 재빌드·retag로 대체하지 않았다.
 
-정상 SDK508 admin-only dry-run1·confirm1 healthy와 current/postproof를 완료했다. 운영 receipt135fa3ba와 frozen37 member6d375b9f의 실제 해시 불일치0을 확인했다. 공개936/image3262·backend499/schema0042·비선택54·기존 인증/세션/root/pins/current를 보존했고 승인된 Geo 실사용 키는 Transport 등록 웹 build 입력에만 반영했다. 초기 operator launcher 문법 오류는 confirm 호출 전이며 실제 confirm은1회다. 키·접속주소·계정·원시 응답본문은 이 문서에 넣지 않는다.
+정상 SDK508 admin-only dry-run1·confirm1 healthy와 current/postproof를 완료했다. 운영 receipt135fa3ba와 frozen37 member6d375b9f의 실제 해시 불일치0을 확인했다. 선택 Transport current는 새 관리자 source/image로 갱신했으며, 공개 current936/image3262·backend499/schema0042·비선택54·기존 인증/세션/root/pins와 다른 앱 current는 보존했다. 승인된 Geo 실사용 키는 Transport 등록 웹 build 입력에만 반영했다. 초기 operator launcher 문법 오류는 confirm 호출 전이며 실제 confirm은1회다. 키·접속주소·계정·원시 응답본문은 이 문서에 넣지 않는다.
 
 실제 관리자 QA는 단일 정상 세션9 PASS·실패0·로그인1/로그아웃1/303→보호401이다. bounded map phase36개(zoom 전16·후20)는 모두 HTTP200·PNG signature·IHDR256과 승인 키 일치를 확인했고 실제 bitmap decode2+2·camera7→8이 통과했다. 전체 세션 observer96개 중 legacy image 판정68·HTTP실패0을 별도로 남기며 나머지28개를 오류 또는 정상 이미지로 단정하지 않는다. 실제7개 폭/왕복9행의 메뉴·실제 Pretendard·표·팝오버·주차장/철도/연락처, 높이 변화 시 rail delta0·문서 scroll/focus 보존도 통과했다. 실제 운영 screenshot은0이며 native 격리 화면 증거와 구분한다. browser 종료·프로세스/port/heavy0을 확인했다.
 

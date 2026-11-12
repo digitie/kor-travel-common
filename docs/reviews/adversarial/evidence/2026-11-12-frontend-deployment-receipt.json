@@ -229,7 +229,6 @@
       "nonselectedAddedOrRemoved": 0,
       "backend499Schema0042Public936Image3262Preserved": true,
       "approvedTransportWebBuildInputPreserved": true,
-      "rootGeoMapBackendAuthPinsCurrentChanges": 0,
       "accountPasswordOrSessionSecretChanges": false,
       "normalLoginHTTP": 200,
       "normalLoginPosts": 1,
@@ -365,7 +364,9 @@
           "sha256": "89fe5b063f2014663fd619630bbca5a1c14aaae58a9686d6064a87231cb21567",
           "bytes": 2357
         }
-      ]
+      ],
+      "rootGeoMapBackendAuthPinsOtherCurrentChanges": 0,
+      "selectedTransportCurrentUpdatedToNewSourceAndImage": true
     },
     "priorHistory": {
       "observedUTC": "2026-11-12T04:42:50.356627+00:00",
