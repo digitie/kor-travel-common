@@ -1,0 +1,43 @@
+{
+  "kind": "released-common-C11-consumer-batch-2",
+  "createdAt": "2026-11-11T19:35:11.910976+00:00",
+  "commonRelease": "e8ed3ae75000be5cd22a3a11492bd97660635d78",
+  "canonicalArtifacts": {
+    "file": "artifacts/integration-11-review/common-artifacts.json",
+    "sha256": "be0bbaba1b825b33754cdbe4352168265d1ccb71467a1031aa095707b0b5eec8"
+  },
+  "previousInput": {
+    "file": "review-manifest-consumers-final-1.json",
+    "sha256": "dec96d31adf89696123a3d6a2d2e65c1f204c6e1f92daaa4b8a4ffac4a4460e7"
+  },
+  "apps": [
+    {
+      "repository": "pinvi",
+      "head": "328c7b634e34d56a1be4067b222e87ed3ae0ebf5",
+      "pendingSupplement": "Pinvi four mobile-only Expo patch dependencies/workflow gate; not part of source328, shared C11 packets unchanged"
+    },
+    {
+      "repository": "kor-travel-concierge",
+      "head": "76beb95c483b9bdc7196a4d64d7fc952f4bdbc11",
+      "pendingSupplement": null
+    }
+  ],
+  "reviewScope": "C11 metadata, entire new delta after original source1/own finding closures, actual whole file/lock/SRI graph, Pinvi Dialog inherited fieldset and context-close mock RSC prefetch-only handling incl negative controls; native token/runtime unchanged until four mobile SDK patches separate. Concierge module-stable checkbox closure already reviewed A, other delta C11 and e2e contracts. Git immutable heads only; no peer raw.",
+  "acceptanceEvidence": {
+    "pinviExact328": {
+      "webUnitPassed": 527,
+      "coreUnit": 138,
+      "markerUnit": 24,
+      "webFullBrowserPassed": 209,
+      "webFullBrowserSkipped": 4,
+      "canvas": 3,
+      "restore": 2,
+      "requiredWebCi": 43086032334,
+      "central": 43086033577,
+      "mobileRequiredCi": 43086032337,
+      "mobileExpoDoctor": "historical 19/20 FAIL4pointpatches pendingfollowup; not ReactDoctor failure",
+      "nativeDeviceEas": "NOT_RUN"
+    },
+    "concierge76": "fresh exact CI commonUI10/local guards and owner evidence pending; source50 A checkbox closure separately FIXED"
+  }
+}

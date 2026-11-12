@@ -1,0 +1,55 @@
+{
+  "archive": "2026-11-12-manager591-originals.tar.gz",
+  "archiveBytes": 21628,
+  "archiveSha256": "295b5a30002764ba06cc96aa2e28c47cb126ef3d63ae9969593cf39f607b730f",
+  "members": [
+    {
+      "original": "review-A-manager-transport-ui-route-478a077.md",
+      "member": "review-A-manager-transport-ui-route-478a077.md",
+      "bytes": 10148,
+      "sha256": "94b48a8a38e589984551d20f316840338a2445d54ad919c32773c7838e1f3a5c"
+    },
+    {
+      "original": "validation/review-manager-transport-ui-route-478a077/manifest.json",
+      "member": "review-manifest-manager-transport-ui-route-478a077.packet.json",
+      "bytes": 7110,
+      "sha256": "1d945ce83c9405768807653bc43e72b57b769ba02a22d82b8dbc6bbcbec2e702"
+    },
+    {
+      "original": "review-A-manager-transport-ui-route-e533820.md",
+      "member": "review-A-manager-transport-ui-route-e533820.md",
+      "bytes": 11681,
+      "sha256": "b7104ed12f28a4c1ba57c7a8d87b0ceeaf34069cdbd8727a493a69c9ea6c6098"
+    },
+    {
+      "original": "review-B-manager-transport-ui-route-e533820.md",
+      "member": "review-B-manager-transport-ui-route-e533820.md",
+      "bytes": 13692,
+      "sha256": "52697dd2f2564f9e7c8fd479dfe83223729bb981b0df2022b0260eb62782d40a"
+    },
+    {
+      "original": "validation/review-manager-transport-ui-route-e533820/manifest.json",
+      "member": "review-manifest-manager-transport-ui-route-e533820.packet.json",
+      "bytes": 14726,
+      "sha256": "79d7253d54a071a4749873beed2c043d52873cf11eb12b26c1978473263b1fd5"
+    },
+    {
+      "original": "validation/review-manager-transport-ui-route-e533820/parent-final-merge-receipt.json",
+      "member": "manager591-parent-merge-receipt.json",
+      "bytes": 1009,
+      "sha256": "daffca81f55fe1a1dadf9732b4956345d4e48f948941155b9d5bdc04b210fc56"
+    }
+  ],
+  "verdictBoundary": "478은 A PUBLIC ONLY·B 완료 승인 없음; e533은 원 A/B COMBINED SOURCE PASS·신규0. 실제 UI 배포 수용은 별도 pending.",
+  "source": "e533820112372fb2f23982265b7a9575db7a0431",
+  "merge": "508b074cff137e5cca79318f4f99ec7d385e655b",
+  "fullTree": "98f2fefd9349dc0538ca8cd5b4e250ab84b2dc77",
+  "fetchedMainTreeEqualsReviewed": true,
+  "exactCI": {
+    "43114698062": "SUCCESS",
+    "43114698466": "SUCCESS"
+  },
+  "actualNewTransportAppAcceptance": false,
+  "rawHistoricalFailuresPendingAndLimitsPreserved": true,
+  "libraryPayloadOrRulesChanged": false
+}

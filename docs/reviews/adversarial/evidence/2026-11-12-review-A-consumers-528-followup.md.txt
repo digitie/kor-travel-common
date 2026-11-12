@@ -1,0 +1,83 @@
+# 원 reviewer A — Pinvi528 최종 bounded 후속 리뷰
+
+runid Mill-A-Pinvi-528-Followup-20261111. frontend/accessibility·consumer 통합·본인 provenance finding 종결. 구현 비참여, read-only, peer raw/verdict 미열람. UTC 시작2026-11-11T20:53:25Z, 최종 불변 재대조20:57:26Z.
+
+**판정 PASS(이번 source/C11 통합·hosted CI 수용 범위). A-CONS-P2-05 FIXED. 기존 A-CONS-P2-04 FIXED 유지. 모바일 SDK4 패치 후속 조건 충족. 신규 P0/P1/P2/P3=0, 본인 범위 OPEN0.** 병합·설치·운영 배포 또는 네이티브 실기기/EAS 실행을 완료했다는 판정은 아니다.
+
+## 불변 입력과 이전 원문
+
+- input consumer-tools/pinvi-final-followup-528d825401df.json SHA256 5bae5368aa3d1427fb7eda6b389d88e384c8d633915848ef65353c3efb962a3e 시작/종료 일치.
+- exact HEAD528d825401dff3fe5e97b2bab238e0b80ac22430 / tree05dfdc0bf3dcdf6296b8039090d42cde09ff470b / Draft PR732.
+- base328c7b634e34d56a1be4067b222e87ed3ae0ebf5. 변경22파일의 집합·각 Git blob·SHA256 모두 manifest와 일치. 시작/종료 shared HEAD528·clean. 실제 감사는 immutable Git archive/show로 /tmp/review-A-pinvi-528에 격리한 source를 사용했다.
+- 원 batch2 manifest SHA256 bcf2aff18fb8a82b1e89753ca68185a378ad26849058ec977323e1db6414160b는 그대로 유지한다. 원 보고서 review-A-consumers-c11-batch-2.md SHA256 2b100b0c969d3abdcd38a7cb93f4be2596d7c0ff23e14841828b9e5ef9d9e5b4도 종료 때 불변 확인했다.
+- 별도 최신 실제 CI receipt consumer-tools/pinvi-final-ci-528d825401df.json과 raw9job의 각 SHA256을 대조해 모두 일치했다. source manifest 제작 시점의 PENDING 문구와 후속 CI 완료 receipt를 구분한다.
+
+## A-CONS-P2-05 — FIXED, 본인 독립 확인
+
+원328은 PR head를 checkout하면서 GITHUB_SHA인 synthetic2ce8198cf23c757cdc552aaefa50dad1893c4548을 이미지 revision으로 선언했다. 두 source의 full tree가 달랐고 기존40hex 형식 검사는 둘 다 통과했다. 그때의 build/boot 성공 및 잘못된 OCI/ENV label 기록은 원문 그대로 보존한다. 실제 운영 배포 사고라고 확대하지 않는다.
+
+새 .github/workflows/web.yml:120-127은 git rev-parse --verify HEAD^{commit}를 실행하고 예상 PR head/push SHA와 같음을 확인한 뒤 단일 source output을 만든다. :132부터 build arg/tag/boot에 그 output만 사용한다. :141의 실제 docker image inspect를 scripts/check_web_image_provenance.py로 대조하고, 실제 built inspect 복사본의 OCI label만 다른 유효40hex로 바꿔 거절되는지도 별도 단계로 확인한다.
+
+검사기는 expected checkout의40hex 형식, inspect 정확1개, OCI revision 정확 일치, PINVI_SOURCE_REVISION ENV 정확1개 및 동일 값을 요구한다. label과 ENV가 서로 같아도 둘 다 checkout과 다르면 거절한다. duplicate ENV도 허용하지 않는다. 예상 SHA를 이미지 metadata에서 역으로 만들어 통과시키지 않는다.
+
+직접 실행:
+
+- 제품 provenance 계약6개 전부 PASS.
+- 추가 CLI 경계10개: 정확한 document exit0; 다른 유효 label/ENV·동일한 잘못된 양쪽값·동일 ENV 중복·ENV 누락·비문자 ENV·잘못된 Config·다중 이미지·expected main은 각각 exit2. 예상대로 전부 판정.
+- workflow source shell 자체도 실제528 Git checkout에서 실행했다. 예상528은 exit0/output revision528, 예상2ce는 exit1/output 없음. GITHUB_OUTPUT은 자기 tmp 파일만 사용했다. Docker build는 새로 수행하지 않았다.
+
+실제 hosted CI web43092723730/job130773649724는 exact528 checkout, source 검증·계약6개·build·OCI/ENV 대조·실제 metadata 변조 음성 단계·HTTP200 boot 모두 SUCCESS임을 직접 API로 확인했다. hash가 고정된 실제 raw에는20:05:22의 OCI/ENV528 일치, 이어서 다른 label 거절,20:05:31 HTTP200이 있다. 이 결과는 단순 합성 JSON 단위 검사 성공보다 넓은 실제 built image 검사 증거다.
+
+본인이 발견한 원인에 대한 source·직접 양성/음성 실행·실제 CI 증거를 확보하여 A-CONS-P2-05를 FIXED로 종결한다.
+
+## SDK·C11·새 main delta
+
+Expo/Constants/Linking/Router는 각각58.0.24/58.0.16/58.0.17/58.0.31 exact다. root와 mobile manifest, lock, 실제 read-only 참조 modules 버전을 직접 대조했다. lock의35개 version delta도 전달 manifest와 동일하며 부속 Expo 전이 의존성/hoisting 변경을 포함한다. lock integrity 검사 exit0. 기존 common library axes를 새 SDK 패치에 섞어 바꾸지 않았다.
+
+mobile-doctor의 continue-on-error가 제거됐고 aggregate requiredChecks에 mobile-doctor가 추가됐다. apps/mobile에서 expo-doctor1.20.2에 실제 PWD를 전달한다. 기존 exclude 배열을 늘려 SDK 검사를 우회하지 않았다. check-mobile-styling의 exact SDK4 값도 함께 갱신됐고 직접 styling guard는 exit0이다. 실제 doctor20/20과 각 export를 아래 CI에서 확인했으므로 이전19/20 조건은 이번 입력에서 충족됐다.
+
+C11 seven tgz/3원장 경로는328→528 Git diff0이다. canonical C11 각 SRI와 source vendor를 대조하고 실제 modules7종297파일 member bytes도 모두 MATCH했다(tokens25/UI94/CSS19/core25/RN34/web85/Scope15). lock의7개 managed copy도 exact version/SRI로 일치한다. Scope 실제 fix.2, CSS 실제 fix.4이며 stock 기준을 움직이는 commonRoot에서 얻지 않았다. 공통 web/mobile code55 guard2개도 C11 canonical·policy와 KT_REQUIRE_CANONICAL=1로 직접 실행해 exit0이다.
+
+main476에서 들어온5개 경로는 최종528/cad9/이전 synthetic2ce의 blob이 같음을 독립 확인했다. TripMapView는328의 기존 변경 위에 main의 collapseIncidents를 병합한 blob이며 main 원문과 완전히 같다고 단정하지 않았다.
+
+실제 product delta도 읽었다. 교통 돌발 목록을 여행 지도에서 기본 접고, native button의 aria-expanded/실제 펼친 list id 연결과 최소44px 높이를 유지한다. 결과0/레이어 끔 때 expanded를 되돌리고 동일5경로의 기능 검사도 유지·보강됐다. 기존 marker 요청1회·순서·정렬 검사를 지우지 않았고, 목록 펼침은 사용자 동작 뒤 검사한다. 새로운 앱 Tab trap이나 공통 UI fork는 없다.
+
+## 기존 focus finding과 직접 회귀
+
+A-CONS-P2-04는 FIXED 유지다. 기존 public Dialog 구현과 panel Shift+Tab 검사, Scope2 C11 bytes가 이번 delta에서 바뀌지 않았다. 직접 exact528 snapshot에서 publicDialog25 + TransportLayerControls10 + adminDialogFocus2 + mockedNetwork4 =41PASS/exit0을 확인했다. 새 교통4개와 기존 modal 경계·fieldset/첫 legend·busy·복원도 포함한다. 전체 브라우저를 이41개로 대체했다고 주장하지 않는다.
+
+추가 CI trigger product 검사4개도 직접 PASS했다. 실제 tracked source에 없는 apps/mobile/vendor 경로를 제거하고 실제 공유 apps/web/vendor 및 provenance 파일을 PR/push/aggregate에서 검사하는 것을 확인했다. 이 검사는 product source/test를 약화해 통과시킨 것이 아니다. 다른 reviewer finding의 종결을 대신 선언하지 않는다.
+
+최초 coverage 실행은 제 snapshot에 .env.example/ETL yaml/contracts/admin_etl 소스를 빼서1FAIL3PASS였다. 해당 exact Git 입력을 자기 snapshot에 추가한 최종4PASS만 제품 판정 근거로 사용한다. 초기 실패 로그도 보존했다.
+
+## 실제 CI와 checkout 정합
+
+직접 fetch_commit_workflow_runs API에서 exact528의 web43092723730/mobile43092723789/API43092723758/ETL43092723780/중앙43092724381이 모두 SUCCESS임을 확인했다. web·mobile·중앙은 job/step 상태도 직접 조회했다. Aggregate CI와 PR Review Reminder는 SKIPPED이며 PASS에 넣지 않는다.
+
+default CI checkout77afd9a8c966199065de17b7694ffc0a0619b82b의 full tree가528의05dfdc…와 정확히 같음을 local Git object로 독립 확인했다. 예전328 vs2ce의 서로 다른 tree를 이 새 동등성으로 덮어쓰지 않는다.
+
+| 범위 | 실제 CI 관찰 |
+|---|---|
+| web unit/build130773649768 |531PASS, core138, markers24; Doctor0·type/lint/build 성공|
+| web e2e130773649474 |209PASS/기존4SKIP; canvas3·restore2 각각PASS|
+| web image130773649724 |실제528 OCI/유일ENV 일치·변조 label 거절·HTTP200|
+| API130773649456 |2259PASS/9SKIP; 전체 workflow SUCCESS, 별도 staleness skip을 pass로 세지 않음|
+| mobile doctor130773650612 |필수20/20 SUCCESS|
+| mobile130773651192/130773651155 |ReactDoctor0·type·lint SUCCESS|
+| mobile export130773651341 |Web SSR/Android/iOS export, 375/1280 CSS/font/input/error smoke PASS|
+| mobile macOS130773651042 |bundled patched WASM iOS export SUCCESS|
+| central130773652134/130773652658 |web/mobile 둘 다 SUCCESS|
+
+raw9job의 전달 SHA256을 직접 재계산하고 결과·checkout·font HTTP200 등 실제 본문을 읽었다. export job은 connector로 원문 다운로드도 성공했다. image/doctor/wasm 로그 다운로드는 ReadTimeout이었고 image 재시도도 같았다. 그래서 fresh 다운로드 성공이라고 쓰지 않는다. 이 항목들은 직접 API의 실제 job/step SUCCESS와 checksum 검증된 raw 원문으로 확인했다. 특히 image source/OCI/ENV/negative 단계는 source 및 로컬 경계 재현과 함께 확인했다.
+
+375/1280 값과 Pretendard font/validation assertion은 실제 실행 script에서도 확인했다. 이는 웹 smoke이며 Android/iOS 실제 장치 실행이나 EAS 배포가 아니다.
+
+## 명령·evidence·제한
+
+evidence: root/review-A-consumers-528-followup-evidence. observations-start/end.json(22blob·9log hash), source.patch, provenance-six.log, own-adversarial.json(CLI10+source shell2), identity-and-guards.json, lock-and-merge-proof.json, web-focused.log, ci-trigger-coverage[-complete].log, ci-direct-api.json, ci-raw-evidence.json을 보존했다.
+
+주요 직접 명령은 git diff/show/archive/ls-tree/rev-parse, python3 -m unittest discover -s scripts/tests -p test_web_image_provenance.py -v, 독립 checker CLI/실제 source shell, 기존 pytest의 test_ci_trigger_coverage.py4개, node vitest/vitest.mjs run(private config/자기 cache·maxWorkers2), 기존 code55 guard·styling/lock 검사다. 기존 modules만 read-only로 참조했고 install·새 Docker build·브라우저·production Docker/HTTP·source 수정은 하지 않았다. heavy build/browser 신규 실행은 NOT_RUN이며 실제 hosted CI 증거와 구분했다.
+
+SDK589의 effective UI environment 수정은 별도 input2 대기 범위다. 이 Pinvi 입력으로 Manager source1 판정이나 새 SDK 환경 수정 수용을 바꾸지 않는다.
+
+**최종 PASS. A-CONS-P2-05 FIXED, A-CONS-P2-04 FIXED 유지, SDK4 후속 조건 충족, 신규0/본인 범위 OPEN0.** 이후 merge/docs/source가 움직이면 그 delta는 새 불변 입력으로만 판단한다.

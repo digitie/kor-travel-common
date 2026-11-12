@@ -1,0 +1,81 @@
+# 원 reviewer A — C11 소비자 batch2 독립 리뷰
+
+runid: Mill-A-Consumers-C11-Batch2-20261111. 분야: frontend/accessibility·도메인 회귀. 구현 비참여·read-only. 시작 UTC 2026-11-11T19:43:19Z, 직접 검증 종료 2026-11-11T19:48:56Z. 상대 raw/verdict·중첩 리뷰 원문 미열람. 과거 raw·manifest·공통/Scope 배포물 보존.
+
+**Concierge76 PASS. Pinvi328 CONDITIONAL: 기존 A-CONS-P2-04 FIXED, 새 A-CONS-P2-05 OPEN 및 별도 모바일 SDK 패치 후속 필요.** C11 source/package 통합 자체는 양쪽 PASS. 신규 P0=0/P1=0/P2=1/P3=0. 실제 배포·운영 mutation은 수행하지 않았다.
+
+## 불변 입력과 관찰
+
+- review-manifest-consumers-c11-batch-2.json SHA256 bcf2aff18fb8a82b1e89753ca68185a378ad26849058ec977323e1db6414160b 시작/종료 일치.
+- Pinvi exact 328c7b634e34d56a1be4067b222e87ed3ae0ebf5, tree 38a13288fc353433e420f734cc1c2562548b8472. 원 소비자 입력 ada425db9deead43a9416d6c761c3fffadd974c1부터 전체19파일 delta 확인.
+- Concierge exact 76beb95c483b9bdc7196a4d64d7fc952f4bdbc11, tree 8113e9d4e4c4300f20c622126d52cc235cd4a281. 원 bcfc→본인 수정확인50e707ba45fdf539dec0aacf13a81045de591fd4→76 경로를 확인. 50→76의14파일은 metadata/vendor/docs이며 frontend/src diff0.
+- C11 canonical artifacts/integration-11-review/common-artifacts.json SHA256 be0bbaba1b825b33754cdbe4352168265d1ccb71467a1031aa095707b0b5eec8. released common e8ed3ae75000be5cd22a3a11492bd97660635d78; producer a35481349d6747b4f13b958ae64d9c0bbd0b5413; reusable checker code55a921b55d248106cbe320e7f5305f3d3cdb60fe. 본인의 Common7·Scope2 PASS는 별도 원문 그대로 유지한다.
+- shared Pinvi는 시작 때 cad9e6b6a9d1c8c79b8ed70a522661c996965201 및 모바일/workflow WIP dirty였다. 그 파일은 감사 입력으로 사용하지 않았다. Concierge shared76 clean. 종료 관찰도 evidence/end-observations.json에 저장했다.
+- Git archive/show로 /tmp/review-A-consumers-c11-batch2에 필요한 입력만 격리했다. 대형 install·브라우저·빌드·재포장 없이 기존 modules를 읽기 참조했다. private config/cache/공격 fixture만 자기 tmp에 생성했다.
+
+## 공통 배포물·의존 경로 직접 확인
+
+Pinvi root/web/mobile ledgers의 sources와7종 version/SRI가 C11 정본과 일치한다. root override와 직접 runtime Focus Scope 의존성이 fix.2 file 경로를 가리키며, root lock의 도달 Scope copy는 fix.2/SRI이다. UI/tokens의 같은 버전 신규 bytes도 lock/SRI에 반영됐다. 모바일 앱 manifest의 DOM UI dependency는 추가되지 않았다. 모바일 ledger가7종 정보를 보유하고 root web modules가 보인다는 사실을 모바일 UI runtime 채택으로 해석하지 않았다.
+
+Concierge 실제 사용하는6종 파일과 ledger/manifest/lock/root override가 C11 정본과 일치한다. RN 항목은 ledger에만 있으며 앱의 실제 RN dependency가 아니다. package.json의 user-event/jsdom 위치 이동은 값 변경이 아니다.
+
+직접 Node code55 guard를 KT_REQUIRE_CANONICAL=1, 별도 C11 정책·canonical로 web/mobile/Concierge 3표면에서 실행하여 전부 exit0. Pinvi는 원 admin guard 외에 전체 app/components/lib source 경로로 확장 검사해 exit0. 앱의 check-common-ui 두 개도 exit0이다. 코드 pin55와 최신 중앙 정책e8ed를 구분해 확인했다.
+
+실제 로컬 node_modules의 archive member bytes도 대조했다.
+
+| 앱 | 실제 대조 | 결과 |
+|---|---|---|
+| Pinvi root/web에서 도달한7종 | tokens25/UI94/CSS19/core25/RN34/web85/Scope15 =297파일 | 전부 MATCH |
+| Concierge6종 | 위에서 RN34 제외 =263파일 | 전부 MATCH |
+
+Scope는 실제 1.3.1+kortravel.fix.2, CSS는 1.33.0+nativecss.fix.4였다. commonRoot를 stock 기준으로 쓰지 않았다. 첫 identity driver는 package.json exports 비공개 패키지를 resolve하지 못하고 file 필드 없는 Concierge ledger를 건너뛰었다. 이를 실제 npm 탐색 경로/filename 및 archive SRI 검증으로 수정했으며 처음 출력은 identity-first-driver.json에 남겼다. 제품 실패로 집계하지 않았다.
+
+## 기존 finding disposition
+
+### A-CONS-P2-04 — FIXED
+
+원래 Pinvi 초기 dialog panel에 포커스한 채 Shift+Tab하면 마지막 control로 이동하지 않던 동작이다. apps/web/tests/publicDialog.test.tsx:171의 원 검사와 expected last focus는 그대로 보존됐고 fieldset 검사2개만 추가됐다. Dialog 앱 구현·public/admin source는 ada→328에서 변경0이다. 앱 자체 Tab trap/테스트 완화로 우회하지 않고 공통 Scope2를 실제 교체했다.
+
+직접 exact328의 publicDialog25 + adminDialogFocus2 + mockedNetwork4 =31개를 실행하여 전부 PASS/exit0. 원 패널 역방향 Tab·첫/끝 경계·busy·닫기/복원·중첩 모달을 포함하며 새 disabled fieldset 및 첫 legend 활성 예외도 PASS했다. publicDialog test SHA256 4c19b2baef246a993fd306ec8b89196a125e03ae681ba6b6f35cbca8198bd5fb이다. 원 stock 실패와 원 Scope2 packed browser20 PASS 기록도 보존한다.
+
+이번 로컬 전체 Next/browser 재실행은 NOT_RUN(호스트 slot·공간 제한). 실제 source328 웹 CI의209/4skip·canvas3·restore2를 직접 API/log로 확인했다. 예전 composite30초 실패를 이 기록으로 지우지 않는다.
+
+### A-CONS-P2-01 — FIXED 유지
+
+Concierge CandidateSelectionHeader module identity, meta의 최신 선택 상태, 안정된 CandidateCell을 반환하는 common renderCell 경로가 본인 확인50과76에서 동일하다. source/test blob 변경0. C11 실제 modules로 CandidateTable 두 검사(헤더/행 checkbox Space 선택·해제의 같은 DOM·focus)를 직접 재실행하여2PASS/exit0. 본인의 이전 old2FAIL→fixed2PASS·실제 Chromium4 focus 결과는 별도 원문에 그대로 보존한다. 이번 실제 CI396단위·브라우저10 결과도 확인했다.
+
+## Pinvi mock 종료 오류 delta에 대한 공격
+
+apps/web/e2e/mocked-network.ts:84-96의 새 예외는 closing 상태, route.fetch ECONNRESET 접두사, GET, 동일 app origin, next-router-prefetch=1와 rsc=1 모두를 요구한다. 원 terminal-disposed 처리와 실외 네트워크 fence를 유지했다. 실행 중 실패를 무조건 삼키는 catch로 바뀌지 않았다.
+
+제품4검사(허용1/거절3) PASS 외에 독립11개를 추가 실행했다: 허용1, 실행 중·POST·HEAD·RSC 누락·prefetch 누락·값0·다른 socket 오류는 실패 유지7, 외부 origin/로컬 image proxy/Grafana health는 fetch 없이 abort 및 verify 실패 유지3. 모두 PASS/exit0. 이는11개 전부 요청 성공이 아니라 지정한 거절까지 확인한 결과다. fixture code와 log를 evidence에 보존했다. 처음 PS/bash quoting 혼용 실행은 driver SyntaxError라 테스트0으로 별도 구분하고 수정 후만 집계한다.
+
+## 신규 finding — A-CONS-P2-05 OPEN
+
+**P2 · Pinvi CI 이미지가 실제 checkout과 다른 source revision을 선언한다.**
+
+- 위치: .github/workflows/web.yml:124. checkout은 같은 파일:118에서 PR head를 선택한다. Dockerfile apps/web/Dockerfile의 org.opencontainers.image.revision label과 PINVI_SOURCE_REVISION ENV가 이 build arg를 사용한다.
+- 재현/실측: run43086032334 job130750539081은 checkout328c7b634e34d56a1be4067b222e87ed3ae0ebf5를 수행했지만 docker build의 PINVI_SOURCE_REVISION은 GITHUB_SHA인2ce8198cf23c757cdc552aaefa50dad1893c4548이었다. 실제 Docker log의 validate-image-provenance 단계가 production/2ce8198…로 실행되고 이미지가 HTTP200으로 부팅한다.
+- 두 source는 동등하지 않다. GitHub compare328→2ce8198은 ahead2, 변경5파일: TransportLayerControls.tsx, TripMapView.tsx, nearby live spec, trip-detail.e2e.ts, TransportLayerControls.test.tsx. 따라서 단순 같은 tree를 다르게 표기한 경우도 아니다.
+- 최소 추가 실행: exact328 validate-image-provenance.sh에 production/328 및 production/2ce를 각각 전달하면 둘 다 exit0. 현재 검사는40자리 SHA 형식만 보증하며 checkout 동등성을 확인하지 않는다. evidence/image-provenance-repro.json 및 ci-direct.json에 원 로그/대조 근거.
+- 영향: CI 이미지의 OCI provenance/환경값이 실제 포함 소스와 달라, exact SHA 기반 추적·재현·이미지 수용 증거가 잘못된다. 이번 이미지의 build/boot 성공 자체는 유효하고 production push/배포를 했다는 뜻은 아니다. PR CI 로컬 이미지의 잘못된 식별 문제이며 실제 운영 이미지가 잘못 배포됐다고 확대하지 않는다.
+- 수정 권고: 실제 git rev-parse HEAD를 단일 source revision으로 얻어 build arg에 전달하고, 예상 PR head와 같음을 확인한다. 빌드 후 실제 image의 OCI revision/ENV도 checkout 값과 대조하며 불일치 음성 검사를 추가한다. CI tag는 식별 목적으로 별도 유지해도 되지만 revision label은 실제 소스여야 한다.
+- 이 workflow 줄은 ada→328 delta에서 새로 바뀐 줄이 아닌 상속된 결함이다. 이번 exact328 CI 증거 감사로 실제 불일치를 처음 확정했으므로 신규 finding으로 기록한다. 수정·본인 재확인 전 OPEN. 코드는 수정하지 않았다.
+
+## 직접 확인한 CI와 checkout 경계
+
+- Pinvi web43086032334: unit/build job130750538823, e2e130750538521, Docker130750539081 모두 SUCCESS. 세 job log가 모두 exact328 checkout을 명시한다. 단위 web527/core138/markers24, 실제 browser209PASS+4skip(2.8분), canvas3(30.6초), restore2(31.1초). Doctor/type/lint/build 성공. Docker build/HTTP200 부팅은 성공하나 위 provenance finding은 별도 OPEN.
+- Pinvi 중앙43086033577 web130750535718/mobile130750536486 둘 다 SUCCESS. source328/code55/actual policy e8ed 로그 확인.
+- Pinvi mobile43086032337: lint/typecheck/ReactDoctor·web/android/ios export+web smoke/macOS WASM export jobs SUCCESS. ExpoDoctor informational130750531998는 실제 FAILURE/exit1,19/20이다. expected/found: expo58.0.24/58.0.23, constants58.0.16/58.0.15, linking58.0.17/58.0.16, router58.0.31/58.0.30. 이4패치 후속은 현재 manifest 밖이며 통과로 변경하지 않는다.
+- 위 모바일 CI는 synthetic2ce8198 checkout이다.328과 full tree는 같지 않으며 변경은 앞서 든 웹5파일이다. mobile/shared packages/root lock/vendor 입력에는 그 차이가 없지만 이를328 전체 tree 실행이라고 부르지 않는다. 실제 단말/EAS는 NOT_RUN.
+- Concierge frontend43087186838 job130754531679 SUCCESS:396단위, Doctor/type/lint/build 및 actual commonUI10 PASS52.0초. checkout은 synthetic2be88950b8e8f50f39b5031b33f43a284c66ce99이고 GitHub compare76→synthetic은 ahead1/files0으로 동등 tree를 독립 확인했다. 중앙43087187283/130754533349는 exact76/code55/actual policye8ed로 SUCCESS.
+
+직접 로컬 실행과 CI 로그 관찰을 섞어 집계하지 않았다. 브라우저10/209·Docker·모바일 export는 reviewer 신규 실행이 아니라 원격 실제 job/log를 본 결과다.
+
+## 명령·evidence·한계
+
+주요 명령: git show/ls-tree/archive/diff base head, Node code55 --package/--lock/--workspace/--artifacts/--policy/--canonical/--profile/--source(KT_REQUIRE_CANONICAL=1), archive SHA512/member bytes 비교, node vitest/vitest.mjs run --config review-A.config.mts --maxWorkers=1 또는2, sh validate-image-provenance.sh production SHA. 정확 guard argv는 identity-and-guards.json, 실제 테스트는 pinvi-focused.log/pinvi-network-attacks.log/concierge-focus.log에 있다. GitHub API fetch_workflow_run_jobs/fetch_workflow_job_logs/compare_commits의 직접 관찰은 ci-direct.json에 저장했다.
+
+모든 evidence는 root/review-A-consumers-c11-batch-2-evidence 아래에 저장했다. input/end observations, source patches, additional guards, 독립 attack source, image-provenance repro를 포함한다. 설치는 기존 modules read-only 참조이며 초기 driver 진단을 제품 실패로 오인하지 않았다. 움직이는 Pinvi 모바일 patch WIP는 이번 감사 대상이 아니다. 추가 SDK/workflow source가 오면 새 manifest로만 재검토한다.
+
+**최종: Concierge76 PASS. Pinvi328의 C11 통합/기존 포커스 finding FIXED, source 수용은 CONDITIONAL(A-CONS-P2-05 OPEN + 모바일4패치 후속).** 전체7앱 배포 PASS로 확대하지 않는다.

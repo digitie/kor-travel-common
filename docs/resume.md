@@ -1,5 +1,37 @@
 # 현재 작업 재개
 
+## 2026-11-12 — Transport Geo형 메뉴·지도 운영 수용 후 최종 문서 출판
+
+현재 실제 수용 앱은 Manager·Concierge·Pinvi·Weather·Geo·Transport 6개다. Transport 최신 PR186의 mergef30/image0ac은 공식 SDK508 관리자 단독 교체와 첫 정상 세션9개를 통과했다. PC 왼쪽256px 세로 메뉴·모바일 왼쪽296px 드로어, 실제 PNG decode2+2·zoom7→8·9폭/11행·Pretendard·로그아웃 후 보호401을 확인했다. [최종 정산](reviews/adversarial/2026-11-12-consumer-sdk-final.md#최종-운영-수용-6개-정산)과 [배포 영수증](reviews/adversarial/evidence/2026-11-12-frontend-deployment-receipt.json)이 현재 근거이며 이전184/185 실패는 원문 그대로 보존한다.
+
+다음 작업은 이 사실 delta의 동일 원 A/B 독립 검토·정확 CI·Common PR50 마감, 이어 Geo의 단일 MD 최종 PR 마감이다. 이후 Transport 남은 PR·빌드 체계를 Map 수준으로 정리하고 전체 프로젝트 빌드·CI·테스트를 일관화한다. CI 실행 순서 최적화는 가장 마지막에 한다. T-218은 IN_PROGRESS다. 시작 파일은 [최종 정산](reviews/adversarial/2026-11-12-consumer-sdk-final.md)이며 문서 검증4종을 실행한다. 원2리뷰·정확 CI가 미완료면 출판하지 않는다.
+
+Map 추가 소스·빌드·이미지·배포는 사용자/Claude 별도 범위다. native 실기기/EAS/스토어는 NOT_RUN이다. C11 UI0.2.0/tokens0.1.1과 기존 산출물은 재발행하지 않는다. toolchain 차이와 실제 ARM 영수증 필드 차이는 후속 일관화에서 조치한다.
+
+이하 이전47a 시점 재개 스냅샷:
+
+## 2026-11-12 — 소비자 7개 주 이관 머지·운영 6개 수용
+
+공통·원본 라이브러리 5개와 앱 7개의 주 이관 PR을 모두 머지했고 fetched main의 전체 tree를 최종 검토 입력과 대조했다. [소비자·SDK 검토 기록](reviews/adversarial/2026-11-12-consumer-sdk-final.md)에 원문·불변 입력·SHA256을 보존한다. 이전 BLOCK과 미실행 상태는 당시 기록으로 유지한다.
+
+현재 실제 배포와 정상 계정 수용까지 확인한 앱은 Manager·Concierge·Pinvi·Weather·Geo·Transport 6개다. Concierge는 merged f2db의 새 이미지와 공통263개 파일, 실제 로그인·표·폼·모바일·Pretendard·VWorld34응답200·로그아웃·보호 API401을 확인했다. Pinvi 공식 paired rebuild는 merged dd3b를 committed했고 DB·보존 Map pin·실제 이미지297개 파일을 확인했다. 실제 로그인200·VirtualTable·모바일375/1280·Pretendard·VWorld15응답200·로그아웃204·보호/이전쿠키 API401과 cleanup도 통과했다.
+
+Geo ARM64 이미지 빌드는 exit0으로 끝났다. Weather는 공식 SDK590 경로의 새 이미지·current·기존 환경 보존과 실제 로그인·표·모바일·Pretendard·타일40개200·로그아웃 수용을 마쳤다. Geo도 공식 dry-run/confirm/current/verify0·새 image82c7·공통263개 파일과 실제 로그인/표37행/검색/모바일/폰트/주소 검색/지도9응답200/logout/보호401을 확인했다. Transport는 공개936/image3262의 단계별13개 수용에 이어 최종 관리자47a/image3f207의 공식 SDK508 단독 교체와 단일 정상 세션9개 수용을 완료했다. 실제 PNG36개·bitmap decode2+2·zoom7→8, 7개 폭/9행·메뉴·실제 Pretendard·로그아웃303→보호401을 확인했다. 원본37개 운영·13개 QA와 이전6b75 실패는 [배포 정산](reviews/adversarial/evidence/2026-11-12-frontend-deployment-receipt.json)에 별도 연결한다. Manager UI candidate589와 Mounts 순서 오탐590은 두 독립 SOURCE PASS·정확 CI 후 머지했다. source 검토·SDK 설치·실제 앱 수용을 구분한다. 다음은 이 사실 delta의 원 A/B bounded facts3 검토·정확 CI·PR50 출판이며 toolchain·build ecosystem·CI_LAST 후속은 별도다. T-218은 IN_PROGRESS를 유지한다. 모바일 Expo SDK58 네 패치와 필수 Expo Doctor는 [필수 라이브러리](standards/frontend-libraries.md)에 추가했고 C11 산출물 bytes는 유지한다.
+
+Map의 추가 빌드·배포는 최신 사용자 지시로 Claude의 별도 작업에 맡긴다. 이미 머지한 Map1496은 보존하고 이 작업에서는 Map 소스·이미지·current·pin을 더 바꾸지 않는다.
+
+이하 시점별 스냅샷:
+
+## 2026-11-12 — Common49와 FocusScope2 원본 머지·최종 독립 증거
+
+- Common exact2d4579b의 원 A/B COMMON7은 모두 PASS·신규0이며 Doctor finding은 각 원 리뷰어가 FIXED를 확인했다. 정확 frontend/docs/packages/selftest/Python workflow가 모두 성공했다. 실제 C11 packed browser65·두 builder 및 UI/tokens 전체 SRI 일치를 확인했다.
+- Common PR49 mergee8ed3ae, Scope PR1 merge408bb40을 fetch해 reviewed source/delivery와 각각 전체 tree 동일을 검증했다. UI0.2.0/tokens0.1.1은 이제 출시 산출물이므로 같은 버전의 다른 bytes 재발행을 금지한다.
+- Scope source1752/delivery01e의 원 A/B input2도 모두 PASS·신규0이다. source38·Storybook17, actual packed17, 원 A actual browser20 및 원 B CJS/ESM38 각각의 범위를 구분한다. Build·집중 regression·SSR·Chromatic 모두 SUCCESS다.
+- 원문·불변 입력을 byte 동일하게 보존하고 각각 SHA256 receipt를 추가했다. 이전 Common6 Doctor BLOCK/CONDITIONAL·Scope1 fieldset CONDITIONAL은 역사 그대로 유지한다. Geo43/Concierge50/Mapf55의 원 A source finding도 후속 직접 검증으로 FIXED다.
+- 앱별 C11 최종 브라우저·CI·새 Manager 공식 candidate SDK 원 A/B 검토·각 앱 PR 머지·merged SHA 이미지와 실제 화면 수용은 계속 진행 중이다. 운영 신규 배포는 아직0건이다.
+
+이하 당시 스냅샷과 이전 이력:
+
 2026-11-12: [T-218](tasks/T-218-radix-library-unification.md)을 계속 진행한다. C10/2d의 일반 정책175·UI101·tokens9·도구400(399 PASS/1 SKIP)과 packed browser 증거를 보존했다. 원 A/B가 required Doctor의 반복 includes3경고를 지적해5715e94의 사전 Set/Map으로 수정했다. 같은80파일3 warning/exit1→0/exit0, prepare41/실제3lock 경로 PASS이며 원 A/B bounded closure와 새 exact CI는 후속이다.
 
 원 Scope1/f97의 plain9 실제 packed browser는 원 A/B가 확인했지만 A-SCOPE-P2-01 disabled-fieldset 잔여를 정식 연기하지 않고 fix.2로 수정했다. 새 preferred source1752a53·고유1.3.1+kortravel.fix.2·33,511bytes·SHA2561ca0487·SRIv3Xwe를 동결한다. MIT/src/provenance/전체 dist hash와 Node22 실제 NPM 버전/ESM/CJS를 확인했고 원본38 PASS다. fix1과C10은 보존하며2차 source/packed browser·두 리뷰·fork CI와 실제 앱 수용은 별도 gate다. C11은 producera354813에서 새 engine2와 UI/tokens policy 버전만 갱신하여 한 번 pack했다. 정책175/UI101/tokens9/Doctor80파일0/도구400(399 PASS·1 SKIP), scanner1380발견0·정확예외32/4, 문서831/링크3152오류0을 확인했다. UI/tokens 자체 실행/CSS·checker는 C10과 같지만 외부 엔진은 변경되므로 최종 새 modal 검증이 필요하다.

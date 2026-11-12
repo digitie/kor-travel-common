@@ -1,0 +1,78 @@
+# 원 리뷰어 B — Pinvi528 불변 후속 검토
+
+- 원 B / Epicurus: packaging/platform/security/release/CI. 구현 참여·peer raw/verdict 열람 없음.
+- runid Epicurus-B-pinvi528-20261111T205324Z. 정확 시작·종료 UTC는 evidence/session.json 및 completion.json에 기록했다.
+- 입력 consumer-tools/pinvi-final-followup-528d825401df.json SHA256 5bae5368aa3d1427fb7eda6b389d88e384c8d633915848ef65353c3efb962a3e 직접 확인.
+- head 528d825401dff3fe5e97b2bab238e0b80ac22430 / tree 05dfdc0bf3dcdf6296b8039090d42cde09ff470b / Draft PR732.
+- 기준328c7b634e34d56a1be4067b222e87ed3ae0ebf5. 기존 batch2 manifest bcf2aff18fb8a82b1e89753ca68185a378ad26849058ec977323e1db6414160b와 모든 이전 원문 보존.
+- 증거: review-B-consumers-528-followup-evidence/. Git ref/blob으로22개 변경 경로·blob·SHA256 및 전체 diff 집합을 검증했다. moving source를 섞지 않았다.
+
+## Verdict와 자기 disposition
+
+**PASS. 신규 finding 0.** 정확 최종 입력의 소스·공통 패키지·SDK 후속 및 확인한 실제 CI를 수용한다. production 배포나 EAS/device 수용을 수행·승인한 결과는 아니다.
+
+| 자기 지적/조건 | disposition | 직접 근거 |
+| --- | --- | --- |
+| B-CONS-P1-02 dead-trigger 필수 API 실패 | **FIXED** | 원본4 assertion 동일, clean328의1FAIL3PASS → exact528의4PASS, 실제 필수 API SUCCESS |
+| B-CONS-P2-01 초기 panel Shift+Tab | **FIXED 유지** | 원 batch2 본인 직접 closure 보존; Dialog test·mockedNetwork 및 해당 구현 경계 이번 delta 변경 없음; 새 전체 웹 CI 성공 |
+| SDK4/ExpoDoctor19/20 후속 조건 | **CLOSED** | exact 선언·lock·실제 버전, 필수Doctor20/20·ReactDoctor0·3export·smoke·macOSWASM 성공 |
+
+옛328의 BLOCK/advisory 및 당시 synthetic tree 불일치 판정을 소급 변경하지 않는다. 본인 finding만 disposition한다.
+
+## B-CONS-P1-02 원본 재현
+
+web.yml PR/push의 obsolete apps/mobile/vendor/** 두 항목을 삭제했다. 실제 shared vendor는 기존 apps/web/**가 덮는다. aggregate의 같은 obsolete 접두 항목도 제거했고 새 provenance 검사2개 입력을 web PR/push/aggregate에 대칭 추가했다. 가짜 vendor·skip·assertion 완화 없음.
+
+원본 apps/api/tests/unit/test_ci_trigger_coverage.py가328/528 byte 동일함을 확인했다. Git tracked 경로만 있는 메타데이터 fixture에 실제 workflow5개·Dockerfile3개·원본 제품 test를 채웠다. PR/push 대칭, aggregate 계약, 실제 COPY 입력 coverage, dead path 거부의 동일4개 함수를 실행했다.
+
+328은 정확히 원 지적의 web PR/push 두 dead path로1FAIL3PASS, 528은4PASS였다. 양쪽 apps/mobile/vendor는 존재하지 않는다. 비소비 파일은 빈 메타데이터 파일이며 source 실행·빌드로 과장하지 않았다. 재현은 reproduce.py / trigger-red-green.json에 보존했다.
+
+실제 API run43092723758/job130773649456은 직접 jobs API SUCCESS. 해시 확인 원문에서 exact528 checkout과2259PASS9SKIP6warnings를 독립 추출했다. 옛328의1FAIL2258PASS9SKIP와 일치하는 red→green이다. migration/wheel 후속 step도 SUCCESS이며 옛 실패 당시 skip을 소급 성공으로 바꾸지 않았다.
+
+## SDK·실제 패키지·incoming main
+
+직접 SDK exact는 expo58.0.24, constants58.0.16, linking58.0.17, router58.0.31이다. root expo/router·mobile4개 선언·lock·실제 설치 package.json4개 및 전달 registry proof의 SRI가 일치한다.
+
+lock 변화는4개만이 아니다. 전이·hoist·추가/제거를 포함한35개 version 경로를 before/after에서 재계산해 manifest 전체 목록과 대조했다. expo-modules-core/CLI/macros/env/router-server 및 react-native-gesture-handler 변화도 포함한다. 변경 entry의 registry/file resolved와 SHA512를 확인했다. 새 runtime 수용을 공통117파일 동일성만으로 갈음하지 않고 새 mobile 실제 CI를 사용했다.
+
+Root override, 공통7종 lock entry, Root/Web/Mobile 원장3개는328→528 byte 동일하다. Git vendor7개는328/528/canonical integration11 전체 byte 및 재계산 SHA512가 일치한다. 실제 설치297파일도 canonical tar member와 모두 같았다. root React 물리 lock 항목은19.3.1 하나다. 공통 packet 재발행이나 native 공통 축 변경 없음.
+
+check-mobile-styling.mjs는 새 SDK4 exact를 전부 검사한다. 본인 exact source fixture에서 정상1PASS,4개 선언 및4개 lock 해석을 각각 옛 값으로 바꾼8공격 모두 exit1. 기존 Tailwind/interop/CSS/디자인 토큰 검사를 유지한다. mobile-doctor의 informational/continue-on-error를 제거하고 physical mobile 디렉터리 $PWD를 명시했으며 aggregate requiredChecks에 추가했다.
+
+Main476의5개 파일은 최종528/cad9/이전synthetic2ce의 해당 blob이 동일하다. TripMapView는 기존 common 소스 위에 props가 합쳐진 결과라 전부 main 원문과 동일하다고 주장하지 않는다. transport 기본 동작을 유지하고 여행 화면에서만 목록 명시 펼침을 추가한다. type=button/aria-expanded/controls id/state reset/조건 없는 hook 순서·기존 import 경계를 확인했다. 테스트는 목록 기본 접힘·핀 비겹침·클릭 가능·명시 펼침을 강화하며 skip/timeout 완화 없음. 새531unit 및 실제 browser CI를 확인했다.
+
+## 이미지 provenance
+
+실제 git HEAD commit과 PR head/push SHA 동등성을 먼저 검사한 output 하나를 build argument/tag/boot에 쓴다. 실제 inspect의 OCI revision과 중복 없는 단일 PINVI_SOURCE_REVISION ENV가 checkout과 같아야 한다. 빌드 metadata의 다른 유효40hex label 대조군은 실패해야 한다.
+
+본인 제품 unittest6PASS. 추가 CLI는 정상1 및 empty/nonobject/malformed labels/비문자ENV/같은ENV중복/ENV누락/잘못된 expected/대문자 expected8개 거부를 직접 확인했다. shell source값은 env로 전달하며 형식 검사만으로 source 동등성을 대신하지 않았다. 운영 Docker 호출 없음.
+
+## 실제 CI와 증거의 경계
+
+GitHub commit runs 및 web/API/mobile/central jobs API를 직접 조회했다. ETL SUCCESS는 runs API 관찰이다. default checkout77afd9a8c966199065de17b7694ffc0a0619b82b는 local tree가05dfdc0으로528과 동일하고 GitHub compare도 files0이다. 옛328/2ce와 달리 이번 전체 tree 동등성을 직접 입증했다.
+
+connector raw-log4건과 image 재시도1건은 ReadTimeout이었다. 조회 성공으로 표기하지 않는다. 제공된 .git/final-528-ci 원문9개를 receipt SHA256/크기와 대조하고 원문에서 checkout/결과를 직접 추출했다. ANSI 제거는 화면 추출만, hash는 원 bytes다. 직접 API 상태와 전달 원문 읽기는 별도 증거다.
+
+| run / job | 관찰 |
+| --- | --- |
+| web43092723730 / 130773649768 | SUCCESS, exact528,531/core138/markers24·Doctor0·build |
+| web /130773649474 | SUCCESS, exact528,209PASS4oldSKIP/canvas3/restore2 |
+| web /130773649724 | SUCCESS, exact528,provenance6·실제OCI/uniqueENV일치·다른40label거부·bootHTTP200 |
+| API43092723758 /130773649456 | SUCCESS,exact528,2259PASS9SKIP·migration/wheel; integration4·provenance·pin consistency도 API SUCCESS |
+| mobile43092723789 /130773650612 | SUCCESS,동일tree77afd,필수Doctor20/20 |
+| mobile /130773651192,130773651155 | SUCCESS,ReactDoctor0/type/style/guard/lint |
+| mobile /130773651341 | SUCCESS,WebSSR/Android/iOS export·모바일/desktop CSS/폰트/입력/오류 smoke |
+| mobile /130773651042 | SUCCESS,macOS bundledWASM iOS export |
+| central43092724381 /130773652134,130773652658 | SUCCESS,web/mobile canonical guard |
+| ETL43092723780 | SUCCESS,commit runs API |
+
+Aggregate43092723685·review reminder43092723955·API contract-staleness는 SKIPPED다. browser4/API9skip과 함께 PASS 개수에 합산하지 않았다.
+
+## 명령·보존·한계
+
+직접 명령: git show/rev-parse/cat-file/diff, sha256sum, 기존 /tmp/kt-manager-candidate-python/bin/python reproduce.py, node scripts/check-mobile-styling.mjs, python -m unittest discover -s scripts/tests -p test_web_image_provenance.py -v, python scripts/check_web_image_provenance.py --expected-revision <sha> <own-json>. source fixture는 본인 tmp에만 만들었다.
+
+evidence에22blob·원 assertion red→green·스타일8공격·provenance6unit/CLI9probe·lock35/actual297·actual SDK4·GitHub jobs/compare·원문9hash/독립추출·timeout을 구분해 남겼다. 옛 raw SHA를 대조했고 새 manifest hash와 head/tree를 재확인했다.
+
+heavy install/build/browser 재실행·native device/EAS·실제 운영 Docker/DB/API/Dagster 수명주기는 NOT_RUN_B. 본인 tmp만 회수했다. 타인 cache/modules 삭제·source 수정 없음. SDK589 input2는 별도 입력으로 이어서 검토한다.
+

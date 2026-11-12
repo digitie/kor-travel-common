@@ -1,0 +1,45 @@
+{
+  "archive": "2026-11-12-common-final-docs34-originals.tar.gz",
+  "archiveBytes": 13064,
+  "archiveSha256": "6e8b040317e2d03a8163db5547024c4472d5f11604c346e0fa4057b42e024f4b",
+  "members": [
+    {
+      "member": "review-A-common-final-docs-3.md",
+      "bytes": 9276,
+      "sha256": "6dfecdb40bed973af76441ec419802ccfae752618b4aee6520cb9b47e414ffea"
+    },
+    {
+      "member": "review-B-common-final-docs-3.md",
+      "bytes": 9627,
+      "sha256": "0dffe9b17fc8bef6bf945a040067030f8b3985f8f0f7e52cd60416eda46e4b6e"
+    },
+    {
+      "member": "review-A-common-final-docs-4.md",
+      "bytes": 2870,
+      "sha256": "5a490f0a328b116ab022a2d7cabbbbe31f5a748140f728526fd0c7b9a7f8d437"
+    },
+    {
+      "member": "review-B-common-final-docs-4.md",
+      "bytes": 2449,
+      "sha256": "a999864e0f4672505bf3c4fedaff0bae948606089ef0fd58b21598247700aa1f"
+    },
+    {
+      "member": "review-manifest-common-final-docs-3.json",
+      "bytes": 5184,
+      "sha256": "0ae0429c422a3067a6d1d3f01b3d52b5087fcd1d0cfb8b3743c845ad44be9d03"
+    },
+    {
+      "member": "review-manifest-common-final-docs-4.json",
+      "bytes": 4911,
+      "sha256": "ed9d8fea316b3978e30f7cdf3daf2ffcaacf2cf3f2aa4f88a06a3e2f57d5cf77"
+    }
+  ],
+  "verdictBoundary": "이전 docs3/4 원문과 당시 미실행·CI pending을 그대로 보존한다. 이 판정으로 현재 M30 사실 후보를 승인하지 않는다.",
+  "rawOriginalBytesUnchanged": true,
+  "dispositions": {
+    "docs3-A": "BLOCK/P2: 선택 Transport current 갱신까지 모두 보존된 것으로 읽히는 문구",
+    "docs3-B": "PASS/신규0; 뒤에 같은48109 정확CI 성공 관찰을 추가한 원문 그대로",
+    "docs4-A": "자기 P2 FIXED 및 bounded PASS; 기존 docs3 BLOCK 보존",
+    "docs4-B": "bounded PASS/신규0; local4c43 정확CI는 미실행/별도 gate"
+  }
+}

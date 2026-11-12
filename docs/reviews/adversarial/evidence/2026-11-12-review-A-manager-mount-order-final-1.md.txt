@@ -1,0 +1,61 @@
+# Manager Mount 순서 수정 독립 리뷰 A — 입력 1
+
+판정: **SOURCE PASS**. 새 P0/P1/P2/P3 finding 각각 0건. Mounts 열거 순서 오탐은 FIXED, 중복·전체 객체 내용·missing/null 구분과 다른 보호 필드 검사는 보존된다. 운영 설치/apply/Weather 수용 PASS로 확대하지 않는다.
+
+- runid: A-MANAGER-MOUNTS-AC4-20261112-01
+- 시작 UTC: 2026-11-11T22:00:42.084370+00:00
+- 완료 UTC: 2026-11-11T22:08:48.166050+00:00
+- 역할: 원 독립 리뷰어 A/Mill. 구현 비참여, peer raw/verdict 미열람. 제품 source 수정·설치·repack·production mutation 0.
+- 불변 manifest: `review-manifest-manager-mount-order-1.json`, SHA256 `24ce04472e44b587659ede8c81db0cab052132194e873fc889777e47d6454a91` 직접 일치 확인.
+- base: `af413443a34063b38d09d788d5dc3ce211decf8a`; head: `ac4eebb5c931a98c6f1dfa921b840ebf415b4aec`; tree: `77876ecdfc9abf5cf1d2c9818b43146c63153087`.
+- 관찰 worktree `/tmp/codex-manager-mount-order-20261112`: 시작/종료 observed HEAD 모두 exact ac4, porcelain clean. 실제 테스트는 own `/tmp/review-A-manager-mount-order-1` Git archive 격리본에서 기존 venv 읽기 참조로 실행했다.
+
+## 불변 소스와 변경 범위
+
+base..head 전체 diff는 6파일: 제품 1, 신규 테스트 1, 문서 4. 모든 6 Git blob/바이트 SHA256과 manifest artifact digest를 직접 대조했다. 원문 값은 `observations-start.json`, diff는 `delta.patch`에 보존했다. 기존 432개 테스트 8모듈은 base/head blob 동일이다. frontend, config, lock, installer, C11 packet은 변경 목록에 없다. source의 나머지 함수와 Map 공유 escaper·paired callback·current/G/health 검사 변경이 없다.
+
+`backend/src/kor_travel_docker_manager/services/service_release_candidate.py:147–154`: Mounts가 list일 때만 각 **전체 항목**을 `json.dumps(item, sort_keys=True)` key로 `sorted`한다. key는 정렬 순서에만 쓰고 실제 비교값은 원 객체 전체다. 따라서 whitelist에 없는 새 속성과 중첩 내용도 남고, set/dedup이 없어 중복 수가 보존된다. 중첩 배열은 정렬하지 않는다. `("Mounts" in record, mounts)`로 key 부재와 명시 null도 구분한다. Config/HostConfig/Network/Image/StartedAt/Running/RestartCount 비교는 그대로다. sorted는 입력 list를 직접 바꾸지 않으며 `_inventory`는 기존대로 deepcopy한다.
+
+`.../service_release_candidate.py:158–160`, `_apply_current`의 admission/observe_after/healthy/_publish 경계를 함께 읽었다. 새 비교가 dry-run, 실행 전, 적용 후, 발행 직전 모두 같은 guard에 사용된다. 실변경을 성공으로 덮거나 current를 발행하는 우회는 없다.
+
+## 본인 직접 실행
+
+1. **565 PASS / exit 0 / 15.11초**: 원 기존432 + 신규85 + 본인 추가48. 명령 전체·cwd·환경 경계는 `own-test-command.json`, raw 출력은 `own-focused-and-late-attacks.log`.
+2. 본인 추가48은 Map/Geo/Weather 각각 적용 후와 발행 직전에서 8가지 실변경을 주입한다: 중첩 배열 순서, 중복 추가/제거, missing→null/null→missing, Env 순서, Binds 순서, 미지 속성 추가. 모두 success=false 및 current 원본 보존을 확인했다. fake SDK fixture에서만 실행하며 실제 Docker를 접촉하지 않았다.
+3. 별도 own AST 공격: 동일 내용을 갖는 최상위 배열 6개 순열/객체 키 역순 허용; old 함수는 순서만 다른 입력을 거부함을 직접 재현했다. Source/Destination/Type/RW/Mode/Propagation/미지 속성·중첩 배열·중복 수·Env/Binds 순서·Image/StartedAt/Running/RestartCount/Network 17종 변경은 모두 구분한다. missing/null/빈 배열/빈 객체/문자열/nonempty 배열의 30개 방향 쌍도 모두 구분했다. 입력 비변경 확인. `own-projection-attacks.json`.
+4. 격리 exact source와 제품 테스트 전체 Ruff PASS: `own-ruff.log`. 본인 임시 probe 파일만 lint 대상에서 제외했으며 제품 파일/규칙 suppression은 없다. CI에서는 원 전체 lint PASS도 별도 확인했다.
+5. 첫 own 확장 fixture 호출이 동적 fixture parameter를 전달하지 못하여 16개 harness FAIL/533 PASS였다. 제품 실패로 해석하지 않는다. 원본 시도 로그/driver를 보존하고 정적 fixture로 고친 동일 공격48개가 위 최종565개에 포함된다.
+
+실행 골격:
+
+```text
+git -C /tmp/codex-manager-mount-order-20261112 diff af413443a34063b38d09d788d5dc3ce211decf8a ac4eebb5c931a98c6f1dfa921b840ebf415b4aec
+git cat-file / git show / git archive: exact 6 blob 및 격리 소스 대조
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=<own>/backend/src DOCKER_HOST=unix:///tmp/review-A-never-contact-docker.sock
+/tmp/kt-manager-candidate-python/bin/python -B -m pytest -q -p no:cacheprovider --basetemp /tmp/review-A-manager-mount-order-pytest-final <원9모듈> tests/test_review_A_mounts_adversarial.py
+/tmp/kt-manager-candidate-python/bin/python -B -m ruff check --ignore EXE001 --exclude test_review_A_mounts_adversarial.py backend/src backend/tests
+```
+
+## 실제 55개 snapshot 근거와 직접 실행 한계
+
+owner의 불변 `actual-raw-source-replay-result.json` 및 해당 isolated AST driver 해시를 검증하고 소스를 읽었다. 보존 외부 즉시 전후 inspect 55개/비선택54개에서 old projection 차이5 → new0, negative8 거부, 원자료 hash/bytes 불변이라는 실행 receipt다. 새 소스 hash `bbe02f31078c747c9a47199435cbb3f7e93e9c0f8e78cce68b736a29fe60bb51`가 exact Git blob 바이트와 일치한다. 이 자료를 SDK 내부 snapshot이라고 주장하지 않는다.
+
+본인도 같은 private 원자료를 읽는 순수 AST driver를 준비했으나 odroid alias 연결 exit255, n150 경유 시도 25초 timeout으로 **실제55개 재실행은 NOT_RUN_TO_COMPLETION**이다. 이를 본인 직접5→0 실행으로 기재하지 않는다. 원자료·운영값은 저장/출력하지 않았다. 직접 증거는 위 source 및 565회귀/합성 공격이고, 실제55개 결과는 hash 검증된 owner receipt다. 별도 `private-replay-limit.json` 보존. 원자료 접근을 위한 추가 live dry-run이나 설치/apply는 실행하지 않았다.
+
+## 정확 CI 직접 관찰
+
+GitHub API로 head ac4에 연계된 두 workflow 및 job/step 상태와 raw job logs를 직접 내려받아 확인했다(`direct-github-ci.json`).
+
+- CI **43106671432 SUCCESS**: backend job130811682749 **3931 PASS /40 SKIP/1 warning,494.90초**, 전체 Ruff PASS. frontend130811683168 **54 unit PASS**, type/lint/Doctor/build step SUCCESS, **browser2 PASS/9.1초**.
+- 중앙 정책 **43106671905 SUCCESS**, job130811683689 SUCCESS. 실제 중앙 policy revision `e8ed3ae75000be5cd22a3a11492bd97660635d78`, producer/codepin `55a921b55d248106cbe320e7f5305f3d3cdb60fe`를 raw log에서 구분했다.
+- 실제 CI checkout은 head 문자 그대로가 아니라 synthetic PR merge **d4e25bcf3bfa2aa3b67e7a1444fdee11b160cc13**이다. GitHub Git commit API를 직접 조회하여 parents=[af413,ac4], **full tree=77876ecdfc9abf5cf1d2c9818b43146c63153087=head tree** 일치를 확인했다(`ci-synthetic-tree-api.json`). 로컬에 synthetic object가 없었던 첫 확인 실패도 보존했다. 따라서 source payload 동일성에 근거하여 CI 결과를 연결한다.
+
+## 처분 및 범위
+
+- 알려진 Mounts 최상위 열거 순서 오탐: **FIXED**.
+- missing/null 구분 및 중복·미지 속성·중첩 배열·다른 보호 필드: **보존 확인**.
+- 이전 A-MGR-COMP-P2-01 raw-dollar own closure: 기존 input3 FIXED 원문 그대로 보존; 이번 변경이 해당 경로를 수정하지 않음을 확인했다.
+- 새 P0/P1/P2/P3: **0/0/0/0**, 미해결 본인 finding 없음.
+- 이 불변 PR590 source와 관련 회귀·CI 범위는 **PASS**. exact merged trusted SDK 설치, 공식 Weather dry-run 재개 및 실제 UI 배포/수용은 이 리뷰에서 실행하지 않았다. Concierge 완료 수용과도 별도 판정이다.
+
+원 evidence 디렉터리: `review-A-manager-mount-order-final-1-evidence/`. 이전 raw/manifest/실패 로그는 불변 보존한다.

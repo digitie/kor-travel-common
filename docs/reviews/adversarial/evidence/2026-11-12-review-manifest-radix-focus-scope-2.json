@@ -1,0 +1,76 @@
+{
+  "createdAt": "2026-11-11T18:44:10.597967+00:00",
+  "scope": "原A/B Scope2 원본 source·새 고유 patch packet·producer/verification/deliverydelta. 동일불변입력/구현비참여/peerraw미열람. 실제 소비자/C11/common merge gates 별도.",
+  "repository": "/home/digitie/dev/common-unification-20261111/radix-primitives-focus-scope",
+  "upstream": "eb3a2b7091293e27df8f9ba906632d8daa3d81a3",
+  "previousFormalHead": "706e27aaf87bda2df7bbb9da60cc01cebc9ff064",
+  "previousVerificationHead": "cc66292dd12f11bf083173f00d8dab9e9c4541df",
+  "head": "1752a539c8d5ae57961a0fa2702d2573d48fefe7",
+  "artifact": {
+    "sourceRepository": "https://github.com/digitie/radix-primitives",
+    "upstreamRepository": "https://github.com/radix-ui/primitives",
+    "upstreamCommit": "eb3a2b7091293e27df8f9ba906632d8daa3d81a3",
+    "upstreamPackage": {
+      "name": "@radix-ui/react-focus-scope",
+      "version": "1.3.1"
+    },
+    "patchedPackage": {
+      "name": "@radix-ui/react-focus-scope",
+      "version": "1.3.1+kortravel.fix.2"
+    },
+    "sourceCommit": "1752a539c8d5ae57961a0fa2702d2573d48fefe7",
+    "license": "MIT",
+    "packageManager": "pnpm@11.5.0",
+    "node": "v24.22.2",
+    "toolVersions": {
+      "esbuild": "0.25.12",
+      "tsup": "8.5.1",
+      "typescript": "5.9.3"
+    },
+    "workspaceLockSha256": "30ae793af509fcf3bfb96172f9c47ccff45486b7fa9dfe399ebfd486d3fb9d64",
+    "sourceSha256": {
+      "src/index.ts": "2ccb67b49cdfb382f31511ffc4c7e312a6fad1483287d63831c4ac5027daca3d",
+      "src/focus-scope.tsx": "a75f90eaf31397e09ecbcc4872029c8e8c5f944e3629b86ec3e09c52ecf2d89d",
+      "src/focus-scope.test.tsx": "84591bcb66e557479e52222db55c6560da7e326ea9fa13bd2b4cbf968f4763c0",
+      "tsconfig.json": "6dd4478cc31e52cc11b417074c9ff358b73690876faa7d79f791d45a55e3866d"
+    },
+    "distSha256": {
+      "index.js": "ec69508cff4309ede0690a88af7f51c3b33d01dc1338d6544135dd6a13745e5f",
+      "index.mjs": "3a1982b3afc4683eb24b899b9621d1a89bf690ee454d63251138974f3f118a02",
+      "index.d.ts": "4d007847d634d020ce69fa934cba649bbf0f41413e1aaab74d2758953dc1a002",
+      "index.d.mts": "4d007847d634d020ce69fa934cba649bbf0f41413e1aaab74d2758953dc1a002",
+      "index.js.map": "f707390a08069875f8bbb6b2c50805e39588e4291804976c61e2fec13678591e",
+      "index.mjs.map": "f73c98673206cf783a922fd2db51f8adc3f382d8951c5ada75803ee8384e152e"
+    },
+    "filename": "radix-ui-react-focus-scope-1.3.1+kortravel.fix.2.tgz",
+    "bytes": 33511,
+    "integrity": "sha512-v3XweXrUSZ/QfrMVvYmsAkVNDnvcN21QKbSrViXYf0OQf5Ue9xSgqQIukgGjsYMEBQ5qxQW8fnOC9t1Y0ENPXw==",
+    "sha256": "1ca04870692565c243130d99c3dba91f3ac853ab2ec9538fc7b658b17fb7b49a"
+  },
+  "artifactPath": "/home/digitie/dev/common-unification-20261111/artifacts/radix-focus-scope-fix2/radix-ui-react-focus-scope-1.3.1+kortravel.fix.2.tgz",
+  "scope1Originals": [
+    "review-A-radix-focus-scope-final-1.md",
+    "review-B-radix-focus-scope-final-1.md"
+  ],
+  "evidence": [
+    "consumer-tools/radix-fix2-before-unit-38.log",
+    "consumer-tools/radix-fix2-after-unit.log",
+    "consumer-tools/radix-fix2-evidence",
+    "consumer-tools/radix-fix2-pack.log"
+  ],
+  "reportedTests": {
+    "sourceUnit": 38,
+    "actualNpmNode22": "fullversion/SRI15files/ESM+CJS5exports PASS",
+    "sourcePackedBrowser": "final175 matcher-corrected run PENDING atmanifestcreation. Old5806after16PASS/1FAIL was Playwright matcher nearest-fieldset error;175 strengthensnative :disabled+rejectedfocus assertions ratherthanweakenexpect."
+  },
+  "requiredClosure": [
+    "A-SCOPE-P2-01 actualfixedfieldsets: container/first reverse, firstlegendexception,nestedouterdisabled, enable/disable/IME/nestedscope remain",
+    "currentproducer/create+verify recipe since706: no sameversionoverwrite, source/dist/lock/tool/provenance inputs, source175 matchespacket15files",
+    "stock→Git IME plusinitialcontainer plusdisabledfieldset corrections distinct; declarations/publicdeps/API unchanged",
+    "oldf97/fix1/c10raw preserved. 1ca048/fix2 immutable. Iflatercommitonly frozenartifactdelivery/CI no source change, exactnewhead boundedproof willfollow. Nevermixmovingworktree."
+  ],
+  "outputs": {
+    "A": "review-A-radix-focus-scope-final-2.md",
+    "B": "review-B-radix-focus-scope-final-2.md"
+  }
+}

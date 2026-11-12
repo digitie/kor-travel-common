@@ -1,0 +1,95 @@
+# 원 reviewer A — Manager component UI 후보 SDK 독립 리뷰1
+
+runid Mill-A-Manager-Component-UI-1-20261111. 분야: frontend 소비자 배포 연결·선택 범위·SDK 안전 경계. 구현 비참여, read-only, peer raw/verdict 미열람. UTC 시작2026-11-11T20:24:03Z / 최종 source 검증20:29:32Z.
+
+**SOURCE PASS. 신규 P0/P1/P2/P3=0.** 정확 PR589 CI는 직접 API 관찰 시 queued/job0이다. CI·병합·trusted SDK 설치·실제 Geo/Weather 적용까지 PASS라고 확대하지 않는다. 운영 Docker·production mutation은 수행하지 않았다. 기존 Manager158/9910 및 소비자 리뷰 원문은 불변 보존한다.
+
+## 입력·격리·관찰
+
+- review-manifest-manager-component-ui-1.json SHA256 ee5688ab6783bb535a88160726fb07721ff3c266c40f4629dc8ee9588eb577fd 시작/종료 일치.
+- base9910b9a6dba902c6a59469d3a6f46c6077e78d3f → head df3760cc22d23bab71a1b93c7ca9b86299a94d9f.
+- head tree d2d4d656377d975d1fc7d672364dc6d2563e3fac. source checkout /tmp/codex-manager-component-ui-20261112은 시작·종료 모두 exact df3760/clean이었다. 공유 Aquinas158 checkout은 감사 입력으로 쓰지 않았다.
+- manifest의10개 변경 파일 집합과 실제 git diff 집합 동일. 각 Git blob10개 및 전달 evidence8개 SHA256을 시작/종료 모두 검증해 일치했다.
+- Git archive/show로 /tmp/review-A-manager-component-ui-final1에 제품 snapshot을 만들었다. 비교용 base991 snapshot도 자기 tmp 아래에 만들었다. 소스 수정·새 dependency install·repack·CodeGraph 생성/갱신·운영 연결은 하지 않았다.
+- 기존 /tmp/kt-manager-candidate-python을 read-only 참조했다. Python3.14.4, Docker SDK7.2.0, pytest9.2.0. 실제 제품 import는 격리 backend/src를 PYTHONPATH로 지정했다. PYTHONDONTWRITEBYTECODE=1, pytest cache 비활성화. Docker factory는 제품 fake fixtures로만 실행했고 추가로 DOCKER_HOST=unix:///tmp/review-A-component-ui-NO-DAEMON.sock을 지정해 운영 socket fallback을 방지했다.
+
+## 전체 delta와 의미 검토
+
+10파일 모두의 source/docs diff를 직접 읽었다. 제품 변경은 CLI·registry·기존 candidate 공유 본문·새 component candidate·새 테스트·target metadata이다. docs4개는 절차/결정/후속 gate를 명시한다. frontend·HTTP API·package/lock·C11 packets·manifest/pin schema는 diff0이다. 새 영구 gate·새 그룹·기존 그룹 layout 변경도 없다.
+
+### 선택과 설정의 단일 사실
+
+- config/docker-targets.yml에 Geo geocoder-ui 및 Weather weather-web 역할과 각 canonical GitHub URL만 추가했다. runtime/group을 별도로 중복 선언하지 않는다.
+- registry.py:1133의 component_ui_candidate_for_target는 role/source_url 정확2키, UI/web/frontend 접미 역할, canonical HTTPS GitHub .git URL, target에 등록된 정확히1개 UI compose_service를 요구한다. URL userinfo/포트/query/fragment·형식 오류·추가 필드는 거절한다.
+- 새 metadata는 기존 전체 registry 검증에도 연결됐다(registry.py:1238). 기존 외부 target/container 소속·services 연결 검사를 제거하지 않았다.
+- service_release_component_candidate.py:24는 기존 _declaration으로 호스트·catalog 역할·그룹 유효성을 먼저 확인한 뒤 runtime이 속한 기존 단일 그룹을 유도한다. oneshot-only UI는 선택하지 않는다.
+- 같은 함수:25는 CANONICAL_RUNTIME_SOURCE_URLS의 Map/Pinvi 키를 먼저 거절한다. 새 component 명령으로 기존 paired authority를 우회할 수 없다. role/group를 임의 CLI 인자로 받을 경로도 없다.
+- source canonical authority는 trusted target config이다. 이를 별도의 Map 전용 URL 목록으로 덮어쓰지 않는다. 직접 probe에서 합성 trusted config의 canonical URL을 바꾸고 root-trusted Git origin·OCI source를 그 URL과 일치시킨 경우 성공했다. 반대로 Git/OCI source 불일치와 unsafe .git은 거절됐다. 이것은 임의 사용자 URL 입력 허용이 아닌 설정의 단일 사실 확인이다.
+- 기존 trusted 설치의 config 경로·소유권/override 제한과 새 metadata 검증을 함께 읽었다. SDK에 직접 전달하는 config와 운영자가 고정한 trusted config의 신뢰 경계를 구분했다.
+
+### 승인·G·현재 기준선
+
+service_release_component_candidate.py:45-71은 immutable image ID/40자리 SHA, 엄격 bool execute와 int1..600 wait, root를 확인한다. CLI에는 --confirm/--dry-run 중 하나가 필수이고 전달 execute는 args.confirm이다. 소스 clone의 trusted ancestors/.git 소유권·비쓰기 권한·canonical origin·commit·origin/main 병합 관계를 검증하며, G 획득 뒤 같은 source를 다시 확인한다. alternate object/commondir·symlink 허용으로 바뀌지 않았다.
+
+G 안에서 기존 _compose_plan으로 current와 catalog 역할·좌표·overlay 소유를 확인한 뒤 mutation 선택만 UI1개로 줄인다. client factory는 그 이후이며 finally에서 close한다. Geo/Weather current를 Map paired receipt로 가정하지 않는다. 실제 fixture에서 _baseline/_receipt_images/_paired_companions가 호출되면 실패하도록 둔 상태로 새 경로60개가 통과했다.
+
+### 공유 본문 추출과 Map 보존
+
+service_release_candidate.py:283의 기존 _apply는 Map의 canonical URL, baseline_unchanged 조건, _receipt_images inventory check, _paired_companions image binding을 명시 callback으로 새 _apply_current(:299)에 전달한다. callback 순서·사후 조건·모든 current/health 검사를 diff와 기존 테스트로 확인했다.
+
+_merged_source의 canonical_url 기본값은 기존 CANONICAL_RUNTIME_SOURCE_URLS lookup을 유지한다. Geo/Weather만 검증된 config URL을 명시 전달한다. 새 경로 extra_conditions=[]가 Map의 baseline 검사를 끄는 구조가 아니다. Map entry는 별도 기존 _apply wrapper를 거치고 모든 paired callback을 전달한다.
+
+기존5모듈169개 test bytes는 base/head SHA256 모두 동일하다. 본인이 base991에서169PASS, 후보에서 같은169를 포함한372PASS를 직접 확인했다. paired 기준선/receipt/companion 누락·경합·잘못된 초기 UI·실제 G 자식 보존 등의 기존 검사가 약화되지 않았다.
+
+### 실행·관측·발행
+
+공유 본문은 OCI revision/source를 승인 tuple과 대조하고 현재 release health를 먼저 요구한다. 전체 Docker inventory를 기록하며 선택 UI는 정확히1개여야 한다.
+
+Compose JSON을1번 렌더해 모든 current image를 immutable ID로 고정하고 UI만 후보로 바꾼다. 실행은 frozen stdin, --env-file /dev/null, --no-deps --no-build --pull never 및 선택 UI1개다. Weather migrate 정의/이미지는 overlay에 남지만 실행 대상으로 추가되지 않는다. API/DB/Dagster/code-server 재생성을 명령하지 않는다.
+
+현재 pointer·비선택 ID/image/start/restart/config/mount/HostConfig/network와 UI 실행 전 identity를 검사하고, 실행 뒤 모든 current·health 및 불변식을 재확인한 뒤 발행한다. 늦은 검증·발행 실패도 기존 진단과 실제 runtime 상태를 보존한다. 자동 rollback이나 UI가 아직 옛 상태라는 추정을 추가하지 않았다.
+
+## 직접 실행과 공격 결과
+
+| 실행 | 직접 결과 |
+|---|---|
+| base991 기존5모듈 |169PASS/3.67초|
+| exact df3760 기존5+신규 component+registry targets/hosts |372PASS/7.88초|
+| 위372 안의 신규 component |60개 포함, 전부PASS|
+| A 추가 독립 경계 probe |24PASS/1.04초|
+| 전체 backend src/tests Ruff --no-cache |exit0, All checks passed|
+| git diff --check base..head |exit0|
+
+본인24개는 Geo/Weather 각각 아래12개를 실행했다.
+
+- G 경합: factory·mutation 전에 거절.
+- G를 기다리는 동안 origin/main을 제거: 잠금 안 두 번째 source 확인에서 factory 전에 거절.
+- custom source clone의 쓰기 가능 .git/config·symlink·alternates3종: 모두 factory 전에 거절.
+- 비선택 DB HostConfig·Mounts·Networks3종 변경: current 발행을 막고 nonselected_unchanged=false를 보존.
+- 실제 UI가 바뀐 뒤 atomic manifest 발행 OSError: success=false, returncode0, 사후 health 진단 유지, 옛 current 유지, secret 원문 미노출.
+- render 중 UI restart: mutation 전에 거절.
+- trusted target config의 custom canonical URL을 Git/OCI와 일치: 기존 그룹 그대로 정상 적용.
+- 두 번째 component 후보: paired 기준선 없이 직전 component current를 previous로 이어 발행.
+
+이 검사는 fake Docker 상태와 자기 Git/current/G fixtures만 변경했다. 실제 Docker daemon은 사용하지 않았다. 기본 성공만 세거나 실패 assertion을 제거한 검사가 아니다.
+
+초기 격리 snapshot에 root docker-compose.yml을 빼서305PASS/5FAIL, 다음에는 registry-host 검사가 읽는 systemd service·검사 script를 빼서370PASS/2FAIL이었다. 모두 FileNotFound/검사대상 부재의 reviewer driver 오류다. exact Git 파일을 자기 snapshot에 추가한 최종372만 제품 판정 근거로 사용했다. 초기 로그도 삭제하지 않았다. 제품 source/test를 고쳐 통과시킨 것이 아니다.
+
+## CI 관찰과 한계
+
+GitHub connector의 fetch_commit_workflow_runs 및 fetch_workflow_run_jobs를 exact df3760으로 직접 조회했다.
+
+- CI run43095710359: 관찰 시 queued, jobs=[].
+- 공통 프론트엔드 정책 run43095710716: 관찰 시 queued, jobs=[].
+
+아직 실제 checkout SHA·전체 backend·frontend/browser·중앙 정책 job log를 관찰할 수 없었다. 이를 이전158/9910 CI로 대체해 PASS라고 주장하지 않는다. CI 실행이나 재시도를 리뷰어가 요청하지도 않았다.
+
+이번 범위는 Geo/Weather 기존 current의 UI 단독 후보를 지원하는 SDK source다. 실제 운영 current/adopt 상태, 이미지 빌드 내용, 정확 merged SHA/image tuple, trusted SDK 설치, 실제 UI-only 적용·비선택 보존·공개 로그인 수용은 후속 실행 gate다. 실제 단말/다른 앱의 새 소스나 Pinvi 수정도 이 판정에 포함하지 않는다.
+
+## commands/evidence와 최종 disposition
+
+주요 명령: git rev-parse/ls-tree/archive/show/diff base head; manifest Git blob10/evidence SHA2568 시작/종료 비교; 기존 venv python -m pytest -q -p no:cacheprovider(위 모듈 명시); ruff check --no-cache src tests; GitHub 위 두 조회 API. exact argv/env/cwd는 own-product-command.json, product-rerun-commands.json, own-adversarial-command.json에 기록했다.
+
+evidence root: review-A-manager-component-ui-final-1-evidence. source.patch/docs.patch, observations-start/end.json, scope-and-byte-proof.json, own-base169.log, own-focused372.log, own-adversarial.py/log, own-ruff.log, ci-direct.json을 보존한다. 추가 probe는 실행 후 제품 테스트 검색 경로에서 제거했고 evidence 원문은 남겼다.
+
+**신규 finding 없음(P0/P1/P2/P3=0), open source finding0, SOURCE PASS.** 기존 Map SDK source PASS는 보존되며 새 component 경로도 source 검토를 통과했다. exact CI·두 독립 리뷰의 merge 담당 확인·PR 병합·trusted 설치·실제 적용은 아직 본인의 완료 주장에 포함되지 않는다.

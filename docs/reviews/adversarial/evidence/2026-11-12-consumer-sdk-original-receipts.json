@@ -1,0 +1,187 @@
+{
+  "format": "원문 bytes 보존; .md.txt는 원검토 환경 상대 링크를 출판 대상 링크로 오인하지 않도록 한 확장자이며 내용은 변경하지 않음",
+  "records": [
+    {
+      "originalName": "review-A-consumers-c11-batch-1.md",
+      "publishedPath": "2026-11-12-review-A-consumers-c11-batch-1.md.txt",
+      "sha256": "a8b93cef62bffe0d8fe6c66a428a9aa55451e7f1c8e3c72ae9ab9e1a5a03f553",
+      "bytes": 9120,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-B-consumers-c11-batch-1.md",
+      "publishedPath": "2026-11-12-review-B-consumers-c11-batch-1.md.txt",
+      "sha256": "ce4ff6265a106d8634b4a13de3b6afc99f67f51702e517061a940b773032218a",
+      "bytes": 12808,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-A-consumers-c11-batch-2.md",
+      "publishedPath": "2026-11-12-review-A-consumers-c11-batch-2.md.txt",
+      "sha256": "2b100b0c969d3abdcd38a7cb93f4be2596d7c0ff23e14841828b9e5ef9d9e5b4",
+      "bytes": 12370,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-B-consumers-c11-batch-2.md",
+      "publishedPath": "2026-11-12-review-B-consumers-c11-batch-2.md.txt",
+      "sha256": "0fde4f4ad57717467a3d70152f46db126eb726b253a56f14db741ea0521cf9d0",
+      "bytes": 15289,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-A-consumers-528-followup.md",
+      "publishedPath": "2026-11-12-review-A-consumers-528-followup.md.txt",
+      "sha256": "da9285423c7bcaa80269dc452705758404900e223a864c6dacad80a6bb88f716",
+      "bytes": 10897,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-B-consumers-528-followup.md",
+      "publishedPath": "2026-11-12-review-B-consumers-528-followup.md.txt",
+      "sha256": "9a4438996ae9ead4dd7cde7347b5f26e938f49718a4dde51d98d230381bb679d",
+      "bytes": 8812,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-A-map-c11-7ce-main-supplement.md",
+      "publishedPath": "2026-11-12-review-A-map-c11-7ce-main-supplement.md.txt",
+      "sha256": "5e3d1529511c3e102d667db0e9ca59ee272262ef66a084c6343929458701fb54",
+      "bytes": 8240,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-B-map-c11-7ce-main-supplement.md",
+      "publishedPath": "2026-11-12-review-B-map-c11-7ce-main-supplement.md.txt",
+      "sha256": "dcf7e005d670b1245141a60bf56f4966541c2950540570f6e9dca57b5eff49a9",
+      "bytes": 6365,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-A-transport-c11-4e25-supplement.md",
+      "publishedPath": "2026-11-12-review-A-transport-c11-4e25-supplement.md.txt",
+      "sha256": "553dd6e3428cc95bf5a24b017645263f46eeac936fbe85a3b0d139035c3a3d57",
+      "bytes": 5981,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-B-transport-c11-4e25-supplement.md",
+      "publishedPath": "2026-11-12-review-B-transport-c11-4e25-supplement.md.txt",
+      "sha256": "07897b60a4c01cb5153172f4cab4c92d1e049b6c9600f1823f1d661a1f3cf966",
+      "bytes": 5402,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-A-manager-component-ui-final-1.md",
+      "publishedPath": "2026-11-12-review-A-manager-component-ui-final-1.md.txt",
+      "sha256": "346c0367e66fd56fff31be65bb8a80d90c183c7bc4140decb408c029ba889f6a",
+      "bytes": 11244,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-B-manager-component-ui-final-1.md",
+      "publishedPath": "2026-11-12-review-B-manager-component-ui-final-1.md.txt",
+      "sha256": "833adcb2de10f4b973f072f8eb574a59a921744824a1d31c345aa8b6185b94bf",
+      "bytes": 13013,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-A-manager-component-ui-final-2.md",
+      "publishedPath": "2026-11-12-review-A-manager-component-ui-final-2.md.txt",
+      "sha256": "6012a8ddb46e0213f2d307a068a54456dcb7c7a35521320e07612cc1d45621f4",
+      "bytes": 11092,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-B-manager-component-ui-final-2.md",
+      "publishedPath": "2026-11-12-review-B-manager-component-ui-final-2.md.txt",
+      "sha256": "143ea12067a46ee3470485b369eb84d3346bd24c272cdb357b92ddbc462a3e8f",
+      "bytes": 9733,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-A-manager-component-ui-final-3.md",
+      "publishedPath": "2026-11-12-review-A-manager-component-ui-final-3.md.txt",
+      "sha256": "b6a187b5b1c31324205c253be6491877a3f9fba5634ef43dbd4f68ee292f0771",
+      "bytes": 9171,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-B-manager-component-ui-final-3.md",
+      "publishedPath": "2026-11-12-review-B-manager-component-ui-final-3.md.txt",
+      "sha256": "a8185beed315af2263bab8fea337be03e90b9cad6a8ec827bde3fab242d6af44",
+      "bytes": 8738,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-manifest-consumers-c11-batch-1.json",
+      "publishedPath": "2026-11-12-review-manifest-consumers-c11-batch-1.json",
+      "sha256": "c0affe2a88bf0f176abb0e3df298b0fb2da698f442f74196f00ac3e237f30a4c",
+      "bytes": 6504,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-manifest-consumers-c11-batch-2.json",
+      "publishedPath": "2026-11-12-review-manifest-consumers-c11-batch-2.json",
+      "sha256": "bcf2aff18fb8a82b1e89753ca68185a378ad26849058ec977323e1db6414160b",
+      "bytes": 1979,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-manifest-map-c11-main1497-supplement-7ce.json",
+      "publishedPath": "2026-11-12-review-manifest-map-c11-main1497-supplement-7ce.json",
+      "sha256": "8cc46f10fc13d2c05dbd0821acbe8c42e4dae4dc9b1cab9344bf8d4c2f74dfc0",
+      "bytes": 13948,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-manifest-transport-c11-delta-4e25c98.json",
+      "publishedPath": "2026-11-12-review-manifest-transport-c11-delta-4e25c98.json",
+      "sha256": "8b23b0ada68cd5c7e48f7de08d8ca54e1572a66059b89c036e196ba9fdca1ea8",
+      "bytes": 31003,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-manifest-manager-component-ui-1.json",
+      "publishedPath": "2026-11-12-review-manifest-manager-component-ui-1.json",
+      "sha256": "ee5688ab6783bb535a88160726fb07721ff3c266c40f4629dc8ee9588eb577fd",
+      "bytes": 4224,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-manifest-manager-component-ui-2.json",
+      "publishedPath": "2026-11-12-review-manifest-manager-component-ui-2.json",
+      "sha256": "aa1d5838ab0d7f9c37f723028b216664ecaa3e35e4be92f6e34895bf91ae84f3",
+      "bytes": 4677,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-manifest-manager-component-ui-3.json",
+      "publishedPath": "2026-11-12-review-manifest-manager-component-ui-3.json",
+      "sha256": "aba6f9351bba4ce15e87a8a2642e13c9634dd65d77e69c6b28822362506c0cb2",
+      "bytes": 4014,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-A-manager-mount-order-final-1.md",
+      "publishedPath": "2026-11-12-review-A-manager-mount-order-final-1.md.txt",
+      "sha256": "b731d91fb57f84a8fe976e23c23978497697c877f2a209a47e2f6e69eb558fe1",
+      "bytes": 8099,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-B-manager-mount-order-final-1.md",
+      "publishedPath": "2026-11-12-review-B-manager-mount-order-final-1.md.txt",
+      "sha256": "5c12cbcca5f1538cee0de4e6aeb6c5bfd3e98055fc3a562b04720ba26baaeac3",
+      "bytes": 8618,
+      "byteIdentical": true
+    },
+    {
+      "originalName": "review-manifest-manager-mount-order-1.json",
+      "publishedPath": "2026-11-12-review-manifest-manager-mount-order-1.json",
+      "sha256": "24ce04472e44b587659ede8c81db0cab052132194e873fc889777e47d6454a91",
+      "bytes": 10850,
+      "byteIdentical": true
+    }
+  ]
+}

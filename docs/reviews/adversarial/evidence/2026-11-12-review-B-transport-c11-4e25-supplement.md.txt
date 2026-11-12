@@ -1,0 +1,54 @@
+# 원 리뷰어 B — Transport C11 4e25 test/docs 보충
+
+- 원 B/Epicurus, packaging/platform/security/release/CI 독립 검토. 구현 참여·peer raw/verdict 열람 없음.
+- 입력 review-manifest-transport-c11-delta-4e25c98.json SHA256 8b23b0ada68cd5c7e48f7de08d8ca54e1572a66059b89c036e196ba9fdca1ea8 직접 확인.
+- 기준ef7bd62dd81cb01b3c41b8bb10106c4586bb3bcf → 정확4e25c98e4eed1e1212b0842ff30fa4333fdb9a38.
+- inner capsule manifest SHA256 71cd87abb0bcd2715dcc5ff62b69553d82d468c034fcef24f39a4425c704504e도 직접 확인했다.
+- runid/UTC는 review-B-transport-c11-4e25-supplement-evidence/session.json, completion.json에 기록했다. 이전 batch1 B 원문 불변 보존.
+
+## Verdict
+
+**SOURCE/TEST SUPPLEMENT PASS, 새 finding0. 전체 exact CI 조건은 CONDITIONAL.**
+
+실제 전달44개 browser 결과와 소스/런타임 입력의 연결을 검증했다. 본인 새 browser/build 실행으로 표기하지 않는다. 원 batch1 source/package PASS는 유지하며 운영 배포·backend 수명주기 수용을 확대하지 않는다.
+
+## Git·패키지 보존
+
+outer/inner manifest와 base/head 변경6개 blob의 oid/크기/SHA256, capsule snapshot 원문을 실제 Git source와 대조했다. 그6개를 제외한 나머지 **872개 tracked entry의 mode/type/oid/path가 base/head에서 정확히 같다**. 보호 inventory hash도 확인했다.
+
+제품 frontend208·backend/deploy237·package manifest3·lock3·vendor19 및 CI workflow/공통 guard code pin은 변경되지 않았다. C11 패키지 byte·SRI 및 Root/표면 overrides는 이전 source/package 수용을 그대로 승계할 수 있는 범위다. 공통 runtime/source 전환이나 새 payload/repack은 없다.
+
+## 비동기 mount 대기 변경
+
+제품/test 변경은 admin e2e/doctor-domain-regressions.spec.ts의 주석1줄과 **await expect(filters).toBeAttached()** 한 줄 추가뿐이다. 그2줄을 제거하면 old test 파일과 byte 동일함을 직접 확인했다.
+
+TransportMap 비동기 mount 전에 isVisible이 즉시 false를 반환해 모바일 필터를 열지 못하던 경쟁을, DOM attachment를 기다린 후 기존 visibility 분기로 진행하도록 고친다.375/1440 두 뷰포트에서 기존 검색·시간표·날짜 변경·응답 삭제·폭 assertion은 모두 남는다. desktop에서는 attached지만 CSS로 숨겨진 trigger를 기존 분기가 건너뛴다. timeout 증가·skip·retry·selector/assertion 제거·제품 코드 변경이 없다.
+
+기존 실패를 단순 재실행 성공으로 숨기지 않았다. capsule의 original-admin-native-failure JSON/log/exit/trace/screenshot도 hash로 확인했다. 수정 이후 raw browser 각각의 개별 test 결과를 아래처럼 다시 셌다.
+
+| 전달 실제 suite | 본인 JSON 검증 |
+| --- | --- |
+| native public |4PASS |
+| native admin |18PASS |
+| Alpine public |4PASS |
+| Alpine admin |18PASS |
+| 합계 |**44PASS /0FAIL/0SKIP/0FLAKY** |
+
+각44건 모두 results가 정확히1개이고 status=passed/retry0이며 test status=expected다. 전체 stats뿐 아니라 개별 결과를 검사했고 report global errors 없음과 browser exit4개 모두0도 확인했다. 제품 build log/exit 및 다른 capsule raw 파일도 outer manifest SHA/크기로 대조했다.
+
+## 실제 입력 연결·cleanup
+
+source receipt는 ef7 base의306개 입력 SHA를 보존한다. 본인은 이306개를 final4e Git byte와 직접 대조했다. 차이는 정확히 readiness test 한 파일뿐이며 새 SHA e85bc4b44be9e19281c6a6cad0ecc883e70ea25dc449fa8ced020a930c7ad3f4가 별도 readiness delta receipt 및 final Git blob과 일치한다. 다른305개 입력은 같다. 따라서 image/source 태그가 ef7인 사실을 숨기지 않으면서, 고정 제품 코드와 정확한 test 추가분으로 실제44 결과의 범위를 연결했다.
+
+final acceptance 및 all-process receipt는 producer/작업 디렉터리 프로세스 부재와 slot1 FREE, 소유 프로세스/컨테이너 정리 상태를 기록한다. 정리 exit143을 build/browser 성공 exit0으로 섞지 않았다. 이 cleanup은 보존 자료의 관찰이지 본인이 원격 프로세스를 종료하거나 daemon을 변경한 작업이 아니다.
+
+## 직접 CI 상태
+
+GitHub exact4e commit-runs API를 직접 두 번 조회했다. 처음 CI43095636424/central43095636827은 QUEUED였다. 마지막에는 새 CI43101417820 및 central43101418253이 **IN_PROGRESS/conclusion null**, 옛 두 run은 여전히 QUEUED였다. 결과와 checkout/tree 동등성을 아직 PASS로 선언하지 않는다. 실제44 수용은 위 source receipt·원문 자료로 분리하며 전체 exact CI green을 대신하지 않는다.
+
+## 검증·한계·보존
+
+명령은 WSL git show/ls-tree -rz/rev-parse/diff와 Python hashlib/JSON 재귀 결과 검사였다. source edit·새 설치·heavy build/browser 재반복·운영 Docker/API/DB/RustFS/Dagster 변경은0/NOT_RUN_B다. 원문6개·보호872·source306·capsule 원자료를 읽기만 했고 peer 원문은 열지 않았다.
+
+증거 폴더에 direct-proof.json, runtime-provenance-proof.json, 직접 CI 관찰, 이전 raw SHA 및 완료 상태를 남겼다. 기존 원문/manifest/capsule/타인 cache·작업본은 덮어쓰지 않았다. 이 보충은 기존 batch1의 실제 runtime 조건 중44 browser 증거를 확인한 것이며, 정식 merge/deploy 조건의 exact CI는 계속 분리한다.
+

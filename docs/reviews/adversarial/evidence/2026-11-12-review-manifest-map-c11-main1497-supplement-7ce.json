@@ -1,0 +1,306 @@
+{
+  "schemaVersion": 1,
+  "kind": "Map C11 upstream-main integration supplemental review input",
+  "createdAtUTC": "2026-11-11T21:04:16.404697+00:00",
+  "repository": "https://github.com/digitie/kor-travel-map.git",
+  "pullRequest": "https://github.com/digitie/kor-travel-map/pull/1496",
+  "finalSource": {
+    "commit": "7ce46cd92ba8d6ae1c7dee556939f70bf94fb3d9",
+    "tree": "b9d87fa457c6e5b5c21f4e058d685748f3958bfe",
+    "parents": [
+      "7202653aff29e1d9738a6264aaefa7a3f9c747b0",
+      "5742b45e7ac077b38e83dc8c95946fe15ab80ab7"
+    ],
+    "incomingMainCommit": "5742b45e7ac077b38e83dc8c95946fe15ab80ab7",
+    "incomingMainTree": "54be58260ad1db9c242c58732185e1be11b1ea9b"
+  },
+  "previousFrozenInputs": [
+    {
+      "path": "review-manifest-consumers-c11-batch-1.json",
+      "sha256": "c0affe2a88bf0f176abb0e3df298b0fb2da698f442f74196f00ac3e237f30a4c"
+    },
+    {
+      "path": "review-manifest-map-c11-test-supplement-720.json",
+      "sha256": "3dd47b07097f1589da7398fa583bd6ebbc781d2dac1b8b9eeca630d22d5fd6be"
+    }
+  ],
+  "delta": {
+    "relativeTo": "7202653aff29e1d9738a6264aaefa7a3f9c747b0",
+    "changedFiles": [
+      {
+        "path": "CHANGELOG.md",
+        "finalGitBlob": "6367b86a2de9993c73960e841cc31fa1b96cdfd9",
+        "finalFileSHA256": "52d7348e435022327b231008601076a03bee3e95560491d9e62ada65a2a4e371",
+        "incomingMainBlob": "f979825f6d341a8d360740336088564997885db5",
+        "equalsMain": false,
+        "classification": "combined-document-history"
+      },
+      {
+        "path": "alembic/head-schema.sql",
+        "finalGitBlob": "78137d0cba8553f73d45932acb8a8d1f80aa48f2",
+        "finalFileSHA256": "59205a0c7758beb67d9c289dc9047b536a7ff5d41ebeb8db307280f5d355a321",
+        "incomingMainBlob": "78137d0cba8553f73d45932acb8a8d1f80aa48f2",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "alembic/versions/451_feature_search_prominence.py",
+        "finalGitBlob": "5021bb26465930f5e7e293136765623738730628",
+        "finalFileSHA256": "5bbcf25aee26a33f03790609a44889b76039334b5d212d6eec89bd778b4e8ba8",
+        "incomingMainBlob": "5021bb26465930f5e7e293136765623738730628",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "docs/journal.md",
+        "finalGitBlob": "b43bcb155168b6dba9579404c185ee9c2da053af",
+        "finalFileSHA256": "6a232c557357f483c20d6725116d697f94f2c78afaa13d2085ccdbf69c1419eb",
+        "incomingMainBlob": "675548f17651f03cfba8dcc3d317c4b86e2beff5",
+        "equalsMain": false,
+        "classification": "combined-document-history"
+      },
+      {
+        "path": "docs/resume.md",
+        "finalGitBlob": "41d282ae278929d15fa975732f0075f715967938",
+        "finalFileSHA256": "00aaf588490b3fafee767759dbdfd20e7f7ab24c14e4fbd14d58474dd77edca3",
+        "incomingMainBlob": "a7d0b8877e1ead015e76a08ca2e29a912e96bdcc",
+        "equalsMain": false,
+        "classification": "combined-document-history"
+      },
+      {
+        "path": "packages/kor-travel-map-dagster/src/kortravelmap/dagster/maintenance.py",
+        "finalGitBlob": "01d1965c97608d584a2dc3349a52523b2bd21f0a",
+        "finalFileSHA256": "a0bd80975b079bd35eefc2cb69ce860a490872c0fe6cb8dff2a59f0ec465cdf0",
+        "incomingMainBlob": "01d1965c97608d584a2dc3349a52523b2bd21f0a",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "packages/kor-travel-map-dagster/tests/test_maintenance.py",
+        "finalGitBlob": "0b0dca2bfbb73b84cbad24e437d5473ffdf0b99d",
+        "finalFileSHA256": "2ba92510a92434060dc375258ece3f031b4d6b8e01d974de4924160e2ba4b578",
+        "incomingMainBlob": "0b0dca2bfbb73b84cbad24e437d5473ffdf0b99d",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "src/kortravelmap/_application_migration_graph.json",
+        "finalGitBlob": "cbe6357744dbb9e0ed775c3ec5cf7432fc4f2683",
+        "finalFileSHA256": "677236f91e1ab524c129e5c2655ea62dd2812d162df4ce07b2b63ba9b8091a5b",
+        "incomingMainBlob": "cbe6357744dbb9e0ed775c3ec5cf7432fc4f2683",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "src/kortravelmap/client/__init__.py",
+        "finalGitBlob": "5a27542ec2254b3a7c491a38ccff07f04c699720",
+        "finalFileSHA256": "e5dcdc138d5969ad3263090adaa7f4622857fdac153061db3fea298cc61dfe35",
+        "incomingMainBlob": "5a27542ec2254b3a7c491a38ccff07f04c699720",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "src/kortravelmap/infra/feature_repo.py",
+        "finalGitBlob": "cb740b6a11fc1f4f953210acee474f5505b27b98",
+        "finalFileSHA256": "90a19afa88cd09e47f8f737f8b5758f1f7a528ad8d8796ec6213edc1730023eb",
+        "incomingMainBlob": "cb740b6a11fc1f4f953210acee474f5505b27b98",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "src/kortravelmap/infra/models.py",
+        "finalGitBlob": "f4e81b94f71255cab7d73881b031d47751df8f65",
+        "finalFileSHA256": "90628a5cd3b0cc4212315c7031a6b3c675961d594b3c6b1ae6e9535329c6521c",
+        "incomingMainBlob": "f4e81b94f71255cab7d73881b031d47751df8f65",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "src/kortravelmap/infra/runtime_privileges.py",
+        "finalGitBlob": "5cacce21ddb6e72341ac75418ade00e8194d9cc2",
+        "finalFileSHA256": "d2c8bb5e319d8125c822dd4ee5f024a08ed78d1b685014896d19101425a71e14",
+        "incomingMainBlob": "5cacce21ddb6e72341ac75418ade00e8194d9cc2",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "src/kortravelmap/infra/search_prominence_repo.py",
+        "finalGitBlob": "83c2ff51c0eb9a08e68bde035635a1769e722d30",
+        "finalFileSHA256": "e58b4b3977cad19373b576d4d76a140411f36c7de7bbf38e63cd79a61ef1f689",
+        "incomingMainBlob": "83c2ff51c0eb9a08e68bde035635a1769e722d30",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "tests/integration/test_feature_search_region.py",
+        "finalGitBlob": "5a6113b0befb03f68ab19aca5b5a683830ec798b",
+        "finalFileSHA256": "4ad9e4d65bec62d24ab595db41bf8e16a9ec81ce1fd760f86ec2806cfc63bb18",
+        "incomingMainBlob": "5a6113b0befb03f68ab19aca5b5a683830ec798b",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "tests/integration/test_feature_search_relevance.py",
+        "finalGitBlob": "d69000e87bf2ded72372207427463c9a15d96e8b",
+        "finalFileSHA256": "0bae9dc31b076cb57671135c0818f767822419ffd807baca654d69d11a24aefc",
+        "incomingMainBlob": "d69000e87bf2ded72372207427463c9a15d96e8b",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "tests/integration/test_search_prominence.py",
+        "finalGitBlob": "26041923626663343d9c20411882e5b41e49ecd2",
+        "finalFileSHA256": "823c19c0e7dfa6aaedf44eae9488d4085e6f82d70b340183a9a6aa3e1d50a6a3",
+        "incomingMainBlob": "26041923626663343d9c20411882e5b41e49ecd2",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "tests/unit/test_infra_feature_repo.py",
+        "finalGitBlob": "a36f2bfad2d14189d5d44a4ba605d923f4715fa3",
+        "finalFileSHA256": "3d0ca1ff4aa5727ec7d0beb96008d26fccb2d5cdabb22a1d976dd095f4fa5375",
+        "incomingMainBlob": "a36f2bfad2d14189d5d44a4ba605d923f4715fa3",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "tests/unit/test_migration_forward_only.py",
+        "finalGitBlob": "4ca2a8f31bcde74957f8da353bfd9243a4563872",
+        "finalFileSHA256": "2ac6f35c2d72ecc5261df868bd2bc6b942d77bbd9c60192b01ba2a24a0bc4c69",
+        "incomingMainBlob": "4ca2a8f31bcde74957f8da353bfd9243a4563872",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      },
+      {
+        "path": "tests/unit/test_place_attribute_sql.py",
+        "finalGitBlob": "055e4693bbd1445a88588e9da43f08f2becee825",
+        "finalFileSHA256": "c67aac9e76357216c6c2f134d8caca87349a3dce0937ed986d58f4de1c5c84db",
+        "incomingMainBlob": "055e4693bbd1445a88588e9da43f08f2becee825",
+        "equalsMain": true,
+        "classification": "upstream-main-code-or-test"
+      }
+    ],
+    "upstreamCodeAndTestsExactlyMain": 16,
+    "documentsPreserve720WithInsertionsOnly": {
+      "CHANGELOG.md": {
+        "onlyInsertions": true,
+        "insertedLines": 7
+      },
+      "docs/journal.md": {
+        "onlyInsertions": true,
+        "insertedLines": 10
+      },
+      "docs/resume.md": {
+        "onlyInsertions": true,
+        "insertedLines": 10
+      }
+    },
+    "frontendRootPackageLockVendorUnchanged": true,
+    "protectedPaths": [
+      "package.json",
+      "package-lock.json",
+      "packages/kor-travel-map-admin/frontend"
+    ]
+  },
+  "runtimeEvidenceReuse": {
+    "actuallyBrowserTestedCommit": "7202653aff29e1d9738a6264aaefa7a3f9c747b0",
+    "observedRevision": "7202653aff29e1d9738a6264aaefa7a3f9c747b0",
+    "observedFrontendDigest": "643d18ca6dfbddde68995f5ca70ade48a5da0a81b8e9db4bfe51f3e0d585fb2c",
+    "DTests": 286,
+    "inventorySHA256": "dc85a2c127f1ddb68fef6ae55dc71a04ddb2005bfeb784c94249aaf535d939a5",
+    "gatePassed": true,
+    "wholeRunnerEvidence": "map-runtime-final-summary.json",
+    "scope": "frontend inputs identical only; final backend source differs, not claiming720 whole-source equivalence",
+    "DWillNotBeRepeatedForBackendOnlyMerge": true
+  },
+  "newBackendValidation": {
+    "focusedRootUnitPassed": 104,
+    "dagsterLocalCollection": "BLOCKED missing redis; raw collection error preserved; notPASS",
+    "operationalDBMigrationExecuted": false,
+    "exactFinalHeadCIGateRequired": true,
+    "runIDs": {
+      "ci": 43097581051,
+      "frontend": 43097581136,
+      "policy": 43097581503,
+      "lint": 43097581112,
+      "openapi": 43097581124,
+      "docker": 43097581042
+    },
+    "statusAtFreeze": "queued, backendjobs0; immutable input does not claim eventualCI outcome"
+  },
+  "requestedIndependentReview": [
+    "source merge integration only: upstream16 exact blobs, doc conflict preservation and archive limits",
+    "frontend/dependency unchanged proof and bounded D286 reuse",
+    "backend/client/DTO/schema integration risk from incoming main without production migration or API/DB/Dagster lifecycle",
+    "remain conditional on exact7ce whole CI, original source reviews and official frontend-only deployment admission"
+  ],
+  "evidence": [
+    {
+      "path": "validation/c11-map-weather-20261112/map-main1497-review-7ce46cd/final-source-git-blobs.txt",
+      "sha256": "22ff6cfc6d4bca215ee2aac7fb824f27a8e9e96bd2b36b28deb69173f6e813fe",
+      "bytes": 284084
+    },
+    {
+      "path": "validation/c11-map-weather-20261112/map-main1497-review-7ce46cd/changed19-exact-final-source.tar.gz",
+      "sha256": "d31d4bc12c73e681de8ec7e6e70d93df934066190c9aaa80c21eac0293c849ea",
+      "bytes": 744215
+    },
+    {
+      "path": "validation/c11-map-weather-20261112/map-main1497-review-7ce46cd/map-final-source-CI-delta-separation.json",
+      "sha256": "19ec9812ee4ef42973bb16c212b8cc24903f3cbed2eb6dad344faa833d30742f",
+      "bytes": 1301
+    },
+    {
+      "path": "validation/c11-map-weather-20261112/map-main1497-review-7ce46cd/map-main1497-merge-proof.json",
+      "sha256": "11bbccdb1ec6088929bfd6ab16d49e8567b98de6f802b80c4642a29a936a6803",
+      "bytes": 6460
+    },
+    {
+      "path": "validation/c11-map-weather-20261112/map-main1497-review-7ce46cd/map7ce-CI-synthetic-tree-proof.json",
+      "sha256": "2ddbf59b310a96cd7b6f85667fae10f9dc8a96409ef8a974db4716fafc47ab9f",
+      "bytes": 270
+    },
+    {
+      "path": "validation/c11-map-weather-20261112/map-main1497-review-7ce46cd/map-final-D-redacted-report.json",
+      "sha256": "67835bf6a2996d09fa466b8cda0019aaa120add93bc0d56837d7cb8ef87747f9",
+      "bytes": 1223
+    },
+    {
+      "path": "validation/c11-map-weather-20261112/map-main1497-review-7ce46cd/map-runtime-final-summary.json",
+      "sha256": "6c4f5abde8f2c5de0de5deb8dfb0f94d26386c3ea7702a8a533a507286743b97",
+      "bytes": 880
+    },
+    {
+      "path": "validation/c11-map-weather-20261112/map-main1497-review-7ce46cd/slot2-final-result.json",
+      "sha256": "9d7143f97013e86345106f4f261fb23bc862b0e24d86a636fff77a3ef1debdff",
+      "bytes": 1507
+    },
+    {
+      "path": "validation/c11-map-weather-20261112/map-main1497-review-7ce46cd/main1497-targeted-root-unit-status.json",
+      "sha256": "56254d44753a5c872609efd79e95ab7ca969d1720bdd09cde53f9cca4e7bb69d",
+      "bytes": 330
+    },
+    {
+      "path": "validation/c11-map-weather-20261112/map-main1497-review-7ce46cd/main1497-targeted-root-unit.log",
+      "sha256": "132587e95acc3660efddea090e099bc80d249264c4480457be7130acbfd6ee58",
+      "bytes": 180
+    },
+    {
+      "path": "validation/c11-map-weather-20261112/map-main1497-review-7ce46cd/main1497-targeted-dagster-dependency-unit-status.json",
+      "sha256": "b79f2e77d6cc31af697ea15e5ce38fb8381a44c739c3b5388b71c51cfc02b82b",
+      "bytes": 179
+    },
+    {
+      "path": "validation/c11-map-weather-20261112/map-main1497-review-7ce46cd/main1497-targeted-dagster-dependency-unit.log",
+      "sha256": "a07113e0171d5b827ba26961022a9c564ec20b8b6e225062d2ebcd91ed4e25ed",
+      "bytes": 1545
+    },
+    {
+      "path": "validation/c11-map-weather-20261112/map-main1497-review-7ce46cd/map1497-precommit-checks.json",
+      "sha256": "009dd251de65517121e16a19bbc8b36174288243140311315d4bc53ea1313dc2",
+      "bytes": 324
+    }
+  ],
+  "productionApplied": false,
+  "newCommonPackGenerated": false
+}

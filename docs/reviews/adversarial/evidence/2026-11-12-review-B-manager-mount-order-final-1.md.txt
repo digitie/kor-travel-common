@@ -1,0 +1,75 @@
+# 원 리뷰어 B — Manager Mount 순서 입력1
+
+- 원 B/Epicurus, packaging/platform/security/release/CI 독립 검토. 구현 참여·peer raw/verdict 및 nested review 열람 없음.
+- runid Epicurus-B-manager-mount-order-20261111T215258Z. 시작/종료 UTC는 evidence/session.json과 completion.json(종료2026-11-11T21:58:04.019141+00:00)에 기록했다.
+- 입력 review-manifest-manager-mount-order-1.json SHA256 24ce04472e44b587659ede8c81db0cab052132194e873fc889777e47d6454a91 직접 시작/종료 재확인.
+- base af413443a34063b38d09d788d5dc3ce211decf8a → 정확 ac4eebb5c931a98c6f1dfa921b840ebf415b4aec, tree77876ecdfc9abf5cf1d2c9818b43146c63153087, PR590.
+- source Git 저장소 /tmp/codex-manager-mount-order-20261112에서 immutable blob만 읽었다. 증거 review-B-manager-mount-order-final-1-evidence/.
+- 이전589/e798 PASS·B-MGR-P1-01 FIXED·당시 CI 및 모든 B 원문은 불변 보존한다.
+
+## Verdict / disposition
+
+**SOURCE PASS, 신규 finding0. 최종 CI 조건은 CONDITIONAL.**
+
+Mounts 열거 순서만 제외하는 수정과 missing/null 구분 강화를 독립 확인했다. 기존 값·중복·내부 ordered 배열 및 다른 보호 필드 검사를 유지한다. 제품517PASS·추가 SDK 공격24PASS·순열/값 변경 probe가 뒷받침한다.
+
+공유된 실호스트 order-only 반례의 source 수정은 수용한다. 실제 호스트에서 수정 SDK로 공식 dry-run/apply를 재실행한 결과를 주장하지 않는다. 마지막 직접 CI 관찰은 중앙 정책 SUCCESS·frontend SUCCESS·backend test IN_PROGRESS다. CI 미완을 local517로 대신하지 않는다.
+
+## 불변 source와 한정된 의미 변화
+
+manifest의6개 경로, base/head Git blob·SHA256·크기, 실제 diff 경로 집합 및 final tree를 확인했다. 변경은 production1파일·신규 product test1파일·docs4개다. 기존432개를 구성하는8 test 모듈은 모두 base/head blob 동일하다.
+
+production은 service_release_candidate.py의 _nonselected 안에만 있다. Mounts가 list이면 전체 항목을 json.dumps(sort_keys=True) key로 정렬한 새 list를 만든다. 실제 비교값은 전체 mount 객체 그대로여서 field 선택·삭제·중복 제거가 없다. sort_keys는 JSON object의 key 삽입 순서 차이를 없애는 정렬 key이고 내부 list는 정렬하지 않는다. 입력 record를 제자리 수정하지 않는다.
+
+Mounts를 포함했는지 여부와 값을 tuple로 함께 보존해 missing/null/빈 list를 구분한다. 이 강화는 기존 missing과null이 같게 비교되던 모호함을 제거한다. opaque 내부 비교 projection이며 manifest/pin schema를 바꾸지 않는다.
+
+AST에서 새 _nonselected 하나를 원 함수로 돌리면 모듈 전체가 base와 동일함을 직접 확인했다. 다른 후보 함수·실행 순서·G/source/current/paired/health/publication은 바뀌지 않았다. Config.Env·HostConfig.Binds·Network 내부 배열·Id/Image/StartedAt/Running/RestartCount를 정렬하거나 지우지 않는다. frontend/C11/config/installer도 변경 집합 밖으로 그대로다. B-MGR-P1-01의 component raw 환경 경계도 동일하다.
+
+## 직접 제품 red→green
+
+기존 /tmp/kt-manager-candidate-python을 읽기 전용 참조하고 Git에서 만든 본인 snapshot으로 검사했다.
+
+| 검사 | 본인 직접 결과 |
+| --- | --- |
+| 신규85 test를 exact baseaf413 source에 적용 | **18FAIL/67PASS** |
+| exactac4e 기존432 + 신규85 | **517PASS**,skip0 |
+| 제품 전체 backend Ruff | **PASS** |
+| 원 B SDK 사후/발행 경계 추가 test | **24PASS** |
+| Mounts 순열·object key 순서 probe | **24개 허용**, 입력 불변 |
+| 실제 내용·state·다른 보호 필드 negative probe | **23개 검출** |
+
+before 대조는 본인 snapshot의 candidate 파일 하나만 base Git blob으로 잠시 바꾸고 신규 제품85를 실행했다. finally에서 ac4e 원 blob으로 복원했고 마지막248개 snapshot 파일을 모두 원 blob과 재대조했다. 구현 worktree·live SDK를 고치지 않았다.
+
+제품85는 Map paired와 Geo/Weather component에서 render/dry-run/after-up/publication 순서 변경을 허용하면서 Source/Destination/RW/Mode/Propagation/Type/Name/Driver·새 field·삭제 field·중첩 값·내부 list·mount 추가/제거·중복 수·missing/null/empty·Env/Binds 순서 변경을 거부한다.
+
+본인 별도 순열 검사는 중복 mount를 포함한4개 항목의24순열과 key 삽입 순서 뒤집기를 허용하는지 보았다. Source/삭제 key/중첩 값·list/중복 추가·삭제, Config.Env/HostConfig.Binds/Network Aliases 순서, restart/Id/image/running 변화는 거부했다. missing/null/empty list/empty object/one-null-list의10개 쌍도 모두 달랐다.
+
+추가 SDK24개는 Map/Geo/Weather 각각에서 source·중복 수·내부 배열 변경이 after-up 또는 publish 직전에 mount 순서 변경과 함께 일어나도 nonselected_unchanged=false·success=false·current 미발행을 확인한다. 한 번 검출한 변경을 원복한 뒤 재검사하더라도 false flag가 유지되는 transient 대조도 포함한다. child returncode0·post verification·client close를 확인해 단순 사전 예외만 검사한 것이 아니다.
+
+## 실호스트 반례 증거와 본인 확인의 경계
+
+manifest의 보존 replay 결과/스크립트·85 before/after·517/Ruff·기타 artifacts는 전부 SHA256/크기를 확인했다. 제공 private replay는 공식 Weather dry-run **SDK 외부 즉시 전후**55 inspect records 중 비선택54를 exact old/new AST로 비교해 old5/new0 및8개 내용 변조 검출을 기록한다. SDK 내부 snapshot을 instrument했다는 증거가 아니다.
+
+본인은 운영 private inspect 원값이나 live SDK를 열거나 원격 projection을 재실행하지 않았다. 원 replay 스크립트를 실행하면 운영 경로를 읽고 출력 경로를 쓸 수 있으므로 수행하지 않았다. 결과의5→0은 생산자 전달 증거로 분류한다. 별도로 synthetic55 records에서5개의 Mounts 순서만 바꾼 본인 AST projection은 **old5/new0·비선택54**를 직접 재현했다. synthetic 자료를 실제 호스트 자료로 부르지 않았다.
+
+이 source 수용은 실제 호스트의 수정 후 dry-run 성공이나 UI apply 성공으로 확대하지 않는다. 운영 source install/dry-run/apply는0/NOT_RUN_B다. 원 반례·private raw·기존 원문은 수정하지 않았다.
+
+## 직접 CI 관찰
+
+정확ac4e commit-runs 및 CI jobs API를 직접 조회했다.
+
+- [중앙 정책43106671905](https://github.com/digitie/kor-travel-docker-manager/actions/runs/43106671905): 초기 IN_PROGRESS → 마지막 SUCCESS.
+- [전체 CI43106671432](https://github.com/digitie/kor-travel-docker-manager/actions/runs/43106671432): 마지막 IN_PROGRESS/conclusion null.
+- backend130811682749: lint SUCCESS, test IN_PROGRESS.
+- frontend130811683168: dependency guard/type/lint/Doctor/unit/build/common UI browser를 포함해 SUCCESS.
+
+PR merge ref는 한 번 immutable d4e25bcf3bfa2aa3b67e7a1444fdee11b160cc13로 해석했다. ac4e를 af413에 합치는 message와 GitHub compare ac4e→그 SHA **files0**을 확인했다. 이를 정식 PR merge나 운영 설치로 간주하지 않는다. local517/본인 공격과 원격 full backend 완료는 서로 다른 증거다. 미완 backend의 최종 성공/실패는 이 원문에서 선언하지 않는다.
+
+## 명령·보존
+
+주요 명령은 WSL git show/cat-file/ls-tree/rev-parse/diff, 기존 venv pytest -p no:cacheprovider, ruff check . --no-cache, AST projection 및 CodeGraph init/sync/status/impact _nonselected와 manual rg다. 기존432·신규85 및 추가24 source 코드를 읽고 실행했으며 peer review 보고서는 읽지 않았다.
+
+evidence에는517/Ruff, old85 red, 본인24 late-guard test,24순열/23negative·synthetic55 projection 코드/결과, exact6 source/tree/unchanged432 및 AST proof, 직접 CI/merge compare, artifact digest, 이전 B raw SHA·완료 기록을 보존했다. 초기 fixture palindrome/collection 시도 원문도 생산자 artifact hash로 보존됐고 유효 최종85/본인 before18FAIL와 구분했다.
+
+대형 install/build/browser·전체 backend local suite·운영 Docker/DB/API/Dagster·live SDK 수정·공식 dry-run 재시도·UI apply는 NOT_RUN_B다. source 코드 수정·pack 재생성·guard 예외·새 schema/env hash 추가 없음. 본인 tmp만 회수했고 타인 cache/venv/modules 및 모든 기존 원문은 보존했다. 남은 조건은 정확 전체 CI 완료와 소유자의 별도 공식 운영 수용이다.
+

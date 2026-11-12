@@ -1,0 +1,190 @@
+{
+  "archive": "2026-11-12-transport184-originals.tar.gz",
+  "archiveBytes": 41052,
+  "archiveSha256": "04d0d1e448b396fdb28f1481f4d9c358c7ec0bf4c766f1285c100b35e451e05f",
+  "members": [
+    {
+      "member": "disposition.json",
+      "bytes": 1133,
+      "sha256": "123ee20d20175a0e747631542ab66549ffa4e071577825292f06c41fd6641b58"
+    },
+    {
+      "member": "index.json",
+      "bytes": 6748,
+      "sha256": "203ef75bada678c32601b19a6b2bfecbca2b0fb34d68c4d36b654c1096eee1e9"
+    },
+    {
+      "member": "review-A-transport-geo-drawer-0aae-source-1.md",
+      "bytes": 8967,
+      "sha256": "87da8377eb5881e0e081aa4c7d63116932597bc1bf48e4516362cf8e6b533eed"
+    },
+    {
+      "member": "review-A-transport-geo-drawer-3c75-ci-close-5.md",
+      "bytes": 2367,
+      "sha256": "589ff0b642cef71ea12ea768a46a1ca9cb5abc5caadea79435bc28c0894174d7"
+    },
+    {
+      "member": "review-A-transport-geo-drawer-3c75-execution-4.md",
+      "bytes": 8390,
+      "sha256": "1cc00ba7b7099087599a95daca68e1ecab17ce933523345d05550429d2ca86a4"
+    },
+    {
+      "member": "review-A-transport-geo-drawer-3c75-source-3.md",
+      "bytes": 6616,
+      "sha256": "b1120c234eeafc88f895715011900392849bcf8e75ee186808261bec5cf24777"
+    },
+    {
+      "member": "review-A-transport-geo-drawer-postfix-source-2.md",
+      "bytes": 1513,
+      "sha256": "eb40ff6d97e02fab67b7ea35b78ad1a9d948648d3508704b7d7ac14e903390cd"
+    },
+    {
+      "member": "review-B-transport-geo-drawer-0aae-source-1.md",
+      "bytes": 9868,
+      "sha256": "d6433697d226a9f94e5c26d56973688d982a2b520803ed701ed0acdf949dba57"
+    },
+    {
+      "member": "review-B-transport-geo-drawer-3c75-ci-close-5.md",
+      "bytes": 2340,
+      "sha256": "812cd18aba78b366056a5e4c39c933fa4df85c4b50f1b8cfcbb01a9fa4ad72a6"
+    },
+    {
+      "member": "review-B-transport-geo-drawer-3c75-execution-4.md",
+      "bytes": 8020,
+      "sha256": "0f535f2fcd9bf6b713e73e8379b735f7ad0bce5fced4133ba354b5240e15bc2f"
+    },
+    {
+      "member": "review-B-transport-geo-drawer-3c75-source-3.md",
+      "bytes": 5767,
+      "sha256": "49c5027426f01290c901f2f6e925928eafd8c1b14625bb44d5ab38bdbf4f2b55"
+    },
+    {
+      "member": "review-B-transport-geo-drawer-postfix-source-2.md",
+      "bytes": 2220,
+      "sha256": "1d534dca9337399e9f46654b3b54b6c84e06d3eab41b2ca87735ee4f256e02a9"
+    },
+    {
+      "member": "review-manifest-transport-geo-drawer-0aae-source-1.json",
+      "bytes": 3781,
+      "sha256": "ccb8bb6c196f5c0193a54d7d3c4ae685c490d9531ef44a8ac8c170c9f332471f"
+    },
+    {
+      "member": "review-manifest-transport-geo-drawer-3c75-ci-close-5.json",
+      "bytes": 1668,
+      "sha256": "defe69e656eeb9f1262602aa0027db261121c3e44857fcd1f9c822e948acb880"
+    },
+    {
+      "member": "review-manifest-transport-geo-drawer-3c75-execution-4.json",
+      "bytes": 2066,
+      "sha256": "3d6da26a9e0f01e22ed4345572bc3c1310e3731915851d6801e8d921abaf93fd"
+    },
+    {
+      "member": "review-manifest-transport-geo-drawer-3c75-source-3.json",
+      "bytes": 3795,
+      "sha256": "2741ec83b3ecd427893446e2c407fde69673f86d082ae28248c73f2891cf7dd9"
+    },
+    {
+      "member": "review-manifest-transport-geo-drawer-postfix-source-2.json",
+      "bytes": 3345,
+      "sha256": "7f346c1fb5cb3c74cbeb6fbb9dfead55d0b63584906f954f797104a900fda0d8"
+    },
+    {
+      "member": "validation/transport-M88566f-contact-diagnostic-20261112/final-receipt.json",
+      "bytes": 1554,
+      "sha256": "df4499f676ccc27dec58a5f822da28e8a0959b414212edbfa5efd76991eeafad"
+    },
+    {
+      "member": "validation/transport-M88566f-contact-diagnostic-20261112/parent-diagnostic-verification.json",
+      "bytes": 492,
+      "sha256": "d1a3a124f756ed535e8c399c71e89e3cedd22044af2a9233b03c6ed469b0bf09"
+    },
+    {
+      "member": "validation/transport-geo-drawer-3c75-qa-20261112/final-manifest.json",
+      "bytes": 7944,
+      "sha256": "51910abc5ab73d2500d738a40d8f6d37c0ee51cd610ff1eb2fe1eed1485c944c"
+    },
+    {
+      "member": "validation/transport-geo-drawer-3c75-qa-20261112/parent-verification.json",
+      "bytes": 2125,
+      "sha256": "187c037217a39b87546b54929e0cd84d435f69851160ce79f8e395170a68d1de"
+    },
+    {
+      "member": "validation/transport-geo-drawer-admin-M88566f7d-deployment-20261112/final-receipt.json",
+      "bytes": 2324,
+      "sha256": "081f8abba37132edebe752ac1f3061ef9caf3801775f0d62b7cfa6ed37747717"
+    },
+    {
+      "member": "validation/transport-geo-drawer-admin-M88566f7d-deployment-20261112/parent-official-apply-verification.json",
+      "bytes": 636,
+      "sha256": "85e408124f97f969d2c78c44efab4e9812177946cd73bd5c987e5c97ee930536"
+    },
+    {
+      "member": "validation/transport-geo-drawer-arm-20261112/candidate-3c75431e/final-cache-manifest.json",
+      "bytes": 2602,
+      "sha256": "97d246f245f7c04f29f6835cbf21472e8d17cb35546d3682b1abb782a4116893"
+    },
+    {
+      "member": "validation/transport-geo-drawer-arm-20261112/candidate-3c75431e/parent-cache-verification.json",
+      "bytes": 349,
+      "sha256": "4f70b1802f383b3281828cd0a8225f9661114ce22d086cc7fe0c3d603afa8ab0"
+    },
+    {
+      "member": "validation/transport-geo-drawer-arm-20261112/merged-88566f7d/final-receipt.json",
+      "bytes": 3690,
+      "sha256": "de991d253e86f3295340db1af23be90c9c1473fa10e2be44d2a39a4038a85982"
+    },
+    {
+      "member": "validation/transport-geo-drawer-arm-20261112/merged-88566f7d/parent-final-image-verification.json",
+      "bytes": 663,
+      "sha256": "f680befd9fd108a0527ccdfbacdad0305bced23ba1a53a9284608522b6817df5"
+    },
+    {
+      "member": "validation/transport-geo-drawer-candidate-20261112/ci-3c75-front-checkpoint.json",
+      "bytes": 560,
+      "sha256": "0f7c245bec01badc184c398d038fc687f8e1df0c32cf9e08c9b250da1f34048d"
+    },
+    {
+      "member": "validation/transport-geo-drawer-candidate-20261112/merge184-tree-bridge.json",
+      "bytes": 1264,
+      "sha256": "12154a15fdeabe272b9ba2b979064521abf8e8d69a1116f2db70ca720dd2e1e0"
+    },
+    {
+      "member": "validation/transport-geo-drawer-candidate-20261112/parent-execution-review-read.json",
+      "bytes": 743,
+      "sha256": "919f7ee07e181eda03a6207e9163fa7ceaa74d06cafc71a5b6c4cd9ccd21bec8"
+    },
+    {
+      "member": "validation/transport-geo-drawer-candidate-20261112/superseded-ci-cancel-receipt.json",
+      "bytes": 770,
+      "sha256": "dd4ad76d202ca2e4961b0c04900c0fc2557f31c29d6a09d6caab36ddec93f733"
+    },
+    {
+      "member": "validation/transport-geo-drawer-next-actual-20261112/final-receipt.json",
+      "bytes": 4988,
+      "sha256": "5e544d41700cd37aae2ed9e92e60e0237ebc42876db680519688d78aec8e6921"
+    },
+    {
+      "member": "validation/transport-geo-drawer-next-actual-20261112/parent-first-actual-verification.json",
+      "bytes": 902,
+      "sha256": "22c72dc50257db5a705ac42e353aceb7bddb09b167b0029e526c4688e9652b1f"
+    },
+    {
+      "member": "validation/transport-pr184-exact-ci-3c75431e-monitor-20261112/final-receipt.json",
+      "bytes": 2698,
+      "sha256": "ed42aaee3b12a4b046093d4343b647ffa95e8dbc662f0e3d1484b6169f272cf2"
+    },
+    {
+      "member": "validation/transport-pr184-exact-ci-3c75431e-monitor-20261112/parent-api-final.json",
+      "bytes": 8759,
+      "sha256": "3110997a2e6d9a00a88aeb6bf9452ca922c92e14f310bcdb3084b510e336c002"
+    },
+    {
+      "member": "validation/transport-pr184-exact-ci-3c75431e-monitor-20261112/parent-final-ci-verification.json",
+      "bytes": 1229,
+      "sha256": "9bbd4f6079fec0cd019bc4ed0ba6640cc519074af092a2ee7036a28dca6462f0"
+    }
+  ],
+  "originalMemberBytesVerified": true,
+  "libraryPayloadOrRulesChanged": false,
+  "historicalFailuresRetained": true
+}

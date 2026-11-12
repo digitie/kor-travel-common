@@ -1,0 +1,190 @@
+{
+  "archive": "2026-11-12-transport185-originals.tar.gz",
+  "archiveBytes": 49842,
+  "archiveSha256": "f40fc90a23efa390e9dec27046b15acbff960131a86f05a9d7b2444844f7d0d0",
+  "members": [
+    {
+      "member": "closure-disposition.json",
+      "bytes": 1646,
+      "sha256": "2887c979a26bf1910b56026db068fdb0e9d54399babec8fd84f14701be31c1ba"
+    },
+    {
+      "member": "closure-index.json",
+      "bytes": 6884,
+      "sha256": "81faf16c2b48a8cf963e02a63802085926f8acf9d30f61841384df7bcef012ab"
+    },
+    {
+      "member": "review-A-transport-rail-server-frame-bf93-focus-analysis.md",
+      "bytes": 4944,
+      "sha256": "1d93557bfca086d4ecb8e457a4b0ae56b4c7ca5e479207487fe5ee6d813d98b5"
+    },
+    {
+      "member": "review-A-transport-rail-server-frame-bf93-source-1.md",
+      "bytes": 10295,
+      "sha256": "362f71ec09426cf88ef1614a446108042b3de0ea74336015e8b118ef133bacf3"
+    },
+    {
+      "member": "review-A-transport-rail-server-frame-edb-ci-close-4.md",
+      "bytes": 2666,
+      "sha256": "1975f48e33f2c0b5ea1d9ef47c036b877acd36e8447ff938a906fd92a7fb57df"
+    },
+    {
+      "member": "review-A-transport-rail-server-frame-edb-execution-3.md",
+      "bytes": 8410,
+      "sha256": "91fbea97de799fbfe9dbe3ccc02508f31c9c337f7ffc673925e1d9b683125f28"
+    },
+    {
+      "member": "review-A-transport-rail-server-frame-edb-source-2.md",
+      "bytes": 7182,
+      "sha256": "fb1261674577f012abc7a75ea24d6509be20f6f1572d13fdc2574ef648ee6aec"
+    },
+    {
+      "member": "review-B-transport-rail-server-frame-bf93-source-1.md",
+      "bytes": 9056,
+      "sha256": "acabb2bb3643bb5b57ecbf61cd0d4af8c18f35475526e51ea016ba2504d0925a"
+    },
+    {
+      "member": "review-B-transport-rail-server-frame-edb-ci-close-4.md",
+      "bytes": 2422,
+      "sha256": "4eb4a9b583aae303a74b6d6201c04edc1f63ce04da977e87ed3ac4038e107e89"
+    },
+    {
+      "member": "review-B-transport-rail-server-frame-edb-execution-3.md",
+      "bytes": 7013,
+      "sha256": "adff36ff01e16d93f19a40b954ea34209adfca367ea52b1a49da142d85e51fe4"
+    },
+    {
+      "member": "review-B-transport-rail-server-frame-edb-source-2.md",
+      "bytes": 5278,
+      "sha256": "2b204be254b34805b95462542d2ce488e4729c71d25916b5cffb28b6732b7813"
+    },
+    {
+      "member": "review-manifest-transport-rail-server-frame-bf93-source-1.json",
+      "bytes": 2968,
+      "sha256": "759f210a69842147aad34a8880d021b1f890656a76c6839bb29a2958f162f4e1"
+    },
+    {
+      "member": "review-manifest-transport-rail-server-frame-edb-ci-close-4.json",
+      "bytes": 2423,
+      "sha256": "959c90bebf90e0ba96cd89bd44828d83c452a730883530d290ae223547436fd8"
+    },
+    {
+      "member": "review-manifest-transport-rail-server-frame-edb-execution-3.json",
+      "bytes": 3409,
+      "sha256": "0aaf771e908d289e558cc492ace744c1fffcbd707617b29037a82a3e4218584d"
+    },
+    {
+      "member": "review-manifest-transport-rail-server-frame-edb-source-2.json",
+      "bytes": 4460,
+      "sha256": "5ccb5aceeff4f87c1ceedab206649aaee3dba93123c4388ad8aae355d1ba6f60"
+    },
+    {
+      "member": "validation/transport-M9aeb-PNG-only-diagnostic-20261112/final-receipt.json",
+      "bytes": 4465,
+      "sha256": "85f98db18ea564ace22e6db98398be6c958d55cfebac53a596eb8e9bf413158f"
+    },
+    {
+      "member": "validation/transport-M9aeb-PNG-only-diagnostic-20261112/parent-frozen-verification.json",
+      "bytes": 236,
+      "sha256": "8b37865de34cb13547ad6592493d10ea7a48cf03fe16879cbe2858ad03342617"
+    },
+    {
+      "member": "validation/transport-PR185-M9aeb-actual-preparation-20261112/final-receipt.json",
+      "bytes": 8638,
+      "sha256": "96b8278432c2cb599705d41d26bcba8db836c82d5c0f0f0dba20d237a2148cf1"
+    },
+    {
+      "member": "validation/transport-PR185-M9aeb-actual-preparation-20261112/parent-full31-verification.json",
+      "bytes": 246,
+      "sha256": "1629724945cdad7773beb3f266ad92c01df9349c1f165b468d34a11fe4f6286d"
+    },
+    {
+      "member": "validation/transport-PR185-M9aeb-actual-preparation-20261112/parent-menu-visual-verification.json",
+      "bytes": 1462,
+      "sha256": "fdd8f96e5b00006bf5c9a1317682a2302767f4c3089d02319e859f1651652d43"
+    },
+    {
+      "member": "validation/transport-bf9-parent-focus-once-20261112/parent-diagnosis.json",
+      "bytes": 1859,
+      "sha256": "2c2f0f2e3e9fc35d048cafe30599d43e18893ba19d2a9c8662e7d21b159aa34e"
+    },
+    {
+      "member": "validation/transport-bf9-parent-focus-unit-20261112/after-result.json",
+      "bytes": 495,
+      "sha256": "517112766eba8c30e95d32b7eb956024672e7b9cf61718ce451fbfac3ab554bd"
+    },
+    {
+      "member": "validation/transport-bf9-parent-focus-unit-20261112/before-result.json",
+      "bytes": 36,
+      "sha256": "379acf8778f0a4439b2c58b911e9c0df27cac4ea777e0d81cc6e3d3d49f0ff1e"
+    },
+    {
+      "member": "validation/transport-rail-map-focus-edb-qa-20261112/final-receipt.json",
+      "bytes": 10573,
+      "sha256": "c3c572c1b427c6b4654f496d93cdfdfe3d47881eb3539c349962dd6b2bfe470d"
+    },
+    {
+      "member": "validation/transport-rail-map-focus-edb-qa-20261112/parent-final-frozen-verification.json",
+      "bytes": 309,
+      "sha256": "e5e6317f9791baba8c4c203813c4691fe8dcc89a8b545dd00c360148658ca661"
+    },
+    {
+      "member": "validation/transport-rail-map-ssr-admin-M9aebd199-deployment-20261112/final-receipt.json",
+      "bytes": 2453,
+      "sha256": "0d0c6ec7773fffda2df69cd9c1f54fb1b68ddb73a14f518ca40333a979b084fb"
+    },
+    {
+      "member": "validation/transport-rail-map-ssr-admin-M9aebd199-deployment-20261112/parent-official-apply-verification.json",
+      "bytes": 8085,
+      "sha256": "41fea3f6765fc45d1e67172335b305aecf36212019dcc667e8788cd4165a69dc"
+    },
+    {
+      "member": "validation/transport-rail-map-ssr-arm-20261112/merged-9aebd199/final-receipt.json",
+      "bytes": 3952,
+      "sha256": "1a59a8efdd32947cb0bac4b6d636e1805189d791eaa2a53510146223e5ab6640"
+    },
+    {
+      "member": "validation/transport-rail-map-ssr-arm-20261112/merged-9aebd199/parent-final-M-image-verification.json",
+      "bytes": 3751,
+      "sha256": "64a5405a54f3a3fb69ccf693e323b0c3f066b00cb15e963923f2bbf02a49d035"
+    },
+    {
+      "member": "validation/transport-rail-map-ssr-before-20261112/before-receipt.json",
+      "bytes": 1076,
+      "sha256": "73359111cdadd21cd503ec2e7c070377af9196c2189551e27eb3a1055215fadc"
+    },
+    {
+      "member": "validation/transport-rail-map-ssr-bf9-focus-diagnostic-20261112/collection-failure-receipt.json",
+      "bytes": 907,
+      "sha256": "0a004378b0a6e74bf9535bc9778330e788e2eb293f27acfbb6bfff974f6abf13"
+    },
+    {
+      "member": "validation/transport-rail-map-ssr-bf9-focus-diagnostic-r2-20261112/final-receipt.json",
+      "bytes": 14599,
+      "sha256": "b0c0646dee6790264350e659e28a7fbf87f30229f92c1a8d29452165f86a1b24"
+    },
+    {
+      "member": "validation/transport-rail-map-ssr-bf9-qa-20261112/final-receipt.json",
+      "bytes": 8259,
+      "sha256": "c484c64fd3b4cecfede405d6625c2ac5bf7c8bccd80e2f26796cf87b4be9008f"
+    },
+    {
+      "member": "validation/transport-rail-map-ssr-edb-candidate-20261112/ci-final-receipt.json",
+      "bytes": 1899,
+      "sha256": "746e935ad868263cb70de6a3c254ff34e336d8ed6795af37a2e31f8d4cc59ae0"
+    },
+    {
+      "member": "validation/transport-rail-map-ssr-edb-candidate-20261112/focus-observation-count-addendum.json",
+      "bytes": 1469,
+      "sha256": "3ff54061d6ba60c6bced1e3b6db37c602e50c8b06db0001ae7296fed739dae77"
+    },
+    {
+      "member": "validation/transport-rail-map-ssr-edb-candidate-20261112/merge185-tree-bridge.json",
+      "bytes": 989,
+      "sha256": "063e8e1b33d931156f7abd8072a100554a54bf38c2d0d8c3c4c6968486df2a57"
+    }
+  ],
+  "originalMemberBytesVerified": true,
+  "libraryPayloadOrRulesChanged": false,
+  "historicalFailuresRetained": true
+}

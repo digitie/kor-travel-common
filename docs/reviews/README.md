@@ -20,6 +20,13 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-11-12 | 최종 사실 입력5 문서 정산 | [원문·판정](adversarial/2026-11-12-consumer-sdk-final.md#입력5-최종-사실출처-검토-정산), 37a264b | 동일 원 A UI·수용 / 원 B 출처·보존 | 두 PASS·신규0, 원문 pending 보존·정확 후보 CI3/9 SUCCESS; 최종 closure head CI 별도 |
+| 2026-11-12 | Transport184~186 메뉴·지도·최신 운영 정산 | [현재 정산](adversarial/2026-11-12-consumer-sdk-final.md#최종-운영-수용-6개-정산), bd08/mergef30 | 동일 원 A UI·계약 / 원 B 출처·배포 | source2·helper3·실행4 두 PASS, 이전 실패 보존·실제 정상9 PASS; 현재 출판 후보의 원2검토·CI는 별도 |
+| 2026-11-12 | Transport183 모바일 메뉴 원문·정산 | [기록](adversarial/2026-11-12-consumer-sdk-final.md#transport183-모바일-메뉴-원문과-머지-정산), cd4/merge47a | 원 A UI·스크롤 / 원 B 격리·출처 | 원 두 BLOCK 보존 → 자기 지적 FIXED·소스/실행/CI종료 PASS·신규0, 실제 새 키 운영 수용 별도 |
+| 2026-11-12 | Transport182 기존 관리자 기능 보존 원문·정산 | [기록](adversarial/2026-11-12-consumer-sdk-final.md#transport182-기존-관리자-기능-보존의-원-검토머지-정산), c3/merge6b75 | 원 A UI·계약 / 원 B 기능·출처 | 원 두 입력1 BLOCK → 자기 지적 FIXED·소스/실행 PASS, merged tree 일치, 실제 관리자 수용 별도 |
+| 2026-11-12 | SDK 원문·머지 정산 | [Transport 두 UI 선택](adversarial/2026-11-12-consumer-sdk-final.md), e533/merge508b | 원 A 계약·격리 / 원 B 출처·배포 | 두 COMBINED SOURCE PASS·신규0·정확 CI 성공·실제 Transport 수용 후속 |
+| 2026-11-12 | 문서 출판·사실 정산 | [소비자·SDK와 배포 원문 정산](adversarial/2026-11-12-consumer-sdk-final.md), 입력1/1742·입력2/79ed | 원 A 문서·계약 / 원 B 출처·배포 | 두 입력 모두 두 PASS·신규0, 정확 CI 성공·실제 완료5·Transport 후속 |
+| 2026-11-12 | FULL·원문 정산 | [Common7·Scope2](adversarial/2026-11-12-common7-scope2-final.md), [소비자·SDK](adversarial/2026-11-12-consumer-sdk-final.md) | 원 A UI·계약 / 원 B 패키징·CI | 범위별 SOURCE PASS·자기 지적 FIXED, 이전 BLOCK 보존·실제 배포 별도 |
 | 2026-11-11 | FULL·1차 | [Radix 공통화](adversarial/2026-11-11-radix-unification.md), 789e6d2/7402214 | A UI·접근성 / B 패키징·CI·고지 | 두 BLOCK·수정 및 재검토 중 |
 | 2026-10-23 | FULL·소스 정산 | [workspace metadata 갱신 주기](adversarial/2026-10-23-workspace-refresh-closure.md), 89ea368 | A 실행·복구 / B SDK·패키징 | 두 SOURCE PASS·OPEN0·CI8SUCCESS·소비자/운영 별도 |
 | 2026-10-18 | FULL·통합 delta | [daemon 풀·영속 webserver 합집합](adversarial/2026-10-18-daemon-pool-union-closure.md), ff849ea | A 계약·의존성 / B 설치·패키징 | 두 SOURCE PASS·P3 FIXED·CI14SUCCESS·운영 별도 |

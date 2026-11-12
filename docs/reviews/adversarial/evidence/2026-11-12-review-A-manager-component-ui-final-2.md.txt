@@ -1,0 +1,102 @@
+# 원 reviewer A — Manager component UI SDK input2 독립 리뷰
+
+runid Mill-A-Manager-Component-UI-2-20261111. 구현 비참여, read-only, peer raw/verdict 미열람. UTC 시작2026-11-11T20:59:52Z / 최종 불변 재대조21:04:43Z.
+
+**판정 BLOCK. 신규 A-MGR-COMP-P2-01 OPEN(다중 달러 raw ENV 손상). P0=0/P1=0/P2=1/P3=0.** 제품400개와 Ruff는 통과하지만 추가 실제 Compose/fake Engine 반례가 있다. 정확71550 CI도 아직 완료되지 않았다. 원 source1 PASS 원문은 수정하지 않는다.
+
+## 불변 입력·관찰·범위
+
+- review-manifest-manager-component-ui-2.json SHA256 aa1d5838ab0d7f9c37f723028b216664ecaa3e35e4be92f6e34895bf91ae84f3 시작/종료 일치.
+- base9910b9a6dba902c6a59469d3a6f46c6077e78d3f; 이전 reviewed df3760cc22d23bab71a1b93c7ca9b86299a94d9f; exact head71550de2f3f0754444d8b1d8fb5478a41cfede8c.
+- exact tree f2cd03ca9c9af13d1ed1ac48e127c22b45ae48d0. shared /tmp/codex-manager-component-ui-20261112은 시작/종료 모두71550/clean. 본인 실행은 Git archive/show로 분리한 /tmp/review-A-manager-component-ui-final2에서 수행했다.
+- manifest 전체10개 변경 blob과 base→head 실제 집합 동일. 전달 evidence11개 SHA256도 시작/종료 모두 일치했다.
+- 이전 review-A-manager-component-ui-final-1.md SHA256 346c0367e66fd56fff31be65bb8a80d90c183c7bc4140decb408c029ba889f6a 불변.
+- input2의 df→71550 delta는 component/helper/test 및 docs7파일이다. CLI·registry·config UI role/source·기존 Map 테스트·frontend·HTTP API·locks/C11·manifest/pin schema의 추가 변경은 없다.
+- 운영 read-only consumer 보고서 validation/c11-map-weather-20261112/PR589-component-effective-environment-drift.ko.md를 읽었다. 이 자료는 peer raw가 아니며 actual key/운영값은 포함하지 않았다. 보고서의 private 파일/운영 locator를 열거나 운영에 접속하지 않았다.
+
+기존 Python3.14.4/Docker SDK7.2.0/pytest9.2.0 venv를 read-only 참조했다. 대형 install·image build·browser·production Docker/HTTP 요청·source commit/repack 없음. 새 fixture·cache·Unix socket은 자기 tmp에만 생성했다.
+
+## 새 구현에서 확인한 보장
+
+service_release_component_candidate.py:54-84가 G 아래 현재 선택 UI의 Config.Env와 후보 image Config.Env를 읽는다. 환경은 list의 key=value 문자열이어야 하며 NUL·중복 key·빈 key·불완전 항목을 거절한다. 빈 값과 '='가 포함된 값은 유지한다. 후보 기본값을 먼저 두고 live 값을 우선 병합한다.
+
+:68-72는 selected 환경을 명시 mapping으로 바꾸고 selected env_file을 제거한다. :73-83은 승인한 old/current 또는 candidate image 관계 및 해당 raw 환경을 비교한다. :114-119에서 이를 추가 admission/post/publication 조건과 render 이전 redaction 원천으로 전달한다.
+
+공유 _apply_current 변경은 optional extra_secrets와 기존 _secrets의 병합뿐이다. Map의 기본 callback/환경 처리 의미는 유지한다. Map/Pinvi 우회 거절·root/승인·source/G/factory 순서·current/비선택/health·terminal 발행 실패는 기존 경로 그대로다. 기본5 test169개 blob도 df와71550에서 동일하다.
+
+독립 재실행에서 최종 제품 환경28개를 exact df source와 동일한 최종 fixture/control에 넣으면 **28FAIL/60 deselected**였다.71550에서는 기존372+새28을 합친 **400PASS/9.62초**, 전체 backend Ruff exit0였다. 소비자가 제시한 live/frozen 환경 차이를 다루는 기본 반례·재검사·render 전 가림이 실제로 강화된 것은 확인했다. 그러나 raw ENV 전체 보존은 아래 추가 반례 때문에 완료되지 않았다.
+
+## 신규 A-MGR-COMP-P2-01 — OPEN
+
+**P2 · raw live/image ENV의 연속 달러가 Compose stdin에서 줄어든다. 사후 거절 전 실제 재생성 환경이 달라질 수 있다.**
+
+### 위치와 원인
+
+- service_release_component_candidate.py:70에서 Docker Config.Env의 raw 값을 Compose environment에 그대로 넣는다.
+- 이후 service_release_candidate.py의 _apply_current가 공통 _escape_materialized_compose_environment_values를 적용해 stdin을 만든다.
+- 이 공통 escaper는 이미 docker compose config가 정규화한 환경값의 짝수 달러 run을 보존하고 홀수 run만 늘리는 계약이다. 새 component bind가 공급하는 값은 정규화된 Compose 문서가 아닌 raw Docker 값이다. 두 표현이 섞여 raw '$$'가 escape된 '$'1개로 해석된다. 후보 image의 새 ENV default도 같은 문제다.
+
+### 직접 재현: 실제 Compose5.1.4 → 자기 fake Engine
+
+실제 Docker Compose5.1.4 CLI를 **명시 --host unix:///tmp/review-A-manager-component-ui-final2/fake-compose-engine.sock**으로 실행했다. DOCKER_CONFIG도 자기 빈 fixture였다. 서비스 network_mode=none, synthetic immutable image ID와 synthetic 환경만 사용했다.
+
+제품 _preserve_environment의 bind와 실제 공통 escaper를 적용한 stdin을 동일 --no-deps --no-build --pull never --force-recreate up 형태로 넘겼다. 자기 HTTP Unix server는 image/container 조회에 합성 응답만 반환하고, containers/create의 실제 JSON body를 기록한 뒤 의도적으로400을 반환했다. 실제 container나 image·네트워크는 만들지 않았고 production daemon에는 연결하지 않았다.
+
+실제 Engine 요청 Env의 비교:
+
+| 합성 항목 | 승인 raw 값 | 실제 Compose create 요청 값 |
+|---|---|---|
+| live PASSWORD | live$$secret | live$secret |
+| 새 image default NEW_SECRET | image$$default | image$default |
+| live TRIPLE | a$$$b | a$$b |
+| live FOUR | a$$$$b | a$$b |
+| live SINGLE | a$b | a$b |
+| live EQUALS / EMPTY | a=b / 빈 값 | 동일 |
+
+즉 단일 달러 control은 통과하나2·3·4개 연속 달러는 보존되지 않는다. 이 표의 값은 전부 reviewer가 만든 합성 값이며 운영값이 아니다.
+
+서버 event는 자기 socket의 images inspect GET / containers list GET / containers create POST뿐이다. CLI exit1은 server가 create body 기록 후 의도적으로 중단한 결과이며 제품/production Docker 실패로 집계하지 않는다. 실제 Env payload가 핵심 증거다.
+
+### 전체 SDK 경로에서도 2개 red 재현
+
+별도 own-dollar-regression.py는 Geo/Weather 제품 fixture를 사용해 같은 실제 Compose 디코딩을 재현했다. source71550의 전체 apply_component_ui_candidate를 거치면 선택 UI fake image는 새 ID로 바뀌고, 환경 값은 줄어든 뒤 selected_environment_unchanged=false로 실패하며 옛 current를 유지한다. 환경 보존 assertion은 **2FAIL**이다. original400개와 다른 추가 반례다.
+
+부작용 후 실패를 잘 관찰하는 guard는 유지되지만, 이 guard만으로 실행 전에 환경이 보존되지는 않는다. 실제 운영에서 같은 값으로 적용하면 새 UI가 잘못된 credential/config로 생성돼 사용 불능이나 설정 drift를 일으킬 수 있다. 자동 rollback이 없으므로 current가 옛 상태라는 사실도 실제 UI 환경 보존의 증명이 아니다. 실제 운영 apply가 있었다고 주장하지 않는다.
+
+### 권고·disposition
+
+component에서 새로 가져온 **raw** live/image 환경을 Compose 표현으로 정확히1번 인코딩한 뒤 전달하고, 비교와 승인 데이터는 raw 값으로 유지한다. 예를 들어 raw의 모든 달러를 Compose용으로 인코딩하는 별도 경계를 두어야 한다. 이미 정규화된 입력을 받는 Map 공통 escaper의 의미를 전체 변경하면 기존 paired 경로가 회귀할 수 있으므로 두 표현을 구분해야 한다.
+
+수정 뒤 '$', '$$', '$$$', '$$$$', '$VAR', '${VAR}' 및 빈 값/등호를 실제 Compose→Engine Env에서 확인하고 Geo/Weather 전체 경로·candidate defaults·사후/발행 경계를 다시 검사할 것을 권고한다.
+
+원본 source 수정 없음. 이 finding은 즉시 commentary로 전달했다. 수정된 별도 불변 입력에서 본인 재확인 전 **OPEN**이며71550은 BLOCK이다.
+
+## 증거 해석과 제한
+
+첫 진단으로 docker compose config --format json 출력을 raw runtime 환경과 비교했다. 이 출력은 다시 escaping된 Compose 표현이므로 그것만으로 runtime 손상을 판정할 수 없었다. dollar-config-diagnostic-limit.json에 이 제한을 명시했고, 최종 finding은 그 비교가 아닌 **실제 containers/create Env payload**와 전체 SDK red2에만 근거한다. 최초 진단은 제품 failure로 세지 않는다.
+
+redaction은 제품28개가 검사한 raw live/candidate secret·render 실패와 기존 generic terminal 진단 범위에서 확인됐다. 이번 finding을 별도의 실제 secret 유출 사고로 확대하지 않았다. 운영 env·키 원문은 읽거나 출력하지 않았다.
+
+hosted CI는 exact71550으로 직접 API 조회했다. 시작에는 CI43099196196/중앙43099196905 모두 queued였고, 종료21:04:43Z 부근에는 CI는 in_progress, 중앙은 queued였다. 완료/green을 주장하지 않는다. 이전 df/9910 CI로 대체하지 않으며, 이후 CI가 green이더라도 추가 red2의 source 원인은 별도 수정·재검토가 필요하다.
+
+## commands/evidence
+
+root/review-A-manager-component-ui-final-2-evidence에 다음을 보존한다.
+
+- observations-start/end.json: manifest/hash·전체10blob·evidence11hash·clean/observedSHA·기존5test169 byte proof.
+- delta.patch: exact df→71550 전체 source/docs 차이.
+- own-before-df28.log / own-before-command.json: exact df에 최종28 controls를 주입한 독립 before28FAIL.
+- own-focused400.log / own-ruff.log: exact71550의400PASS·Ruff0.
+- fake-engine-dollar-repro.py/json: 실행 가능한 합성 재현, 실제 Compose argv/자기 Engine routes/create body/expected·actual 값.
+- own-dollar-regression.py/log: 전체 SDK Geo/Weather red2, 새 image/환경 drift/옛 current 관계.
+- dollar-real-compose-repro.json 및 dollar-config-diagnostic-limit.json: 초기 config 정규화 진단과 그 한계.
+- ci-direct.json: 직접 API의 실제 관찰 시점·queued/in_progress 상태.
+
+명령은 immutable git show/archive/diff/rev-parse, 기존 venv pytest -q -p no:cacheprovider(400개 및 before28/own2 명시), ruff check --no-cache src tests, 실제 docker compose version/config 및 명시 자기 fake Engine의 up이다. 새 pytest 공격은 고유한 자기 --basetemp를 사용했고 product 검사 경로의 추가 fixture는 실행 후 제거해 Ruff 대상에 섞지 않았다. 타인 cache는 삭제하지 않았다.
+
+## 최종 disposition
+
+- 소비자 live/frozen drift에 대한 기본 보완: source의 최종28 red→green 직접 확인. 운영 적용은0/미실행.
+- 기존 Map 기본 의미·169 test bytes: 유지 확인. source1 PASS 원문 불변.
+- **A-MGR-COMP-P2-01 OPEN**: raw 다중 달러 환경 보존 실패, 실제 Compose/fake Engine 및 전체 SDK red2 확보.
+- 신규 P0/P1/P3=0. **71550 input2 BLOCK**. CI·merge·trusted SDK 설치·실제 Geo/Weather 적용 승인을 이 원문으로 대신하지 않는다.

@@ -1,3 +1,27 @@
+## 2026-11-12 — Transport Geo형 메뉴·지도 실제 수용 후 문서 마감 후보
+
+Transport184의 PC 왼쪽256px 세로 메뉴·모바일 왼쪽296px 드로어, 185의 서버 frame·포커스 보존, 186의 잘린 사용자 로더 수정을 반영했다. 실제 mergef30의 정상 ARM image0ac을 SDK508로 관리자만 교체하고 첫 정상 세션9 PASS·PNG decode2+2·zoom7→8·9폭/11행·폰트·로그아웃 후 보호401을 확인했다. 부모가 동결63개와 실제 화면4개를 직접 확인했다. 184 운영 연락처 실패와185 최초 canvas5초 실패·진단 실패는 보존하며 새 피드백5초/전체 bootstrap60초 계약과 동등하다고 주장하지 않는다.
+
+Common50에 기존 원 두 reviewer의 원문·CI·실제 merged ARM/SDK/정상 수용 정산을 byte 그대로 추가한다. 패키지·버전·CI·scanner 예외·동결 산출물은 변경하지 않는다. 문서 출판의 원2검토·정확 CI 후 Common50, 이어 Geo 단일 MD를 마감한다. Transport 남은 PR/빌드 체계와 전체 프로젝트 규칙 일관화는 그 이후, CI 순서 최적화는 가장 마지막이다. Map 추가 소스·빌드·이미지·배포는 제외하고 native 실기기/EAS/스토어는 NOT_RUN으로 유지한다. 현재 근거는 [최종 정산](reviews/adversarial/2026-11-12-consumer-sdk-final.md#최종-운영-수용-6개-정산)이다.
+
+## 2026-11-12 — 문서 입력1 두 PASS·Geo 실제 수용 추가
+
+1742c375의46개 문서/증거/attributes를 원 A/B가 독립 검토해 두 PASS·신규0을 확인했고, 정확3개 workflow와 docs6개 job 모두 성공했다. 원문·불변 입력을 byte 그대로 별도 receipt에 보존했다. 이후 Geo image82c7/common263의 공식4단계 exit0과 실제 표37행·지오코딩 후보1·타일9응답200·정상 로그아웃/보호401까지 확인하여 실제 완료5개다. 새 공개 JSON에는 별도 과거 공유PG 설정1차이 미확정과 Geo 검증기 실패/재시도를 보존한다. Transport/Map/native 한계를 완료로 바꾸지 않는다. source 정책·패키지·버전·vendor·workflow 변경0이며 이 사실 delta의 원 두 검토와 정확 CI는 후속이다.
+
+## 2026-11-12 — 소비자 7개 머지와 독립 source 증거 출판
+
+공통·fork 5개와 소비자 주 이관 PR 7개의 정확 CI·두 독립 리뷰·fetched main tree를 확인했다. 소비자와 Manager candidate SDK의 원 A/B 보고서18개 및 불변 입력8개를 원문 bytes 그대로 보존하고 SHA256 원장으로 연결했다. SDK 입력2의 raw 달러 BLOCK은 입력3의 자기 지적 FIXED와 별개로 유지한다. Mounts 최상위 순서만 정규화한590도 원 두 SOURCE PASS·backend3931 PASS/40 SKIP·frontend54/browser2·정책 CI 성공 후 ca1d32b로 머지했고 전체 tree가 같다.
+
+실제 완료 수용은 Manager·Concierge·Pinvi·Weather 4개이며 나머지 앱은 배포·수용 진행 중이다. Geo ARM64 빌드 exit0 후 Weather 우선 배포와 실제 수용을 마쳤다. 이후 사용자 지시로 Map 추가 빌드·배포는 Claude에 맡기고 Map 소스·이미지·current·pin의 추가 변경을 중단한다. Pinvi 모바일의 Expo 네 patch와 필수 Doctor를 문서에 정리했다. UI0.2.0/tokens0.1.1 및 7종 동결 산출물·버전 정책 코드·lock·vendor bytes는 변경하지 않았다. 이 문서 후속 PR의 독립 출판/규약 검토·CI와 전체 배포 완료는 별도다. 실패·SKIP·native 실기기 NOT_RUN을 성공에 합산하지 않는다.
+
+## 2026-11-12 — Common49와 FocusScope2 원본 머지·최종 독립 증거
+
+- Common exact2d4579b의 원 A/B COMMON7은 모두 PASS·신규0이며 Doctor finding은 각 원 리뷰어가 FIXED를 확인했다. 정확 frontend/docs/packages/selftest/Python workflow가 모두 성공했다. 실제 C11 packed browser65·두 builder 및 UI/tokens 전체 SRI 일치를 확인했다.
+- Common PR49 mergee8ed3ae, Scope PR1 merge408bb40을 fetch해 reviewed source/delivery와 각각 전체 tree 동일을 검증했다. UI0.2.0/tokens0.1.1은 이제 출시 산출물이므로 같은 버전의 다른 bytes 재발행을 금지한다.
+- Scope source1752/delivery01e의 원 A/B input2도 모두 PASS·신규0이다. source38·Storybook17, actual packed17, 원 A actual browser20 및 원 B CJS/ESM38 각각의 범위를 구분한다. Build·집중 regression·SSR·Chromatic 모두 SUCCESS다.
+- 원문·불변 입력을 byte 동일하게 보존하고 각각 SHA256 receipt를 추가했다. 이전 Common6 Doctor BLOCK/CONDITIONAL·Scope1 fieldset CONDITIONAL은 역사 그대로 유지한다. Geo43/Concierge50/Mapf55의 원 A source finding도 후속 직접 검증으로 FIXED다.
+- 앱별 C11 최종 브라우저·CI·새 Manager 공식 candidate SDK 원 A/B 검토·각 앱 PR 머지·merged SHA 이미지와 실제 화면 수용은 계속 진행 중이다. 운영 신규 배포는 아직0건이다.
+
 ## 2026-11-12 — Scope2 최종 후보11 동결
 
 - preferred source1752a53·고유1.3.1+kortravel.fix.2·고정1ca0487을 common exact 축과 세 설치 경로에 연결했다. 원본38·NPM/ESM/CJS, 공통 actual engine2에서 정책175·UI101·tokens9·빌드·Doctor80파일0·도구400(399 PASS/1 SKIP)을 확인했다.

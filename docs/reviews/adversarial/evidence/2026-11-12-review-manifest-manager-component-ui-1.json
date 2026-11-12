@@ -1,0 +1,94 @@
+{
+  "kind": "manager-existing-component-ui-candidate-final-1",
+  "createdAt": "2026-11-11T20:22:56.366773+00:00",
+  "repository": "kor-travel-docker-manager",
+  "checkout": "/tmp/codex-manager-component-ui-20261112",
+  "base": "9910b9a6dba902c6a59469d3a6f46c6077e78d3f",
+  "head": "df3760cc22d23bab71a1b93c7ca9b86299a94d9f",
+  "branch": "agent/component-ui-candidate-20261112",
+  "changedFiles": [
+    {
+      "path": "backend/src/kor_travel_docker_manager/service_release_cli.py",
+      "blob": "c01919f17de91dfe39e29b8395268181d1766436"
+    },
+    {
+      "path": "backend/src/kor_travel_docker_manager/services/registry.py",
+      "blob": "d0ccdedde4b57f637d65fc2a2f2caa3a80f15df7"
+    },
+    {
+      "path": "backend/src/kor_travel_docker_manager/services/service_release_candidate.py",
+      "blob": "9da643de23abcdb3d41a0a1d4cf97a7127ef16c0"
+    },
+    {
+      "path": "backend/src/kor_travel_docker_manager/services/service_release_component_candidate.py",
+      "blob": "d2780282fd66b4021ba1cee260043f554225bb56"
+    },
+    {
+      "path": "backend/tests/test_service_release_component_candidate.py",
+      "blob": "809569f3ac676b26ecc779f8be7d8182846e66c4"
+    },
+    {
+      "path": "config/docker-targets.yml",
+      "blob": "fc1a076aeb9fee12631f527d47774f50eadc2ca8"
+    },
+    {
+      "path": "docs/decisions.md",
+      "blob": "017858472fd1417d0dd4411998cabc0c07da675e"
+    },
+    {
+      "path": "docs/journal.md",
+      "blob": "ba48d470afa2fc2c9726c04ddd22b5463d580999"
+    },
+    {
+      "path": "docs/service-current-release.md",
+      "blob": "c84aa89f82d6d8152f377316519e25546576e53a"
+    },
+    {
+      "path": "docs/tasks.md",
+      "blob": "607f09b107fa4eb3860dccde3bc95ae3698eb9b9"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "validation/manager-component-ui-driver-parent/map169-before-valid.log",
+      "sha256": "8aef2dbc21bb4095898a88cfd47636e5f5818bbbe71bbea5d13d77716b4bd803"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/map169-after-registry-schema.log",
+      "sha256": "85e1d7e7ac2a7c7fd050f8ed99fff36fe9c90b25f7ece176d62091727745bbea"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/focused-final.log",
+      "sha256": "bff762a8f57bc0a5e421328b8b6dc0f2a65a77fd002fcbb336fd6c6fa3e48863"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/ruff-final.log",
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/scope-proof.json",
+      "sha256": "22ea5eb25e7fff6607c40040716dfe3b6c94f8ea0077825ffc739629692437f7"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/staged-security-audit.json",
+      "sha256": "b4a2c15de23ccb15e83de6eb95198d176721b73be49e8d37d3bb406186838685"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/codegraph-sync.log",
+      "sha256": "13497da3cd594734a7fd9c77bd7bd62da7219c9167dc06f242ef0f011fe2999b"
+    },
+    {
+      "path": "validation/manager-component-ui-driver-parent/codegraph-impact.log",
+      "sha256": "ec11aa42da5148bf2f3046b2ca5888e7fddd76ff3bb3efa2df4109e329ba1e3c"
+    }
+  ],
+  "scope": "Necessary official Geo/Weather UI-only rollout support. Existing current main layout retained. Target UI/source config single source; group/runtime derived. Reuse approved Map mutation/observation/publication body; paired default behavior and protected Map/Pinvi non-bypass preserved. No HTTP/frontend/package/manifest schema changes; no new persistent gates or attestation. Audit callback extraction, root/source approval/G/client boundaries/config validation/current+nonselected health/publication/failure redaction.",
+  "tests": {
+    "existingFiveModuleBeforeAfter": 169,
+    "newComponentCases": 60,
+    "focusedIncludingRegistry": 372,
+    "allBackendRuff": "PASS",
+    "fullExactCi": "pending PR run"
+  },
+  "constraints": "Read immutable Git10blobs, source/test evidence independently. Do not read peer raw/verdict. No source edit or production Docker contact; use own fixtures and existing venv read-only. Parent implementation participates in neither reviewer verdict. New source input separate from merged588/991."
+}

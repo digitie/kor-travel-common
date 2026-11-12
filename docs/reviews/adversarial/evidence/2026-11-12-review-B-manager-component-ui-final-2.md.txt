@@ -1,0 +1,88 @@
+# 원 리뷰어 B — Manager component UI 입력2
+
+- 원 B/Epicurus, packaging/platform/security/release/CI. 구현 참여·peer raw/verdict 열람 없음.
+- runid Epicurus-B-manager-component2-20261111T210101Z. 시작/종료 UTC는 evidence/session.json과 completion.json(종료2026-11-11T21:06:17.853072+00:00)에 기록했다.
+- 입력 review-manifest-manager-component-ui-2.json SHA256 aa1d5838ab0d7f9c37f723028b216664ecaa3e35e4be92f6e34895bf91ae84f3 직접 재확인.
+- 정확 head71550de2f3f0754444d8b1d8fb5478a41cfede8c, 이전 검토df3760cc22d23bab71a1b93c7ca9b86299a94d9f, 공통 base9910b9a6dba902c6a59469d3a6f46c6077e78d3f.
+- manifest 전체10개 Git blob 및 diff 집합을 확인했다. source는 Git object로 격리했고 moving checkout을 섞지 않았다.
+- 증거: review-B-manager-component-ui-final-2-evidence/. source1 PASS/CI조건부 원문은 불변 보존한다.
+
+## Verdict
+
+**BLOCK — 신규 B-MGR-P1-01 OPEN.** 기존 환경 drift의 주요 수정과 제품400PASS·Ruff PASS는 확인했으나, raw effective 환경값을 Compose 직렬화 값으로 취급하는 경계 오류가 남았다. 정확715 원격 central은 SUCCESS, 전체 CI는 마지막 직접 관찰에서 IN_PROGRESS/conclusion null이다. CI가 성공하더라도 아래 독립 재현 결함은 닫히지 않는다.
+
+## B-MGR-P1-01 — P1 / OPEN — 연속 literal 달러가 적용 중 손상됨
+
+위치:
+
+- backend/src/kor_travel_docker_manager/services/service_release_component_candidate.py:70 — Docker inspect의 raw effective 값과 후보 이미지 raw 기본값을 environment에 그대로 넣음.
+- backend/src/kor_travel_docker_manager/services/service_release_candidate.py:397 — 기존 Compose environment escape helper를 거쳐 stdin up으로 전달.
+- backend/src/kor_travel_docker_manager/services/compose_service.py:1769 — 이미 escape된 Compose 값이라는 계약으로 짝수 달러 run을 그대로 유지함.
+
+새 경로는 current Docker Config.Env 및 후보 image Config.Env에서 raw 문자열을 읽는다. 하지만 공유 helper는 Compose config에서 이미 escape된 값의 짝수 달러를 다시 escape하지 않는다. 따라서 live PASSWORD=literal$$secret은 stdin에도 literal$$secret으로 전달돼 실제 Compose의 literal-dollar 규칙으로 literal$secret이 된다. 세 개는 두 개로, 네 개는 두 개로 줄어든다. 새 후보 기본값도 같은 bind를 거치므로 같은 문제를 가진다.
+
+공식 근거: [Docker Compose interpolation](https://docs.docker.com/reference/compose-file/interpolation/)의 double-dollar가 literal single-dollar를 나타내는 규칙. 기존 Map helper의 입력 계약을 바꾸라는 뜻이 아니라 새 raw 입력을 기존 serialized 입력과 구분해야 한다.
+
+직접 재현:
+
+1. 정확715의 제품 component fixture에 synthetic live PASSWORD 값만 literal$secret / literal$$secret / literal$$$secret / literal$$$$secret으로 각각 설정.
+2. 원 제품 public apply_component_ui_candidate를 호출하고, 제품 fixture의 materialized_environment로 실제 전송 stdin과 Compose literal-dollar 해석을 반영한 fake recreate 환경을 관찰.
+3. Geo/Weather 각1달러 대조군은 성공. 각2·3·4달러 케이스는 selected_environment_unchanged=false, success=false로 실패한다.
+4. **6 FAIL / 2 PASS**. 테스트 test_review_b_effective_dollars.py와 effective-dollars-regression.log를 보존했다. 제품400과 별도의 새 공격이다.
+
+영향: 실행 전 live 환경 guard는 원 문자열이 그대로여서 통과한다. recreate로 환경값이 바뀐 뒤 사후 guard가 실패하므로 current pointer 발행만 막고 이미 바뀐 UI 환경은 되돌리지 않는다. 비밀번호·API key·기타 환경값을 변경시킬 수 있어 무해한 사전 거부로 분류할 수 없다. 운영 apply는0이며 실제 운영 사고를 주장하지 않는다.
+
+권고: component에서 새로 주입하는 raw live/default 값을 기존 Compose 직렬화 계약에 맞춰 한 번 정확하게 encode하거나 raw 경계를 별도 처리해야 한다. 모든 달러를 보존하도록 raw 1/2/3/4개·혼합 문자열·후보 기본값을 검증하고, 기존 Map의 이미 escape된 값에는 중복 encoding이 생기지 않게 유지한다. G/현재·비선택/health/late publication/가림 조건 및 기존169 테스트를 그대로 유지한 새 immutable 입력에서 원 B closure가 필요하다. 제품 source 수정은 하지 않았다.
+
+### 재현의 실제 범위
+
+본인은 actual Docker create/up/run을 실행하지 않았다. 추가로 daemon을 본인 존재하지 않는 Unix socket으로 고정하고 비어 있는 본인 DOCKER_CONFIG에서 **docker compose config만** 실행했다. 이 명령은 canonical escaped 값으로 다시 출력하므로 결과를 실제 container Env 관찰로 간주하지 않는다. 처음 helper probe의 단순 출력 동등 예상은 이 직렬화 때문에 맞지 않아 정정했다. compose-dollar-proof.json은 전송값·canonical 출력·공식 literal-dollar 규칙에 따른 해석을 별도 필드로 기록한다. 실행 경로의 6FAIL/2PASS는 원 제품 fixture로 독립 재현했으며 Compose 문서와 일치한다.
+
+## 입력2에서 확인한 개선
+
+소비자의 별도 readonly drift 문서는 peer raw가 아닌 운영 사실 인계로 읽고 manifest SHA를 검증했다. 실제 운영값이 없고 apply0라는 경계를 유지했다.
+
+- G 안에서 선택 UI가 정확히 하나인지 확인한 뒤 current effective Env를 읽는다.
+- 후보 image defaults와 병합할 때 current가 우선하며 후보에만 있는 새 key를 추가한다. current/env의 누락·중복·불완전·NUL 항목을 거부한다.
+- 선택 environment를 명시적으로 고정하고 선택 env_file을 제거한다.
+- selected_environment_unchanged guard를 render 후 admission·사후·건강 확인·publication guard에 연결한다. current/image 관계와 environment를 다시 비교한다.
+- captured expected 값들을 extra_secrets로 render 이전에 합치며, late 실패는 기존 terminal 진단을 유지한다.
+- CLI/registry/config와 공유 실행 helper는 df 대비 byte 동일하다. 기존 Map callbacks/receipt/companions 및 기본 환경 의미를 변경하지 않았다.
+- 기존5 test 모듈169개는 blob이 그대로이며 그 SHA를 unchanged-five-tests-proof.json에 남겼다. schema/frontend/HTTP/lock/C11 pack/새 persistent gate 변경 없음.
+
+이 개선들이 연속 달러 결함을 제외한 환경 보존 대조군에서 실제 작동함을 아래 직접 실행으로 확인했다.
+
+## 직접 실행과 증거
+
+기존 /tmp/kt-manager-candidate-python을 읽기 전용 참조, Python3.14.4/pytest9.2.0 사용. 실제 Docker client factory는 제품 fake만 사용했다.
+
+| 검사 | 직접 결과 |
+| --- | --- |
+| 최종 환경28 controls를 exactdf source에 적용 | **28 FAIL**,60 deselected |
+| 정확715 제품 release/CLI/compose/process/candidate/component/registry targets/hosts | **400 PASS**, skip0 |
+| 제품 전체 backend Ruff | **PASS** |
+| 원 B 연속달러 추가8공격 | **6 FAIL / 2 PASS** |
+| manifest10blob·원169 test blob·247 snapshot blob 재대조 | **PASS** |
+
+수정 전 대조는 본인 snapshot의 두 source 파일만 immutable df blob으로 잠시 바꿔 최종 제품 test 환경28개를 실행한 뒤 finally에서715 원 blob으로 복원했다. implementation checkout과 기존 원문은 수정하지 않았다. 새 tests는 제품 source를 고치거나 assertion을 완화하지 않는다.
+
+실행 명령:
+
+- git show/rev-parse/cat-file/diff로 입력·source·blob 확인.
+- PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 DATABASE_URL=sqlite:// /tmp/kt-manager-candidate-python/bin/python -m pytest -p no:cacheprovider <release/CLI/compose/process/candidate/component/registry targets/hosts8모듈> -q
+- 같은 환경의 pytest tests/test_service_release_component_candidate.py -k environment -q (df 대조).
+- pytest tests/test_review_b_effective_dollars.py -q (B 공격).
+- ruff check . --no-cache
+- python3 compose-dollar-proof.py (본인 socket에 고정한 Compose config parser만).
+- 본인 snapshot에서 codegraph init -i/sync/status/impact _preserve_environment --json 및 manual rg.
+
+원문 로그, 추가 test 코드, pure parser 재현 코드, CodeGraph/manual callsite, Git blob 및 unchanged169 proof, CI 관찰, 이전 raw hash를 evidence에 보존했다. parent handoff11개 evidence의 digest는 확인했으며 parent 결과를 본인 직접 실행으로 세지 않았다.
+
+## CI·보존·미실행
+
+정확715의 GitHub commit runs API를 두 번 직접 조회했다. 초기 CI43099196196/central43099196905는 QUEUED였다. 마지막은 [central43099196905](https://github.com/digitie/kor-travel-docker-manager/actions/runs/43099196905) SUCCESS, [전체 CI43099196196](https://github.com/digitie/kor-travel-docker-manager/actions/runs/43099196196) IN_PROGRESS였다. 전체 CI 성공/실패·새 synthetic tree 동등성을 아직 주장하지 않는다. source1의 queued 기록도 불변 보존한다.
+
+운영 Docker/DB/API/Dagster 수명주기·실제 UI apply·SDK 설치·대형 install/build/browser는 NOT_RUN_B. synthetic 값만 사용했으며 소비자 실제 비밀값을 읽거나 기록하지 않았다. manifest hash/전체10blob 및247 snapshot 파일이715 원본과 같음을 재확인하고 본인 tmp만 회수했다. 타인 cache/venv/module/작업본 삭제 없음. source1·Pinvi 후속 등 모든 기존 B 원문을 SHA로 확인하고 보존했다.
+
+다음 입력에서는 B-MGR-P1-01의 원본 실패6개가 통과하고 Map 기본 환경 동작이 유지되는지 본인이 다시 확인해야 한다.
+

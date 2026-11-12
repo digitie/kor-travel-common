@@ -1,0 +1,75 @@
+# Common 최종 문서 출판·표준 독립 리뷰 A — 입력 1
+
+판정: **DOCS/STANDARDS SOURCE PASS**. 신규 P0/P1/P2/P3 각 0건. 이 판정은 불변 문서·attributes 출판에 한정하며 새 앱 소스·새 패키지·운영 배포 승인으로 확대하지 않는다. 관찰 당시 exact PR CI 일부는 진행/대기 중이다.
+
+- runid: A-COMMON-FINAL-DOCS-1742-20261112-01
+- 입력 생성 UTC: 2026-11-11T22:27:54.713276+00:00; 검토 완료 UTC: 2026-11-11T22:34:04.274018+00:00
+- 원 독립 리뷰어 A/Mill; 구현 비참여, current common-final-docs 상대 결과 미열람. 과거 확정 보고서는 원본 바이트 대조에만 사용했다.
+- manifest: `review-manifest-common-final-docs-1.json`, 직접 SHA256 `852069ed9adf00b7bd5cd64f8dc1eccf346b55abfafe4d3d296efa28ae20ec4f` 일치.
+- base `e8ed3ae75000be5cd22a3a11492bd97660635d78` → exact head `1742c3756b8f28a685741eb2f88d3bef49c5cafc`, PR50. 시작/종료 실제 worktree HEAD 일치·porcelain clean.
+- 제품·앱 소스 수정, 설치, 빌드, repack, merge, 운영 호출/변경 없음. own `/tmp`의 Git object fixture와 root의 새 evidence/report만 생성했다.
+
+## 범위와 원문 불변성
+
+전체 Git diff의 46개 경로가 manifest 파일 집합과 정확히 같다. 각 `git rev-parse head:path` blob ID, `git show head:path` 실제 바이트 SHA256·크기를 manifest와 전부 비교했다. 변경은 `.gitattributes`, CHANGELOG와 docs뿐이다. base의 기존 1373개 tracked entry가 mode/type/blob 그대로이며 packages·versions·생성 정책·tools·vendor·workflows는 변경되지 않았다. 문서만 보고 새 패키지가 만들어졌다고 추론하지 않았다.
+
+consumer/SDK 원장 **26 records** 전부에서 `publishedPath`의 **실제 committed Git blob 바이트**와 원장 SHA256/크기 및 root `originalName` 원본 바이트가 일치했다. Common7·Scope2 원장 **9 records**도 동일하게 대조했다(합계35). worktree 사본 SHA만으로 대신하지 않았다. 자체 이전 Manager input2 BLOCK 원문의 `6012a8...`, input3 FIXED의 `b6a187...`, Mount 판정 `b731d9...`도 그대로다. 전체 대조 원문은 `git-blobs-and-originals.json`에 보존한다.
+
+역사 원문은 당시 pending/BLOCK/NOT_RUN을 그대로 남긴다. `docs/reviews/adversarial/2026-11-12-consumer-sdk-final.md:3–17`은 SOURCE 판정과 배포·정상 로그인 수용을 구분하고, 입력2 BLOCK과 입력3 FIXED를 서로 다른 행으로 보존한다. `.md.txt` 원문 내 상대 evidence 경로는 당시 환경 기준이라고 명시하여 공개 링크/공개 raw 실행 로그로 오인하지 않게 했다. Common7/Scope2 정산 역시 당시 pending을 후속 성공으로 소급 교체하지 않는다.
+
+## standards 권한과 모바일 호환성
+
+`AGENTS.md`, 문서 라우터, workflow·review 진입 규칙, 상세 T-218 및 frontend-libraries를 exact Git blob으로 읽었다. review/journal은 역사 근거이고 현재 규범·버전 registry를 대체하지 않는 기존 권한 관계가 유지된다.
+
+`docs/standards/frontend-libraries.md:3,17–89`의 versions.json 권한과 자동 생성 영역을 대조했다. 공식 `sync_frontend_policy.mjs --check`를 exact Git 도구·JSON·문서만 갖춘 own fixture에서 실행하여 exit0, 정책 JSON 및 표 **65개 행** 일치. 독립 비교도 `axis.packages` alias와 `exact ?? recommended`를 적용해 전 행 일치했다. 처음 자체 비교에서 exact 필드만 가정해 대부분의 recommended 축을 누락한 harness assertion은 제품 오류로 취급하지 않았고 공식 generator와 올바른 alias 규칙으로 재확인했다.
+
+추가된 `frontend-libraries.md:93`의 Expo 4 patch는 common 웹 공통 축과 분리된 **Pinvi 모바일 SDK 구성**으로 서술하며 웹 앱 설치를 요구하지 않는다. 동결 C11/동일 버전 bytes 재배포도 금지한다. 실제 frozen Pinvi528의 `apps/mobile/package.json`, root lock, `scripts/check-mobile-styling.mjs`를 직접 읽어 아래 값을 대조했다.
+
+| 패키지 | 문서·package·lock·guard |
+|---|---|
+| expo | 58.0.24 |
+| expo-constants | 58.0.16 |
+| expo-linking | 58.0.17 |
+| expo-router | 58.0.31 |
+
+reviewed528 `528d825401dff3fe5e97b2bab238e0b80ac22430`과 merged dd3 `dd3bcd18ce573e6ddf784864d63901352e7e05d3`의 **전체 tree `05dfdc0bf3dcdf6296b8039090d42cde09ff470b` 동일**도 직접 확인했다. mandatory mobile-doctor job과 aggregate requiredCheck 연결을 exact workflow에서 읽었고, own 과거 528 검토의 raw log를 SHA256 재검증하여 **20/20 checks passed**를 다시 확인했다(job130773650612). Expo Doctor와 React Doctor를 대체 관계로 쓰지 않는 새 문구가 이에 맞는다. 새 모바일 빌드/실기기·EAS·스토어 실행은 하지 않았다.
+
+## source와 runtime 사실의 상한
+
+최신 `docs/resume.md:3–13`, journal 새 절과 `T-218:37`은 공통·주 앱 PR 머지와 운영 수용을 분리한다. 완료 snapshot은 Manager·Concierge·Pinvi·Weather **4개**이며 Geo는 ARM64 빌드 exit0 이후 수용/배포 후속, Transport도 후속이다. Map 추가 build/deploy는 최신 사용자 인계로 제외하면서 기존 머지는 보존한다. T-218 상태는 **IN_PROGRESS**이고 실기기/EAS/스토어는 **NOT_RUN**이다. 아래에 남은 예전 운영0건/당시 pending은 시점별 snapshot으로 명시돼 있다.
+
+새 문서에는 all-runtime-complete 또는 물리 native 검증 성공 주장이 없다. source PASS·CI·설치·실제 auth 수용을 하나로 합치지 않는다. 이 검토에서 네 앱의 운영 수용을 다시 실행하지 않았으며, 네 앱 상태는 명시된 동결 인계 시점의 사실로 취급했다. 제 기존 Concierge 실제 수용 원문을 포함한 이전 결과도 갱신하지 않았다. 이후 runtime 사실을 추가할 때는 새 delta 입력으로 확인해야 한다.
+
+## 링크·attributes 직접 공격
+
+- exact Git Markdown/validator를 own fixture에 두고 다른 tracked target은 **존재 확인용 빈 파일**로 만들었다. 공식 링크 도구의 검사 목적은 파일 존재이며 그 target 내용 검증을 했다고 주장하지 않는다. 결과 **840 documents /3192 local targets /errors0**.
+- 공식 plan validator **111 task/errors0**. 제품 gate PASS를 판정하는 검사가 아님을 구분했다.
+- own fixture에서 게시 원문 링크를 nonexistent 경로로 변조하면 링크 검사 **exit1**. 이후 원문 fixture는 복원했다. fragment/원격 URL 가용성은 도구 범위 밖이며 확인하지 않았다.
+- `.gitattributes` 추가 규칙은 wildcard 없이 정확한 **6개 CRLF 역사 원문 경로**만 `-text -eol whitespace=cr-at-eol,-blank-at-eof`다. 모두 실제 CRLF가 있고 LF 정규화 시 SHA256이 달라진다. Git `hash-object --path` 필터를 거친 hash와 `--no-filters` 원 바이트 hash가 같다.
+- `git check-attr --source=head`로 인접 A 원문·미래 raw 이름·standards·제품 경로에는 새 whitespace 예외가 적용되지 않음을 확인했다. 별도 own Git fixture에서 예외 대상 경로에 trailing space를 넣어도 `git diff --check` **exit2/trailing whitespace**로 거부했다. 저장소 전체 whitespace 검사를 끄는 예외가 아니다.
+- exact base..head의 `git diff --check` **exit0**. owner의 기존 prescan/초기 diff/final diff 로그는 남아 있으며 읽기·해시 관찰만 하고 수정하지 않았다. 과거 staging 정규화/EOF 실패를 최종 성공으로 덮어쓰지 않았다.
+
+## 명령·evidence와 CI 제한
+
+```text
+git diff --name-only / git ls-tree -r / git rev-parse head:path / git show head:path
+git cat-file --batch: exact Git Markdown·도구 바이트로 own fixture 생성
+python3 -B <fixture>/tools/validate_document_links.py <fixture>
+python3 -B <fixture>/tools/validate_plan.py --root <fixture>
+node <fixture>/tools/sync_frontend_policy.mjs --check
+git check-attr --source=1742c3756b8f28a685741eb2f88d3bef49c5cafc text eol whitespace -- <정확6개/인접경로>
+git hash-object --stdin --no-filters; git hash-object --stdin --path <preserved path>
+git diff --check e8ed3ae75000be5cd22a3a11492bd97660635d78 1742c3756b8f28a685741eb2f88d3bef49c5cafc
+```
+
+근거 디렉터리 `review-A-common-final-docs-1-evidence/`:
+
+- `git-blobs-and-originals.json`, `publication-and-standards.patch`: exact 소스·원문 바이트 비교.
+- `attributes-checks.json`, `narrow-attributes-adversary.json`: 6개 좁은 보존·공격.
+- `object-link-plan-checks.json` 및 validator logs: 직접 문서 검사·링크 변조 반례.
+- `mobile-standards-source-proof.json`, `standards-and-adversarial-checks.json`, `official-generator-check.log`: SDK/정본 생성 검사.
+- `preserved-publication-attempts.json`, `observations-end.json`, `direct-ci-status.json`: 실패 기록 보존·마지막 관찰·CI 경계.
+
+GitHub API를 직접 조회한 UTC **2026-11-11T22:32:45.696Z**에 exact head 연계 common frontend43111997734는 SUCCESS, docs43111997774는 IN_PROGRESS, python-package43111997752는 QUEUED였다. PR-triggered 첫 페이지 API이므로 전체 check suite를 열거했다고 주장하지 않는다. **원격 전체 CI PASS 또는 merge 가능 확정으로 표기하지 않는다.** 이번 bounded review에서는 변경 없는 전체 Python400·패키지·앱 테스트를 반복하지 않았다. manifest의 399PASS/1SKIP·scan 결과는 인계 증거이며 제 신규 실행 수치에 합치지 않았다.
+
+신규 finding P0=0/P1=0/P2=0/P3=0. **불변1742 문서 출판·standards SOURCE PASS**, 후속 CI와 이후 운영 사실 delta는 별도다. 원 COMMON7/Scope2/소비자/SDK 판정 원문 및 이 보고서는 소급 변경하지 않는다.
