@@ -350,3 +350,37 @@ test("지원 && 연결은 유지하고 JSON exec의 제어기호 인수는 shell
   f.put("Dockerfile", attackFrom + attackPin + 'RUN ["npm","run","build","--","&",">","|","literal"]\n');
   assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, true);
 });
+
+for (const command of [
+  "RUN mkdir -p /home/node/.npm",
+  "RUN chown -R node:node /app/.next/cache /home/node/.npm",
+  'RUN ["mkdir","-p","/home/node/.npm"]',
+]) {
+  test("npm 캐시 경로를 CLI 호출로 오인하지 않는다 " + command, t => {
+    const f = fixture(t);
+    f.put("Dockerfile", attackFrom + command + "\n");
+    assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, true);
+  });
+}
+test("캐시 생성 뒤에도 npm/npx 실제 명령의 pin은 필요하다", t => {
+  const f = fixture(t), cache = "RUN mkdir -p /home/node/.npm && chown -R node:node /home/node/.npm\n";
+  for (const command of ["npm ci --engine-strict", "npx next start"]) {
+    f.put("Dockerfile", attackFrom + cache + "RUN " + command + "\n");
+    reject(f.run({ dockerfiles: ["Dockerfile"] }), /fresh Node stage/u);
+    f.put("Dockerfile", attackFrom + cache + attackPin + "RUN " + command + "\n");
+    assert.equal(f.run({ dockerfiles: ["Dockerfile"] }).ok, true);
+  }
+});
+test("절대 CLI·wrapper·동적 npm 실행은 cache 경로와 혼동하여 제외하지 않는다", t => {
+  const f = fixture(t);
+  for (const command of [
+    "/usr/local/bin/npm ci --engine-strict", "/usr/local/bin/npx next start",
+    "env npm ci --engine-strict", 'sh -c "npm ci --engine-strict"',
+    "$(command -v npm) ci --engine-strict",
+    '["/usr/local/bin/npm","ci","--engine-strict"]',
+    '["sh","-c","npm ci --engine-strict"]',
+  ]) {
+    f.put("Dockerfile", attackFrom + attackPin + "RUN " + command + "\n");
+    reject(f.run({ dockerfiles: ["Dockerfile"] }), /npm|shell/u);
+  }
+});

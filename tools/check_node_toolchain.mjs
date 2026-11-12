@@ -164,11 +164,12 @@ function nodeImages(text, node, npm, label, errors) {
       continue;
     }
     const run = /^(?:RUN|CMD|ENTRYPOINT)\s+(.+)$/iu.exec(line);
-    if (run && /\b(?:npm|npx)\b/u.test(run[1])) {
+    // .npm 캐시 경로는 실행 파일이 아니다. 절대 경로 CLI·wrapper 안의 npm/npx 검사는 유지한다.
+    if (run && /(?<![\w.])(?:npm|npx)\b/u.test(run[1])) {
       const command = run[1].replace(/^(?:--[\w-]+=\S+\s+)+/u, "");
       const commands = command.startsWith("[") ? [command] : command.split(/\s*&&\s*/u);
       for (const part of commands) {
-        if (/\b(?:npm|npx)\b/u.test(part)) npmCommand(part, stage, npm, label, errors);
+        if (/(?<![\w.])(?:npm|npx)\b/u.test(part)) npmCommand(part, stage, npm, label, errors);
       }
     }
     if (!/^FROM\b/iu.test(line)) continue;

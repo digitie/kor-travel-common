@@ -1,3 +1,11 @@
+## 2026-11-13 — npm 캐시 경로와 Docker CLI 감지 구분
+
+404a의 실제 소비자 정적 검사에서 .npm 캐시 디렉터리를 npm 명령으로 오인하여 Geo·Weather·Transport를 거부했다.
+같은 소비자 입력 해시를 유지한 직접 재현과 77 PASS/4 FAIL을 보존하고, 경로의 점 접두사는 CLI 감지에서 제외한다.
+실제 npm/npx의 exact pin·strict 검사와 절대 경로 CLI·wrapper·동적 명령의 기존 거부는 유지한다.
+후속 회귀 81개와 7개 소비자 정적 검사는 통과했으며, 정본 Node/npm 실행과 독립 재검토·새 정확 CI는 각각 별도 증거로 정산한다.
+원 404a의 CI 성공·SOURCE BLOCK 및 이전 c4cc/e1d0 반례·리뷰를 수정하지 않는다. 공개 C11·dependency graph·운영 변경은 없다.
+
 ## 2026-11-13 — 공식 INI·shell 경계·기본 registry 후보3
 
 A2/B2의 INI 인용 key·section·전역 shadow, shell 단일 & 및 alias 기본 registry 반례를
