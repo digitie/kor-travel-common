@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 import test from "node:test";
 import assert from "node:assert/strict";
 import { Toast } from "../index.js";
