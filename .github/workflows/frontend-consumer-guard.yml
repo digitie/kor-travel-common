@@ -71,8 +71,6 @@ jobs:
           npm install --global npm@12.0.1
           npm ci --ignore-scripts --engine-strict
           npm run check:toolchain
-          npm run test:toolchain
-          npm run check:policy
       - name: 중앙 버전·산출물과 소비자 대조
         env:
           FRONTEND: ${{ toJSON(matrix.frontend) }}
@@ -113,3 +111,8 @@ jobs:
           if (toolchain.error) throw toolchain.error;
           process.exit(toolchain.status ?? 1);
           JS
+      - name: 공통 검사기 회귀 검증
+        working-directory: common
+        run: |
+          npm run test:toolchain
+          npm run check:policy

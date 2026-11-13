@@ -7,6 +7,9 @@ on:
     branches: [main]
 permissions:
   contents: read
+concurrency:
+  group: common-frontend-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   frontend:
     runs-on: ubuntu-24.04
@@ -27,9 +30,9 @@ jobs:
           npm run check:toolchain
           npm run check:policy
           npm run lint
-          npm run build
           npm run check
-          npm test
           npm run doctor
+          npm run build
           npm run check:examples --workspace packages/ui
+          npm test
           git diff --exit-code -- frontend-dependencies.json packages/tokens/dist
