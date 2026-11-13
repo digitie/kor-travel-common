@@ -1,3 +1,10 @@
+## 2026-11-13 — 선택형 차트·애니메이션 의존성 정본 보강
+
+- Weather·Transport의 추가 기능에서 공통으로 소비하는 두 패키지의 중앙 관리 누락을 확인했다. 공식 npm registry/latest 조회일과 후보 버전은 버전 정본·외부 evidence에 결박하고, 중앙 생성 정책·필요 라이브러리 규약만 보강했다.
+- 프로필 필수 목록·C11 vendor bytes·root lock·공개 컴포넌트/API/CSS는 그대로다. 소비자 변경은 각 저장소 PR에서 처리하며 이 Common 후보에 앱 코드를 포함하지 않는다.
+- 로컬 정책 회귀194개와 생성 문서 계약6개, 실제 중앙 CLI의 선택형 경계8경우/16관찰을 확인했다. 기존 정책에서 허용하던 두 패키지의 이전 버전·lock drift·alias를 새 정책이 거부하고 미사용 web/mobile·정확 버전·무관 선택 의존성은 통과했다. fixture graph 대조이며 실제 소비자 설치·이미지 수용은 아니다.
+- 문서·링크 오류0, plan·registry 자체 검사·diff 검사를 통과했다. 로컬 순수 정책/생성 검사의 Node는22.22.2였고 실제 정본22.23.1/npm12.0.1 검증은 정확 CI에서 별도 확인한다. 원2 독립 리뷰·정확 CI·소비자 전파는 미완이다. CI 순서 감사·이미지·운영 작업은 실행하지 않았다.
+
 ## 2026-11-13 — 설치 별칭과 실제 패키지 identity 연결
 
 B-COMMON-RADIX-P2-01과 Aquinas A-P2-01의 actual tools alias 반례를 읽고 같은 정책/canonical CLI로 재현했다. 기존 resolveInstalled를 사용해 bare/scoped literal root의 요청 이름·npm 별칭 대상·workspace lock 실제 이름을 기존 검사에 연결한다. source overlay·native forbidden 외 registry 별칭의 exact selector/lock identity/version도 검사한다. managed vendor alias는 기존 전체 graph/SRI 검사를 유지해 common UI wrapper를 허용하며 무관한 alias 전체를 금지하지 않는다.

@@ -1,3 +1,9 @@
+## 2026-11-13 — 선택형 차트·애니메이션 정책 후보
+
+Common52의 alias guard는 실제2a34에 병합됐다. Weather·Transport가 추가로 함께 소비하는 차트·애니메이션 패키지를 중앙 선택형 정확 버전 정책과 생성 규약에 포함한다. web/mobile 필수 목록과 C11 bytes·lock·공개 UI API·CSS는 유지한다. 범위와 수용 기준은 [T-218](tasks/T-218-radix-library-unification.md#선택형-공통-차트애니메이션-후속-수용-기준)을 따른다.
+
+검증·원2 독립 리뷰·정확 CI와 소비자 버전/참조 전파는 진행 중이며 이미지·운영 수용으로 합산하지 않는다. CI 순서 감사는 마지막 별도 단계다. 이하 이전 후보와 실패 기록은 당시 사실로 보존한다.
+
 ## 2026-11-13 — Radix alias identity 후보2
 
 bb7e의 literal 수정과 정확 CI4개/15job SUCCESS, B의 P2 BLOCK·Aquinas의 P2 CONDITIONAL은 당시 원문대로 보존한다. 별칭 요청 이름·npm 선언 대상·현재 workspace lock 실제 identity에 기존 Radix/native 금지와 registry exact 버전을 연결했다. 실제 tools CLI alias 경계15 FAIL/4 PASS→19 PASS, 버전5 FAIL/2 PASS→7 PASS 및 전체 정책193 PASS다. 실제 Manager048 source/lock/모든 file vendor/canonical의 정상 앱·common UI vendor alias·무관 alias는 전후0, Radix/scoped alias와 합성 버전 drift는0→1이다.

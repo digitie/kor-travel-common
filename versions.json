@@ -501,6 +501,18 @@
       "recommended": "3.10.1",
       "source": "ADR-017; 2026-11-11 npm registry/peer 검증"
     },
+    "echarts": {
+      "ecosystem": "npm",
+      "floor": null,
+      "recommended": "6.1.0",
+      "source": "2026-11-13 https://registry.npmjs.org/echarts/latest; Weather·Transport 공통 선택 의존성"
+    },
+    "motion": {
+      "ecosystem": "npm",
+      "floor": null,
+      "recommended": "14.13.0",
+      "source": "2026-11-13 https://registry.npmjs.org/motion/latest; Weather·Transport 공통 선택 의존성"
+    },
     "sonner": {
       "ecosystem": "npm",
       "floor": null,
@@ -868,6 +880,7 @@
       "autoprefixer",
       "class-variance-authority",
       "clsx",
+      "echarts",
       "eslint",
       "eslint-config-next",
       "eslint-import-resolver-typescript",
@@ -880,6 +893,7 @@
       "lightningcss",
       "lucide-react",
       "maplibre-gl",
+      "motion",
       "nativewind",
       "next",
       "next-intl",

@@ -39,6 +39,14 @@ Geo·Map·Weather·Concierge·Docker Manager·Pinvi 웹/모바일·Transport를 
 - 소비자 실제 설치·build·원2리뷰·CI는 앱별 증거로 수용한다. 미실행은 NOT_RUN이며 이 후보만으로 native 실기기/EAS/스토어·T-218을 완료하지 않는다.
 - CI 순서/needs/fail-fast 감사·최적화는 마지막 별도 단계이며 이 후속은 기존 step 상대 순서를 유지한다.
 
+## 선택형 공통 차트·애니메이션 후속 수용 기준
+
+Weather·Transport의 동시 소비가 확인된 차트·애니메이션 의존성을 [라이브러리 규약](../standards/frontend-libraries.md)의 중앙 정확 버전 검사에 포함한다. 기존 빌드 도구 후속 기록은 유지하고 이번 선택형 정책 추가를 별도로 수용한다.
+
+- `versions.json`의 선택 축과 생성 JSON·문서가 일치하며 web/mobile 필수 목록은 유지한다. 미사용 앱은 새 패키지 설치 없이 통과해야 한다.
+- 실제 중앙 CLI에서 새 공유 의존성의 선언·lock 불일치를 거부하고 정본 버전과 무관한 선택 의존성은 허용한다. 기존 정책 회귀·두 독립 리뷰·정확 CI를 확인한다.
+- 소비자별 manifest/lock·검사 코드/정책 참조 전파와 새 이미지·운영 수용은 별도 기록한다. C11 bytes·공개 UI API·CSS·workflow 실행 순서를 바꾸지 않는다.
+
 ## 검증 명령
 
 npm run lint, npm run build, npm run check, npm test, npm run doctor, npm run check:examples --workspace packages/ui, npm run check:policy, tools/check_spdx.py, tools/validate_plan.py 및 소비자별 빌드·브라우저 검증을 실행한다.
