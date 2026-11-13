@@ -30,6 +30,7 @@ Weather·Transport가 함께 사용하는 `echarts`·`motion`도 정확 버전 �
 |---|---|
 | @axe-core/playwright | 4.14.0 |
 | @hookform/resolvers | 7.0.5 |
+| @kor-travel/toast | 0.1.0 |
 | @kor-travel/tokens | 0.1.1 |
 | @kor-travel/ui | 0.2.0 |
 | @next/eslint-plugin-next | 16.4.6 |
@@ -101,6 +102,10 @@ Weather·Transport가 함께 사용하는 `echarts`·`motion`도 정확 버전 �
 TypeScript는 OpenAPI 생성기와 typescript-eslint peer 범위 때문에 5.9.3, Node 타입은 Node22 실행환경에 맞춘다. NativeWind RC는 사용자 승인에 따른 것으로 대응 엔진과 함께 고정한다. stable로 표시하지 않는다.
 
 Pinvi 모바일의 Expo SDK58 패치 버전은 해당 앱의 `apps/mobile/package.json`과 workspace lock이 정본이다. 앱의 `check-mobile-styling.mjs`가 지원하는 Expo 항목의 선언·lock을 대조하고, 나머지 SDK 구성은 명시적인 선언·lock과 CI의 필수 Expo Doctor로 호환성을 검증한다. Expo 계열은 이 문서의 중앙 정확 버전 목록에 포함되지 않으며 웹 앱에 설치를 요구하지 않는다. React Doctor는 별개의 검사이므로 한쪽 성공으로 다른 쪽 실패를 대체하지 않는다. 실기기·EAS·스토어 검증도 이 검사 결과로 대신하지 않는다. SDK 패치만으로 동결된 공통 UI·tokens·VWorld·CSS compiler 산출물을 다시 배포하거나 같은 버전의 bytes를 바꾸지 않는다.
+
+## 선택형 공통 Toast
+
+`@kor-travel/toast`는 웹 알림이 필요한 앱만 설치한다. Radix Toast namespace를 그대로 공개하며 알림 만료·일시정지·포커스·swipe·접근성을 자체 재구현하지 않는다. 기존 C11 UI·tokens 산출물은 그대로 두고 새 선택형 패키지의 버전·SRI만 원장에서 검증한다. 사용하지 않는 앱과 모바일에 추가하지 않는다.
 
 ## CSS compiler의 공통 bytes
 

@@ -626,6 +626,12 @@
       "checked": false,
       "source": "사용자 승인 원본 Radix FocusScope 수정; upstream eb3a2b7, fork source1752a53; vendor/README.md",
       "note": "공통 UI를 사용하는 웹의 패치 엔진. 앱은 개별 Radix를 직접 import하지 않고 exact vendor/override 및 모든 도달 copy의 bytes를 검사한다."
+    },
+    "@kor-travel/toast": {
+      "ecosystem": "npm",
+      "floor": null,
+      "recommended": "0.1.0",
+      "source": "Geo 알림용 선택형 공통 Radix Toast namespace; 원본 radix-ui1.8.1/React19.3.1 유지"
     }
   },
   "actions": {
@@ -789,7 +795,8 @@
       "vworld-map-web",
       "vworld-map-rn",
       "lightningcss",
-      "@radix-ui/react-focus-scope"
+      "@radix-ui/react-focus-scope",
+      "@kor-travel/toast"
     ],
     "profiles": {
       "web": {
@@ -853,7 +860,8 @@
         ],
         "forbidden": [
           "@kor-travel/ui",
-          "radix-ui"
+          "radix-ui",
+          "@kor-travel/toast"
         ]
       }
     },
@@ -924,7 +932,8 @@
       "vworld-map-rn",
       "vworld-map-web",
       "zod",
-      "zustand"
+      "zustand",
+      "@kor-travel/toast"
     ],
     "patchedRadixPackages": [
       "@radix-ui/react-focus-scope"
