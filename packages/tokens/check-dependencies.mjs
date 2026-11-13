@@ -27,11 +27,17 @@ for (const section of sections) {
   declaredBy.set(name, section); deps[name] = spec;
  }
 }
+// 설치 별칭도 기존 선언 대상과 현재 workspace의 lock identity로 검사한다.
+function dependencyNames(name) {
+ const spec = deps[name];
+ const target = typeof spec === "string" ? /^npm:((?:@[^/]+\/)?[^@/]+)(?:@|$)/.exec(spec.trim())?.[1]?.trim() : undefined;
+ return new Set([name, target, resolveInstalled(name)?.entry.name].filter(value => typeof value === "string" && value));
+}
 // 공식 scope의 정책 등록 패치 엔진만 직접 고정할 수 있다. 앱 소스 사용 금지는 별도로 유지한다.
-for (const name of Object.keys(deps)) if (name.startsWith("@radix-ui/react-")
+for (const requested of Object.keys(deps)) for (const name of dependencyNames(requested)) if (name.startsWith("@radix-ui/react-")
  && (!/^@radix-ui\/react-[a-z0-9-]+$/.test(name) || !patchedRadixPackages.has(name)
   || !artifactNames.has(name) || typeof policy.versions[name] !== "string" || !policy.versions[name]))
- errors.push(name + ": 개별 Radix 대신 공통 UI 경로 사용");
+ errors.push(requested + ": 개별 Radix 대신 공통 UI 경로 사용");
 if (!policy.profiles[values.profile]) throw new Error("알 수 없는 검사 프로필");
 const profile = policy.profiles[values.profile];
 for (const name of profile.required) {
@@ -40,7 +46,8 @@ for (const name of profile.required) {
 }
 for (const name of profile.runtimeRequired ?? []) if (!(name in (manifest.dependencies ?? {}))) errors.push(name + ": dependencies에 필수 런타임 선언 필요");
 const forbidden = new Set([...policy.forbidden, ...(profile.forbidden ?? [])]);
-for (const name of forbidden) if (name in deps) errors.push(name + ": " + (name === "maplibre-vworld-react" ? "공개 core/web/RN 배포물로 이관 필요" : "공통 Radix 구현으로 이관 필요"));
+for (const requested of Object.keys(deps)) for (const name of dependencyNames(requested))
+ if (forbidden.has(name)) errors.push(requested + ": " + (name === "maplibre-vworld-react" ? "공개 core/web/RN 배포물로 이관 필요" : "공통 Radix 구현으로 이관 필요"));
 function resolveInstalled(name, directory = values.workspace) {
  const parts = directory.split("/").filter(Boolean);
  for (let i = parts.length; i >= 0; i--) {
@@ -57,6 +64,15 @@ function resolveInstalled(name, directory = values.workspace) {
  return undefined;
 }
 const installed = name => resolveInstalled(name)?.entry;
+// registry 별칭도 원 이름의 exact 선언·lock 버전을 따른다. vendor 별칭은 아래 artifact bytes 검사를 유지한다.
+for (const [requested, spec] of Object.entries(deps)) for (const name of dependencyNames(requested)) {
+ const wanted = Object.hasOwn(policy.versions, name) ? policy.versions[name] : undefined;
+ if (name === requested || !wanted || artifactNames.has(name)) continue;
+ const got = installed(requested);
+ if (spec !== "npm:" + name + "@" + wanted || got?.name !== name)
+  errors.push(requested + ": 별칭 선언·lock identity가 정확 정본과 다름: " + name);
+ if (got?.version !== wanted) errors.push(requested + ": 별칭 lock 설치 버전 " + got?.version + " != " + wanted);
+}
 // 별도 도구·다른 workspace가 아닌, 이 앱의 런타임 의존 그래프만 검사한다.
 const visited = new Set(), runtime = [{ location: values.workspace, entry: manifest }];
 const reactLocations = new Map([["react", new Set()], ["react-dom", new Set()]]);
@@ -170,11 +186,16 @@ function scan(path) {
     }
     const imported = importedModule(node);
     if (imported !== undefined) {
-     if ([...forbidden].some(name => imported === name || imported.startsWith(name + "/")))
-      errors.push(file + ": 공통 정책의 금지 패키지 import: " + imported);
-     if (imported === "@base-ui/react" || imported.startsWith("@base-ui/react/")
-      || imported.startsWith("@floating-ui/") || imported.startsWith("@radix-ui/react-"))
-      errors.push(file + ": 공통 Radix 외 overlay 구현");
+     const root = imported.split("/").slice(0, imported.startsWith("@") ? 2 : 1).join("/");
+     for (const name of dependencyNames(root)) {
+      const modulePath = name + imported.slice(root.length);
+      if ([...forbidden].some(name => modulePath === name || modulePath.startsWith(name + "/")))
+       errors.push(file + ": 공통 정책의 금지 패키지 import: " + imported);
+      if (modulePath === "@base-ui/react" || modulePath.startsWith("@base-ui/react/")
+       || modulePath === "radix-ui" || modulePath.startsWith("radix-ui/")
+       || modulePath.startsWith("@floating-ui/") || modulePath.startsWith("@radix-ui/react-"))
+       errors.push(file + ": 공통 Radix 외 overlay 구현");
+     }
     }
     ts.forEachChild(node, visit);
    }

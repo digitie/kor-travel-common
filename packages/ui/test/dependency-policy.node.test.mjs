@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import policy from "../dependency-policy.json" with { type: "json" };
-function fixture(change, {profile="web",workspace="",canonical=false,policyOverride,requireCanonical=false,packageDirectory=""}={}) {
+function fixture(change, {profile="web",workspace="",canonical=false,policyOverride,requireCanonical=false,packageDirectory="",checker="../check-dependencies.mjs"}={}) {
  const root=mkdtempSync(join(tmpdir(),"kt-policy-"));
  try {
   const dependencies={}, devDependencies={}, packages={}, artifacts={packages:{}};
@@ -34,7 +34,7 @@ function fixture(change, {profile="web",workspace="",canonical=false,policyOverr
   writeFileSync(join(root,"common-artifacts.json"),JSON.stringify(artifacts));
   if(canonical) writeFileSync(join(root,"canonical.json"),JSON.stringify(canonicalArtifacts));
   if(policyOverride) { const externalPolicy=structuredClone(policy);policyOverride(externalPolicy);writeFileSync(join(root,"policy.json"),JSON.stringify(externalPolicy)); }
-  return spawnSync(process.execPath,[fileURLToPath(new URL("../check-dependencies.mjs",import.meta.url)),"--package",join(packageDirectory,"package.json"),"--artifacts","common-artifacts.json","--profile",profile,"--workspace",workspace,...(canonical?["--canonical","canonical.json"]:[]),...(policyOverride?["--policy","policy.json"]:[])],{cwd:root,encoding:"utf8",env:{...process.env,...(requireCanonical?{KT_REQUIRE_CANONICAL:"1"}:{})}});
+  return spawnSync(process.execPath,[fileURLToPath(new URL(checker,import.meta.url)),"--package",join(packageDirectory,"package.json"),"--artifacts","common-artifacts.json","--profile",profile,"--workspace",workspace,...(canonical?["--canonical","canonical.json"]:[]),...(policyOverride?["--policy","policy.json"]:[])],{cwd:root,encoding:"utf8",env:{...process.env,...(requireCanonical?{KT_REQUIRE_CANONICAL:"1"}:{})}});
  } finally {rmSync(root,{recursive:true,force:true});}
 }
 test("동일 선언·lock·산출물은 통과",()=>{const result=fixture();assert.equal(result.status,0,result.stderr);});
@@ -411,6 +411,154 @@ test("관리 산출물 검사는 도달한 alias의 실제 package identity도 �
   packages["node_modules/widget/node_modules/map-alias"]={name:"vworld-map-web",version:policy.versions["vworld-map-web"],integrity:"sha512-stock"};
  }),"빌드 전이 버전·bytes 불일치");
 });
+// 통합 진입점도 앱 자체 primitive 구현을 허용하는 우회 경로가 아니다.
+for (const modulePath of ["radix-ui", "radix-ui/dialog"]) {
+ for (const [label, code] of [["정적 import", path => "import { Dialog } from " + JSON.stringify(path) + "; export const Overlay = () => <Dialog.Root />;"], ...moduleForms]) {
+  test("통합 Radix " + modulePath + "의 " + label + "도 공통 UI 경로를 요구", () => {
+   rejected(fixture(({root, dependencies, packages}) => {
+    dependencies["radix-ui"] = policy.versions["radix-ui"];
+    packages["node_modules/radix-ui"] = {version: policy.versions["radix-ui"]};
+    writeFileSync(join(root,"src/overlay.tsx"), code(modulePath));
+   }), "공통 Radix 외 overlay 구현");
+  });
+ }
+}
+test("공통 wrapper와 내부 Radix 전이 구현은 유지", () => {
+ const result = fixture(({root, packages}) => {
+  packages["node_modules/@kor-travel/ui"].dependencies = {"radix-ui": policy.versions["radix-ui"]};
+  packages["node_modules/radix-ui"] = {version: policy.versions["radix-ui"], dependencies: {"@radix-ui/react-dialog": "1.0.0"}};
+  packages["node_modules/@radix-ui/react-dialog"] = {version: "1.0.0"};
+  mkdirSync(join(root,"node_modules/@kor-travel/ui"), {recursive:true});
+  writeFileSync(join(root,"node_modules/@kor-travel/ui/index.tsx"), 'import { Dialog } from "radix-ui"; import { Root } from "@radix-ui/react-dialog";');
+  writeFileSync(join(root,"src/dialog.tsx"), 'import { Dialog, DialogContent } from "@kor-travel/ui"; export const Overlay = () => <Dialog><DialogContent /></Dialog>;');
+ });
+ assert.equal(result.status,0,result.stderr);
+});
+for (const modulePath of ["radix-ui-extra", "@example/radix-ui"]) {
+ test("통합 Radix 인접 이름 " + modulePath + "는 실제 금지 경로로 오인하지 않는다", () => {
+  const result = fixture(({root}) => writeFileSync(join(root,"src/adjacent.ts"), "export * from " + JSON.stringify(modulePath) + ";"));
+  assert.equal(result.status,0,result.stderr);
+ });
+}
+test("통합 Radix 이름을 설명한 주석과 문자열은 import가 아니다", () => {
+ const result = fixture(({root}) => writeFileSync(join(root,"src/note.ts"), '// import { Dialog } from "radix-ui";\nexport const note = "radix-ui/dialog";'));
+ assert.equal(result.status,0,result.stderr);
+});
+test("통합 Radix 버전 선언의 기존 web 계약은 변경하지 않는다", () => {
+ const result = fixture(({dependencies,packages}) => {
+  dependencies["radix-ui"] = policy.versions["radix-ui"];
+  packages["node_modules/radix-ui"] = {version:policy.versions["radix-ui"]};
+ });
+ assert.equal(result.status,0,result.stderr);
+});
+test("통합 Radix를 사용하지 않는 native tokens 경로는 유지", () => {
+ const result = fixture(({root}) => writeFileSync(join(root,"src/native.tsx"), 'import { View } from "react-native"; import { tokens } from "@kor-travel/tokens"; export const Screen = () => <View />;'), {profile:"mobile"});
+ assert.equal(result.status,0,result.stderr);
+});
+test("통합 Radix의 기존 native 금지 선언은 유지", () => {
+ rejected(fixture(({root,dependencies,packages}) => {
+  dependencies["radix-ui"] = policy.versions["radix-ui"];
+  packages["node_modules/radix-ui"] = {version:policy.versions["radix-ui"]};
+  writeFileSync(join(root,"src/native.ts"), 'import { Dialog } from "radix-ui";');
+ }, {profile:"mobile"}), "공통 정책의 금지 패키지 import: radix-ui");
+});
+// 실제 tools CLI에 기존 정책·canonical을 전달해 npm 요청 이름과 실제 identity를 함께 검사한다.
+const centralAliasOptions = {checker:"../../../tools/check_frontend_dependencies.mjs", canonical:true, policyOverride:()=>{}, requireCanonical:true};
+const aliasCases = [
+ ["web root", "overlay-bridge", "radix-ui", "web", "", "normal"],
+ ["web scoped", "@example/overlay-bridge", "radix-ui", "web", "", "normal"],
+ ["web subpath", "overlay-bridge", "radix-ui", "web", "/dialog", "normal"],
+ ["scoped subpath", "@example/overlay-bridge", "radix-ui", "web", "/dialog", "normal"],
+ ["mobile root", "overlay-bridge", "radix-ui", "mobile", "", "normal"],
+ ["mobile scoped subpath", "@example/overlay-bridge", "radix-ui", "mobile", "/dialog", "normal"],
+ ["individual Radix", "overlay-bridge", "@radix-ui/react-dialog", "web", "", "normal"],
+ ["individual scoped subpath", "@example/overlay-bridge", "@radix-ui/react-dialog", "web", "/subpath", "normal"],
+ ["Base UI", "overlay-bridge", "@base-ui/react", "web", "", "normal"],
+ ["Floating UI", "overlay-bridge", "@floating-ui/react", "web", "", "normal"],
+ ["manifest identity", "overlay-bridge", "radix-ui", "web", "", "missing-name"],
+ ["manifest/lock disagreement", "overlay-bridge", "radix-ui", "web", "", "different-name"],
+ ["undeclared transitive identity", "overlay-bridge", "radix-ui", "web", "", "transitive"],
+ ["mobile declaration only", "overlay-bridge", "radix-ui", "mobile", "", "no-import"],
+ ["nearest workspace identity", "@example/overlay-bridge", "radix-ui", "mobile", "/dialog", "workspace"],
+];
+for (const [label, alias, target, profile, subpath, kind] of aliasCases) {
+ test("패키지 alias의 " + label + " 우회도 실제 tools CLI에서 거부", () => {
+  const version = policy.versions[target] ?? "1.0.0";
+  const result = fixture(({root, dependencies, packages}) => {
+   dependencies[alias] = "npm:" + target + "@" + version;
+   packages["node_modules/" + alias] = {name:target, version};
+   if (kind === "missing-name") delete packages["node_modules/" + alias].name;
+   if (kind === "different-name") packages["node_modules/" + alias].name = "unrelated-engine";
+   if (kind === "transitive") {
+    delete dependencies[alias];
+    dependencies["fixture-helper"] = "1.0.0";
+    packages["node_modules/fixture-helper"] = {version:"1.0.0", dependencies:{[alias]:"npm:" + target + "@" + version}};
+   }
+   if (kind === "workspace") {
+    dependencies[alias] = "npm:unrelated-engine@1.0.0";
+    packages["node_modules/" + alias] = {name:"unrelated-engine", version:"1.0.0"};
+    packages["apps/mobile/node_modules/" + alias] = {name:target, version};
+   }
+   if (kind !== "no-import") writeFileSync(join(root,"src/alias.tsx"), "import { Dialog } from " + JSON.stringify(alias + subpath) + "; export const Overlay = () => <Dialog.Root />;");
+  }, {...centralAliasOptions, profile, ...(kind === "workspace" ? {workspace:"apps/mobile"} : {})});
+  rejected(result, "Radix");
+ });
+}
+for (const [label, target] of [["무관한 alias", "unrelated-engine"], ["인접한 이름", "radix-ui-extra"], ["다른 scope", "@example/radix-ui"], ["무관한 prototype 이름", "constructor"]]) {
+ test("패키지 alias의 " + label + " 정상 경로는 유지", () => {
+  const result = fixture(({root, dependencies, packages}) => {
+   dependencies["overlay-bridge"] = "npm:" + target + "@1.0.0";
+   packages["node_modules/overlay-bridge"] = {name:target, version:"1.0.0"};
+   writeFileSync(join(root,"src/alias.ts"), 'export * from "overlay-bridge/subpath";');
+  }, centralAliasOptions);
+  assert.equal(result.status,0,result.stderr);
+ });
+}
+test("패키지 alias의 nearer workspace 정상 identity는 무관한 root 설치보다 우선", () => {
+ const result = fixture(({root,dependencies,packages}) => {
+  dependencies["overlay-bridge"] = "npm:unrelated-engine@1.0.0";
+  packages["node_modules/overlay-bridge"] = {name:"radix-ui", version:policy.versions["radix-ui"]};
+  packages["apps/mobile/node_modules/overlay-bridge"] = {name:"unrelated-engine", version:"1.0.0"};
+  writeFileSync(join(root,"src/alias.ts"), 'export * from "overlay-bridge/subpath";');
+ }, {...centralAliasOptions,profile:"mobile",workspace:"apps/mobile"});
+ assert.equal(result.status,0,result.stderr);
+});
+for (const kind of ["wrong-both", "wrong-selector", "range-selector", "wrong-lock", "missing-identity"]) {
+ test("패키지 alias의 버전 " + kind + "는 기존 exact 정책으로 거부", () => {
+  const result = fixture(({dependencies,packages}) => {
+   const wanted = policy.versions["radix-ui"];
+   dependencies["overlay-bridge"] = "npm:radix-ui@" + (kind === "wrong-both" || kind === "wrong-selector" ? "1.8.0" : kind === "range-selector" ? "^" + wanted : wanted);
+   packages["node_modules/overlay-bridge"] = {name:"radix-ui", version:kind === "wrong-both" || kind === "wrong-lock" ? "1.8.0" : wanted};
+   if (kind === "missing-identity") delete packages["node_modules/overlay-bridge"].name;
+  }, centralAliasOptions);
+  rejected(result,"별칭");
+ });
+}
+test("패키지 alias의 정확한 registry 선언만 있고 직접 구현은 없으면 허용", () => {
+ const result = fixture(({dependencies,packages}) => {
+  dependencies["overlay-bridge"] = "npm:radix-ui@" + policy.versions["radix-ui"];
+  packages["node_modules/overlay-bridge"] = {name:"radix-ui", version:policy.versions["radix-ui"]};
+ },centralAliasOptions);
+ assert.equal(result.status,0,result.stderr);
+});
+test("패키지 alias의 common UI vendor·canonical bytes는 wrapper로 허용", () => {
+ const result = fixture(({root,dependencies,packages}) => {
+  dependencies["ui-bridge"] = dependencies["@kor-travel/ui"];
+  packages["node_modules/ui-bridge"] = {...packages["node_modules/@kor-travel/ui"],name:"@kor-travel/ui"};
+  writeFileSync(join(root,"src/wrapper.tsx"), 'import { Dialog } from "ui-bridge"; export const Overlay = () => <Dialog />;');
+ },centralAliasOptions);
+ assert.equal(result.status,0,result.stderr);
+});
+for (const [label,code] of moduleForms) {
+ test("패키지 alias의 scoped subpath " + label + "도 실제 identity를 검사", () => {
+  const result = fixture(({root,dependencies,packages}) => {
+   dependencies["@example/overlay-bridge"] = "npm:radix-ui@" + policy.versions["radix-ui"];
+   packages["node_modules/@example/overlay-bridge"] = {name:"radix-ui",version:policy.versions["radix-ui"]};
+   writeFileSync(join(root,"src/alias.ts"), code("@example/overlay-bridge/dialog"));
+  },centralAliasOptions);
+  rejected(result,"공통 Radix 외 overlay 구현");
+ });
+}
 test("관리 산출물 source·UI·tokens 배포 checker bytes는 동일",()=>{
  const source=readFileSync(new URL("../../../tools/check_frontend_dependencies.mjs",import.meta.url));
  assert.deepEqual(readFileSync(new URL("../check-dependencies.mjs",import.meta.url)),source);

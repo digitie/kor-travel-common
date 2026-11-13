@@ -1,3 +1,17 @@
+## 2026-11-13 — Radix alias identity 후보2
+
+bb7e의 literal 수정과 정확 CI4개/15job SUCCESS, B의 P2 BLOCK·Aquinas의 P2 CONDITIONAL은 당시 원문대로 보존한다. 별칭 요청 이름·npm 선언 대상·현재 workspace lock 실제 identity에 기존 Radix/native 금지와 registry exact 버전을 연결했다. 실제 tools CLI alias 경계15 FAIL/4 PASS→19 PASS, 버전5 FAIL/2 PASS→7 PASS 및 전체 정책193 PASS다. 실제 Manager048 source/lock/모든 file vendor/canonical의 정상 앱·common UI vendor alias·무관 alias는 전후0, Radix/scoped alias와 합성 버전 drift는0→1이다.
+
+독립 B/Aquinas의 source2 재검토·새 exact CI·최종 non-Map codepin 전파는 미완이다. versions/lock/정책/C11·runtime/CSS와 기존 앱/Map은 바꾸지 않았다. 아래 phase1·bb7e 이력은 그대로 유지한다.
+
+추가 정상 constructor alias의 prototype 오인을 별도 RED로 확인해 정책 자체 키만 대조하도록 제한했다. 초기193 PASS 원문을 유지하며 최종 전체194 PASS/skip0·38.243초와 같은 최종 코드의 실제 Manager12회 대조를 별도로 고정한다.
+
+## 2026-11-13 — 통합 Radix import guard 후보
+
+통합 radix-ui의 앱 직접 import 우회를 실제 중앙 CLI에서 재현하고 root/하위 경로를 기존 AST 검사에 추가했다. 같은 25개 회귀는 수정 전18 FAIL/7 PASS, 후25 PASS이며 전체 정책159 PASS다. web 공통 wrapper·내부 전이 Radix와 native tokens 경로는 유지한다. tools와 UI/tokens의 생성 checker source만 동기화하고 버전·lock·봉인된 C11은 바꾸지 않았다.
+
+이 후보는 구현자의 검증이며 독립 리뷰·정확 CI·소비자 전파는 미완이다. reusable guard는 common-ref의 tools 코드를 실행하므로 이전36 고정 호출과 기존 C11 내장 checker는 자동 수정되지 않는다. parent가 별도 최종 일관성 단계에서 non-Map 호출 ref를 갱신하고 검증해야 한다. 앱·Map·운영·CI 순서 분석은 이번 변경 범위 밖이다. 아래 기록은 당시 상태로 보존한다.
+
 ## 2026-11-13 — 공식 shell token 후보5 검증 중
 
 8a2c의 81개/CI 성공과 원 A4/B4의 미해결 BLOCK·CONDITIONAL을 보존한다. 공식 shell-quote의 실행 파일/data token과 whole RUN 연산자 검사를 적용하고 잠긴 두 parser fixture를 동결한다. 정본 runtime·독립 재검토·새 정확 CI 전 merge·도구 ref 소비자 출판은 대기한다. CI 순서 최적화·공개 C11 재pack·운영 적용은 범위 밖이다.

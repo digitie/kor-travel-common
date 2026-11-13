@@ -1,3 +1,23 @@
+## 2026-11-13 — 설치 별칭과 실제 패키지 identity 연결
+
+B-COMMON-RADIX-P2-01과 Aquinas A-P2-01의 actual tools alias 반례를 읽고 같은 정책/canonical CLI로 재현했다. 기존 resolveInstalled를 사용해 bare/scoped literal root의 요청 이름·npm 별칭 대상·workspace lock 실제 이름을 기존 검사에 연결한다. source overlay·native forbidden 외 registry 별칭의 exact selector/lock identity/version도 검사한다. managed vendor alias는 기존 전체 graph/SRI 검사를 유지해 common UI wrapper를 허용하며 무관한 alias 전체를 금지하지 않는다.
+
+source2는 alias 경계19 PASS(이전15 FAIL/4 PASS), 별도 버전7 PASS(이전5 FAIL/2 PASS), 모든 literal forms를 합친 추가34 PASS·전체193 PASS다. 실제 Manager048의 전체 frontend source·manifest/lock·dep/dev file vendor/canonical을 복사한12회 대조에서 원 앱/common vendor alias/unrelated는0→0, Radix/scoped subpath는0→1이다. 1.8.0 drift의 metadata만 합성한 별도 대조도0→1이며 해당 버전 설치·runtime을 실행했다고 주장하지 않는다.
+
+Node22.22.2/고정 TypeScript5.9.3을 재사용했고 새 dependency·C11 재pack·앱/Map 수정0이다. source1의 MDX 부재 Python400 실패와 이후 dependency-equipped bb CI400/skip3 성공은 별도 역사이며 source2 결과로 소급하지 않는다. 전체 Python/UI/build/Doctor·canonical runtime·새 CI는 여기서 재실행하지 않는다. 코드 실행 ref와 main 정책 데이터는 별개라 독립 원2 closure·parent의 최종 non-Map uses/common-ref 갱신·실제 중앙 CI가 여전히 필요하다.
+
+추가 정상 constructor alias의 prototype 오인을 별도 RED로 확인해 정책 자체 키만 대조하도록 제한했다. 초기193 PASS 원문을 유지하며 최종 전체194 PASS/skip0·38.243초와 같은 최종 코드의 실제 Manager12회 대조를 별도로 고정한다.
+
+## 2026-11-13 — 통합 Radix의 공통 UI 우회 검사
+
+B-COMMON36-COVERAGE-01에 따라 실제 tools guard에서 정확 버전 radix-ui 직접 선언 및 UI 전이 설치를 통한 Dialog.Root import가 모두 exit0인 것을 재현했다. 동일 중앙 정책/canonical 입력에서 공통 wrapper와 native tokens는 전후 exit0이다. 기존 AST의 모듈 경로 조건에 radix-ui root와 slash 경계만 추가하고 UI/tokens 생성 checker source 사본을 맞췄다.
+
+같은 테스트 bytes의25개는 이전18 FAIL/7 PASS에서25 PASS로 바뀌었고 전체 정책159 PASS다. 정적 import·재export·literal import/require·타입 참조 및 하위 경로, 인접 이름·주석·native/전이 구현 대조를 포함한다. Node22.22.2와 기존 TypeScript5.9.3을 readonly 참조했으며 canonical22.23.1 runtime·소비자 전체 빌드/브라우저·정확 CI는 이 결과로 주장하지 않는다. 수동 caller 추적을 사용했으며 Windows CodeGraph launcher는 이 작은 MJS 조건 영향 분석에 실행하지 않았다.
+
+중앙 workflow는 inputs.common-ref로 받은 코드의 tools/check_frontend_dependencies.mjs를 실행하고 main의 정책 JSON만 별도로 읽는다. 따라서 live policy만 바꾸거나 C11 설치를 유지하는 것으로 이 수정이 전파되지는 않는다. 기존 C11 tgz·runtime·버전·lock·정책 JSON은 그대로이며, parent의 non-Map caller ref 갱신과 새 중앙 CI가 후속 gate다. 작성자는 독립 source 판정을 내리지 않고 동일 불변 후보를 원 B와 새 독립 reviewer에게 인계한다. 과거 원문과 phase1 기록은 삭제하지 않았다.
+
+Python 전체400은 MDX 의존성이 없는 격리 환경에서38 FAIL/3 ERROR/1 SKIP으로 실패했다. 41개 실패/오류는 모두 MDX parser 실행 불가이며 원문을 보존한다. 전체 PASS로 표시하지 않고 의존성 준비 후 CI 재검증을 요구한다. 문서 링크852/3275·계획111·공백 검사는 통과했다.
+
 ## 2026-11-13 — 공식 shell token과 전체 RUN 제어 경계 후보5
 
 8a2c의 점 캐시 조치는 유지하되 비점 캐시·node/echo의 npm data 오인과 전체 AND-list background 누락은 미해결임을 보존한다.
