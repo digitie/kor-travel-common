@@ -6,6 +6,8 @@ source2는 alias 경계19 PASS(이전15 FAIL/4 PASS), 별도 버전7 PASS(이전
 
 Node22.22.2/고정 TypeScript5.9.3을 재사용했고 새 dependency·C11 재pack·앱/Map 수정0이다. source1의 MDX 부재 Python400 실패와 이후 dependency-equipped bb CI400/skip3 성공은 별도 역사이며 source2 결과로 소급하지 않는다. 전체 Python/UI/build/Doctor·canonical runtime·새 CI는 여기서 재실행하지 않는다. 코드 실행 ref와 main 정책 데이터는 별개라 독립 원2 closure·parent의 최종 non-Map uses/common-ref 갱신·실제 중앙 CI가 여전히 필요하다.
 
+추가 정상 constructor alias의 prototype 오인을 별도 RED로 확인해 정책 자체 키만 대조하도록 제한했다. 초기193 PASS 원문을 유지하며 최종 전체194 PASS/skip0·38.243초와 같은 최종 코드의 실제 Manager12회 대조를 별도로 고정한다.
+
 ## 2026-11-13 — 통합 Radix의 공통 UI 우회 검사
 
 B-COMMON36-COVERAGE-01에 따라 실제 tools guard에서 정확 버전 radix-ui 직접 선언 및 UI 전이 설치를 통한 Dialog.Root import가 모두 exit0인 것을 재현했다. 동일 중앙 정책/canonical 입력에서 공통 wrapper와 native tokens는 전후 exit0이다. 기존 AST의 모듈 경로 조건에 radix-ui root와 slash 경계만 추가하고 UI/tokens 생성 checker source 사본을 맞췄다.

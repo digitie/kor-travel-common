@@ -66,7 +66,7 @@ function resolveInstalled(name, directory = values.workspace) {
 const installed = name => resolveInstalled(name)?.entry;
 // registry 별칭도 원 이름의 exact 선언·lock 버전을 따른다. vendor 별칭은 아래 artifact bytes 검사를 유지한다.
 for (const [requested, spec] of Object.entries(deps)) for (const name of dependencyNames(requested)) {
- const wanted = policy.versions[name];
+ const wanted = Object.hasOwn(policy.versions, name) ? policy.versions[name] : undefined;
  if (name === requested || !wanted || artifactNames.has(name)) continue;
  const got = installed(requested);
  if (spec !== "npm:" + name + "@" + wanted || got?.name !== name)

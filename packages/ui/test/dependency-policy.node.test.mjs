@@ -504,7 +504,7 @@ for (const [label, alias, target, profile, subpath, kind] of aliasCases) {
   rejected(result, "Radix");
  });
 }
-for (const [label, target] of [["무관한 alias", "unrelated-engine"], ["인접한 이름", "radix-ui-extra"], ["다른 scope", "@example/radix-ui"]]) {
+for (const [label, target] of [["무관한 alias", "unrelated-engine"], ["인접한 이름", "radix-ui-extra"], ["다른 scope", "@example/radix-ui"], ["무관한 prototype 이름", "constructor"]]) {
  test("패키지 alias의 " + label + " 정상 경로는 유지", () => {
   const result = fixture(({root, dependencies, packages}) => {
    dependencies["overlay-bridge"] = "npm:" + target + "@1.0.0";

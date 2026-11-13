@@ -4,6 +4,8 @@ bb7e의 literal 수정과 정확 CI4개/15job SUCCESS, B의 P2 BLOCK·Aquinas의
 
 독립 B/Aquinas의 source2 재검토·새 exact CI·최종 non-Map codepin 전파는 미완이다. versions/lock/정책/C11·runtime/CSS와 기존 앱/Map은 바꾸지 않았다. 아래 phase1·bb7e 이력은 그대로 유지한다.
 
+추가 정상 constructor alias의 prototype 오인을 별도 RED로 확인해 정책 자체 키만 대조하도록 제한했다. 초기193 PASS 원문을 유지하며 최종 전체194 PASS/skip0·38.243초와 같은 최종 코드의 실제 Manager12회 대조를 별도로 고정한다.
+
 ## 2026-11-13 — 통합 Radix import guard 후보
 
 통합 radix-ui의 앱 직접 import 우회를 실제 중앙 CLI에서 재현하고 root/하위 경로를 기존 AST 검사에 추가했다. 같은 25개 회귀는 수정 전18 FAIL/7 PASS, 후25 PASS이며 전체 정책159 PASS다. web 공통 wrapper·내부 전이 Radix와 native tokens 경로는 유지한다. tools와 UI/tokens의 생성 checker source만 동기화하고 버전·lock·봉인된 C11은 바꾸지 않았다.
