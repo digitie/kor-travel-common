@@ -13,7 +13,7 @@
   "scripts": {
     "build": "npm run build --workspace packages/tokens && npm run build --workspace packages/ui",
     "check": "npm run check --workspace packages/tokens && npm run check --workspace packages/ui",
-    "test": "npm run test:toolchain && npm test --workspace packages/tokens && npm test --workspace packages/ui",
+    "test": "npm run test:toolchain && npm test --workspace packages/tokens && npm test --workspace packages/ui && npm test --workspace packages/toast",
     "lint": "eslint packages/ui/src packages/ui/examples",
     "doctor": "npm run doctor --workspace packages/ui",
     "check:policy": "node tools/sync_frontend_policy.mjs --check",
