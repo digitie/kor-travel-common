@@ -12,6 +12,14 @@ Radix FocusScope의 초기패널 Shift+Tab과 disabled fieldset 상속 결함은
 
 지도는 maplibre-vworld-react GitHub의 정확 커밋에서 core/web/RN을 빌드한다. 이동하는 main 참조와 개발자별 재포장은 배포 참조로 사용하지 않는다. 라이브러리의 재현된 결함은 원 저장소에서 수정·검증한 후 같은 산출물을 소비한다.
 
+### 선택형 공통 차트·애니메이션
+
+Weather·Transport가 함께 사용하는 `echarts`·`motion`도 정확 버전 정본에 포함한다. 두 패키지는 web/mobile 프로필의 필수 목록에 추가하지 않는다. 사용하는 앱의 선언·lock·실제 설치본을 같은 정본으로 검사하며, 사용하지 않는 앱에 설치를 요구하지 않는다. 아래 자동 생성 표가 버전의 정본을 따른다.
+
+2026-11-13 공식 npm registry의 `echarts/latest`·`motion/latest`를 확인했다. 별도 기능에서 들어온 Motion의 이전 패치는 소비자별 PR에서 정렬한다. 중앙 검사 코드와 정책을 적용할 소비 workflow는 같은 최종 Common 병합 SHA를 `uses`와 `common-ref` 양쪽에 고정한다. 소비자 코드·lock·CI 갱신과 실제 이미지·운영 수용은 각각 확인한다.
+
+이미 릴리스한 C11 UI·tokens·외부 라이브러리 산출물은 그대로 유지한다. 선택형 정책 추가를 이유로 같은 공개 버전을 다른 bytes로 재배포하지 않는다. 이번 변경은 중앙 버전 정책·규약이며 공통 컴포넌트 API나 CSS 변경이 아니다.
+
 ## 버전 표
 
 다음 표는 versions.json에서 자동 생성하며 JSON 정책과 함께 CI에서 동일성을 검사한다.
@@ -42,6 +50,7 @@ Radix FocusScope의 초기패널 Shift+Tab과 disabled fieldset 상속 결함은
 | autoprefixer | 10.6.2 |
 | class-variance-authority | 0.7.1 |
 | clsx | 2.1.1 |
+| echarts | 6.1.0 |
 | eslint | 10.14.0 |
 | eslint-config-next | 16.4.6 |
 | eslint-import-resolver-typescript | 4.4.5 |
@@ -54,6 +63,7 @@ Radix FocusScope의 초기패널 Shift+Tab과 disabled fieldset 상속 결함은
 | lightningcss | 1.33.0+nativecss.fix.4 |
 | lucide-react | 1.72.0 |
 | maplibre-gl | 6.17.0 |
+| motion | 14.13.0 |
 | nativewind | 5.0.0-rc.1 |
 | next | 16.4.6 |
 | next-intl | 4.15.0 |
