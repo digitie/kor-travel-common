@@ -1,3 +1,9 @@
+## 2026-11-13 — Radix alias identity 후보2
+
+bb7e의 literal 수정과 정확 CI4개/15job SUCCESS, B의 P2 BLOCK·Aquinas의 P2 CONDITIONAL은 당시 원문대로 보존한다. 별칭 요청 이름·npm 선언 대상·현재 workspace lock 실제 identity에 기존 Radix/native 금지와 registry exact 버전을 연결했다. 실제 tools CLI alias 경계15 FAIL/4 PASS→19 PASS, 버전5 FAIL/2 PASS→7 PASS 및 전체 정책193 PASS다. 실제 Manager048 source/lock/모든 file vendor/canonical의 정상 앱·common UI vendor alias·무관 alias는 전후0, Radix/scoped alias와 합성 버전 drift는0→1이다.
+
+독립 B/Aquinas의 source2 재검토·새 exact CI·최종 non-Map codepin 전파는 미완이다. versions/lock/정책/C11·runtime/CSS와 기존 앱/Map은 바꾸지 않았다. 아래 phase1·bb7e 이력은 그대로 유지한다.
+
 ## 2026-11-13 — 통합 Radix import guard 후보
 
 통합 radix-ui의 앱 직접 import 우회를 실제 중앙 CLI에서 재현하고 root/하위 경로를 기존 AST 검사에 추가했다. 같은 25개 회귀는 수정 전18 FAIL/7 PASS, 후25 PASS이며 전체 정책159 PASS다. web 공통 wrapper·내부 전이 Radix와 native tokens 경로는 유지한다. tools와 UI/tokens의 생성 checker source만 동기화하고 버전·lock·봉인된 C11은 바꾸지 않았다.

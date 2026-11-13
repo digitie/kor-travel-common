@@ -1,3 +1,11 @@
+## 2026-11-13 — 설치 별칭과 실제 패키지 identity 연결
+
+B-COMMON-RADIX-P2-01과 Aquinas A-P2-01의 actual tools alias 반례를 읽고 같은 정책/canonical CLI로 재현했다. 기존 resolveInstalled를 사용해 bare/scoped literal root의 요청 이름·npm 별칭 대상·workspace lock 실제 이름을 기존 검사에 연결한다. source overlay·native forbidden 외 registry 별칭의 exact selector/lock identity/version도 검사한다. managed vendor alias는 기존 전체 graph/SRI 검사를 유지해 common UI wrapper를 허용하며 무관한 alias 전체를 금지하지 않는다.
+
+source2는 alias 경계19 PASS(이전15 FAIL/4 PASS), 별도 버전7 PASS(이전5 FAIL/2 PASS), 모든 literal forms를 합친 추가34 PASS·전체193 PASS다. 실제 Manager048의 전체 frontend source·manifest/lock·dep/dev file vendor/canonical을 복사한12회 대조에서 원 앱/common vendor alias/unrelated는0→0, Radix/scoped subpath는0→1이다. 1.8.0 drift의 metadata만 합성한 별도 대조도0→1이며 해당 버전 설치·runtime을 실행했다고 주장하지 않는다.
+
+Node22.22.2/고정 TypeScript5.9.3을 재사용했고 새 dependency·C11 재pack·앱/Map 수정0이다. source1의 MDX 부재 Python400 실패와 이후 dependency-equipped bb CI400/skip3 성공은 별도 역사이며 source2 결과로 소급하지 않는다. 전체 Python/UI/build/Doctor·canonical runtime·새 CI는 여기서 재실행하지 않는다. 코드 실행 ref와 main 정책 데이터는 별개라 독립 원2 closure·parent의 최종 non-Map uses/common-ref 갱신·실제 중앙 CI가 여전히 필요하다.
+
 ## 2026-11-13 — 통합 Radix의 공통 UI 우회 검사
 
 B-COMMON36-COVERAGE-01에 따라 실제 tools guard에서 정확 버전 radix-ui 직접 선언 및 UI 전이 설치를 통한 Dialog.Root import가 모두 exit0인 것을 재현했다. 동일 중앙 정책/canonical 입력에서 공통 wrapper와 native tokens는 전후 exit0이다. 기존 AST의 모듈 경로 조건에 radix-ui root와 slash 경계만 추가하고 UI/tokens 생성 checker source 사본을 맞췄다.
