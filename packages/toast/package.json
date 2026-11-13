@@ -1,0 +1,31 @@
+{
+  "name": "@kor-travel/toast",
+  "version": "0.1.0",
+  "description": "공통 Radix Toast namespace — 기존 라이브러리 동작을 그대로 제공",
+  "type": "module",
+  "license": "GPL-3.0-or-later",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "radix-ui": "1.8.1"
+  },
+  "peerDependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "scripts": {
+    "test": "node --test test/toast.test.mjs"
+  }
+}

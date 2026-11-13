@@ -20,7 +20,8 @@
     "vworld-map-web",
     "vworld-map-rn",
     "lightningcss",
-    "@radix-ui/react-focus-scope"
+    "@radix-ui/react-focus-scope",
+    "@kor-travel/toast"
   ],
   "profiles": {
     "web": {
@@ -84,7 +85,8 @@
       ],
       "forbidden": [
         "@kor-travel/ui",
-        "radix-ui"
+        "radix-ui",
+        "@kor-travel/toast"
       ]
     }
   },
@@ -158,6 +160,7 @@
     "vworld-map-rn": "1.0.1",
     "vworld-map-web": "1.0.3",
     "zod": "4.6.7",
-    "zustand": "5.1.0"
+    "zustand": "5.1.0",
+    "@kor-travel/toast": "0.1.0"
   }
 }
