@@ -411,6 +411,57 @@ test("관리 산출물 검사는 도달한 alias의 실제 package identity도 �
   packages["node_modules/widget/node_modules/map-alias"]={name:"vworld-map-web",version:policy.versions["vworld-map-web"],integrity:"sha512-stock"};
  }),"빌드 전이 버전·bytes 불일치");
 });
+// 통합 진입점도 앱 자체 primitive 구현을 허용하는 우회 경로가 아니다.
+for (const modulePath of ["radix-ui", "radix-ui/dialog"]) {
+ for (const [label, code] of [["정적 import", path => "import { Dialog } from " + JSON.stringify(path) + "; export const Overlay = () => <Dialog.Root />;"], ...moduleForms]) {
+  test("통합 Radix " + modulePath + "의 " + label + "도 공통 UI 경로를 요구", () => {
+   rejected(fixture(({root, dependencies, packages}) => {
+    dependencies["radix-ui"] = policy.versions["radix-ui"];
+    packages["node_modules/radix-ui"] = {version: policy.versions["radix-ui"]};
+    writeFileSync(join(root,"src/overlay.tsx"), code(modulePath));
+   }), "공통 Radix 외 overlay 구현");
+  });
+ }
+}
+test("공통 wrapper와 내부 Radix 전이 구현은 유지", () => {
+ const result = fixture(({root, packages}) => {
+  packages["node_modules/@kor-travel/ui"].dependencies = {"radix-ui": policy.versions["radix-ui"]};
+  packages["node_modules/radix-ui"] = {version: policy.versions["radix-ui"], dependencies: {"@radix-ui/react-dialog": "1.0.0"}};
+  packages["node_modules/@radix-ui/react-dialog"] = {version: "1.0.0"};
+  mkdirSync(join(root,"node_modules/@kor-travel/ui"), {recursive:true});
+  writeFileSync(join(root,"node_modules/@kor-travel/ui/index.tsx"), 'import { Dialog } from "radix-ui"; import { Root } from "@radix-ui/react-dialog";');
+  writeFileSync(join(root,"src/dialog.tsx"), 'import { Dialog, DialogContent } from "@kor-travel/ui"; export const Overlay = () => <Dialog><DialogContent /></Dialog>;');
+ });
+ assert.equal(result.status,0,result.stderr);
+});
+for (const modulePath of ["radix-ui-extra", "@example/radix-ui"]) {
+ test("통합 Radix 인접 이름 " + modulePath + "는 실제 금지 경로로 오인하지 않는다", () => {
+  const result = fixture(({root}) => writeFileSync(join(root,"src/adjacent.ts"), "export * from " + JSON.stringify(modulePath) + ";"));
+  assert.equal(result.status,0,result.stderr);
+ });
+}
+test("통합 Radix 이름을 설명한 주석과 문자열은 import가 아니다", () => {
+ const result = fixture(({root}) => writeFileSync(join(root,"src/note.ts"), '// import { Dialog } from "radix-ui";\nexport const note = "radix-ui/dialog";'));
+ assert.equal(result.status,0,result.stderr);
+});
+test("통합 Radix 버전 선언의 기존 web 계약은 변경하지 않는다", () => {
+ const result = fixture(({dependencies,packages}) => {
+  dependencies["radix-ui"] = policy.versions["radix-ui"];
+  packages["node_modules/radix-ui"] = {version:policy.versions["radix-ui"]};
+ });
+ assert.equal(result.status,0,result.stderr);
+});
+test("통합 Radix를 사용하지 않는 native tokens 경로는 유지", () => {
+ const result = fixture(({root}) => writeFileSync(join(root,"src/native.tsx"), 'import { View } from "react-native"; import { tokens } from "@kor-travel/tokens"; export const Screen = () => <View />;'), {profile:"mobile"});
+ assert.equal(result.status,0,result.stderr);
+});
+test("통합 Radix의 기존 native 금지 선언은 유지", () => {
+ rejected(fixture(({root,dependencies,packages}) => {
+  dependencies["radix-ui"] = policy.versions["radix-ui"];
+  packages["node_modules/radix-ui"] = {version:policy.versions["radix-ui"]};
+  writeFileSync(join(root,"src/native.ts"), 'import { Dialog } from "radix-ui";');
+ }, {profile:"mobile"}), "공통 정책의 금지 패키지 import: radix-ui");
+});
 test("관리 산출물 source·UI·tokens 배포 checker bytes는 동일",()=>{
  const source=readFileSync(new URL("../../../tools/check_frontend_dependencies.mjs",import.meta.url));
  assert.deepEqual(readFileSync(new URL("../check-dependencies.mjs",import.meta.url)),source);

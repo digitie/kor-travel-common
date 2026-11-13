@@ -1,3 +1,9 @@
+## 2026-11-13 — 통합 Radix import guard 후보
+
+통합 radix-ui의 앱 직접 import 우회를 실제 중앙 CLI에서 재현하고 root/하위 경로를 기존 AST 검사에 추가했다. 같은 25개 회귀는 수정 전18 FAIL/7 PASS, 후25 PASS이며 전체 정책159 PASS다. web 공통 wrapper·내부 전이 Radix와 native tokens 경로는 유지한다. tools와 UI/tokens의 생성 checker source만 동기화하고 버전·lock·봉인된 C11은 바꾸지 않았다.
+
+이 후보는 구현자의 검증이며 독립 리뷰·정확 CI·소비자 전파는 미완이다. reusable guard는 common-ref의 tools 코드를 실행하므로 이전36 고정 호출과 기존 C11 내장 checker는 자동 수정되지 않는다. parent가 별도 최종 일관성 단계에서 non-Map 호출 ref를 갱신하고 검증해야 한다. 앱·Map·운영·CI 순서 분석은 이번 변경 범위 밖이다. 아래 기록은 당시 상태로 보존한다.
+
 ## 2026-11-13 — 공식 shell token 후보5 검증 중
 
 8a2c의 81개/CI 성공과 원 A4/B4의 미해결 BLOCK·CONDITIONAL을 보존한다. 공식 shell-quote의 실행 파일/data token과 whole RUN 연산자 검사를 적용하고 잠긴 두 parser fixture를 동결한다. 정본 runtime·독립 재검토·새 정확 CI 전 merge·도구 ref 소비자 출판은 대기한다. CI 순서 최적화·공개 C11 재pack·운영 적용은 범위 밖이다.

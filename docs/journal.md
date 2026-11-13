@@ -1,3 +1,13 @@
+## 2026-11-13 — 통합 Radix의 공통 UI 우회 검사
+
+B-COMMON36-COVERAGE-01에 따라 실제 tools guard에서 정확 버전 radix-ui 직접 선언 및 UI 전이 설치를 통한 Dialog.Root import가 모두 exit0인 것을 재현했다. 동일 중앙 정책/canonical 입력에서 공통 wrapper와 native tokens는 전후 exit0이다. 기존 AST의 모듈 경로 조건에 radix-ui root와 slash 경계만 추가하고 UI/tokens 생성 checker source 사본을 맞췄다.
+
+같은 테스트 bytes의25개는 이전18 FAIL/7 PASS에서25 PASS로 바뀌었고 전체 정책159 PASS다. 정적 import·재export·literal import/require·타입 참조 및 하위 경로, 인접 이름·주석·native/전이 구현 대조를 포함한다. Node22.22.2와 기존 TypeScript5.9.3을 readonly 참조했으며 canonical22.23.1 runtime·소비자 전체 빌드/브라우저·정확 CI는 이 결과로 주장하지 않는다. 수동 caller 추적을 사용했으며 Windows CodeGraph launcher는 이 작은 MJS 조건 영향 분석에 실행하지 않았다.
+
+중앙 workflow는 inputs.common-ref로 받은 코드의 tools/check_frontend_dependencies.mjs를 실행하고 main의 정책 JSON만 별도로 읽는다. 따라서 live policy만 바꾸거나 C11 설치를 유지하는 것으로 이 수정이 전파되지는 않는다. 기존 C11 tgz·runtime·버전·lock·정책 JSON은 그대로이며, parent의 non-Map caller ref 갱신과 새 중앙 CI가 후속 gate다. 작성자는 독립 source 판정을 내리지 않고 동일 불변 후보를 원 B와 새 독립 reviewer에게 인계한다. 과거 원문과 phase1 기록은 삭제하지 않았다.
+
+Python 전체400은 MDX 의존성이 없는 격리 환경에서38 FAIL/3 ERROR/1 SKIP으로 실패했다. 41개 실패/오류는 모두 MDX parser 실행 불가이며 원문을 보존한다. 전체 PASS로 표시하지 않고 의존성 준비 후 CI 재검증을 요구한다. 문서 링크852/3275·계획111·공백 검사는 통과했다.
+
 ## 2026-11-13 — 공식 shell token과 전체 RUN 제어 경계 후보5
 
 8a2c의 점 캐시 조치는 유지하되 비점 캐시·node/echo의 npm data 오인과 전체 AND-list background 누락은 미해결임을 보존한다.

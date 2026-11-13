@@ -173,6 +173,7 @@ function scan(path) {
      if ([...forbidden].some(name => imported === name || imported.startsWith(name + "/")))
       errors.push(file + ": 공통 정책의 금지 패키지 import: " + imported);
      if (imported === "@base-ui/react" || imported.startsWith("@base-ui/react/")
+      || imported === "radix-ui" || imported.startsWith("radix-ui/")
       || imported.startsWith("@floating-ui/") || imported.startsWith("@radix-ui/react-"))
       errors.push(file + ": 공통 Radix 외 overlay 구현");
     }
