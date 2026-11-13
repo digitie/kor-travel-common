@@ -17,6 +17,7 @@ env:
 
 jobs:
   docs:
+    needs: [secret-scan, check-versions]
     name: docs
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -62,6 +63,7 @@ jobs:
         run: python -B -X utf8 tools/check_prod_redaction.py --all
 
   tools:
+    needs: [secret-scan, check-versions]
     name: tools (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
@@ -86,6 +88,13 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
           printf '검사 source: `%s`\n' "$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - name: 설치 전 정적 정책 검사
+        run: |
+          python -B -X utf8 tools/check_aliases.py packages/tokens/aliases
+          python -B -X utf8 tools/check_versions.py --self-check
+          python -B -X utf8 tools/check_spdx.py
+          python -B -X utf8 tools/scan_secrets.py --all
+          python -B -X utf8 tools/check_prod_redaction.py --all
       - name: MDX 검사 Node.js 설치
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -101,11 +110,6 @@ jobs:
           python -B -X utf8 tools/validate_document_links.py
           python -B -X utf8 tools/validate_plan.py
           python -B -X utf8 -m unittest discover -s tests -p 'test_*.py'
-          python -B -X utf8 tools/check_aliases.py packages/tokens/aliases
-          python -B -X utf8 tools/check_versions.py --self-check
-          python -B -X utf8 tools/check_spdx.py
-          python -B -X utf8 tools/scan_secrets.py --all
-          python -B -X utf8 tools/check_prod_redaction.py --all
 
   secret-scan:
     name: secret-scan
@@ -172,6 +176,7 @@ jobs:
           PY
 
   packages:
+    needs: [secret-scan, check-versions]
     name: packages
     runs-on: ubuntu-24.04
     container:
