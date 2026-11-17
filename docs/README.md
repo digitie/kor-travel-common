@@ -85,6 +85,7 @@ branch·PR·리뷰 절차는 dev-environment가 아니라 [agent workflow](runbo
 | 영역×앱 매트릭스·후보 판정·차단 항목·열린 결정 | [commonality matrix](survey/commonality-matrix.md) |
 | 확정 결정 레지스터(D-xx)·열림(O-n)·파일 지도·ADR·task 목록 | [design brief](plan/design-brief.md) |
 | Phase 0~5 목표·산출물·완료 기준·중단 조건 | [integration plan](plan/integration-plan.md) |
+| 2026-11-17 다섯 저장소 재조사: 공유 수단의 실측 비용·후보 61건 판정·공유하지 않는 목록·task 24개의 순서 | [commonization plan](plan/commonization-plan-2026-11-17.md) |
 
 ## 작업·운영·이력
 

@@ -1,3 +1,9 @@
+## 2026-11-17 — 공통화 재조사·계획 초안
+
+소유자 요청으로 pinvi·map·weather·transport·docker-manager를 고정 커밋에서 다시 조사하고 [공통화 재조사·계획](plan/commonization-plan-2026-11-17.md)과 task 24개(T-022~T-026, T-219~T-221, T-313~T-315, T-414·T-415·T-434·T-435·T-465·T-466, T-480a·T-481a·T-482a·T-482b·T-484a·T-486a·T-486b)를 추가했다. 문서 초안이며 코드·패키지·정책 정본은 바꾸지 않았다. 독립 적대 리뷰 2건과 PR은 아직이다.
+
+다음 한 작업은 이 초안의 두 리뷰 finding 반영이다. 그 뒤 선행이 없는 묶음 A([T-022](tasks/T-022-ledger-reality-reconcile.md)·[T-023](tasks/T-023-frontend-guard-release-model-adr.md)·[T-313](tasks/T-313-collection-outcome-tag.md)·[T-026](tasks/T-026-python-version-rule.md))부터 고른다. T-218의 진행 상태와 아래 기록은 그대로다. 이 항목은 소비자 실행·운영 수용을 뜻하지 않는다.
+
 ## 2026-11-13 — 선택형 차트·애니메이션 정책 후보
 
 Common52의 alias guard는 실제2a34에 병합됐다. Weather·Transport가 추가로 함께 소비하는 차트·애니메이션 패키지를 중앙 선택형 정확 버전 정책과 생성 규약에 포함한다. web/mobile 필수 목록과 C11 bytes·lock·공개 UI API·CSS는 유지한다. 범위와 수용 기준은 [T-218](tasks/T-218-radix-library-unification.md#선택형-공통-차트애니메이션-후속-수용-기준)을 따른다.

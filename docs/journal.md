@@ -1,3 +1,12 @@
+## 2026-11-17 — 공통화 재조사와 계획 초안(문서 전용)
+
+- 대상과 기준: pinvi `b1605949`, kor-travel-map `f1788da9`, kor-travel-weather `e68f16a7`, kor-travel-transport `60095379`, kor-travel-docker-manager `31d56e4e`, common `97f8ed98`. 각 저장소를 새로 받아 읽기만 했다. 테스트·빌드·배포·운영 호스트 접근은 하지 않았다.
+- 방법: 일곱 영역(백엔드 골격·횡단, 도메인 헬퍼, Dagster, 프론트 셸·UI, 프론트 지도·e2e·lint, Ops·CI)을 나눠 조사하고, 판정에 쓰는 인용을 같은 커밋에서 다시 읽었다(문서의 `✔`). 다시 읽은 표본에서 어긋난 인용은 없었다. 2026-11-17 재vendor PR의 시각·파일 수와 CI 결과는 `gh`로 조회했다.
+- 결과: 후보 61건(지금 공유 8, 나중에 공유 24, 공유하지 않음 29)과 task 24개. 기존 계획과 어긋나는 판정(C1·C4 라우터·C5·C9·C10·C3을 공유하지 않음으로)은 제안으로만 적었고 반영은 T-022와 ADR 개정이 소유한다. 기존 ADR·task·코드·`versions.json`은 바꾸지 않았다.
+- 검증: `tools/validate_plan.py` 상세 task 135·오류 0, `tools/validate_document_links.py` 오류 0, `git diff --check` 통과. 전체 unittest·패키지 빌드는 문서 전용 변경이라 실행하지 않았다(`NOT_RUN(문서 전용, 도구·패키지 미변경)`).
+- 미확인: 계획 문서 §7. 특히 실행 확인이 없고, 고정 운영 이미지 안의 probe 동작과 공용 instance의 실제 렌더링은 보지 않았다.
+- 남은 것: 독립 적대 리뷰 2건, finding 반영, PR. 다섯 저장소의 backlog 포인터는 각 저장소의 문서 전용 브랜치로 준비했다.
+
 ## 2026-11-17 — 후보12 산출물 동결(ui 0.2.1·tokens 0.1.2·toast 0.1.1·vworld web 1.0.4/rn 1.0.2)
 
 - producer는 #57의 main merge `938d1db`다. 그 main push docs `packages` job artifact `common-release-packs-938d1db…`의 ui·tokens·toast pack을 그대로 원장에 옮겼다. PR head `53472b4`(같은 tree)의 artifact와 세 tgz의 SHA256이 같아 재현됐다.

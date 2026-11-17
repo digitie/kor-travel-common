@@ -2,7 +2,7 @@
 
 이 원장은 열린 task의 요약·선행 관계를 관리한다. 수용 기준·외부 선행·검증·evidence는 상세 파일, 현재 다음 한 작업은 [resume](resume.md), 실행 선택과 단계별 출구는 [통합 계획](plan/integration-plan.md)이 정본이다. 작성 문법은 [task 규칙](tasks-rule.md)을 따른다.
 
-총 111개의 상세 작업이 있다. 완료 24개는 완료 원장에 보존하고 열린 87개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
+총 135개의 상세 작업이 있다. 완료 24개는 완료 원장에 보존하고 열린 111개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
 
 ## 실행 대기열
 
@@ -11,6 +11,37 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 그 이후 아래 표에서 모든 선행이 DONE인 항목만 선택한다. 현재 범위의 common 작업만 기반 → 토큰 → UI → Python → 공통 운영/도구 분류 안에서 P0~P3 우선, 동순위는 ID 순이다. T-006의 계정 확보는 사용자 지시로 철회했다. T-010a·T-109·T-212·T-213·T-310·T-311 및 소비자 이관/미래 시점 task는 외부 evidence를 기다리고 독립적인 common READY 항목을 진행한다. 후보 보존 T-109a·T-212a·T-213a·T-310a가 후속 common 구현을 연다(ADR-014). rc 검증·정식 채택 경계는 [통합 계획 §4](plan/integration-plan.md#4-rc-검증과-정식-채택)를 따른다.
 
 완료 요약은 [완료 원장](tasks-done.md)에 보존한다. 선행 값의 정본은 아래 표와 상세 metadata이며, 브리프의 과거 task 목록은 최초 설계 근거다.
+
+## 공통화 재조사 묶음 (2026-11-17)
+
+소유자 요청으로 다섯 저장소(pinvi·map·weather·transport·docker-manager)를 다시 조사해 만든 24개 task다. 근거·판정·순서는 [공통화 재조사·계획](plan/commonization-plan-2026-11-17.md)이 정본이고 수용 기준은 각 상세 파일에 있다. ID는 [task 규칙](tasks-rule.md) §2의 대역을 따랐지만(기반 T-02x, UI T-21x~, Python T-31x, 소비자 T-4xx) 한 묶음으로 읽히도록 이 절에 모았다. 소비자 저장소 task는 그 저장소에서 실행하며 이 저장소는 수정하지 않는다. T-022가 끝나기 전에는 기존 T-2xx·T-3xx와 이 묶음의 관계를 계획 문서 §6의 '기존 task에 맡긴 것'으로 읽는다.
+
+| Task | 상태 | 우선순위 | 제목 | 선행 |
+|---|---|---|---|---|
+| [T-022](tasks/T-022-ledger-reality-reconcile.md) | READY | P0 | UI·Python task 원장을 실물과 대조해 재분류 | 없음 |
+| [T-023](tasks/T-023-frontend-guard-release-model-adr.md) | READY | P0 | 프론트 정책 guard·릴리스 모델 ADR(전환 창과 내장 정책 분리) | 없음 |
+| [T-024](tasks/T-024-guard-transition-window.md) | BLOCKED | P0 | 프론트 정책 전환 창 구현(검사기·생성기·정본 형식) | T-023 |
+| [T-025](tasks/T-025-decouple-embedded-policy.md) | BLOCKED | P1 | tarball 내장 정책 사본이 무관한 패키지 버전을 올리지 않게 분리 | T-023 |
+| [T-026](tasks/T-026-python-version-rule.md) | READY | P2 | Python 공통 패키지의 버전 올림 규칙 | 없음 |
+| [T-219](tasks/T-219-ui-admin-display-kit.md) | BLOCKED | P1 | 관리자 표시 부품 묶음을 공통 UI로 이관 | T-022, T-024 |
+| [T-220](tasks/T-220-ui-admin-form-error-kit.md) | BLOCKED | P1 | 관리자 폼·도움말·오류 부품 묶음을 공통 UI로 이관 | T-219 |
+| [T-221](tasks/T-221-ui-0-3-0-candidate-freeze.md) | BLOCKED | P1 | ui 0.3.0 단일 후보 동결과 전환 창 공지 | T-219, T-220, T-024 |
+| [T-313](tasks/T-313-collection-outcome-tag.md) | READY | P1 | 수집 결과 run tag 기록 함수를 공통 Dagster 모듈에 추가 | 없음 |
+| [T-314](tasks/T-314-reconciliation-sensor-consumer-cursor.md) | READY | P2 | 회수 sensor가 소비자 cursor와 정체 시계를 callback에 전달 | 없음 |
+| [T-315](tasks/T-315-dagster-webserver-health-probe.md) | READY | P2 | Dagster webserver 정의 로드 probe CLI | 없음 |
+| [T-414](tasks/T-414-map-guard-ref-toolchain.md) | BLOCKED | P2 | map: guard 검사 코드 ref 갱신과 정확 Node/npm 도구 규칙 이관 | T-023 |
+| [T-415](tasks/T-415-map-admin-kit-adoption.md) | BLOCKED | P1 | map: 관리자 공통 부품 묶음 채택 | T-221 |
+| [T-480a](tasks/T-480a-map-api-http-health-probe.md) | READY | P1 | map-api: compose healthcheck를 공통 HTTP probe로 교체 | 없음 |
+| [T-484a](tasks/T-484a-pinvi-retry-sensor-for-jobs.md) | READY | P2 | pinvi-etl: job별 재시도 sensor 5개를 다중 job sensor 1개로 | 없음 |
+| [T-465](tasks/T-465-weather-navigation-sanitize.md) | READY | P1 | weather-admin: 로컬 경로 정규화 사본을 공통 export로 교체 | 없음 |
+| [T-466](tasks/T-466-weather-admin-kit-adoption.md) | BLOCKED | P2 | weather-admin: 관리자 공통 부품 묶음 채택 | T-221 |
+| [T-481a](tasks/T-481a-weather-collection-outcome.md) | BLOCKED | P2 | weather-dagster: 로컬 수집 결과 tag 함수를 공통 구현으로 교체 | T-313 |
+| [T-434](tasks/T-434-transport-navigation-sanitize.md) | READY | P2 | transport-admin: 로컬 경로 정규화 사본을 공통 export로 교체 | 없음 |
+| [T-435](tasks/T-435-transport-admin-kit-adoption.md) | BLOCKED | P2 | transport-admin: 관리자 공통 부품 묶음 채택 | T-221 |
+| [T-482a](tasks/T-482a-transport-collection-outcome.md) | BLOCKED | P2 | transport-dagster: 로컬 수집 결과 tag 함수를 공통 구현으로 교체 | T-313 |
+| [T-482b](tasks/T-482b-transport-retry-sensor-for-jobs.md) | READY | P3 | transport-dagster: job별 재시도 sensor 3개를 다중 job sensor 1개로 | 없음 |
+| [T-486a](tasks/T-486a-ktdm-api-http-health-probe.md) | READY | P1 | ktdm: map-api·pinvi-api healthcheck를 공통 HTTP probe로 교체 | 없음 |
+| [T-486b](tasks/T-486b-ktdm-shared-dagster-per-job-limit.md) | READY | P2 | ktdm: 공용 Dagster instance의 job별 한도와 run_retries 결정 | 없음 |
 
 ## 저장소 기반
 
