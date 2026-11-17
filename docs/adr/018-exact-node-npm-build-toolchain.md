@@ -1,6 +1,6 @@
 # ADR-018: private anchor의 정확 Node/npm 빌드·테스트 선택
 
-- 상태: accepted
+- 상태: partially superseded by ADR-019 — guard가 도구 축을 `main`이 아니라 호출자의 `common-ref`에서 읽는다(2026-11-17). 정확 선택 규칙 자체는 유지
 - 날짜: 2026-11-13
 - 근거 문서: [버전 규약](../standards/versions.md), [T-218](../tasks/T-218-radix-library-unification.md)
 - Supersedes: ADR-008의 Node/npm 빌드·테스트 선택에 한해 범위 선언 자유를 대체하며 일반 floor/report 정책은 유지

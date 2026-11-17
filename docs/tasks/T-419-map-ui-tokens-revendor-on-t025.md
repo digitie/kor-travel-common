@@ -12,7 +12,7 @@
 
 ## 목표
 
-map은 정확 Node/npm 핀 결정(T-416)을 기다리는 동안 옛 guard(`55a921b`)를 호출하고, 그 판은 common `main`의 정책을 읽는다. T-025가 `ui`·`tokens`의 현재 값을 올리는 날 map의 guard가 실패한다. 그날 두 tarball을 재vendor한다. T-417이 먼저 끝나 map이 새 guard에 있으면 이 task는 필요 없다.
+map은 공통 Node 축이 26.13.1로 오를 때(T-029)까지 옛 guard(`55a921b`)를 호출하고(T-416은 2026-11-17 채택으로 결정됐다), 그 판은 common `main`의 정책을 읽는다. T-025가 `ui`·`tokens`의 현재 값을 올리는 날 map의 guard가 실패한다. 그날 두 tarball을 재vendor한다. T-417이 먼저 끝나 map이 새 guard에 있으면 이 task는 필요 없다.
 
 ## 고정 결정
 

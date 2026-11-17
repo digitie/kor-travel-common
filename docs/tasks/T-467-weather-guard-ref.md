@@ -11,7 +11,7 @@
 
 ## 목표
 
-weather의 guard 호출을 T-024가 지정한 채택 커밋으로 올린다. ADR-019의 권고안이 채택됐다면 그 뒤로 common main의 정책·Node/npm 변경이 이 저장소의 CI를 깨지 않는다. 벤더한 패키지는 바꾸지 않는다.
+weather의 guard 호출을 T-024가 지정한 채택 커밋으로 올린다. ADR-019(2026-11-17 accepted)에 따라 그 뒤로 common main의 정책·Node/npm 변경이 이 저장소의 CI를 깨지 않는다. 벤더한 패키지는 바꾸지 않는다.
 
 ## 고정 결정
 

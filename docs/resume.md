@@ -1,3 +1,9 @@
+## 2026-11-17 — 소유자 결정 반영(ADR-019·ADR-020 accepted, T-416 Node 26.13.1)
+
+[ADR-019](adr/019-frontend-policy-guard-model.md)(guard가 정책과 Node/npm 축을 호출자의 `common-ref`에서 읽는다)와 [ADR-020](adr/020-python-ui-scope-after-resurvey.md)(§1.5 15행 권고대로)이 accepted다. T-023은 DONE. T-416은 채택이고 값은 Node 26.13.1(최신 LTS 줄 최신 patch)·npm 12.0.1이며 Map ADR-124 PR이 핀을 담는다. 공통 축 상향은 [T-029](tasks/T-029-node-axis-to-latest-lts.md)(소유자 확인과 옛 판 호출자 전부의 이전 뒤)다.
+
+다음 한 작업: [T-024](tasks/T-024-guard-model-implementation.md)(ADR-019 구현과 채택 커밋 지정, guard 자신의 Node·npm도 ref에서). 병렬로 [T-022](tasks/T-022-ledger-reality-reconcile.md)(대조표·task 분할 — ADR-020 표가 입력), [T-026](tasks/T-026-python-version-rule.md). T-486b는 Manager에서 영향 자료 → 구현 순서로 진행한다.
+
 ## 2026-11-17 — 공통화 재조사·계획 초안(리뷰 2회 반영)
 
 소유자 요청으로 pinvi·map·weather·transport·docker-manager를 고정 커밋에서 다시 조사하고 [공통화 재조사·계획](plan/commonization-plan-2026-11-17.md)과 task 33개를 추가했다(T-022~T-027, T-219~T-221, T-313·T-314, T-415~T-419, T-424, T-434~T-437, T-465~T-468, T-474, T-480b·T-481a·T-482a·T-482b·T-484a·T-486a·T-486b). 문서 초안이며 코드·패키지·정책 정본은 바꾸지 않았다. 적대 리뷰 2회와 확인 pass의 finding을 반영했고 PR은 열었으나 병합 전이다.

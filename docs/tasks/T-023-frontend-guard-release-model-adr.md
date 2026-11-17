@@ -1,6 +1,6 @@
-# T-023 프론트 정책 guard·릴리스 모델 ADR(정책을 읽는 자리와 내장 정책)
+# T-023 프론트 정책 guard·릴리스 모델 ADR(정책을 읽는 자리와 내장 정책) (2026-11-17, PR #60)
 
-- 상태: READY
+- 상태: DONE
 - 우선순위: P0
 - Gate: 문서 검증·2인 리뷰·소유자 결정
 - 선행: 없음
@@ -45,10 +45,10 @@ docs/journal.md, docs/resume.md
 
 ## 수용 기준
 
-- [ ] ADR이 네 안 각각의 '얻는 것·잃는 것'과 결정 이유를 적고 상태가 `accepted`다(소유자 결정과 날짜 기록 포함).
-- [ ] Node/npm 도구 축, 내장 정책의 자리, 선택형 패키지 원칙이 각각 결정 문장으로 있다.
-- [ ] 결정이 T-024·T-025의 수용 기준으로 그대로 옮길 수 있는 문장으로 적혀 있다.
-- [ ] 문서 검증이 오류 0이다.
+- [x] ADR이 네 안 각각의 '얻는 것·잃는 것'과 결정 이유를 적고 상태가 `accepted`다(소유자 결정과 날짜 기록 포함).
+- [x] Node/npm 도구 축, 내장 정책의 자리, 선택형 패키지 원칙이 각각 결정 문장으로 있다.
+- [x] 결정이 T-024·T-025의 수용 기준으로 그대로 옮길 수 있는 문장으로 적혀 있다.
+- [x] 문서 검증이 오류 0이다.
 
 ## 검증 명령
 
@@ -61,6 +61,8 @@ git diff --check
 ## evidence
 
 ADR 본문과 두 리뷰 report. 소유자 결정은 PR 대화 또는 ADR의 '결정' 절에 날짜와 함께 남긴다.
+
+실행 기록(2026-11-17): 소유자 결정 원문은 [ADR-019](../adr/019-frontend-policy-guard-model.md) 머리에 있다. 리뷰 [report](../reviews/adversarial/2026-11-17-adr-019-020-owner-decisions.md)(A·B 둘 다 PASS-with-fixes, finding 반영). `validate_document_links.py` 오류 0, `validate_plan.py` 오류 0, `git diff --check` 통과.
 
 ## rollback·release 차단 조건
 

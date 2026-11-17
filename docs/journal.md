@@ -1,3 +1,14 @@
+## 2026-11-17 — 소유자 결정: ADR-019·ADR-020 accepted, T-416 Node 26.13.1, T-486b 권고대로
+
+- 소유자 답(원문): "ADR-019 … 추천안은 검사기가 각 서비스가 고정해 둔 common 버전에서 정책과 Node/npm 버전을 읽는 것입니다. / ADR-020 … 항목별로 수락·거부·보류를 정합니다. / Map의 Node 버전 고정 (T-416) … / 공용 Dagster의 job별 실행 한도와 재시도 설정 (T-486b) … — 이것들은 추천안 대로 node는 최신버전으로".
+- [ADR-019](adr/019-frontend-policy-guard-model.md) accepted: guard가 정책 세 파일과 Node/npm 축(guard 자신의 Node·npm 포함)을 호출자의 `common-ref`에서 읽고, 지연은 막지 않는 보고로 본다. ADR-018은 축을 읽는 자리만 부분 대체. T-023 DONE, T-024 READY.
+- [ADR-020](adr/020-python-ui-scope-after-resurvey.md) accepted: 계획 §1.5 15행을 권고대로 — 수락 12, 보류 2(C12·C13), 수락+보류 1(C2: 로깅 설정 철회·request-id 보류), 거부 0. ADR-011 부분 대체. T-027의 외부 선행 충족(남은 선행 T-022).
+- T-416 채택. "최신 버전"은 nodejs.org 색인(2026-11-17 조회)의 가장 새 LTS 줄 최신 patch **26.13.1**(26 Lithium, 2026-11-10 보안 릴리스)로 읽었다. 가장 새 항목 `v27.0.0-alpha.0.1.1`은 alpha라 제외. npm은 공통 축 12.0.1 유지(26.13.1 동봉 npm 11.20.0으로 내리지 않음). Map 기록·핀은 Map ADR-124 PR.
+- 공통 축이 22.23.1이라 Map이 새 guard로 옮기려면 축을 26.13.1로 올린 커밋이 필요하다. [T-029](tasks/T-029-node-axis-to-latest-lts.md)를 더했다(선행 T-024. 외부 선행: 공통 축 상향에 대한 소유자 확인, geo·concierge를 포함한 옛 판 호출자 전부의 이전 — 옛 판은 Node 22.23.1로 검사기를 돌리고 `--runtime`으로 main 축과 대조하므로 당일 갱신으로 피할 수 없다). T-417의 선행에 T-029.
+- T-486b: 권고대로. 영향 자료를 먼저 만들고 자료가 권고를 뒷받침하면 구현한다. 자료는 별도 문서 PR로 task 파일에 싣는다.
+- 리뷰: 독립 적대 리뷰 2명(둘 다 PASS-with-fixes, BLOCKER 0). MAJOR(T-029 외부 선행·geo/concierge·guard 자신의 Node, T-023 완료 처리, resume·journal, T-417 잔여 문구, T-029의 결정 범위)와 MINOR를 반영했다. [report](reviews/adversarial/2026-11-17-adr-019-020-owner-decisions.md).
+- 검증: `tools/validate_plan.py` 상세 task 145·오류 0, `tools/validate_document_links.py` 오류 0, `git diff --check` 통과. 패키지 빌드·unittest는 `NOT_RUN(문서 전용)`.
+
 ## 2026-11-17 — 공통화 계획 확인 pass(N1~N4) 반영
 
 - 2회차 리뷰어의 확인 pass가 25건 해소를 확인하고 새 지적 넷을 냈다. 넷 다 코드에서 확인하고 반영했다.

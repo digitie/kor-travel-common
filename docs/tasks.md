@@ -2,7 +2,7 @@
 
 이 원장은 열린 task의 요약·선행 관계를 관리한다. 수용 기준·외부 선행·검증·evidence는 상세 파일, 현재 다음 한 작업은 [resume](resume.md), 실행 선택과 단계별 출구는 [통합 계획](plan/integration-plan.md)이 정본이다. 작성 문법은 [task 규칙](tasks-rule.md)을 따른다.
 
-총 144개의 상세 작업이 있다. 완료 24개는 완료 원장에 보존하고 열린 120개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
+총 145개의 상세 작업이 있다. 완료 25개는 완료 원장에 보존하고 열린 120개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
 
 ## 실행 대기열
 
@@ -14,16 +14,16 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 
 ## 공통화 재조사 묶음 (2026-11-17)
 
-소유자 요청으로 다섯 저장소(pinvi·map·weather·transport·docker-manager)를 다시 조사해 만든 33개 task다. 근거·판정·순서는 [공통화 재조사·계획](plan/commonization-plan-2026-11-17.md)이 정본이고 수용 기준은 각 상세 파일에 있다. ID는 [task 규칙](tasks-rule.md) §2의 대역을 따랐지만(기반 T-02x, UI T-21x~, Python T-31x, 소비자 T-4xx) 한 묶음으로 읽히도록 이 절에 모았다. 소비자 저장소 task는 그 저장소에서 실행하며 이 저장소는 수정하지 않는다. T-022가 끝나기 전에는 기존 T-2xx·T-3xx와 이 묶음의 관계를 계획 문서 §1.5와 §6의 '기존 task에 맡긴 것'으로 읽는다. 소유자 결정을 기다리는 것: T-416(Map 정확 Node/npm 핀), T-023의 ADR-019 채택, T-027의 선행인 ADR-020 채택, T-486b의 구현 단계. T-025의 동결은 소비자별 호출 SHA 갱신 또는 당일 재vendor 확인(상세 파일의 외부 선행) 뒤에 병합한다.
+소유자 요청으로 다섯 저장소(pinvi·map·weather·transport·docker-manager)를 다시 조사해 만든 33개 task와, 2026-11-17 소유자 결정 뒤 더한 T-029다. 근거·판정·순서는 [공통화 재조사·계획](plan/commonization-plan-2026-11-17.md)이 정본이고 수용 기준은 각 상세 파일에 있다. ID는 [task 규칙](tasks-rule.md) §2의 대역을 따랐지만(기반 T-02x, UI T-21x~, Python T-31x, 소비자 T-4xx) 한 묶음으로 읽히도록 이 절에 모았다. 소비자 저장소 task는 그 저장소에서 실행하며 이 저장소는 수정하지 않는다. T-022가 끝나기 전에는 기존 T-2xx·T-3xx와 이 묶음의 관계를 계획 문서 §1.5와 §6의 '기존 task에 맡긴 것'으로 읽는다. 소유자 결정(2026-11-17): ADR-019·ADR-020 accepted(T-023 DONE, T-027의 외부 선행 충족), T-416 채택(Node 26.13.1, 공통 축 상향은 T-029), T-486b는 권고대로(영향 자료 먼저). T-025의 동결은 소비자별 호출 SHA 갱신 또는 당일 재vendor 확인(상세 파일의 외부 선행) 뒤에 병합한다.
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
 | [T-022](tasks/T-022-ledger-reality-reconcile.md) | READY | P0 | UI·Python task 원장을 실물과 대조해 재분류 | 없음 |
-| [T-023](tasks/T-023-frontend-guard-release-model-adr.md) | READY | P0 | 프론트 정책 guard·릴리스 모델 ADR(정책을 읽는 자리와 내장 정책) | 없음 |
-| [T-024](tasks/T-024-guard-model-implementation.md) | BLOCKED | P0 | ADR-019가 정한 프론트 guard 모델 구현과 채택 커밋 지정 | T-023 |
+| [T-024](tasks/T-024-guard-model-implementation.md) | READY | P0 | ADR-019가 정한 프론트 guard 모델 구현과 채택 커밋 지정 | T-023 |
 | [T-025](tasks/T-025-decouple-embedded-policy.md) | BLOCKED | P1 | 내장 정책을 패키지 자기 것으로 줄이고 ui·tokens·toast 릴리스 | T-023, T-024 |
 | [T-026](tasks/T-026-python-version-rule.md) | READY | P2 | Python 공통 패키지의 버전 올림 규칙 | 없음 |
 | [T-027](tasks/T-027-standards-after-reclassification.md) | BLOCKED | P1 | 재분류 결정을 표준 문서에 반영(backend-stack·openapi·ci-deploy·ui-contract) | T-022 |
+| [T-029](tasks/T-029-node-axis-to-latest-lts.md) | BLOCKED | P2 | 공통 Node 도구 축을 최신 LTS(26.13.1)로 올림 | T-024 |
 | [T-219](tasks/T-219-admin-kit-package-self-contained.md) | BLOCKED | P1 | 선택형 패키지 admin-kit 골격과 앱 의존이 없는 부품 | T-022, T-025 |
 | [T-220](tasks/T-220-admin-kit-injected.md) | BLOCKED | P1 | admin-kit 2차: 사전·링크 주입이 필요한 부품과 폼·오류 | T-219 |
 | [T-221](tasks/T-221-admin-kit-0-1-0-freeze.md) | BLOCKED | P1 | admin-kit 0.1.0 동결과 선택형 산출물 등록 | T-219, T-220 |
@@ -31,7 +31,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 | [T-314](tasks/T-314-reconciliation-sensor-consumer-cursor.md) | READY | P3 | 회수 sensor의 선택형 소비자 cursor와 정체 시계 전달 | 없음 |
 | [T-415](tasks/T-415-map-admin-kit-adoption.md) | BLOCKED | P1 | map: admin-kit 채택 | T-221 |
 | [T-416](tasks/T-416-map-exact-node-npm-pin-decision.md) | BLOCKED | P1 | map: 정확 Node/npm 핀 채택 여부 결정 | 없음 |
-| [T-417](tasks/T-417-map-guard-ref-toolchain.md) | BLOCKED | P2 | map: guard 검사 코드 ref 갱신과 정확 Node/npm 도구 규칙 이관 | T-416, T-024 |
+| [T-417](tasks/T-417-map-guard-ref-toolchain.md) | BLOCKED | P2 | map: guard 검사 코드 ref 갱신과 정확 Node/npm 도구 규칙 이관 | T-416, T-024, T-029 |
 | [T-418](tasks/T-418-map-ui-reexport-shims.md) | READY | P3 | map: ui 순수 재수출 shim을 공통 경로 직접 import로 | 없음 |
 | [T-419](tasks/T-419-map-ui-tokens-revendor-on-t025.md) | BLOCKED | P2 | map: T-025 릴리스 당일 ui·tokens 재vendor(T-417 미완일 때) | T-025 |
 | [T-480b](tasks/T-480b-map-api-http-health-probe.md) | READY | P1 | map-api: compose healthcheck를 공통 HTTP probe로 교체 | 없음 |

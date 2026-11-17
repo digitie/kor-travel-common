@@ -20,6 +20,7 @@
 
 | 날짜 | 종류 | 기준선·범위 | 리뷰어 | 결과 |
 |---|---|---|---|---|
+| 2026-11-17 | 문서 FULL(결정 기록·task DAG) | [ADR-019·ADR-020·T-416](adversarial/2026-11-17-adr-019-020-owner-decisions.md), aa3e0bc | A 문서·원장 / B workflow·검사기 사실 | 두 PASS-with-fixes·BLOCKER 0, P1 7건 FIXED, post-fix 재검토 NOT_RUN |
 | 2026-11-13 | FULL 반복·원문/closure 정산 | [도구 선택 guard](adversarial/2026-11-13-build-toolchain-closure.md), 제품941d | 동일 원 A 입력·계약 / 원 B 실행·출처 | 최종 두 SOURCE PASS·신규/미해결0, 과거 BLOCK/CONDITIONAL 보존·제품CI4/15 SUCCESS; closure exactCI 별도 |
 | 2026-11-12 | 최종 사실 입력5 문서 정산 | [원문·판정](adversarial/2026-11-12-consumer-sdk-final.md#입력5-최종-사실출처-검토-정산), 37a264b | 동일 원 A UI·수용 / 원 B 출처·보존 | 두 PASS·신규0, 원문 pending 보존·정확 후보 CI3/9 SUCCESS; 최종 closure head CI 별도 |
 | 2026-11-12 | Transport184~186 메뉴·지도·최신 운영 정산 | [현재 정산](adversarial/2026-11-12-consumer-sdk-final.md#최종-운영-수용-6개-정산), bd08/mergef30 | 동일 원 A UI·계약 / 원 B 출처·배포 | source2·helper3·실행4 두 PASS, 이전 실패 보존·실제 정상9 PASS; 현재 출판 후보의 원2검토·CI는 별도 |

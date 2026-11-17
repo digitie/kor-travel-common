@@ -1,8 +1,8 @@
 # kor-travel-common ADR — Architecture Decision Records
 
-**다음 후보 번호는 ADR-019이다.**
+**다음 후보 번호는 ADR-021이다.**
 
-- 정본 지위: ADR의 단일 색인. 별도 `docs/decisions.md`는 두지 않는다(D-02·D-27, 이중 색인 금지). 확정 task: T-004(★이번 PR). 마지막 갱신: 2026-09-06.
+- 정본 지위: ADR의 단일 색인. 별도 `docs/decisions.md`는 두지 않는다(D-02·D-27, 이중 색인 금지). 확정 task: T-004(★이번 PR). 마지막 갱신: 2026-11-17(ADR-019·ADR-020).
 
 kor-travel-common의 구조적 결정은 파일당 하나의 ADR로 둔다. 파일명은 `NNN-<slug>.md`(3자리·소문자 kebab), H1은 `# ADR-NNN: 제목`, 머리 불릿에 `상태`·`날짜`가 필수이고 `근거 문서`·`Supersedes`는 선택이다. 본문 절은 컨텍스트 → 결정 → 대안 검토 → 결과 → 후속·적용 위치 순서다. 이 색인은 번호·제목·상태를 관리하며 상위 인덱스는 [문서 지도](../README.md)다.
 
@@ -28,7 +28,7 @@ kor-travel-common의 구조적 결정은 파일당 하나의 ADR로 둔다. 파�
 | [ADR-008](008-version-alignment-policy.md) | 라이브러리·플랫폼 버전 일치 정책(floor/recommended/exceptions·lockfile 의무·판정 어휘·승격 권한) | accepted — O-6·O-7·O-10·O-17·O-18은 기본값으로 진행 |
 | [ADR-009](009-openapi-rest-conventions.md) | OpenAPI/REST 규약 3계층과 예외 레지스트리·health 경로 | accepted — O-14(429 코드명·geo v2 시점·pinvi Zod)는 기본값으로 진행 |
 | [ADR-010](010-consumer-adoption-model.md) | 소비자 채택 모델(매니페스트·첫 소비자 순서·라이선스 gate·채택 PR 규격·시각 기준선·NOT_RUN) | partially superseded by ADR-013 |
-| [ADR-011](011-python-common-package.md) | Python 공통 패키지 구조(extras·3.11 호환·모듈 우선순위·인증 범위 밖·메트릭 접두) | partially superseded by ADR-015 — O-7(앱 floor 3.12 시점)·O-12(메트릭 접두 map·pinvi)는 기본값으로 진행 |
+| [ADR-011](011-python-common-package.md) | Python 공통 패키지 구조(extras·3.11 호환·모듈 우선순위·인증 범위 밖·메트릭 접두) | partially superseded by ADR-015, ADR-020 — O-7(앱 floor 3.12 시점)·O-12(메트릭 접두 map·pinvi)는 기본값으로 진행 |
 | [ADR-012](012-tailwind-v4-migration-policy.md) | Tailwind v4 전환 정책(대상·순서·4단 PR·pinvi mobile 예외 보류) | proposed — O-8(pinvi mobile Tailwind 3 예외) 사용자 승인 대기; 나머지 항목은 기본값으로 진행 |
 | [ADR-013](013-package-release-execution-contract.md) | 패키지 릴리스 순서·호환 범위·검증 소비자 계약 | partially superseded by ADR-014 |
 | [ADR-014](014-common-implementation-without-registry-publishing.md) | npm·PyPI 미게시와 common 구현·외부 릴리스 분리 | accepted |
@@ -37,4 +37,8 @@ kor-travel-common의 구조적 결정은 파일당 하나의 ADR로 둔다. 파�
 
 - [ADR-017: 공통 shadcn Radix·VirtualTable 및 의존성 일치](017-shadcn-radix-shared-components.md)
 
-- [ADR-018: private anchor의 정확 Node/npm 빌드·테스트 선택](018-exact-node-npm-build-toolchain.md) — accepted
+- [ADR-018: private anchor의 정확 Node/npm 빌드·테스트 선택](018-exact-node-npm-build-toolchain.md) — partially superseded by ADR-019(guard가 도구 축을 읽는 자리)
+
+- [ADR-019: 프론트 guard는 정책과 Node/npm 축을 호출자가 고정한 common 커밋에서 읽는다](019-frontend-policy-guard-model.md) — accepted(소유자 2026-11-17)
+
+- [ADR-020: 2026-11 재조사로 Python·UI 공통 범위를 다시 정한다](020-python-ui-scope-after-resurvey.md) — accepted(소유자 2026-11-17)

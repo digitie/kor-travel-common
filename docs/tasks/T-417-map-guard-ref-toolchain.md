@@ -3,27 +3,30 @@
 - 상태: BLOCKED
 - 우선순위: P2
 - Gate: 소비자 CI(공통 프론트엔드 정책)
-- 선행: T-416, T-024
+- 선행: T-416, T-024, T-029
 - 소유 저장소: kor-travel-map
-- 병렬: 묶음 B. T-416이 '채택'일 때만 진행
+- 병렬: T-029 뒤(묶음 B의 다른 task와 달리 공통 축 상향을 기다린다)
 
 출처는 [공통화 재조사·계획(2026-11-17)](../plan/commonization-plan-2026-11-17.md)의 §2.2·§3.6(K-78)이다. 근거 위치(file:line)와 차이 분석은 그 문서가 정본이며 여기서 반복하지 않는다.
 
+## 2026-11-17 결정 반영
+
+T-416은 **채택**으로 정해졌고 값은 Node 26.13.1·npm 12.0.1이다. 루트 `.nvmrc`, 정확 `engines`, CI `node-version`, Node Docker 이미지는 T-416의 Map PR(ADR-124)이 먼저 바꾼다. 그래서 이 task의 구현 범위 2는 그 PR이 빠뜨린 도구 규칙 입력(`toolchain-manifests`·`node-dockerfiles`)만 남는다. 호출 SHA는 공통 축이 26.13.1인 커밋이어야 하므로 T-024의 채택 커밋이 아니라 [T-029](T-029-node-axis-to-latest-lts.md)의 병합 커밋(그 뒤 common이 지정한 커밋)으로 올린다. 그 커밋의 정책이 그때 Map이 벤더한 판과 같아야 한다(T-025 릴리스 뒤면 T-419로 받은 `ui` 0.2.2·`tokens` 0.1.3). 다르면 같은 PR에서 재vendor한다.
+
 ## 목표
 
-T-416이 정확 핀 채택을 결정하면 map의 guard 호출 SHA를 올리고 도구 규칙이 요구하는 것을 채운다. T-416이 미채택이면 이 task는 그 결정으로 닫는다.
+T-416이 채택(2026-11-17, Node 26.13.1)으로 정해졌으므로 map의 guard 호출 SHA를 공통 축이 26.13.1인 커밋으로 올리고 남은 도구 규칙 입력을 채운다.
 
 ## 고정 결정
 
 - 도구 규칙의 정본은 [ADR-018](../adr/018-exact-node-npm-build-toolchain.md)과 [versions](../standards/versions.md) §3.1.1이다.
-- 전제는 T-416의 '채택' 결정이다. 결정 없이 `engines`를 바꾸지 않는다.
-- 호출 SHA는 '최신'이 아니라 T-024가 지정한 채택 커밋 하나로 올린다. 그 커밋에서 map이 걸리는 규칙은 T-024의 evidence에 미리 적혀 있다.
-- T-025 릴리스 뒤에 이 task를 하면 이미 T-025 판(`ui` 0.2.2·`tokens` 0.1.3)을 벤더한 상태라 T-024 채택 커밋의 정책(0.2.1·0.1.2)과 맞지 않는다. 그때는 T-025가 적어 둔 동결 병합 커밋(admin-kit을 채택할 것이면 T-221의 admin-kit 채택 커밋)으로 올린다. 어느 경우든 common이 지정한 커밋이고 '최신'이 아니다.
+- 전제는 T-416의 '채택' 결정(2026-11-17)이다. `.nvmrc`·정확 `engines`·CI·이미지의 Node는 T-416의 Map PR이 이미 26.13.1로 바꿨다.
+- 호출 SHA는 '최신'이 아니라 common이 지정한 커밋 하나로 올린다: T-029의 병합 커밋. 그 뒤 T-025 동결이나 T-221(admin-kit)이 병합돼 Map이 그 판을 벤더했다면, common이 그 뒤에 지정한 커밋(공통 축 26.13.1을 포함)으로 올린다. 그 커밋의 정책이 그때 Map이 벤더한 판과 같아야 한다.
 
 ## 구현 범위
 
-1. `.github/workflows/common-frontend-policy.yml`의 호출 SHA와 `common-ref`를 T-024가 지정한 채택 커밋으로 올린다.
-2. 도구 규칙이 요구하는 것(루트 `.nvmrc`, 정확 `engines.node`·`engines.npm`, `packageManager`, `toolchain-manifests`·`node-dockerfiles` 입력)을 채운다.
+1. `.github/workflows/common-frontend-policy.yml`의 호출 SHA와 `common-ref`를 위 고정 결정의 커밋으로 올린다.
+2. 도구 규칙이 요구하는 것 가운데 T-416의 Map PR이 하지 않은 것(`toolchain-manifests`·`node-dockerfiles` 입력, 검사기가 더 요구하는 항목)을 채운다.
 3. map의 기존 검증 스크립트(`verify-npm-tree.mjs`·`verify-next-sharp.mjs`)와 겹치는 검사가 있으면 어느 쪽을 남기는지 적는다.
 4. common 후속 PR(문서 전용): [integration map](../integration-map.md)의 map 호출 SHA를 갱신한다.
 
