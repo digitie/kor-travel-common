@@ -6,6 +6,8 @@
 UI·tokens·toast의 실행 코드와 CSS는 바뀌지 않는다. 내장 `dependency-policy.json`이 새 정본을 담도록 patch 버전으로 올렸다. toast는 빌드 단계가 없어 정책 사본이 루트와 같은지, 세 패키지 버전이 `versions.json`과 같은지를 toast 시험이 확인한다.
 docs CI `packages` job은 smoke가 검증한 ui/tokens pack과 toast pack을 `common-release-packs-<source SHA>` artifact로 보관한다.
 
+후보12 동결: producer `938d1db`의 CI pack(ui `sha512-Yk0T…`, tokens `sha512-IF5q…`, toast `sha512-R4UI…`)과 maplibre-vworld-react `79b70997`의 web 1.0.4(`sha512-yuie…`)·rn 1.0.2(`sha512-ZJ6W…`)를 `frontend-artifacts.json`에 고정했다.
+
 ### 이관
 
 새 common-ref를 채택하는 소비자는 vendored `@kor-travel/ui` 0.2.1·`@kor-travel/tokens` 0.1.2(toast 사용 시 0.1.1)와, 쓰는 경우 `vworld-map-web` 1.0.4·`vworld-map-rn` 1.0.2를 함께 갱신한다. 산출물 원장의 version·SHA512는 `frontend-artifacts.json`에서 그대로 옮긴다. 기존 common-ref에 고정된 소비자는 바뀌지 않는다. 각자의 고정 SHA에서 정책·정본·checker를 읽기 때문이다.

@@ -1,3 +1,10 @@
+## 2026-11-17 — 후보12 산출물 동결(ui 0.2.1·tokens 0.1.2·toast 0.1.1·vworld web 1.0.4/rn 1.0.2)
+
+- producer는 #57의 main merge `938d1db`다. 그 main push docs `packages` job artifact `common-release-packs-938d1db…`의 ui·tokens·toast pack을 그대로 원장에 옮겼다. PR head `53472b4`(같은 tree)의 artifact와 세 tgz의 SHA256이 같아 재현됐다.
+- 세 pack의 내장 정책은 web 1.0.4·rn 1.0.2·ui 0.2.1·tokens 0.1.2·toast 0.1.1이고, ui의 tokens peer는 0.1.2다(풀어서 확인).
+- vworld 3종은 maplibre-vworld-react main `79b70997` push Marker CI artifact의 pack이다. core 1.0.1은 기존 원장 bytes와 같다.
+- toast 0.1.1 tgz를 `vendor/`에 추가했다(0.1.0은 역사 보존). smoke lock의 ui/tokens integrity를 동결 pack으로 맞췄다. 기존 소비자는 고정 SHA를 쓰므로 영향이 없다.
+
 ## 2026-11-17 — vworld-map-web 1.0.4·rn 1.0.2 정책과 ui 0.2.1·tokens 0.1.2·toast 0.1.1 후보
 
 - Pinvi 운영 Firefox에서 바탕지도 타일이 0건이던 결함을 maplibre-vworld-react #33(web 1.0.4)이 고쳤다. rn은 web과 대조한 #34(1.0.2: fitBounds padding·마커 anchor·명시 mapStyle)로 고친다. 정책 정본 `versions.json`의 두 축과 생성물(frontend-dependencies.json·라이브러리 문서)을 갱신했다.
