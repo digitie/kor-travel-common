@@ -1,6 +1,6 @@
 # T-024 ADR-019가 정한 프론트 guard 모델 구현과 채택 커밋 지정
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P0
 - Gate: 도구 단위·selftest workflow·2인 리뷰
 - 선행: T-023
@@ -12,6 +12,10 @@
 ## 목표
 
 ADR-019의 결정을 재사용 workflow와 문서에 구현한다. ADR-019는 2026-11-17 소유자 결정으로 권고안(정책과 도구 축을 `common-ref`에서 읽기 + 막지 않는 지연 보고)을 accepted로 정했다. 아래 범위는 그 결정 그대로다. 어느 안이든 이 task는 소비자가 올릴 **채택 커밋 하나**를 지정한다.
+
+## 채택 커밋
+
+`e18d1892dcc3915a5e6e57ccad550a852b793780`(PR #63 squash 병합, 2026-11-18). 소비자는 guard 호출 SHA와 `common-ref`를 이 값으로 함께 올린다. 소비자별 결과는 [evidence](../evidence/t024-guard-model.md).
 
 ## 고정 결정
 
@@ -48,13 +52,13 @@ CHANGELOG.md, docs/journal.md, docs/integration-map.md
 
 ## 수용 기준
 
-- [ ] selftest: 새 workflow를 고정 ref로 호출한 fixture 소비자가, 그 뒤 `main`의 정책 값과 `axes.node.recommended`를 바꿔도 통과한다.
-- [ ] selftest: 같은 fixture가 자기 `common-ref`의 정책과 어긋나면 실패한다(검사는 그대로 엄격하다).
-- [ ] selftest: Node 축이 22.23.1이 아닌 ref(시험용 커밋 또는 fixture)를 고정한 소비자에서 guard 자신의 Node·npm이 그 ref의 값으로 선택되고 통과한다.
-- [ ] 옛 판(`97f8ed9`) workflow를 호출하는 fixture의 판정이 이 변경 전과 같다.
-- [ ] 채택 커밋이 문서에 40자리로 적혀 있고, 일곱 소비자 main에 대한 읽기 전용 실행 결과(통과 또는 걸린 규칙 목록)가 evidence에 있다.
-- [ ] 지연 보고가 소비자별 호출 ref·벤더 버전·정본과의 차이를 표로 내고, 차이가 있어도 exit 0이다.
-- [ ] `npm run check:policy`·`npm run test:toolchain`·`npm test --workspace packages/ui`가 통과한다.
+- [x] selftest: 새 workflow를 고정 ref로 호출한 fixture 소비자가, 그 뒤 `main`의 정책 값과 `axes.node.recommended`를 바꿔도 통과한다.
+- [x] selftest: 같은 fixture가 자기 `common-ref`의 정책과 어긋나면 실패한다(검사는 그대로 엄격하다).
+- [x] selftest: Node 축이 22.23.1이 아닌 ref(시험용 커밋 또는 fixture)를 고정한 소비자에서 guard 자신의 Node·npm이 그 ref의 값으로 선택되고 통과한다.
+- [x] 옛 판(`97f8ed9`) workflow를 호출하는 fixture의 판정이 이 변경 전과 같다.
+- [x] 채택 커밋이 문서에 40자리로 적혀 있고, 일곱 소비자 main에 대한 읽기 전용 실행 결과(통과 또는 걸린 규칙 목록)가 evidence에 있다.
+- [x] 지연 보고가 소비자별 호출 ref·벤더 버전·정본과의 차이를 표로 내고, 차이가 있어도 exit 0이다.
+- [x] `npm run check:policy`·`npm run test:toolchain`·`npm test --workspace packages/ui`가 통과한다.
 
 ## 검증 명령
 

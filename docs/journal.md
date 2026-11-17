@@ -1,3 +1,9 @@
+## 2026-11-18 — T-024 병합, 채택 커밋 기록
+
+- PR #63을 squash 병합했다. 채택 커밋은 `e18d1892dcc3915a5e6e57ccad550a852b793780`. 병합 커밋 트리는 리뷰·CI를 마친 head와 같다.
+- 이 커밋을 checkout해 일곱 소비자 main에 새 guard 대조 단계를 다시 돌렸다. pinvi·weather·transport·docker-manager·geo·concierge PASS, map은 도구 규칙 두 건(`.nvmrc`·`engines`, T-029 커밋으로 옮긴다). [evidence](evidence/t024-guard-model.md).
+- T-024 DONE. 선행이 T-024뿐이던 T-424·T-467·T-436·T-474를 READY로 바꿨다(소비자 저장소에서 실행).
+
 ## 2026-11-18 — T-024 guard 모델 구현(ADR-019)
 
 - `frontend-consumer-guard.yml`: main 정책 checkout을 없애고 `--policy`·`--canonical`·`--registry`를 `common-ref`에서 읽는다. 검사기 Node는 ref의 `.nvmrc`(`node-version-file`), npm은 ref의 `axes.npm.recommended`. 다른 저장소 호출이면 `job.workflow_sha`와 `common-ref`가 같아야 한다. 선택 입력 `root`(기본 `.`)는 fixture가 저장소 루트가 아닌 곳에 `.nvmrc`를 두기 위해 더했다.

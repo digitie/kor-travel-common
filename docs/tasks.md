@@ -19,7 +19,6 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
 | [T-022](tasks/T-022-ledger-reality-reconcile.md) | READY | P0 | UI·Python task 원장을 실물과 대조해 재분류 | 없음 |
-| [T-024](tasks/T-024-guard-model-implementation.md) | IN_PROGRESS | P0 | ADR-019가 정한 프론트 guard 모델 구현과 채택 커밋 지정 | T-023 |
 | [T-025](tasks/T-025-decouple-embedded-policy.md) | BLOCKED | P1 | 내장 정책을 패키지 자기 것으로 줄이고 ui·tokens·toast 릴리스 | T-023, T-024 |
 | [T-026](tasks/T-026-python-version-rule.md) | READY | P2 | Python 공통 패키지의 버전 올림 규칙 | 없음 |
 | [T-027](tasks/T-027-standards-after-reclassification.md) | BLOCKED | P1 | 재분류 결정을 표준 문서에 반영(backend-stack·openapi·ci-deploy·ui-contract) | T-022 |
@@ -35,20 +34,20 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 | [T-418](tasks/T-418-map-ui-reexport-shims.md) | READY | P3 | map: ui 순수 재수출 shim을 공통 경로 직접 import로 | 없음 |
 | [T-419](tasks/T-419-map-ui-tokens-revendor-on-t025.md) | BLOCKED | P2 | map: T-025 릴리스 당일 ui·tokens 재vendor(T-417 미완일 때) | T-025 |
 | [T-480b](tasks/T-480b-map-api-http-health-probe.md) | READY | P1 | map-api: compose healthcheck를 공통 HTTP probe로 교체 | 없음 |
-| [T-424](tasks/T-424-pinvi-guard-ref.md) | BLOCKED | P2 | pinvi: guard 호출 SHA를 채택 커밋으로 갱신 | T-024 |
+| [T-424](tasks/T-424-pinvi-guard-ref.md) | READY | P2 | pinvi: guard 호출 SHA를 채택 커밋으로 갱신 | T-024 |
 | [T-484a](tasks/T-484a-pinvi-retry-sensor-for-jobs.md) | READY | P3 | pinvi: job별 재시도 sensor 5개를 다중 job sensor 1개로(API 정적 목록 포함) | 없음 |
 | [T-465](tasks/T-465-weather-navigation-sanitize.md) | READY | P3 | weather-admin: 로컬 경로 정규화 사본을 공통 export로 교체 | 없음 |
 | [T-466](tasks/T-466-weather-admin-kit-adoption.md) | BLOCKED | P2 | weather-admin: admin-kit 채택 | T-221 |
-| [T-467](tasks/T-467-weather-guard-ref.md) | BLOCKED | P2 | weather: guard 호출 SHA를 채택 커밋으로 갱신 | T-024 |
+| [T-467](tasks/T-467-weather-guard-ref.md) | READY | P2 | weather: guard 호출 SHA를 채택 커밋으로 갱신 | T-024 |
 | [T-468](tasks/T-468-weather-ui-reexport-shims.md) | READY | P3 | weather-admin: ui 순수 재수출 shim을 공통 경로 직접 import로 | 없음 |
 | [T-481a](tasks/T-481a-weather-collection-outcome.md) | BLOCKED | P3 | weather-dagster: 로컬 수집 결과 tag 함수를 공통 구현으로 교체 | T-313 |
 | [T-434](tasks/T-434-transport-navigation-sanitize.md) | READY | P3 | transport-admin: 로컬 경로 정규화 사본을 공통 export로 교체 | 없음 |
 | [T-435](tasks/T-435-transport-admin-kit-adoption.md) | BLOCKED | P2 | transport-admin: admin-kit 채택 | T-221 |
-| [T-436](tasks/T-436-transport-guard-ref.md) | BLOCKED | P2 | transport: guard 호출 SHA를 채택 커밋으로 갱신 | T-024 |
+| [T-436](tasks/T-436-transport-guard-ref.md) | READY | P2 | transport: guard 호출 SHA를 채택 커밋으로 갱신 | T-024 |
 | [T-437](tasks/T-437-transport-ui-reexport-shims.md) | READY | P3 | transport-admin: ui 순수 재수출 shim을 공통 경로 직접 import로 | 없음 |
 | [T-482a](tasks/T-482a-transport-collection-outcome.md) | BLOCKED | P3 | transport-dagster: 로컬 수집 결과 tag 함수를 공통 구현으로 교체 | T-313 |
 | [T-482b](tasks/T-482b-transport-retry-sensor-for-jobs.md) | READY | P3 | transport-dagster: job별 재시도 sensor 3개를 다중 job sensor 1개로 | 없음 |
-| [T-474](tasks/T-474-ktdm-guard-ref.md) | BLOCKED | P2 | ktdm: guard 호출 SHA를 채택 커밋으로 갱신 | T-024 |
+| [T-474](tasks/T-474-ktdm-guard-ref.md) | READY | P2 | ktdm: guard 호출 SHA를 채택 커밋으로 갱신 | T-024 |
 | [T-486a](tasks/T-486a-ktdm-api-http-health-probe.md) | READY | P1 | ktdm: map-api·pinvi-api healthcheck를 공통 HTTP probe로 교체 | 없음 |
 | [T-486b](tasks/T-486b-ktdm-shared-dagster-per-job-limit.md) | BLOCKED | P2 | ktdm: 공용 Dagster instance의 job별 한도와 run_retries 결정 자료와 구현 | 없음 |
 

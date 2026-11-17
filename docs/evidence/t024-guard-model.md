@@ -4,7 +4,7 @@
 
 ## 채택 커밋
 
-채택 커밋은 이 task PR의 병합 커밋이다. 40자리 값은 병합 뒤 후속 문서 PR이 이 절과 [integration map](../integration-map.md)·T-024에 적는다(자기 커밋 hash를 미리 넣지 않는다).
+채택 커밋은 PR #63의 squash 병합 커밋 **`e18d1892dcc3915a5e6e57ccad550a852b793780`**이다. 병합 커밋의 트리는 리뷰·CI를 마친 PR head(`989946a`)와 같다. 병합 뒤 이 커밋을 checkout해 아래 소비자 실행을 다시 돌렸고 결과가 같았다(map main은 그사이 `efe9c43ad8ba5200b11ca1e0bc7b71a99732fb14`로 움직였고 결과·호출 줄은 그대로).
 
 ## 무엇이 바뀌었나
 
