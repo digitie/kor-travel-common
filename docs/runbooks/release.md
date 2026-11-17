@@ -59,6 +59,12 @@ T-010의 common fixture 성공과 T-010a의 실제 소비자 dispatch 성공은 
 4. 실제 발행·검증 후 최신 main에서 문서 전용 branch/PR을 만든다. 해당 release evidence와 필요한 review 원본을 경로별로 가져오고, 완료 원장·상세 task·resume·journal 및 해당 버전 CHANGELOG 절을 현재 문서에 반영한다. 이 PR은 package·lock 변경을 포함하지 않는다. release branch 전체 merge/cherry-pick이나 main의 다음 minor 변경을 덮는 CHANGELOG 통째 복사는 하지 않는다. 코드 결함 수정의 main 이식이 필요하면 별도 구현 task/PR에서 현재 minor로 검증한다.
 5. main 문서 PR에서 모든 선행 완료·발행 자산·필수 검증을 재확인한 뒤 릴리스 task를 DONE으로 옮기고 충족된 후속 task를 READY로 갱신한다. main의 link·plan·필수 CI가 통과하고 이 PR이 병합되어야 현재 실행 원장에서 종료된다. 발행은 끝났지만 기록 PR이 남으면 task는 IN_PROGRESS로 남긴다. 보존 source, release merge commit, main 완료 기록 commit은 서로 다른 참조로 기록한다.
 
+### 2.3 프론트 정책·Node/npm 축 변경과 소비자 guard(ADR-019)
+
+프론트 정책 세 파일(`versions.json`·`frontend-dependencies.json`·`frontend-artifacts.json`)이나 Node/npm 축을 바꾸는 common 커밋은 새 `common-ref`를 내는 일이다. [ADR-019](../adr/019-frontend-policy-guard-model.md) 판 guard를 호출하는 소비자는 자기 ref를 올리는 PR에서만 그 변경을 받고, 그 PR에서 새 ref의 정책·산출물·Node/npm에 맞춘다. registry 보안 갱신도 같은 경로(main 반영 → 소비자 ref PR)다. 차이는 주간 지연 보고([`frontend-guard-lag-report.yml`](../../.github/workflows/frontend-guard-lag-report.yml))로 본다.
+
+옛 판 guard(`55a921b`·`97f8ed9`·`9e16393`)는 정책을 main에서 읽는다. 그런 변경을 병합하기 전에 지연 보고의 "guard 판" 열로 옛 판 호출자가 남았는지 확인하고, 남았다면 그 소비자의 이전 또는 당일 재vendor를 외부 선행으로 확인한다. Node/npm 축 변경은 당일 재vendor로도 피할 수 없으므로 옛 판(`97f8ed9`·`9e16393`) 호출자가 모두 옮긴 뒤에 병합한다([T-029](../tasks/T-029-node-axis-to-latest-lts.md)).
+
 ## 3. 절차
 
 ### 3.1 준비

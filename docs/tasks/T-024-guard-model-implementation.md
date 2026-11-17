@@ -1,6 +1,6 @@
 # T-024 ADR-019가 정한 프론트 guard 모델 구현과 채택 커밋 지정
 
-- 상태: READY
+- 상태: IN_PROGRESS
 - 우선순위: P0
 - Gate: 도구 단위·selftest workflow·2인 리뷰
 - 선행: T-023

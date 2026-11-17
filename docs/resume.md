@@ -2,7 +2,7 @@
 
 [ADR-019](adr/019-frontend-policy-guard-model.md)(guard가 정책과 Node/npm 축을 호출자의 `common-ref`에서 읽는다)와 [ADR-020](adr/020-python-ui-scope-after-resurvey.md)(§1.5 15행 권고대로)이 accepted다. T-023은 DONE. T-416은 채택이고 값은 Node 26.13.1(최신 LTS 줄 최신 patch)·npm 12.0.1이며 Map ADR-124 PR이 핀을 담는다. 공통 축 상향은 [T-029](tasks/T-029-node-axis-to-latest-lts.md)(소유자 확인과 옛 판 호출자 전부의 이전 뒤)다.
 
-다음 한 작업: [T-024](tasks/T-024-guard-model-implementation.md)(ADR-019 구현과 채택 커밋 지정, guard 자신의 Node·npm도 ref에서). 병렬로 [T-022](tasks/T-022-ledger-reality-reconcile.md)(대조표·task 분할 — ADR-020 표가 입력), [T-026](tasks/T-026-python-version-rule.md). T-486b는 영향 자료가 차단 조건(map 동시 run 감소)에 걸려 구현하지 않았고 소유자 재결정을 기다린다(BLOCKED).
+다음 한 작업: [T-024](tasks/T-024-guard-model-implementation.md) 병합과 채택 커밋 40자리 기록(구현 PR 진행 중, [evidence](evidence/t024-guard-model.md)). 그 뒤 소비자 호출 SHA 갱신(T-424·T-467·T-436·T-474, geo·concierge는 각 저장소 요청)과 T-029. 병렬로 [T-022](tasks/T-022-ledger-reality-reconcile.md)(대조표·task 분할 — ADR-020 표가 입력), [T-026](tasks/T-026-python-version-rule.md). T-486b는 영향 자료가 차단 조건(map 동시 run 감소)에 걸려 구현하지 않았고 소유자 재결정을 기다린다(BLOCKED).
 
 ## 2026-11-17 — 공통화 재조사·계획 초안(리뷰 2회 반영)
 

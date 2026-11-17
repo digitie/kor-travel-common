@@ -1,3 +1,12 @@
+## 2026-11-18 — T-024 guard 모델 구현(ADR-019)
+
+- `frontend-consumer-guard.yml`: main 정책 checkout을 없애고 `--policy`·`--canonical`·`--registry`를 `common-ref`에서 읽는다. 검사기 Node는 ref의 `.nvmrc`(`node-version-file`), npm은 ref의 `axes.npm.recommended`. 다른 저장소 호출이면 `job.workflow_sha`와 `common-ref`가 같아야 한다. 선택 입력 `root`(기본 `.`)는 fixture가 저장소 루트가 아닌 곳에 `.nvmrc`를 두기 위해 더했다.
+- selftest: 시험 전용 고정 ref `81810cc`(브랜치 `selftest/t024-guard-ref-fixture`, Node 24.22.3·npm 11.20.0·zustand 5.0.16)를 `common-ref`로 고정한 fixture 소비자가 통과하고, 같은 fixture를 main 값 쪽으로 바꾼 네 변형은 실패한다. 이 ref가 main과 달라서 '그 뒤 main이 바뀌어도 통과'와 'guard 자신의 Node·npm이 ref 값'을 한 job이 함께 보인다.
+- 옛 판 판정 불변은 시험 사본 대신 정책 세 파일 bytes 불변으로 확인했다(사본은 다음 정책 변경마다 결과가 달라져 영구 시험이 되지 못한다).
+- 주간 지연 보고 `tools/frontend_guard_lag_report.py`: 일곱 소비자 main의 workflow에서 호출 SHA·`common-ref`·guard 판·main보다 뒤 커밋 수·정책 파일 차이·벤더 버전 차이를 표로 낸다. 어떤 실패에도 exit 0.
+- 일곱 소비자 main 읽기 전용 실행: map 외 여섯 PASS. map은 도구 규칙 두 건(`.nvmrc`·`engines`, 이미 26.13.1)에 걸리며 T-029 커밋으로 옮긴다. 표는 [evidence](evidence/t024-guard-model.md).
+- 채택 커밋 40자리는 병합 뒤 후속 문서 PR이 적는다.
+
 ## 2026-11-17 — T-486b 안 (가) 구현: 공용 instance에 `run_retries`만 추가
 
 - 소유자가 안 (가)를 골랐다. Manager [#610](https://github.com/digitie/kor-travel-docker-manager/pull/610)(병합 `79032717`)가 `run_retries` 블록(standalone 사본과 같은 값)만 더하고 concierge 리터럴 다섯은 그대로 뒀다. `dagster/max_retries≥1` tag를 단 run(오늘은 pinvi 멱등 job 다섯)만 재시도된다.

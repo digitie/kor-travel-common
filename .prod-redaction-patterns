@@ -52,3 +52,16 @@ path="vendor/lightningcss-1.33.0+nativecss.fix.4.tgz!/package/wasm/lightningcss_
 rules=["INTERNAL-HOST"]
 sha256="4c2a5251dac4f47ebdadce39579febee5e12e00a3c892e5719e2a46ffa535a27"
 reason="공개 bundler 오류 문장 끝과 CSS local() 키워드가 WASM 상수 영역에서 인접 배치된 문자열; 운영 hostname 아님"
+
+# T-024: tests/fixtures/guard-consumer는 vendor/와 같은 lightningcss fix4 bytes를 싣는다.
+[[allowlist]]
+path="tests/fixtures/guard-consumer/vendor/lightningcss-1.33.0+nativecss.fix.4.tgz!/package/lightningcss.linux-x64-gnu.node"
+rules=["INTERNAL-HOST"]
+sha256="8a38620c1bbf54acfb12f40b3180ce4e8510a5fb952e9173a3b7fe0b676ecbd6"
+reason="T-024 guard fixture의 동일 bytes 사본. 공개 cssparser 오류 문장 끝과 Rust panic 접두가 native 상수 영역에서 인접 배치된 문자열; 운영 hostname 아님"
+
+[[allowlist]]
+path="tests/fixtures/guard-consumer/vendor/lightningcss-1.33.0+nativecss.fix.4.tgz!/package/wasm/lightningcss_node.wasm"
+rules=["INTERNAL-HOST"]
+sha256="4c2a5251dac4f47ebdadce39579febee5e12e00a3c892e5719e2a46ffa535a27"
+reason="T-024 guard fixture의 동일 bytes 사본. 공개 bundler 오류 문장 끝과 CSS local() 키워드가 WASM 상수 영역에서 인접 배치된 문자열; 운영 hostname 아님"

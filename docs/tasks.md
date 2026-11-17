@@ -19,7 +19,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
 | [T-022](tasks/T-022-ledger-reality-reconcile.md) | READY | P0 | UI·Python task 원장을 실물과 대조해 재분류 | 없음 |
-| [T-024](tasks/T-024-guard-model-implementation.md) | READY | P0 | ADR-019가 정한 프론트 guard 모델 구현과 채택 커밋 지정 | T-023 |
+| [T-024](tasks/T-024-guard-model-implementation.md) | IN_PROGRESS | P0 | ADR-019가 정한 프론트 guard 모델 구현과 채택 커밋 지정 | T-023 |
 | [T-025](tasks/T-025-decouple-embedded-policy.md) | BLOCKED | P1 | 내장 정책을 패키지 자기 것으로 줄이고 ui·tokens·toast 릴리스 | T-023, T-024 |
 | [T-026](tasks/T-026-python-version-rule.md) | READY | P2 | Python 공통 패키지의 버전 올림 규칙 | 없음 |
 | [T-027](tasks/T-027-standards-after-reclassification.md) | BLOCKED | P1 | 재분류 결정을 표준 문서에 반영(backend-stack·openapi·ci-deploy·ui-contract) | T-022 |
