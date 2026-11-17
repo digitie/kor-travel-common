@@ -1,13 +1,39 @@
 # T-486b ktdm: 공용 Dagster instance의 job별 한도와 run_retries 결정 자료와 구현
 
-- 상태: READY
+- 상태: BLOCKED
 - 우선순위: P2
 - Gate: 소유자 결정 기록·backend 시험·공용 instance 수용
 - 선행: 없음
+- 외부 선행: 소유자 재결정. 2026-11-17 영향 자료가 차단 조건(map의 동시 run 감소)에 걸려 권고안을 구현하지 않았다. 아래 "영향 자료와 결정"의 (가)~(다) 중 선택
 - 소유 저장소: kor-travel-docker-manager
 - 병렬: 묶음 D(언제든)
 
 출처는 [공통화 재조사·계획(2026-11-17)](../plan/commonization-plan-2026-11-17.md)의 §3.4·§4.9(K-46)이다. 근거 위치(file:line)와 차이 분석은 그 문서가 정본이며 여기서 반복하지 않는다.
+
+## 영향 자료와 결정(2026-11-17)
+
+소유자 결정(2026-11-17): "공용 Dagster의 job별 실행 한도와 재시도 설정 (T-486b): 영향 자료를 먼저 만들고, 구현은 결정 뒤에 합니다 — 추천안대로". 권고안은 공용 `dagster.yaml`의 concierge 리터럴 다섯을 `kortravelcommon/job` 값별 한도 1(`applyLimitPerUniqueValue`) 일반 규칙 하나로 바꾸고 `run_retries` 블록을 더하는 것이다. 자료가 권고를 뒷받침하면 구현하기로 했다.
+
+방법: 운영 공용 Dagster webserver(n150)에 읽기 전용 GraphQL `runsOrError(filter:{createdAfter: 30일 전}, limit 250 페이지)` — 최근 30일 41,116 run(2026-10-18~11-17). 위치(`dagster/code_location`)×`kortravelcommon/job` 값과 job 이름별로 같은 값의 최대 동시 실행(start→end)과 최대 동시 존재(생성→end, QUEUED 포함)를 셌다. 렌더링된 instance 설정을 읽기 전용으로 확인했다. 코드 기준: Manager `7e9d60f`, Map `377bc8e3`, weather·transport·pinvi main. 더 자세한 쌍별 질의는 호스트 I/O guard가 보류해 하지 않았다.
+
+렌더링된 공용 instance 설정(Manager release `2c3f95b6`, 호스트 override 없음): 전역 동시 6, 위치별 map 10·pinvi 10·geo 10·weather 10·transport 3·concierge 2, concierge 리터럴 다섯(각 1), `kor_travel_map.feature_update_request_id`(key만) 4. `run_retries` 블록은 없고 `run_monitoring.max_resume_run_attempts`는 0.
+
+| tenant | 30일 run | job tag 있는 run | 값 수 | 같은 값 최대 동시 실행 / 동시 존재 | 같은 값이 겹칠 수 있는 경로 | 값별 한도 1이 동시성을 줄이는가 |
+|---|---|---|---|---|---|---|
+| map | 8,864 | 1,458 | 33 | `feature_update_request_worker` 2 / 11. `mois_licenses`·`visitkorea_festivals` 2 / 2. 나머지 1 / 2 이하 | `feature_update_request_queue_sensor`가 15초 tick마다 run_key가 다른 worker run을 최대 10개 낸다. 모두 같은 값 `map/feature_update_request_worker`이고, instance가 의도적으로 동시 4를 허용한다. 관리자 수동 실행과 schedule, geo 릴리스 sensor가 적재 job을 겹치게 할 수 있다 | **예.** worker가 설계값 4에서 1로 줄고 적재 job이 직렬화된다 |
+| pinvi | 18,442 | 18,442 | 8 | 1 / 2 | schedule만. standalone 사본에 이미 같은 규칙 | 아니오 |
+| concierge | 13,810 | 13,810 | 5 | 1 / 1 | 이미 리터럴 다섯으로 제한 | 아니오(일반 규칙과 같다) |
+| weather·transport | 0(odroid로 이전) | — | — | 측정 안 함 | standalone 사본에 이미 같은 규칙 | 아니오 |
+| geo | 0 | — | — | — | — | — |
+
+재시도: `dagster/retry_number` tag가 있는 run은 없었다. `dagster/max_retries`는 map 0(1,458건, 나머지는 tag 없음), concierge 0, pinvi 0(13,754건)·1(4,688건, 멱등 job 다섯). pinvi·weather·transport standalone 사본은 `run_retries: {enabled: true, max_retries: 0, retry_on_asset_or_op_failure: false}`다. 이 블록을 공용 instance에 넣으면 `max_retries≥1` tag가 있는 pinvi job 다섯만 재시도하게 된다. 안전하지만 pinvi의 운영 동작이 바뀌므로 따로 결정한다.
+
+**결정: 일반 규칙은 채택하지 않는다(구현하지 않음).** 이 파일의 차단 조건("map의 동시 run이 한도에 걸려 줄어드는 것이 확인되면 일반 규칙을 채택하지 않는다")에 걸렸다. Manager PR은 열지 않았다. 소유자가 다시 고를 안:
+
+- (가) concierge 리터럴을 그대로 두고 `run_retries` 블록만 더한다(위 값, pinvi 다섯 job의 재시도가 켜진다).
+- (나) map을 값별 규칙에서 빼고 일반 규칙을 쓴다. Dagster의 tag 한도는 code location 범위를 받지 않으므로 그대로는 표현할 수 없다.
+- (다) map이 worker run에 요청마다 다른 job tag 값을 달게 한 뒤 일반 규칙을 쓴다(map 코드 변경).
+- (라) 지금대로 둔다. 사유와 공통 가이드([dagster-adoption](../runbooks/dagster-adoption.md) §3)와의 차이를 Manager 문서에 적는다(구현 범위 4).
 
 ## 목표
 

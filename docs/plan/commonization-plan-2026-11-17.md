@@ -6,7 +6,7 @@
   - ADR-019: 안 1(정책과 Node/npm 축을 호출자의 `common-ref`에서 읽기 + 막지 않는 지연 보고) accepted → [ADR-019](../adr/019-frontend-policy-guard-model.md). T-023 DONE, T-024 READY.
   - ADR-020: §1.5 15행을 권고대로(수락 12·보류 2·수락과 보류로 나눈 것 1·거부 0) accepted → [ADR-020](../adr/020-python-ui-scope-after-resurvey.md). T-027의 외부 선행 충족, T-022는 대조표·task 분할이 남았다.
   - T-416: 채택. 값은 22.23.1이 아니라 **Node 26.13.1**(2026-11-17 nodejs.org 색인의 최신 LTS 줄 최신 patch)·npm 12.0.1(공통 축 유지). 공통 축을 26.13.1로 올리는 [T-029](../tasks/T-029-node-axis-to-latest-lts.md)를 더했고 T-417의 선행이 됐다.
-  - T-486b: 권고대로. 영향 자료를 먼저 만들고, 자료가 권고를 뒷받침하면 구현한다([T-486b](../tasks/T-486b-ktdm-shared-dagster-per-job-limit.md)의 결정 절).
+  - T-486b: 권고대로. 영향 자료를 먼저 만들고, 자료가 권고를 뒷받침하면 구현한다. 2026-11-17 자료가 차단 조건(map worker의 같은 job tag 값 동시 run이 설계상 4, 실측 2)에 걸려 구현하지 않았고 소유자 재결정을 기다린다([T-486b](../tasks/T-486b-ktdm-shared-dagster-per-job-limit.md)의 "영향 자료와 결정").
 - 성격상 §1~§3·§7은 조사 스냅샷(survey), §4~§6은 계획(plan)이다. 소유자가 문서 하나를 요청해 한 파일에 두었다. 기준 커밋을 바꿔 다시 조사할 때는 이 문서를 고치지 않고 새 문서를 만든다.
 - 인용 형식: `<저장소 약칭>:<저장소 상대 경로>:<줄>`. 약칭과 경로 접두는 §1.1 표를 따른다. `✔`는 작성자가 하위 조사 뒤 같은 커밋에서 직접 다시 읽거나 `diff`·`cmp`로 재확인한 인용이다. 표시가 없는 인용은 하위 조사 결과이며 한계는 §7에 적었다.
 
@@ -498,7 +498,7 @@ def record_collection_outcome(context, outcome: str) -> None:
 | [T-465](../tasks/T-465-weather-navigation-sanitize.md) | kor-travel-weather | 로컬 경로 정규화의 판정 본체를 공통 호출로 | A |
 | [T-434](../tasks/T-434-transport-navigation-sanitize.md) | kor-travel-transport | 로컬 경로 정규화의 판정 본체를 공통 호출로 | A |
 | [T-416](../tasks/T-416-map-exact-node-npm-pin-decision.md) | kor-travel-map | 정확 Node/npm 핀 채택 여부 결정(2026-11-17 채택, Node 26.13.1. Map PR 병합 대기) | A |
-| [T-486b](../tasks/T-486b-ktdm-shared-dagster-per-job-limit.md) | kor-travel-docker-manager | 공용 instance의 job별 한도·`run_retries` 결정 자료와 구현 | A |
+| [T-486b](../tasks/T-486b-ktdm-shared-dagster-per-job-limit.md) | kor-travel-docker-manager | 공용 instance의 job별 한도·`run_retries` 결정 자료와 구현(2026-11-17 자료: 일반 규칙 미채택, 재결정 대기) | A |
 
 **guard 모델과 내장 정책**
 
