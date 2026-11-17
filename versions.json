@@ -1,7 +1,7 @@
 {
   "schema": "kor-travel-common.version-registry.v1",
   "baseline": "2026-09",
-  "updated": "2026-11-17",
+  "updated": "2026-11-18",
   "next_review": "2026-12",
   "policy": "docs/standards/versions.md",
   "source": "docs/adr/017-shadcn-radix-shared-components.md; 기존 런타임·백엔드 축은 원 source 절을 따른다. Node/npm 빌드 선택은 docs/adr/018-exact-node-npm-build-toolchain.md.",
@@ -16,8 +16,8 @@
     "node": {
       "ecosystem": "runtime",
       "floor": "22.12",
-      "recommended": "22.23.1",
-      "image": "node:22.23.1-bookworm-slim",
+      "recommended": "26.13.1",
+      "image": "node:26.13.1-bookworm-slim",
       "check": "engines.node",
       "note": "빌드·테스트 선택은 권고 정확 patch와 private anchor를 일치시킨다(ADR-018). 기존 floor는 호환 하한이며 Docker 배포판·libc는 각 앱이 유지하고 digest를 핀한다.",
       "source": "vm §1.1·§4.4"

@@ -59,7 +59,7 @@ Git Bash에서는 bash 표기 명령이 그대로 동작한다(`python3`가 없�
 |---|---|
 | Python 실행 | `py -3 -B -X utf8 tools/validate_document_links.py` |
 | unittest | `py -3 -B -X utf8 -m unittest discover -s tests -p "test_*.py" -v` |
-| Node 버전 | nvm-windows `nvm install 22.23.1` → `nvm use 22.23.1`, 이후 `npm install -g npm@12.0.1` |
+| Node 버전 | nvm-windows `nvm install 26.13.1` → `nvm use 26.13.1`, 이후 `npm install -g npm@12.0.1` |
 | uv | Windows 설치본에서 같은 명령(`uv sync --locked`, `uv run …`) |
 | 개행 | `git config core.autocrlf false`. `.gitattributes`가 LF를 강제하므로 편집기가 CRLF로 저장해도 stage 시 정규화된다. 확인: `git ls-files --eol <path>`의 `i/`가 `lf`. `i/crlf`면 `git add --renormalize <path>` |
 | 편집기 | `.editorconfig`(utf-8·lf·최종 개행·`*.ps1`만 crlf)를 적용한다 |
