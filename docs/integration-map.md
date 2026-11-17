@@ -58,4 +58,5 @@
 |---|---|---|---|
 | 2026-11-17 | kor-travel-map | 정확 Node/npm 핀 채택. Node 26.13.1(최신 LTS 26의 최신 patch), npm 12.0.1(공통 축). guard 호출은 공통 축이 26.13.1인 커밋(T-029) 뒤에 올린다(T-417). 그 전까지 `55a921b` | [T-416](tasks/T-416-map-exact-node-npm-pin-decision.md), Map ADR-124(Map PR, 병합 전) |
 | 2026-11-17 | 전체 소비자 | guard는 정책과 Node/npm 축을 호출자의 `common-ref`에서 읽는다(구현 T-024 전까지 옛 동작) | [ADR-019](adr/019-frontend-policy-guard-model.md) |
+| 2026-11-18 | 전체 소비자 | 공통 Node 축 26.13.1(T-029). 병합 커밋 `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`. 이 커밋으로 호출 SHA와 `common-ref`를 올리는 소비자는 같은 PR에서 `.nvmrc`(·`.node-version`)·정확 `engines.node`·CI Node·모든 Node `FROM`(`node:26.13.1-<배포판>@sha256:…`)을 26.13.1로 옮긴다. npm 12.0.1 그대로. Map은 T-417에서 이 커밋으로 옮긴다 | [T-029](tasks/T-029-node-axis-to-latest-lts.md), [evidence](evidence/t029-node-axis.md) |
 | 2026-11-18 | 전체 소비자 | ADR-019 판 guard 구현. 호출 SHA와 `common-ref`를 T-024 채택 커밋 `e18d1892dcc3915a5e6e57ccad550a852b793780`으로 함께 올린 소비자만 새 동작을 얻고, 옛 판 호출자는 그대로다. 지연은 주간 보고 | [T-024](tasks/T-024-guard-model-implementation.md), [evidence](evidence/t024-guard-model.md) |

@@ -1,10 +1,11 @@
-# T-029 공통 Node 도구 축을 최신 LTS(26.13.1)로 올림
+# T-029 공통 Node 도구 축을 최신 LTS(26.13.1)로 올림 (2026-11-18, PR #65)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P2
 - Gate: 도구 단위·패키지 빌드·2인 리뷰
 - 선행: T-024
 - 외부 선행: 소유자 확인 — 2026-11-17 결정은 Map(T-416)에 대한 답이었으므로, 공통 축을 같은 값으로 올려 각 소비자가 ref를 올릴 때 Node 26으로 옮기게 하는 것을 소유자가 확인한다. 그리고 옛 판(`97f8ed9`·`9e16393`)을 호출하는 **모든** 소비자가 T-024 채택 커밋 이후로 호출 SHA를 올렸음: pinvi(T-424)·weather(T-467)·transport(T-436)·docker-manager(T-474)와 geo·concierge(이 계획에 task가 없어 각 저장소에 요청한다). 옛 판은 `node-version: 22.23.1`로 검사기를 돌리고 `check:toolchain --runtime`이 그 실행 Node를 main 축과 대조하므로, 소비자가 Node를 미리 올려도 축이 바뀐 날 실패한다. 당일 갱신으로 피할 길은 없다
+- 외부 선행 충족(2026-11-18): 소유자 확인 2026-11-17. 옛 판 호출자 여섯 전부 병합 — pinvi [#778](https://github.com/digitie/pinvi/pull/778)(`78779c6462ab23c79893e14c11ec94414fd8ce71`)·weather [#250](https://github.com/digitie/kor-travel-weather/pull/250)(`91f95abeb2ddc69193494c6736621738708f09a6`)·transport [#209](https://github.com/digitie/kor-travel-transport/pull/209)(`1b64873daac3479bc73ccadff890a3855cd36f28`)·docker-manager [#612](https://github.com/digitie/kor-travel-docker-manager/pull/612)(`011f1fb94028fd4984fbab63d3b1fd7dc29a0726`)·geo [#640](https://github.com/digitie/kor-travel-geo/pull/640)(`f5b3003d82d4b2fed8e585a4df5d3a5ce8a022fb`)·concierge [#271](https://github.com/digitie/kor-travel-concierge/pull/271)(`9723689fdb45bc969ca8b6829176ab5ffe262037`). 병합 직전 여섯 기본 브랜치의 guard 호출은 모두 `e18d189`, map은 `55a921b`.
 - 소유 저장소: kor-travel-common
 - 병렬: T-024 뒤. T-025와는 독립이다(`tools/sync_frontend_policy.mjs`는 `ecosystem: npm` 축만 생성 정책에 넣고 Node 축은 `runtime`이라 `ui`·`tokens`·`toast`를 다시 pack하게 만들지 않는다). T-417의 선행
 
@@ -46,6 +47,10 @@ docs/standards/versions.md, docs/integration-map.md, CHANGELOG.md, docs/journal.
 
 > 구현 메모(2026-11-18): 소유자가 2026-11-17에 모든 저장소의 Node 26 이전을 확인했다(조정 세션을 거친 구두 확인이라 저장소 안 링크는 없다)(외부 선행의 소유자 확인 충족). 옛 판 호출자 여섯의 이전 PR 상태는 병합 PR 본문에 적는다. `B2 alias default registry` 시험이 실제 `versions.json`을 읽으면서 정합 값을 상수 22.23.1로 두어 축 상향에 결박돼 있어 함께 고쳤다. [evidence](../evidence/t029-node-axis.md).
 
+## 병합 커밋
+
+`0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`(PR #65 squash 병합, 2026-11-18). 트리는 리뷰·CI를 마친 head `9a6395e`와 같다. Map은 T-417에서 guard 호출 SHA와 `common-ref`를 이 값으로 올린다. 이 커밋을 고정한 fixture 소비자 guard 실행도 PASS다([evidence](../evidence/t029-node-axis.md)).
+
 ## 수용 기준
 
 - [x] `npm ci --engine-strict && npm run check:toolchain`이 Node 26.13.1·npm 12.0.1에서 통과한다.
@@ -53,7 +58,7 @@ docs/standards/versions.md, docs/integration-map.md, CHANGELOG.md, docs/journal.
 - [x] `frontend-dependencies.json`과 `ui`·`tokens`·`toast` tarball SHA-256이 바꾸기 전과 같다.
 - [x] 이 커밋을 `common-ref`로 고정한 fixture 소비자에서 guard selftest가 Node 26.13.1로 통과한다(T-024가 guard 자신의 Node를 ref에서 고르게 했는지 확인. `frontend-consumer-guard.yml`·`frontend.yml`·`consumer-smoke.yml`의 적힌 `node-version`이 남아 있으면 이 task에서 고친다).
 - [x] 병합 PR 본문에 외부 선행 각 항목의 상태와 근거 링크가 있다.
-- [ ] 병합 커밋이 40자리로 integration map과 T-417에 있다.
+- [x] 병합 커밋이 40자리로 integration map과 T-417에 있다.
 
 ## 검증 명령
 

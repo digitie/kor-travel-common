@@ -1,5 +1,7 @@
 # T-029 공통 Node 축 26.13.1 evidence
 
+병합 커밋: **`0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`**(PR #65 squash, 트리는 head `9a6395e`와 같음).
+
 기준일은 2026-11-18이다. 정본은 [T-029](../tasks/T-029-node-axis-to-latest-lts.md)·[ADR-019](../adr/019-frontend-policy-guard-model.md)다. 소비자 저장소는 수정하지 않았다. 소비자 반영은 `NOT_RUN(소비자 저장소)`.
 
 ## 바뀐 값
@@ -30,6 +32,7 @@ linux/arm64/v8 `sha256:8261241c4197285eaeca819863dab5042cd1f9147b000670f4e773f4d
 |---|---|---|
 | [44189997950](https://github.com/digitie/kor-travel-common/actions/runs/44189997950) | `bdde7069e121a56e18a1b189afbcd9b1db6b740e` | FAIL — 검사기 실행 Node v26.13.1·npm 12.0.1, 대조·도구 규칙 PASS, `test:toolchain` 1건 실패(아래) |
 | [44190418059](https://github.com/digitie/kor-travel-common/actions/runs/44190418059) | `7f6052a758aa65308e5336eae6d6bd6a362f5960` | PASS — "Node 26.13.1 / npm 12.0.1 도구 규칙 PASS", `test:toolchain` 90/90 |
+| [44197736859](https://github.com/digitie/kor-travel-common/actions/runs/44197736859) | `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`(병합 커밋) | PASS — 같은 출력 |
 
 첫 실행의 실패는 `B2 alias default registry` 시험이 실제 `versions.json`을 기본 registry로 읽으면서 정합 선언은 상수 22.23.1로 만들던 결박이었다. 축을 올리면 언제나 깨지는 시험이라 정합 값을 실제 `versions.json`에서 읽게 고쳤다.
 
