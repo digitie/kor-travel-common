@@ -511,7 +511,7 @@ def record_collection_outcome(context, outcome: str) -> None:
 | 2 | [T-474](../tasks/T-474-ktdm-guard-ref.md) | kor-travel-docker-manager | guard 호출 SHA를 채택 커밋으로 | T-024 | B |
 | 3 | [T-025](../tasks/T-025-decouple-embedded-policy.md) | common | 내장 정책을 패키지 자기 것으로 줄이고 세 패키지 patch 릴리스(외부 선행: 소비자 호출 SHA 갱신 또는 당일 재vendor 확인) | T-023, T-024 | — |
 | 4 | [T-419](../tasks/T-419-map-ui-tokens-revendor-on-t025.md) | kor-travel-map | T-025 릴리스 당일 `ui`·`tokens` 재vendor(T-417 미완일 때) | T-025 | — |
-| 4 | [T-029](../tasks/T-029-node-axis-to-latest-lts.md) | common | 공통 Node 축을 26.13.1로(외부 선행: 소비자 호출 SHA 갱신 또는 당일 Node 갱신 확인) | T-024, T-025 | — |
+| 4 | [T-029](../tasks/T-029-node-axis-to-latest-lts.md) | common | 공통 Node 축을 26.13.1로(외부 선행: geo·concierge 포함 옛 판 호출자 전부의 호출 SHA 갱신) | T-024 | — |
 | 5 | [T-417](../tasks/T-417-map-guard-ref-toolchain.md) | kor-travel-map | guard 호출 SHA를 T-029 커밋으로, 남은 도구 규칙 입력(T-416 채택) | T-416, T-024, T-029 | — |
 
 **원장·standards**

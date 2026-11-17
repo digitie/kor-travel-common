@@ -4,11 +4,11 @@
 - 날짜: 2026-11-17
 - 결정자: 소유자(2026-11-17, "ADR-020 (기존 표준과 어긋나는 판정): T-022가 초안을 만들고, 항목별로 수락·거부·보류를 정합니다 … 이것들은 추천안 대로")
 - 근거 문서: [공통화 재조사·계획](../plan/commonization-plan-2026-11-17.md) §1.5·§3·§5, [T-022](../tasks/T-022-ledger-reality-reconcile.md)
-- Supersedes: [ADR-011](011-python-common-package.md)의 모듈 우선순위(1차 C12·C4·C13·C20, 2차 C1·C9·C2·C3, 3차 C5·C10·C15·C16·C17·C18) 가운데 아래 표에서 '수락'·'보류'한 항목. Python 버전·extras·메트릭 접두와 C6·C7·C8·C11·C14 결정은 그대로 둔다
+- Supersedes: [ADR-011](011-python-common-package.md)의 모듈 우선순위(C1~C21) 가운데 아래 표에서 '수락'·'보류'한 항목(C1·C2·C3·C4·C5·C9·C10·C12·C13·C15·C16·C17·C18·C20)만. Python 버전·extras·메트릭 접두와 그 밖의 모듈(C6·C7·C8·C11·C14 등)의 결정은 그대로 둔다
 
 ## 컨텍스트
 
-ADR-011과 [backend-stack](../standards/backend-stack.md)·[openapi](../standards/openapi.md)·[ci-deploy](../standards/ci-deploy.md)·[ui-contract](../standards/ui-contract.md)는 2026-09 조사를 근거로 Python 모듈 19개와 UI 부품의 공통 순서를 정했다. 2026-11-17 재조사는 다섯 저장소의 고정 커밋에서 같은 항목을 다시 읽었다. 계획한 1차·2차 Python 모듈은 구현되지 않았고, 실물 `kortravelcommon`은 운영 장애가 요구한 묶음(Dagster 복구·probe·응답 상한 HTTP 등)이 됐다. 재조사의 판정 가운데 기존 결정과 어긋나는 것은 계획 §1.5 표의 15행이다. 이 ADR은 그 15행을 하나씩 결정한다.
+ADR-011과 [backend-stack](../standards/backend-stack.md)·[openapi](../standards/openapi.md)·[ci-deploy](../standards/ci-deploy.md)·[ui-contract](../standards/ui-contract.md)는 2026-09 조사를 근거로 Python 모듈(C1~C21)과 UI 부품의 공통 순서를 정했다. 2026-11-17 재조사는 다섯 저장소의 고정 커밋에서 같은 항목을 다시 읽었다. 계획한 1차·2차 Python 모듈은 구현되지 않았고, 실물 `kortravelcommon`은 운영 장애가 요구한 묶음(Dagster 복구·probe·응답 상한 HTTP 등)이 됐다. 재조사의 판정 가운데 기존 결정과 어긋나는 것은 계획 §1.5 표의 15행이다. 이 ADR은 그 15행을 하나씩 결정한다.
 
 판정 어휘:
 
@@ -22,13 +22,13 @@ ADR-011과 [backend-stack](../standards/backend-stack.md)·[openapi](../standard
 
 | # | 항목 | 기존 결정 | 판정 | 이유(한 줄) | 후속 |
 |---|---|---|---|---|---|
-| 1 | C12 OpenAPI export CLI | ADR-011 1차, openapi export drift 행, ci-deploy `openapi-drift.yml`, T-303·T-309 | 보류 | 직렬화·비교 규칙이 셋 다 달라 맞추는 비용이 줄 수 이득보다 크다(K-16) | T-303·T-309 범위 재정의(T-022). 조건: 네 번째 export 소비자 또는 직렬화 통일 결정 |
+| 1 | C12 OpenAPI export CLI | ADR-011 1차, openapi export drift 행, ci-deploy `openapi-drift.yml`, T-303·T-309 | 보류 | 직렬화·비교 규칙이 셋 다 달라 맞추는 비용이 줄 수 이득보다 크다(K-16) | T-303·T-309 범위 재정의(T-022). 다시 열 조건: 세 저장소의 직렬화·비교 규칙을 맞추기로 할 때(K-16). 그 전의 독립 개선(W `sort_keys`)은 PinVi 스냅샷 재수용이 따른다 |
 | 2 | C4 health 라우터 | ADR-011 1차, BE-15, T-304 | 수락 | 응답 본문이 각 서비스 OpenAPI 계약이다. 공유는 probe만(K-15, K-10) | T-304에서 health 철회(T-022). probe는 T-480b·T-486a |
-| 3 | C13 time | ADR-011 1차, BE-19, T-304 | 보류 | 저장소 **안** 중복이 더 크다. 저장소 안 정리가 먼저다(K-35) | T-304의 time 부분 범위 재정의(T-022) |
+| 3 | C13 time | ADR-011 1차, BE-19, T-304 | 보류 | 저장소 **안** 중복이 더 크다. 저장소 안 정리가 먼저다(K-35) | T-304의 time 부분 범위 재정의(T-022). 다시 열 조건: 각 저장소 안의 KST 헬퍼 중복을 먼저 정리한 뒤(K-35) |
 | 4 | C20 quality(ruff·mypy 베이스, `python-quality.yml`) | ADR-011 1차, BE-6~BE-11, T-305, T-401의 Python 절반 | 수락 | 베이스의 공통 부분은 이미 같고 나머지는 저장소별 선택이다(K-71) | T-305 철회, T-401 Python 절반 철회(T-022), standards 반영(T-027) |
 | 5 | C1 settings 베이스 | ADR-011 2차, BE-12, T-306 | 수락 | 빈 env 처리가 네 방식이고 profile 기본값이 반대라 공통 베이스가 의미를 조용히 바꾼다(K-12) | T-306에서 C1 철회(T-022) |
 | 6 | C9 db 엔진 팩토리 | ADR-011 2차, BE-23, T-306 | 수락 | 드라이버가 셋이고 timeout 값이 사고별로 조정돼 있다(K-13) | T-306에서 C9 철회. C7은 독립 task로 남긴다(T-022) |
-| 7 | C2 logging | ADR-011 2차, BE-13, T-307 | 수락(로깅 설정)·보류(request-id 미들웨어) | 로깅 설정은 저장소별이고, request-id는 신뢰 정책이 갈려 `trust_incoming` 옵션을 정한 뒤에 공유한다(K-23, K-24) | T-307을 request-id와 지표로 나눈다(T-022) |
+| 7 | C2 logging | ADR-011 2차, BE-13, T-307 | 수락(로깅 설정)·보류(request-id 미들웨어) | 로깅 설정은 저장소별이고, request-id는 신뢰 정책이 갈려 `trust_incoming` 옵션을 정한 뒤에 공유한다(K-23, K-24) | T-307을 request-id와 지표로 나눈다(T-022). request-id를 다시 열 조건: `trust_incoming` 옵션과 길이·문자 제한을 정하는 task(T-307 분할분) |
 | 8 | C3 metrics | ADR-011 2차, BE-14, T-307 | 수락 | 지표 이름·라벨이 대시보드 계약이다(K-24) | T-307의 지표 부분 철회(T-022) |
 | 9 | C5 errors·problem | ADR-011 3차, BE-16, T-308 | 수락 | 오류 형식 다섯 가지를 프론트와 형제 client가 읽는다. 통합은 세 저장소 이상의 파괴적 변경이다(K-19) | T-308에서 C5 철회(T-022) |
 | 10 | C10 alembic 템플릿 | ADR-011 3차, BE-24, T-308 | 수락 | P·M이 같은 위험을 반대 방식으로 다룬다. 규약 문장 한 줄만 남긴다(K-14) | T-308에서 C10 철회, 규약 한 줄은 T-027 |

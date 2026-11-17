@@ -22,7 +22,7 @@ ADR-019의 결정을 재사용 workflow와 문서에 구현한다. ADR-019는 20
 
 ## 구현 범위
 
-1. `.github/workflows/frontend-consumer-guard.yml`: `main` 정책 checkout 단계를 없애고 `--policy`·`--canonical`·도구 검사의 `--registry`를 `common-ref` checkout에서 읽는다.
+1. `.github/workflows/frontend-consumer-guard.yml`: `main` 정책 checkout 단계를 없애고 `--policy`·`--canonical`·도구 검사의 `--registry`를 `common-ref` checkout에서 읽는다. 검사기를 돌리는 `setup-node`의 `node-version: 22.23.1`과 `npm@12.0.1` 설치 줄도 적어 두지 않고 `common-ref`의 `.nvmrc`(`node-version-file`)와 `axes.npm.recommended`를 읽는다. 그래야 축을 올린 커밋(T-029)을 고정한 소비자가 common의 `npm ci --engine-strict`와 `check:toolchain --runtime`에서 실패하지 않는다.
 2. 지연 보고: 소비자별 `common-ref`와 벤더 버전을 정본과 비교해 표로 내는 주간 job(실패시키지 않음). 입력은 `consumers.pins.json` 또는 각 저장소의 workflow 파일이다.
 3. 채택 커밋 지정: 이 task의 병합 커밋을 채택 커밋으로 문서에 적는다. 그 커밋의 검사기를 각 소비자의 현재 main(P, M, W, T, D, geo, concierge)에 읽기 전용으로 돌려, 걸리는 규칙을 소비자별로 적는다.
 4. [frontend-libraries](../standards/frontend-libraries.md) '검사와 갱신' 절, [versions](../standards/versions.md) §3.1.1, [release](../runbooks/release.md), [consumer-adoption](../runbooks/consumer-adoption.md)을 결정에 맞춘다.
@@ -48,6 +48,7 @@ CHANGELOG.md, docs/journal.md, docs/integration-map.md
 
 - [ ] selftest: 새 workflow를 고정 ref로 호출한 fixture 소비자가, 그 뒤 `main`의 정책 값과 `axes.node.recommended`를 바꿔도 통과한다.
 - [ ] selftest: 같은 fixture가 자기 `common-ref`의 정책과 어긋나면 실패한다(검사는 그대로 엄격하다).
+- [ ] selftest: Node 축이 22.23.1이 아닌 ref(시험용 커밋 또는 fixture)를 고정한 소비자에서 guard 자신의 Node·npm이 그 ref의 값으로 선택되고 통과한다.
 - [ ] 옛 판(`97f8ed9`) workflow를 호출하는 fixture의 판정이 이 변경 전과 같다.
 - [ ] 채택 커밋이 문서에 40자리로 적혀 있고, 일곱 소비자 main에 대한 읽기 전용 실행 결과(통과 또는 걸린 규칙 목록)가 evidence에 있다.
 - [ ] 지연 보고가 소비자별 호출 ref·벤더 버전·정본과의 차이를 표로 내고, 차이가 있어도 exit 0이다.
