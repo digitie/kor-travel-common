@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, cpSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync, symlinkSync, cpSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -310,12 +310,16 @@ test("B2 alias default registry는 실제 checker 데이터에 고정하고 명�
   catch (error) { throw new Error("NOT_RUN: default registry alias 시험에 symlink 기능이 필요합니다", { cause: error }); }
   const other = { axes: { node: { recommended: "24.15.0" }, npm: { recommended: "11.19.1" } } };
   const variants = [[[], checker], [[], alias], [["--preserve-symlinks-main"], alias]];
+  // 기본 registry는 실제 checker 옆 versions.json이므로 정합 선언도 그 축에서 읽는다(축 상향에 결박하지 않음).
+  const live = JSON.parse(readFileSync(resolve(dirname(checker), "../versions.json"), "utf8")).axes;
+  const real = { node: live.node.recommended, npm: live.npm.recommended };
+  assert.notDeepEqual(real, { node: other.axes.node.recommended, npm: other.axes.npm.recommended });
   const results = [];
   for (const fakeExists of [true, false]) {
     if (fakeExists) f.put("alias-site/versions.json", other);
     else rmSync(join(f.root, "alias-site/versions.json"));
     for (const good of [true, false]) {
-      const selected = good ? { node, npm } : { node: "24.15.0", npm: "11.19.1" };
+      const selected = good ? real : { node: "24.15.0", npm: "11.19.1" };
       f.put("package.json", { private: true, packageManager: "npm@" + selected.npm, engines: selected }); f.put(".nvmrc", selected.node);
       results.push(variants.map(([flags, entry]) => spawnSync(process.execPath, [...flags, entry, "--root", f.root], { encoding: "utf8", cwd: f.root }).status));
     }

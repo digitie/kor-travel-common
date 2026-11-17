@@ -1,3 +1,13 @@
+## 공통 Node 축 26.13.1 — 2026-11-18
+
+### 변경
+
+`versions.json`의 `axes.node.recommended`를 22.23.1에서 26.13.1(최신 LTS 줄 26의 최신 patch)로, `image`를 `node:26.13.1-bookworm-slim`으로 올렸다(T-029). `floor`(22.12)·npm 축(12.0.1)·`@types/node`는 그대로다. common 자신의 `.nvmrc`·`engines.node`·lock을 같은 값으로 맞췄고, `frontend.yml`·`consumer-smoke.yml`은 적어 둔 `node-version` 대신 `.nvmrc`(`node-version-file`)와 `axes.npm.recommended`를 읽는다. 생성 정책 `frontend-dependencies.json`과 `ui`·`tokens`·`toast` tarball은 바뀌지 않는다(Node 축은 생성 정책 밖).
+
+### 이관
+
+이 커밋을 호출 SHA와 `common-ref`로 함께 고정하는 소비자는 같은 PR에서 private anchor를 26.13.1로 옮긴다: 루트(또는 `root`) `.nvmrc`, `engines.node`(정확 `26.13.1`), CI `setup-node`의 Node, guard의 `node-dockerfiles`가 가리키는 Node Dockerfile의 `FROM node:26.13.1-<배포판>@sha256:<digest>`. npm(12.0.1)·`packageManager`는 그대로다. ref를 올리지 않은 소비자는 영향이 없다.
+
 ## frontend guard ADR-019 판 — 2026-11-18
 
 ### 변경
