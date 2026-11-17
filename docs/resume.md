@@ -1,3 +1,7 @@
+## 2026-11-18 — T-029 DONE(공통 Node 축 26.13.1)
+
+T-029 DONE(PR #65). 병합 커밋 `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`. 옛 판 호출자 여섯은 모두 T-024 채택 커밋 `e18d189`로 옮겼다(pinvi #778·weather #250·transport #209·docker-manager #612·geo #640·concierge #271 병합). 다음 한 작업: Map의 [T-417](tasks/T-417-map-guard-ref-toolchain.md)(T-416 Map PR 뒤 이 커밋으로 guard 이전). 다른 소비자는 ref를 올릴 때 같은 PR에서 Node를 26.13.1로 옮긴다([integration map](integration-map.md)).
+
 ## 2026-11-17 — 소유자 결정 반영(ADR-019·ADR-020 accepted, T-416 Node 26.13.1)
 
 [ADR-019](adr/019-frontend-policy-guard-model.md)(guard가 정책과 Node/npm 축을 호출자의 `common-ref`에서 읽는다)와 [ADR-020](adr/020-python-ui-scope-after-resurvey.md)(§1.5 15행 권고대로)이 accepted다. T-023은 DONE. T-416은 채택이고 값은 Node 26.13.1(최신 LTS 줄 최신 patch)·npm 12.0.1이며 Map ADR-124 PR이 핀을 담는다. 공통 축 상향은 [T-029](tasks/T-029-node-axis-to-latest-lts.md)(소유자 확인과 옛 판 호출자 전부의 이전 뒤)다.

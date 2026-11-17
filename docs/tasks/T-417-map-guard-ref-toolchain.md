@@ -11,7 +11,7 @@
 
 ## 2026-11-17 결정 반영
 
-T-416은 **채택**으로 정해졌고 값은 Node 26.13.1·npm 12.0.1이다. 루트 `.nvmrc`, 정확 `engines`, CI `node-version`, Node Docker 이미지는 T-416의 Map PR(ADR-124)이 먼저 바꾼다. 그래서 이 task의 구현 범위 2는 그 PR이 빠뜨린 도구 규칙 입력(`toolchain-manifests`·`node-dockerfiles`)만 남는다. 호출 SHA는 공통 축이 26.13.1인 커밋이어야 하므로 T-024의 채택 커밋이 아니라 [T-029](T-029-node-axis-to-latest-lts.md)의 병합 커밋(그 뒤 common이 지정한 커밋)으로 올린다. 그 커밋의 정책이 그때 Map이 벤더한 판과 같아야 한다(T-025 릴리스 뒤면 T-419로 받은 `ui` 0.2.2·`tokens` 0.1.3). 다르면 같은 PR에서 재vendor한다.
+T-416은 **채택**으로 정해졌고 값은 Node 26.13.1·npm 12.0.1이다. 루트 `.nvmrc`, 정확 `engines`, CI `node-version`, Node Docker 이미지는 T-416의 Map PR(ADR-124)이 먼저 바꾼다. 그래서 이 task의 구현 범위 2는 그 PR이 빠뜨린 도구 규칙 입력(`toolchain-manifests`·`node-dockerfiles`)만 남는다. 호출 SHA는 공통 축이 26.13.1인 커밋이어야 하므로 T-024의 채택 커밋이 아니라 [T-029](T-029-node-axis-to-latest-lts.md)의 병합 커밋 `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`(PR #65, 2026-11-18; 그 뒤 common이 지정한 커밋이 있으면 그 커밋)으로 올린다. 그 커밋의 정책이 그때 Map이 벤더한 판과 같아야 한다(T-025 릴리스 뒤면 T-419로 받은 `ui` 0.2.2·`tokens` 0.1.3). 다르면 같은 PR에서 재vendor한다.
 
 ## 목표
 
@@ -21,7 +21,7 @@ T-416이 채택(2026-11-17, Node 26.13.1)으로 정해졌으므로 map의 guard 
 
 - 도구 규칙의 정본은 [ADR-018](../adr/018-exact-node-npm-build-toolchain.md)과 [versions](../standards/versions.md) §3.1.1이다.
 - 전제는 T-416의 '채택' 결정(2026-11-17)이다. `.nvmrc`·정확 `engines`·CI·이미지의 Node는 T-416의 Map PR이 이미 26.13.1로 바꿨다.
-- 호출 SHA는 '최신'이 아니라 common이 지정한 커밋 하나로 올린다: T-029의 병합 커밋. 그 뒤 T-025 동결이나 T-221(admin-kit)이 병합돼 Map이 그 판을 벤더했다면, common이 그 뒤에 지정한 커밋(공통 축 26.13.1을 포함)으로 올린다. 그 커밋의 정책이 그때 Map이 벤더한 판과 같아야 한다.
+- 호출 SHA는 '최신'이 아니라 common이 지정한 커밋 하나로 올린다: T-029의 병합 커밋 `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`. 그 뒤 T-025 동결이나 T-221(admin-kit)이 병합돼 Map이 그 판을 벤더했다면, common이 그 뒤에 지정한 커밋(공통 축 26.13.1을 포함)으로 올린다. 그 커밋의 정책이 그때 Map이 벤더한 판과 같아야 한다.
 
 ## 구현 범위
 

@@ -1,3 +1,9 @@
+## 2026-11-18 — T-029 병합, 병합 커밋 기록
+
+- 옛 판 호출자 여섯(pinvi #778·weather #250·transport #209·docker-manager #612·geo #640·concierge #271)이 모두 병합된 것을 `gh pr view`와 기본 브랜치 workflow로 확인한 뒤 PR #65를 squash 병합했다. 병합 커밋 `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`, 트리는 head와 같다.
+- 이 커밋을 호출 SHA·`common-ref`로 고정한 fixture 소비자 guard가 Node 26.13.1·npm 12.0.1로 PASS([44197736859](https://github.com/digitie/kor-travel-common/actions/runs/44197736859)).
+- T-029 DONE. integration map과 T-417에 병합 커밋을 적었다. T-417은 T-416(Map ADR-124 PR) 때문에 BLOCKED로 남는다.
+
 ## 2026-11-18 — T-029 구현: 공통 Node 축 26.13.1
 
 - 소유자가 2026-11-17에 모든 저장소의 Node 26 이전을 확인했다(조정 세션을 거친 구두 확인이라 저장소 안 링크는 없다). `versions.json` `axes.node.recommended` 26.13.1·`image` `node:26.13.1-bookworm-slim`, common `.nvmrc`·`engines.node`·lock을 같은 값으로. `frontend.yml`·`consumer-smoke.yml`은 `.nvmrc`(`node-version-file`)와 `axes.npm.recommended`를 읽는다. npm 축·floor·`@types/node`는 그대로.
