@@ -4,7 +4,7 @@
 - 우선순위: P2
 - Gate: 소유자 결정 기록·backend 시험·공용 instance 수용
 - 선행: 없음
-- 외부 선행: 소유자 재결정. 2026-11-17 영향 자료가 차단 조건(map의 동시 run 감소)에 걸려 권고안을 구현하지 않았다. 아래 "영향 자료와 결정"의 (가)~(다) 중 선택
+- 외부 선행: 운영 적용(소유자 일정). 소유자가 2026-11-17 안 (가)를 골랐고 Manager [#610](https://github.com/digitie/kor-travel-docker-manager/pull/610)(`79032717`)로 구현·병합했다. 남은 것은 n150 Manager 설치 뒤 `dagster-plane converge`와 적용 뒤 관찰이다
 - 소유 저장소: kor-travel-docker-manager
 - 병렬: 묶음 D(언제든)
 
@@ -34,6 +34,8 @@
 - (나) map을 값별 규칙에서 빼고 일반 규칙을 쓴다. Dagster의 tag 한도는 code location 범위를 받지 않으므로 그대로는 표현할 수 없다.
 - (다) map이 worker run에 요청마다 다른 job tag 값을 달게 한 뒤 일반 규칙을 쓴다(map 코드 변경).
 - (라) 지금대로 둔다. 사유와 공통 가이드([dagster-adoption](../runbooks/dagster-adoption.md) §3)와의 차이를 Manager 문서에 적는다(구현 범위 4).
+
+**재결정과 구현(2026-11-17).** 소유자가 안 (가)를 골랐다. Manager [#610](https://github.com/digitie/kor-travel-docker-manager/pull/610)(병합 `79032717`)가 공용 `dagster.yaml`에 `run_retries: {enabled: true, max_retries: 0, retry_on_asset_or_op_failure: false}`만 더했다. concierge 리터럴 다섯은 그대로이고 값별 한도 일반 규칙은 없다. 결정 기록과 공통 가이드(§3)와의 차이는 Manager `docs/decisions.md` ADR-63이다. 렌더러는 바뀌지 않았고 호스트 파생 경로가 블록을 보존하는지 시험을 더했다. 운영 적용은 하지 않았다(evidence: 공용 instance 관찰 `NOT_RUN(운영 적용 전)`).
 
 ## 목표
 

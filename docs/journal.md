@@ -1,3 +1,8 @@
+## 2026-11-17 — T-486b 안 (가) 구현: 공용 instance에 `run_retries`만 추가
+
+- 소유자가 안 (가)를 골랐다. Manager [#610](https://github.com/digitie/kor-travel-docker-manager/pull/610)(병합 `79032717`)가 `run_retries` 블록(standalone 사본과 같은 값)만 더하고 concierge 리터럴 다섯은 그대로 뒀다. `dagster/max_retries≥1` tag를 단 run(오늘은 pinvi 멱등 job 다섯)만 재시도된다.
+- 운영 적용 전이라 task는 BLOCKED(외부 선행: 운영 적용, 소유자 일정)로 둔다.
+
 ## 2026-11-17 — T-486b 영향 자료: 값별 한도 1 일반 규칙은 map 동시 run을 줄여 미채택
 
 - n150 공용 Dagster 최근 30일 41,116 run을 읽기 전용 GraphQL로 셌다. map의 `feature_update_request_queue_sensor`가 같은 job tag 값(`map/feature_update_request_worker`)으로 worker run을 tick당 최대 10개 내고 instance가 의도적으로 동시 4를 허용한다(실측 동시 실행 2·동시 존재 11). 적재 job도 동시 실행 2가 있었다. pinvi·concierge는 같은 값 동시 실행 최대 1, weather·transport는 odroid로 이전해 run 0.
