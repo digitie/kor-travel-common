@@ -15,13 +15,13 @@
 
 ## 고정 결정
 
-- 소비자 선언은 계속 40자리 커밋 핀이다([backend-stack](../standards/backend-stack.md) BE-29·BE-30). 이 task는 태그·wheel 발행 절차를 바꾸지 않는다.
+- 소비자의 실제 선언은 40자리 커밋 핀이다(P·M·W·T의 `pyproject.toml`). [backend-stack](../standards/backend-stack.md) BE-29는 `@py-vX.Y.Z` 태그 선언을 규정하지만 py 태그는 하나도 없다. 이 task는 그 불일치를 문서에 사실대로 적고, 태그·wheel 발행 절차 자체는 바꾸지 않는다.
 - 새 CI 강제를 넣지 않는다. 규칙은 runbook과 CHANGELOG 절이다.
 
 ## 구현 범위
 
 1. [release](../runbooks/release.md)에 'Python 소스가 바뀌는 PR은 `pyproject.toml` 버전의 dev 번호를 올리고 CHANGELOG의 Python 절에 한 줄을 적는다'를 추가한다.
-2. [backend-stack](../standards/backend-stack.md) §9에 현재 소비 방식(커밋 핀, Manager는 hash 고정 wheel)을 사실대로 적는다.
+2. [backend-stack](../standards/backend-stack.md) §9(BE-29·BE-30)에 현재 소비 방식(커밋 핀, Manager는 hash 고정 wheel, 태그 없음)을 '현황'으로 적는다. 규칙 문장의 변경은 T-027의 범위와 겹치지 않게 현황 주석만 둔다.
 3. 다음 Python 변경(T-313)이 이 규칙의 첫 적용이 되도록 T-313 상세에 연결한다.
 
 ## 범위 밖

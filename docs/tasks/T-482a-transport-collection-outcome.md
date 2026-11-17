@@ -15,7 +15,7 @@
 
 ## 고정 결정
 
-- T-481a와 같다.
+- T-481a와 같다. 핀을 올릴 때 T-314가 이미 병합됐다면 `backend/app/dagster/recovery.py`의 회수 sensor 시험을 함께 돌린다.
 
 ## 구현 범위
 

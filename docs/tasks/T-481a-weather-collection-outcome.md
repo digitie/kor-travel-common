@@ -16,6 +16,7 @@
 ## 고정 결정
 
 - tag 문자열과 순위 규칙은 공통 구현(T-313)이 정본이다. 관리자 프론트는 바뀌지 않는다.
+- 핀을 올리면 그 사이 common에 병합된 다른 변경도 함께 들어온다. T-314(회수 sensor cursor)가 이미 병합됐다면 weather의 `sync_recovery.py`가 읽는 cursor 형식 호환을 T-314의 호환 시험이 지킨다. 이 PR에서도 회수 sensor 시험을 함께 돌린다.
 - 이 저장소는 다른 팀이 유지한다.
 
 ## 구현 범위
@@ -49,6 +50,7 @@ packages/kor-travel-weather-dagster/tests/**
 - [ ] 저장소에 `_record_collection_outcome` 정의가 0개다(grep).
 - [ ] `python` job이 통과하고 Dagster 패키지 시험 수가 로컬 함수 시험을 뺀 만큼만 준다.
 - [ ] 핀 커밋이 세 `pyproject.toml` 자리와 `uv.lock`에서 같다.
+- [ ] 회수 sensor 시험(`sync_recovery` 관련)이 새 핀에서 통과한다.
 
 ## 검증 명령
 

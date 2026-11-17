@@ -5,7 +5,7 @@
 - Gate: 패키지 빌드·tarball 설치·2인 리뷰
 - 선행: T-023
 - 소유 저장소: kor-travel-common
-- 병렬: 묶음 B
+- 병렬: 묶음 B. T-221의 선행
 
 출처는 [공통화 재조사·계획(2026-11-17)](../plan/commonization-plan-2026-11-17.md)의 §2.2·§4.1(K-02)이다. 근거 위치(file:line)와 차이 분석은 그 문서가 정본이며 여기서 반복하지 않는다.
 
@@ -17,7 +17,7 @@
 
 - 방식은 ADR-019가 정한다. 후보: (가) tarball에서 정책 사본을 빼고 소비자 로컬 검사가 정책 파일 경로를 인자로 받는다, (나) 사본에 그 패키지 자신의 peer 범위만 남긴다.
 - 소비자의 로컬 `check:dependencies`가 계속 동작해야 한다. 중앙 guard의 판정은 바뀌지 않는다.
-- 이미 낸 버전(0.2.1·0.1.2·0.1.1)의 bytes는 바꾸지 않는다. 변경은 다음 버전부터다.
+- 이미 낸 버전(`ui` 0.2.1·`tokens` 0.1.2·`toast` 0.1.1)의 bytes는 바꾸지 않는다. 바뀐 pack 구성은 다음 버전에 실린다. `ui`는 T-221의 0.3.0이 그 버전이다. `tokens`·`toast`를 같은 후보에 함께 올릴지(권고: 함께, 재vendor를 한 번으로) 이 task가 정해 T-221에 넘긴다.
 
 ## 구현 범위
 
@@ -46,6 +46,7 @@ docs/standards/frontend-libraries.md, CHANGELOG.md
 - [ ] 시험: pack한 tarball을 임시 프로젝트에 설치하고 문서에 적은 로컬 검사 명령이 통과한다.
 - [ ] `npm run build --workspaces`·`npm test --workspaces`·`npm run check:policy`가 통과한다.
 - [ ] 이관 절이 소비자가 바꿀 명령 한 줄을 전후로 보여 준다.
+- [ ] `tokens`·`toast`의 다음 버전을 T-221의 같은 후보에 넣는지 여부와 버전 번호가 이 파일의 '결정' 줄에 적혀 있다.
 
 ## 검증 명령
 

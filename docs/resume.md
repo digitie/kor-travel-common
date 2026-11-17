@@ -1,8 +1,8 @@
-## 2026-11-17 — 공통화 재조사·계획 초안
+## 2026-11-17 — 공통화 재조사·계획 초안(리뷰 1회차 반영)
 
-소유자 요청으로 pinvi·map·weather·transport·docker-manager를 고정 커밋에서 다시 조사하고 [공통화 재조사·계획](plan/commonization-plan-2026-11-17.md)과 task 24개(T-022~T-026, T-219~T-221, T-313~T-315, T-414·T-415·T-434·T-435·T-465·T-466, T-480a·T-481a·T-482a·T-482b·T-484a·T-486a·T-486b)를 추가했다. 문서 초안이며 코드·패키지·정책 정본은 바꾸지 않았다. 독립 적대 리뷰 2건과 PR은 아직이다.
+소유자 요청으로 pinvi·map·weather·transport·docker-manager를 고정 커밋에서 다시 조사하고 [공통화 재조사·계획](plan/commonization-plan-2026-11-17.md)과 task 29개를 추가했다(T-022~T-027, T-219~T-222, T-313~T-315, T-415~T-417, T-424, T-434·T-435, T-465·T-466, T-474, T-480b·T-481a·T-482a·T-482b·T-484a·T-486a·T-486b). 문서 초안이며 코드·패키지·정책 정본은 바꾸지 않았다. 적대 리뷰 1회차의 finding 19건을 반영했고 2회차 리뷰와 PR은 아직이다.
 
-다음 한 작업은 이 초안의 두 리뷰 finding 반영이다. 그 뒤 선행이 없는 묶음 A([T-022](tasks/T-022-ledger-reality-reconcile.md)·[T-023](tasks/T-023-frontend-guard-release-model-adr.md)·[T-313](tasks/T-313-collection-outcome-tag.md)·[T-026](tasks/T-026-python-version-rule.md))부터 고른다. T-218의 진행 상태와 아래 기록은 그대로다. 이 항목은 소비자 실행·운영 수용을 뜻하지 않는다.
+다음 한 작업은 2회차 리뷰 finding 반영이다. 그 뒤 선행이 없는 묶음 A([T-022](tasks/T-022-ledger-reality-reconcile.md)·[T-023](tasks/T-023-frontend-guard-release-model-adr.md)·[T-313](tasks/T-313-collection-outcome-tag.md)·[T-026](tasks/T-026-python-version-rule.md))부터 고른다. [T-416](tasks/T-416-map-exact-node-npm-pin-decision.md)은 소유자 결정 대기다. T-218의 진행 상태와 아래 기록은 그대로다. 이 항목은 소비자 실행·운영 수용을 뜻하지 않는다.
 
 ## 2026-11-13 — 선택형 차트·애니메이션 정책 후보
 

@@ -18,6 +18,7 @@
 - 기존 호출 모양은 그대로 동작한다(추가만).
 - 회수 SQL·lease·fencing은 계속 소비자 소유다([dagster-adoption](../runbooks/dagster-adoption.md) §4·§19).
 - Map의 회수 sensor는 대상이 아니다(주기·반환형·시계가 달라 factory에 맞지 않는다).
+- weather는 공통 cursor의 `stall:` 접두와 그 뒤의 JSON을 직접 읽는다(`kortravelweather_dagster/sync_recovery.py:64-65,119-127`, 커밋 `e68f16a`). 그 문자열 모양을 이 task가 바꾸지 않는다. 소비자 구획은 그 파서가 그대로 읽히는 자리에 둔다.
 
 ## 구현 범위
 
@@ -46,6 +47,7 @@ docs/runbooks/dagster-adoption.md, CHANGELOG.md
 - [ ] 기존 `test_reconciliation_sensor.py`가 수정 없이 통과한다.
 - [ ] 옛 형식 cursor로 시작한 sensor가 첫 tick에서 예외 없이 새 형식으로 넘어간다.
 - [ ] 소비자 cursor가 tick 사이에 보존되고 code-server 재시작(새 프로세스)을 흉내 낸 시험에서도 남는다.
+- [ ] 호환 시험: weather `e68f16a`의 `_alerted_stall`과 같은 판독(접두 `stall:` 뒤를 `json.loads`해 `StallClock.from_dict`)이 새 형식 cursor에서도 같은 결과를 낸다. 소비자 cursor가 있을 때와 없을 때 둘 다 확인한다.
 
 ## 검증 명령
 
@@ -61,4 +63,4 @@ uv sync --locked --extra dev --extra dagster && uv run pytest -q tests/test_reco
 ## rollback·release 차단 조건
 
 - 추가만 하는 변경. `git revert` 1회.
-- 옛 cursor를 읽지 못하면 병합하지 않는다.
+- 옛 cursor를 읽지 못하거나 위 호환 시험이 실패하면 병합하지 않는다.

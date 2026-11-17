@@ -1,7 +1,7 @@
 # T-484a pinvi-etl: job별 재시도 sensor 5개를 다중 job sensor 1개로
 
 - 상태: READY
-- 우선순위: P2
+- 우선순위: P3
 - Gate: 소비자 CI(etl)·배포 뒤 sensor 확인
 - 선행: 없음
 - 소유 저장소: pinvi
@@ -17,13 +17,15 @@ pinvi ETL은 `infrastructure_retry_sensor`를 job마다 하나씩 5개 만든다
 
 - 공통 구현과 사용 규칙은 [dagster-multi-job-retry](../runbooks/dagster-multi-job-retry.md)와 [dagster-adoption](../runbooks/dagster-adoption.md) §16이 정본이다.
 - 재시도 대상 job 집합과 각 job의 `RecoveryPolicy`는 바꾸지 않는다.
-- asset job을 다시 주입하는 지금 방식(`with_updated_job`)이 필요한 이유를 유지한다.
+- 다중 job sensor는 `jobs=[…]`를 대상으로 하고 job 이름으로 run을 요청한다. asset job을 다시 주입할 때는 `with_updated_jobs([다시 주입할 asset job 전부])`를 쓴다. `with_updated_job(j)`는 대상을 그 job 하나로 바꿔 버리므로 쓰지 않는다.
+- 합친 sensor는 한 tick(60초)에 RunRequest를 하나만 낸다. 여러 job이 같은 때 인프라 실패하면 재시도가 tick마다 하나씩 나간다. 지금(job별 sensor)은 같은 tick에 각각 나간다.
+- weather는 이 구현을 env로 꺼 둔 상태라(기본 false) pinvi의 채택이 첫 운영 사용이 될 수 있다. 배포 뒤 관찰을 수용 기준에 둔다.
 
 ## 구현 범위
 
-1. `apps/etl/pinvi/etl/definitions.py:88-97`의 sensor 목록을 `_for_jobs` 하나로 바꾼다.
+1. `apps/etl/pinvi/etl/definitions.py:88-97`의 sensor 목록을 `_for_jobs` 하나로 바꾸고 `with_updated_jobs([...])`로 다섯 asset job을 다시 주입한다.
 2. 새 sensor의 기본 상태를 옛 sensor들과 같게 둔다. 이름이 바뀌므로 옛 sensor 상태는 넘어오지 않는다.
-3. ETL 단위 시험에서 sensor 수와 대상 job 집합을 단언한다.
+3. ETL 단위 시험에서 sensor 수, sensor의 대상 job 다섯 개, job별 정책을 단언한다.
 4. 필요하면 `kor-travel-common` 핀을 올린다(현재 `c289b46`에 `_for_jobs`가 있다).
 
 ## 범위 밖
@@ -49,7 +51,8 @@ docs/journal.md, docs/resume.md, docs/tasks.md
 
 ## 수용 기준
 
-- [ ] Definitions의 인프라 재시도 sensor가 1개이고 대상 job 집합이 바꾸기 전 5개와 같다(시험).
+- [ ] Definitions의 인프라 재시도 sensor가 1개이고 **그 sensor의 대상 job**이 바꾸기 전 5개와 같다(시험. sensor 수만 세지 않는다).
+- [ ] 두 job이 같은 scan에서 실패했을 때 첫 tick에 하나, 다음 tick에 나머지가 요청되는 시험이 있다.
 - [ ] `etl` workflow가 통과한다.
 - [ ] 배포 뒤 옛 sensor 5개가 목록에 없고 새 sensor가 의도한 상태(RUNNING/STOPPED)다. 확인하지 못하면 `NOT_RUN(배포)`로 남긴다.
 

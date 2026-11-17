@@ -1,4 +1,4 @@
-# T-480a map-api: compose healthcheck를 공통 HTTP probe로 교체
+# T-480b map-api: compose healthcheck를 공통 HTTP probe로 교체
 
 - 상태: READY
 - 우선순위: P1
@@ -18,6 +18,7 @@ map 자체 `docker-compose.yml`의 API healthcheck는 `CMD-SHELL`로 인라인 `
 - probe 계약은 [http-health-probe](../runbooks/http-health-probe.md)가 정본이다.
 - `/health` 응답과 OpenAPI는 바꾸지 않는다. 바뀌는 것은 compose의 probe 명령뿐이다.
 - 새 의존이 없다. map-api는 이미 `kor-travel-common[http]`를 설치한다(`packages/kor-travel-map-api/pyproject.toml:31`).
+- map 자체 compose는 컨테이너 env와 게시 포트가 같은 변수 `KOR_TRAVEL_MAP_API_PORT`를 쓴다(`docker-compose.yml:417,508`). 그래서 compose 치환 값이 컨테이너 안 포트와 같다. Manager compose는 그렇지 않다(T-486a).
 
 ## 구현 범위
 

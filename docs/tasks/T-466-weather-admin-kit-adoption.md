@@ -1,28 +1,29 @@
-# T-466 weather-admin: 관리자 공통 부품 묶음 채택
+# T-466 weather-admin: ui 0.3.0 재vendor·guard 호출 SHA 갱신과 관리자 부품 채택
 
 - 상태: BLOCKED
 - 우선순위: P2
 - Gate: 소비자 빌드·단위·e2e·시각 비교
 - 선행: T-221
 - 소유 저장소: kor-travel-weather
-- 병렬: 묶음 C(T-435와 동시 가능, T-415 뒤 권장)
+- 병렬: 채택 묶음(T-424·T-435·T-474와 동시 가능, T-415 뒤 권장)
 
 출처는 [공통화 재조사·계획(2026-11-17)](../plan/commonization-plan-2026-11-17.md)의 §3.5·§4.8(K-50)이다. 근거 위치(file:line)와 차이 분석은 그 문서가 정본이며 여기서 반복하지 않는다.
 
 ## 목표
 
-weather 관리자 프론트의 map과 같은 로컬 부품(45개 파일 중 해당분)을 `@kor-travel/ui` 0.3.0으로 바꾸고 로컬 파일을 지운다.
+weather 관리자 프론트를 `@kor-travel/ui` 0.3.0으로 재vendor하고 guard 호출 SHA를 올린다. map과 같은 로컬 부품은 공통 부품으로 바꾸고 지운다.
 
 ## 고정 결정
 
 - T-415와 같다. map의 채택 PR을 참고 구현으로 쓴다.
+- 예고 창 동안 0.3.0 소비자는 새 검사기에서만 통과한다. 호출 SHA 갱신(`ci.yml`과 독립 workflow 두 곳)과 재vendor를 한 PR에 둔다. 부품 교체는 같은 PR이거나 뒤따르는 PR이다. T-222 전에 끝나야 하는 것은 재vendor다.
 - `status-label.ts`는 weather의 도메인 사전으로 남긴다(지금은 map 사전을 그대로 갖고 있다. 정리는 이 task 밖).
 - 이 저장소는 다른 팀이 유지한다.
 
 ## 구현 범위
 
-1. ui tarball·원장·lock을 0.3.0으로.
-2. 로컬 표시·폼·도움말·오류 부품과 `lib/{format,error-recovery}.ts`를 공통 import로 바꾸고 지운다.
+1. ui tarball(과 T-221이 함께 올린 패키지)·원장·lock을 0.3.0으로. guard 호출 SHA 두 곳을 T-024 이후 커밋으로.
+2. 로컬 표시·폼·도움말·오류 부품과 `lib/{format,error-recovery}.ts`를 공통 import로 바꾸고 지운다. `confirm-dialog`는 남긴다.
 3. 단위·e2e 선택자 갱신.
 
 ## 범위 밖
@@ -47,6 +48,7 @@ packages/kor-travel-weather-admin/frontend/{components,lib}/**
 
 ## 수용 기준
 
+- [ ] `common-policy / guard` job이 새 호출 SHA로 통과한다.
 - [ ] 의존성 검사·lint·type-check·단위·build·e2e가 통과한다.
 - [ ] 지운 파일 수와 줄 수를 PR에 적는다.
 - [ ] 6폭 화면 비교에서 의도하지 않은 차이가 0이다.

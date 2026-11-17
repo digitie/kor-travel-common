@@ -1,7 +1,7 @@
 # 공통화 재조사와 실행 계획 — 2026-11-17
 
 - 정본 지위: 다섯 저장소(pinvi·kor-travel-map·kor-travel-weather·kor-travel-transport·kor-travel-docker-manager)의 코드에서 **무엇을 공통으로 만들 수 있고 무엇은 만들면 안 되는지**를 고정 커밋 기준으로 다시 조사한 결과와 실행 순서다. 이 문서는 근거와 계획이며 규범이 아니다. 규칙은 [standards](../standards/README.md)·[ADR](../adr/README.md), 실행 범위와 수용 기준은 [task 원장](../tasks.md)과 상세 task가 정본이다.
-- 상태: **초안**. 소유자 요청(2026-11-17)에 따른 1차 작성본이며 독립 적대 리뷰 2건을 아직 거치지 않았다. 판정은 제안이고 ADR·task로 옮겨지기 전에는 결정이 아니다.
+- 상태: **초안(적대 리뷰 1회차 반영)**. 소유자 요청(2026-11-17)에 따른 작성본이다. 1회차 리뷰의 finding 19건을 반영했고 2회차 리뷰 전이다. 판정은 제안이고 ADR·task로 옮겨지기 전에는 결정이 아니다.
 - 성격상 §1~§3·§7은 조사 스냅샷(survey), §4~§6은 계획(plan)이다. 소유자가 문서 하나를 요청해 한 파일에 두었다. 기준 커밋을 바꿔 다시 조사할 때는 이 문서를 고치지 않고 새 문서를 만든다.
 - 인용 형식: `<저장소 약칭>:<저장소 상대 경로>:<줄>`. 약칭과 경로 접두는 §1.1 표를 따른다. `✔`는 작성자가 하위 조사 뒤 같은 커밋에서 직접 다시 읽거나 `diff`·`cmp`로 재확인한 인용이다. 표시가 없는 인용은 하위 조사 결과이며 한계는 §7에 적었다.
 
@@ -22,6 +22,8 @@
 
 transport는 2026-09 조사의 `kor-travel-airport`가 이름을 바꾼 저장소다. 원장의 airport 대역(T-430~T-439, T-482)을 그대로 잇는다. geo·concierge는 이번 범위가 아니어서 다시 조사하지 않았다. 두 저장소가 근거였던 2026-09 판정은 이 문서가 뒤집지도 확인하지도 않는다.
 
+기준 커밋 뒤에 바뀐 것 가운데 판정에 닿는 것은 셋이다. map #1504와 weather #243이 병합돼 두 저장소도 후보 12를 벤더한다. weather의 guard 호출은 `97f8ed9`로 올랐고 map은 `55a921b` 그대로다. kor-travel-weather #244(`8c3b4744`)가 K-51의 검증 차이를 고쳤다.
+
 ### 1.2 방법
 
 1. 여섯 저장소를 새로 받아 위 커밋에 고정했다. 읽기 전용이며 테스트·빌드·설치·배포와 운영 호스트 접근은 하지 않았다.
@@ -36,13 +38,13 @@ transport는 2026-09 조사의 `kor-travel-airport`가 이름을 바꾼 저장�
 | 축 | 2026-09-06 조사·계획([매트릭스](../survey/commonality-matrix.md), [백엔드 횡단](../survey/cross/backend.md), [브리프](design-brief.md)) | 이번 재조사에서 달라진 것 |
 |---|---|---|
 | 대상 | 7 저장소(airport·concierge·docker-manager·geo·map·weather·pinvi) | 5 저장소. airport는 transport로 개명. geo·concierge 제외 |
-| Python 공통 | 후보 C1~C21, 실행 task T-302~T-312, 소비 T-480~T-486. 1차는 C12 export·C4 health·C13 time·C20 quality | 계획한 모듈은 하나도 구현되지 않았다. 실물 `kortravelcommon`은 운영 장애가 요구한 다른 묶음이다: Dagster 복구·coalescing·회수 sensor, code-server·HTTP·gRPC probe, 응답 상한 HTTP, deadline, 정체 시계, 역지오코딩 갱신(T-319 계열). 원장은 T-302를 READY, T-303~T-312를 BLOCKED로 둔 채다 |
+| Python 공통 | 후보 C1~C21, 실행 task T-302~T-312, 소비 T-480~T-486. 1차는 C12 export·C4 health·C13 time·C20 quality | 계획한 1차·2차 모듈(C12·C4·C13·C20, C1·C9·C7·C2·C3)은 구현되지 않았다. `http`(C15 자리)와 `dagster`(C18 자리) 모듈은 있지만 내용이 계획과 다르다. 실물 `kortravelcommon`은 운영 장애가 요구한 묶음이다: Dagster 복구·coalescing·회수 sensor, code-server·HTTP·gRPC probe, 응답 상한 HTTP, deadline, 정체 시계, 역지오코딩 갱신(T-319 계열). 원장은 T-302를 READY, T-303~T-312를 BLOCKED로 둔 채다 |
 | React UI | T-201~T-214(base-ui 전제) | T-218이 Radix 기반 `@kor-travel/ui` 0.2.1·`tokens` 0.1.2·`toast` 0.1.1과 중앙 guard를 실물로 만들었다. 원장은 T-201(골격)을 BLOCKED로 둔 채다. [ui-contract](../standards/ui-contract.md)가 약속한 관리자 부품은 패키지에 없다 |
 | 공유 비용 | 배포 방식 후보 비교까지. 채택 뒤 운영 비용은 다루지 않음 | 2026-11-17 실측: 정책 한 번 바꾸자 다섯 저장소에 재vendor PR 5개·파일 80개(§2.2) |
-| 판정 근거 | 저장소 수와 함수 동일성 | 다섯 저장소의 현재 줄 번호와 차이 분석. C1·C4·C5·C9·C10·C3은 "공유하지 않음"으로 바꿀 것을 제안(§3, §5) |
+| 판정 근거 | 저장소 수와 함수 동일성 | 다섯 저장소의 현재 줄 번호와 차이 분석. accepted ADR·standards와 어긋나는 판정은 §1.5 표에 모두 모았다 |
 | 새로 본 것 | — | 수집 결과 run tag, probe 사본 세 종류, 관리자 부품 45개 파일 동일 사본, 로컬 경로 정규화 사본 차이, 공용 Dagster instance 설정 공백, Valkey, 빌드 영수증 생산자 fork |
 
-이 문서는 기존 ADR과 task를 고치지 않는다. 기존 계획과 어긋나는 판정은 "제안"으로 적고, 반영은 [T-022](../tasks/T-022-ledger-reality-reconcile.md)(원장 정합)와 ADR 개정이 소유한다.
+이 문서는 기존 ADR·standards·task를 고치지 않는다. 기존 결정과 어긋나는 판정은 §1.5에 "제안"으로 모았다. 반영은 [T-022](../tasks/T-022-ledger-reality-reconcile.md)(원장 재분류와 ADR-020 초안)와 [T-027](../tasks/T-027-standards-after-reclassification.md)(standards 본문)이 소유한다.
 
 ### 1.4 판정에 쓴 제약
 
@@ -52,10 +54,33 @@ transport는 2026-09 조사의 `kor-travel-airport`가 이름을 바꾼 저장�
 | R2 | 단순함이 결박보다 우선이다. 강제 계층을 더 쌓지 않는다 | 소유자 지시(2026-09-22); `AGENTS.md` Simplicity First |
 | R3 | Manager는 범용으로 유지한다. 렌더링된 모델에서 유도하고 서비스별 리터럴을 넣지 않는다 | 소유자 지시 |
 | R4 | npm·PyPI에 게시하지 않는다. 프론트 패키지는 벤더 tarball이다 | [ADR-014](../adr/014-common-implementation-without-registry-publishing.md) |
-| R5 | common main의 버전을 하나 바꾸면 모든 소비자의 guard가 재vendor 전까지 실패한다. 이 수단으로 공유하는 비용은 실제다 | 2026-11-17 실측(§2.2) |
+| R5 | common main의 버전을 하나 바꾸면 그 패키지를 선언한 모든 소비자의 guard가 재vendor 전까지 실패한다. 이 수단으로 공유하는 비용은 실제다 | 2026-11-17 실측(§2.2) |
 | R6 | Map 라이브러리 계층은 `fastapi`·`starlette`를 import하지 않고(`M:pyproject.toml:311-328` ✔) provider adapter·wrapper를 만들지 않는다 | Map ADR-006·ADR-020 |
 | R7 | weather·transport는 다른 팀(Codex)이 주로 유지한다. 그 저장소의 채택 비용과 시점은 그 팀이 정한다 | 소유자 지시 |
 | R8 | 소비자 한 곳의 관찰만으로 공통으로 올리지 않는다. env 이름·헤더 이름·지표 이름·오류 형식은 배포 계약이다 | `AGENTS.md` §6-7·§6-9 |
+
+### 1.5 기존 ADR·standards와 어긋나는 판정(제안)
+
+아래 판정은 accepted [ADR-011](../adr/011-python-common-package.md)·[backend-stack](../standards/backend-stack.md)·[openapi](../standards/openapi.md)·[ci-deploy](../standards/ci-deploy.md)·[ui-contract](../standards/ui-contract.md)와 어긋난다. 이 문서가 그 결정을 바꾸는 것이 아니다. T-022가 ADR-020 초안으로 올리고, 채택된 것만 T-027이 standards에 옮긴다. 채택 전에는 기존 결정이 유효하다.
+
+| 모듈 | 기존 결정 | 이 문서의 판정 | 근거 절 |
+|---|---|---|---|
+| C12 OpenAPI export CLI | ADR-011 1차, openapi의 export drift 행, ci-deploy의 `openapi-drift.yml`, T-303·T-309 | 나중에 공유(작게). 직렬화 규칙이 셋 다 달라 맞추는 비용이 줄 수 이득보다 크다 | K-16 |
+| C4 health 라우터 | ADR-011 1차, BE-15, T-304 | 공유하지 않음. probe만 공유(K-10) | K-15 |
+| C13 time | ADR-011 1차, BE-19, T-304 | 나중에 공유(낮음). 저장소 안 정리가 먼저 | K-35 |
+| C20 quality(ruff·mypy 베이스, `python-quality.yml`) | ADR-011 1차, BE-6~BE-11, T-305, T-401의 Python 절반 | 공유하지 않음. 베이스의 공통 부분은 이미 같고 나머지는 저장소별 선택이다 | K-71 |
+| C1 settings 베이스 | ADR-011 2차, BE-12, T-306 | 공유하지 않음 | K-12 |
+| C9 db 엔진 팩토리 | ADR-011 2차, BE-23, T-306 | 공유하지 않음 | K-13 |
+| C2 logging | ADR-011 2차, BE-13, T-307 | request-id 미들웨어만 나중에 공유. 로깅 설정은 공유하지 않음 | K-23, K-24 |
+| C3 metrics | ADR-011 2차, BE-14, T-307 | 공유하지 않음 | K-24 |
+| C5 errors·problem | ADR-011 3차, BE-16, T-308 | 공유하지 않음 | K-19 |
+| C10 alembic 템플릿 | ADR-011 3차, BE-24, T-308 | 공유하지 않음. 규약 문장만 | K-14 |
+| C15 http(재시도·circuit 정책) | ADR-011 3차, BE-20, T-308 | 공유하지 않음. 응답 상한 요청(`bounded_request`)은 이미 있다 | K-18 |
+| C18 dagster(Definitions 3단 폴백·`dagster.yaml` 템플릿) | ADR-011 3차, BE-21, T-308 | 공유하지 않음. 복구·coalescing·회수 sensor는 이미 있다 | K-47, K-49 |
+| `validateForm`(헤드리스 폼 검증) | ui-contract §4.6, T-210 | 공유하지 않음. 규칙 기반 구현은 map 한 곳이다 | K-55 |
+| UI 엔진 표기 | ui-contract §2·§3이 `@base-ui/react` | 실물은 `radix-ui`(ADR-017). 문서를 실물에 맞춘다 | K-50 |
+
+기존 결정과 **같은 방향**인 것: C6 pagination(보류 → 코덱만 나중에, K-20), C7 `public_api_key`(유지, K-17), C8 `trusted_proxy`(유지, K-17), C11 testing(유지, K-75), C14 좌표 경계(금지, K-34), `ConfirmDialog`(앱 소유·T-508, K-50), 세션·로그인(ADR-015·BE-22, K-53). C16 security headers와 C17 cors는 이번에 다섯 저장소를 다시 비교하지 않아 판정이 없다(§7).
 
 ## 2. 공유 수단과 비용
 
@@ -63,10 +88,10 @@ transport는 2026-09 조사의 `kor-travel-airport`가 이름을 바꾼 저장�
 
 | 수단 | 쓰는 곳 | 한 번 바꿀 때 | 함대 결합 |
 |---|---|---|---|
-| A. Python git 커밋 핀 | `P:apps/api/pyproject.toml:9`·`P:apps/etl/pyproject.toml:12`(`c289b46`), `M:packages/kor-travel-map-api/pyproject.toml:31`·`M:packages/kor-travel-map-dagster/pyproject.toml:25`(`aa232ad`), `W:pyproject.toml:15,55`(`aa232ad`), `T:backend/pyproject.toml:11`(`c289b46`) ✔ | 새 기능이 필요한 소비자만 핀 PR 1개 | 없음 |
+| A. Python git 커밋 핀 | `P:apps/api/pyproject.toml:9`·`P:apps/etl/pyproject.toml:12`(`c289b46`), `M:packages/kor-travel-map-api/pyproject.toml:31`·`M:packages/kor-travel-map-dagster/pyproject.toml:25`(`aa232ad`), `W:pyproject.toml:15,55`·`W:packages/kor-travel-weather-dagster/pyproject.toml:11`(`aa232ad`), `T:backend/pyproject.toml:11`(`c289b46`) ✔ | 새 기능이 필요한 소비자만 핀 PR 1개 | 없음 |
 | A'. 벤더 wheel + hash | `D:docker/dagster-host/vendor/kor_travel_common-0.1.0.dev0-py3-none-any.whl`, `D:docker/dagster-host/requirements.txt:555-556` ✔ | wheel 교체 PR | 없음 |
 | B. 벤더 tarball + 중앙 원장 guard | 프론트 7개 표면(`<frontend>/vendor/*.tgz`, `common-artifacts.json`) | **모든** 소비자 재vendor PR. 그 전까지 guard 실패 | 강함 |
-| C. 재사용 workflow를 커밋으로 호출 | `frontend-consumer-guard.yml@<sha>` 호출 5곳 | 호출 SHA PR(검사 코드에 한함) | 코드는 없음, 정책 데이터는 B와 같음 |
+| C. 재사용 workflow를 커밋으로 호출 | `frontend-consumer-guard.yml@<sha>` 호출 7곳(P·M·D 하나씩, W·T는 `ci.yml`과 독립 workflow에 하나씩) | 호출 SHA PR(검사 코드에 한함) | 코드는 없음, 정책 데이터는 B와 같음 |
 | D. 출처를 적은 복사 | `T:TA/lib/vendor/map-marker-react/`(Map 사본) ✔, `D:docker/dagster-host/build-bytecode.py`(`C:cpy/build_bytecode.py`와 동일 ✔), Manager↔transport code-server probe(스크립트가 일치를 강제) | 손으로 다시 복사 | 약함. 표류 가능 |
 | E. 규약 문서 | `docs/standards/*` | 없음 | 없음 |
 
@@ -83,11 +108,12 @@ guard는 검사 **코드**를 호출자가 고정한 커밋에서 받고(`C:.git
 | 02:38:06 | pinvi #763 병합(파일 26개) |
 | 03:09:25 | docker-manager #605 병합(파일 8개) |
 | 03:11:05 | transport #205 병합(파일 20개) |
-| 조사 시점 | map #1504(파일 12개)·weather #243(파일 14개)은 열려 있음. 두 저장소는 후보 11에 머문다 |
+| 조사 시점 | map #1504(파일 12개)·weather #243(파일 14개)은 열려 있음. 두 저장소는 후보 11에 머문다(둘 다 그 뒤 병합됐다) |
 
 - 재vendor PR 5개, 파일 80개다. geo·concierge도 같은 guard의 소비자이지만 이번에 조회하지 않았다.
 - **`ui`·`tokens`·`toast`는 실행 코드와 CSS가 바뀌지 않았다.** tarball이 정책 사본(`dependency-policy.json`)을 싣고 있어서, 무관한 `vworld-map-web` 한 줄 때문에 세 패키지가 patch 버전을 올렸다(common #57 변경 파일 17개 중 패키지 쪽은 `package.json`·`dependency-policy.json`·테스트뿐 ✔; `ui` 0.2.0과 0.2.1 tarball은 같은 94개 파일이고 다른 것은 `package.json`·`dependency-policy.json`·`check-dependencies.mjs` 셋).
 - 검사기는 소비자가 선언하지 않은 산출물은 건너뛴다(`check_frontend_dependencies.mjs:145` ✔). 그래서 지도가 없는 docker-manager와 transport 공개 웹은 `vworld-map-web`만 바뀌었다면 영향이 없었다. 두 저장소가 PR을 내야 했던 이유는 위의 내장 사본 때문이다.
+- 소비자는 **자기가 고정한 판의 검사기**를 실행한다. 지금 고정된 판은 셋이다(`55a921b` map, `97f8ed9` 나머지 넷; weather는 조사 시점에 `9e16393`). 세 판 모두 정책에서 `versions`·`profiles`·`forbidden`·`artifactPackages`·`patchedRadixPackages`와 정본의 `packages`만 읽는다(각 커밋의 `tools/check_frontend_dependencies.mjs` ✔). 모델을 바꿀 때 이 사실이 설계를 정한다(§4.1).
 - map #1504의 첫 실행은 guard에서 실패했다. 호출 SHA를 최신으로 올리자 map에 없는 정확 Node/npm 도구 규칙이 걸렸고(`도구 규칙: 검사 파일·경로를 읽을 수 없습니다`), 두 번째 커밋이 호출 SHA를 `55a921b`로 되돌렸다 ✔. map은 검사 코드가 44커밋 뒤처진 채(`git rev-list --count 55a921b..97f8ed9` ✔) 정책만 최신을 따른다.
 - 한 달 동안 정책 세 파일이 바뀐 날은 나흘(11-11, 11-12, 11-13, 11-17), 커밋 19개다(`git log --since=2026-10-17` ✔).
 - common의 11-17 journal은 "기존 소비자는 고정 SHA를 쓰므로 영향이 없다"고 적었고(`C:docs/journal.md`의 후보12 두 항목 ✔), 같은 날 docker-manager의 journal은 "공통 guard는 고정 ref와 무관하게 common main의 정책·정본을 읽으므로" 옛 버전으로는 실패한다고 적었다(`D:docs/journal.md` 첫 항목 ✔). 정책을 바꾸는 쪽도 이 결합을 놓쳤다.
@@ -134,17 +160,17 @@ guard는 검사 **코드**를 호출자가 고정한 커밋에서 받고(`C:.git
 | K-34 | 좌표·bbox·haversine·한국 경계 | ● | ● | ● | ● | × | 상수가 정당하게 다름 | 공유하지 않음 |
 | K-35 | 시간(KST) 헬퍼(C13) | ● | ● | ● | ● | ● naive | 저장소 안 중복이 더 큼 | 나중에 공유(낮음) |
 | K-40 | 수집 결과 run tag | × | × | ● | ● | × | 함수 동일, 두 관리자 UI가 읽음 | 지금 공유 §3.4 |
-| K-41 | 다중 job 인프라 재시도 sensor | ◐ job당 1개 | × | ○ | ◐ job당 1개 | — | 공통 구현 미채택 | 지금 공유(채택 공백) §3.4 |
+| K-41 | 다중 job 인프라 재시도 sensor | ◐ job당 1개 | × | ◐ env로 꺼 둠 | ◐ job당 1개 | — | 공통 구현 미채택 | 지금 공유(채택 공백) §3.4 |
 | K-42 | 회수 sensor의 소비자 cursor·정체 시계 | × | ◐ 자체 | ◐ | ◐ | — | 공통 API 공백을 각자 우회 | 나중에 공유 §3.4 |
 | K-43 | Dagster webserver 정의 로드 probe | ● | ● | ◐ | ● | ● ×4 | 같은 한 줄 7곳 | 나중에 공유 §3.4 |
-| K-44 | code-server probe 세 세대 | — | ○ | ○ | ● 사본 | ● | 재시작 책임이 미정 | 나중에 공유(결정 선행) |
+| K-44 | code-server probe 세 세대 | ◐ Manager compose | ◐ standalone은 2세대 | ○ | ● 사본 | ● | 재시작 책임이 미정 | 나중에 공유(결정 선행) |
 | K-45 | Map coalescing schedule | ○ | ● 자체 | ○ | ○ | — | 범위 판정 방식이 다름 | 나중에 공유 |
 | K-46 | 공용 `dagster.yaml`의 job별 한도·`run_retries` | — | — | — | — | ● | 가이드가 요구한 규칙이 없음 | 나중에 공유(Manager 결정) |
 | K-47 | Definitions 골격·schedule on/off·실패 sensor | ● | ● | ● | ● | — | 도메인 결선 | 공유하지 않음 |
 | K-48 | 적재·수집 run 원장 | × | ● | ● | ● | — | 스키마가 도메인 | 공유하지 않음 |
 | K-49 | standalone `dagster.yaml` 사본 | ● | ● | ● | ● | ● | 로컬 스택에 필요 | 공유하지 않음 |
 | K-50 | 관리자 공통 부품 묶음 | ◐ 재도색 | ● | ● 동일 | ● 동일 | ◐ | 45개 파일 byte 동일 ×3 | 나중에 공유(한 번에) §3.5 |
-| K-51 | 로컬 경로 정규화(`sanitizeLocalPath`) | × | × | ● | ● | × | 사본 세 벌, W 서버 쪽 사본에 검증 하나가 없음 | 지금 공유(채택 공백) §3.5 |
+| K-51 | 로컬 경로 정규화(`sanitizeLocalPath`) | × | × | ● | ● | × | 구현 세 벌. 입력 타입·trim·길이 상한이 다름(검증 차이는 조사 뒤 맞춤) | 지금 공유(채택 공백) §3.5 |
 | K-52 | 관리자 셸 조각(skip link·header·접힘) | ● | ● | ● | ● | ● | nav·로그아웃은 앱 소유 | 나중에 공유(K-50과 함께) |
 | K-53 | Next 계층 세션·로그인 crypto | × | ● | ● | ● | × | 사본이 아니라 재구현, 폐기 저장소가 다름 | 공유하지 않음 |
 | K-54 | API client·오류 파싱·타입 생성 | ● | ● | ● | ● | ● | 오류 형식 넷·인증 셋 | 공유하지 않음 |
@@ -174,7 +200,7 @@ guard는 검사 **코드**를 호출자가 고정한 커밋에서 받고(`C:.git
 
 ### 3.2 백엔드
 
-**K-11 app factory·lifespan — 공유하지 않음.** `P:apps/api/app/main.py:50-127`, `M:api/app.py:769-1463`, `W:wapi/app.py:130-347`, `T:app/main.py:516-3732`, `D:kdm/main.py:174-244`. 코드 수준에서 같은 것이 없다. 문서 노출은 넷이 다르고(P 항상, M은 production에서 `/docs`만 끔 `api/app.py:827-828`, T는 `openapi_url`까지 `app/main.py:630-632`), 미들웨어 순서와 시작 시 fail-closed 검사도 저장소마다 다르다. 공통 factory는 일부러 다르게 둔 다섯 계약 위에 결박층을 하나 더 얹는다(R2).
+**K-11 app factory·lifespan — 공유하지 않음.** `P:apps/api/app/main.py:50-127`, `M:api/app.py:769-1463`, `W:wapi/app.py:130-347`, `T:app/main.py:516-3732`, `D:kdm/main.py:174-244`. 코드 수준에서 같은 것이 없다. 문서 노출은 셋으로 갈리고(P·W·D는 기본값대로 항상, M은 production에서 `/docs`·`/redoc`을 끔 `api/app.py:827-828` ✔, T는 `openapi_url`까지 설정으로 끔 `app/main.py:630-632`), 미들웨어 순서와 시작 시 fail-closed 검사도 저장소마다 다르다. 공통 factory는 일부러 다르게 둔 다섯 계약 위에 결박층을 하나 더 얹는다(R2).
 
 **K-12 settings 베이스 — 공유하지 않음.** `P:apps/api/app/core/config.py:644-651`, `M:lib/settings.py:42-72`·`M:api/settings.py:380-395`, `W:wlib/settings.py:77,168-179`, `T:app/core/config.py:11-24`, D는 settings 클래스가 없다(`os.environ` 자리 66곳). compose의 `${X:-}`가 만드는 빈 문자열을 넷이 다르게 다룬다: M core는 `env_ignore_empty=True`(`lib/settings.py:71`), M api는 필드별 validator(`api/settings.py:767-800`), P는 토큰 필드 10개 validator(`config.py:1436-1463`)이고 공백은 남겨 뒤에서 거절, W는 13개 필드에서 공백까지 미설정으로 본다(`wlib/settings.py:664-684`), T는 없다. profile 기본값도 반대다(W `production` `wlib/settings.py:183`, M code 기본 `local-dev` `api/settings.py:412-414`). 공통 베이스는 P·W·T의 빈 env 의미를 조용히 바꾼다. 나중에 쓸 만한 것은 `mode="before"` validator로 쓰는 순수 함수 둘뿐이다(저장소당 10~25줄).
 
@@ -186,7 +212,7 @@ guard는 검사 **코드**를 호출자가 고정한 커밋에서 받고(`C:.git
 
 **K-16 OpenAPI export — 나중에 공유(작게).** `M:packages/kor-travel-map-api/scripts/export_openapi.py`(527줄), `W:packages/kor-travel-weather-api/scripts/export_openapi.py`(27줄), `T:scripts/export_openapi.py`(60줄) ✔. P·D는 없다. 같은 것은 `json.dumps(app.openapi(), indent=2, ensure_ascii=False)` 한 줄이다. M·T는 `sort_keys=True`(`export_openapi.py:438`, `:42` ✔), W는 없다(`:21` ✔). M은 끝 개행 없이 `.strip()` 비교, T는 개행을 쓰고 정확 비교, W는 스크립트 안 비교가 없고 CI가 `git diff`로 본다. 공유할 수 있는 부분은 25줄 정도의 `dump`·`check_or_write`인데, 직렬화를 맞추면 커밋된 산출물이 한 번 다시 써지고 그 사본을 가진 쪽이 따라 움직인다. 줄 수 이득보다 비용이 크다. 값싼 독립 개선은 W에 `sort_keys=True`를 넣는 것이다.
 
-**K-17 인증 프리미티브 — 나중에 공유.** 공개 API 키 생성·해시 함수는 `M:lib/infra/public_api_keys.py:86-96`과 `D:kdm/services/public_api_key_service.py:20-27`이 본문까지 같다 ✔(길이 32, `ascii_letters+digits`). 그 밖은 정책이다: 키 전달(M은 헤더만, D는 query), 조회(M은 TTL 캐시, D는 요청마다 조회), 실패 코드(M 401/403/422, W 401, T·P 일부 404로 표면 은닉), 미설정 시 동작(M 미강제, W production에서 예외, T는 32자 미만이면 닫힘 `app/main.py:708`), proxy 신뢰(넷 다 다르고 IPv4-mapped 정규화는 T만 `app/service_exports.py:298-299`). 작은 `secrets` 모듈(바이트 안전 상수시간 비교, 키 생성·해시, CIDR 판정)은 저장소당 10~25줄을 지운다. D의 백엔드는 common에 의존하지 않고(Poetry) 이 이득으로 의존을 새로 만들 이유가 없다. [T-312](../tasks/T-312-auth-core-primitives.md)가 이미 이 범위를 갖고 있으므로 새 task를 만들지 않는다.
+**K-17 인증 프리미티브 — 나중에 공유.** 공개 API 키 생성·해시 함수는 `M:lib/infra/public_api_keys.py:86-96`과 `D:kdm/services/public_api_key_service.py:20-27`이 본문까지 같다 ✔(길이 32, `ascii_letters+digits`). 그 밖은 정책이다: 키 전달(M은 헤더만, D는 query), 조회(M은 TTL 캐시, D는 요청마다 조회), 실패 코드(M 401/403/422, W 401, T·P 일부 404로 표면 은닉), 미설정 시 동작(M 미강제, W production에서 예외, T는 32자 미만이면 닫힘 `app/main.py:708`), proxy 신뢰(넷 다 다르고 IPv4-mapped 정규화는 T만 `app/service_exports.py:298-299`). 작은 `secrets` 모듈(바이트 안전 상수시간 비교, 키 생성·해시, CIDR 판정)은 저장소당 10~25줄을 지운다. D의 백엔드는 common에 의존하지 않고(Poetry) 이 이득으로 의존을 새로 만들 이유가 없다. 원장에서 C7(키 생성·해시)은 [T-306](../tasks/T-306-settings-db-api-key.md), C8(CIDR·proxy 신뢰)은 [T-308](../tasks/T-308-api-third-tier-modules.md)이 갖고 있다. [T-312](../tasks/T-312-auth-core-primitives.md)는 비밀번호·세션·JWT·RBAC다. T-306에는 이 문서가 공유하지 않음으로 둔 C1·C9가 함께 묶여 있으므로, T-022가 T-306을 나눠 C7을 남겨야 한다. 새 task는 만들지 않는다.
 
 **K-18 outbound HTTP — 공유하지 않음.** 재시도 루프는 다섯 저장소 모두 손으로 쓴 것이고 서로 다르다. P는 client마다 `0.2·2^n`과 3회 실패·120초 circuit(`P:apps/api/app/clients/_resilience.py:18-61`), M은 실행 단위 예산(`M:dag/upstream_retry.py:102-117`)과 geo에 502/503/504만 선형 backoff(`M:lib/geocoding.py:1579-1611`), W는 thread를 재우는 sync(`W:wlib/providers/base.py:346-451`), T는 provider 라이브러리에 맡긴다. 재시도·circuit은 호출 자리의 결정이다. 공통 `bounded_request`를 쓰는 곳은 둘뿐이다(`M:api/dagster_graphql.py:915`, `P:apps/api/app/services/admin_etl.py:670` ✔). M의 `_read_capped`(`M:api/transport_state_service.py:231-255` ✔)는 gzip을 허용하고 공통은 모든 압축을 거절한다(`C:cpy/http.py:66-68` ✔). 소비자가 한 곳이라 공통 옵션으로 올리지 않는다(R8). P의 `tenacity` 선언은 import가 없다(`P:apps/api/pyproject.toml:23` ✔).
 
@@ -222,13 +248,13 @@ guard는 검사 **코드**를 호출자가 고정한 커밋에서 받고(`C:.git
 
 **K-40 수집 결과 run tag — 지금 공유.** `_record_collection_outcome`은 `W:wdag/definitions.py:399-418`과 `T:app/dagster/definitions.py:60-79`에서 본문이 같다(`suppress` 대 `contextlib.suppress` 한 줄 차이 ✔). tag `kortravel/collection-outcome`은 두 관리자 프론트가 읽는다(`W:WA/lib/dagster.ts:222`, `W:WA/components/dagster-console.tsx:86`, `T:TA/components/dagster-console.tsx:86` ✔). 사실상 저장소 사이 계약인데 정의가 두 곳에 있다. 이득: 정의 한 곳, 각 20줄 제거, 세 번째 소비자가 같은 값을 쓴다. 비용: common 함수 하나와 핀 PR 둘. 위험: 낮다(동작 보존, A 수단). 채택은 두 저장소의 유지 팀이 한다(R7).
 
-**K-41 다중 job 인프라 재시도 sensor — 지금 공유(채택 공백).** 공통에 `infrastructure_retry_sensor_for_jobs`가 있다(`C:cpy/dagster.py:331` ✔). W는 쓴다. P는 job마다 sensor를 5개(`P:etl/definitions.py:88-97` ✔), T는 3개 만든다(`T:app/dagster/definitions.py:1041-1048` ✔). 하나로 합치면 실패 조회가 한 번이 되고 sensor tick 수가 준다. 비용: 저장소당 6줄 안팎. 위험: sensor 이름이 바뀌어 기존 sensor의 cursor·상태가 새로 시작한다. 채택 PR이 이 전환을 다뤄야 한다.
+**K-41 다중 job 인프라 재시도 sensor — 지금 공유(채택 공백).** 공통에 `infrastructure_retry_sensor_for_jobs`가 있다(`C:cpy/dagster.py:331` ✔). W는 env `KOR_TRAVEL_WEATHER_INFRA_RETRY_ENABLED`가 `true`일 때만 등록하고 기본값은 `false`다(`W:wdag/recovery.py:19-30` ✔). 추적된 compose 어디에도 그 env가 없다. P·T의 채택이 이 구현의 첫 운영 사용이 될 수 있다. P는 job마다 sensor를 5개(`P:etl/definitions.py:88-97` ✔), T는 3개 만든다(`T:app/dagster/definitions.py:1041-1048` ✔). 하나로 합치면 실패 조회가 한 번이 되고 sensor tick 수가 준다. 비용: 저장소당 6줄 안팎. 위험: sensor 이름이 바뀌어 기존 sensor의 cursor·상태가 새로 시작한다. 채택 PR이 이 전환을 다뤄야 한다. 또 합친 sensor는 한 tick에 RunRequest를 하나만 낸다(`C:cpy/dagster.py:658-661` ✔). 여러 job이 같은 때 실패하면 재시도가 60초 간격으로 하나씩 나간다.
 
-**K-42 회수 sensor의 소비자 cursor — 나중에 공유.** 공통 `reconciliation_sensor`가 sensor cursor를 소유해서, W와 T는 keyset 위치를 프로세스 메모리에 둔다(`W:wdag/sync_recovery.py:97-116` ✔, `T:app/dagster/recovery.py:206-223` ✔). W는 공통의 비공개 cursor 접두 `stall:`을 직접 다시 읽는다(`W:wdag/sync_recovery.py:64-65,119-127` ✔, 원본 `C:cpy/dagster.py:69` ✔). 비공개 형식에 묶인 것이라 공통이 형식을 바꾸면 조용히 깨진다. callback이 현재 정체 시계를 받고 작은 하위 cursor를 저장할 수 있게 공통 API를 넓히면 W 30줄·T 20줄이 준다. Map의 회수 sensor(`M:dag/feature_operation_sensors.py`)는 30초 주기·`RunRequest` 반환·시계 둘이 필요해 factory에 맞지 않는다. 의도된 불일치이므로 옮기지 않는다.
+**K-42 회수 sensor의 소비자 cursor — 나중에 공유.** 공통 `reconciliation_sensor`가 sensor cursor를 소유해서, W와 T는 keyset 위치를 프로세스 메모리에 둔다(`W:wdag/sync_recovery.py:97-116` ✔, `T:app/dagster/recovery.py:206-223` ✔). W는 공통의 비공개 cursor 접두 `stall:`을 직접 다시 읽는다(`W:wdag/sync_recovery.py:64-65,119-127` ✔, 원본 `C:cpy/dagster.py:69` ✔). 비공개 형식에 묶인 것이라 공통이 형식을 바꾸면 조용히 깨진다. callback이 현재 정체 시계를 받고 작은 하위 cursor를 저장할 수 있게 공통 API를 넓히면 W 30줄·T 20줄이 준다. Map의 회수 sensor(`M:dag/feature_operation_sensors.py`)는 30초 주기·`RunRequest` 반환·시계 둘이 필요해 factory에 맞지 않는다. 의도된 불일치이므로 옮기지 않는다. API를 넓힐 때 weather가 읽는 `stall:` 문자열 모양은 그대로 둬야 한다(T-314의 호환 수용 기준).
 
 **K-43 webserver 정의 로드 probe — 나중에 공유.** `{repositoriesOrError{__typename}}`을 보내 `RepositoryConnection`인지 보는 한 줄이 7곳에 있다: `D:docker-compose.yml:2013,2432,2791,3259`, `M:docker-compose.yml:778`, `T:docker-compose.shared.yml:378`, `P:apps/etl/Dockerfile:98-102`(curl+grep) ✔. 공통에는 webserver probe가 없다. 운영은 Manager의 공용 webserver가 workspace를 읽는 별도 probe를 쓰므로(`D:docker-compose.yml:990-1010`) 이 사본들은 standalone·legacy 스택의 것이다. 그래서 이득이 작다. 공통 CLI 하나(`dagster_webserver_health`)는 만들 가치가 있으나 급하지 않다.
 
-**K-44 code-server probe 세 세대 — 나중에 공유(결정 선행).** (1) Manager의 93줄 인라인 probe(`D:docker-compose.yml:103-196`)가 `T:docker-compose.shared.yml:118-211`에 그대로 복사돼 있고 ✔ 전환 스크립트가 일치를 강제한다. 이 probe는 PID 1에 SIGTERM을 보내고 고아 run을 거둔다. (2) `kortravelcommon.dagster_health`(`M:docker-compose.yml:675-681`). (3) `kortravelcommon.grpc_health --check live`(`W:compose.yaml:301`, `D:docker-compose.yml:2707,3155`). geo·weather 쪽 주석은 "PID 종료·DB reaper는 healthcheck 책임이 아니다"라고 적는다. (3)으로 모으면 T의 94줄과 D의 약 150줄이 준다. 그러나 멈춘 자식을 누가 다시 띄우는가가 먼저 정해져야 한다. 읽기 전용 대체물 `C:cpy/dagster_recovery.py`를 결선한 곳은 W뿐이다. Manager와 유지 팀의 결정이다.
+**K-44 code-server probe 세 세대 — 나중에 공유(결정 선행).** (1) Manager의 93줄 인라인 probe(`D:docker-compose.yml:103-196`)가 `T:docker-compose.shared.yml:118-211`에 그대로 복사돼 있고 ✔ 전환 스크립트가 일치를 강제한다. 이 probe는 PID 1에 SIGTERM을 보내고 고아 run을 거둔다. Manager compose에서는 Map·PinVi·concierge의 code-server도 이 (1)을 쓴다(`D:docker-compose.yml:1929,2361,1443`). (2) `kortravelcommon.dagster_health`(`M:docker-compose.yml:675-681`, Map의 standalone compose만). (3) `kortravelcommon.grpc_health --check live`(`W:compose.yaml:301`, `D:docker-compose.yml:2707,3155`). geo·weather 쪽 주석은 "PID 종료·DB reaper는 healthcheck 책임이 아니다"라고 적는다. (3)으로 모으면 T의 94줄과 D의 약 150줄이 준다. 그러나 멈춘 자식을 누가 다시 띄우는가가 먼저 정해져야 한다. 읽기 전용 대체물 `C:cpy/dagster_recovery.py`를 결선한 곳은 W뿐이다. Manager와 유지 팀의 결정이다.
 
 **K-45 Map coalescing — 나중에 공유.** `M:dag/schedules.py:583-613` ✔은 공통 `coalescing_schedule`(`C:cpy/dagster.py:177` ✔)과 세 가지가 다르다: `NOT_STARTED`·`MANAGED`도 센다(`schedules.py:70-77` ✔), DB에서 `kor_travel_map.operation_key` tag로 좁힌다, `execution_fn`으로 `RunRequest`/`SkipReason`을 돌려준다. 공통이 tag 범위를 받거나 Map이 origin 범위를 받아들여야 옮길 수 있다(약 40줄).
 
@@ -238,17 +264,17 @@ guard는 검사 **코드**를 호출자가 고정한 커밋에서 받고(`C:.git
 
 ### 3.5 프론트엔드
 
-**K-50 관리자 공통 부품 묶음 — 나중에 공유(한 번에).** MA·WA·TA 세 프론트에 **45개 파일(2,076줄)이 byte 단위로 같다** ✔(`cmp -s`로 다시 셈). `components/ui/*` 30개와 `confirm-dialog`·`copy-button`·`detail-list`·`empty-state`·`json-viewer`·`pagination-bar`·`stat-strip`·`status-badge`·`status-badge-variants`, `lib/{format,occurrence-key,string-list,utils}.ts`, `app/error.tsx`·`app/global-error.tsx`다. MA=WA만 같은 파일이 9개(1,317줄: `app-error-panel`·`filter-bar`·`section-card`·`selectable-row`·`multi-filter-combobox`·`lib/error-recovery.ts` 등) 더 있고 TA 쪽은 조금 다르다. 표류가 이미 보인다: `help-tip.tsx`는 W·T가 M보다 새 판이다. PW 관리자는 같은 묶음을 일부러 다시 칠한 이식본이다(약 2,330줄). [ui-contract](../standards/ui-contract.md) §4는 이 부품들(`EmptyState`·`StatStrip`·`StatusBadge`·`DetailList`·`JsonViewer`·`CopyButton`·`AppErrorPanel`·`HelpTip`·`FormField*`·`AdminPageHeader`·`AdminSkipLink`)을 계약으로 적었지만 `packages/ui/src`에는 없다 ✔. 같은 문서는 엔진을 `@base-ui/react`라고 적는데(`ui-contract.md:19,32` ✔) 실물은 `radix-ui`다. 기존 task T-203·T-205·T-209·T-210이 이 범위다. 이득: M·W·T에서 각 1,100~1,300줄, PW 관리자가 토큰 이름 매핑을 받아들이면 600~900줄. 비용: 클래스가 로컬 어휘(`text-text-secondary`, `rounded-control`)라 파일 이동이 아니라 이식이다. 그리고 `ui` 버전이 오르므로 함대 전체가 재vendor한다. 그래서 **한 버전으로 묶고**, §4.1의 전환 창이 생긴 뒤에 낸다. `status-label.ts`는 도메인 사전이라 앱에 남는다.
+**K-50 관리자 공통 부품 묶음 — 나중에 공유(한 번에).** MA·WA·TA 세 프론트에 **45개 파일(2,076줄)이 byte 단위로 같다** ✔(`cmp -s`로 다시 셈). `components/ui/*` 30개와 `confirm-dialog`·`copy-button`·`detail-list`·`empty-state`·`json-viewer`·`pagination-bar`·`stat-strip`·`status-badge`·`status-badge-variants`, `lib/{format,occurrence-key,string-list,utils}.ts`, `app/error.tsx`·`app/global-error.tsx`다. MA=WA만 같은 파일이 9개(1,317줄) 더 있다. 그중 다섯(`app-error-panel`·`filter-bar`·`section-card`·`lib/status-label.ts`·`lib/error-recovery.ts`)은 TA에 조금 다른 판이 있고(각 16·23·2·2·2줄 차이 ✔), 넷(`selectable-row`·`multi-filter-combobox`·`lib/admin-auth-events.ts`·`providers/query-client-provider.tsx`)은 TA에 없다 ✔. 표류가 이미 보인다: `help-tip.tsx`는 W·T가 M보다 새 판이다. PW 관리자는 같은 묶음을 일부러 다시 칠한 이식본이다(약 2,330줄). [ui-contract](../standards/ui-contract.md) §4는 이 부품들(`EmptyState`·`StatStrip`·`StatusBadge`·`DetailList`·`JsonViewer`·`CopyButton`·`AppErrorPanel`·`HelpTip`·`FormField*`·`AdminPageHeader`·`AdminSkipLink`)을 계약으로 적었지만 `packages/ui/src`에는 없다 ✔. 같은 문서는 엔진을 `@base-ui/react`라고 적는데(`ui-contract.md:19,32` ✔) 실물은 `radix-ui`다. 기존 task T-203·T-205·T-206(HelpTip)·T-208(Pager)·T-209·T-210이 이 범위와 겹친다. 그대로 옮길 수 없는 의존도 있다: `status-badge`·`status-badge-variants`·`stat-strip`은 앱 사전 `@/lib/status-label`을, `stat-strip`·`detail-list`는 `next/link`와 `help-tip`을, `copy-button`은 `sonner`를, `help-tip`은 `zustand`를 import한다 ✔. `@kor-travel/ui`에는 `next` peer가 없다. 그래서 사전·링크·토스트는 주입으로 바꿔야 한다. `confirm-dialog`는 ui-contract가 엔진 선택을 앱 소유로 두고 공통 API를 T-508로 미뤘으므로 묶음에서 뺀다. 이득: M·W·T에서 각 1,100~1,300줄, PW 관리자가 토큰 이름 매핑을 받아들이면 600~900줄. 비용: 클래스가 로컬 어휘(`text-text-secondary`, `rounded-control`)라 파일 이동이 아니라 이식이다. 그리고 `ui` 버전이 오르므로 함대 전체가 재vendor한다. 그래서 **한 버전으로 묶고**, §4.1의 예고 필드가 생긴 뒤에 낸다. 버전이 오르면 부품을 쓰지 않는 소비자(P·D)도 재vendor해야 한다. `status-label.ts`는 도메인 사전이라 앱에 남는다.
 
-**K-51 로컬 경로 정규화(`sanitizeLocalPath`) — 지금 공유(채택 공백).** `@kor-travel/ui/navigation`이 `sanitizeLocalPath`를 내보낸다(`C:packages/ui/src/navigation.ts` ✔). W와 T는 client에서는 그것을 import하면서 서버 쪽에는 로컬 사본을 둔다(`W:WA/lib/navigation.ts` ✔, `T:TA/lib/navigation.ts` ✔). 같은 규칙이 세 벌이다. weather의 서버 쪽 사본에는 다른 두 사본에 있는 검증 하나가 빠져 있어 맞춰야 한다. 사본을 공통 export 하나로 바꾸면 다시 갈라지지 않는다. 패키지 변경이 없어 함대 비용이 0이다. 차이점: 공통 함수는 `fallback` 인자가 없고 로컬 사본보다 거절 범위가 넓다. 호출부가 맞춰야 한다.
+**K-51 로컬 경로 정규화(`sanitizeLocalPath`) — 지금 공유(채택 공백).** `@kor-travel/ui/navigation`이 `sanitizeLocalPath`를 내보낸다(`C:packages/ui/src/navigation.ts:5-17` ✔). W와 T의 관리자 프론트는 같은 목적의 로컬 구현 `lib/navigation.ts`를 따로 둔다(`W:WA/lib/navigation.ts` ✔, `T:TA/lib/navigation.ts` ✔). W는 서버 쪽 호출부 셋이 로컬을, client 로그인 폼이 공통을 쓴다(`W:WA/components/login-form.tsx:5` ✔). T는 서버 쪽과 client 모두 로컬을 쓴다(`T:TA/components/login-form.tsx:7` ✔). 구현이 세 벌이고 모양이 다르다. 공통은 `string | null | undefined`를 받고 인코딩된 경계 문자와 제어 문자를 거절한다. 로컬 둘은 `unknown`을 받고 앞뒤 공백을 지우고 500자를 넘으면 거절한다(공통에는 길이 상한이 없다). 호출부는 `unknown`을 넘긴다(`W:WA/app/api/auth/login/route.ts:172,227` ✔, `T:TA/app/api/auth/login/route.ts:23` ✔). `fallback` 인자를 넘기는 호출부는 없다. 기준 커밋에서 W 로컬 구현에는 다른 두 구현에 있는 검증 하나가 빠져 있었고, 조사 뒤 kor-travel-weather #244(`8c3b4744`)가 그 검증을 더했다(운영 반영은 weather 배포 뒤). 남은 일은 중복 제거다. 로컬 구현을 통째로 지우면 타입 검사가 깨지고 trim·길이 상한이 사라지므로, 로컬에는 타입 좁히기·trim·길이 상한만 남기고 판정 본체는 공통 함수를 부르게 한다. 패키지 변경이 없어 함대 비용이 0이다.
 
 **K-52 관리자 셸 조각 — 나중에 공유(K-50과 함께).** 다섯 관리자 표면 모두 nav를 공통 `AppMenu`로 그린다. 남은 로컬 셸(`M:MA/src/components/admin-shell.tsx` 556줄, `W:WA/components/admin-shell.tsx` 512줄, `T:TA/components/admin-shell.tsx` 254줄, `P:PW/app/(admin)/admin/layout.tsx`, `D:DM/src/components/layout/AppShell.tsx`)에서 같은 것은 skip link 문구와 접힘 저장 방식 정도다. nav 내용·권한·로그아웃 전송은 앱 소유다(`ui-contract.md:144`). skip link·header 띠·접힘 hook은 그것만으로 재vendor할 값이 안 된다. K-50의 버전에 싣는다.
 
-**K-53 Next 계층 세션·로그인 crypto — 공유하지 않음.** `M:MA/src/lib/auth.ts`(554줄)와 `W:WA/lib/session.ts`(549줄)는 payload 모양·8시간 TTL·PBKDF2 310,000회·10분 5회 제한이 같지만 글자로 같은 줄은 97줄뿐인 재구현이다. 폐기 저장소(M 프로세스 메모리, W 백엔드, T 없음), 신뢰할 수 없는 proxy 헤더일 때의 제한 키, `Origin` 누락 처리, `secure` 규칙이 다 다르다. T는 PBKDF2가 없다(`T:TA/lib/session.ts:26-28`). 2026-09의 "상수 일치" 관찰은 M·W·D에서만 맞다. 공통 보안 모듈은 함대 전체의 결합이 된다.
+**K-53 Next 계층 세션·로그인 crypto — 공유하지 않음.** `M:MA/src/lib/auth.ts`(554줄)와 `W:WA/lib/session.ts`(549줄)는 payload 모양·8시간 TTL·PBKDF2 310,000회·10분 5회 제한이 같지만 글자로 같은 줄은 97줄뿐인 재구현이다. 폐기 저장소(M 프로세스 메모리, W 백엔드, T 없음), 신뢰할 수 없는 proxy 헤더일 때의 제한 키, `Origin` 누락 처리, `secure` 규칙이 다 다르다. T는 PBKDF2가 없다(`T:TA/lib/session.ts:26-28`). 2026-09의 "상수 일치" 관찰은 M·W·D에서만 맞다. Next 계층(TypeScript)의 공통 보안 모듈은 함대 전체의 결합이 된다. 이 판정은 [ADR-015](../adr/015-common-shared-systems-scope.md)의 Python 주입형 프리미티브(T-312)와 공용 로그인 UI 계약(`LoginForm`, 다섯 관리자 표면이 이미 쓴다)을 건드리지 않는다. BE-22가 적은 세션 상수(8시간·PBKDF2 310,000회·10분 5회)는 규약으로 남기되, T는 PBKDF2를 쓰지 않는다는 사실을 T-312가 계약을 고정할 때 반영해야 한다.
 
 **K-54·K-55 — 공유하지 않음.** API client는 오류 형식 넷과 인증 모델 셋 위에 있다(`M:MA/src/api/client.ts` 711줄, `P:packages/api-client/src/client.ts` 469줄 등). 공통 fetch wrapper는 앱당 60줄을 아끼려고 그것들을 추상화해야 한다. 타입 생성은 M만 `openapi-typescript`를 쓰고 P는 zod다. 형제 서비스의 OpenAPI를 벤더한 프론트는 없다(R1에 맞는 현 상태). `validateForm`은 M(규칙 기반)과 P(zod 기반)가 이름만 같다. `format.ts` 63줄은 M·W·T가 같고 K-50과 함께 간다.
 
-**K-56 토큰 브리지 — 나중에 공유(기존 task).** D와 TP에는 `--kt-*` 정의가 없다(`git grep -- '--kt-'` 빈 결과). 공통 부품은 공통 기본 브랜드 색을, 로컬 화면은 앱 팔레트를 쓴다. 렌더링 결과는 확인하지 않았다. 기존 [T-472](../tasks/T-472-ktdm-tokens-adoption.md)·[T-431](../tasks/T-431-airport-tokens-adoption.md)이 이 범위다. M·T의 140줄 `@theme inline` alias 블록은 같고 K-50의 부품이 그 이름으로 쓰여 있어 함께 다룬다.
+**K-56 토큰 브리지 — 나중에 공유(기존 task).** D와 TP에는 `--kt-*` 정의가 없다(`git grep -- '--kt-'` 빈 결과). 공통 부품은 공통 기본 브랜드 색을, 로컬 화면은 앱 팔레트를 쓴다. 렌더링 결과는 확인하지 않았다. 기존 [T-472](../tasks/T-472-ktdm-tokens-adoption.md)·[T-431](../tasks/T-431-airport-tokens-adoption.md)이 이 범위다. M·W·T의 127줄 `@theme inline` alias 블록은 byte 동일하고 ✔ K-50의 부품이 그 이름으로 쓰여 있어 함께 다룬다.
 
 **K-57 Dagster 운영 콘솔 — 나중에 공유(T-216).** 공통 `DagsterOperations`는 M·P가 쓴다. 그 뒤에 나온 상세·액션 콘솔은 W와 T에 같은 파일로 있다(`components/dagster-console.tsx` 302줄, `lib/dagster-console-{client,model}.ts` ✔; `lib/dagster-failure-diagnostics.ts`는 6줄 차이 ✔). 진행 중인 [T-216](../tasks/T-216-dagster-operations.md)이 흡수할 대상이다.
 
@@ -264,15 +290,15 @@ guard는 검사 **코드**를 호출자가 고정한 커밋에서 받고(`C:.git
 
 **K-70 Node CI job 골격 — 나중에 공유.** setup-node 22.23.1 → `npm install --global npm@12.0.1` → `npm ci --engine-strict` → 검사·빌드 순서가 W·T(2개 job)·D에서 같은 모양이다. P·M은 workspace 루트 설치라 모양이 다르다. main을 읽지 않는 재사용 workflow를 커밋으로 호출하면 함대 결합이 없다(수단 C). 기존 [T-401](../tasks/T-401-reusable-workflows-quality.md)의 `node-quality.yml`이 이 범위다.
 
-**K-71·K-72 — 공유하지 않음.** Python 설치가 넷이고(uv 고정, uv 미고정, pip+constraints, pip+정확 핀) format은 P만 강제하고 mypy는 M·P만 돌린다. 공통 ruff·mypy 베이스는 Map을 다시 포맷·lint하게 하거나 T에 새 강제를 얹는다(R2, R7). Dockerfile은 핀 방식·사용자·잠금이 다르다.
+**K-71·K-72 — 공유하지 않음.** Python 설치가 넷이고(uv 고정, uv 미고정, pip+constraints, pip+정확 핀) format은 P만 강제하고 mypy는 M·P만 돌린다. ADR-011의 C20은 format 규칙을 이미 빼 두었으므로 재포맷은 쟁점이 아니다. 남는 사실은 이렇다: ruff 베이스의 공통 부분(`line-length=100`, `E,F,I,UP,B`)은 ruff를 쓰는 곳에서 이미 같아 공유해도 지워지는 것이 몇 줄이고, 그 밖의 규칙군·mypy 실행·import-linter·coverage는 저장소마다 다른 선택이다. 재사용 `python-quality.yml`은 네 설치 방식과 Map의 네 세션을 입력 행렬로 받아야 하고, ruff·mypy가 없는 T에는 새 강제가 된다(R2, R7). ADR-011 1차·BE-6~BE-11·T-305와 어긋나는 판정이다(§1.5). Dockerfile은 핀 방식·사용자·잠금이 다르다.
 
 **K-73·K-74 `build-images.py`·`.dockerignore` matcher — 나중에 공유(유지 팀 판단).** `W:scripts/build-images.py`(730줄)는 `T:scripts/build-images.py`(673줄)를 원형으로 적은 fork다(`W:scripts/build-images.py:31` ✔, 최상위 함수 이름 18개 공통 ✔). `.dockerignore` matcher는 W·T·D에 세 구현이 있고 지원 문법이 다르다. 발견한 것 중 가장 큰 글자 그대로의 중복이지만 두 사본 모두 다른 팀 소유이고 Manager의 서비스별 경로 둘에 물려 있다.
 
-**K-75 비내구 테스트 PostgreSQL helper — 나중에 공유.** `M:tests/integration/_disposable_pg.py`(69줄)와 `P:apps/api/tests/integration/_disposable_pg.py`(72줄)는 서버 명령과 `make_nondurable` 본문이 같다 ✔. P에 PG 주 버전 분기가 더 있다. 소비자가 둘이고, 공유하면 테스트 시점에 git 핀 패키지 의존이 생긴다. 세 번째 소비자가 생기면 P 판을 기준으로 `[testing]` extra에 둔다.
+**K-75 비내구 테스트 PostgreSQL helper — 나중에 공유.** `M:tests/integration/_disposable_pg.py`(69줄)와 `P:apps/api/tests/integration/_disposable_pg.py`(72줄)는 서버 명령과 `make_nondurable` 본문이 같다 ✔. P에 PG 주 버전 분기가 더 있고, env 이름(`KTM_…`/`PINVI_…`)·기본 크기(3g/2g)·빈 값 처리도 다르다. 소비자가 둘이고, 공유하면 테스트 시점에 git 핀 패키지 의존이 생긴다. 세 번째 소비자가 생기면 P 판을 기준으로 `[testing]` extra에 둔다.
 
 **K-76·K-77·K-79 — 공유하지 않음.** 배포 스크립트는 호스트와 gate에 묶여 있다. Map의 `scripts/n150/*`는 이미 Manager launcher 위의 얇은 순서 스크립트다. 전체 트리 redaction을 도입하면 모든 소비자가 첫날 실패한다(운영 도메인 형식에 걸리는 추적 파일: P 2, M 3, W 19, T 37, D 8). 새 강제 계층이고(R2) 정리 빚의 대부분이 다른 팀 저장소에 있다(R7). Manager의 `build-bytecode.py`는 의도적으로 의존 없이 둔 사본이다.
 
-**K-78 Map의 guard 검사 코드 지연 — 나중에 공유(결정 선행).** Map은 `55a921b`를 호출한다. 그 판에는 도구 규칙 단계가 없다. 최신으로 올리면 루트 `.nvmrc`와 정확 `engines.node`가 필요하다(Map 루트는 범위 선언). #1504의 커밋 메시지가 "정확 Node/npm 도구 규칙 이관은 별도 결정"이라고 적었다 ✔. §4.1의 결정과 함께 다룬다.
+**K-78 Map의 guard 검사 코드 지연 — 나중에 공유(결정 선행).** Map은 `55a921b`를 호출한다. 그 판에는 도구 규칙 단계가 없다. 최신으로 올리면 루트 `.nvmrc`와 정확 `engines.node`가 필요하다(Map 루트는 범위 선언). #1504의 커밋 메시지가 "정확 Node/npm 도구 규칙 이관은 별도 결정"이라고 적었다 ✔. Map이 정확 핀을 채택할지는 소유자에게 질의된 상태이고 답이 없다. 그래서 결정 task([T-416](../tasks/T-416-map-exact-node-npm-pin-decision.md))를 따로 두고, 이관([T-417](../tasks/T-417-map-guard-ref-toolchain.md))은 그 뒤에 둔다. 이 결정은 §4.1과 물려 있다. Map이 옛 검사기에 남으면 예고 창 동안 새 버전을 받을 수 없다.
 
 ## 4. 공유 대상의 설계
 
@@ -280,36 +306,57 @@ guard는 검사 **코드**를 호출자가 고정한 커밋에서 받고(`C:.git
 
 문제는 §2.2다. 원인은 셋이다: (가) 정책 데이터를 `main`에서 읽는다, (나) 패키지마다 한 버전만 허용한다, (다) tarball이 정책 사본을 싣고 있어 무관한 패키지가 함께 오른다.
 
+설계를 정하는 제약이 하나 더 있다. **소비자는 자기가 고정한 옛 검사기를 실행한다.** 지금 고정된 세 판(`55a921b`, `9e16393`, `97f8ed9`)은 모두 정책의 현재 값 하나(`versions[name]`, 정본 `packages[name]`)만 읽는다. 그러므로 common이 새 검사기를 내도, 정책의 현재 값을 새 버전으로 바꾸는 순간 옛 검사기를 고정한 소비자는 모두 실패한다. 1회차 리뷰가 이 점을 지적했고, 처음 초안의 "직전 버전 허용 + 만료일" 안은 그래서 아무도 보호하지 못한다.
+
 | 안 | 내용 | 얻는 것 | 잃는 것 |
 |---|---|---|---|
-| 1. 전환 창(권고) | 정책에 직전 버전과 만료일을 함께 둔다. 검사기는 만료 전까지 현재·직전 둘 다 통과시킨다 | 같은 날 함대 실패가 없다. 만료 뒤에는 지금과 같은 수렴 강제 | 검사기·생성기·정본 형식 변경. 날짜가 지나면 커밋 없이 실패가 생긴다(공지로 다룸) |
-| 2. 정책을 고정 커밋에서 읽기 | guard가 정책도 `common-ref`에서 읽는다. 지연은 주간 보고로 본다 | 가장 단순. 소비자가 올릴 때만 바뀐다 | 수렴 강제가 사라진다. [frontend-libraries](../standards/frontend-libraries.md)의 현재 의도를 뒤집는다 |
-| 3. 현행 + 절차 | common PR이 소비자 PR을 모두 준비한 뒤 병합 | 변경 없음 | 실패 구간이 남는다(11-17에도 일부 그렇게 했으나 두 저장소가 뒤처졌다) |
+| 1. 예고 필드(권고) | 새 버전을 정책의 **추가 필드**에 싣고 현재 값은 그대로 둔다. 새 검사기는 현재 묶음 또는 예고 묶음 중 하나와 통째로 맞으면 통과시킨다. 소비자 채택이 끝난 뒤 별도 PR이 현재 값을 바꾼다 | 예고 시점에 어느 검사기를 고정한 소비자도 실패하지 않는다(옛 검사기는 추가 필드를 읽지 않는다). 날짜 논리가 없다 | 릴리스가 두 PR(예고, 마감)이 된다. 채택 PR은 호출 SHA를 함께 올려야 한다 |
+| 2. 직전 버전 허용 + 만료일 | 현재 값을 새 버전으로 올리고 직전 버전을 추가 필드에 둔다 | 새 검사기 소비자는 보호된다 | 옛 검사기 소비자는 그날 실패한다. 모든 소비자의 호출 SHA 갱신이 선행돼야 하고 Map은 T-416 전에는 올릴 수 없다. 날짜로 실패가 생긴다 |
+| 3. 정책을 고정 커밋에서 읽기 | guard가 정책도 `common-ref`에서 읽는다. 지연은 주간 보고로 본다 | 가장 단순. 소비자가 올릴 때만 바뀐다 | 수렴 강제가 사라진다. [frontend-libraries](../standards/frontend-libraries.md)의 현재 의도를 뒤집는다. 이 동작도 새 workflow 판을 호출해야 얻는다 |
+| 4. 현행 + 절차 | common PR이 소비자 PR을 모두 준비한 뒤 병합 | 변경 없음 | 실패 구간이 남는다(11-17에도 일부 그렇게 했으나 두 저장소가 뒤처졌다) |
 
-(다)는 어느 안과도 따로 고칠 수 있다. tarball이 **다른 패키지의** 버전 표를 싣지 않게 하고, 소비자의 로컬 검사는 소비자가 가진 정책 파일(또는 중앙 정본 경로)을 받는다. 그러면 `vworld-map-web`만 바뀐 날 지도 없는 소비자는 PR이 필요 없고 `ui`·`tokens`·`toast`는 버전을 올리지 않는다.
+안 1을 권고한다. 안 2보다 단순하다(선행 task와 날짜 논리가 없다). 안 3보다 기존 의도(정확 버전 수렴)를 덜 바꾼다. 실제로 동작하는 이유는 옛 검사기가 읽는 키를 건드리지 않기 때문이고, 이것을 T-024가 세 고정 검사기로 시험한다.
 
-- 대상 저장소: common. 형식: ADR 1건([T-023](../tasks/T-023-frontend-guard-release-model-adr.md)) → 구현 2건([T-024](../tasks/T-024-guard-transition-window.md), [T-025](../tasks/T-025-decouple-embedded-policy.md)).
-- 함대를 깨지 않는 채택: 새 검사기는 직전 버전 정보가 **없는** 정책을 지금과 똑같이 판정한다. 소비자는 호출 SHA를 올릴 때 새 동작을 얻는다. 호출 SHA를 올리지 않은 소비자는 옛 검사기로 현재 정책을 읽으므로 정본에 새 필드를 **추가만** 한다(옛 검사기가 모르는 키를 무시하는지 T-024가 회귀 시험으로 고정한다).
-- Map의 검사 코드 이관([T-414](../tasks/T-414-map-guard-ref-toolchain.md))은 이 결정 뒤로 둔다.
+안 1에서 소비자가 겪는 일:
 
-### 4.2 원장을 실물에 맞춤(K-03)
+1. 예고 PR 병합(T-221). 아무도 실패하지 않는다. 현재 값이 그대로다.
+2. 소비자 채택 PR. guard 호출 SHA를 T-024 이후 커밋으로 올리고 새 버전으로 재vendor한다. **둘을 한 PR에 둔다.** 옛 검사기는 예고 버전 소비자를 실패시키기 때문이다.
+3. 마감 PR(T-222). 모든 소비자의 채택을 확인한 뒤 현재 값을 새 버전으로 바꾸고 예고를 지운다. 이때 남아 있는 옛 버전 소비자는 실패한다. 수렴 강제는 여기서 지금과 같이 작동한다.
 
-- 대상: common 문서. [T-022](../tasks/T-022-ledger-reality-reconcile.md).
-- 할 일: T-201~T-214와 T-302~T-312 각각을 실물(`packages/ui` 0.2.1, `packages/py` 0.1.0.dev0)과 대조해 "실물로 충족", "범위 재정의", "철회 제안" 중 하나로 표시한다. 이 문서의 판정 중 기존 계획과 어긋나는 것(C1 settings·C9 db·C10 alembic·C4 health 라우터·C5 errors·C3 metrics를 공유하지 않음으로, C13 time을 낮춤, C2 request-id를 지표와 분리)을 ADR-011 개정안으로 올린다.
-- 이 정합이 끝나야 K-50의 실행 task가 기존 T-203·T-205·T-209·T-210과 겹치지 않는다.
+guard를 올릴 수 없는 소비자가 있다. Map은 호출 SHA를 올리면 도구 규칙에 걸린다(K-78). Map이 정확 핀을 채택하면(T-416 → T-417) 다른 소비자와 같다. 채택하지 않으면 Map은 창 동안 새 버전을 받을 수 없고, 마감 PR 직후 같은 날 재vendor해야 한다. 그 사이 Map의 guard는 실패한다. T-222가 이 경로를 명시한다.
+
+geo·concierge는 이번 조사 범위 밖이지만 같은 guard의 소비자다. 두 저장소가 채택하지 않은 채 마감하면 두 저장소의 guard가 실패한다. T-222의 외부 선행으로 적었다.
+
+(다)는 따로 고친다. tarball이 **다른 패키지의** 버전 표를 싣지 않게 하고, 소비자의 로컬 검사는 정책 파일 경로를 받는다. 그러면 `vworld-map-web`만 바뀐 날 `ui`·`tokens`·`toast`는 버전을 올리지 않는다. 바뀐 pack 구성은 다음 버전부터 실리므로 T-025는 T-221보다 먼저다.
+
+- 대상 저장소: common. ADR-019([T-023](../tasks/T-023-frontend-guard-release-model-adr.md)) → 구현([T-024](../tasks/T-024-guard-announce-field.md), [T-025](../tasks/T-025-decouple-embedded-policy.md)).
+- Map의 결정과 이관: [T-416](../tasks/T-416-map-exact-node-npm-pin-decision.md), [T-417](../tasks/T-417-map-guard-ref-toolchain.md).
+
+### 4.2 원장과 standards를 실물에 맞춤(K-03)
+
+- 대상: common 문서. [T-022](../tasks/T-022-ledger-reality-reconcile.md) → [T-027](../tasks/T-027-standards-after-reclassification.md).
+- T-022: T-201~T-214와 T-302~T-312 각각을 실물(`packages/ui` 0.2.1, `packages/py` 0.1.0.dev0)과 대조해 "실물로 충족", "범위 재정의", "철회 제안", "그대로" 중 하나로 표시한다. §1.5 표의 모든 행을 ADR-020 초안의 결정 항목으로 올린다. ADR-019는 T-023이 쓰므로 번호가 겹치지 않는다.
+- T-022는 묶인 task를 나눈다. T-306(C1+C9+C7)에서 C7을 따로 남긴다. T-308(C5·C16·C17·C8·C11·C10·C15·C18), T-307(C2+C3), T-304(C4+C13)도 항목별로 나눈다. 그래야 "공유하지 않음"이 유지할 모듈까지 지우지 않는다.
+- T-027: ADR-020이 채택한 항목만 `backend-stack`(BE-6~BE-16, BE-19~BE-21, BE-23·BE-24와 §8 표), `openapi`, `ci-deploy`, `ui-contract`, `packages.md` §4에 옮긴다.
+- 이 정합이 끝나야 K-50의 실행 task가 기존 T-203·T-205·T-206·T-208·T-209·T-210과 겹치지 않는다.
 
 ### 4.3 Python 패키지 버전 규칙(K-04)
 
 - 대상: common. [T-026](../tasks/T-026-python-version-rule.md).
 - `packages/py`가 바뀌는 PR은 `pyproject.toml`의 버전을 올린다(`0.1.0.devN` 또는 다음 minor의 dev). 소비자 핀은 계속 40자리 커밋이다. 버전은 어느 핀이 어느 내용인지 사람이 구분하는 표지다.
+- BE-29는 `@py-vX.Y.Z` 태그 선언을 규정하지만 py 태그는 없고 소비자는 커밋을 직접 핀한다. T-026은 이 현황을 문서에 적는다. 규칙 문장을 바꿀지는 T-027의 몫이다.
 - 새 CI 강제는 넣지 않는다(R2). 릴리스 runbook과 CHANGELOG 절에 적는다.
 - 지금 세 핀은 내용이 같으므로 맞추기만 하는 PR은 내지 않는다. 각 저장소의 첫 채택 PR이 핀을 올린다.
 
 ### 4.4 HTTP 생존 probe 채택(K-10)
 
 - 공통 코드는 이미 있다. 새 코드가 없다.
-- 순서: [T-480a](../tasks/T-480a-map-api-http-health-probe.md)(Map 자체 compose)와 [T-486a](../tasks/T-486a-ktdm-api-http-health-probe.md)(Manager compose의 map-api·pinvi-api)는 서로 독립이다.
-- 형식: `["CMD", "python", "-I", "-m", "kortravelcommon.http_health", "--port", "<포트>", "--path", "/health", "--timeout-seconds", "3"]`. 포트 env 기본값은 지금 probe와 같은 식을 쓴다.
+- 순서: [T-480b](../tasks/T-480b-map-api-http-health-probe.md)(Map 자체 compose)와 [T-486a](../tasks/T-486a-ktdm-api-http-health-probe.md)(Manager compose의 map-api·pinvi-api)는 서로 독립이다.
+- 형식: `["CMD", "python", "-I", "-m", "kortravelcommon.http_health", "--port", "<포트 식>", "--path", "/health", "--timeout-seconds", "3"]`.
+- **포트 식은 서비스마다 다시 정해야 한다.** 지금의 shell 형식 probe는 컨테이너 안 env를 실행 때 읽는다. exec 형식의 `${…}`는 compose가 호스트 env로 치환한다.
+  - Map 자체 compose: 컨테이너 env와 게시 포트가 같은 변수 `KOR_TRAVEL_MAP_API_PORT`다(`M:docker-compose.yml:417,508`). `${KOR_TRAVEL_MAP_API_PORT:-12701}`를 쓴다.
+  - Manager compose의 map-api: 컨테이너 안 포트는 `${KOR_TRAVEL_MAP_API_CONTAINER_PORT:-12701}`이고(`D:docker-compose.yml:1667` ✔) `KOR_TRAVEL_MAP_API_PORT`는 호스트 게시 포트다(`:1736` ✔). probe에는 **컨테이너 포트 식**을 쓴다. 게시 포트 식을 쓰면 두 값이 다른 호스트에서 엉뚱한 포트를 본다.
+  - Manager compose의 pinvi-api: uvicorn이 `${PINVI_API_PORT:-12801}`에서 듣는다(`D:docker-compose.yml:2143` ✔). 같은 식을 쓴다.
 - 함대를 깨지 않는 채택: compose가 요구하는 모듈이 고정 이미지에 없으면 재구축이 `compose up`에서만 죽는다. T-486a는 고정된 이미지 안에서 `python -I -c "import kortravelcommon.http_health"`가 0으로 끝나는지를 수용 기준에 둔다(`-m` 실행은 모듈이 없어도 1로 끝나서 '연결 거절'과 구분되지 않는다). Docker `timeout`은 Python 시작 비용을 감싸도록 probe timeout보다 크게 둔다(weather 블록과 같은 방식).
 
 ### 4.5 수집 결과 run tag(K-40)
@@ -326,31 +373,44 @@ def record_collection_outcome(context, outcome: str) -> None:
 
 - 동작은 두 사본과 같다: `partial`·`deferred`만 기록, 이미 같거나 높은 값이면 그대로, 모든 예외를 삼키고 경고 한 줄.
 - 이관 순서: common 병합 → weather([T-481a](../tasks/T-481a-weather-collection-outcome.md))와 transport([T-482a](../tasks/T-482a-transport-collection-outcome.md))가 각자 핀을 올리며 로컬 함수를 지운다. 둘은 독립이다. tag 문자열이 같으므로 두 관리자 UI는 바뀌지 않는다.
+- 핀을 올리면 그 사이 common에 들어간 다른 변경도 함께 온다. T-314가 먼저 병합됐다면 회수 sensor cursor가 바뀌어 있다. T-314의 호환 수용 기준이 이것을 지키고, 두 채택 PR은 회수 sensor 시험을 함께 돌린다.
 
 ### 4.6 다중 job 재시도 sensor 채택(K-41)
 
 - 공통 코드는 이미 있다. [T-484a](../tasks/T-484a-pinvi-retry-sensor-for-jobs.md)(pinvi), [T-482b](../tasks/T-482b-transport-retry-sensor-for-jobs.md)(transport).
-- sensor 이름이 바뀐다. 옛 sensor의 상태(RUNNING/STOPPED)와 cursor는 새 sensor로 넘어가지 않는다. 채택 PR은 새 sensor의 기본 상태를 옛 것과 같게 두고, 배포 뒤 옛 sensor가 사라졌는지와 새 sensor의 첫 tick을 확인한다. pinvi는 `with_updated_job`으로 asset job을 다시 주입하는 지금 방식을 유지해야 한다(`P:etl/definitions.py:95`).
+- sensor 이름이 바뀐다. 옛 sensor의 상태(RUNNING/STOPPED)와 cursor는 새 sensor로 넘어가지 않는다. 채택 PR은 새 sensor의 기본 상태를 옛 것과 같게 두고, 배포 뒤 옛 sensor가 사라졌는지와 새 sensor의 첫 tick을 확인한다.
+- pinvi는 지금 sensor마다 `with_updated_job(job)`으로 asset job을 다시 주입한다(`P:etl/definitions.py:95` ✔). 다중 job sensor에서 그 호출을 그대로 쓰면 대상이 job 하나로 줄어든다. `with_updated_jobs([다시 주입할 asset job 전부])`를 써야 한다(공통 구현은 `jobs=[…]`를 대상으로 하고 job 이름으로 run을 요청한다, `C:cpy/dagster.py:572,669-673` ✔).
+- 동작이 하나 달라진다. 합친 sensor는 한 tick에 RunRequest를 하나만 낸다. 지금은 job마다 sensor가 있어 같은 tick에 각각 낼 수 있다.
+- weather가 이 구현을 꺼 둔 상태라 두 채택이 첫 운영 사용이 될 수 있다. 그래서 우선순위를 P3으로 두고 배포 뒤 관찰을 수용 기준에 넣었다.
 
 ### 4.7 로컬 경로 정규화 채택(K-51)
 
 - 공통 코드는 이미 있다. [T-465](../tasks/T-465-weather-navigation-sanitize.md)(weather), [T-434](../tasks/T-434-transport-navigation-sanitize.md)(transport).
-- 서버 쪽 호출부가 `@kor-travel/ui/navigation`을 import한다. 그 모듈은 React와 `"use client"`가 없는 순수 함수다(`C:packages/ui/src/navigation.ts` ✔). 서버 번들에 dist 하위 경로가 그대로 실리는지는 채택 PR이 빌드로 확인한다.
-- 공통 함수에는 `fallback` 인자가 없다. 기본 경로가 `/`가 아닌 호출부는 `sanitizeLocalPath(x) === "/" ? fallback : …`로 감싼다.
+- weather 로컬 구현의 검증 차이는 kor-travel-weather #244(`8c3b4744`)로 이미 맞췄다. 두 task는 중복 제거만 다룬다.
+- 로컬 `lib/navigation.ts`를 지우지 않고 얇게 줄인다. 문자열이 아니면 기본 경로, trim, 500자 초과면 기본 경로, 그다음 공통 `sanitizeLocalPath`를 부른다. URL 파싱과 경계 검사는 로컬에 두지 않는다.
+- 호출부 import는 바꾸지 않는다(`@/lib/navigation`). 그래서 `unknown`을 넘기는 호출부의 타입 검사와 transport client의 빌드가 그대로 통과한다.
+- 달라지는 동작은 하나다. 공통 함수가 더 거절하는 입력(인코딩된 경계 문자, 제어 문자)이 기본 경로가 된다. 시험으로 고정한다.
+- 공통 모듈은 React와 `"use client"`가 없는 순수 함수다(`C:packages/ui/src/navigation.ts` ✔). 서버 번들에 dist 하위 경로가 실리는지는 채택 PR이 빌드로 확인한다.
 - 패키지 버전이 바뀌지 않으므로 함대 비용이 없다.
 
 ### 4.8 관리자 공통 부품 묶음(K-50·K-52·K-56 일부)
 
 - 대상: `@kor-travel/ui`의 한 버전(0.3.0 후보). 새 패키지를 만들지 않는다.
-- 선행: T-022(원장 정합)와 T-024(전환 창). 전환 창 없이 내면 §2.2가 되풀이된다.
-- 범위는 둘로 나눈다. [T-219](../tasks/T-219-ui-admin-display-kit.md): 표시 부품(`EmptyState`·`StatStrip`·`StatusBadge`와 variants·`DetailList`·`JsonViewer`·`CopyButton`·`PaginationBar`·`ConfirmDialog`)과 `format`. [T-220](../tasks/T-220-ui-admin-form-error-kit.md): 폼(`FormFieldInput`·`FormSelect`·`FormTextArea`)·`HelpTip`·`AppErrorPanel`과 `error-recovery`·`SectionCard`·`FilterBar`·skip link·header 띠.
-- 원천은 M·W·T에서 같은 파일이다. `help-tip`은 W·T 판(더 새 것)을 쓴다. 클래스 어휘는 `--kt-*` 의미 토큰으로 옮긴다. 토스트는 주입(`onNotify`)으로 둔다([ui-contract](../standards/ui-contract.md) UC-3.7).
-- [T-221](../tasks/T-221-ui-0-3-0-candidate-freeze.md)이 두 묶음을 한 후보로 얼리고 전환 창 만료일을 공지한다.
-- 채택 순서: map([T-415](../tasks/T-415-map-admin-kit-adoption.md)) → weather([T-466](../tasks/T-466-weather-admin-kit-adoption.md))·transport([T-435](../tasks/T-435-transport-admin-kit-adoption.md)). map이 먼저인 이유는 원천이고 시각 회귀 기준이 있어서다. pinvi 관리자는 재도색 이식본이라 강제하지 않는다.
+- 선행: T-022(원장 정합), T-024(예고 필드), T-025(내장 정책 분리).
+- 소스는 둘로 나눈다. 나누는 기준은 앱 의존이다.
+  - [T-219](../tasks/T-219-ui-admin-kit-self-contained.md): 앱 모듈에 기대지 않는 부품. `EmptyState`·`CopyButton`(토스트 주입)·`JsonViewer`·`SectionCard`·`FilterBar`·`HelpTip`과 `format`.
+  - [T-220](../tasks/T-220-ui-admin-kit-injected.md): 앱 사전이나 라우터 링크에 기대던 부품과 폼·오류. `StatusBadge`와 variants·`StatStrip`·`DetailList`(사전·링크 주입, `HelpTip` 사용)·`PaginationBar`·`FormField*`·`AppErrorPanel`과 `error-recovery`·skip link·header 띠.
+- 넣지 않는 것: `ConfirmDialog`(ui-contract가 앱 소유로 둠, T-508), `validateForm`(map 한 곳), `status-label.ts`(도메인 사전).
+- 원천은 M·W·T에서 같은 파일이다. `help-tip`은 W·T 판(더 새 것)을 쓴다. transport 판이 다른 다섯 파일은 차이를 읽고 고른다. 클래스 어휘는 `--kt-*` 의미 토큰으로 옮긴다.
+- [T-221](../tasks/T-221-ui-0-3-0-candidate-freeze.md)이 두 묶음을 한 후보로 얼려 **예고**로 싣는다. T-025가 `tokens`·`toast`도 올리기로 했으면 같은 후보에 넣어 재vendor를 한 번으로 한다.
+- 버전이 오르면 `ui`를 벤더하는 **모든** 소비자가 재vendor해야 한다. 부품을 쓰지 않는 소비자도 같다. 채택 task는 다섯이다: map([T-415](../tasks/T-415-map-admin-kit-adoption.md)), pinvi([T-424](../tasks/T-424-pinvi-ui-0-3-0-revendor.md)), weather([T-466](../tasks/T-466-weather-admin-kit-adoption.md)), transport([T-435](../tasks/T-435-transport-admin-kit-adoption.md)), docker-manager([T-474](../tasks/T-474-ktdm-ui-0-3-0-revendor.md)). 각 PR은 guard 호출 SHA 갱신과 재vendor를 함께 한다.
+- 부품 교체는 map·weather·transport만 한다. pinvi 관리자는 재도색 이식본이고 docker-manager의 부품은 다른 구현이라 재vendor만 필수다.
+- map을 먼저 채택한다. 원천이고 시각 회귀 기준이 있어서다.
+- [T-222](../tasks/T-222-ui-0-3-0-switch-current.md)가 채택을 확인한 뒤 현재 값을 0.3.0으로 바꾼다.
 
 ### 4.9 나중 묶음의 첫 걸음
 
-- **회수 sensor API**([T-314](../tasks/T-314-reconciliation-sensor-consumer-cursor.md)): `reconciliation_sensor(..., reconcile=fn)`의 `fn`이 `ReconcileTick(clock: StallClock | None, cursor: str | None)`을 받고 새 하위 cursor를 돌려줄 수 있게 한다. 기존 호출 모양은 그대로 동작한다. 채택은 weather·transport가 이 API가 나온 뒤 정한다.
+- **회수 sensor API**([T-314](../tasks/T-314-reconciliation-sensor-consumer-cursor.md)): `reconciliation_sensor(..., reconcile=fn)`의 `fn`이 `ReconcileTick(clock: StallClock | None, cursor: str | None)`을 받고 새 하위 cursor를 돌려줄 수 있게 한다. 기존 호출 모양은 그대로 동작한다. weather가 읽는 `stall:` 문자열 모양을 바꾸지 않는다는 것이 수용 기준이다. 채택은 weather·transport가 이 API가 나온 뒤 정한다.
 - **webserver probe**([T-315](../tasks/T-315-dagster-webserver-health-probe.md)): `python -I -m kortravelcommon.dagster_webserver_health --port <포트> [--timeout-seconds 4]`. stdlib만 쓰고 loopback GraphQL `{repositoriesOrError{__typename}}`의 `RepositoryConnection`을 0으로, 그 밖을 1로 끝낸다. 응답 크기 상한을 둔다.
 - **공용 instance 설정**([T-486b](../tasks/T-486b-ktdm-shared-dagster-per-job-limit.md)): Manager가 일반 규칙의 영향(특히 Map의 job tag 수)을 확인하고 결정한다.
 
@@ -385,55 +445,67 @@ def record_collection_outcome(context, outcome: str) -> None:
 | 마커 팔레트 표, 클러스터 엔진, bbox 형식 | 같은 코드에 다른 색. 데이터 모양·API 계약 | K-61 |
 | e2e 하네스 패키지, live runner | 저장소별 운영 gate와 증거 규칙 | K-62 |
 | vitest 설정·test-utils, tsconfig·postcss·npmrc | 2~33줄, 배치 종속 | K-63, K-65 |
-| Python 품질 설정·`python-quality` workflow | 설치 방식 넷. 재포맷 또는 새 강제를 부른다 | K-71 |
+| Python 품질 설정·`python-quality` workflow | 공통 부분은 이미 같고 나머지는 저장소별 선택. 설치 방식 넷(§1.5와 어긋남) | K-71 |
 | Dockerfile 템플릿 | 핀·사용자·잠금 방식이 다르다 | K-72 |
 | 배포·호스트 스크립트, 백업 스크립트 | 호스트·gate별. Map의 것은 이미 얇다 | K-76 |
 | 소비자 전체 트리 redaction·task 원장 lint 강제 | 새 강제 계층. 도입 즉시 모든 소비자 실패 | K-77 |
 | Manager의 `build-bytecode.py` 사본 | 의도된 무의존 사본 | K-79 |
 | PinVi 사용자 표면 UI·모바일 UI, PinVi 관리자 재도색 이식본의 강제 통합 | 소비자 브랜드. [ui-contract](../standards/ui-contract.md)가 범위 밖으로 둠 | K-50 |
 | Python 핀을 맞추기만 하는 PR | 세 핀의 내용이 같다 | §4.3 |
+| `ConfirmDialog` 공통 API, `validateForm` | ui-contract가 앱 소유로 둠(T-508). 규칙 기반 검증은 map 한 곳 | K-50, K-55 |
 
 ## 6. Task 목록
 
-수용 기준·검증 명령·되돌리기는 각 상세 파일이 정본이다([task 규칙](../tasks-rule.md) §4·§5). 아래 표는 순서와 묶음만 준다. "병렬"이 같은 글자인 task는 동시에 진행할 수 있다.
+수용 기준·검증 명령·되돌리기는 각 상세 파일이 정본이다([task 규칙](../tasks-rule.md) §4·§5). 아래 표는 순서와 묶음만 준다. "묶음" 글자가 같은 task는 동시에 진행할 수 있다. "—"는 앞뒤 순서가 정해진 task다.
 
-| 순서 | Task | 소유 저장소 | 한 줄 | 선행 | 병렬 |
+| 순서 | Task | 소유 저장소 | 한 줄 | 선행 | 묶음 |
 |---|---|---|---|---|---|
-| 1 | [T-022](../tasks/T-022-ledger-reality-reconcile.md) | common | UI·Python 원장을 실물과 대조해 재분류 | 없음 | A |
-| 1 | [T-023](../tasks/T-023-frontend-guard-release-model-adr.md) | common | guard·릴리스 모델 ADR(전환 창·내장 정책 분리) | 없음 | A |
+| 1 | [T-022](../tasks/T-022-ledger-reality-reconcile.md) | common | UI·Python 원장 재분류와 ADR-020 초안 | 없음 | A |
+| 1 | [T-023](../tasks/T-023-frontend-guard-release-model-adr.md) | common | guard·릴리스 모델 ADR-019(예고 필드·내장 정책 분리) | 없음 | A |
 | 1 | [T-026](../tasks/T-026-python-version-rule.md) | common | Python 패키지 버전 규칙 | 없음 | A |
 | 1 | [T-313](../tasks/T-313-collection-outcome-tag.md) | common | 수집 결과 run tag 함수 | 없음 | A |
-| 1 | [T-480a](../tasks/T-480a-map-api-http-health-probe.md) | kor-travel-map | Map API healthcheck를 공통 probe로 | 없음 | A |
+| 1 | [T-480b](../tasks/T-480b-map-api-http-health-probe.md) | kor-travel-map | Map API healthcheck를 공통 probe로 | 없음 | A |
 | 1 | [T-486a](../tasks/T-486a-ktdm-api-http-health-probe.md) | kor-travel-docker-manager | map-api·pinvi-api healthcheck를 공통 probe로 | 없음 | A |
 | 1 | [T-484a](../tasks/T-484a-pinvi-retry-sensor-for-jobs.md) | pinvi | 재시도 sensor 5개를 1개로 | 없음 | A |
 | 1 | [T-482b](../tasks/T-482b-transport-retry-sensor-for-jobs.md) | kor-travel-transport | 재시도 sensor 3개를 1개로 | 없음 | A |
-| 1 | [T-465](../tasks/T-465-weather-navigation-sanitize.md) | kor-travel-weather | 로컬 경로 정규화 사본을 공통 export로 | 없음 | A |
-| 1 | [T-434](../tasks/T-434-transport-navigation-sanitize.md) | kor-travel-transport | 로컬 경로 정규화 사본을 공통 export로 | 없음 | A |
-| 2 | [T-024](../tasks/T-024-guard-transition-window.md) | common | 전환 창 구현(검사기·생성기·정본) | T-023 | B |
+| 1 | [T-465](../tasks/T-465-weather-navigation-sanitize.md) | kor-travel-weather | 로컬 경로 정규화의 판정 본체를 공통 호출로 | 없음 | A |
+| 1 | [T-434](../tasks/T-434-transport-navigation-sanitize.md) | kor-travel-transport | 로컬 경로 정규화의 판정 본체를 공통 호출로 | 없음 | A |
+| 1 | [T-416](../tasks/T-416-map-exact-node-npm-pin-decision.md) | kor-travel-map | 정확 Node/npm 핀 채택 여부 결정(소유자 답 대기) | 없음 | A |
+| 2 | [T-027](../tasks/T-027-standards-after-reclassification.md) | common | 재분류 결정을 standards에 반영 | T-022 | B |
+| 2 | [T-024](../tasks/T-024-guard-announce-field.md) | common | 예고 필드 구현(옛 검사기 호환) | T-023 | B |
 | 2 | [T-025](../tasks/T-025-decouple-embedded-policy.md) | common | tarball 내장 정책 사본 분리 | T-023 | B |
 | 2 | [T-481a](../tasks/T-481a-weather-collection-outcome.md) | kor-travel-weather | 로컬 결과 tag 함수를 공통으로 | T-313 | B |
 | 2 | [T-482a](../tasks/T-482a-transport-collection-outcome.md) | kor-travel-transport | 로컬 결과 tag 함수를 공통으로 | T-313 | B |
-| 2 | [T-414](../tasks/T-414-map-guard-ref-toolchain.md) | kor-travel-map | guard 검사 코드 ref와 도구 규칙 이관 | T-023 | B |
-| 3 | [T-219](../tasks/T-219-ui-admin-display-kit.md) | common | 관리자 표시 부품 묶음 | T-022, T-024 | — |
-| 4 | [T-220](../tasks/T-220-ui-admin-form-error-kit.md) | common | 관리자 폼·도움말·오류 부품 묶음 | T-219 | — |
-| 5 | [T-221](../tasks/T-221-ui-0-3-0-candidate-freeze.md) | common | `ui` 0.3.0 단일 후보 동결과 전환 창 공지 | T-219, T-220, T-024 | — |
-| 6 | [T-415](../tasks/T-415-map-admin-kit-adoption.md) | kor-travel-map | 관리자 부품 묶음 채택 | T-221 | C |
-| 7 | [T-466](../tasks/T-466-weather-admin-kit-adoption.md) | kor-travel-weather | 관리자 부품 묶음 채택 | T-221 | C |
-| 7 | [T-435](../tasks/T-435-transport-admin-kit-adoption.md) | kor-travel-transport | 관리자 부품 묶음 채택 | T-221 | C |
+| 2 | [T-417](../tasks/T-417-map-guard-ref-toolchain.md) | kor-travel-map | guard 호출 SHA와 도구 규칙 이관(T-416이 채택일 때) | T-416 | B |
+| 3 | [T-219](../tasks/T-219-ui-admin-kit-self-contained.md) | common | 관리자 부품 1차(앱 의존 없는 부품) | T-022, T-024 | — |
+| 4 | [T-220](../tasks/T-220-ui-admin-kit-injected.md) | common | 관리자 부품 2차(사전·링크 주입, 폼·오류) | T-219 | — |
+| 5 | [T-221](../tasks/T-221-ui-0-3-0-candidate-freeze.md) | common | `ui` 0.3.0 단일 후보를 예고로 동결 | T-219, T-220, T-024, T-025 | — |
+| 6 | [T-415](../tasks/T-415-map-admin-kit-adoption.md) | kor-travel-map | 0.3.0 재vendor와 부품 채택(먼저) | T-221, T-416 | — |
+| 7 | [T-466](../tasks/T-466-weather-admin-kit-adoption.md) | kor-travel-weather | 0.3.0 재vendor·호출 SHA 갱신·부품 채택 | T-221 | C |
+| 7 | [T-435](../tasks/T-435-transport-admin-kit-adoption.md) | kor-travel-transport | 0.3.0 재vendor·호출 SHA 갱신·부품 채택 | T-221 | C |
+| 7 | [T-424](../tasks/T-424-pinvi-ui-0-3-0-revendor.md) | pinvi | 0.3.0 재vendor·호출 SHA 갱신 | T-221 | C |
+| 7 | [T-474](../tasks/T-474-ktdm-ui-0-3-0-revendor.md) | kor-travel-docker-manager | 0.3.0 재vendor·호출 SHA 갱신 | T-221 | C |
+| 8 | [T-222](../tasks/T-222-ui-0-3-0-switch-current.md) | common | 현재 값을 0.3.0으로 전환(마감) | T-221, T-416, T-424, T-435, T-466, T-474 | — |
 | 언제든 | [T-314](../tasks/T-314-reconciliation-sensor-consumer-cursor.md) | common | 회수 sensor의 소비자 cursor·정체 시계 전달 | 없음 | D |
 | 언제든 | [T-315](../tasks/T-315-dagster-webserver-health-probe.md) | common | Dagster webserver 정의 로드 probe CLI | 없음 | D |
 | 언제든 | [T-486b](../tasks/T-486b-ktdm-shared-dagster-per-job-limit.md) | kor-travel-docker-manager | 공용 instance의 job별 한도·`run_retries` 결정 | 없음 | D |
 
-저장소별 수: common 11, kor-travel-map 3, pinvi 1, kor-travel-weather 3, kor-travel-transport 4, kor-travel-docker-manager 2(합 24).
+저장소별 수: common 13, kor-travel-map 4, pinvi 2, kor-travel-weather 3, kor-travel-transport 4, kor-travel-docker-manager 3(합 29).
 
-새 task를 만들지 않고 기존 task에 맡긴 것: 인증 프리미티브(T-312), request-id(T-307, 지표와 분리해), time(T-304), cursor 코덱(T-508), 토큰 브리지(T-472·T-431), Dagster 콘솔(T-216), Node CI 골격(T-401), provider 핀·worker 스크립트 요청(T-505·T-506). 이들의 재분류는 T-022가 한다.
+T-415는 순서 6이고 순서 7의 넷보다 먼저 하기를 권한다(원천 저장소). 선행 관계는 아니다. T-415는 T-416의 결정에 따라 T-417 뒤에 병합하거나, T-222 직후에 병합한다(§4.1).
+
+geo·concierge는 이번 범위 밖이라 task가 없다. 그러나 두 저장소도 `ui`를 벤더하므로 T-222 전에 같은 채택(호출 SHA 갱신 + 재vendor)이 필요하다. T-222의 외부 선행이다.
+
+새 task를 만들지 않고 기존 task에 맡긴 것: 공개 API 키(T-306의 C7)·proxy 신뢰(T-308의 C8), request-id(T-307, 지표와 분리해), time(T-304), cursor 코덱(T-508), 토큰 브리지(T-472·T-431), Dagster 콘솔(T-216), Node CI 골격(T-401의 Node 절반), provider 핀·worker 스크립트 요청(T-505·T-506), docker-manager의 부품 전환(T-473). 이들의 재분류는 T-022가 한다.
+
+ID는 [task 규칙](../tasks-rule.md) §2에 따라 이미 참조된 번호를 피했다. T-414·T-423·T-480a는 설계 패널 문서가 다른 뜻으로 쓴 적이 있어 쓰지 않았다. `docs/survey/`에 보이는 T-026·T-219·T-314는 geo·pinvi 저장소 자체의 task 번호라 이 저장소의 ID와 겹치지 않는다.
 
 소비자 저장소의 task는 그 저장소의 backlog에 포인터 한 줄로 등록한다. 포인터는 이 문서와 상세 task를 가리키고 수용 기준을 복제하지 않는다.
 
 ## 7. 검증하지 못한 것
 
 - **실행 확인이 없다.** 모든 판정은 소스 읽기다. 테스트·빌드·이미지 실행을 하지 않았다. "지워지는 줄 수"는 어림이다.
-- **K-51**: 세 사본의 차이는 소스 비교로만 확인했다. 앱을 실행해 보지 않았다.
+- **K-51**: 세 구현의 차이는 소스 비교로 확인했다. kor-travel-weather #244(`8c3b4744`)의 단위 시험은 그 PR의 CI에서 통과했지만 운영 반영(weather 배포)은 확인하지 않았다.
 - **K-10**: 고정된 운영 이미지 안에서 probe가 도는지 보지 않았다. 핀 커밋에 모듈 파일이 있다는 것만 확인했다. PinVi API 이미지에서 `python`이 PATH의 어떤 해석기를 가리키는지도 보지 않았다.
 - **K-46**: 호스트에 렌더링된 실제 instance 설정을 보지 않았다(호스트 접근 금지). 추적된 YAML과 override 표만 읽었다. Map의 queue run들이 같은 `kortravelcommon/job` 값을 갖는지 확인하지 않았다.
 - **K-56**: D·TP에서 공통 부품이 어떤 색으로 그려지는지 보지 않았다(CSS 읽기만).
@@ -443,6 +515,9 @@ def record_collection_outcome(context, outcome: str) -> None:
 - **provider 라이브러리 내부**(`failure_kind` 범위 등)와 geo·concierge 코드는 읽지 않았다.
 - **`✔` 없는 인용**은 하위 조사가 `nl -ba`·`grep -n`으로 확인했다고 보고한 값이다. 작성자가 다시 읽은 표본에서는 모두 맞았지만 전수는 아니다.
 - **TypeScript 쪽 시간·거리 헬퍼**는 표본만 봤다.
+- **C16 security headers·C17 cors**는 다섯 저장소를 다시 비교하지 않았다. 판정이 없고 기존 결정(BE-17, T-308)을 건드리지 않는다.
+- **옛 검사기 호환**(§4.1): 세 고정 검사기가 읽는 정책 키는 소스에서 확인했다. 추가 필드가 든 정책으로 실제로 돌려 보지는 않았다. T-024의 수용 기준이다.
+- **Dagster API**: `with_updated_job`이 대상을 job 하나로 바꾼다는 것은 리뷰어의 Dagster 소스 인용을 받아들인 것이고 직접 실행하지 않았다. 공통 구현 쪽(`jobs=[…]`, job 이름 요청, tick당 하나)은 직접 읽었다.
 
 ## 8. 근거
 
@@ -450,4 +525,4 @@ def record_collection_outcome(context, outcome: str) -> None:
 - 결정: [ADR-011](../adr/011-python-common-package.md), [ADR-014](../adr/014-common-implementation-without-registry-publishing.md), [ADR-015](../adr/015-common-shared-systems-scope.md), [ADR-017](../adr/017-shadcn-radix-shared-components.md), [ADR-018](../adr/018-exact-node-npm-build-toolchain.md).
 - 규칙: [backend-stack](../standards/backend-stack.md) §8·§10, [frontend-libraries](../standards/frontend-libraries.md), [ui-contract](../standards/ui-contract.md), [versions](../standards/versions.md).
 - 실물: `packages/py/kor-travel-common`, `packages/ui`, `tools/check_frontend_dependencies.mjs`, `.github/workflows/frontend-consumer-guard.yml`.
-- 2026-11-17 PR: common #57·#58, pinvi #763, kor-travel-transport #205, kor-travel-docker-manager #605, kor-travel-map #1504, kor-travel-weather #243.
+- 2026-11-17 PR: common #57·#58, pinvi #763, kor-travel-transport #205, kor-travel-docker-manager #605, kor-travel-map #1504, kor-travel-weather #243·#244.

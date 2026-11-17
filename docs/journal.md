@@ -1,3 +1,12 @@
+## 2026-11-17 — 공통화 계획 리뷰 1회차 반영
+
+- 1회차 적대 리뷰(BLOCKER 1, MAJOR 8, MINOR 10)의 finding을 코드에서 다시 확인하고 반영했다. 기각한 finding은 없다. 설계 패널 문서가 다른 뜻으로 쓴 T-414·T-480a는 T-416·T-417·T-480b로 바꿨다. `docs/survey/`의 T-026·T-219·T-314 언급은 geo·pinvi 저장소 자체의 task 번호라 그대로 뒀다.
+- guard 모델(§4.1)을 다시 설계했다. 처음의 '직전 버전 허용 + 만료일'은 소비자가 고정한 옛 검사기(`55a921b`·`9e16393`·`97f8ed9`)가 정책의 현재 값 하나만 읽으므로 아무도 보호하지 못했다. 새 버전을 추가 필드에 예고하고 현재 값은 채택 뒤 별도 PR(T-222)이 바꾸는 안으로 바꿨다. 세 검사기가 읽는 정책 키는 각 커밋의 소스에서 확인했다.
+- 추가한 task: T-027(standards 반영), T-222(현재 값 전환), T-416(Map 정확 Node/npm 핀 결정, 소유자 답 대기), T-417(그 이관), T-424·T-474(pinvi·docker-manager 재vendor). T-219·T-220은 앱 의존(`status-label`, `next/link`, `sonner`) 기준으로 다시 나눴고 `ConfirmDialog`를 뺐다.
+- 기존 ADR·standards와 어긋나는 판정을 계획 문서 §1.5 표에 모두 모았다(C12·C4·C13·C20·C1·C9·C2·C3·C5·C10·C15·C18·`validateForm`·UI 엔진 표기).
+- 조사 중 확인한 weather 서버 쪽 `sanitizeLocalPath` 구현의 검증 차이는 kor-travel-weather #244(`8c3b4744`)로 맞췄다(배포는 weather 담당). T-465·T-434는 중복 제거만 남아 P2·P3으로 낮췄다.
+- 검증: `tools/validate_plan.py` 상세 task 140·오류 0, `tools/validate_document_links.py` 오류 0, redaction·secret scan 0건, `git diff --check` 통과. 패키지 빌드·전체 unittest는 `NOT_RUN(문서 전용)`.
+
 ## 2026-11-17 — 공통화 재조사와 계획 초안(문서 전용)
 
 - 대상과 기준: pinvi `b1605949`, kor-travel-map `f1788da9`, kor-travel-weather `e68f16a7`, kor-travel-transport `60095379`, kor-travel-docker-manager `31d56e4e`, common `97f8ed98`. 각 저장소를 새로 받아 읽기만 했다. 테스트·빌드·배포·운영 호스트 접근은 하지 않았다.
