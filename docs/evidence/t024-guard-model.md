@@ -25,13 +25,25 @@
 | 수용 기준 | 시험 | 판정 |
 |---|---|---|
 | 고정 ref 소비자는 main의 정책 값·`axes.node.recommended`가 달라도 통과 | `frontend-guard-pinned-ref`: 새 guard를 `common-ref: 81810cc…`로 호출. fixture의 zustand·Node·npm은 main과 다르다 | PR CI |
-| 자기 `common-ref`와 어긋나면 실패 | `frontend-guard-strict`: 같은 fixture는 통과, zustand를 main 값으로·`.nvmrc`를 22.23.1로·`packageManager`를 npm@12.0.1로·원장 tokens 버전을 바꾼 네 변형은 각각 실패 | PR CI(로컬 사전 실행 동일) |
+| 자기 `common-ref`와 어긋나면 실패 | `frontend-guard-strict`: guard workflow의 대조 단계 원문을 꺼내 실행한다. 같은 fixture는 통과, zustand를 main 값으로·`.nvmrc`를 22.23.1로·`packageManager`를 npm@12.0.1로·원장 tokens 버전을 바꾼 네 변형과 `root` 탈출은 각각 기대한 오류 문구로 실패 | PR CI(로컬 사전 실행 동일) |
 | Node 축이 22.23.1이 아닌 ref에서 guard 자신의 Node·npm이 그 ref 값 | `frontend-guard-pinned-ref`의 "중앙 검사 환경" 로그 `Node v24.22.3 / npm 11.20.0`과 `check:toolchain --runtime` PASS | PR CI |
 | 옛 판(`97f8ed9`) 호출자의 판정이 그대로 | 아래 절 | 변경 없음 |
 
 ## 옛 판 판정 불변
 
 옛 판 workflow는 자기 SHA의 파일이라 이 PR이 바꿀 수 없다. 옛 판이 main에서 읽는 것은 정책 세 파일뿐이고(`versions.json`·`frontend-dependencies.json`·`frontend-artifacts.json`), 이 PR은 셋 다 바꾸지 않는다(`git diff origin/main -- versions.json frontend-dependencies.json frontend-artifacts.json` 빈 출력). 따라서 병합 전후 main의 정책 bytes가 같고 옛 판 호출자의 판정도 같다. 과제 문서가 예시한 옛 검사기 사본(`tests/fixtures/guard-checkers/`)은 두지 않았다. 사본으로 확인할 수 있는 것이 위 bytes 동일성과 같고, 사본은 정책이 바뀌는 다음 PR마다 결과가 달라져 영구 시험이 되지 못한다.
+
+대신 실제 옛 판을 실제 호출자에 돌려 전후를 비교했다. 각 옛 판(`97f8ed9`, map은 `55a921b`)의 workflow에서 "중앙 버전·산출물과 소비자 대조" 단계 원문을 꺼내, 그 SHA의 검사기와 정책 디렉터리(`common-policy`) 하나로 일곱 소비자 main의 호출 입력에 실행했다. 정책 디렉터리는 병합 전(main `565646d`)과 병합 후(이 PR head)의 세 파일이며 `diff -r`로 bytes가 같다. Node 22.23.1·npm 12.0.1.
+
+| 소비자 frontend | 옛 판 | 병합 전 | 병합 후 |
+|---|---|---|---|
+| pinvi `apps/web`·`apps/mobile` | `97f8ed9` | PASS·PASS | PASS·PASS |
+| weather `packages/kor-travel-weather-admin/frontend` | `97f8ed9` | PASS | PASS |
+| transport `frontend`·`packages/kor-travel-transport-admin/frontend` | `97f8ed9` | PASS·PASS | PASS·PASS |
+| docker-manager `frontend` | `97f8ed9` | PASS | PASS |
+| geo `kor-travel-geo-ui` | `97f8ed9` | PASS | PASS |
+| concierge `frontend` | `97f8ed9` | PASS | PASS |
+| map `packages/kor-travel-map-admin/frontend` | `55a921b` | PASS | PASS |
 
 ## 일곱 소비자 main 읽기 전용 실행
 
