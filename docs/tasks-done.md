@@ -6,7 +6,7 @@
 
 | ID | 상태 | 우선순위 | 작업 | 선행 |
 |---|---|---:|---|---|
-| [T-024](tasks/T-024-guard-model-implementation.md) | DONE | P0 | ADR-019가 정한 프론트 guard 모델 구현과 채택 커밋 지정 (2026-11-18, PR #63) | T-023 |
+| [T-024](tasks/T-024-guard-model-implementation.md) | DONE | P0 | ADR-019가 정한 프론트 guard 모델 구현과 채택 커밋 지정 | T-023 |
 | [T-023](tasks/T-023-frontend-guard-release-model-adr.md) | DONE | P0 | 프론트 정책 guard·릴리스 모델 ADR(정책을 읽는 자리와 내장 정책) (2026-11-17, PR #60) | 없음 |
 | [T-215](tasks/T-215-shared-login-menu.md) | DONE | P1 | 공용 로그인·탐색 메뉴 구현 (2026-09-29, PR #23) | 없음 |
 | [T-010](tasks/T-010-reusable-workflows-stage1.md) | DONE | P1 | 재사용 워크플로 1단계(`versions-check`·`contrast-check`·`docs-check`) + `workflows-selftest` fixture + `consumers.pins.json` + consumer-smoke | T-005, T-009, T-101, T-103 |
