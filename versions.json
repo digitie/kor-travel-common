@@ -600,7 +600,7 @@
     "vworld-map-rn": {
       "ecosystem": "npm",
       "floor": null,
-      "recommended": "1.0.1",
+      "recommended": "1.0.2",
       "source": "GitHub 원본의 라이선스·소스 동봉 패치"
     },
     "react-native": {

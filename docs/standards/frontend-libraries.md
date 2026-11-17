@@ -92,7 +92,7 @@ Weather·Transport가 함께 사용하는 `echarts`·`motion`도 정확 버전 �
 | vite-tsconfig-paths | 6.1.1 |
 | vitest | 5.1.0 |
 | vworld-map-core | 1.0.1 |
-| vworld-map-rn | 1.0.1 |
+| vworld-map-rn | 1.0.2 |
 | vworld-map-web | 1.0.4 |
 | zod | 4.6.7 |
 | zustand | 5.1.0 |

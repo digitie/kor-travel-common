@@ -2,13 +2,13 @@
 
 ### 변경
 
-정책 정본에서 `vworld-map-web`을 1.0.3에서 1.0.4로 올렸다(maplibre-vworld-react #33). 1.0.4는 `vworld://` 타일 스킴을 문자열로 https로 바꿔 Firefox·Safari에서 바탕지도가 비던 결함을 고쳤다. `vworld-map-core` 1.0.1과 `vworld-map-rn` 1.0.1은 그대로다. rn 갱신은 후속 릴리스에서 한다.
+정책 정본에서 `vworld-map-web`을 1.0.3에서 1.0.4로, `vworld-map-rn`을 1.0.1에서 1.0.2로 올렸다(maplibre-vworld-react #33·#34). 1.0.4는 `vworld://` 타일 스킴을 문자열로 https로 바꿔 Firefox·Safari에서 바탕지도가 비던 결함을 고쳤다. rn 1.0.2는 web과 대조해 `fitBounds` padding 전달·마커 anchor/offset·명시 `mapStyle`을 고쳤다. `vworld-map-core` 1.0.1은 그대로다.
 UI·tokens·toast의 실행 코드와 CSS는 바뀌지 않는다. 내장 `dependency-policy.json`이 새 정본을 담도록 patch 버전으로 올렸다. toast는 빌드 단계가 없어 정책 사본이 루트와 같은지, 세 패키지 버전이 `versions.json`과 같은지를 toast 시험이 확인한다.
 docs CI `packages` job은 smoke가 검증한 ui/tokens pack과 toast pack을 `common-release-packs-<source SHA>` artifact로 보관한다.
 
 ### 이관
 
-새 common-ref를 채택하는 소비자는 vendored `@kor-travel/ui` 0.2.1·`@kor-travel/tokens` 0.1.2(toast 사용 시 0.1.1)와, 쓰는 경우 `vworld-map-web` 1.0.4를 함께 갱신한다. 산출물 원장의 version·SHA512는 `frontend-artifacts.json`에서 그대로 옮긴다. 기존 common-ref에 고정된 소비자는 바뀌지 않는다. 각자의 고정 SHA에서 정책·정본·checker를 읽기 때문이다.
+새 common-ref를 채택하는 소비자는 vendored `@kor-travel/ui` 0.2.1·`@kor-travel/tokens` 0.1.2(toast 사용 시 0.1.1)와, 쓰는 경우 `vworld-map-web` 1.0.4·`vworld-map-rn` 1.0.2를 함께 갱신한다. 산출물 원장의 version·SHA512는 `frontend-artifacts.json`에서 그대로 옮긴다. 기존 common-ref에 고정된 소비자는 바뀌지 않는다. 각자의 고정 SHA에서 정책·정본·checker를 읽기 때문이다.
 
 ## 2026-11-12 — 공통 산출물과 소비자 규약 정산
 
