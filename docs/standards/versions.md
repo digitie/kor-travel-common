@@ -81,8 +81,9 @@ npm 명령은 정적으로 검증하지 못하므로 명시 literal로 통일하
 도구 축으로 runtime gate를 실행한다([ADR-019](../adr/019-frontend-policy-guard-model.md)). guard 자신의
 Node는 그 ref의 `.nvmrc`, npm은 `axes.npm.recommended`로 고르므로 축을 올린 ref를 고정한 소비자도
 그 값으로 검사된다. main의 축이 바뀌어도 ref를 올리지 않은 소비자는 영향이 없고, 차이는 주간 지연
-보고로 본다. 옛 판(`97f8ed9`·`9e16393`)은 검사기를 Node 22.23.1로 돌리고 main 축과 대조하므로
+보고로 본다. 옛 판 가운데 `97f8ed9`·`9e16393`은 검사기를 Node 22.23.1로 돌리고 main 축과 대조하므로
 그 판의 호출자가 남아 있는 동안 main의 Node/npm 축을 바꾸지 않는다([T-029](../tasks/T-029-node-axis-to-latest-lts.md)).
+`55a921b`는 도구 단계가 없어 축 변경의 영향을 받지 않지만 정책 세 파일은 main에서 읽는다.
 기본 registry는 entry와 동일한 physical checker 경로에서 유도한다. alias 부모의 다른/없는 registry로 바뀌지 않으며 명시 `--registry` override는 유지한다.
 소비자 연결은 이 입력을 실제 제공하는 리뷰·머지된 불변 code ref로만 한다. consumer-smoke와 새 guard가 checkout하는 common-ref에도 `check:toolchain` script가 있어야 한다. SHA/tag 입력 형식의 허용은 구 ref의 실행 호환성을 뜻하지 않으며, script가 없는 구 ref는 fallback 없이 실패한다.
 Common private tool의 공식 ini·shell-quote 두 parser dependency만 root graph 예외로 승인한다. 나머지 lock entry의 deep equality와 새 node의 공식 SRI를 검증하며 소비자 graph·C11 공개 패키지·산출물·65개 프론트 버전/정책은 변경·재발행하지 않는다.

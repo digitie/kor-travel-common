@@ -101,13 +101,13 @@ class GitHub:
         if self.token:
             headers["Authorization"] = "Bearer " + self.token
         request = urllib.request.Request("https://api.github.com/" + path, headers=headers)
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urllib.request.urlopen(request, timeout=15) as response:
             return response.read()
 
     def text(self, repo: str, path: str, ref: str) -> str | None:
         try:
-            quoted = urllib.parse.quote(path)
-            data = json.loads(self._get(f"repos/{repo}/contents/{quoted}?ref={ref}"))
+            quoted, ref_q = urllib.parse.quote(path), urllib.parse.quote(ref, safe="")
+            data = json.loads(self._get(f"repos/{repo}/contents/{quoted}?ref={ref_q}"))
             return base64.b64decode(data["content"]).decode("utf-8")
         except Exception:  # noqa: BLE001 — 보고는 실패하지 않는다
             return None
@@ -122,7 +122,8 @@ class GitHub:
 
     def behind(self, ref: str, main: str) -> str:
         try:
-            return str(json.loads(self._get(f"repos/{COMMON}/compare/{ref}...{main}")).get("ahead_by", "?"))
+            pair = urllib.parse.quote(ref, safe="") + "..." + urllib.parse.quote(main, safe="")
+            return str(json.loads(self._get(f"repos/{COMMON}/compare/{pair}")).get("ahead_by", "?"))
         except Exception:  # noqa: BLE001
             return "?"
 

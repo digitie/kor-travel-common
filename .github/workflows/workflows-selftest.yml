@@ -89,6 +89,9 @@ jobs:
   # ADR-019·T-024: 고정 ref 81810cc는 main과 Node/npm 축(24.22.3/11.20.0)·zustand 정본이 다른
   # 시험 전용 커밋이다(selftest/t024-guard-ref-fixture 브랜치, 삭제 금지). main 값이 무엇이든
   # fixture는 자기 ref의 값으로 통과해야 하고, guard 자신의 Node·npm도 그 ref에서 골라야 한다.
+  # 여기서는 guard YAML(HEAD)과 검사기(81810cc)의 판이 다르다. guard가 그 ref의 검사기에 없는
+  # 인수·동작을 쓰게 되면 이 job이 실패하므로, 그때는 새 main에서 같은 세 값만 바꾼 시험 커밋을
+  # 새로 잘라(selftest/ 브랜치) 이 SHA와 fixture를 함께 바꾼다.
   frontend-guard-pinned-ref:
     uses: ./.github/workflows/frontend-consumer-guard.yml
     with:
@@ -118,33 +121,40 @@ jobs:
         run: |
           npm install --global "npm@$(jq -r '.axes.npm.recommended' versions.json)"
           npm ci --ignore-scripts --engine-strict
+      # guard workflow의 대조 단계 원문을 그대로 꺼내 실행한다(검사기를 따로 부르지 않는다).
       - name: 어긋난 fixture 거부
         env:
           KT_REQUIRE_CANONICAL: '1'
+          TOOLCHAIN_MANIFESTS: '[]'
+          NODE_DOCKERFILES: '[]'
+          FRONTEND: '{"package":"package.json","lock":"package-lock.json","workspace":"","profile":"mobile"}'
         run: |
-          common="$PWD/common"
-          check() {
-            node "$common/tools/check_frontend_dependencies.mjs" --profile mobile \
-              --package "$1/package.json" --lock "$1/package-lock.json" --workspace "" \
-              --artifacts "$1/common-artifacts.json" \
-              --policy "$common/frontend-dependencies.json" --canonical "$common/frontend-artifacts.json" \
-            && (cd "$common" && npm run check:toolchain -- --root "$1" --registry "$common/versions.json" --manifest package.json)
+          yq -e '.jobs.guard.steps[] | select(.name == "common-ref 정책·산출물과 소비자 대조") | .run' \
+            consumer/.github/workflows/frontend-consumer-guard.yml > "$RUNNER_TEMP/guard-step.sh"
+          ws="$RUNNER_TEMP/ws"
+          prepare() {
+            rm -rf "$ws" && mkdir -p "$ws"
+            cp -r consumer/tests/fixtures/guard-consumer "$ws/consumer"
+            ln -s "$PWD/common" "$ws/common"
           }
-          case_dir() {
-            rm -rf "$RUNNER_TEMP/case" && cp -r consumer/tests/fixtures/guard-consumer "$RUNNER_TEMP/case"
-            echo "$RUNNER_TEMP/case"
-          }
-          dir="$(case_dir)"; check "$dir"
+          run_guard() { (cd "$ws" && CONSUMER_ROOT="${1:-.}" bash -e "$RUNNER_TEMP/guard-step.sh") > "$RUNNER_TEMP/out.txt" 2>&1; }
           expect_fail() {
-            if check "$1"; then echo "::error::$2 변경이 통과했습니다"; exit 1; fi
-            echo "기대대로 실패: $2"
+            if run_guard "$3"; then cat "$RUNNER_TEMP/out.txt"; echo "::error::$1 변경이 통과했습니다"; exit 1; fi
+            if ! grep -qF -- "$2" "$RUNNER_TEMP/out.txt"; then
+              cat "$RUNNER_TEMP/out.txt"; echo "::error::$1: 기대한 실패 문구($2)가 없습니다"; exit 1
+            fi
+            echo "기대대로 실패: $1 — $2"
           }
-          dir="$(case_dir)"
-          sed -i 's/"5\.0\.16"/"5.1.0"/' "$dir/package.json" "$dir/package-lock.json"
-          expect_fail "$dir" "정책 값(zustand을 main 값으로)"
-          dir="$(case_dir)"; echo 22.23.1 > "$dir/.nvmrc"
-          expect_fail "$dir" ".nvmrc(main 축으로)"
-          dir="$(case_dir)"; sed -i 's/npm@11\.20\.0/npm@12.0.1/' "$dir/package.json"
-          expect_fail "$dir" "packageManager(main 축으로)"
-          dir="$(case_dir)"; sed -i 's/"version": "0\.1\.2"/"version": "0.1.1"/' "$dir/common-artifacts.json"
-          expect_fail "$dir" "산출물 원장 버전"
+          prepare
+          run_guard || { cat "$RUNNER_TEMP/out.txt"; echo "::error::변형 전 fixture가 실패했습니다"; exit 1; }
+          cat "$RUNNER_TEMP/out.txt"
+          prepare; sed -i 's/"5\.0\.16"/"5.1.0"/' "$ws/consumer/package.json" "$ws/consumer/package-lock.json"
+          expect_fail "정책 값(zustand을 main 값으로)" "zustand: dependencies 선언 5.1.0 != 5.0.16"
+          prepare; echo 22.23.1 > "$ws/consumer/.nvmrc"
+          expect_fail ".nvmrc(main 축으로)" ".nvmrc Node 버전 불일치"
+          prepare; sed -i 's/npm@11\.20\.0/npm@12.0.1/' "$ws/consumer/package.json"
+          expect_fail "packageManager(main 축으로)" "packageManager 버전 불일치"
+          prepare; sed -i 's/"version": "0\.1\.2"/"version": "0.1.1"/' "$ws/consumer/common-artifacts.json"
+          expect_fail "산출물 원장 버전" "@kor-travel/tokens: 산출물 원장 버전 불일치"
+          prepare
+          expect_fail "기준 디렉터리 탈출" "기준 디렉터리 밖" "../outside"

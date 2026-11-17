@@ -63,7 +63,7 @@ T-010의 common fixture 성공과 T-010a의 실제 소비자 dispatch 성공은 
 
 프론트 정책 세 파일(`versions.json`·`frontend-dependencies.json`·`frontend-artifacts.json`)이나 Node/npm 축을 바꾸는 common 커밋은 새 `common-ref`를 내는 일이다. [ADR-019](../adr/019-frontend-policy-guard-model.md) 판 guard를 호출하는 소비자는 자기 ref를 올리는 PR에서만 그 변경을 받고, 그 PR에서 새 ref의 정책·산출물·Node/npm에 맞춘다. registry 보안 갱신도 같은 경로(main 반영 → 소비자 ref PR)다. 차이는 주간 지연 보고([`frontend-guard-lag-report.yml`](../../.github/workflows/frontend-guard-lag-report.yml))로 본다.
 
-옛 판 guard(`55a921b`·`97f8ed9`·`9e16393`)는 정책을 main에서 읽는다. 그런 변경을 병합하기 전에 지연 보고의 "guard 판" 열로 옛 판 호출자가 남았는지 확인하고, 남았다면 그 소비자의 이전 또는 당일 재vendor를 외부 선행으로 확인한다. Node/npm 축 변경은 당일 재vendor로도 피할 수 없으므로 옛 판(`97f8ed9`·`9e16393`) 호출자가 모두 옮긴 뒤에 병합한다([T-029](../tasks/T-029-node-axis-to-latest-lts.md)).
+옛 판 guard(`55a921b`·`97f8ed9`·`9e16393`)는 정책을 main에서 읽는다. 그런 변경을 병합하기 전에 지연 보고의 "guard 판" 열로 옛 판 호출자가 남았는지 확인하고, 남았다면 그 소비자의 이전 또는 당일 재vendor를 외부 선행으로 확인한다. Node/npm 축 변경은 당일 재vendor로도 피할 수 없으므로 옛 판(`97f8ed9`·`9e16393`) 호출자가 모두 옮긴 뒤에 병합한다([T-029](../tasks/T-029-node-axis-to-latest-lts.md)). `55a921b`(map)는 도구 단계가 없어 그 순서에 들지 않고, Node 축이 26.13.1인 T-029 커밋이 생긴 뒤 그 커밋으로 옮긴다(T-417).
 
 ## 3. 절차
 
