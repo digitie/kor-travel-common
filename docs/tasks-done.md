@@ -6,7 +6,7 @@
 
 | ID | 상태 | 우선순위 | 작업 | 선행 |
 |---|---|---:|---|---|
-| [T-023](tasks/T-023-frontend-guard-release-model-adr.md) | DONE | P0 | 프론트 정책 guard·릴리스 모델 ADR(정책을 읽는 자리와 내장 정책) | 없음 |
+| [T-023](tasks/T-023-frontend-guard-release-model-adr.md) | DONE | P0 | 프론트 정책 guard·릴리스 모델 ADR(정책을 읽는 자리와 내장 정책) (2026-11-17, PR #60) | 없음 |
 | [T-215](tasks/T-215-shared-login-menu.md) | DONE | P1 | 공용 로그인·탐색 메뉴 구현 (2026-09-29, PR #23) | 없음 |
 | [T-010](tasks/T-010-reusable-workflows-stage1.md) | DONE | P1 | 재사용 워크플로 1단계(`versions-check`·`contrast-check`·`docs-check`) + `workflows-selftest` fixture + `consumers.pins.json` + consumer-smoke | T-005, T-009, T-101, T-103 |
 | [T-103](tasks/T-103-kt-contrast-ux-lint.md) | DONE | P1 | tools/kt_contrast.py(report·`contrast-baseline.json`) + `tools/ux_lint.py`(금지 7종+window.confirm, 전체 report·diff fail) + 4앱 오버라이드 예제 보고 (2026-09-08, PR #20) | T-101 |
