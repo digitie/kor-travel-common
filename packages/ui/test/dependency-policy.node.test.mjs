@@ -42,8 +42,10 @@ function rejected(result, reason) {
  assert.equal(result.status,1,result.stderr);
  assert.ok(result.stderr.includes(reason), result.stderr);
 }
+// 고정 파일명 대신 정책의 현재 UI 버전으로 vendor 경로를 만든다(버전을 올려도 같은 산출물을 겨냥한다).
+const uiArchive="vendor/kor-travel-ui-"+policy.versions["@kor-travel/ui"]+".tgz";
 test("lock 버전만 달라도 실패",()=>rejected(fixture(({packages})=>packages["node_modules/react"].version="0.0.0"),"lock 설치 버전"));
-test("같은 버전의 다른 bytes를 거부",()=>rejected(fixture(({root})=>writeFileSync(join(root,"vendor/kor-travel-ui-0.2.0.tgz"),"다른 파일")),"파일·원장·lock 해시 불일치"));
+test("같은 버전의 다른 bytes를 거부",()=>rejected(fixture(({root})=>writeFileSync(join(root,uiArchive),"다른 파일")),"파일·원장·lock 해시 불일치"));
 test("Base UI 직접 의존을 거부",()=>rejected(fixture(({dependencies})=>dependencies["@base-ui/react"]="1.9.0"),"공통 Radix 구현으로 이관 필요"));
 test("네이티브 표 재도입을 거부",()=>rejected(fixture(({root})=>writeFileSync(join(root,"src/table.tsx"),"export const T = () => <table><tbody /></table>")),"공통 VirtualTable 외 표 구현"));
 test("개별 floating 구현을 거부",()=>rejected(fixture(({root})=>writeFileSync(join(root,"src/dialog.tsx"),"import { useFloating } from '@floating-ui/react';")),"공통 Radix 외 overlay 구현"));
@@ -59,7 +61,7 @@ test("중앙 원장과 같은 bytes는 통과",()=>{const result=fixture(undefin
 test("앱 파일·원장·lock을 함께 바꿔도 중앙 정본 차이는 거부",()=>rejected(fixture(({root,packages,artifacts})=>{
  const bytes=Buffer.from("앱별 임의 재포장");
  const integrity="sha512-"+createHash("sha512").update(bytes).digest("base64");
- writeFileSync(join(root,"vendor/kor-travel-ui-0.2.0.tgz"),bytes);
+ writeFileSync(join(root,uiArchive),bytes);
  packages["node_modules/@kor-travel/ui"].integrity=integrity;
  artifacts.packages["@kor-travel/ui"].integrity=integrity;
 },{canonical:true}),"중앙 산출물 정본과 다름"));
