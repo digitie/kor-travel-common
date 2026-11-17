@@ -1,4 +1,4 @@
-# T-220 관리자 부품 묶음 2차(사전·링크 주입이 필요한 부품과 폼·오류)를 공통 UI로 이관
+# T-220 admin-kit 2차: 사전·링크 주입이 필요한 부품과 폼·오류
 
 - 상태: BLOCKED
 - 우선순위: P1
@@ -11,7 +11,7 @@
 
 ## 목표
 
-T-219에 이어, 앱의 상태 사전(`status-label`)이나 라우터 링크(`next/link`)에 기대던 부품과 폼·오류 부품을 옮긴다. 앱 의존은 prop 주입으로 바꾼다. 버전은 올리지 않는다.
+T-219에 이어, 앱의 상태 사전(`status-label`)이나 라우터 링크(`next/link`)에 기대던 부품과 폼·오류 부품을 `@kor-travel/admin-kit`에 넣는다. 앱 의존은 prop 주입으로 바꾼다.
 
 ## 고정 결정
 
@@ -39,8 +39,8 @@ T-219에 이어, 앱의 상태 사전(`status-label`)이나 라우터 링크(`ne
 예정 경로는 존재·실행 증거가 아니다.
 
 ```text
-packages/ui/src/{status-badge,status-badge-variants,stat-strip,detail-list,pagination-bar,form-field-*,form-select,form-textarea,app-error-panel,error-recovery,admin-skip-link,admin-page-header}.ts(x)
-packages/ui/test/*.test.tsx, packages/ui/package.json  # exports만
+packages/admin-kit/src/{status-badge,status-badge-variants,stat-strip,detail-list,pagination-bar,form-field-*,form-select,form-textarea,app-error-panel,error-recovery,admin-skip-link,admin-page-header}.ts(x)
+packages/admin-kit/test/*.test.tsx, packages/admin-kit/package.json  # exports만
 PROVENANCE.md
 ```
 
@@ -49,12 +49,12 @@ PROVENANCE.md
 - [ ] 부품이 하위 경로로 import되고 빌드·타입 검사가 통과한다.
 - [ ] 새 소스에 `next/`와 `@/lib/status-label` import가 없다(grep 0). 사전·링크를 주입하지 않아도 렌더되는 기본 동작 시험이 있다.
 - [ ] `AppErrorPanel`이 `role="alert"`와 재시도·이전 화면 동작을 갖는다는 시험이 있다.
-- [ ] `version`과 `dependency-policy.json`이 바뀌지 않았다.
+- [ ] 기존 세 패키지의 `package.json` 버전과 tarball SHA-256이 바뀌지 않았다.
 
 ## 검증 명령
 
 ```bash
-npm run build --workspace packages/ui && npm test --workspace packages/ui
+npm run build --workspace packages/admin-kit && npm test --workspace packages/admin-kit
 python3 -B -X utf8 tools/check_spdx.py
 ```
 
@@ -64,4 +64,4 @@ T-219와 같은 형식.
 
 ## rollback·release 차단 조건
 
-- `git revert` 1회. 버전이 오르지 않았으므로 소비자 영향이 없다.
+- `git revert` 1회. 정책에 등록하기 전이라 소비자 영향이 없다.

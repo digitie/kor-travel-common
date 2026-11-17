@@ -4,6 +4,7 @@
 - 우선순위: P1
 - Gate: 문서 검증·2인 리뷰
 - 선행: T-022
+- 외부 선행: ADR-020 accepted(소유자의 행별 결정). T-022가 DONE이어도 이 결정 전에는 병합하지 않는다
 - 소유 저장소: kor-travel-common
 - 병렬: T-022 뒤. T-219와 동시 가능
 
@@ -21,7 +22,7 @@ T-022의 ADR-020이 accepted가 되어도 `docs/standards/backend-stack.md`의 B
 
 ## 구현 범위
 
-1. [backend-stack](../standards/backend-stack.md): BE-6~BE-11(C20), BE-12(C1), BE-13(C2), BE-14(C3), BE-15(C4), BE-16(C5), BE-19(C13), BE-20(C15), BE-21(C18), BE-23(C9), BE-24(C10)와 §8 모듈 표·§8.1 앱별 표·§10 금지 목록을 ADR-020 결정대로 고친다.
+1. [backend-stack](../standards/backend-stack.md): BE-6~BE-11(C20), BE-12(C1), BE-13(C2), BE-14(C3), BE-15(C4), BE-16(C5), BE-17(C16·C17), BE-19(C13), BE-20(C15), BE-21(C18), BE-23(C9), BE-24(C10)와 §8 모듈 표·§8.1 앱별 표·§10 금지 목록을 ADR-020 결정대로 고친다.
 2. [openapi](../standards/openapi.md)의 export drift 행과 health 규칙(M5), [ci-deploy](../standards/ci-deploy.md)의 `python-quality.yml`·`openapi-drift.yml` 절을 같은 결정에 맞춘다.
 3. [ui-contract](../standards/ui-contract.md): 엔진 표기를 실물(Radix)로, §4의 부품 표를 실물과 T-219·T-220 범위에 맞춘다. `ConfirmDialog`·`validateForm` 행은 결정대로 둔다.
 4. [packages](../architecture/packages.md) §4의 모듈 우선순위 표를 동기화한다.

@@ -23,8 +23,9 @@ map 자체 `docker-compose.yml`의 API healthcheck는 `CMD-SHELL`로 인라인 `
 ## 구현 범위
 
 1. `docker-compose.yml:513-518`의 `test`를 `["CMD", "python", "-I", "-m", "kortravelcommon.http_health", "--port", "${KOR_TRAVEL_MAP_API_PORT:-12701}", "--path", "/health", "--timeout-seconds", "3"]`로 바꾼다.
-2. Docker `timeout`이 Python 시작 비용을 감싸는지 확인하고 필요하면 값을 조정한다(현재 5s).
-3. compose 내용을 고정하는 map의 시험이 있으면 함께 갱신한다.
+2. `interval`·`retries`·`start_period`는 그대로 둔다. `timeout`(현재 5s)이 probe timeout 3초에 Python 시작 시간을 더한 값을 감싸는지 확인하고 모자라면 그것만 올린다.
+3. 모듈 존재 확인을 `docker-images` workflow에 한 단계로 넣는다: 빌드한 API 이미지에서 `python -I -c "import kortravelcommon.http_health"`. standalone 스택 기동(`.env`와 의존 서비스 전체가 필요하다)에 기대지 않는다.
+4. compose 내용을 고정하는 map의 시험이 있으면 함께 갱신한다.
 
 ## 범위 밖
 
@@ -43,24 +44,25 @@ Manager compose의 같은 probe(T-486a), Dagster webserver probe, `/health` 본�
 
 ```text
 docker-compose.yml
+.github/workflows/docker-images.yml
 tests/**(compose 고정 시험이 있으면)
 docs/journal.md, docs/resume.md
 ```
 
 ## 수용 기준
 
-- [ ] 빌드한 API 이미지에서 `python -I -c "import kortravelcommon.http_health"`가 0으로 끝난다(모듈 존재 확인. `-m` 실행은 모듈이 없어도 1로 끝나므로 존재 확인에 쓰지 않는다).
-- [ ] standalone 스택에서 API 컨테이너가 `healthy`가 된다.
+- [ ] `docker-images` workflow가 빌드한 API 이미지에서 `python -I -c "import kortravelcommon.http_health"`가 0으로 끝난다(`-m` 실행은 모듈이 없어도 1로 끝나므로 존재 확인에 쓰지 않는다).
 - [ ] compose 파일에 API용 `CMD-SHELL` healthcheck가 남아 있지 않다.
 - [ ] map CI(`ci`·`lint`·`docker-images`)가 통과한다.
+- [ ] 격리 스택에서 API 컨테이너가 `healthy`가 된다. 실행하지 못하면 `NOT_RUN(격리 스택)`으로 남긴다.
 
 ## 검증 명령
 
 ```bash
 # kor-travel-map
 docker compose config >/dev/null
-docker compose run --rm --no-deps --entrypoint python api -I -c 'import kortravelcommon.http_health'; echo $?
-docker compose up -d api && docker inspect --format '{{.State.Health.Status}}' <api 컨테이너>
+gh pr checks <PR>          # docker-images의 모듈 확인 단계 포함
+# 격리 스택이 있을 때만: docker compose up -d api && docker inspect --format '{{.State.Health.Status}}' <api 컨테이너>
 ```
 
 ## evidence

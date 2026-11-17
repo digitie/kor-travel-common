@@ -6,7 +6,7 @@
 - 선행: 없음
 - 외부 선행: 소유자 결정. 2026-11-17에 질의했고 답이 아직 없다
 - 소유 저장소: kor-travel-map
-- 병렬: 결정이 나오면 T-417·T-415가 풀린다
+- 병렬: 결정이 나오면 T-417이 풀린다. 다른 task는 이 결정을 기다리지 않는다
 
 출처는 [공통화 재조사·계획(2026-11-17)](../plan/commonization-plan-2026-11-17.md)의 §2.2·§3.6(K-78)·§4.1이다. 근거 위치(file:line)와 차이 분석은 그 문서가 정본이며 여기서 반복하지 않는다.
 
@@ -21,9 +21,10 @@ map은 guard workflow를 `55a921b`로 호출한다. 그 뒤 판은 도구 규칙
 
 ## 구현 범위
 
-1. 선택지를 적는다. (가) 채택: 루트 `.nvmrc` 22.23.1, 정확 `engines`, `packageManager`. map의 범위 선언(`^22.22.2 || ^24.15.0 || >=26.0.0`)을 버린다. (나) 미채택: 사유를 map ADR 또는 `versions.json` 예외로 남긴다.
-2. 각 선택의 결과를 적는다. (가)면 T-417로 호출 SHA를 올릴 수 있고 예고 창 동안 새 버전을 받을 수 있다. (나)면 map은 옛 검사기에 남아 창 동안 새 버전을 받을 수 없고, 정책의 현재 값이 바뀌는 날마다 같은 날 재vendor해야 한다(T-222 참조).
-3. 결정을 map의 ADR 색인과 common [integration map](../integration-map.md)에 기록한다.
+1. 선택지를 적는다. (가) 채택: 루트 `.nvmrc` 22.23.1, 정확 `engines`, `packageManager`. map의 범위 선언(`^22.22.2 || ^24.15.0 || >=26.0.0`)을 버린다. (나) 미채택: 사유를 map ADR로 남긴다.
+2. 각 선택의 결과를 적는다. (가)면 T-417로 호출 SHA를 올릴 수 있고, ADR-019의 권고안이 채택되면 그 뒤로 main 정책 변경이 map을 깨지 않는다. (나)면 map은 옛 guard에 남아 지금처럼 main 정책이 바뀌는 날마다 재vendor한다. 다른 task는 어느 쪽이든 진행된다.
+3. 결정을 map의 ADR 색인에 기록한다(map PR).
+4. common 후속 PR(문서 전용): [integration map](../integration-map.md)에 결정을 적고 T-417의 상세 파일을 결정에 맞춘다. (나)이고 예외 등록이 필요하면 `versions.json`의 `exceptions[]`도 이 후속 PR이 고친다.
 
 ## 범위 밖
 
@@ -35,6 +36,7 @@ map은 guard workflow를 `55a921b`로 호출한다. 그 뒤 판은 도구 규칙
 - 브랜치: `docs/…` 또는 `agent/<agent>-<task>` 형식의 작업 브랜치, `origin/main`에서 분기. PR 1개.
 - 되돌리기: `git revert <merge-sha>` 1회.
 - 그 저장소의 backlog에는 이 task를 가리키는 포인터 한 줄만 두고 수용 기준을 복제하지 않는다.
+- PR은 둘이다: map의 결정 기록 PR, common의 문서 전용 후속 PR.
 
 ## 예상 변경 파일
 
@@ -49,8 +51,8 @@ docs/integration-map.md(common)
 ## 수용 기준
 
 - [ ] 소유자의 결정(채택/미채택)과 날짜가 map 문서에 인용과 함께 있다.
-- [ ] 미채택이면 사유와 `versions.json` 예외(또는 map ADR) 위치가 있다.
-- [ ] T-417·T-415·T-222의 상세 파일이 이 결정을 가리키도록 갱신됐다.
+- [ ] 미채택이면 사유가 map ADR에 있다.
+- [ ] common 후속 PR이 병합돼 integration map과 T-417이 결정을 가리킨다.
 
 ## 검증 명령
 

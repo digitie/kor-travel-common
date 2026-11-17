@@ -15,7 +15,7 @@ transport 관리자 프론트의 `lib/navigation.ts`는 공통 `sanitizeLocalPat
 
 ## 고정 결정
 
-- T-465와 같다(얇은 로컬 함수가 타입 좁히기·trim·500자 상한을 갖고 공통 함수를 부른다).
+- T-465와 같다(얇은 로컬 함수가 타입 좁히기·trim·500자 상한을 갖고 공통 함수를 부른다. `%20`·`%25`·공백이 든 값은 기본 경로가 된다).
 - 호출부 세 곳(로그인 route, 로그인 page, client 로그인 폼)의 import는 그대로 `@/lib/navigation`이다.
 - 이 저장소는 다른 팀이 유지한다.
 
@@ -49,6 +49,7 @@ packages/kor-travel-transport-admin/frontend/**/*.test.ts
 
 - [ ] `lib/navigation.ts`에 `new URL(`이 없다.
 - [ ] 공백이 붙은 정상 경로, 500자 초과 경로, 문자열이 아닌 값의 결과가 바꾸기 전과 같다.
+- [ ] `/runs?q=a%20b`, `/a%25b`, `/a b`의 결과가 기본 경로이고 그 변화가 PR 본문에 적혀 있다.
 - [ ] transport-admin job(lint·type-check·test·build)이 통과한다.
 
 ## 검증 명령

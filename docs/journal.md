@@ -1,3 +1,14 @@
+## 2026-11-17 — 공통화 계획 리뷰 2회차 반영
+
+- 2회차 적대 리뷰(BLOCKER 2, MAJOR 8, MINOR 15)의 finding을 코드에서 다시 확인하고 반영했다. 기각한 finding은 없다.
+- 관리자 부품 묶음을 `@kor-travel/ui` 0.3.0의 하위 경로가 아니라 선택형 산출물 패키지 `@kor-travel/admin-kit`로 내기로 바꿨다(계획 문서 §4.8의 비교). 부품을 쓰지 않는 소비자의 재vendor, 현재 값 전환 단계, 그 단계가 다른 팀과 범위 밖 저장소를 기다리는 일, Map의 T-416 의존이 없어진다. 검사기 두 판 모두 선언하지 않은 산출물을 건너뛰고(`:145@97f8ed9`, `:129@55a921b`) `@kor-travel/toast`가 같은 모양의 선례다. 선행은 T-025 하나다: 지금은 정책에 패키지를 더하는 것만으로 `ui`·`tokens`·`toast`가 다시 pack된다.
+- guard 모델의 권고를 '정책과 Node/npm 도구 축을 호출 커밋에서 읽기'로 바꿨다. 예고 필드 안은 예고 자리 하나·끝이 없는 창·Node/npm 미포함·긴급 경로 부재가 드러나 대안으로 내렸다. 결정은 ADR-019(소유자)다.
+- T-314는 새 cursor 기능을 켠 호출자만 새 형식을 쓰게 고쳤다. `StallClock.from_dict`가 필드 추가를 거절해(`stall.py:79-83`) weather가 직접 읽는 cursor 안에 구획을 넣을 자리가 없었다.
+- T-025는 내장 사본을 패키지 자기 것으로 줄이는 방식(소비자 `check:dependencies` 명령 줄 불변)으로 정하고 세 패키지의 릴리스를 범위에 넣었다.
+- K-40·K-41을 '나중에 공유'로 내렸다(tag는 각 저장소의 자기 관리자만 읽는다. pinvi는 API 쪽 정적 sensor 목록이 묶여 있다). K-25(보안 헤더·CORS, 공유하지 않음)와 K-66(순수 재수출 shim, 지금 공유)을 더했다. T-222·T-315는 없앴다.
+- task 32개(common 11·map 5·pinvi 2·weather 5·transport 6·manager 3), 후보 63건(지금 7·나중 26·공유하지 않음 30).
+- 검증: `tools/validate_plan.py` 상세 task 143·오류 0, `tools/validate_document_links.py` 오류 0, redaction·secret scan 0건, `git diff --check` 통과. 패키지 빌드·전체 unittest는 `NOT_RUN(문서 전용)`.
+
 ## 2026-11-17 — 공통화 계획 리뷰 1회차 반영
 
 - 1회차 적대 리뷰(BLOCKER 1, MAJOR 8, MINOR 10)의 finding을 코드에서 다시 확인하고 반영했다. 기각한 finding은 없다. 설계 패널 문서가 다른 뜻으로 쓴 T-414·T-480a는 T-416·T-417·T-480b로 바꿨다. `docs/survey/`의 T-026·T-219·T-314 언급은 geo·pinvi 저장소 자체의 task 번호라 그대로 뒀다.

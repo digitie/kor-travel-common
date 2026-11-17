@@ -1,23 +1,23 @@
 # T-313 수집 결과 run tag 기록 함수를 공통 Dagster 모듈에 추가
 
-- 상태: READY
-- 우선순위: P1
+- 상태: BLOCKED
+- 우선순위: P3
 - Gate: Python 단위·wheel 설치·2인 리뷰
-- 선행: 없음
+- 선행: T-026
 - 소유 저장소: kor-travel-common
-- 병렬: 묶음 A
+- 병렬: T-026 뒤. T-216이 Dagster 콘솔을 공통으로 옮길 때 함께 하기를 권한다
 
 출처는 [공통화 재조사·계획(2026-11-17)](../plan/commonization-plan-2026-11-17.md)의 §3.4·§4.5(K-40)이다. 근거 위치(file:line)와 차이 분석은 그 문서가 정본이며 여기서 반복하지 않는다.
 
 ## 목표
 
-`_record_collection_outcome`이 weather와 transport에 같은 본문으로 있고, tag `kortravel/collection-outcome`을 두 관리자 프론트가 읽는다. 정의를 `kortravelcommon.dagster` 한 곳에 둔다.
+`_record_collection_outcome`이 weather와 transport에 같은 본문으로 있다. tag `kortravel/collection-outcome`은 각 저장소의 자기 관리자 프론트가 읽는다. 정의를 `kortravelcommon.dagster` 한 곳에 둔다. 이득은 저장소당 20줄이고 급하지 않다.
 
 ## 고정 결정
 
 - `[dagster]` extra 안에 둔다. core-only 설치는 Dagster를 import하지 않는다([ADR-011](../adr/011-python-common-package.md)).
 - 동작은 두 사본과 같다(동작 보존). tag 문자열을 바꾸지 않는다.
-- T-026의 버전 규칙을 이 PR에서 처음 적용한다(dev 번호 올림).
+- T-026의 버전 규칙을 따른다(dev 번호 올림). 다른 Python PR과 번호가 겹치면 뒤에 병합하는 쪽이 rebase한다.
 
 ## 구현 범위
 

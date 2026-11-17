@@ -1,11 +1,11 @@
-# T-314 회수 sensor가 소비자 cursor와 정체 시계를 callback에 전달
+# T-314 회수 sensor의 선택형 소비자 cursor와 정체 시계 전달
 
 - 상태: READY
-- 우선순위: P2
+- 우선순위: P3
 - Gate: Python 단위·wheel 설치·2인 리뷰
 - 선행: 없음
 - 소유 저장소: kor-travel-common
-- 병렬: 묶음 D(언제든)
+- 병렬: 언제든. 다른 Python PR과 dev 번호가 겹치면 rebase
 
 출처는 [공통화 재조사·계획(2026-11-17)](../plan/commonization-plan-2026-11-17.md)의 §3.4·§4.9(K-42)이다. 근거 위치(file:line)와 차이 분석은 그 문서가 정본이며 여기서 반복하지 않는다.
 
@@ -17,16 +17,18 @@
 
 - 기존 호출 모양은 그대로 동작한다(추가만).
 - 회수 SQL·lease·fencing은 계속 소비자 소유다([dagster-adoption](../runbooks/dagster-adoption.md) §4·§19).
+- 새 기능을 **켜지 않은** 호출자의 cursor는 지금과 byte 단위로 같다(`stall:` + 시계 JSON 또는 `null`). 소비자 구획은 켠 호출자에게만 쓴다.
+- `StallClock.from_dict`는 엄격한 채로 둔다(필드가 더 있으면 거절). weather가 cursor를 직접 읽는 지금 방식(`sync_recovery.py:119-125`)은 켜지 않는 한 그대로 동작한다. 켜는 호출자는 cursor를 직접 읽는 것을 그만두고 `ReconcileTick.clock`을 써야 한다.
 - Map의 회수 sensor는 대상이 아니다(주기·반환형·시계가 달라 factory에 맞지 않는다).
-- weather는 공통 cursor의 `stall:` 접두와 그 뒤의 JSON을 직접 읽는다(`kortravelweather_dagster/sync_recovery.py:64-65,119-127`, 커밋 `e68f16a`). 그 문자열 모양을 이 task가 바꾸지 않는다. 소비자 구획은 그 파서가 그대로 읽히는 자리에 둔다.
+- T-026의 버전 규칙을 따른다.
 
 ## 구현 범위
 
-1. callback이 선택적으로 `ReconcileTick(clock, consumer_cursor)`를 받고 새 `consumer_cursor`(짧은 문자열, 길이 상한)를 돌려줄 수 있게 한다.
-2. 공통 cursor 형식에 소비자 구획을 추가하되 옛 cursor(구획 없음)를 읽을 수 있다.
+1. `reconciliation_sensor`에 선택 인자를 더한다. 켜면 callback이 `ReconcileTick(clock, consumer_cursor)`를 받고 새 `consumer_cursor`(짧은 문자열, 길이 상한)를 돌려줄 수 있다.
+2. 켠 호출자의 cursor 형식을 새로 정한다(접두를 달리해 옛 형식과 구분). 옛 형식 cursor에서 시작해도 첫 tick에 예외 없이 넘어간다.
 3. 정체 경보 한 줄을 만드는 `format_stall_alert(event, clock, now)`를 `stall.py`에 둔다.
-4. 단위 시험: 옛 callback 호환, 옛 cursor 호환, 소비자 cursor 왕복, 길이 상한 초과 거절, 정체 시계 전달.
-5. 가이드 §19 갱신.
+4. 단위 시험: 켜지 않은 호출자의 byte 동일성, 켠 호출자의 cursor 왕복·길이 상한·옛 cursor에서의 전환, 정체 시계 전달.
+5. 가이드 §19 갱신. 켜는 절차(cursor 직접 판독 제거)를 적는다.
 
 ## 범위 밖
 
@@ -44,10 +46,11 @@ docs/runbooks/dagster-adoption.md, CHANGELOG.md
 
 ## 수용 기준
 
-- [ ] 기존 `test_reconciliation_sensor.py`가 수정 없이 통과한다.
-- [ ] 옛 형식 cursor로 시작한 sensor가 첫 tick에서 예외 없이 새 형식으로 넘어간다.
-- [ ] 소비자 cursor가 tick 사이에 보존되고 code-server 재시작(새 프로세스)을 흉내 낸 시험에서도 남는다.
-- [ ] 호환 시험: weather `e68f16a`의 `_alerted_stall`과 같은 판독(접두 `stall:` 뒤를 `json.loads`해 `StallClock.from_dict`)이 새 형식 cursor에서도 같은 결과를 낸다. 소비자 cursor가 있을 때와 없을 때 둘 다 확인한다.
+- [ ] 켜지 않은 호출자: 같은 시계에 대해 cursor 문자열이 `97f8ed9`의 인코더 출력과 byte 단위로 같다(시험).
+- [ ] 그 cursor에서 weather `8c3b474`의 `_alerted_stall`과 같은 판독(접두 `stall:` 뒤를 `json.loads`해 `StallClock.from_dict`)이 바꾸기 전과 같은 값을 낸다(시험).
+- [ ] 기존 `test_reconciliation_sensor.py`와 `test_stall_pg_errors.py`가 수정 없이 통과한다.
+- [ ] 켠 호출자: 소비자 cursor가 tick 사이에 보존되고, 옛 형식 cursor로 시작해도 첫 tick이 예외 없이 끝난다.
+- [ ] `pyproject.toml` 버전이 올랐다.
 
 ## 검증 명령
 

@@ -3,9 +3,9 @@
 - 상태: BLOCKED
 - 우선순위: P2
 - Gate: 소비자 CI(공통 프론트엔드 정책)
-- 선행: T-416
+- 선행: T-416, T-024
 - 소유 저장소: kor-travel-map
-- 병렬: T-416이 '채택'일 때만 진행. T-024 뒤에 하면 호출 SHA를 한 번만 올린다
+- 병렬: 묶음 B. T-416이 '채택'일 때만 진행
 
 출처는 [공통화 재조사·계획(2026-11-17)](../plan/commonization-plan-2026-11-17.md)의 §2.2·§3.6(K-78)이다. 근거 위치(file:line)와 차이 분석은 그 문서가 정본이며 여기서 반복하지 않는다.
 
@@ -17,13 +17,14 @@ T-416이 정확 핀 채택을 결정하면 map의 guard 호출 SHA를 올리고 
 
 - 도구 규칙의 정본은 [ADR-018](../adr/018-exact-node-npm-build-toolchain.md)과 [versions](../standards/versions.md) §3.1.1이다.
 - 전제는 T-416의 '채택' 결정이다. 결정 없이 `engines`를 바꾸지 않는다.
-- 호출 SHA는 T-024가 병합된 뒤라면 그 이후 커밋으로 올린다. 그래야 0.3.0 채택(T-415) 때 다시 올리지 않는다.
+- 호출 SHA는 '최신'이 아니라 T-024가 지정한 채택 커밋 하나로 올린다. 그 커밋에서 map이 걸리는 규칙은 T-024의 evidence에 미리 적혀 있다.
 
 ## 구현 범위
 
-1. `.github/workflows/common-frontend-policy.yml`의 호출 SHA와 `common-ref`를 결정 뒤의 common 커밋으로 올린다.
+1. `.github/workflows/common-frontend-policy.yml`의 호출 SHA와 `common-ref`를 T-024가 지정한 채택 커밋으로 올린다.
 2. 도구 규칙이 요구하는 것(루트 `.nvmrc`, 정확 `engines.node`·`engines.npm`, `packageManager`, `toolchain-manifests`·`node-dockerfiles` 입력)을 채운다.
 3. map의 기존 검증 스크립트(`verify-npm-tree.mjs`·`verify-next-sharp.mjs`)와 겹치는 검사가 있으면 어느 쪽을 남기는지 적는다.
+4. common 후속 PR(문서 전용): [integration map](../integration-map.md)의 map 호출 SHA를 갱신한다.
 
 ## 범위 밖
 
@@ -64,7 +65,7 @@ gh pr checks <PR>
 
 ## evidence
 
-PR의 check 결과. common 쪽 기록은 [integration map](../integration-map.md)에 호출 SHA를 갱신한다.
+map PR의 check 결과. common 쪽 기록은 문서 전용 후속 PR로 남긴다.
 
 ## rollback·release 차단 조건
 

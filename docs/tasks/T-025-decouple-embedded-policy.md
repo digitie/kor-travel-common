@@ -1,66 +1,72 @@
-# T-025 tarball 내장 정책 사본이 무관한 패키지 버전을 올리지 않게 분리
+# T-025 내장 정책을 패키지 자기 것으로 줄이고 ui·tokens·toast 릴리스
 
 - 상태: BLOCKED
 - 우선순위: P1
 - Gate: 패키지 빌드·tarball 설치·2인 리뷰
-- 선행: T-023
+- 선행: T-023, T-024
+- 외부 선행: geo·concierge와 호출 SHA를 올리지 않은 소비자에게 릴리스 예정일 공지. 두 저장소의 작업은 이 task의 선행이 아니다
 - 소유 저장소: kor-travel-common
-- 병렬: 묶음 B. T-221의 선행
+- 병렬: T-024 뒤. T-219의 선행
 
 출처는 [공통화 재조사·계획(2026-11-17)](../plan/commonization-plan-2026-11-17.md)의 §2.2·§4.1(K-02)이다. 근거 위치(file:line)와 차이 분석은 그 문서가 정본이며 여기서 반복하지 않는다.
 
 ## 목표
 
-`ui`·`tokens`·`toast` tarball은 전체 정책 사본(`dependency-policy.json`)을 싣는다. 그래서 `vworld-map-web` 한 줄이 바뀐 날 실행 코드가 같은 세 패키지가 patch 버전을 올렸고, 지도가 없는 소비자도 재vendor했다. 이 task는 패키지 버전이 **그 패키지의 내용이 바뀔 때만** 오르게 한다.
+`ui`·`tokens`·`toast` tarball은 정책 전체의 사본(`dependency-policy.json`)을 싣는다. 그래서 정책의 어느 줄이 바뀌어도 세 패키지가 다시 pack되고 모든 소비자가 재vendor한다. 각 패키지가 자기 것만 싣게 줄이고, 줄인 판을 한 번 릴리스한다. 그 뒤로는 무관한 정책 변경이 세 패키지를 건드리지 않는다.
 
 ## 고정 결정
 
-- 방식은 ADR-019가 정한다. 후보: (가) tarball에서 정책 사본을 빼고 소비자 로컬 검사가 정책 파일 경로를 인자로 받는다, (나) 사본에 그 패키지 자신의 peer 범위만 남긴다.
-- 소비자의 로컬 `check:dependencies`가 계속 동작해야 한다. 중앙 guard의 판정은 바뀌지 않는다.
-- 이미 낸 버전(`ui` 0.2.1·`tokens` 0.1.2·`toast` 0.1.1)의 bytes는 바꾸지 않는다. 바뀐 pack 구성은 다음 버전에 실린다. `ui`는 T-221의 0.3.0이 그 버전이다. `tokens`·`toast`를 같은 후보에 함께 올릴지(권고: 함께, 재vendor를 한 번으로) 이 task가 정해 T-221에 넘긴다.
+- 방식은 ADR-019가 정한다. 권고(계획 문서 §4.1): 내장 사본에는 그 패키지 자신의 peer 범위와 자기 식별만 남기고, tarball 안의 검사기는 그것만 검사한다. 함대 전체의 정확 버전 대조는 중앙 guard가 한다.
+- 소비자 일곱 프론트는 인자 없이 tarball 안의 검사기를 실행하고(`check:dependencies`) CI가 그것을 막는다. 그 명령 줄이 **바뀌지 않아야** 한다. 바꿔야 하는 방식을 택했다면 정확한 교체 줄을 이관 절에 적는다.
+- 이미 낸 버전(`ui` 0.2.1·`tokens` 0.1.2·`toast` 0.1.1)의 bytes는 바꾸지 않는다. 줄인 판은 세 패키지의 다음 버전이다.
+- 이 릴리스는 세 패키지의 현재 값을 바꾼다. 새 guard(T-024)로 옮긴 소비자는 영향이 없고, 옮기지 않은 소비자는 그날 재vendor해야 한다(지금과 같다). 릴리스 전에 옮기지 않은 소비자 목록을 공지한다.
 
 ## 구현 범위
 
-1. `packages/{ui,tokens,toast}`의 pack 구성과 `check-dependencies.mjs` 진입점을 결정에 맞게 바꾼다.
-2. 소비자 로컬 검사 명령의 새 형태를 [frontend-libraries](../standards/frontend-libraries.md)에 적고 이관 절(`### Breaking` 여부 포함)을 CHANGELOG에 둔다.
-3. 회귀: 정책에서 무관한 패키지 한 줄만 바꾼 뒤 세 패키지를 pack하면 tarball SHA-256이 이전과 같다.
+1. `tools/sync_frontend_policy.mjs`와 `packages/{ui,tokens,toast}`의 `scripts/sync-policy.mjs`·`dependency-policy.json`·`check-dependencies.mjs`·`package.json`(files·버전)을 결정에 맞게 바꾼다.
+2. 회귀: `versions.json`에서 무관한 패키지 한 줄을 바꾸거나 새 패키지를 더한 뒤 세 패키지를 pack하면 tarball SHA-256이 그대로다.
+3. 소비자 일곱 프론트의 현재 `check:dependencies` 명령 줄(pinvi web·mobile, map, weather, transport 둘, docker-manager)을 이관 절에 그대로 적고, 새 tarball에서 각 줄이 통과하는 fixture 시험을 둔다.
+4. 세 패키지의 버전을 올리고 기존 2단계(source PR → 동결 PR)로 릴리스한다. `packages/ui/smoke/next-app`의 `package.json`·lock도 함께 바꾼다.
+5. 릴리스 전에 지연 보고(T-024)로 옛 guard에 남은 소비자를 뽑아 공지한다(이 저장소 journal·integration map, 각 저장소에는 이슈 또는 포인터).
+6. [frontend-libraries](../standards/frontend-libraries.md)와 CHANGELOG에 이관 절.
 
 ## 범위 밖
 
-정책 내용 자체, 중앙 guard workflow, 소비자 저장소.
+중앙 guard workflow(T-024), 소비자 저장소의 재vendor, 새 패키지(T-219~T-221).
 
 ## 예상 변경 파일
 
 예정 경로는 존재·실행 증거가 아니다.
 
 ```text
-packages/ui/package.json, packages/tokens/package.json, packages/toast/package.json
-packages/*/check-dependencies.mjs, packages/*/dependency-policy.json
 tools/sync_frontend_policy.mjs
-docs/standards/frontend-libraries.md, CHANGELOG.md
+packages/{ui,tokens,toast}/{package.json,dependency-policy.json,check-dependencies.mjs,scripts/sync-policy.mjs}
+packages/ui/smoke/next-app/{package.json,package-lock.json}, package-lock.json
+versions.json, frontend-dependencies.json, frontend-artifacts.json
+docs/standards/frontend-libraries.md, CHANGELOG.md, docs/journal.md, docs/integration-map.md
 ```
 
 ## 수용 기준
 
-- [ ] 시험: `versions.json`의 `vworld-map-web` 축만 바꾸고 생성·pack했을 때 `ui`·`tokens`·`toast` tarball의 SHA-256이 바꾸기 전과 같다.
-- [ ] 시험: pack한 tarball을 임시 프로젝트에 설치하고 문서에 적은 로컬 검사 명령이 통과한다.
-- [ ] `npm run build --workspaces`·`npm test --workspaces`·`npm run check:policy`가 통과한다.
-- [ ] 이관 절이 소비자가 바꿀 명령 한 줄을 전후로 보여 준다.
-- [ ] `tokens`·`toast`의 다음 버전을 T-221의 같은 후보에 넣는지 여부와 버전 번호가 이 파일의 '결정' 줄에 적혀 있다.
+- [ ] 시험: `versions.json`의 `vworld-map-web` 축만 바꾸고 생성·pack했을 때, 그리고 새 패키지 축을 하나 더했을 때, `ui`·`tokens`·`toast` tarball의 SHA-256이 바꾸기 전과 같다.
+- [ ] 시험: 일곱 소비자 프론트의 `check:dependencies` 명령 줄이 새 tarball에서 수정 없이 통과한다(또는 이관 절에 정확한 교체 줄이 있고 그 줄이 통과한다).
+- [ ] 시험: 새 tarball의 내장 검사가, 중앙 정책에는 있지만 그 패키지와 무관한 의존성의 버전 차이를 실패시키지 않는다. 자기 peer 위반은 실패시킨다.
+- [ ] `npm run build --workspaces`·`npm test --workspaces`·`npm run check:policy`가 통과하고 PR head와 main push artifact의 tarball SHA-256이 같다.
+- [ ] 릴리스 PR 본문에 옛 guard에 남은 소비자 목록과 공지 위치가 있다.
 
 ## 검증 명령
 
 ```bash
 npm ci --engine-strict && npm run check:toolchain
-npm run build --workspaces && npm test --workspaces
+npm run build --workspaces && npm test --workspaces && npm run check:policy
 npm pack --workspace packages/ui --workspace packages/tokens --workspace packages/toast && sha256sum *.tgz
 ```
 
 ## evidence
 
-정책 변경 전후 tarball SHA-256 표, 설치 스모크 출력. 소비자 채택은 `NOT_RUN(소비자 저장소)`.
+정책 변경 전후 tarball SHA-256 표, 일곱 명령 줄의 fixture 결과, 공지 링크. 소비자 재vendor는 `NOT_RUN(소비자 저장소)`.
 
 ## rollback·release 차단 조건
 
-- `git revert` 1회. 새 버전을 아직 동결하지 않았다면 소비자 영향이 없다.
-- 로컬 검사 명령이 바뀌는데 이관 절이 없으면 병합하지 않는다.
+- 동결 전이면 source PR revert. 동결 뒤에는 버전을 내리지 않고 다음 patch로 고친다.
+- 일곱 명령 줄 가운데 하나라도 이관 절 없이 실패하면 병합하지 않는다.

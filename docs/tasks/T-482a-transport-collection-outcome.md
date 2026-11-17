@@ -1,7 +1,7 @@
 # T-482a transport-dagster: 로컬 수집 결과 tag 함수를 공통 구현으로 교체
 
 - 상태: BLOCKED
-- 우선순위: P2
+- 우선순위: P3
 - Gate: 소비자 CI(backend)
 - 선행: T-313
 - 소유 저장소: kor-travel-transport
@@ -15,7 +15,7 @@
 
 ## 고정 결정
 
-- T-481a와 같다. 핀을 올릴 때 T-314가 이미 병합됐다면 `backend/app/dagster/recovery.py`의 회수 sensor 시험을 함께 돌린다.
+- T-481a와 같다. 새 핀에 T-314가 들어 있어도 이 PR에서 그 기능을 켜지 않는다. `backend/app/dagster/recovery.py`의 회수 sensor 시험을 함께 돌린다.
 
 ## 구현 범위
 

@@ -1,30 +1,30 @@
-# T-435 transport: ui 0.3.0 재vendor·guard 호출 SHA 갱신과 관리자 부품 채택
+# T-435 transport-admin: admin-kit 채택
 
 - 상태: BLOCKED
 - 우선순위: P2
 - Gate: 소비자 빌드·단위·e2e·시각 비교
 - 선행: T-221
 - 소유 저장소: kor-travel-transport
-- 병렬: 채택 묶음(T-424·T-466·T-474와 동시 가능, T-415 뒤 권장)
+- 병렬: 채택 묶음 C(T-466과 동시 가능, T-415 뒤 권장)
 
 출처는 [공통화 재조사·계획(2026-11-17)](../plan/commonization-plan-2026-11-17.md)의 §3.5·§4.8(K-50)이다. 근거 위치(file:line)와 차이 분석은 그 문서가 정본이며 여기서 반복하지 않는다.
 
 ## 목표
 
-transport의 두 프론트를 `@kor-travel/ui` 0.3.0으로 재vendor하고 guard 호출 SHA를 올린다. 관리자 프론트의 map과 같은 로컬 부품은 공통 부품으로 바꾸고 지운다.
+transport 관리자 프론트의 map과 같은 로컬 부품을 `@kor-travel/admin-kit`의 것으로 바꾸고 로컬 파일을 지운다.
 
 ## 고정 결정
 
 - T-415와 같다.
-- 예고 창 동안 0.3.0 소비자는 새 검사기에서만 통과한다. 호출 SHA 갱신(`ci.yml`과 독립 workflow 두 곳)과 두 프론트의 재vendor를 한 PR에 둔다. 부품 교체는 같은 PR이거나 뒤따르는 PR이다.
+- guard 호출 SHA와 `@kor-travel/ui`·`tokens` 버전은 이 PR에서 바꾸지 않는다. 공개 프론트(`frontend/`)는 부품을 쓰지 않으므로 건드리지 않는다.
 - transport 사본이 map과 다른 다섯 파일(`app-error-panel`·`filter-bar`·`section-card`·`status-label`·`error-recovery`)은 T-219·T-220이 고른 쪽을 따른다. `status-label`은 앱에 남는다.
 - 이 저장소는 다른 팀이 유지한다.
 
 ## 구현 범위
 
-1. 두 프론트의 ui tarball(과 T-221이 함께 올린 패키지)·원장·lock을 0.3.0으로. guard 호출 SHA 두 곳을 T-024 이후 커밋으로.
-2. 관리자 프론트의 로컬 부품과 `lib/{format,error-recovery}.ts`를 공통 import로 바꾸고 지운다. `confirm-dialog`는 남긴다.
-3. `components/ui/empty.tsx`와 로컬 `empty-state.tsx`의 이중 구현을 하나로 한다.
+1. 관리자 프론트의 `vendor/`에 admin-kit tarball을 더하고 `package.json`·lock·`common-artifacts.json`에 등록한다.
+2. 로컬 부품과 `lib/{format,error-recovery}.ts`를 공통 import로 바꾸고 지운다. `confirm-dialog`·`sonner.tsx`·로컬 `button.tsx`는 남긴다.
+3. `components/ui/empty.tsx`와 로컬 `empty-state.tsx`의 이중 구현을 T-219의 결정대로 하나로 한다.
 
 ## 범위 밖
 
@@ -44,13 +44,12 @@ transport의 두 프론트를 `@kor-travel/ui` 0.3.0으로 재vendor하고 guard
 ```text
 packages/kor-travel-transport-admin/frontend/{package.json,package-lock.json,common-artifacts.json,vendor/*}
 packages/kor-travel-transport-admin/frontend/{components,lib}/**
-frontend/{package.json,package-lock.json,common-artifacts.json,vendor/*}
 ```
 
 ## 수용 기준
 
-- [ ] guard job이 새 호출 SHA로 세 프론트 항목 모두 통과한다.
-- [ ] 두 프론트의 의존성 검사·lint·type-check·단위·build가 통과한다.
+- [ ] guard job이 지금 호출 SHA 그대로 두 프론트 항목 모두 통과한다.
+- [ ] 관리자 프론트의 의존성 검사·lint·type-check·단위·build가 통과한다.
 - [ ] 지운 파일 수와 줄 수를 PR에 적는다.
 - [ ] 6폭 화면 비교에서 의도하지 않은 차이가 0이다.
 

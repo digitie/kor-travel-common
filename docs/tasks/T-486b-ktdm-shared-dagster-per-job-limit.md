@@ -1,8 +1,8 @@
-# T-486b ktdm: 공용 Dagster instance의 job별 한도와 run_retries 결정
+# T-486b ktdm: 공용 Dagster instance의 job별 한도와 run_retries 결정 자료와 구현
 
 - 상태: READY
 - 우선순위: P2
-- Gate: 결정 기록·backend 시험·공용 instance 수용
+- Gate: 소유자 결정 기록·backend 시험·공용 instance 수용
 - 선행: 없음
 - 소유 저장소: kor-travel-docker-manager
 - 병렬: 묶음 D(언제든)
@@ -17,7 +17,8 @@
 
 - 공통 쪽 기대는 [dagster-adoption](../runbooks/dagster-adoption.md) §3이다.
 - Manager는 범용으로 유지한다. 서비스 값 리터럴을 일반 규칙으로 바꾸는 방향이 그에 맞다.
-- 운영 동작이 바뀐다(모든 tenant의 같은 job이 동시 1개로 묶인다). 영향 확인이 먼저다.
+- 운영 동작이 바뀐다(모든 tenant의 같은 job이 동시 1개로 묶인다). 결정자는 소유자다. 이 task는 영향 확인 자료를 만들고, 결정이 난 뒤 구현한다.
+- 영향 확인 자료를 낸 뒤 소유자 결정을 기다린다. 결정 전에는 구현하지 않고, 그 동안 이 task를 BLOCKED(외부 선행: 소유자 결정)로 바꿔 둔다.
 
 ## 구현 범위
 

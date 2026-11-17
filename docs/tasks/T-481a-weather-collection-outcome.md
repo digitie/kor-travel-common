@@ -1,7 +1,7 @@
 # T-481a weather-dagster: 로컬 수집 결과 tag 함수를 공통 구현으로 교체
 
 - 상태: BLOCKED
-- 우선순위: P2
+- 우선순위: P3
 - Gate: 소비자 CI(python)
 - 선행: T-313
 - 소유 저장소: kor-travel-weather
@@ -16,7 +16,7 @@
 ## 고정 결정
 
 - tag 문자열과 순위 규칙은 공통 구현(T-313)이 정본이다. 관리자 프론트는 바뀌지 않는다.
-- 핀을 올리면 그 사이 common에 병합된 다른 변경도 함께 들어온다. T-314(회수 sensor cursor)가 이미 병합됐다면 weather의 `sync_recovery.py`가 읽는 cursor 형식 호환을 T-314의 호환 시험이 지킨다. 이 PR에서도 회수 sensor 시험을 함께 돌린다.
+- 핀을 올리면 그 사이 common에 병합된 다른 변경도 함께 들어온다. 새 핀에 T-314가 들어 있어도 이 PR에서 그 기능을 켜지 않는다. 켜지 않으면 cursor가 지금과 byte 단위로 같아 `sync_recovery.py`의 판독이 그대로 동작한다.
 - 이 저장소는 다른 팀이 유지한다.
 
 ## 구현 범위

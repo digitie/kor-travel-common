@@ -1,7 +1,7 @@
 # T-465 weather-admin: 로컬 경로 정규화 사본을 공통 export로 교체
 
 - 상태: READY
-- 우선순위: P2
+- 우선순위: P3
 - Gate: 소비자 단위·빌드·e2e
 - 선행: 없음
 - 소유 저장소: kor-travel-weather
@@ -18,15 +18,16 @@ weather 관리자 프론트의 `lib/navigation.ts`는 공통 `sanitizeLocalPath`
 - 공통 함수의 계약은 `packages/ui/src/navigation.ts`와 그 단위 시험이 정본이다.
 - 패키지 버전을 올리지 않는다. 이미 벤더한 `@kor-travel/ui`에 export가 있다.
 - 두 구현은 모양이 다르다. 공통은 `string | null | undefined`를 받고 인코딩된 경계 문자·제어 문자를 거절한다. 로컬은 `unknown`을 받고 앞뒤 공백을 지우고 500자를 넘으면 거절한다. 호출부는 `unknown`을 넘긴다(로그인 route의 요청 본문). 그래서 사본을 통째로 지우지 않고, 타입 좁히기·trim·길이 상한만 가진 얇은 로컬 함수가 공통 함수를 부르게 한다.
+- 동작이 달라진다. 공통 함수는 값 어디에든(query·hash 포함) `%20`·`%25`·공백·제어 문자·인코딩된 경계 문자가 있으면 거절한다. 지금 로컬 구현은 `/runs?q=a%20b`를 보존하지만 바꾼 뒤에는 기본 경로가 된다. 이 변화가 받아들일 수 없으면 이 task를 하지 않는다(공통 규칙을 바꾸는 것은 `ui` 버전 변경이다).
 - 이 저장소는 다른 팀이 유지한다. 시점과 방식은 그 팀이 정한다.
 
 ## 구현 범위
 
 1. `lib/navigation.ts`를 얇은 함수로 줄인다: 문자열이 아니면 기본 경로, trim, 500자 초과면 기본 경로, 그다음 `@kor-travel/ui/navigation`의 `sanitizeLocalPath` 호출. URL 파싱과 경계 검사를 로컬에 두지 않는다.
-2. 호출부 import는 그대로 `@/lib/navigation`이다. client(`components/login-form.tsx`)는 지금처럼 공통 export를 직접 쓴다.
+2. 호출부 넷을 확인한다: `app/api/auth/login/route.ts`, `app/login/page.tsx`, `middleware.ts`(자기 runtime 설정이 있다), 그리고 공통 export를 직접 쓰는 `components/login-form.tsx`. 앞의 셋은 import를 그대로 `@/lib/navigation`으로 둔다.
 3. `fallback` 인자는 어느 호출부도 넘기지 않는다. 인자를 없앤다.
-4. 단위 시험: 기존 시험과 #244의 시험이 그대로 통과한다. 공통 구현이 더 거절하는 입력(인코딩된 경계 문자)이 이제 기본 경로가 된다는 시험을 더한다.
-5. 서버 번들에 하위 경로가 실리는지 `next build`로 확인한다.
+4. 단위 시험: 기존 시험과 #244의 시험이 그대로 통과한다. `%20`·`%25`·값 안의 공백·인코딩된 경계 문자가 든 입력이 기본 경로가 된다는 시험을 더한다.
+5. `middleware.ts`가 쓰는 runtime의 번들에 하위 경로가 실리는지 `next build`로 확인한다.
 
 ## 범위 밖
 
@@ -53,6 +54,7 @@ packages/kor-travel-weather-admin/frontend/lib/navigation.test.ts
 - [ ] `lib/navigation.ts`에 `new URL(`이 없다(판정 본체는 공통 함수).
 - [ ] 기존 단위 시험 4건이 수정 없이 통과한다.
 - [ ] 공백이 붙은 정상 경로, 500자 초과 경로, 문자열이 아닌 값의 결과가 바꾸기 전과 같다.
+- [ ] `/runs?q=a%20b`, `/a%25b`, `/a b`의 결과가 기본 경로이고 그 변화가 PR 본문에 적혀 있다.
 - [ ] lint·type-check·단위·`next build`·기존 e2e가 통과한다.
 
 ## 검증 명령
