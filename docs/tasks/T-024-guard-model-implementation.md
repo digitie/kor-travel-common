@@ -1,6 +1,6 @@
 # T-024 ADR-019가 정한 프론트 guard 모델 구현과 채택 커밋 지정
 
-- 상태: READY
+- 상태: IN_PROGRESS
 - 우선순위: P0
 - Gate: 도구 단위·selftest workflow·2인 리뷰
 - 선행: T-023
@@ -19,6 +19,8 @@ ADR-019의 결정을 재사용 workflow와 문서에 구현한다. ADR-019는 20
 - 옛 SHA를 호출하는 소비자의 동작은 바뀌지 않는다(그 workflow 판은 계속 `main`을 읽는다). 새 동작은 호출 SHA를 올린 소비자만 얻는다.
 - 지금 고정된 검사기는 둘이다: `55a921b`(map)와 `97f8ed9`(나머지와 geo·concierge. `9e16393`은 `tools/`가 같다). CI checkout은 얕으므로 두 판의 검사기를 시험 fixture로 저장소에 둔다.
 - 수렴을 막는 강제로 다시 만들지 않는다. 지연은 보고로만 본다.
+
+> 구현 메모(2026-11-18): '두 판의 검사기를 시험 fixture로 저장소에 둔다'와 수용 기준 4는 고정 사본 대신 실제 옛 판(`97f8ed9`, map은 `55a921b`) workflow의 대조 단계 원문을 일곱 소비자 main에 병합 전후 정책으로 돌린 판정 표로 확인했다(전후 동일, [evidence](../evidence/t024-guard-model.md)). 옛 판은 main 정책을 읽으므로 영구 selftest로 두면 다음 정책 변경 PR마다 결과가 바뀐다. 이 PR은 정책 세 파일을 바꾸지 않는다.
 
 ## 구현 범위
 

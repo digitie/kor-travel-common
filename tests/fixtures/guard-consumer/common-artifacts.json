@@ -1,0 +1,17 @@
+{
+  "sources": {
+    "common": "81810cc3462435d73e683de7ce85c4f11557747b"
+  },
+  "packages": {
+    "@kor-travel/tokens": {
+      "version": "0.1.2",
+      "filename": "kor-travel-tokens-0.1.2.tgz",
+      "integrity": "sha512-IF5qTyPe0LrVFvHRHp2roruudcOO2U96b11zVr0D+Ir1Twsuc2UcAqkYoEL6LfMpDMiq6Xp+CfIDv7N/zkmo/w=="
+    },
+    "lightningcss": {
+      "version": "1.33.0+nativecss.fix.4",
+      "filename": "lightningcss-1.33.0+nativecss.fix.4.tgz",
+      "integrity": "sha512-zDQ03VJE37OlyBrLsRcsEdIVu0T4BXJKDH5y9//To6GlGN2UrKQGERFVAFblkPQ5ZEbhuOp5wpXxGARZNdbQLA=="
+    }
+  }
+}

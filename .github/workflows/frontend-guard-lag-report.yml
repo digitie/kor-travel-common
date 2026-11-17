@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+# ADR-019 결정 3: 최신 정본과의 차이는 실패가 아니라 주간 보고로 본다. 이 job은 실패하지 않는다.
+name: frontend guard lag report
+on:
+  schedule:
+    - cron: '17 0 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  report:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: 소비자별 호출 ref·벤더 버전과 정본 비교
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 -B -X utf8 tools/frontend_guard_lag_report.py --main-sha "$GITHUB_SHA" || true

@@ -73,6 +73,7 @@ uv run python -c "import kortravelcommon; print(kortravelcommon.__version__)"
 
 - `AGENTS.md` 공통 절, PR 템플릿, dependabot, ESLint 조각 등은 `templates/`에서 복사하고 원본 경로·common 커밋을 파일 머리 주석에 남긴다. 목록과 복사 규칙은 [templates](../../templates/README.md)가 정본이다.
 - 재사용 워크플로는 태그 또는 SHA로만 참조하고(`uses: digitie/kor-travel-common/.github/workflows/versions-check.yml@<tag|sha>`), 기존 워크플로에 job을 추가하는 방식으로 넣는다(전면 대체 금지). required check 이름은 `name:` 입력으로 기존 이름을 보전한다(D-18). 참조 태그 형식은 T-010에서 확정하며 그 전에는 SHA를 쓴다.
+- 프론트 정책 guard(`frontend-consumer-guard.yml`)는 호출 SHA와 `common-ref`에 **같은 40자리 값**을 적는다. 이 값은 common이 지정한 채택 커밋(ADR-019 판은 [T-024](../tasks/T-024-guard-model-implementation.md)가 지정)이며 최신 main이 아니다. guard는 정책·산출물 정본·Node/npm 축을 그 커밋에서 읽으므로, 호출 SHA를 올리는 PR에서 vendor tarball·`common-artifacts.json`·lock과 `.nvmrc`·`engines`·`packageManager`·Node 이미지를 그 커밋의 값에 함께 맞춘다. 올린 뒤에는 common main의 정책 변경이 그 소비자를 깨지 않고, 차이는 common의 주간 지연 보고에 나타난다. `.nvmrc`와 검사 경로의 기준이 저장소 루트가 아니면 선택 입력 `root`로 그 디렉터리를 준다.
 - 규칙 문서 채택은 코드 채택과 독립이다. 라이선스 gate가 닫힌 앱(concierge·docker-manager·pinvi)도 규칙 ID 참조와 예외 등록은 가능하다.
 
 ## 4. 등록(CSS·Tailwind·Python)

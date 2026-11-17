@@ -1,3 +1,13 @@
+## frontend guard ADR-019 판 — 2026-11-18
+
+### 변경
+
+재사용 `frontend-consumer-guard.yml`이 정책 세 파일(`versions.json`·`frontend-dependencies.json`·`frontend-artifacts.json`)과 Node/npm 도구 축을 common main이 아니라 호출자의 `common-ref`에서 읽는다(ADR-019, T-024). guard 자신의 Node는 그 ref의 `.nvmrc`, npm은 `axes.npm.recommended`로 고른다. 다른 저장소의 호출에서는 호출 SHA와 `common-ref`가 같은지 확인한다. 선택 입력 `root`(기본 `.`)를 더했다. 최신 정본과의 차이는 주간 `frontend-guard-lag-report.yml`(exit 0)로 본다.
+
+### 이관
+
+호출 SHA와 `common-ref`를 T-024가 지정한 채택 커밋으로 함께 올린 소비자만 새 동작을 얻는다. 옛 판(`55a921b`·`97f8ed9`·`9e16393`)을 호출하는 소비자는 지금과 같다(계속 main을 읽는다). 채택 커밋의 정책은 직전 main과 같아 pinvi·weather·transport·docker-manager·geo·concierge는 SHA 두 자리만 바꾸면 통과한다(evidence). Map은 Node 축이 26.13.1인 T-029 커밋으로 옮긴다.
+
 ## ui 0.2.1·tokens 0.1.2·toast 0.1.1 후보 — 2026-11-17
 
 ### 변경
