@@ -1,7 +1,7 @@
 {
   "schema": "kor-travel-common.version-registry.v1",
   "baseline": "2026-09",
-  "updated": "2026-11-13",
+  "updated": "2026-11-17",
   "next_review": "2026-12",
   "policy": "docs/standards/versions.md",
   "source": "docs/adr/017-shadcn-radix-shared-components.md; 기존 런타임·백엔드 축은 원 source 절을 따른다. Node/npm 빌드 선택은 docs/adr/018-exact-node-npm-build-toolchain.md.",
@@ -558,13 +558,13 @@
     "@kor-travel/ui": {
       "ecosystem": "npm",
       "floor": null,
-      "recommended": "0.2.0",
+      "recommended": "0.2.1",
       "source": "ADR-017; 2026-11-11 npm registry/peer 검증"
     },
     "@kor-travel/tokens": {
       "ecosystem": "npm",
       "floor": null,
-      "recommended": "0.1.1",
+      "recommended": "0.1.2",
       "source": "ADR-017; 2026-11-11 npm registry/peer 검증"
     },
     "vworld-map-core": {
@@ -576,7 +576,7 @@
     "vworld-map-web": {
       "ecosystem": "npm",
       "floor": null,
-      "recommended": "1.0.3",
+      "recommended": "1.0.4",
       "source": "ADR-017; 2026-11-11 npm registry/peer 검증"
     },
     "nativewind": {
@@ -600,7 +600,7 @@
     "vworld-map-rn": {
       "ecosystem": "npm",
       "floor": null,
-      "recommended": "1.0.1",
+      "recommended": "1.0.2",
       "source": "GitHub 원본의 라이선스·소스 동봉 패치"
     },
     "react-native": {
@@ -630,7 +630,7 @@
     "@kor-travel/toast": {
       "ecosystem": "npm",
       "floor": null,
-      "recommended": "0.1.0",
+      "recommended": "0.1.1",
       "source": "Geo 알림용 선택형 공통 Radix Toast namespace; 원본 radix-ui1.8.1/React19.3.1 유지"
     }
   },

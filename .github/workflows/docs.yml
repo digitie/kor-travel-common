@@ -267,6 +267,33 @@ jobs:
           SMOKE_APP="$smoke_app" npm exec -- playwright test --config packages/ui/smoke/playwright.radix.config.ts
           npm ci --prefix packages/ui/examples/next-app --no-audit --no-fund --engine-strict
           npm run build --prefix packages/ui/examples/next-app
+      # 위 smoke가 설치·검증한 같은 ui/tokens pack과 toast pack을 검사 source별로 보관한다. 소비자 vendor와
+      # frontend-artifacts.json 동결은 main push 실행의 이 artifact를 쓴다(로컬 재pack 대신).
+      - name: 배포 후보 pack 보관 준비(ui·tokens·toast)
+        run: |
+          release_dir=test-results/release-packs
+          mkdir -p "$release_dir"
+          cp test-results/ui-pack/kor-travel-tokens-*.tgz test-results/ui-pack/kor-travel-ui-*.tgz "$release_dir/"
+          npm pack --workspace packages/toast --pack-destination "$release_dir"
+          printf '%s\n' "$SOURCE_SHA" > "$release_dir/SOURCE_SHA"
+          (cd "$release_dir" && sha256sum ./*.tgz > SHA256SUMS)
+          node --input-type=module - "$release_dir" <<'NODE'
+          import { createHash } from 'node:crypto';
+          import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+          import { join } from 'node:path';
+          const dir = process.argv[2];
+          const lines = readdirSync(dir).filter(name => name.endsWith('.tgz')).sort()
+            .map(name => name + ' sha512-' + createHash('sha512').update(readFileSync(join(dir, name))).digest('base64'));
+          writeFileSync(join(dir, 'SRI'), lines.join('\n') + '\n');
+          console.log(lines.join('\n'));
+          NODE
+      - name: 배포 후보 pack 보관
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: common-release-packs-${{ env.SOURCE_SHA }}
+          path: test-results/release-packs/
+          if-no-files-found: error
+          retention-days: 30
       - name: tarball 설치 스모크
         run: |
           package_dir="$(mktemp -d)"

@@ -1,6 +1,6 @@
 {
   "name": "@kor-travel/ui",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "kor-travel 공용 Radix UI·가상 테이블·폼과 지도 작업면",
   "license": "GPL-3.0-or-later",
   "author": "Youn-sok Choi (digitie)",
@@ -207,7 +207,7 @@
     "zustand": "5.1.0"
   },
   "peerDependencies": {
-    "@kor-travel/tokens": "0.1.1",
+    "@kor-travel/tokens": "0.1.2",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
