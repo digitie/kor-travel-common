@@ -1,3 +1,42 @@
+## 2026-11-17 — 공통화 계획 확인 pass(N1~N4) 반영
+
+- 2회차 리뷰어의 확인 pass가 25건 해소를 확인하고 새 지적 넷을 냈다. 넷 다 코드에서 확인하고 반영했다.
+- N1: T-025 릴리스 날 옛 guard에 남은 소비자의 재vendor에 task가 없었고 T-415가 그것과 어긋났다. Map의 T-419(T-025 릴리스 당일 `ui`·`tokens` 재vendor, T-417 미완일 때)를 더하고, T-025의 외부 선행에 T-424·T-474 병합과 T-467·T-436 병합 또는 당일 재vendor 확인을 넣었다.
+- N2: T-025의 올림을 patch(`ui` 0.2.2·`tokens` 0.1.3·`toast` 0.1.2, breaking 없음)로, admin-kit의 peer를 `@kor-travel/ui` `>=0.2.1 <0.3.0`·`@kor-travel/tokens` `>=0.1.2 <0.2.0`으로 적고 두 조합 설치·빌드를 수용 기준에 넣었다.
+- N3: 새 guard는 고정 커밋의 정책에 admin-kit이 없으면 건너뛴다. 공백을 적어만 두는 안 대신, 호출 SHA를 T-221이 지정한 admin-kit 채택 커밋으로 올리고 `ui`·`tokens`를 재vendor하는 것을 채택의 첫 단계로 넣었다(계획 문서 §4.8). T-221이 그 커밋을 지정한다.
+- N4: shim 넷은 경로나 이름이 다르다(`tabs-variants`→`ui/tabs`, `native-select-option`→`ui/native-select`, `data-table`→`ui/virtual-table`과 이름 둘, `AlertDialogClose`→`AlertDialogCancel`). T-418·T-468·T-437을 원 경로·원 이름으로 고치고 K-50의 앱 잔류 목록에서 `data-table.tsx`를 뺐다.
+- task 33개(common 11·map 6·pinvi 2·weather 5·transport 6·manager 3). 후보 수는 그대로다(63건).
+- 검증: `tools/validate_plan.py` 상세 task 144·오류 0, `tools/validate_document_links.py` 오류 0, redaction·secret scan 0건, `git diff --check` 통과. 패키지 빌드·전체 unittest는 `NOT_RUN(문서 전용)`.
+
+## 2026-11-17 — 공통화 계획 리뷰 2회차 반영
+
+- 2회차 적대 리뷰(BLOCKER 2, MAJOR 8, MINOR 15)의 finding을 코드에서 다시 확인하고 반영했다. 기각한 finding은 없다.
+- 관리자 부품 묶음을 `@kor-travel/ui` 0.3.0의 하위 경로가 아니라 선택형 산출물 패키지 `@kor-travel/admin-kit`로 내기로 바꿨다(계획 문서 §4.8의 비교). 부품을 쓰지 않는 소비자의 재vendor, 현재 값 전환 단계, 그 단계가 다른 팀과 범위 밖 저장소를 기다리는 일, Map의 T-416 의존이 없어진다. 검사기 두 판 모두 선언하지 않은 산출물을 건너뛰고(`:145@97f8ed9`, `:129@55a921b`) `@kor-travel/toast`가 같은 모양의 선례다. 선행은 T-025 하나다: 지금은 정책에 패키지를 더하는 것만으로 `ui`·`tokens`·`toast`가 다시 pack된다.
+- guard 모델의 권고를 '정책과 Node/npm 도구 축을 호출 커밋에서 읽기'로 바꿨다. 예고 필드 안은 예고 자리 하나·끝이 없는 창·Node/npm 미포함·긴급 경로 부재가 드러나 대안으로 내렸다. 결정은 ADR-019(소유자)다.
+- T-314는 새 cursor 기능을 켠 호출자만 새 형식을 쓰게 고쳤다. `StallClock.from_dict`가 필드 추가를 거절해(`stall.py:79-83`) weather가 직접 읽는 cursor 안에 구획을 넣을 자리가 없었다.
+- T-025는 내장 사본을 패키지 자기 것으로 줄이는 방식(소비자 `check:dependencies` 명령 줄 불변)으로 정하고 세 패키지의 릴리스를 범위에 넣었다.
+- K-40·K-41을 '나중에 공유'로 내렸다(tag는 각 저장소의 자기 관리자만 읽는다. pinvi는 API 쪽 정적 sensor 목록이 묶여 있다). K-25(보안 헤더·CORS, 공유하지 않음)와 K-66(순수 재수출 shim, 지금 공유)을 더했다. T-222·T-315는 없앴다.
+- task 32개(common 11·map 5·pinvi 2·weather 5·transport 6·manager 3), 후보 63건(지금 7·나중 26·공유하지 않음 30).
+- 검증: `tools/validate_plan.py` 상세 task 143·오류 0, `tools/validate_document_links.py` 오류 0, redaction·secret scan 0건, `git diff --check` 통과. 패키지 빌드·전체 unittest는 `NOT_RUN(문서 전용)`.
+
+## 2026-11-17 — 공통화 계획 리뷰 1회차 반영
+
+- 1회차 적대 리뷰(BLOCKER 1, MAJOR 8, MINOR 10)의 finding을 코드에서 다시 확인하고 반영했다. 기각한 finding은 없다. 설계 패널 문서가 다른 뜻으로 쓴 T-414·T-480a는 T-416·T-417·T-480b로 바꿨다. `docs/survey/`의 T-026·T-219·T-314 언급은 geo·pinvi 저장소 자체의 task 번호라 그대로 뒀다.
+- guard 모델(§4.1)을 다시 설계했다. 처음의 '직전 버전 허용 + 만료일'은 소비자가 고정한 옛 검사기(`55a921b`·`9e16393`·`97f8ed9`)가 정책의 현재 값 하나만 읽으므로 아무도 보호하지 못했다. 새 버전을 추가 필드에 예고하고 현재 값은 채택 뒤 별도 PR(T-222)이 바꾸는 안으로 바꿨다. 세 검사기가 읽는 정책 키는 각 커밋의 소스에서 확인했다.
+- 추가한 task: T-027(standards 반영), T-222(현재 값 전환), T-416(Map 정확 Node/npm 핀 결정, 소유자 답 대기), T-417(그 이관), T-424·T-474(pinvi·docker-manager 재vendor). T-219·T-220은 앱 의존(`status-label`, `next/link`, `sonner`) 기준으로 다시 나눴고 `ConfirmDialog`를 뺐다.
+- 기존 ADR·standards와 어긋나는 판정을 계획 문서 §1.5 표에 모두 모았다(C12·C4·C13·C20·C1·C9·C2·C3·C5·C10·C15·C18·`validateForm`·UI 엔진 표기).
+- 조사 중 확인한 weather 서버 쪽 `sanitizeLocalPath` 구현의 검증 차이는 kor-travel-weather #244(`8c3b4744`)로 맞췄다(배포는 weather 담당). T-465·T-434는 중복 제거만 남아 P2·P3으로 낮췄다.
+- 검증: `tools/validate_plan.py` 상세 task 140·오류 0, `tools/validate_document_links.py` 오류 0, redaction·secret scan 0건, `git diff --check` 통과. 패키지 빌드·전체 unittest는 `NOT_RUN(문서 전용)`.
+
+## 2026-11-17 — 공통화 재조사와 계획 초안(문서 전용)
+
+- 대상과 기준: pinvi `b1605949`, kor-travel-map `f1788da9`, kor-travel-weather `e68f16a7`, kor-travel-transport `60095379`, kor-travel-docker-manager `31d56e4e`, common `97f8ed98`. 각 저장소를 새로 받아 읽기만 했다. 테스트·빌드·배포·운영 호스트 접근은 하지 않았다.
+- 방법: 일곱 영역(백엔드 골격·횡단, 도메인 헬퍼, Dagster, 프론트 셸·UI, 프론트 지도·e2e·lint, Ops·CI)을 나눠 조사하고, 판정에 쓰는 인용을 같은 커밋에서 다시 읽었다(문서의 `✔`). 다시 읽은 표본에서 어긋난 인용은 없었다. 2026-11-17 재vendor PR의 시각·파일 수와 CI 결과는 `gh`로 조회했다.
+- 결과: 후보 61건(지금 공유 8, 나중에 공유 24, 공유하지 않음 29)과 task 24개. 기존 계획과 어긋나는 판정(C1·C4 라우터·C5·C9·C10·C3을 공유하지 않음으로)은 제안으로만 적었고 반영은 T-022와 ADR 개정이 소유한다. 기존 ADR·task·코드·`versions.json`은 바꾸지 않았다.
+- 검증: `tools/validate_plan.py` 상세 task 135·오류 0, `tools/validate_document_links.py` 오류 0, `git diff --check` 통과. 전체 unittest·패키지 빌드는 문서 전용 변경이라 실행하지 않았다(`NOT_RUN(문서 전용, 도구·패키지 미변경)`).
+- 미확인: 계획 문서 §7. 특히 실행 확인이 없고, 고정 운영 이미지 안의 probe 동작과 공용 instance의 실제 렌더링은 보지 않았다.
+- 남은 것: 독립 적대 리뷰 2건, finding 반영, PR. 다섯 저장소의 backlog 포인터는 각 저장소의 문서 전용 브랜치로 준비했다.
+
 ## 2026-11-17 — 후보12 산출물 동결(ui 0.2.1·tokens 0.1.2·toast 0.1.1·vworld web 1.0.4/rn 1.0.2)
 
 - producer는 #57의 main merge `938d1db`다. 그 main push docs `packages` job artifact `common-release-packs-938d1db…`의 ui·tokens·toast pack을 그대로 원장에 옮겼다. PR head `53472b4`(같은 tree)의 artifact와 세 tgz의 SHA256이 같아 재현됐다.
