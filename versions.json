@@ -16,8 +16,8 @@
     "node": {
       "ecosystem": "runtime",
       "floor": "22.12",
-      "recommended": "22.23.1",
-      "image": "node:22.23.1-bookworm-slim",
+      "recommended": "24.22.3",
+      "image": "node:24.22.3-bookworm-slim",
       "check": "engines.node",
       "note": "빌드·테스트 선택은 권고 정확 patch와 private anchor를 일치시킨다(ADR-018). 기존 floor는 호환 하한이며 Docker 배포판·libc는 각 앱이 유지하고 digest를 핀한다.",
       "source": "vm §1.1·§4.4"
@@ -25,7 +25,7 @@
     "npm": {
       "ecosystem": "runtime",
       "floor": "10.9",
-      "recommended": "12.0.1",
+      "recommended": "11.20.0",
       "check": "engines.npm|packageManager",
       "note": "빌드·테스트 job과 새 Docker stage는 npm12.0.1을 명시 선택한다. private anchor·engine-strict·실행 버전 검사는 ADR-018을 따른다.",
       "source": "vm §3.2·§4.4"
@@ -138,7 +138,7 @@
     "zustand": {
       "ecosystem": "npm",
       "floor": "5",
-      "recommended": "5.1.0",
+      "recommended": "5.0.16",
       "source": "ADR-017; 2026-11-11 npm registry/peer 검증"
     },
     "react-hook-form": {

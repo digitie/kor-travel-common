@@ -9,7 +9,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { checkToolchain } from "../tools/check_node_toolchain.mjs";
 
-const node = "22.23.1", npm = "12.0.1", digest = "a".repeat(64);
+const node = "24.22.3", npm = "11.20.0", digest = "a".repeat(64);
 const checker = resolve(dirname(fileURLToPath(import.meta.url)), "../tools/check_node_toolchain.mjs");
 function fixture(t) {
   const root = mkdtempSync(join(tmpdir(), "kt-node-toolchain-"));

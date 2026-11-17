@@ -160,7 +160,7 @@
     "vworld-map-rn": "1.0.2",
     "vworld-map-web": "1.0.4",
     "zod": "4.6.7",
-    "zustand": "5.1.0",
+    "zustand": "5.0.16",
     "@kor-travel/toast": "0.1.1"
   }
 }
