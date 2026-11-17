@@ -1,0 +1,13 @@
+name: t029 head guard verify (임시)
+on:
+  push:
+    branches: [selftest/t029-head-verify]
+permissions:
+  contents: read
+jobs:
+  guard:
+    uses: digitie/kor-travel-common/.github/workflows/frontend-consumer-guard.yml@0dec9543c8c8730ce7b05837f2fbe6c31d4ede65
+    with:
+      common-ref: 0dec9543c8c8730ce7b05837f2fbe6c31d4ede65
+      root: tests/fixtures/guard-consumer-t029
+      frontends: '[{"package":"package.json","lock":"package-lock.json","workspace":"","profile":"mobile"}]'
