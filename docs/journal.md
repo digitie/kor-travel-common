@@ -1,3 +1,9 @@
+## 2026-11-17 — vworld-map-web 1.0.4·rn 1.0.2 정책과 ui 0.2.1·tokens 0.1.2·toast 0.1.1 후보
+
+- Pinvi 운영 Firefox에서 바탕지도 타일이 0건이던 결함을 maplibre-vworld-react #33(web 1.0.4)이 고쳤다. rn은 web과 대조한 #34(1.0.2: fitBounds padding·마커 anchor·명시 mapStyle)로 고친다. 정책 정본 `versions.json`의 두 축과 생성물(frontend-dependencies.json·라이브러리 문서)을 갱신했다.
+- ui·tokens·toast는 실행 코드·CSS 변경이 없다. 내장 정책 사본이 새 정본을 담도록 patch로 올렸다. 기존 소비자(Map 55a921b, Transport·Weather·Concierge·Geo·Manager 9e16393)는 고정 SHA의 정책·정본·checker를 읽으므로 이 변경의 영향이 없다. 새 ref를 채택할 때 vendored 3종과 vworld 산출물을 함께 갱신한다.
+- 산출물 동결은 이 source의 main push에서 docs `packages` job이 남기는 `common-release-packs-<SHA>` artifact로 별도 PR에서 한다(이전 후보와 같은 2단계: source → 동결).
+
 ## 2026-11-13 — 선택형 차트·애니메이션 의존성 정본 보강
 
 - Weather·Transport의 추가 기능에서 공통으로 소비하는 두 패키지의 중앙 관리 누락을 확인했다. 공식 npm registry/latest 조회일과 후보 버전은 버전 정본·외부 evidence에 결박하고, 중앙 생성 정책·필요 라이브러리 규약만 보강했다.

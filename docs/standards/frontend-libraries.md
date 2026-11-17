@@ -30,9 +30,9 @@ Weather·Transport가 함께 사용하는 `echarts`·`motion`도 정확 버전 �
 |---|---|
 | @axe-core/playwright | 4.14.0 |
 | @hookform/resolvers | 7.0.5 |
-| @kor-travel/toast | 0.1.0 |
-| @kor-travel/tokens | 0.1.1 |
-| @kor-travel/ui | 0.2.0 |
+| @kor-travel/toast | 0.1.1 |
+| @kor-travel/tokens | 0.1.2 |
+| @kor-travel/ui | 0.2.1 |
 | @next/eslint-plugin-next | 16.4.6 |
 | @playwright/test | 1.65.0 |
 | @radix-ui/react-focus-scope | 1.3.1+kortravel.fix.2 |
@@ -92,8 +92,8 @@ Weather·Transport가 함께 사용하는 `echarts`·`motion`도 정확 버전 �
 | vite-tsconfig-paths | 6.1.1 |
 | vitest | 5.1.0 |
 | vworld-map-core | 1.0.1 |
-| vworld-map-rn | 1.0.1 |
-| vworld-map-web | 1.0.3 |
+| vworld-map-rn | 1.0.2 |
+| vworld-map-web | 1.0.4 |
 | zod | 4.6.7 |
 | zustand | 5.1.0 |
 
