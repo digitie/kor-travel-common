@@ -3,11 +3,15 @@
 - 상태: BLOCKED
 - 우선순위: P2
 - Gate: 소비자 CI(공통 프론트엔드 정책)
-- 선행: T-416, T-024
+- 선행: T-416, T-024, T-029
 - 소유 저장소: kor-travel-map
 - 병렬: 묶음 B. T-416이 '채택'일 때만 진행
 
 출처는 [공통화 재조사·계획(2026-11-17)](../plan/commonization-plan-2026-11-17.md)의 §2.2·§3.6(K-78)이다. 근거 위치(file:line)와 차이 분석은 그 문서가 정본이며 여기서 반복하지 않는다.
+
+## 2026-11-17 결정 반영
+
+T-416은 **채택**으로 정해졌고 값은 Node 26.13.1·npm 12.0.1이다. 루트 `.nvmrc`, 정확 `engines`, CI `node-version`, Node Docker 이미지는 T-416의 Map PR(ADR-124)이 먼저 바꾼다. 그래서 이 task의 구현 범위 2는 그 PR이 빠뜨린 도구 규칙 입력(`toolchain-manifests`·`node-dockerfiles`)만 남는다. 호출 SHA는 공통 축이 26.13.1인 커밋이어야 하므로 T-024의 채택 커밋이 아니라 [T-029](T-029-node-axis-to-latest-lts.md)의 병합 커밋(그 뒤 common이 지정한 커밋)으로 올린다. T-029는 T-025 뒤이므로, 그때 Map은 T-419로 `ui` 0.2.2·`tokens` 0.1.3을 벤더한 상태다.
 
 ## 목표
 

@@ -9,6 +9,10 @@
 
 출처는 [공통화 재조사·계획(2026-11-17)](../plan/commonization-plan-2026-11-17.md)의 §1.3·§4.2(K-03)이다. 근거 위치(file:line)와 차이 분석은 그 문서가 정본이며 여기서 반복하지 않는다.
 
+## 2026-11-17 소유자 결정 반영
+
+소유자가 2026-11-17에 §1.5의 행별 판정을 계획의 권고대로 정했다. 그래서 구현 범위 2의 ADR-020은 초안이 아니라 accepted로 먼저 병합됐다([ADR-020](../adr/020-python-ui-scope-after-resurvey.md): 15행, 수락 12·보류 2·수락과 보류로 나눈 것 1·거부 0). 이 task에 남은 것은 대조표(구현 범위 1), task 분할(3), T-219·T-220과의 겹침 해소(4), resume·journal(5)이다. 분할한 task 가운데 'ADR-020 accepted'를 기다리던 것은 그 외부 선행이 이미 충족됐다. 수용 기준의 'ADR-020이 색인에 `proposed`로 등록'은 'accepted로 등록'으로 읽는다.
+
 ## 목표
 
 원장은 T-201(ui 골격)을 BLOCKED, T-302(Python 골격)를 READY, T-303~T-312를 BLOCKED로 두고 있다. 실물은 `@kor-travel/ui` 0.2.1(Radix 기반, T-218)과 `kortravelcommon` 0.1.0.dev0(T-319 계열 모듈)이다. 또 재조사의 판정 여럿이 accepted ADR·standards와 어긋난다(계획 문서 §1.5). 이 task는 T-201~T-214와 T-302~T-312를 실물·재조사 결과와 대조해 재분류하고, 어긋나는 판정을 ADR 초안으로 올린다. 코드와 standards 본문은 바꾸지 않는다(standards 반영은 T-027).

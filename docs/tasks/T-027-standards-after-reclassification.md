@@ -4,7 +4,7 @@
 - 우선순위: P1
 - Gate: 문서 검증·2인 리뷰
 - 선행: T-022
-- 외부 선행: ADR-020 accepted(소유자의 행별 결정). T-022가 DONE이어도 이 결정 전에는 병합하지 않는다
+- 외부 선행: 없음. ADR-020(소유자의 행별 결정)은 2026-11-17 accepted다([ADR-020](../adr/020-python-ui-scope-after-resurvey.md)). 남은 선행은 T-022다
 - 소유 저장소: kor-travel-common
 - 병렬: T-022 뒤. T-219와 동시 가능
 

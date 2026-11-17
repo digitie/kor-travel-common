@@ -2,6 +2,11 @@
 
 - 정본 지위: 다섯 저장소(pinvi·kor-travel-map·kor-travel-weather·kor-travel-transport·kor-travel-docker-manager)의 코드에서 **무엇을 공통으로 만들 수 있고 무엇은 만들면 안 되는지**를 고정 커밋 기준으로 다시 조사한 결과와 실행 순서다. 이 문서는 근거와 계획이며 규범이 아니다. 규칙은 [standards](../standards/README.md)·[ADR](../adr/README.md), 실행 범위와 수용 기준은 [task 원장](../tasks.md)과 상세 task가 정본이다.
 - 상태: **초안(적대 리뷰 2회 반영)**. 소유자 요청(2026-11-17)에 따른 작성본이다. 1회차 finding 19건과 2회차 finding 25건을 반영했다. 판정은 제안이고 ADR·task로 옮겨지기 전에는 결정이 아니다.
+- **소유자 결정(2026-11-17).** 열린 결정 넷이 정해졌다. 이 문서의 '결정 대기' 표현보다 아래가 우선한다.
+  - ADR-019: 안 1(정책과 Node/npm 축을 호출자의 `common-ref`에서 읽기 + 막지 않는 지연 보고) accepted → [ADR-019](../adr/019-frontend-policy-guard-model.md). T-023 DONE, T-024 READY.
+  - ADR-020: §1.5 15행을 권고대로(수락 12·보류 2·수락과 보류로 나눈 것 1·거부 0) accepted → [ADR-020](../adr/020-python-ui-scope-after-resurvey.md). T-027의 외부 선행 충족, T-022는 대조표·task 분할이 남았다.
+  - T-416: 채택. 값은 22.23.1이 아니라 **Node 26.13.1**(2026-11-17 nodejs.org 색인의 최신 LTS 줄 최신 patch)·npm 12.0.1(공통 축 유지). 공통 축을 26.13.1로 올리는 [T-029](../tasks/T-029-node-axis-to-latest-lts.md)를 더했고 T-417의 선행이 됐다.
+  - T-486b: 권고대로. 영향 자료를 먼저 만들고, 자료가 권고를 뒷받침하면 구현한다([T-486b](../tasks/T-486b-ktdm-shared-dagster-per-job-limit.md)의 결정 절).
 - 성격상 §1~§3·§7은 조사 스냅샷(survey), §4~§6은 계획(plan)이다. 소유자가 문서 하나를 요청해 한 파일에 두었다. 기준 커밋을 바꿔 다시 조사할 때는 이 문서를 고치지 않고 새 문서를 만든다.
 - 인용 형식: `<저장소 약칭>:<저장소 상대 경로>:<줄>`. 약칭과 경로 접두는 §1.1 표를 따른다. `✔`는 작성자가 하위 조사 뒤 같은 커밋에서 직접 다시 읽거나 `diff`·`cmp`로 재확인한 인용이다. 표시가 없는 인용은 하위 조사 결과이며 한계는 §7에 적었다.
 
@@ -330,7 +335,7 @@ guard는 검사 **코드**를 호출자가 고정한 커밋에서 받고(`C:.git
 1. common이 새 guard workflow를 낸다([T-024](../tasks/T-024-guard-model-implementation.md)). 옛 SHA를 호출하는 소비자는 지금과 똑같이 동작한다(main을 읽는다). 아무도 실패하지 않는다.
 2. 소비자가 호출 SHA를 그 커밋으로 올린다(pinvi [T-424](../tasks/T-424-pinvi-guard-ref.md), weather [T-467](../tasks/T-467-weather-guard-ref.md), transport [T-436](../tasks/T-436-transport-guard-ref.md), docker-manager [T-474](../tasks/T-474-ktdm-guard-ref.md), map [T-417](../tasks/T-417-map-guard-ref-toolchain.md)). 올린 뒤로는 main의 정책 변경이 그 소비자를 깨지 않는다.
 3. 호출 SHA를 "최신"이 아니라 **T-024가 지정한 채택 커밋 하나**로 올린다. #1504는 SHA를 올리면서 그 뒤에 더해진 규칙까지 받아 실패했다. T-024는 그 커밋의 검사기를 각 소비자의 현재 main에 읽기 전용으로 돌려 걸리는 규칙을 미리 적는다. T-025 릴리스 뒤에 옮기는 소비자는 이미 T-025 판을 벤더했으므로 T-025가 적어 둔 동결 커밋으로 올린다.
-4. Map은 호출 SHA를 올리면 도구 규칙에 걸린다(K-78). 정확 핀을 채택할지는 소유자 결정이다([T-416](../tasks/T-416-map-exact-node-npm-pin-decision.md)). 채택하지 않으면 Map은 옛 guard에 남아 지금처럼 main 정책 변경마다 당일 재vendor한다. 다른 task는 Map의 결정을 기다리지 않는다.
+4. Map은 호출 SHA를 올리면 도구 규칙에 걸린다(K-78). 정확 핀을 채택할지는 소유자 결정이다([T-416](../tasks/T-416-map-exact-node-npm-pin-decision.md)). 채택하지 않으면 Map은 옛 guard에 남아 지금처럼 main 정책 변경마다 당일 재vendor한다. 다른 task는 Map의 결정을 기다리지 않는다. **2026-11-17 결정: 채택, Node 26.13.1.** 공통 축(22.23.1)과 달라서 Map은 축을 26.13.1로 올리는 [T-029](../tasks/T-029-node-axis-to-latest-lts.md)의 커밋으로 옮긴다(T-417).
 5. geo·concierge도 같은 guard의 소비자다(`97f8ed9` 호출). 이번 범위 밖이라 task가 없다. 올리지 않으면 지금과 같을 뿐이고, 이 계획의 어느 단계도 두 저장소의 채택을 선행으로 두지 않는다.
 
 (다)는 따로 고친다([T-025](../tasks/T-025-decouple-embedded-policy.md)). 각 패키지는 **자기 것만**(자기 peer 범위와 자기 식별) 싣고, 소비자의 로컬 `check:dependencies`는 그것만 검사한다. 함대 전체의 정확 버전 대조는 중앙 guard의 몫으로 남긴다. 그러면 소비자의 `check:dependencies` 명령 줄은 바뀌지 않고, 정책에 무관한 패키지를 더하거나 바꿔도 `ui`·`tokens`·`toast`가 다시 pack되지 않는다. 다른 방식(tarball에서 사본을 빼고 정책 파일 경로를 인자로 받기)은 택하지 않는다: 일곱 소비자 프론트가 인자 없이 tarball 안의 검사기를 실행하고 CI가 그것을 막으므로 모든 소비자의 명령 줄을 바꿔야 하고, 정책 파일을 소비자가 벤더하면 K-02의 비용이 소비자로 옮겨갈 뿐이다.
@@ -492,7 +497,7 @@ def record_collection_outcome(context, outcome: str) -> None:
 | [T-437](../tasks/T-437-transport-ui-reexport-shims.md) | kor-travel-transport | 순수 재수출 shim 제거 | A |
 | [T-465](../tasks/T-465-weather-navigation-sanitize.md) | kor-travel-weather | 로컬 경로 정규화의 판정 본체를 공통 호출로 | A |
 | [T-434](../tasks/T-434-transport-navigation-sanitize.md) | kor-travel-transport | 로컬 경로 정규화의 판정 본체를 공통 호출로 | A |
-| [T-416](../tasks/T-416-map-exact-node-npm-pin-decision.md) | kor-travel-map | 정확 Node/npm 핀 채택 여부 결정(소유자 답 대기) | A |
+| [T-416](../tasks/T-416-map-exact-node-npm-pin-decision.md) | kor-travel-map | 정확 Node/npm 핀 채택 여부 결정(2026-11-17 채택, Node 26.13.1. Map PR 병합 대기) | A |
 | [T-486b](../tasks/T-486b-ktdm-shared-dagster-per-job-limit.md) | kor-travel-docker-manager | 공용 instance의 job별 한도·`run_retries` 결정 자료와 구현 | A |
 
 **guard 모델과 내장 정책**
@@ -504,9 +509,10 @@ def record_collection_outcome(context, outcome: str) -> None:
 | 2 | [T-467](../tasks/T-467-weather-guard-ref.md) | kor-travel-weather | guard 호출 SHA를 채택 커밋으로 | T-024 | B |
 | 2 | [T-436](../tasks/T-436-transport-guard-ref.md) | kor-travel-transport | guard 호출 SHA를 채택 커밋으로 | T-024 | B |
 | 2 | [T-474](../tasks/T-474-ktdm-guard-ref.md) | kor-travel-docker-manager | guard 호출 SHA를 채택 커밋으로 | T-024 | B |
-| 2 | [T-417](../tasks/T-417-map-guard-ref-toolchain.md) | kor-travel-map | guard 호출 SHA와 도구 규칙 이관(T-416이 채택일 때) | T-416, T-024 | B |
 | 3 | [T-025](../tasks/T-025-decouple-embedded-policy.md) | common | 내장 정책을 패키지 자기 것으로 줄이고 세 패키지 patch 릴리스(외부 선행: 소비자 호출 SHA 갱신 또는 당일 재vendor 확인) | T-023, T-024 | — |
 | 4 | [T-419](../tasks/T-419-map-ui-tokens-revendor-on-t025.md) | kor-travel-map | T-025 릴리스 당일 `ui`·`tokens` 재vendor(T-417 미완일 때) | T-025 | — |
+| 4 | [T-029](../tasks/T-029-node-axis-to-latest-lts.md) | common | 공통 Node 축을 26.13.1로(외부 선행: 소비자 호출 SHA 갱신 또는 당일 Node 갱신 확인) | T-024, T-025 | — |
+| 5 | [T-417](../tasks/T-417-map-guard-ref-toolchain.md) | kor-travel-map | guard 호출 SHA를 T-029 커밋으로, 남은 도구 규칙 입력(T-416 채택) | T-416, T-024, T-029 | — |
 
 **원장·standards**
 
@@ -536,9 +542,9 @@ def record_collection_outcome(context, outcome: str) -> None:
 | [T-484a](../tasks/T-484a-pinvi-retry-sensor-for-jobs.md) | pinvi | 재시도 sensor 5개를 1개로(API 정적 목록 포함) | 없음 |
 | [T-482b](../tasks/T-482b-transport-retry-sensor-for-jobs.md) | kor-travel-transport | 재시도 sensor 3개를 1개로 | 없음 |
 
-저장소별 수: common 11, kor-travel-map 6, pinvi 2, kor-travel-weather 5, kor-travel-transport 6, kor-travel-docker-manager 3(합 33).
+저장소별 수: common 12, kor-travel-map 6, pinvi 2, kor-travel-weather 5, kor-travel-transport 6, kor-travel-docker-manager 3(합 34. T-029는 2026-11-17 소유자 결정 뒤에 더했다).
 
-조건이 붙은 곳은 넷이다. T-417은 T-416이 "채택"일 때만 진행하고 "미채택"이면 그 결정으로 닫는다. T-419는 T-025 릴리스 날 Map이 옛 guard에 남아 있을 때만 실행하고 T-417이 먼저 끝났으면 닫는다. T-025의 동결은 외부 선행(소비자별 호출 SHA 갱신 또는 당일 재vendor 확인)을 확인한 뒤에 병합한다. T-027은 ADR-020이 accepted가 된 뒤에만 병합한다(소유자의 행별 결정, 상세 파일의 외부 선행). 그 밖의 선행은 모두 원장의 `선행` 열에 있다.
+조건이 붙은 곳은 넷이다. T-417은 T-416이 "채택"일 때만 진행하고 "미채택"이면 그 결정으로 닫는다(2026-11-17 채택으로 정해졌고, T-029 뒤에 진행한다). T-419는 T-025 릴리스 날 Map이 옛 guard에 남아 있을 때만 실행하고 T-417이 먼저 끝났으면 닫는다. T-025의 동결은 외부 선행(소비자별 호출 SHA 갱신 또는 당일 재vendor 확인)을 확인한 뒤에 병합한다. T-027은 ADR-020이 accepted가 된 뒤에만 병합한다(소유자의 행별 결정, 상세 파일의 외부 선행). 그 밖의 선행은 모두 원장의 `선행` 열에 있다.
 
 geo·concierge는 이번 범위 밖이라 task가 없다. 이 계획의 어느 task도 두 저장소의 작업을 선행으로 두지 않는다. 두 저장소가 guard 호출 SHA를 올리지 않으면 T-025의 릴리스 날 지금과 같이 당일 재vendor가 필요하다. T-025가 릴리스 전에 알린다. 이 계획에는 두 저장소의 재vendor task가 없다.
 
