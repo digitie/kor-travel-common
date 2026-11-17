@@ -22,7 +22,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 | [T-025](tasks/T-025-decouple-embedded-policy.md) | BLOCKED | P1 | 내장 정책을 패키지 자기 것으로 줄이고 ui·tokens·toast 릴리스 | T-023, T-024 |
 | [T-026](tasks/T-026-python-version-rule.md) | READY | P2 | Python 공통 패키지의 버전 올림 규칙 | 없음 |
 | [T-027](tasks/T-027-standards-after-reclassification.md) | BLOCKED | P1 | 재분류 결정을 표준 문서에 반영(backend-stack·openapi·ci-deploy·ui-contract) | T-022 |
-| [T-029](tasks/T-029-node-axis-to-latest-lts.md) | BLOCKED | P2 | 공통 Node 도구 축을 최신 LTS(26.13.1)로 올림 | T-024 |
+| [T-029](tasks/T-029-node-axis-to-latest-lts.md) | IN_PROGRESS | P2 | 공통 Node 도구 축을 최신 LTS(26.13.1)로 올림 | T-024 |
 | [T-219](tasks/T-219-admin-kit-package-self-contained.md) | BLOCKED | P1 | 선택형 패키지 admin-kit 골격과 앱 의존이 없는 부품 | T-022, T-025 |
 | [T-220](tasks/T-220-admin-kit-injected.md) | BLOCKED | P1 | admin-kit 2차: 사전·링크 주입이 필요한 부품과 폼·오류 | T-219 |
 | [T-221](tasks/T-221-admin-kit-0-1-0-freeze.md) | BLOCKED | P1 | admin-kit 0.1.0 동결과 선택형 산출물 등록 | T-219, T-220 |

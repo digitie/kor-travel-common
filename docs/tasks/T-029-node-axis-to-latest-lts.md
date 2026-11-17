@@ -1,6 +1,6 @@
 # T-029 공통 Node 도구 축을 최신 LTS(26.13.1)로 올림
 
-- 상태: BLOCKED
+- 상태: IN_PROGRESS
 - 우선순위: P2
 - Gate: 도구 단위·패키지 빌드·2인 리뷰
 - 선행: T-024
@@ -43,6 +43,8 @@ versions.json
 .github/workflows/*.yml(node-version)
 docs/standards/versions.md, docs/integration-map.md, CHANGELOG.md, docs/journal.md
 ```
+
+> 구현 메모(2026-11-18): 소유자가 2026-11-17에 모든 저장소의 Node 26 이전을 확인했다(외부 선행의 소유자 확인 충족). 옛 판 호출자 여섯의 이전 PR 상태는 병합 PR 본문에 적는다. `B2 alias default registry` 시험이 실제 `versions.json`을 읽으면서 정합 값을 상수 22.23.1로 두어 축 상향에 결박돼 있어 함께 고쳤다. [evidence](../evidence/t029-node-axis.md).
 
 ## 수용 기준
 

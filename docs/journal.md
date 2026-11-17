@@ -1,3 +1,10 @@
+## 2026-11-18 — T-029 구현: 공통 Node 축 26.13.1
+
+- 소유자가 2026-11-17에 모든 저장소의 Node 26 이전을 확인했다. `versions.json` `axes.node.recommended` 26.13.1·`image` `node:26.13.1-bookworm-slim`, common `.nvmrc`·`engines.node`·lock을 같은 값으로. `frontend.yml`·`consumer-smoke.yml`은 `.nvmrc`(`node-version-file`)와 `axes.npm.recommended`를 읽는다. npm 축·floor·`@types/node`는 그대로.
+- guard를 PR head로 고정한 fixture 소비자 실행에서 `test:toolchain`의 `B2 alias default registry` 시험이 실패했다. 실제 `versions.json`을 기본 registry로 읽으면서 정합 선언은 상수 22.23.1이던 결박이라, 그 값을 실제 `versions.json`에서 읽게 고쳤다. 고친 head에서 guard는 Node 26.13.1·npm 12.0.1로 PASS. [evidence](evidence/t029-node-axis.md).
+- 공식 `node:26.13.1-bookworm-slim` index digest `sha256:5df79989ed685e09f0a98019db4cebfb22fb9df1a53c0161664a011f7ff6b0f1`(2026-11-18 조회)를 evidence에 적었다. `versions.json`은 digest를 싣지 않는다.
+- 병합 조건: 옛 판 호출자 여섯(pinvi #778·weather #250·transport #209·docker-manager #612·geo #640·concierge #271) 전부 병합.
+
 ## 2026-11-18 — T-024 병합, 채택 커밋 기록
 
 - PR #63을 squash 병합했다. 채택 커밋은 `e18d1892dcc3915a5e6e57ccad550a852b793780`. 병합 커밋 트리는 리뷰·CI를 마친 head와 같다.
