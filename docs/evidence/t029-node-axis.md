@@ -34,3 +34,18 @@ linux/arm64/v8 `sha256:8261241c4197285eaeca819863dab5042cd1f9147b000670f4e773f4d
 첫 실행의 실패는 `B2 alias default registry` 시험이 실제 `versions.json`을 기본 registry로 읽으면서 정합 선언은 상수 22.23.1로 만들던 결박이었다. 축을 올리면 언제나 깨지는 시험이라 정합 값을 실제 `versions.json`에서 읽게 고쳤다.
 
 기존 selftest(`frontend-guard-pinned-ref`, 고정 시험 ref `81810cc`의 Node 24.22.3)는 guard 자신의 Node가 ref에서 선택됨을 계속 보인다.
+
+## 생성 정책·tarball 불변
+
+docs CI `packages` job이 보관한 배포 후보 pack(`common-release-packs-<source SHA>`)을 main과 PR head에서 내려받아 비교했다.
+
+| 파일 | main `c9e57d6`([44188150909](https://github.com/digitie/kor-travel-common/actions/runs/44188150909)) | PR head `c31fcaa`([44192052384](https://github.com/digitie/kor-travel-common/actions/runs/44192052384)) |
+|---|---|---|
+| `kor-travel-ui-0.2.1.tgz` | `f1a8212bef2b171c0f7a209d2ee893750cb74f6cb8a89766bd6a62c73d62de6c` | 같음 |
+| `kor-travel-tokens-0.1.2.tgz` | `c6e2e27d716d5db7c9157f412cfd28d941536c032ce702a8cceb32f2a0c16253` | 같음 |
+| `kor-travel-toast-0.1.1.tgz` | `30a5b2ee7b391791474addda15fe4ce629e820889f02010123273dd4f9cda222` | 같음 |
+| `frontend-dependencies.json` | `6aba422cf160ca8935c26101a2575e6b56c02ea9c117e67194acc3f29ffc00aa` | 같음(파일 미변경) |
+
+## PR CI(Node 26.13.1)
+
+`common frontend` job([44192052315](https://github.com/digitie/kor-travel-common/actions/runs/44192052315))이 `node: v26.13.1`로 `npm ci --engine-strict`, `check:toolchain`("Node 26.13.1 / npm 12.0.1 도구 규칙 PASS"), `check:policy`, `test:toolchain`(90/90), 워크스페이스 시험을 통과했다. selftest의 `frontend-guard-pinned-ref`·`frontend guard (자기 ref와 어긋나면 실패)`도 통과했다.

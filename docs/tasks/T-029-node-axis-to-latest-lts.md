@@ -48,11 +48,11 @@ docs/standards/versions.md, docs/integration-map.md, CHANGELOG.md, docs/journal.
 
 ## 수용 기준
 
-- [ ] `npm ci --engine-strict && npm run check:toolchain`이 Node 26.13.1·npm 12.0.1에서 통과한다.
-- [ ] `npm run check:policy`·`npm run test:toolchain`·`npm test --workspaces`가 통과한다.
-- [ ] `frontend-dependencies.json`과 `ui`·`tokens`·`toast` tarball SHA-256이 바꾸기 전과 같다.
-- [ ] 이 커밋을 `common-ref`로 고정한 fixture 소비자에서 guard selftest가 Node 26.13.1로 통과한다(T-024가 guard 자신의 Node를 ref에서 고르게 했는지 확인. `frontend-consumer-guard.yml`·`frontend.yml`·`consumer-smoke.yml`의 적힌 `node-version`이 남아 있으면 이 task에서 고친다).
-- [ ] 병합 PR 본문에 외부 선행 각 항목의 상태와 근거 링크가 있다.
+- [x] `npm ci --engine-strict && npm run check:toolchain`이 Node 26.13.1·npm 12.0.1에서 통과한다.
+- [x] `npm run check:policy`·`npm run test:toolchain`·`npm test --workspaces`가 통과한다.
+- [x] `frontend-dependencies.json`과 `ui`·`tokens`·`toast` tarball SHA-256이 바꾸기 전과 같다.
+- [x] 이 커밋을 `common-ref`로 고정한 fixture 소비자에서 guard selftest가 Node 26.13.1로 통과한다(T-024가 guard 자신의 Node를 ref에서 고르게 했는지 확인. `frontend-consumer-guard.yml`·`frontend.yml`·`consumer-smoke.yml`의 적힌 `node-version`이 남아 있으면 이 task에서 고친다).
+- [x] 병합 PR 본문에 외부 선행 각 항목의 상태와 근거 링크가 있다.
 - [ ] 병합 커밋이 40자리로 integration map과 T-417에 있다.
 
 ## 검증 명령
