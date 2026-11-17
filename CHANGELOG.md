@@ -6,7 +6,7 @@
 
 ### 이관
 
-이 커밋을 호출 SHA와 `common-ref`로 함께 고정하는 소비자는 같은 PR에서 private anchor를 26.13.1로 옮긴다: 루트(또는 `root`) `.nvmrc`, `engines.node`(정확 `26.13.1`), CI `setup-node`의 Node, guard의 `node-dockerfiles`가 가리키는 Node Dockerfile의 `FROM node:26.13.1-<배포판>@sha256:<digest>`. npm(12.0.1)·`packageManager`는 그대로다. ref를 올리지 않은 소비자는 영향이 없다.
+이 커밋을 호출 SHA와 `common-ref`로 함께 고정하는 소비자는 같은 PR에서 Node를 26.13.1로 옮긴다: 기준 디렉터리(`root`)의 `.nvmrc`와 있으면 `.node-version`, 모든 anchor(`frontends[].package`·`toolchain-manifests`)의 정확 `engines.node`, CI `setup-node`의 Node, `node-dockerfiles`가 가리키는 Dockerfile의 **모든** Node `FROM`(`node:26.13.1-<배포판>@sha256:<digest>`). npm(12.0.1)·`engines.npm`·`packageManager`·`.npmrc`는 그대로이고, 새 Node stage마다 npm 12.0.1 명시 선택도 그대로 필요하다(Node 26 동봉 npm은 11.20.0). T-024 채택 커밋(`e18d189`) 이후 판을 호출하면서 ref를 올리지 않은 소비자는 영향이 없다. 옛 판(`97f8ed9`·`9e16393`)은 main 축을 읽으므로 그 호출자가 모두 옮긴 뒤에 병합한다.
 
 ## frontend guard ADR-019 판 — 2026-11-18
 

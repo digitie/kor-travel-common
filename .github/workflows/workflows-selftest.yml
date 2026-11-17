@@ -150,7 +150,7 @@ jobs:
           cat "$RUNNER_TEMP/out.txt"
           prepare; sed -i 's/"5\.0\.16"/"5.1.0"/' "$ws/consumer/package.json" "$ws/consumer/package-lock.json"
           expect_fail "정책 값(zustand을 main 값으로)" "zustand: dependencies 선언 5.1.0 != 5.0.16"
-          prepare; echo 26.13.1 > "$ws/consumer/.nvmrc"
+          prepare; jq -r '.axes.node.recommended' consumer/versions.json > "$ws/consumer/.nvmrc"
           expect_fail ".nvmrc(main 축으로)" ".nvmrc Node 버전 불일치"
           prepare; sed -i 's/npm@11\.20\.0/npm@12.0.1/' "$ws/consumer/package.json"
           expect_fail "packageManager(main 축으로)" "packageManager 버전 불일치"
