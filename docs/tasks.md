@@ -14,7 +14,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 
 ## 공통화 재조사 묶음 (2026-11-17)
 
-소유자 요청으로 다섯 저장소(pinvi·map·weather·transport·docker-manager)를 다시 조사해 만든 33개 task와, 2026-11-17 소유자 결정 뒤 더한 T-029다. 근거·판정·순서는 [공통화 재조사·계획](plan/commonization-plan-2026-11-17.md)이 정본이고 수용 기준은 각 상세 파일에 있다. ID는 [task 규칙](tasks-rule.md) §2의 대역을 따랐지만(기반 T-02x, UI T-21x~, Python T-31x, 소비자 T-4xx) 한 묶음으로 읽히도록 이 절에 모았다. 소비자 저장소 task는 그 저장소에서 실행하며 이 저장소는 수정하지 않는다. T-022가 끝나기 전에는 기존 T-2xx·T-3xx와 이 묶음의 관계를 계획 문서 §1.5와 §6의 '기존 task에 맡긴 것'으로 읽는다. 소유자 결정(2026-11-17): ADR-019·ADR-020 accepted(T-023 DONE, T-027의 외부 선행 충족), T-416 채택(Node 26.13.1, 공통 축 상향은 T-029), T-486b는 권고대로(영향 자료 먼저). T-025의 동결은 소비자별 호출 SHA 갱신 또는 당일 재vendor 확인(상세 파일의 외부 선행) 뒤에 병합한다.
+소유자 요청으로 다섯 저장소(pinvi·map·weather·transport·docker-manager)를 다시 조사해 만든 33개 task와, 2026-11-17 소유자 결정 뒤 더한 T-029다. 근거·판정·순서는 [공통화 재조사·계획](plan/commonization-plan-2026-11-17.md)이 정본이고 수용 기준은 각 상세 파일에 있다. ID는 [task 규칙](tasks-rule.md) §2의 대역을 따랐지만(기반 T-02x, UI T-21x~, Python T-31x, 소비자 T-4xx) 한 묶음으로 읽히도록 이 절에 모았다. 소비자 저장소 task는 그 저장소에서 실행하며 이 저장소는 수정하지 않는다. T-022가 끝나기 전에는 기존 T-2xx·T-3xx와 이 묶음의 관계를 계획 문서 §1.5와 §6의 '기존 task에 맡긴 것'으로 읽는다. 소유자 결정(2026-11-17): ADR-019·ADR-020 accepted(T-023 DONE, T-027의 외부 선행 충족), T-416 채택(Node 26.13.1, 공통 축 상향은 T-029), T-486b는 권고대로 영향 자료를 만들었으나 차단 조건에 걸려 구현하지 않았다(소유자 재결정 대기). T-025의 동결은 소비자별 호출 SHA 갱신 또는 당일 재vendor 확인(상세 파일의 외부 선행) 뒤에 병합한다.
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
@@ -50,7 +50,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 | [T-482b](tasks/T-482b-transport-retry-sensor-for-jobs.md) | READY | P3 | transport-dagster: job별 재시도 sensor 3개를 다중 job sensor 1개로 | 없음 |
 | [T-474](tasks/T-474-ktdm-guard-ref.md) | BLOCKED | P2 | ktdm: guard 호출 SHA를 채택 커밋으로 갱신 | T-024 |
 | [T-486a](tasks/T-486a-ktdm-api-http-health-probe.md) | READY | P1 | ktdm: map-api·pinvi-api healthcheck를 공통 HTTP probe로 교체 | 없음 |
-| [T-486b](tasks/T-486b-ktdm-shared-dagster-per-job-limit.md) | READY | P2 | ktdm: 공용 Dagster instance의 job별 한도와 run_retries 결정 자료와 구현 | 없음 |
+| [T-486b](tasks/T-486b-ktdm-shared-dagster-per-job-limit.md) | BLOCKED | P2 | ktdm: 공용 Dagster instance의 job별 한도와 run_retries 결정 자료와 구현 | 없음 |
 
 ## 저장소 기반
 

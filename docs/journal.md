@@ -1,3 +1,8 @@
+## 2026-11-17 — T-486b 영향 자료: 값별 한도 1 일반 규칙은 map 동시 run을 줄여 미채택
+
+- n150 공용 Dagster 최근 30일 41,116 run을 읽기 전용 GraphQL로 셌다. map의 `feature_update_request_queue_sensor`가 같은 job tag 값(`map/feature_update_request_worker`)으로 worker run을 tick당 최대 10개 내고 instance가 의도적으로 동시 4를 허용한다(실측 동시 실행 2·동시 존재 11). 적재 job도 동시 실행 2가 있었다. pinvi·concierge는 같은 값 동시 실행 최대 1, weather·transport는 odroid로 이전해 run 0.
+- task의 차단 조건에 걸려 일반 규칙을 구현하지 않았다(Manager PR 없음). `run_retries`는 pinvi `max_retries=1` job 다섯만 재시도하게 되므로 별도 결정. 소유자에게 (가)~(라)를 물었다. 자세한 표는 [T-486b](tasks/T-486b-ktdm-shared-dagster-per-job-limit.md).
+
 ## 2026-11-17 — 소유자 결정: ADR-019·ADR-020 accepted, T-416 Node 26.13.1, T-486b 권고대로
 
 - 소유자 답(원문): "ADR-019 … 추천안은 검사기가 각 서비스가 고정해 둔 common 버전에서 정책과 Node/npm 버전을 읽는 것입니다. / ADR-020 … 항목별로 수락·거부·보류를 정합니다. / Map의 Node 버전 고정 (T-416) … / 공용 Dagster의 job별 실행 한도와 재시도 설정 (T-486b) … — 이것들은 추천안 대로 node는 최신버전으로".
