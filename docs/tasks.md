@@ -2,7 +2,7 @@
 
 이 원장은 열린 task의 요약·선행 관계를 관리한다. 수용 기준·외부 선행·검증·evidence는 상세 파일, 현재 다음 한 작업은 [resume](resume.md), 실행 선택과 단계별 출구는 [통합 계획](plan/integration-plan.md)이 정본이다. 작성 문법은 [task 규칙](tasks-rule.md)을 따른다.
 
-총 143개의 상세 작업이 있다. 완료 24개는 완료 원장에 보존하고 열린 119개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
+총 144개의 상세 작업이 있다. 완료 24개는 완료 원장에 보존하고 열린 120개는 아래 표에서 관리한다. 패키지 실물·소비자 검증이 필요한 task는 해당 gate를 닫기 전 DONE으로 옮기지 않는다.
 
 ## 실행 대기열
 
@@ -14,7 +14,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 
 ## 공통화 재조사 묶음 (2026-11-17)
 
-소유자 요청으로 다섯 저장소(pinvi·map·weather·transport·docker-manager)를 다시 조사해 만든 32개 task다. 근거·판정·순서는 [공통화 재조사·계획](plan/commonization-plan-2026-11-17.md)이 정본이고 수용 기준은 각 상세 파일에 있다. ID는 [task 규칙](tasks-rule.md) §2의 대역을 따랐지만(기반 T-02x, UI T-21x~, Python T-31x, 소비자 T-4xx) 한 묶음으로 읽히도록 이 절에 모았다. 소비자 저장소 task는 그 저장소에서 실행하며 이 저장소는 수정하지 않는다. T-022가 끝나기 전에는 기존 T-2xx·T-3xx와 이 묶음의 관계를 계획 문서 §1.5와 §6의 '기존 task에 맡긴 것'으로 읽는다. 소유자 결정을 기다리는 것: T-416(Map 정확 Node/npm 핀), T-023의 ADR-019 채택, T-027의 선행인 ADR-020 채택, T-486b의 구현 단계.
+소유자 요청으로 다섯 저장소(pinvi·map·weather·transport·docker-manager)를 다시 조사해 만든 33개 task다. 근거·판정·순서는 [공통화 재조사·계획](plan/commonization-plan-2026-11-17.md)이 정본이고 수용 기준은 각 상세 파일에 있다. ID는 [task 규칙](tasks-rule.md) §2의 대역을 따랐지만(기반 T-02x, UI T-21x~, Python T-31x, 소비자 T-4xx) 한 묶음으로 읽히도록 이 절에 모았다. 소비자 저장소 task는 그 저장소에서 실행하며 이 저장소는 수정하지 않는다. T-022가 끝나기 전에는 기존 T-2xx·T-3xx와 이 묶음의 관계를 계획 문서 §1.5와 §6의 '기존 task에 맡긴 것'으로 읽는다. 소유자 결정을 기다리는 것: T-416(Map 정확 Node/npm 핀), T-023의 ADR-019 채택, T-027의 선행인 ADR-020 채택, T-486b의 구현 단계. T-025의 동결은 소비자별 호출 SHA 갱신 또는 당일 재vendor 확인(상세 파일의 외부 선행) 뒤에 병합한다.
 
 | Task | 상태 | 우선순위 | 제목 | 선행 |
 |---|---|---|---|---|
@@ -33,6 +33,7 @@ T-013 문서·계획 인계를 마쳤다. T-003 고지·SPDX를 완료했다. T-
 | [T-416](tasks/T-416-map-exact-node-npm-pin-decision.md) | BLOCKED | P1 | map: 정확 Node/npm 핀 채택 여부 결정 | 없음 |
 | [T-417](tasks/T-417-map-guard-ref-toolchain.md) | BLOCKED | P2 | map: guard 검사 코드 ref 갱신과 정확 Node/npm 도구 규칙 이관 | T-416, T-024 |
 | [T-418](tasks/T-418-map-ui-reexport-shims.md) | READY | P3 | map: ui 순수 재수출 shim을 공통 경로 직접 import로 | 없음 |
+| [T-419](tasks/T-419-map-ui-tokens-revendor-on-t025.md) | BLOCKED | P2 | map: T-025 릴리스 당일 ui·tokens 재vendor(T-417 미완일 때) | T-025 |
 | [T-480b](tasks/T-480b-map-api-http-health-probe.md) | READY | P1 | map-api: compose healthcheck를 공통 HTTP probe로 교체 | 없음 |
 | [T-424](tasks/T-424-pinvi-guard-ref.md) | BLOCKED | P2 | pinvi: guard 호출 SHA를 채택 커밋으로 갱신 | T-024 |
 | [T-484a](tasks/T-484a-pinvi-retry-sensor-for-jobs.md) | READY | P3 | pinvi: job별 재시도 sensor 5개를 다중 job sensor 1개로(API 정적 목록 포함) | 없음 |

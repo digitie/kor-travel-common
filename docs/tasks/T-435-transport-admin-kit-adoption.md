@@ -16,15 +16,16 @@ transport 관리자 프론트의 map과 같은 로컬 부품을 `@kor-travel/adm
 ## 고정 결정
 
 - T-415와 같다.
-- guard 호출 SHA와 `@kor-travel/ui`·`tokens` 버전은 이 PR에서 바꾸지 않는다. 공개 프론트(`frontend/`)는 부품을 쓰지 않으므로 건드리지 않는다.
+- admin-kit은 벤더한 날부터 중앙 정본과 대조돼야 한다. 옛 guard(main 정책을 읽음)는 그대로 대조한다. 새 guard(T-024)는 고정한 커밋의 정책에 admin-kit이 없으면 건너뛰므로, 호출 SHA를 T-221이 지정한 admin-kit 채택 커밋으로 올리는 것이 채택의 일부다. 그 커밋의 정책은 `ui`·`tokens`가 T-025 판이므로 함께 재vendor한다. transport는 workflow 하나가 두 프론트를 검사하므로 호출 SHA를 올리면 공개 프론트(`frontend/`)의 `ui`·`tokens`도 같은 PR에서 재vendor한다. 공개 프론트는 admin-kit을 쓰지 않는다.
 - transport 사본이 map과 다른 다섯 파일(`app-error-panel`·`filter-bar`·`section-card`·`status-label`·`error-recovery`)은 T-219·T-220이 고른 쪽을 따른다. `status-label`은 앱에 남는다.
 - 이 저장소는 다른 팀이 유지한다.
 
 ## 구현 범위
 
-1. 관리자 프론트의 `vendor/`에 admin-kit tarball을 더하고 `package.json`·lock·`common-artifacts.json`에 등록한다.
-2. 로컬 부품과 `lib/{format,error-recovery}.ts`를 공통 import로 바꾸고 지운다. `confirm-dialog`·`sonner.tsx`·로컬 `button.tsx`는 남긴다.
-3. `components/ui/empty.tsx`와 로컬 `empty-state.tsx`의 이중 구현을 T-219의 결정대로 하나로 한다.
+1. 첫 단계(앞선 PR 권장, [ADR-010](../adr/010-consumer-adoption-model.md) 결정 5): 호출하는 guard가 새 판(T-024)이면 호출 SHA와 `common-ref`를 T-221이 지정한 admin-kit 채택 커밋으로 올리고 `ui`·`tokens`를 그 커밋의 값(T-025 판)으로 재vendor한다. 옛 판(main 정책을 읽음)이면 `ui`·`tokens`는 T-025 릴리스 날 이미 올라와 있어 이 단계가 없다.
+2. 관리자 프론트의 `vendor/`에 admin-kit tarball을 더하고 `package.json`·lock·`common-artifacts.json`에 등록한다.
+3. 로컬 부품과 `lib/{format,error-recovery}.ts`를 공통 import로 바꾸고 지운다. `confirm-dialog`·`sonner.tsx`·로컬 `button.tsx`는 남긴다.
+4. `components/ui/empty.tsx`와 로컬 `empty-state.tsx`의 이중 구현을 T-219의 결정대로 하나로 한다.
 
 ## 범위 밖
 
@@ -44,11 +45,13 @@ transport 관리자 프론트의 map과 같은 로컬 부품을 `@kor-travel/adm
 ```text
 packages/kor-travel-transport-admin/frontend/{package.json,package-lock.json,common-artifacts.json,vendor/*}
 packages/kor-travel-transport-admin/frontend/{components,lib}/**
+frontend/{package.json,package-lock.json,common-artifacts.json,vendor/*}          # 새 guard일 때 ui·tokens 재vendor
+.github/workflows/ci.yml, .github/workflows/common-frontend-policy.yml          # 새 guard일 때
 ```
 
 ## 수용 기준
 
-- [ ] guard job이 지금 호출 SHA 그대로 두 프론트 항목 모두 통과한다.
+- [ ] guard job(두 프론트 항목): guard 실행이 admin-kit을 중앙 정본과 대조했고 통과한다(옛 guard면 호출 SHA 그대로, 새 guard면 admin-kit 채택 커밋). admin-kit이 없는 정책으로 건너뛴 통과는 인정하지 않는다.
 - [ ] 관리자 프론트의 의존성 검사·lint·type-check·단위·build가 통과한다.
 - [ ] 지운 파일 수와 줄 수를 PR에 적는다.
 - [ ] 6폭 화면 비교에서 의도하지 않은 차이가 0이다.

@@ -21,7 +21,7 @@ map 관리자 프론트의 `components/ui/*` 30개 가운데 13개(68줄)는 `ex
 
 ## 구현 범위
 
-1. 대상 13개: `tabs-variants`·`alert-dialog`·`breadcrumb`·`checkbox`·`data-table`·`native-select-option`·`popover`·`separator`·`skeleton`·`table`·`tabs`·`textarea`·`tooltip`. 호출부 import를 `@kor-travel/ui/<이름>`으로 바꾸고 파일을 지운다.
+1. 대상 13개: `tabs-variants`·`alert-dialog`·`breadcrumb`·`checkbox`·`data-table`·`native-select-option`·`popover`·`separator`·`skeleton`·`table`·`tabs`·`textarea`·`tooltip`. 호출부 import를 각 shim이 재수출하던 **원 경로와 원 이름**으로 바꾸고 파일을 지운다. 아홉 개는 `@kor-travel/ui/<같은 이름>`이다. 경로나 이름이 다른 넷: `tabs-variants` → `@kor-travel/ui/tabs`(`tabsListVariants`), `native-select-option` → `@kor-travel/ui/native-select`(`NativeSelectOption`), `data-table` → `@kor-travel/ui/virtual-table`(`DataTable` → `VirtualTable`, `DataTableClampCell` → `VirtualTableClampCell`. 타입 `DataTableProps`·`DataTableColumnMeta`·`DataTableEmptyState`는 이름이 같다), `alert-dialog`의 `AlertDialogClose` → `AlertDialogCancel`. `@kor-travel/ui`에는 `./tabs-variants`·`./native-select-option`·`./data-table` 하위 경로가 없다.
 2. `lib/utils.ts`의 `cn`을 쓰는 호출부를 `@kor-travel/ui/utils`로 바꾸고 파일을 지운다.
 3. 시험·mock의 경로 갱신.
 
@@ -50,6 +50,7 @@ docs/journal.md, docs/resume.md, docs/tasks.md
 ## 수용 기준
 
 - [ ] 13개 shim과 `lib/utils.ts`가 없고 `@/components/ui/<그 이름>`·`@/lib/utils` import가 0개다(grep).
+- [ ] `@kor-travel/ui/tabs-variants`·`@kor-travel/ui/native-select-option`·`@kor-travel/ui/data-table` import가 0개다(없는 하위 경로). 이름을 바꾼 넷의 호출부가 type-check를 통과한다.
 - [ ] lint·type-check·단위·`next build`·`check:dependencies`가 통과한다.
 - [ ] `vendor/`·`common-artifacts.json`·lock이 바뀌지 않았다.
 

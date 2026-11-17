@@ -19,6 +19,7 @@
 - `versions.json`에 정확 버전 축을 더하고 `frontendPolicy.packages`·`artifactPackages`에 넣는다. 프로필의 `required`·`runtimeRequired`에는 넣지 않는다. 모바일 프로필의 `forbidden`에 넣는다(`@kor-travel/ui`와 같다).
 - `frontend-artifacts.json`의 `sources`는 기존 패키지의 출처를 설명한다. 덮어쓰지 않고 이 패키지의 출처 커밋을 따로 더한다.
 - 같은 버전의 bytes를 다시 만들지 않는다.
+- 새 guard(T-024)를 쓰는 소비자는 자기가 고정한 커밋의 정책으로 검사받는다. 그 커밋이 이 task보다 앞이면 정책에 admin-kit이 없어 검사기가 건너뛴다. 그래서 이 task의 동결 병합 커밋을 **admin-kit 채택 커밋**으로 지정한다. 채택하는 소비자는 호출 SHA를 이 커밋으로 올리고 그 정책의 `ui`·`tokens` 값(T-025 판)으로 재vendor한다.
 
 ## 구현 범위
 
@@ -26,6 +27,7 @@
 2. `versions.json`·`frontend-dependencies.json`(생성)·`frontend-artifacts.json`·[frontend-libraries](../standards/frontend-libraries.md)의 생성 표.
 3. 동결 PR: artifact의 tarball을 원장에 기록하고 SHA-256을 PR 본문에 적는다.
 4. 소비자에게 알릴 것(벤더할 파일, `common-artifacts.json` 항목, 채택 task 번호)을 `docs/journal.md`와 [integration map](../integration-map.md)에 적는다.
+5. 동결 병합 커밋을 admin-kit 채택 커밋으로 문서에 40자리로 적는다. T-024 채택 커밋과 이 커밋 사이에 더해진 검사 규칙을 목록으로 적는다(없으면 없다고 적는다).
 
 ## 범위 밖
 
@@ -47,6 +49,8 @@ docs/journal.md, docs/resume.md, docs/integration-map.md
 - [ ] admin-kit를 선언한 소비자 fixture가 두 고정 검사기와 최신 검사기에서 통과한다(옛 검사기도 main 정책에서 새 산출물을 읽는다).
 - [ ] `ui`·`tokens`·`toast`의 정책 값과 tarball SHA-256이 이 PR 전과 같다.
 - [ ] PR head와 main push artifact의 admin-kit tarball SHA-256이 같다.
+- [ ] 새 guard fixture: 호출 ref가 이 task 이전이면 선언된 admin-kit을 건너뛰고(대조 없음), admin-kit 채택 커밋이면 중앙 정본과 대조한다(시험).
+- [ ] admin-kit 채택 커밋과, T-024 채택 커밋 뒤에 더해진 검사 규칙 목록이 문서에 있다.
 
 ## 검증 명령
 

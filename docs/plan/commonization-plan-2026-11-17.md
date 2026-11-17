@@ -272,7 +272,7 @@ guard는 검사 **코드**를 호출자가 고정한 커밋에서 받고(`C:.git
 
 ### 3.5 프론트엔드
 
-**K-50 관리자 공통 부품 묶음 — 나중에 공유(선택형 패키지).** MA·WA·TA 세 프론트에 **45개 파일(2,076줄)이 byte 단위로 같다** ✔(`cmp -s`로 다시 셈). `components/ui/*` 30개와 `confirm-dialog`·`copy-button`·`detail-list`·`empty-state`·`json-viewer`·`pagination-bar`·`stat-strip`·`status-badge`·`status-badge-variants`, `lib/{format,occurrence-key,string-list,utils}.ts`, `app/error.tsx`·`app/global-error.tsx`다. MA=WA만 같은 파일이 9개(1,317줄) 더 있다. 그중 다섯(`app-error-panel`·`filter-bar`·`section-card`·`lib/status-label.ts`·`lib/error-recovery.ts`)은 TA에 조금 다른 판이 있고(각 16·23·2·2·2줄 차이 ✔), 넷(`selectable-row`·`multi-filter-combobox`·`lib/admin-auth-events.ts`·`providers/query-client-provider.tsx`)은 TA에 없다 ✔. 표류가 이미 보인다: `help-tip.tsx`는 W·T가 M보다 새 판이다. PW 관리자는 같은 묶음을 일부러 다시 칠한 이식본이다(약 2,330줄). [ui-contract](../standards/ui-contract.md) §4는 이 부품들(`EmptyState`·`StatStrip`·`StatusBadge`·`DetailList`·`JsonViewer`·`CopyButton`·`AppErrorPanel`·`HelpTip`·`FormField*`·`AdminPageHeader`·`AdminSkipLink`)을 계약으로 적었지만 `packages/ui/src`에는 없다 ✔. 같은 문서는 엔진을 `@base-ui/react`라고 적는데(`ui-contract.md:19,32` ✔) 실물은 `radix-ui`다. 기존 task T-203·T-205·T-206(HelpTip)·T-208(Pager)·T-209·T-210이 이 범위와 겹친다. 그대로 옮길 수 없는 의존도 있다: `status-badge`·`status-badge-variants`·`stat-strip`은 앱 사전 `@/lib/status-label`을, `stat-strip`·`detail-list`는 `next/link`와 `help-tip`을, `copy-button`은 `sonner`를, `help-tip`은 `zustand`를 import한다 ✔. `@kor-travel/ui`에는 `next` peer가 없다. 그래서 사전·링크·토스트는 주입으로 바꿔야 한다. `confirm-dialog`는 ui-contract가 엔진 선택을 앱 소유로 두고 공통 API를 T-508로 미뤘으므로 묶음에서 뺀다. 45개 중 30개(846줄)는 `components/ui/*`이고 그 가운데 13개(68줄)는 `@kor-travel/ui/*`를 그대로 재수출하는 shim이다 ✔(K-66). 나머지 17개는 로컬 클래스를 덧붙인 얇은 wrapper·variants·폼이다. 묶음에 넣지 않고 앱에 남기는 동일 파일: `components/ui/sonner.tsx`(토스트 엔진은 앱 소유), `components/ui/button.tsx`(로컬 wrapper. 공통 `Button`에 spinner가 생기면 지운다), `components/ui/data-table.tsx`(재수출), `lib/occurrence-key.ts`·`lib/string-list.ts`(도메인 보조), `lib/utils.ts`(`cn`은 `@kor-travel/ui/utils`로 바꾼다, K-66), `app/error.tsx`·`app/global-error.tsx`(Next 규약 파일. `AppErrorPanel`을 부른다). `empty-state`는 공통에 이미 `empty`가 있다(`C:packages/ui/src/empty.tsx` ✔). 둘 중 무엇을 남길지 T-219가 정한다. 이득: M·W·T에서 재수출 shim과 앱에 남는 파일을 빼고 각 800~1,000줄 안팎(어림), PW 관리자가 토큰 이름 매핑을 받아들이면 600~900줄. 비용: 클래스가 로컬 어휘(`text-text-secondary`, `rounded-control`)라 파일 이동이 아니라 이식이다. `ui`의 하위 경로로 넣으면 `ui` 버전이 올라 부품을 쓰지 않는 소비자(P·D·geo·concierge)까지 재vendor한다. 그래서 **선택형 산출물 패키지 `@kor-travel/admin-kit`**로 낸다(§4.8의 비교). 쓰는 소비자(M·W·T)만 벤더한다. `status-label.ts`는 도메인 사전이라 앱에 남는다.
+**K-50 관리자 공통 부품 묶음 — 나중에 공유(선택형 패키지).** MA·WA·TA 세 프론트에 **45개 파일(2,076줄)이 byte 단위로 같다** ✔(`cmp -s`로 다시 셈). `components/ui/*` 30개와 `confirm-dialog`·`copy-button`·`detail-list`·`empty-state`·`json-viewer`·`pagination-bar`·`stat-strip`·`status-badge`·`status-badge-variants`, `lib/{format,occurrence-key,string-list,utils}.ts`, `app/error.tsx`·`app/global-error.tsx`다. MA=WA만 같은 파일이 9개(1,317줄) 더 있다. 그중 다섯(`app-error-panel`·`filter-bar`·`section-card`·`lib/status-label.ts`·`lib/error-recovery.ts`)은 TA에 조금 다른 판이 있고(각 16·23·2·2·2줄 차이 ✔), 넷(`selectable-row`·`multi-filter-combobox`·`lib/admin-auth-events.ts`·`providers/query-client-provider.tsx`)은 TA에 없다 ✔. 표류가 이미 보인다: `help-tip.tsx`는 W·T가 M보다 새 판이다. PW 관리자는 같은 묶음을 일부러 다시 칠한 이식본이다(약 2,330줄). [ui-contract](../standards/ui-contract.md) §4는 이 부품들(`EmptyState`·`StatStrip`·`StatusBadge`·`DetailList`·`JsonViewer`·`CopyButton`·`AppErrorPanel`·`HelpTip`·`FormField*`·`AdminPageHeader`·`AdminSkipLink`)을 계약으로 적었지만 `packages/ui/src`에는 없다 ✔. 같은 문서는 엔진을 `@base-ui/react`라고 적는데(`ui-contract.md:19,32` ✔) 실물은 `radix-ui`다. 기존 task T-203·T-205·T-206(HelpTip)·T-208(Pager)·T-209·T-210이 이 범위와 겹친다. 그대로 옮길 수 없는 의존도 있다: `status-badge`·`status-badge-variants`·`stat-strip`은 앱 사전 `@/lib/status-label`을, `stat-strip`·`detail-list`는 `next/link`와 `help-tip`을, `copy-button`은 `sonner`를, `help-tip`은 `zustand`를 import한다 ✔. `@kor-travel/ui`에는 `next` peer가 없다. 그래서 사전·링크·토스트는 주입으로 바꿔야 한다. `confirm-dialog`는 ui-contract가 엔진 선택을 앱 소유로 두고 공통 API를 T-508로 미뤘으므로 묶음에서 뺀다. 45개 중 30개(846줄)는 `components/ui/*`이고 그 가운데 13개(68줄)는 `@kor-travel/ui/*`를 그대로 재수출하는 shim이다 ✔(K-66). 나머지 17개는 로컬 클래스를 덧붙인 얇은 wrapper·variants·폼이다. 묶음에 넣지 않고 앱에 남기는 동일 파일: `components/ui/sonner.tsx`(토스트 엔진은 앱 소유), `components/ui/button.tsx`(로컬 wrapper. 공통 `Button`에 spinner가 생기면 지운다), `lib/occurrence-key.ts`·`lib/string-list.ts`(도메인 보조), `lib/utils.ts`(`cn`은 `@kor-travel/ui/utils`로 바꾼다, K-66), `app/error.tsx`·`app/global-error.tsx`(Next 규약 파일. `AppErrorPanel`을 부른다). `empty-state`는 공통에 이미 `empty`가 있다(`C:packages/ui/src/empty.tsx` ✔). 둘 중 무엇을 남길지 T-219가 정한다. 이득: M·W·T에서 재수출 shim과 앱에 남는 파일을 빼고 각 800~1,000줄 안팎(어림), PW 관리자가 토큰 이름 매핑을 받아들이면 600~900줄. 비용: 클래스가 로컬 어휘(`text-text-secondary`, `rounded-control`)라 파일 이동이 아니라 이식이다. `ui`의 하위 경로로 넣으면 `ui` 버전이 올라 부품을 쓰지 않는 소비자(P·D·geo·concierge)까지 재vendor한다. 그래서 **선택형 산출물 패키지 `@kor-travel/admin-kit`**로 낸다(§4.8의 비교). 쓰는 소비자(M·W·T)만 벤더한다. `status-label.ts`는 도메인 사전이라 앱에 남는다.
 
 **K-51 로컬 경로 정규화(`sanitizeLocalPath`) — 지금 공유(채택 공백).** `@kor-travel/ui/navigation`이 `sanitizeLocalPath`를 내보낸다(`C:packages/ui/src/navigation.ts:5-17` ✔). W와 T의 관리자 프론트는 같은 목적의 로컬 구현 `lib/navigation.ts`를 따로 둔다(`W:WA/lib/navigation.ts` ✔, `T:TA/lib/navigation.ts` ✔). W는 서버 쪽 호출부 셋이 로컬을, client 로그인 폼이 공통을 쓴다(`W:WA/components/login-form.tsx:5` ✔). T는 서버 쪽과 client 모두 로컬을 쓴다(`T:TA/components/login-form.tsx:7` ✔). 구현이 세 벌이고 모양이 다르다. 공통은 `string | null | undefined`를 받고 인코딩된 경계 문자와 제어 문자를 거절한다. 로컬 둘은 `unknown`을 받고 앞뒤 공백을 지우고 500자를 넘으면 거절한다(공통에는 길이 상한이 없다). 호출부는 `unknown`을 넘긴다(`W:WA/app/api/auth/login/route.ts:172,227` ✔, `T:TA/app/api/auth/login/route.ts:23` ✔). `fallback` 인자를 넘기는 호출부는 없다. 기준 커밋에서 W 로컬 구현에는 다른 두 구현에 있는 검증 하나가 빠져 있었고, 조사 뒤 kor-travel-weather #244(`8c3b4744`)가 그 검증을 더했다(운영 반영은 weather 배포 뒤). 남은 일은 중복 제거다. 로컬 구현을 통째로 지우면 타입 검사가 깨지고 trim·길이 상한이 사라지므로, 로컬에는 타입 좁히기·trim·길이 상한만 남기고 판정 본체는 공통 함수를 부르게 한다. 패키지 변경이 없어 함대 비용이 0이다. 동작은 달라진다. 공통 함수는 값 **어디에든**(query·hash 포함) `%20`·`%25`·공백·제어 문자가 있으면 거절한다(`C:packages/ui/src/navigation.ts:9` ✔). 지금 로컬 구현은 `/runs?q=a%20b`를 그대로 돌려주지만 바꾼 뒤에는 `/`가 된다. 이 변화가 받아들일 수 없으면 중복 제거를 하지 않는다(공통 규칙을 바꾸는 것은 `ui` 버전 변경이다).
 
@@ -294,7 +294,7 @@ guard는 검사 **코드**를 호출자가 고정한 커밋에서 받고(`C:.git
 
 **K-61~K-65 — 공유하지 않음(K-64는 나중에).** 팔레트 코드 `P-01`은 M에서 `#1f77b4`, P에서 `#E53935`다(`M:packages/map-marker-react/src/palette.ts:38`, `P:packages/design-tokens/src/colors.ts:55` ✔). 같은 코드로 공유하면 한쪽 색이 조용히 바뀐다. 클러스터는 데이터 모양에 묶여 네 구현이다. e2e는 저장소별 운영 gate다. 다만 W·T 사이에는 같은 파일이 있다(`e2e/fixtures/native-delay-proxy.mjs` 동일, `address-refresh.spec.ts`는 기본 포트 한 줄 차이 ✔). 그것은 두 저장소 안의 정리다. vitest 설정은 9~33줄이고 중복은 import 한 줄이다. ESLint는 plugin 묶음 다섯·a11y 심각도 셋이 의도적이라 preset은 나중 일이다. doctor 플래그 한 줄은 [frontend-stack](../standards/frontend-stack.md)에 적는 것으로 충분하다.
 
-**K-66 `@kor-travel/ui` 순수 재수출 shim — 지금 공유(채택 공백).** M·W·T의 `components/ui/*` 30개 가운데 13개(68줄)는 `export … from "@kor-travel/ui/…"`뿐이다 ✔(`tabs-variants`·`alert-dialog`·`breadcrumb`·`checkbox`·`data-table`·`native-select-option`·`popover`·`separator`·`skeleton`·`table`·`tabs`·`textarea`·`tooltip`). `lib/utils.ts`의 `cn`도 `@kor-travel/ui/utils`와 같다. 호출부 import를 공통 경로로 바꾸고 shim을 지우는 일은 릴리스가 필요 없고 함대 비용이 0이다. 줄 수 이득은 작다. 가치는 K-50 채택 때 건드릴 파일을 줄이는 데 있다.
+**K-66 `@kor-travel/ui` 순수 재수출 shim — 지금 공유(채택 공백).** M·W·T의 `components/ui/*` 30개 가운데 13개(68줄)는 `export … from "@kor-travel/ui/…"`뿐이다 ✔(`tabs-variants`·`alert-dialog`·`breadcrumb`·`checkbox`·`data-table`·`native-select-option`·`popover`·`separator`·`skeleton`·`table`·`tabs`·`textarea`·`tooltip`). `lib/utils.ts`의 `cn`도 `@kor-travel/ui/utils`와 같다. 호출부 import를 각 shim이 재수출하던 원 경로와 원 이름으로 바꾸고 shim을 지우는 일은 릴리스가 필요 없고 함대 비용이 0이다. 넷은 경로나 이름이 shim과 다르다 ✔: `tabs-variants`는 `@kor-travel/ui/tabs`, `native-select-option`은 `@kor-travel/ui/native-select`, `data-table`은 `@kor-travel/ui/virtual-table`(`VirtualTable as DataTable`, `VirtualTableClampCell as DataTableClampCell`), `alert-dialog`는 `AlertDialogCancel as AlertDialogClose`다. `@kor-travel/ui`에는 `./tabs-variants`·`./native-select-option`·`./data-table` 하위 경로가 없다 ✔. 줄 수 이득은 작다. 가치는 K-50 채택 때 건드릴 파일을 줄이는 데 있다.
 
 ### 3.6 Ops·CI
 
@@ -329,13 +329,13 @@ guard는 검사 **코드**를 호출자가 고정한 커밋에서 받고(`C:.git
 
 1. common이 새 guard workflow를 낸다([T-024](../tasks/T-024-guard-model-implementation.md)). 옛 SHA를 호출하는 소비자는 지금과 똑같이 동작한다(main을 읽는다). 아무도 실패하지 않는다.
 2. 소비자가 호출 SHA를 그 커밋으로 올린다(pinvi [T-424](../tasks/T-424-pinvi-guard-ref.md), weather [T-467](../tasks/T-467-weather-guard-ref.md), transport [T-436](../tasks/T-436-transport-guard-ref.md), docker-manager [T-474](../tasks/T-474-ktdm-guard-ref.md), map [T-417](../tasks/T-417-map-guard-ref-toolchain.md)). 올린 뒤로는 main의 정책 변경이 그 소비자를 깨지 않는다.
-3. 호출 SHA를 "최신"이 아니라 **T-024가 지정한 채택 커밋 하나**로 올린다. #1504는 SHA를 올리면서 그 뒤에 더해진 규칙까지 받아 실패했다. T-024는 그 커밋의 검사기를 각 소비자의 현재 main에 읽기 전용으로 돌려 걸리는 규칙을 미리 적는다.
+3. 호출 SHA를 "최신"이 아니라 **T-024가 지정한 채택 커밋 하나**로 올린다. #1504는 SHA를 올리면서 그 뒤에 더해진 규칙까지 받아 실패했다. T-024는 그 커밋의 검사기를 각 소비자의 현재 main에 읽기 전용으로 돌려 걸리는 규칙을 미리 적는다. T-025 릴리스 뒤에 옮기는 소비자는 이미 T-025 판을 벤더했으므로 T-025가 적어 둔 동결 커밋으로 올린다.
 4. Map은 호출 SHA를 올리면 도구 규칙에 걸린다(K-78). 정확 핀을 채택할지는 소유자 결정이다([T-416](../tasks/T-416-map-exact-node-npm-pin-decision.md)). 채택하지 않으면 Map은 옛 guard에 남아 지금처럼 main 정책 변경마다 당일 재vendor한다. 다른 task는 Map의 결정을 기다리지 않는다.
 5. geo·concierge도 같은 guard의 소비자다(`97f8ed9` 호출). 이번 범위 밖이라 task가 없다. 올리지 않으면 지금과 같을 뿐이고, 이 계획의 어느 단계도 두 저장소의 채택을 선행으로 두지 않는다.
 
 (다)는 따로 고친다([T-025](../tasks/T-025-decouple-embedded-policy.md)). 각 패키지는 **자기 것만**(자기 peer 범위와 자기 식별) 싣고, 소비자의 로컬 `check:dependencies`는 그것만 검사한다. 함대 전체의 정확 버전 대조는 중앙 guard의 몫으로 남긴다. 그러면 소비자의 `check:dependencies` 명령 줄은 바뀌지 않고, 정책에 무관한 패키지를 더하거나 바꿔도 `ui`·`tokens`·`toast`가 다시 pack되지 않는다. 다른 방식(tarball에서 사본을 빼고 정책 파일 경로를 인자로 받기)은 택하지 않는다: 일곱 소비자 프론트가 인자 없이 tarball 안의 검사기를 실행하고 CI가 그것을 막으므로 모든 소비자의 명령 줄을 바꿔야 하고, 정책 파일을 소비자가 벤더하면 K-02의 비용이 소비자로 옮겨갈 뿐이다.
 
-T-025 자체는 세 패키지의 pack 내용을 바꾸므로 **한 번은** 세 패키지의 버전이 오른다. 이 릴리스를 소비자가 새 guard로 옮긴 뒤에 내면 아무도 깨지지 않는다. 옮기지 않은 소비자는 그날 재vendor해야 한다(지금과 같다). T-025는 릴리스 전에 옮기지 않은 소비자 목록을 공지한다.
+T-025 자체는 세 패키지의 pack 내용을 바꾸므로 **한 번은** 세 패키지의 버전이 오른다. patch 올림이다(`ui` 0.2.2·`tokens` 0.1.3·`toast` 0.1.2, breaking 없음). 이 릴리스를 소비자가 새 guard로 옮긴 뒤에 내면 그 소비자는 깨지지 않는다. 옮기지 않은 소비자(main 정책을 읽는 옛 guard)는 그날 재vendor해야 한다(지금과 같다). 그래서 T-025의 외부 선행에 적었다: pinvi·docker-manager의 호출 SHA 갱신(T-424·T-474)이 병합됐을 것, weather·transport는 갱신(T-467·T-436)이 병합됐거나 그 팀이 당일 재vendor를 확인했을 것. Map은 T-416의 답을 기다리는 동안 옛 guard(`55a921b`)에 남으므로 그날의 재vendor를 task로 둔다([T-419](../tasks/T-419-map-ui-tokens-revendor-on-t025.md)). T-417이 먼저 끝나면 T-419는 필요 없다. geo·concierge에는 릴리스 전에 공지한다.
 
 ### 4.2 원장과 standards를 실물에 맞춤(K-03)
 
@@ -407,11 +407,11 @@ def record_collection_outcome(context, outcome: str) -> None:
 | 재vendor해야 하는 소비자 | `ui`를 벤더하는 전부(P·M·W·T·D·geo·concierge) | 부품을 쓰는 M·W·T만 |
 | 릴리스 절차 | 기존 패키지의 현재 값이 바뀌므로 §4.1의 모델에 묶인다. 안 2라면 예고·채택·마감 세 단계 | 새 패키지라 직전 현재 값이 없다. 정책에 더하기만 한다 |
 | 마감이 기다리는 것 | 다른 팀 두 저장소와 범위 밖 두 저장소의 채택 | 없음 |
-| Map의 T-416 결정 | 채택 전에 필요(옛 검사기로는 창 동안 새 버전을 못 받음) | 필요 없음. `55a921b` 검사기도 main 정책에서 새 산출물을 읽어 검사한다 |
-| 드는 것 | 없음 | `ui`에 대한 peer(범위로 선언해 `ui` patch마다 올리지 않게 한다), 릴리스 파이프라인이 한 패키지를 더 pack, 원장·정책에 한 항목 |
+| Map의 T-416 결정 | 채택 전에 필요(옛 검사기로는 창 동안 새 버전을 못 받음) | 필요 없음. `55a921b` 검사기도 main 정책에서 새 산출물을 읽어 검사한다(`ui`·`tokens`는 T-419로 T-025 판) |
+| 드는 것 | 없음 | `ui`·`tokens`에 대한 peer(`@kor-travel/ui` `>=0.2.1 <0.3.0`, `@kor-travel/tokens` `>=0.1.2 <0.2.0`. `ui` patch마다 올리지 않는다), 릴리스 파이프라인이 한 패키지를 더 pack, 원장·정책에 한 항목. 새 guard를 쓰는 소비자는 채택할 때 호출 SHA를 올린다(아래) |
 | 선행 | T-024(모델) | T-025(내장 정책 축소). 지금은 정책에 패키지를 더하는 것만으로 `ui`·`tokens`·`toast`가 다시 pack된다(§2.2) |
 
-**(b)를 택한다.** 부품을 쓰지 않는 네 소비자의 비용이 0이 되고, 마감 단계와 그 단계가 다른 팀을 기다리는 일이 없어지고, Map이 소유자 결정을 기다리지 않는다. `@kor-travel/toast`가 같은 모양의 선례다. 드는 것은 패키지 하나의 관리다. 유일한 선행은 T-025다.
+**(b)를 택한다.** 부품을 쓰지 않는 네 소비자가 이 묶음 때문에 치르는 비용이 0이 되고, 마감 단계와 그 단계가 다른 팀을 기다리는 일이 없어지고, Map이 소유자 결정을 기다리지 않는다. `@kor-travel/toast`가 같은 모양의 선례다. 드는 것은 패키지 하나의 관리다. 유일한 선행은 T-025다.
 
 - 대상: 새 패키지 `packages/admin-kit` → `@kor-travel/admin-kit`. `artifactPackages`에 넣고 프로필 필수 목록에는 넣지 않는다.
 - 선행: T-022(원장 정합), T-025(내장 정책 축소).
@@ -421,9 +421,10 @@ def record_collection_outcome(context, outcome: str) -> None:
 - 넣지 않는 것: `ConfirmDialog`(ui-contract가 앱 소유로 둠, T-508), `validateForm`(map 한 곳), `status-label.ts`(도메인 사전), §3.5 K-50에 적은 앱 잔류 파일.
 - 원천은 M·W·T에서 같은 파일이다. `help-tip`은 W·T 판(더 새 것)을 쓴다. transport 판이 다른 다섯 파일은 차이를 읽고 고른다. 클래스 어휘는 `--kt-*` 의미 토큰으로 옮긴다.
 - [T-221](../tasks/T-221-admin-kit-0-1-0-freeze.md)이 0.1.0을 얼려 정책에 선택형 산출물로 더한다.
-- 채택은 쓰는 저장소만 한다: map([T-415](../tasks/T-415-map-admin-kit-adoption.md)) → weather([T-466](../tasks/T-466-weather-admin-kit-adoption.md))·transport([T-435](../tasks/T-435-transport-admin-kit-adoption.md)). map을 먼저 권한다(원천이고 시각 회귀 기준이 있다). 선행 관계는 아니다. 채택 PR은 guard 호출 SHA를 올릴 필요가 없다.
-- pinvi 관리자는 재도색 이식본이고 docker-manager의 부품은 다른 구현이다. 둘은 아무것도 하지 않아도 된다.
-- **릴리스 없이 지금 할 수 있는 것**(K-66): `components/ui/*`의 순수 재수출 shim 13개와 `lib/utils.ts`의 `cn`을 공통 경로 직접 import로 바꾼다(map [T-418](../tasks/T-418-map-ui-reexport-shims.md), weather [T-468](../tasks/T-468-weather-ui-reexport-shims.md), transport [T-437](../tasks/T-437-transport-ui-reexport-shims.md)). 뒤의 채택 PR이 작아진다.
+- 채택은 쓰는 저장소만 한다: map([T-415](../tasks/T-415-map-admin-kit-adoption.md)) → weather([T-466](../tasks/T-466-weather-admin-kit-adoption.md))·transport([T-435](../tasks/T-435-transport-admin-kit-adoption.md)). map을 먼저 권한다(원천이고 시각 회귀 기준이 있다). 선행 관계는 아니다.
+- **채택과 guard 호출 SHA.** admin-kit은 벤더한 날부터 중앙 정본과 대조돼야 한다. 옛 guard(main 정책을 읽음)는 그대로 대조한다. 새 guard(T-024)는 소비자가 고정한 커밋의 정책으로 검사하는데, 그 커밋이 T-221보다 앞이면 정책에 admin-kit이 없어 검사기가 건너뛴다(`check_frontend_dependencies.mjs:99-100,144-145@97f8ed9` ✔). 통과는 하지만 벤더한 bytes가 대조되지 않는다. 두 길을 비교했다: (1) 그 공백을 문서에 적어 두고 소비자가 나중에 SHA를 올릴 때 대조가 시작되게 둔다, (2) 호출 SHA를 T-221이 지정한 admin-kit 채택 커밋으로 올리는 것을 채택의 첫 단계로 넣는다. **(2)를 택한다.** 대조되지 않는 벤더 산출물을 두지 않는 것이 원장의 목적이고, '새 산출물을 받으려면 고정 커밋을 그 산출물을 아는 곳으로 옮긴다'는 고정 커밋 모델의 원래 뜻이다. 그 커밋의 정책은 `ui`·`tokens`가 T-025 판이므로 첫 단계에서 함께 재vendor한다(앞선 PR로 나누기를 권한다). 시점은 채택하는 저장소가 정하고 다른 저장소를 기다리지 않는다. 옛 guard에 남은 Map은 이 단계가 없다(T-419로 이미 T-025 판).
+- pinvi 관리자는 재도색 이식본이고 docker-manager의 부품은 다른 구현이다. 둘은 이 묶음 때문에 할 일이 없다. T-025 릴리스 날의 조건은 §4.1에 있다(호출 SHA 갱신이 먼저 병합돼 있으면 그날도 할 일이 없다).
+- **릴리스 없이 지금 할 수 있는 것**(K-66): `components/ui/*`의 순수 재수출 shim 13개와 `lib/utils.ts`의 `cn`을 각 shim의 원 경로·원 이름 직접 import로 바꾼다(map [T-418](../tasks/T-418-map-ui-reexport-shims.md), weather [T-468](../tasks/T-468-weather-ui-reexport-shims.md), transport [T-437](../tasks/T-437-transport-ui-reexport-shims.md)). 뒤의 채택 PR이 작아진다.
 
 ### 4.9 나중 묶음의 첫 걸음
 
@@ -504,7 +505,8 @@ def record_collection_outcome(context, outcome: str) -> None:
 | 2 | [T-436](../tasks/T-436-transport-guard-ref.md) | kor-travel-transport | guard 호출 SHA를 채택 커밋으로 | T-024 | B |
 | 2 | [T-474](../tasks/T-474-ktdm-guard-ref.md) | kor-travel-docker-manager | guard 호출 SHA를 채택 커밋으로 | T-024 | B |
 | 2 | [T-417](../tasks/T-417-map-guard-ref-toolchain.md) | kor-travel-map | guard 호출 SHA와 도구 규칙 이관(T-416이 채택일 때) | T-416, T-024 | B |
-| 3 | [T-025](../tasks/T-025-decouple-embedded-policy.md) | common | 내장 정책을 패키지 자기 것으로 줄이고 세 패키지 릴리스 | T-023, T-024 | — |
+| 3 | [T-025](../tasks/T-025-decouple-embedded-policy.md) | common | 내장 정책을 패키지 자기 것으로 줄이고 세 패키지 patch 릴리스(외부 선행: 소비자 호출 SHA 갱신 또는 당일 재vendor 확인) | T-023, T-024 | — |
+| 4 | [T-419](../tasks/T-419-map-ui-tokens-revendor-on-t025.md) | kor-travel-map | T-025 릴리스 당일 `ui`·`tokens` 재vendor(T-417 미완일 때) | T-025 | — |
 
 **원장·standards**
 
@@ -519,9 +521,9 @@ def record_collection_outcome(context, outcome: str) -> None:
 | 1 | [T-219](../tasks/T-219-admin-kit-package-self-contained.md) | common | `@kor-travel/admin-kit` 골격과 앱 의존 없는 부품 | T-022, T-025 | — |
 | 2 | [T-220](../tasks/T-220-admin-kit-injected.md) | common | 사전·링크 주입 부품과 폼·오류 | T-219 | — |
 | 3 | [T-221](../tasks/T-221-admin-kit-0-1-0-freeze.md) | common | admin-kit 0.1.0 동결과 선택형 산출물 등록 | T-219, T-220 | — |
-| 4 | [T-415](../tasks/T-415-map-admin-kit-adoption.md) | kor-travel-map | admin-kit 채택(먼저 권장) | T-221 | C |
-| 4 | [T-466](../tasks/T-466-weather-admin-kit-adoption.md) | kor-travel-weather | admin-kit 채택 | T-221 | C |
-| 4 | [T-435](../tasks/T-435-transport-admin-kit-adoption.md) | kor-travel-transport | admin-kit 채택 | T-221 | C |
+| 4 | [T-415](../tasks/T-415-map-admin-kit-adoption.md) | kor-travel-map | admin-kit 채택(먼저 권장. 옛 guard면 T-419 뒤) | T-221 | C |
+| 4 | [T-466](../tasks/T-466-weather-admin-kit-adoption.md) | kor-travel-weather | admin-kit 채택(새 guard면 호출 SHA·`ui`·`tokens` 먼저) | T-221 | C |
+| 4 | [T-435](../tasks/T-435-transport-admin-kit-adoption.md) | kor-travel-transport | admin-kit 채택(새 guard면 호출 SHA·`ui`·`tokens` 먼저) | T-221 | C |
 
 **Dagster(나중)**
 
@@ -534,11 +536,11 @@ def record_collection_outcome(context, outcome: str) -> None:
 | [T-484a](../tasks/T-484a-pinvi-retry-sensor-for-jobs.md) | pinvi | 재시도 sensor 5개를 1개로(API 정적 목록 포함) | 없음 |
 | [T-482b](../tasks/T-482b-transport-retry-sensor-for-jobs.md) | kor-travel-transport | 재시도 sensor 3개를 1개로 | 없음 |
 
-저장소별 수: common 11, kor-travel-map 5, pinvi 2, kor-travel-weather 5, kor-travel-transport 6, kor-travel-docker-manager 3(합 32).
+저장소별 수: common 11, kor-travel-map 6, pinvi 2, kor-travel-weather 5, kor-travel-transport 6, kor-travel-docker-manager 3(합 33).
 
-조건이 붙은 곳은 둘뿐이다. T-417은 T-416이 "채택"일 때만 진행하고 "미채택"이면 그 결정으로 닫는다. T-027은 ADR-020이 accepted가 된 뒤에만 병합한다(소유자의 행별 결정, 상세 파일의 외부 선행). 그 밖의 선행은 모두 원장의 `선행` 열에 있다.
+조건이 붙은 곳은 넷이다. T-417은 T-416이 "채택"일 때만 진행하고 "미채택"이면 그 결정으로 닫는다. T-419는 T-025 릴리스 날 Map이 옛 guard에 남아 있을 때만 실행하고 T-417이 먼저 끝났으면 닫는다. T-025의 동결은 외부 선행(소비자별 호출 SHA 갱신 또는 당일 재vendor 확인)을 확인한 뒤에 병합한다. T-027은 ADR-020이 accepted가 된 뒤에만 병합한다(소유자의 행별 결정, 상세 파일의 외부 선행). 그 밖의 선행은 모두 원장의 `선행` 열에 있다.
 
-geo·concierge는 이번 범위 밖이라 task가 없다. 이 계획의 어느 task도 두 저장소의 작업을 선행으로 두지 않는다. 두 저장소가 guard 호출 SHA를 올리지 않으면 T-025의 릴리스 날 지금과 같이 당일 재vendor가 필요하다. T-025가 릴리스 전에 알린다.
+geo·concierge는 이번 범위 밖이라 task가 없다. 이 계획의 어느 task도 두 저장소의 작업을 선행으로 두지 않는다. 두 저장소가 guard 호출 SHA를 올리지 않으면 T-025의 릴리스 날 지금과 같이 당일 재vendor가 필요하다. T-025가 릴리스 전에 알린다. 이 계획에는 두 저장소의 재vendor task가 없다.
 
 새 task를 만들지 않고 기존 task에 맡긴 것: 공개 API 키(T-306의 C7)·proxy 신뢰(T-308의 C8), request-id(T-307, 지표와 분리해), time(T-304), cursor 코덱(T-508), 토큰 브리지(T-472·T-431), Dagster 콘솔(T-216), Node CI 골격(T-401의 Node 절반), provider 핀·worker 스크립트 요청(T-505·T-506), docker-manager의 부품 전환(T-473). 이들의 재분류는 T-022가 한다.
 

@@ -16,7 +16,7 @@ map·weather·transport 관리자 프론트에 같은 파일 45개(2,076줄)가 
 ## 고정 결정
 
 - 새 패키지는 `packages/admin-kit`, 이름 `@kor-travel/admin-kit`이다. `artifactPackages`에는 넣고 프로필 필수 목록에는 넣지 않는다(`@kor-travel/toast`와 같은 자리). 근거는 계획 문서 §4.8의 비교와 ADR-019의 선택형 패키지 원칙이다.
-- `@kor-travel/ui`와 `@kor-travel/tokens`는 peer다. peer는 같은 minor 범위로 선언해 `ui` patch마다 이 패키지를 올리지 않게 한다. `next`는 peer로 두지 않는다.
+- `@kor-travel/ui`와 `@kor-travel/tokens`는 peer다. 범위는 `@kor-travel/ui` `>=0.2.1 <0.3.0`, `@kor-travel/tokens` `>=0.1.2 <0.2.0`이다. T-025 이전 판과 T-025 판(0.2.2·0.1.3) 둘 다에 설치되고 `ui` patch마다 이 패키지를 올리지 않는다. `next`는 peer로 두지 않는다.
 - 토스트는 주입(`onNotify`)이다. 원천 `copy-button`의 `sonner` import를 주입으로 바꾼다([ui-contract](../standards/ui-contract.md) UC-3.7).
 - `ConfirmDialog`는 넣지 않는다. ui-contract가 엔진 선택을 앱 소유로 두고 공통 API를 T-508로 미뤘다.
 - 클래스는 로컬 어휘가 아니라 `--kt-*` 의미 토큰을 쓴다([design-tokens](../standards/design-tokens.md)).
@@ -54,7 +54,7 @@ PROVENANCE.md, docs/architecture/packages.md, docs/standards/ui-contract.md
 - [ ] 새 단위 시험이 부품당 3개 이상이고 skip 0이다.
 - [ ] `packages/ui`·`packages/tokens`·`packages/toast`의 `package.json` 버전과 pack한 tarball SHA-256이 이 PR 전과 같다.
 - [ ] `EmptyState`와 `Empty` 가운데 무엇을 남기는지와 근거가 PR과 ui-contract에 있다.
-- [ ] pack한 tarball을 `packages/ui/smoke/next-app`(또는 같은 구성의 smoke)에 `ui`와 함께 설치해 webpack·Turbopack 빌드가 통과한다.
+- [ ] pack한 tarball을 두 조합에 각각 설치해 `npm ci`와 webpack·Turbopack 빌드가 통과한다: (`ui` 0.2.1 + `tokens` 0.1.2), (T-025 판 `ui` 0.2.2 + `tokens` 0.1.3). smoke는 `packages/ui/smoke/next-app` 또는 같은 구성으로 둔다.
 
 ## 검증 명령
 

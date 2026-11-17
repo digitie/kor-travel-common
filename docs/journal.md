@@ -1,3 +1,13 @@
+## 2026-11-17 — 공통화 계획 확인 pass(N1~N4) 반영
+
+- 2회차 리뷰어의 확인 pass가 25건 해소를 확인하고 새 지적 넷을 냈다. 넷 다 코드에서 확인하고 반영했다.
+- N1: T-025 릴리스 날 옛 guard에 남은 소비자의 재vendor에 task가 없었고 T-415가 그것과 어긋났다. Map의 T-419(T-025 릴리스 당일 `ui`·`tokens` 재vendor, T-417 미완일 때)를 더하고, T-025의 외부 선행에 T-424·T-474 병합과 T-467·T-436 병합 또는 당일 재vendor 확인을 넣었다.
+- N2: T-025의 올림을 patch(`ui` 0.2.2·`tokens` 0.1.3·`toast` 0.1.2, breaking 없음)로, admin-kit의 peer를 `@kor-travel/ui` `>=0.2.1 <0.3.0`·`@kor-travel/tokens` `>=0.1.2 <0.2.0`으로 적고 두 조합 설치·빌드를 수용 기준에 넣었다.
+- N3: 새 guard는 고정 커밋의 정책에 admin-kit이 없으면 건너뛴다. 공백을 적어만 두는 안 대신, 호출 SHA를 T-221이 지정한 admin-kit 채택 커밋으로 올리고 `ui`·`tokens`를 재vendor하는 것을 채택의 첫 단계로 넣었다(계획 문서 §4.8). T-221이 그 커밋을 지정한다.
+- N4: shim 넷은 경로나 이름이 다르다(`tabs-variants`→`ui/tabs`, `native-select-option`→`ui/native-select`, `data-table`→`ui/virtual-table`과 이름 둘, `AlertDialogClose`→`AlertDialogCancel`). T-418·T-468·T-437을 원 경로·원 이름으로 고치고 K-50의 앱 잔류 목록에서 `data-table.tsx`를 뺐다.
+- task 33개(common 11·map 6·pinvi 2·weather 5·transport 6·manager 3). 후보 수는 그대로다(63건).
+- 검증: `tools/validate_plan.py` 상세 task 144·오류 0, `tools/validate_document_links.py` 오류 0, redaction·secret scan 0건, `git diff --check` 통과. 패키지 빌드·전체 unittest는 `NOT_RUN(문서 전용)`.
+
 ## 2026-11-17 — 공통화 계획 리뷰 2회차 반영
 
 - 2회차 적대 리뷰(BLOCKER 2, MAJOR 8, MINOR 15)의 finding을 코드에서 다시 확인하고 반영했다. 기각한 finding은 없다.

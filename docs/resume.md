@@ -1,6 +1,6 @@
 ## 2026-11-17 — 공통화 재조사·계획 초안(리뷰 2회 반영)
 
-소유자 요청으로 pinvi·map·weather·transport·docker-manager를 고정 커밋에서 다시 조사하고 [공통화 재조사·계획](plan/commonization-plan-2026-11-17.md)과 task 32개를 추가했다(T-022~T-027, T-219~T-221, T-313·T-314, T-415~T-418, T-424, T-434~T-437, T-465~T-468, T-474, T-480b·T-481a·T-482a·T-482b·T-484a·T-486a·T-486b). 문서 초안이며 코드·패키지·정책 정본은 바꾸지 않았다. 적대 리뷰 2회의 finding을 반영했고 PR은 열었으나 병합 전이다.
+소유자 요청으로 pinvi·map·weather·transport·docker-manager를 고정 커밋에서 다시 조사하고 [공통화 재조사·계획](plan/commonization-plan-2026-11-17.md)과 task 33개를 추가했다(T-022~T-027, T-219~T-221, T-313·T-314, T-415~T-419, T-424, T-434~T-437, T-465~T-468, T-474, T-480b·T-481a·T-482a·T-482b·T-484a·T-486a·T-486b). 문서 초안이며 코드·패키지·정책 정본은 바꾸지 않았다. 적대 리뷰 2회와 확인 pass의 finding을 반영했고 PR은 열었으나 병합 전이다.
 
 다음 한 작업은 선행이 없는 묶음 A에서 고른다: [T-022](tasks/T-022-ledger-reality-reconcile.md)(원장 재분류와 ADR-020 초안), [T-023](tasks/T-023-frontend-guard-release-model-adr.md)(guard 모델 ADR-019), [T-026](tasks/T-026-python-version-rule.md)(Python 버전 규칙). 소유자 결정을 기다리는 것은 [T-416](tasks/T-416-map-exact-node-npm-pin-decision.md), ADR-019·ADR-020의 채택이다. T-218의 진행 상태와 아래 기록은 그대로다. 이 항목은 소비자 실행·운영 수용을 뜻하지 않는다.
 
