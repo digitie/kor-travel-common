@@ -85,3 +85,66 @@ jobs:
       common-repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
       tokens-css: .kor-travel-common/packages/tokens/tokens.css
       dark: true
+
+  # ADR-019·T-024: 고정 ref 81810cc는 main과 Node/npm 축(24.22.3/11.20.0)·zustand 정본이 다른
+  # 시험 전용 커밋이다(selftest/t024-guard-ref-fixture 브랜치, 삭제 금지). main 값이 무엇이든
+  # fixture는 자기 ref의 값으로 통과해야 하고, guard 자신의 Node·npm도 그 ref에서 골라야 한다.
+  frontend-guard-pinned-ref:
+    uses: ./.github/workflows/frontend-consumer-guard.yml
+    with:
+      common-ref: 81810cc3462435d73e683de7ce85c4f11557747b
+      root: tests/fixtures/guard-consumer
+      frontends: '[{"package":"package.json","lock":"package-lock.json","workspace":"","profile":"mobile"}]'
+
+  frontend-guard-strict:
+    name: frontend guard (자기 ref와 어긋나면 실패)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: consumer
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: common
+          ref: 81810cc3462435d73e683de7ce85c4f11557747b
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: common/.nvmrc
+      - name: 검사기 설치
+        working-directory: common
+        run: |
+          npm install --global "npm@$(jq -r '.axes.npm.recommended' versions.json)"
+          npm ci --ignore-scripts --engine-strict
+      - name: 어긋난 fixture 거부
+        env:
+          KT_REQUIRE_CANONICAL: '1'
+        run: |
+          common="$PWD/common"
+          check() {
+            node "$common/tools/check_frontend_dependencies.mjs" --profile mobile \
+              --package "$1/package.json" --lock "$1/package-lock.json" --workspace "" \
+              --artifacts "$1/common-artifacts.json" \
+              --policy "$common/frontend-dependencies.json" --canonical "$common/frontend-artifacts.json" \
+            && (cd "$common" && npm run check:toolchain -- --root "$1" --registry "$common/versions.json" --manifest package.json)
+          }
+          case_dir() {
+            rm -rf "$RUNNER_TEMP/case" && cp -r consumer/tests/fixtures/guard-consumer "$RUNNER_TEMP/case"
+            echo "$RUNNER_TEMP/case"
+          }
+          dir="$(case_dir)"; check "$dir"
+          expect_fail() {
+            if check "$1"; then echo "::error::$2 변경이 통과했습니다"; exit 1; fi
+            echo "기대대로 실패: $2"
+          }
+          dir="$(case_dir)"
+          sed -i 's/"5\.0\.16"/"5.1.0"/' "$dir/package.json" "$dir/package-lock.json"
+          expect_fail "$dir" "정책 값(zustand을 main 값으로)"
+          dir="$(case_dir)"; echo 22.23.1 > "$dir/.nvmrc"
+          expect_fail "$dir" ".nvmrc(main 축으로)"
+          dir="$(case_dir)"; sed -i 's/npm@11\.20\.0/npm@12.0.1/' "$dir/package.json"
+          expect_fail "$dir" "packageManager(main 축으로)"
+          dir="$(case_dir)"; sed -i 's/"version": "0\.1\.2"/"version": "0.1.1"/' "$dir/common-artifacts.json"
+          expect_fail "$dir" "산출물 원장 버전"
