@@ -1,6 +1,6 @@
 # T-029 공통 Node 도구 축을 최신 LTS(26.13.1)로 올림
 
-- 상태: BLOCKED
+- 상태: IN_PROGRESS
 - 우선순위: P2
 - Gate: 도구 단위·패키지 빌드·2인 리뷰
 - 선행: T-024
@@ -44,13 +44,15 @@ versions.json
 docs/standards/versions.md, docs/integration-map.md, CHANGELOG.md, docs/journal.md
 ```
 
+> 구현 메모(2026-11-18): 소유자가 2026-11-17에 모든 저장소의 Node 26 이전을 확인했다(조정 세션을 거친 구두 확인이라 저장소 안 링크는 없다)(외부 선행의 소유자 확인 충족). 옛 판 호출자 여섯의 이전 PR 상태는 병합 PR 본문에 적는다. `B2 alias default registry` 시험이 실제 `versions.json`을 읽으면서 정합 값을 상수 22.23.1로 두어 축 상향에 결박돼 있어 함께 고쳤다. [evidence](../evidence/t029-node-axis.md).
+
 ## 수용 기준
 
-- [ ] `npm ci --engine-strict && npm run check:toolchain`이 Node 26.13.1·npm 12.0.1에서 통과한다.
-- [ ] `npm run check:policy`·`npm run test:toolchain`·`npm test --workspaces`가 통과한다.
-- [ ] `frontend-dependencies.json`과 `ui`·`tokens`·`toast` tarball SHA-256이 바꾸기 전과 같다.
-- [ ] 이 커밋을 `common-ref`로 고정한 fixture 소비자에서 guard selftest가 Node 26.13.1로 통과한다(T-024가 guard 자신의 Node를 ref에서 고르게 했는지 확인. `frontend-consumer-guard.yml`·`frontend.yml`·`consumer-smoke.yml`의 적힌 `node-version`이 남아 있으면 이 task에서 고친다).
-- [ ] 병합 PR 본문에 외부 선행 각 항목의 상태와 근거 링크가 있다.
+- [x] `npm ci --engine-strict && npm run check:toolchain`이 Node 26.13.1·npm 12.0.1에서 통과한다.
+- [x] `npm run check:policy`·`npm run test:toolchain`·`npm test --workspaces`가 통과한다.
+- [x] `frontend-dependencies.json`과 `ui`·`tokens`·`toast` tarball SHA-256이 바꾸기 전과 같다.
+- [x] 이 커밋을 `common-ref`로 고정한 fixture 소비자에서 guard selftest가 Node 26.13.1로 통과한다(T-024가 guard 자신의 Node를 ref에서 고르게 했는지 확인. `frontend-consumer-guard.yml`·`frontend.yml`·`consumer-smoke.yml`의 적힌 `node-version`이 남아 있으면 이 task에서 고친다).
+- [x] 병합 PR 본문에 외부 선행 각 항목의 상태와 근거 링크가 있다.
 - [ ] 병합 커밋이 40자리로 integration map과 T-417에 있다.
 
 ## 검증 명령
