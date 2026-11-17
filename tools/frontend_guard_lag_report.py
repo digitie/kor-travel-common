@@ -31,8 +31,8 @@ CONSUMERS = (
 )
 POLICY_FILES = ("versions.json", "frontend-dependencies.json", "frontend-artifacts.json")
 GUARD = "frontend-consumer-guard.yml"
-CALL = re.compile(r"^(?P<indent>[ \t]*)uses:\s*digitie/kor-travel-common/\.github/workflows/"
-                  + re.escape(GUARD) + r"@(?P<sha>[^\s#]+)", re.M)
+CALL = re.compile(r"^(?P<indent>[ \t]*)uses:\s*[\"']?digitie/kor-travel-common/\.github/workflows/"
+                  + re.escape(GUARD) + r"@(?P<sha>[^\s#\"']+)", re.M)
 
 
 def _indent(line: str) -> int:

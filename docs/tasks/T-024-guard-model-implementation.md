@@ -20,6 +20,8 @@ ADR-019의 결정을 재사용 workflow와 문서에 구현한다. ADR-019는 20
 - 지금 고정된 검사기는 둘이다: `55a921b`(map)와 `97f8ed9`(나머지와 geo·concierge. `9e16393`은 `tools/`가 같다). CI checkout은 얕으므로 두 판의 검사기를 시험 fixture로 저장소에 둔다.
 - 수렴을 막는 강제로 다시 만들지 않는다. 지연은 보고로만 본다.
 
+> 구현 메모(2026-11-18): '두 판의 검사기를 시험 fixture로 저장소에 둔다'와 수용 기준 4는 고정 사본 대신 실제 옛 판(`97f8ed9`, map은 `55a921b`) workflow의 대조 단계 원문을 일곱 소비자 main에 병합 전후 정책으로 돌린 판정 표로 확인했다(전후 동일, [evidence](../evidence/t024-guard-model.md)). 옛 판은 main 정책을 읽으므로 영구 selftest로 두면 다음 정책 변경 PR마다 결과가 바뀐다. 이 PR은 정책 세 파일을 바꾸지 않는다.
+
 ## 구현 범위
 
 1. `.github/workflows/frontend-consumer-guard.yml`: `main` 정책 checkout 단계를 없애고 `--policy`·`--canonical`·도구 검사의 `--registry`를 `common-ref` checkout에서 읽는다. 검사기를 돌리는 `setup-node`의 `node-version: 22.23.1`과 `npm@12.0.1` 설치 줄도 적어 두지 않고 `common-ref`의 `.nvmrc`(`node-version-file`)와 `axes.npm.recommended`를 읽는다. 그래야 축을 올린 커밋(T-029)을 고정한 소비자가 common의 `npm ci --engine-strict`와 `check:toolchain --runtime`에서 실패하지 않는다.

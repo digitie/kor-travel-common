@@ -58,6 +58,10 @@ class LagReportTest(unittest.TestCase):
         self.assertEqual(calls[0]["root"], ".")
         self.assertEqual(calls[0]["frontends"][0]["package"], "frontend/package.json")
 
+    def test_quoted_uses(self):
+        text = WORKFLOW.replace("uses: digitie/", "uses: \"digitie/").replace(f"@{OLD}\n", f"@{OLD}\"\n", 1)
+        self.assertEqual(lag.parse_calls(text)[0]["sha"], OLD)
+
     def test_guard_model(self):
         self.assertEqual(lag.guard_model("        with:\n          ref: main\n"), "옛 판(main 읽음)")
         self.assertEqual(lag.guard_model("ref: ${{ inputs.common-ref }}\n"), "ADR-019(ref 읽음)")

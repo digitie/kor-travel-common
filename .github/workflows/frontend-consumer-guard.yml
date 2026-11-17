@@ -104,7 +104,7 @@ jobs:
             if (rel === ".." || rel.startsWith("../") || isAbsolute(rel)) throw new Error("기준 디렉터리 밖 " + label + " 경로 거부");
             return result;
           }
-          const root = inside(checkout, process.env.CONSUMER_ROOT, "기준 디렉터리");
+          const root = inside(checkout, process.env.CONSUMER_ROOT || ".", "기준 디렉터리");
           const packagePath = inside(root, config.package, "검사"), lockPath = inside(root, config.lock, "검사");
           const args = [
             resolve("common/tools/check_frontend_dependencies.mjs"),
