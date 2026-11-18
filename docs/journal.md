@@ -1,3 +1,22 @@
+## 2026-11-18 — 닫힌 task metadata와 CI 계획 검사 복원
+
+- ae2124e의 docs·Ubuntu/Windows tools가 같은 세 계획 metadata 오류에서 중단됐다. 이전에 문서화된 T-416 채택·T-419 대상 없음 종료를 그대로 보존하고 상세 제목을 완료 원장과 맞췄다.
+- T-419의 현행 종료 선행은 실행을 불필요하게 만든 T-417이다. T-025는 미완료 상태로 유지하며 T-419 재vendor를 실행했다고 기록하지 않는다. 종전 실행 계획의 T-025 선행과 현재 종료 조건의 차이를 본문에 명시했다.
+- 기존 validator 그대로 상세 task 145건 오류 3→0, 문서 링크 896개/로컬 대상 3620개 오류 0·diff 공백 검사 PASS. 제품·생성 policy·기존 공개 tarball bytes·검사 조건은 이 후속에서 변경하지 않았다.
+
+## 2026-11-18 — VirtualTable patch의 정확 축·내장 정책 버전 동기화
+
+- 05eba117 CI가 기존 Toast metadata 정확 축 단언에서 UI 0.2.2 != 정본 0.2.1로 실패했다. 같은 시험으로 RED를 재현하고 guard·시험 조건을 유지한 채 정본 축과 생성 사본을 맞췄다.
+- UI 0.2.2·tokens 0.1.3·toast 0.1.2, UI의 정확 tokens peer와 관련 lock을 동기화한다. 내장 policy bytes가 바뀌는 tokens/toast도 patch를 올려 같은 버전의 다른 bytes 발행을 피한다. runtime/CSS는 그대로이며 T-025 설계·소비자는 변경하지 않는다.
+- 기존 metadata·policy·native CSS guard 238 PASS/skip 0과 신규 pack 엔트리 대조를 확인했다. [실패 원인·동기화 evidence](evidence/virtual-table-grid-overflow.md). canonical main artifact·독립 리뷰·부모 채택은 별도 gate다.
+
+## 2026-11-18 — VirtualTable grid 축소 회귀 수정 후보(UI 0.2.2)
+
+- 공통 루트의 min-width:auto가 내부 scroll container까지 intrinsic 폭으로 확장하는 실제 모바일 결함을 `min-w-0` 한 줄로 수정하고 UI만 0.2.2로 준비한다.
+- 실제 DOM 임시 스타일 red→green→원복과 Chromium fixture의 수정 전 모바일 2 FAIL/desktop 2 PASS→수정 후 4 PASS를 구분했다. 같은 그룹에서 폼·가상화·sticky header를 확인했다.
+- 정규 UI build/pack·고지와 tokens 0.1.2의 기존 bytes 동일성을 확인했다. [재현·pack evidence](evidence/virtual-table-grid-overflow.md).
+- PR/CI·독립 리뷰·canonical merge artifact·부모 소비자 채택 전 후보다. Geo 전용 CSS·소비자·배포는 변경하지 않았다. 캐시 도구·의존성을 재사용했으며 CodeGraph 미노출은 rg·빌드·브라우저로 대체했다.
+
 ## 2026-11-18 — T-417 DONE(map 새 guard), T-416·T-419 종료
 
 - map PR #1511 squash 병합 `7dc2af78915e7617ecbff3c748551f6442aecbff`: guard 호출 SHA·`common-ref` = `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`(T-029), 도구 규칙 입력 채움. 병합 head에서 '공통 프론트엔드 정책'·`frontend`·`docker-images`·`ci` success. 선행으로 map PR #1513(dev 포함 npm audit 게이트 한시 완화, GHSA-fc5q-39xc-vjpf)을 병합했다.
