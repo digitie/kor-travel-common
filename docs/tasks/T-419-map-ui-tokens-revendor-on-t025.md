@@ -1,9 +1,9 @@
-# T-419 map: T-025 릴리스 당일 ui·tokens 재vendor(T-417 미완일 때) (2026-11-18, map PR #1511)
+# T-419 map: T-025 릴리스 당일 ui·tokens 재vendor — 대상 없음, T-417 선행 병합으로 종료 (2026-11-18, map PR #1511)
 
 - 상태: DONE
 - 우선순위: P2
 - Gate: 소비자 CI(공통 프론트엔드 정책·frontend)
-- 선행: T-025
+- 선행: T-417
 - 외부 선행: T-025 동결 PR 병합 당일에 실행한다. 그 전에 T-417이 병합됐으면 실행하지 않고 닫는다
 - 소유 저장소: kor-travel-map
 - 병렬: T-025 동결과 같은 날. T-415의 외부 선행(map이 옛 guard에 남아 있을 때)
@@ -50,6 +50,8 @@ docs/journal.md, docs/resume.md, docs/tasks.md
 ```
 
 ## 종료(2026-11-18) — 대상 없음
+
+현재 메타데이터의 선행은 대상 없음 종료를 입증한 T-417이다. 종전 실행 계획의 T-025 선행은 실행을 취소한 현재 DONE 조건이 아니며, T-025의 상태나 수용 기준은 변경하지 않는다.
 
 T-417(map [PR #1511](https://github.com/digitie/kor-travel-map/pull/1511), 병합 `7dc2af78915e7617ecbff3c748551f6442aecbff`)이 T-025 동결보다 먼저 병합돼 map은 새 guard(`common-ref` `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`)를 호출한다. 구현 범위 3에 따라 실행하지 않고 닫는다. 아래 수용 기준은 실행 대상이 아니다. T-025 판은 map이 일반 재vendor로 받는다.
 

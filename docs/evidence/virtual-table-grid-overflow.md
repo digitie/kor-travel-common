@@ -40,3 +40,7 @@ head 05eba117의 common frontend 44301094514에서 기존 toast.test.mjs의 정�
 versions.json의 UI 0.2.2·tokens 0.1.3·toast 0.1.2와 package metadata·UI tokens peer·lock을 맞췄다. sync_frontend_policy.mjs가 정본과 규약 표를 생성하고 각 sync-policy.mjs가 UI/tokens 내장 사본을 갱신하며 Toast 사본도 같은 정본 bytes로 동기화한다. 이 결합으로 tokens/toast의 policy bytes까지 바뀌므로 기존 버전 재포장 대신 patch를 올린다. T-025 정책 분리 설계나 검사 조건은 변경하지 않는다.
 
 기존 metadata·dependency-policy·native CSS guard 238건은 모두 PASS/skip 0이다. tokens 0.1.3과 toast 0.1.2의 tar 엔트리를 이전 공개 버전과 대조하면 package.json과 dependency-policy.json만 다르고 runtime/CSS·파일 집합은 동일하다. 이전 자산은 교체하지 않으며 신규 canonical artifact와 catalog 동결은 부모 통합에서 대조한다.
+
+## 닫힌 task metadata 후속 정합
+
+ae2124e의 docs 134798514111·tools Ubuntu 134798514662·tools Windows 134798514255는 같은 세 plan 오류에서 중단됐다. T-416/T-419의 기존 종료 의도와 완료 원장 제목을 상세 제목에 맞추고, 대상 없음으로 닫힌 T-419의 현행 선행을 그 종료 근거인 T-417로 맞췄다. T-025 미완료 상태와 T-419 미실행 사실은 유지한다. validator는 변경하지 않았으며 실제 검사 결과 상세 task 145건 오류 3→0이다. 이 docs-only 후속은 제품 pack bytes와 policy를 바꾸지 않는다.
