@@ -1,6 +1,6 @@
-# T-419 map: T-025 릴리스 당일 ui·tokens 재vendor(T-417 미완일 때)
+# T-419 map: T-025 릴리스 당일 ui·tokens 재vendor(T-417 미완일 때) (2026-11-18, map PR #1511)
 
-- 상태: BLOCKED
+- 상태: DONE
 - 우선순위: P2
 - Gate: 소비자 CI(공통 프론트엔드 정책·frontend)
 - 선행: T-025
@@ -48,6 +48,10 @@ packages/kor-travel-map-admin/frontend/vendor/kor-travel-{ui,tokens}-*.tgz
 package-lock.json(루트)
 docs/journal.md, docs/resume.md, docs/tasks.md
 ```
+
+## 종료(2026-11-18) — 대상 없음
+
+T-417(map [PR #1511](https://github.com/digitie/kor-travel-map/pull/1511), 병합 `7dc2af78915e7617ecbff3c748551f6442aecbff`)이 T-025 동결보다 먼저 병합돼 map은 새 guard(`common-ref` `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`)를 호출한다. 구현 범위 3에 따라 실행하지 않고 닫는다. 아래 수용 기준은 실행 대상이 아니다. T-025 판은 map이 일반 재vendor로 받는다.
 
 ## 수용 기준
 

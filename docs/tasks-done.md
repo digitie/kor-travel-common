@@ -6,6 +6,9 @@
 
 | ID | 상태 | 우선순위 | 작업 | 선행 |
 |---|---|---:|---|---|
+| [T-417](tasks/T-417-map-guard-ref-toolchain.md) | DONE | P2 | map: guard 검사 코드 ref 갱신과 정확 Node/npm 도구 규칙 이관 (2026-11-18, map PR #1511) | T-416, T-024, T-029 |
+| [T-419](tasks/T-419-map-ui-tokens-revendor-on-t025.md) | DONE | P2 | map: T-025 릴리스 당일 ui·tokens 재vendor — 대상 없음, T-417 선행 병합으로 종료 (2026-11-18, map PR #1511) | T-025 |
+| [T-416](tasks/T-416-map-exact-node-npm-pin-decision.md) | DONE | P1 | map: 정확 Node/npm 핀 채택 여부 결정 — 채택, Node 26.13.1 (2026-11-17, map PR #1507) | 없음 |
 | [T-029](tasks/T-029-node-axis-to-latest-lts.md) | DONE | P2 | 공통 Node 도구 축을 최신 LTS(26.13.1)로 올림 (2026-11-18, PR #65) | T-024 |
 | [T-024](tasks/T-024-guard-model-implementation.md) | DONE | P0 | ADR-019가 정한 프론트 guard 모델 구현과 채택 커밋 지정 | T-023 |
 | [T-023](tasks/T-023-frontend-guard-release-model-adr.md) | DONE | P0 | 프론트 정책 guard·릴리스 모델 ADR(정책을 읽는 자리와 내장 정책) (2026-11-17, PR #60) | 없음 |

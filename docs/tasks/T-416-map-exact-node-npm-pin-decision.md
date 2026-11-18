@@ -1,6 +1,6 @@
-# T-416 map: 정확 Node/npm 핀 채택 여부 결정
+# T-416 map: 정확 Node/npm 핀 채택 여부 결정 (2026-11-17, map PR #1507)
 
-- 상태: BLOCKED
+- 상태: DONE
 - 우선순위: P1
 - Gate: 소유자 결정 기록
 - 선행: 없음
@@ -58,9 +58,9 @@ docs/integration-map.md(common)
 
 ## 수용 기준
 
-- [ ] 소유자의 결정(채택/미채택)과 날짜가 map 문서에 인용과 함께 있다.
-- [ ] 미채택이면 사유가 map ADR에 있다.
-- [ ] common 후속 PR이 병합돼 integration map과 T-417이 결정을 가리킨다.
+- [x] 소유자의 결정(채택/미채택)과 날짜가 map 문서에 인용과 함께 있다.
+- [x] 미채택이면 사유가 map ADR에 있다. (채택이라 해당 없음)
+- [x] common 후속 PR이 병합돼 integration map과 T-417이 결정을 가리킨다.
 
 ## 검증 명령
 
@@ -72,6 +72,9 @@ git diff --stat
 ## evidence
 
 결정 인용과 기록 위치.
+
+- map ADR-124(`docs/adr/124-exact-node-26-pin.md`, accepted)가 소유자 답(2026-11-17)을 인용한다. map [PR #1507](https://github.com/digitie/kor-travel-map/pull/1507) 병합 `fbc4b24237653b247830a12d58c632cc461b7280`.
+- common: integration map §4 결정 기록 행과 T-417 상세가 결정을 가리킨다(PR #60·#66). T-417 완료(map PR #1511)로 이 task를 DONE으로 옮겼다(2026-11-18).
 
 ## rollback·release 차단 조건
 

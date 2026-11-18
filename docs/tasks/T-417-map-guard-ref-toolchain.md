@@ -1,6 +1,6 @@
-# T-417 map: guard 검사 코드 ref 갱신과 정확 Node/npm 도구 규칙 이관
+# T-417 map: guard 검사 코드 ref 갱신과 정확 Node/npm 도구 규칙 이관 (2026-11-18, map PR #1511)
 
-- 상태: BLOCKED
+- 상태: DONE
 - 우선순위: P2
 - Gate: 소비자 CI(공통 프론트엔드 정책)
 - 선행: T-416, T-024, T-029
@@ -54,9 +54,9 @@ docs/journal.md, docs/resume.md
 
 ## 수용 기준
 
-- [ ] PR의 '공통 프론트엔드 정책' check가 새 호출 SHA로 통과한다.
-- [ ] `frontend` workflow와 `docker-images` workflow가 통과한다.
-- [ ] 호출 SHA와 `common-ref`가 같은 40자리 값이다.
+- [x] PR의 '공통 프론트엔드 정책' check가 새 호출 SHA로 통과한다.
+- [x] `frontend` workflow와 `docker-images` workflow가 통과한다.
+- [x] 호출 SHA와 `common-ref`가 같은 40자리 값이다.
 
 ## 검증 명령
 
@@ -70,6 +70,11 @@ gh pr checks <PR>
 ## evidence
 
 map PR의 check 결과. common 쪽 기록은 문서 전용 후속 PR로 남긴다.
+
+- map [PR #1511](https://github.com/digitie/kor-travel-map/pull/1511) squash 병합 `7dc2af78915e7617ecbff3c748551f6442aecbff`(2026-11-18). 호출 SHA와 `common-ref`가 같은 40자리 `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`, 도구 규칙 입력 `toolchain-manifests`(루트·`map-marker-react`·`kor-travel-map-user-client`)·`node-dockerfiles`(`docker/frontend.Dockerfile`)를 채웠다.
+- 병합 head의 check: '공통 프론트엔드 정책'(common-policy / guard)·`frontend`·`docker-images`·`ci`·`lint`·`openapi` 전부 success.
+- 선행 병합: dev 포함 npm audit 게이트 한시 완화 map [PR #1513](https://github.com/digitie/kor-travel-map/pull/1513)(GHSA-fc5q-39xc-vjpf, picomatch dev 전용). #1511의 유일한 실패가 그 스텝이었다.
+- 구현 범위 3(검증 스크립트 겹침)은 map PR의 journal에 적었다. T-419는 이 병합으로 대상 없음이 됐다.
 
 ## rollback·release 차단 조건
 

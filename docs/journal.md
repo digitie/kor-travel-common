@@ -1,3 +1,9 @@
+## 2026-11-18 — T-417 DONE(map 새 guard), T-416·T-419 종료
+
+- map PR #1511 squash 병합 `7dc2af78915e7617ecbff3c748551f6442aecbff`: guard 호출 SHA·`common-ref` = `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`(T-029), 도구 규칙 입력 채움. 병합 head에서 '공통 프론트엔드 정책'·`frontend`·`docker-images`·`ci` success. 선행으로 map PR #1513(dev 포함 npm audit 게이트 한시 완화, GHSA-fc5q-39xc-vjpf)을 병합했다.
+- T-417 DONE. T-416은 map ADR-124(PR #1507)와 integration map·T-417 기록으로 수용 기준을 모두 채워 DONE. T-419는 T-417이 T-025보다 먼저 병합돼 대상 없음으로 닫았다.
+- integration map §4에 map 호출 SHA 갱신 행을 더했다. tasks.md 완료·열린 수를 실제 행 수(30·115)로 맞췄다.
+
 ## 2026-11-18 — T-029 병합, 병합 커밋 기록
 
 - 옛 판 호출자 여섯(pinvi #778·weather #250·transport #209·docker-manager #612·geo #640·concierge #271)이 모두 병합된 것을 `gh pr view`와 기본 브랜치 workflow로 확인한 뒤 PR #65를 squash 병합했다. 병합 커밋 `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`, 트리는 head와 같다.
