@@ -1,3 +1,7 @@
+## 2026-11-18 — VirtualTable canonical main pack catalog 후보
+
+PR68은 검토 f571767과 같은 tree의 R=706aaa7821588dfca72f660c9161f56be2d0445f로 병합됐고 main CI 3종이 모두 SUCCESS다. [실제 main artifact·npm 설치 evidence](evidence/releases/virtual-table-ui-0.2.2-catalog.md)로 UI0.2.2/tokens0.1.3/toast0.1.2의 catalog entry와 [원본 두 리뷰 종료 archive](reviews/adversarial/2026-11-18-common-virtual-table-overflow.md)를 준비했다. 다음 한 작업은 부모의 catalog PR exact-head CI 확인·merge P 및 P main pack과 R의 동일 bytes 대조다. 소비자 채택·운영 수용은 별도이며 미실행이다.
+
 ## 2026-11-18 — 닫힌 task metadata와 CI 계획 검사 복원
 
 - ae2124e의 docs·Ubuntu/Windows tools가 같은 세 계획 metadata 오류에서 중단됐다. 이전에 문서화된 T-416 채택·T-419 대상 없음 종료를 그대로 보존하고 상세 제목을 완료 원장과 맞췄다.

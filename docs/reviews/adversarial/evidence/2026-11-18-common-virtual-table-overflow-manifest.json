@@ -1,0 +1,70 @@
+{
+  "base": "55e3e95c9362b64bbeaddf8abaac0247f0a0df6f",
+  "head": "f571767711f5e0f7010e070f3c426ed578aacaeb",
+  "scope": [
+    "CHANGELOG.md",
+    "docs/evidence/virtual-table-grid-overflow.md",
+    "docs/journal.md",
+    "docs/resume.md",
+    "docs/standards/frontend-libraries.md",
+    "docs/tasks-done.md",
+    "docs/tasks/T-416-map-exact-node-npm-pin-decision.md",
+    "docs/tasks/T-419-map-ui-tokens-revendor-on-t025.md",
+    "frontend-dependencies.json",
+    "package-lock.json",
+    "packages/toast/dependency-policy.json",
+    "packages/toast/package.json",
+    "packages/tokens/dependency-policy.json",
+    "packages/tokens/package.json",
+    "packages/ui/dependency-policy.json",
+    "packages/ui/package.json",
+    "packages/ui/smoke/next-app/app/virtual-table-contracts/page.tsx",
+    "packages/ui/smoke/next-app/package-lock.json",
+    "packages/ui/smoke/next-app/package.json",
+    "packages/ui/smoke/playwright.radix.config.ts",
+    "packages/ui/smoke/virtual-table-browser.spec.ts",
+    "packages/ui/src/virtual-table.tsx",
+    "versions.json"
+  ],
+  "productDelta": "VirtualTable root min-w-0; UI0.2.2/tokens0.1.3/toast0.1.2 synchronized embedded policy; old published bytes preserved",
+  "independentReviews": "PENDING_PARENT_COORDINATION",
+  "actualBrowser": "red2 fail/2 pass -> green4pass; temporary live DOM reverted",
+  "canonicalArtifact": "parent consumes exact main-merge common-release-packs artifact",
+  "releaseVersions": {
+    "ui": "0.2.2",
+    "tokens": "0.1.3",
+    "toast": "0.1.2"
+  },
+  "guardProof": "same failing metadata test reproduced; existing238PASS/skip0; guard/test code unchanged",
+  "ci": {
+    "frontend": {
+      "run": 44307749664,
+      "conclusion": "success"
+    },
+    "docs": {
+      "run": 44307749532,
+      "conclusion": "success"
+    },
+    "python": {
+      "run": 44307749533,
+      "conclusion": "success"
+    }
+  },
+  "closureMetadata": {
+    "planErrors": 0,
+    "validatorUnchanged": true,
+    "T025Unchanged": true,
+    "T419Executed": false,
+    "productUnchangedFrom": "ae2124e3d6ff5b813034956918623ba2391e365f"
+  },
+  "allExactHeadCIGreen": true,
+  "merged": false,
+  "candidateArtifact": {
+    "id": 14429203002,
+    "name": "common-release-packs-f571767711f5e0f7010e070f3c426ed578aacaeb",
+    "archiveDigest": "sha256:d45bed7449046c1f148cf0ccf07a23fb8bb965f780075534a8ee0b37270d5d6c",
+    "candidateOnly": true
+  },
+  "canonicalPackagesProof": "/home/digitie/dev/odroid-disk-remediation-20261117/common-virtual-table-overflow-qa/exact-head-packages-ci.json",
+  "remaining": "Parent independent reviews, exact-head merge, main canonical artifact download and consumer alignment"
+}
