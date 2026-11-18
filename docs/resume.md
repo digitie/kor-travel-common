@@ -1,3 +1,10 @@
+## 2026-11-18 — VirtualTable grid 축소 회귀 수정 후보(UI 0.2.2)
+
+- 공통 루트의 min-width:auto가 내부 scroll container까지 intrinsic 폭으로 확장하는 실제 모바일 결함을 `min-w-0` 한 줄로 수정하고 UI만 0.2.2로 준비한다.
+- 실제 DOM 임시 스타일 red→green→원복과 Chromium fixture의 수정 전 모바일 2 FAIL/desktop 2 PASS→수정 후 4 PASS를 구분했다. 같은 그룹에서 폼·가상화·sticky header를 확인했다.
+- 정규 UI build/pack·고지와 tokens 0.1.2의 기존 bytes 동일성을 확인했다. [재현·pack evidence](evidence/virtual-table-grid-overflow.md).
+- PR/CI·독립 리뷰·canonical merge artifact·부모 소비자 채택 전 후보다. Geo 전용 CSS·소비자·배포는 변경하지 않았다. 캐시 도구·의존성을 재사용했으며 CodeGraph 미노출은 rg·빌드·브라우저로 대체했다.
+
 ## 2026-11-18 — T-417 DONE(map 새 guard)
 
 map이 새 guard로 옮겼다(map PR #1511, 병합 `7dc2af78915e7617ecbff3c748551f6442aecbff`, `common-ref` `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`). T-416·T-419도 닫았다. 이제 일곱 소비자 모두 ADR-019 판 guard를 호출한다 — 남은 map 몫은 T-415·T-418·T-480b.
