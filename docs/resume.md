@@ -1,3 +1,9 @@
+## 2026-11-18 — VirtualTable patch의 정확 축·내장 정책 버전 동기화
+
+- 05eba117 CI가 기존 Toast metadata 정확 축 단언에서 UI 0.2.2 != 정본 0.2.1로 실패했다. 같은 시험으로 RED를 재현하고 guard·시험 조건을 유지한 채 정본 축과 생성 사본을 맞췄다.
+- UI 0.2.2·tokens 0.1.3·toast 0.1.2, UI의 정확 tokens peer와 관련 lock을 동기화한다. 내장 policy bytes가 바뀌는 tokens/toast도 patch를 올려 같은 버전의 다른 bytes 발행을 피한다. runtime/CSS는 그대로이며 T-025 설계·소비자는 변경하지 않는다.
+- 기존 metadata·policy·native CSS guard 238 PASS/skip 0과 신규 pack 엔트리 대조를 확인했다. [실패 원인·동기화 evidence](evidence/virtual-table-grid-overflow.md). canonical main artifact·독립 리뷰·부모 채택은 별도 gate다.
+
 ## 2026-11-18 — VirtualTable grid 축소 회귀 수정 후보(UI 0.2.2)
 
 - 공통 루트의 min-width:auto가 내부 scroll container까지 intrinsic 폭으로 확장하는 실제 모바일 결함을 `min-w-0` 한 줄로 수정하고 UI만 0.2.2로 준비한다.

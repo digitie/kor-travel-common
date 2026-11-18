@@ -2,7 +2,7 @@
 
 - 기준선: Common main `55e3e95c9362b64bbeaddf8abaac0247f0a0df6f`.
 - 변경: 공통 VirtualTable 루트에 `min-w-0`만 추가한다. 공개 props·슬롯·정렬·가상화 기본값은 유지한다.
-- 준비 버전: UI `0.2.2`, tokens `0.1.2`. 소비자 수정·이미지 빌드·배포는 포함하지 않는다.
+- 현재 준비 버전: UI `0.2.2`, tokens `0.1.3`, toast `0.1.2`. 소비자 수정·이미지 빌드·배포는 포함하지 않는다.
 
 ## 실제 재현과 가설 검증
 
@@ -21,9 +21,9 @@ QA에서 공통 루트의 minWidth만 일시적으로 0으로 설정하면 body/
 
 ## pack과 후속 채택
 
-정규 UI build/pack과 타입 선언·고지를 검사했다. 로컬 UI 0.2.2 SHA256은 `81362f9e71e231a4b89af25fcb819fc2327235c86b7445cab5fbf8b2739756a9`다. 정규 tokens 0.1.2 pack의 SHA256은 `c6e2e27d716d5db7c9157f412cfd28d941536c032ce702a8cceb32f2a0c16253`이며 기존 수용 tarball과 전체 bytes가 동일했다.
+첫 head 05eba117의 정규 UI build/pack과 타입 선언·고지를 검사했다. 당시 로컬 UI 0.2.2 SHA256은 `81362f9e71e231a4b89af25fcb819fc2327235c86b7445cab5fbf8b2739756a9`다. 당시 정규 tokens 0.1.2 pack의 SHA256은 `c6e2e27d716d5db7c9157f412cfd28d941536c032ce702a8cceb32f2a0c16253`이며 기존 수용 tarball과 전체 bytes가 동일했다.
 
-로컬 pack은 canonical release artifact가 아니다. 병합 후 부모가 `common-release-packs-<merge-sha>`의 SOURCE_SHA·SHA256SUMS·SRI를 대조하고 Geo·Weather·Transport 공개/관리 네 표면에 같은 UI tarball/version/dist를 공급한다. 기존 tokens bytes와 artifact catalog는 보존한다. 카탈로그 동결과 소비자 채택은 부모가 소유한다. T-025 정책 분리·Map·N150·SDK 변경은 범위 밖이다.
+로컬 pack은 canonical release artifact가 아니다. 병합 후 부모가 `common-release-packs-<merge-sha>`의 SOURCE_SHA·SHA256SUMS·SRI를 대조하고 Geo·Weather·Transport 공개/관리 네 표면에 같은 UI tarball/version/dist를 공급한다. 기존 공개 tarball bytes와 artifact catalog는 보존하고 새 버전의 배포물을 생성한다. 카탈로그 동결과 소비자 채택은 부모가 소유한다. T-025 정책 분리·Map·N150·SDK 변경은 범위 밖이다.
 
 ## PR 직전 로컬 gate 한계
 
@@ -32,3 +32,11 @@ QA에서 공통 루트의 minWidth만 일시적으로 0으로 설정하면 body/
 - plan 검사는 기준선부터 T-416/T-419 요약 제목과 T-419의 T-025 선행 상태 오류 3건이 있다. 해당 task·원장·검사기는 이 PR에서 변경하지 않았다.
 - tools unittest 실행은 405건 중 failures 38/errors 3/skipped 1이었다. 재사용 환경의 MDX parser 등 누락 오류를 포함한다. 제품 회귀 4건의 성공과 합산하지 않는다. 별도 정책·Python 작업으로 확장하거나 이 결과를 전체 green으로 표시하지 않는다.
 - 독립 리뷰 두 건과 canonical CI/merge artifact는 부모 통합에서 확인한다.
+
+## 정확 CI 실패에 따른 최소 릴리스 동기화
+
+head 05eba117의 common frontend 44301094514에서 기존 toast.test.mjs의 정확 축 단언이 UI metadata 0.2.2와 versions.json의 0.2.1 차이로 실패했다. 같은 기존 시험으로 로컬 1 FAIL/2 PASS를 재현했다. 단언과 guard는 수정하지 않았다.
+
+versions.json의 UI 0.2.2·tokens 0.1.3·toast 0.1.2와 package metadata·UI tokens peer·lock을 맞췄다. sync_frontend_policy.mjs가 정본과 규약 표를 생성하고 각 sync-policy.mjs가 UI/tokens 내장 사본을 갱신하며 Toast 사본도 같은 정본 bytes로 동기화한다. 이 결합으로 tokens/toast의 policy bytes까지 바뀌므로 기존 버전 재포장 대신 patch를 올린다. T-025 정책 분리 설계나 검사 조건은 변경하지 않는다.
+
+기존 metadata·dependency-policy·native CSS guard 238건은 모두 PASS/skip 0이다. tokens 0.1.3과 toast 0.1.2의 tar 엔트리를 이전 공개 버전과 대조하면 package.json과 dependency-policy.json만 다르고 runtime/CSS·파일 집합은 동일하다. 이전 자산은 교체하지 않으며 신규 canonical artifact와 catalog 동결은 부모 통합에서 대조한다.

@@ -112,7 +112,7 @@ UI dev.8에 opt-in MapWorkspace·MapFilterPanel·MapStage와 상세 header/접�
 
 #### Fixed
 
-- UI 0.2.2 준비: VirtualTable 루트를 좁은 grid 안에서 축소해 모바일 열을 내부 가로 스크롤로 접근하게 한다. 공개 props·슬롯·정렬 기본값과 tokens 0.1.2 bytes는 유지한다. [회귀 검증](docs/evidence/virtual-table-grid-overflow.md).
+- UI 0.2.2 준비: VirtualTable 루트를 좁은 grid 안에서 축소해 모바일 열을 내부 가로 스크롤로 접근하게 한다. 공개 props·슬롯·정렬 기본값은 유지한다. 정확 축과 내장 정책 동기화에 따라 tokens 0.1.3·toast 0.1.2를 새로 준비하고 기존 공개 자산 bytes는 보존한다. [회귀 검증](docs/evidence/virtual-table-grid-overflow.md).
 
 - TableRow의 색상 전환에서 outline을 제외해 포커스 표시에 전환 지연이 적용되지 않게 한다. 고지의 shadcn CSS 동봉 설명을 실제 상태와 맞춘다. 실제 브라우저 delta 판정은 독립 리뷰에서 확인한다.
 
