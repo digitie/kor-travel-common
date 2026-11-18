@@ -5,7 +5,7 @@
 import { createContext, useContext, useState, useMemo, useCallback } from "react";
 import type { CSSProperties } from "react";
 import * as icons from "lucide-react";
-import { AppMenu, LoginForm, LoginStatus } from "@kor-travel/ui";
+import { AdminShell, AppMenu, LoginForm, LoginStatus } from "@kor-travel/ui";
 import type { AppMenuGroup, AppMenuLinkProps } from "@kor-travel/ui/app-menu";
 import projectData from "./projects.json";
 import "./preview.css";
@@ -57,47 +57,40 @@ function ProjectPreview({ project }: { project: (typeof projects)[number] }) {
     const item = allItems.find(candidate => "href" in candidate && candidate.href === href);
     if (item) { setActiveId(item.id); setView("menu"); }
   }, [allItems]);
-  const railStyle = project.rail ? {
-    background: project.rail.background, color: project.rail.foreground,
-    "--kt-text-secondary": project.rail.muted, "--kt-text-primary": project.rail.foreground,
-    "--kt-brand-tint": "#4c1d95", "--kt-brand": "#c4b5fd", "--kt-surface-subtle": "#4c1d95", "--kt-focus": project.rail.muted,
-  } as CSSProperties : undefined;
+  // 어두운 rail은 셸 안의 rail에만 CSS 변수로 전달한다(drawer는 기본 표면을 쓴다).
+  const rootStyle = { ...project.theme, ...(project.rail ? {
+    "--preview-rail-bg": project.rail.background, "--preview-rail-fg": project.rail.foreground, "--preview-rail-muted": project.rail.muted,
+  } : {}) } as CSSProperties;
+  const menu = <NavigationContext value={navigate}><AppMenu groups={groups} activeItemId={activeId} linkComponent={PreviewLink} /></NavigationContext>;
+  const logout = project.id !== "docker-manager"
+    ? ({ collapsed }: { collapsed: boolean }) => <button className="preview-logout" aria-label="로그아웃" title="로그아웃" onClick={() => setNotice("로그아웃: 실제 인증 연동은 소비자가 제공합니다.")} type="button"><icons.LogOut size={16} aria-hidden="true" />{collapsed ? null : "로그아웃"}</button>
+    : undefined;
 
-  return <div className="preview-root" style={project.theme as CSSProperties} data-project={project.id}>
-    <a className="preview-skip" href="#preview-main">본문으로 건너뛰기</a>
-    <div className="preview-banner"><a href="/">공통 UI 예시</a><span>리모트 메뉴 기준 · 인증 연동 없음</span></div>
-    <div className="preview-layout">
-      <aside className="preview-rail" style={railStyle}>
-        <div className="preview-wordmark"><strong>{project.name}</strong><span>admin</span></div>
-        <div className="preview-navigation"><NavigationContext value={navigate}><AppMenu groups={groups} activeItemId={activeId} linkComponent={PreviewLink} /></NavigationContext></div>
-        {project.id !== "docker-manager" ? <button className="preview-logout" onClick={() => setNotice("로그아웃: 실제 인증 연동은 소비자가 제공합니다.")} type="button"><icons.LogOut size={16} />로그아웃</button> : null}
-      </aside>
-      <main id="preview-main" tabIndex={-1} className="preview-main">
-        <header className="preview-header">
-          <p>공통 컴포넌트 / {project.id}</p>
-          <div><h1>{view === "login" ? "로그인" : selected.label}</h1><span className="preview-version">예시 화면</span></div>
-          <p>{view === "login" ? "프로젝트의 색상으로 적용한 공용 로그인 폼입니다." : "실제 프로젝트의 메뉴 구성과 경로를 사용합니다."}</p>
-        </header>
-        <div className="preview-switcher" role="group" aria-label="예시 화면 선택">
-          <button type="button" aria-pressed={view === "login"} onClick={() => setView("login")}>로그인 예시</button>
-          <button type="button" aria-pressed={view === "menu"} onClick={() => setView("menu")}>메뉴 예시</button>
-        </div>
-        {view === "login" ? <section className="preview-login" aria-label="로그인 컴포넌트 예시">
-          <LoginForm brand={project.name} description="관리자 계정으로 로그인해 주세요."
-            error={error} onClearError={() => setError(null)} onSubmit={async () => {
-              await new Promise(resolve => setTimeout(resolve, 800));
-              if (result === "error") setError("아이디 또는 비밀번호를 확인해 주세요.");
-              else setNotice("예시 로그인 성공 — 실제 세션은 생성하지 않았습니다.");
-            }} footer="이 화면은 공통 UI 예시입니다. 실제 계정 정보를 입력하지 마세요." />
-          <div className="preview-scenario"><label htmlFor="result">제출 결과 예시</label><select id="result" value={result} onChange={event => setResult(event.target.value as "success" | "error")}><option value="error">인증 오류</option><option value="success">성공 안내</option></select></div>
-        </section> : <section className="preview-content">
-          <p className="preview-kicker">선택한 메뉴</p><h2>{selected.label}</h2>
-          <dl><dt>프로젝트</dt><dd>{project.name}</dd><dt>연결 경로</dt><dd>{"href" in selected ? selected.href : "소비자 콜백"}</dd><dt>상태</dt><dd>메뉴 표시 예시 · 서비스 데이터 미연결</dd></dl>
-          <LoginStatus status="unauthenticated" />
-        </section>}
-        <p className="preview-notice" role="status">{notice}</p>
-        <footer className="preview-footer"><span>메뉴·컬러 출처</span><a href={project.menu}>main · {project.sha.slice(0, 8)}</a><span>2026.09.29 확인</span></footer>
-      </main>
-    </div>
+  return <div className="preview-root" style={rootStyle} data-project={project.id}>
+    <AdminShell area={project.name} title={view === "login" ? "로그인" : selected.label}
+      description={view === "login" ? "프로젝트의 색상으로 적용한 공용 로그인 폼입니다." : "실제 프로젝트의 메뉴 구성과 경로를 사용합니다."}
+      actions={<a className="preview-home" href="/">공통 UI 예시</a>}
+      brand={project.name} menu={menu} railFooter={logout} mainId="preview-main"
+      railClassName={project.rail ? "preview-rail-dark" : undefined}>
+      <div className="preview-switcher" role="group" aria-label="예시 화면 선택">
+        <button type="button" aria-pressed={view === "login"} onClick={() => setView("login")}>로그인 예시</button>
+        <button type="button" aria-pressed={view === "menu"} onClick={() => setView("menu")}>메뉴 예시</button>
+      </div>
+      {view === "login" ? <section className="preview-login" aria-label="로그인 컴포넌트 예시">
+        <LoginForm brand={project.name} description="관리자 계정으로 로그인해 주세요."
+          error={error} onClearError={() => setError(null)} onSubmit={async () => {
+            await new Promise(resolve => setTimeout(resolve, 800));
+            if (result === "error") setError("아이디 또는 비밀번호를 확인해 주세요.");
+            else setNotice("예시 로그인 성공 — 실제 세션은 생성하지 않았습니다.");
+          }} footer="이 화면은 공통 UI 예시입니다. 실제 계정 정보를 입력하지 마세요." />
+        <div className="preview-scenario"><label htmlFor="result">제출 결과 예시</label><select id="result" value={result} onChange={event => setResult(event.target.value as "success" | "error")}><option value="error">인증 오류</option><option value="success">성공 안내</option></select></div>
+      </section> : <section className="preview-content">
+        <p className="preview-kicker">선택한 메뉴</p><h2>{selected.label}</h2>
+        <dl><dt>프로젝트</dt><dd>{project.name}</dd><dt>연결 경로</dt><dd>{"href" in selected ? selected.href : "소비자 콜백"}</dd><dt>상태</dt><dd>메뉴 표시 예시 · 서비스 데이터 미연결</dd></dl>
+        <LoginStatus status="unauthenticated" />
+      </section>}
+      <p className="preview-notice" role="status">{notice}</p>
+      <footer className="preview-footer"><span>메뉴·컬러 출처</span><a href={project.menu}>main · {project.sha.slice(0, 8)}</a><span>2026.09.29 확인</span></footer>
+    </AdminShell>
   </div>;
 }

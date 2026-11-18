@@ -1,7 +1,7 @@
 # UX 가이드 — admin·사용자 표면 공통 규칙(UX-G0~G9)
 
 - 정본 지위: 이 문서는 kor-travel 제품군 웹 표면의 **구조·밀도·상태·접근성·문구 규칙**의 정본이다. 색 값·nav 항목·권한·라우트는 앱이 소유한다(UX-G0.1). PC/Mobile 수치는 [responsive-web](responsive-web.md), 토큰은 [design-tokens](design-tokens.md), 컴포넌트 마크업은 [ui-contract](ui-contract.md)가 정본이며 여기서는 링크만 한다.
-- 확정 task: **T-105**. 이 판은 [ux-patterns 조사](../survey/cross/ux-patterns.md) §2 G0~G9와 §4 C1~C22를 브리프 D-13 결정으로 옮긴 초안이다. 마지막 갱신: 2026-09-06.
+- 확정 task: **T-105**. 이 판은 [ux-patterns 조사](../survey/cross/ux-patterns.md) §2 G0~G9와 §4 C1~C22를 브리프 D-13 결정으로 옮긴 초안이다. 마지막 갱신: 2026-11-19(UX-G1.2·G1.5·G1.6, ADR-021).
 - 근거 약칭: `ux` = ux-patterns 조사, `dt` = [design-tokens 조사](../survey/cross/design-tokens.md), `ui` = [ui-components 조사](../survey/cross/ui-components.md), `inv/<app>` = [인벤토리](../survey/README.md) §3.1.
 
 ## 0. 적용 범위와 수준
@@ -31,11 +31,11 @@
 | ID | 규칙 | 수준 | 근거 |
 |---|---|---|---|
 | UX-G1.1 | 데스크톱(≥1024px): 좌측 rail 16rem, 접힘 4rem. 접힘 상태는 `localStorage "<app>:sidebar-collapsed"`에 저장 | MUST | `ux` G1.1(4앱), C1·C2 |
-| UX-G1.2 | <1024px: rail은 상단 가로 strip으로 전환하고 활성 항목을 `scrollIntoView`(reduced-motion 시 `behavior: "auto"`)한다. off-canvas drawer는 허용 옵션이며 UX-G4.8의 모달 접근성 계약을 동일하게 만족해야 한다 | MUST(계약) / strip 기본 SHOULD | `ux` G1.2, C4 |
+| UX-G1.2 | <1024px: rail을 숨기고 상단 바 왼쪽 메뉴 버튼(`aria-expanded`·`aria-controls`)으로 여는 좌측 off-canvas drawer를 쓴다. drawer는 UX-G4.8의 모달 접근성 계약(포커스 가둠·Esc·배경 비활성·포커스 복원)을 만족하고, 메뉴 이동 시 닫고 본문으로 포커스를 옮기며, reduced-motion에서 움직임을 끈다. 메뉴를 본문 위 가로 strip으로 쌓지 않는다. 공통 구현은 `AdminShell`([ui-contract](ui-contract.md) §4.7) | MUST | 소유자 결정 2026-11-19, [ADR-021](../adr/021-admin-shell-left-drawer-and-single-top-bar.md) |
 | UX-G1.3 | skip link → `<main id="main-content" tabIndex={-1}>`(링 끔은 이 컨테이너만). 대상 id는 앱이 바꿀 수 있으나 한 앱에 하나 | MUST | `ux` G1.3(5앱) |
 | UX-G1.4 | 활성 nav = `aria-current="page"` + 색 이외의 형태(좌측 2px brand mark) + `bg-kt-brand-tint` | MUST | `ux` G1.4(4앱), C5 |
-| UX-G1.5 | 헤더 밴드 순서: breadcrumb 또는 section → h1(+HelpTip) + actions(primary ≤1, secondary ≤2) → meta → description, 아래 hairline. 현재 pathname 문자열을 헤더에 노출하지 않는다 | MUST | `ux` G1.5(4앱), C16 |
-| UX-G1.6 | 로그아웃은 rail footer(데스크톱)/상단 아이콘(모바일). 별도 사이트 footer 없음 | MUST | `ux` G1.6(4앱) |
+| UX-G1.5 | 페이지 제목은 PC·모바일 모두 화면 맨 위의 한 줄 상단 바(약 48px, 아래 hairline)다: [메뉴 버튼(모바일)] → `h1` "영역 - 페이지"(예: "날씨 - 날씨지도") → 작은 설명(한 줄 말줄임, 전체는 `title` 속성) → 오른쪽 actions(primary ≤1, secondary ≤2). 앱 설명 문구(예: "Weather Scraper / admin")와 별도 section·meta 줄을 두지 않는다. 현재 pathname 문자열을 헤더에 노출하지 않는다 | MUST | 소유자 결정 2026-11-19, [ADR-021](../adr/021-admin-shell-left-drawer-and-single-top-bar.md) |
+| UX-G1.6 | 로그아웃은 rail footer(데스크톱)/drawer footer(모바일). 별도 사이트 footer 없음 | MUST | `ux` G1.6(4앱), ADR-021 |
 | UX-G1.7 | nav 정본은 셸 밖 모듈(`admin-pages.ts` 형태)에 두어 h1·nav 라벨·e2e가 같은 문자열을 소비한다. 활성 판정(longest-prefix)은 단위 테스트로 고정 | SHOULD | `ux` G1.7 |
 | UX-G1.8 | 우측 inspector rail(`--kt-rail` 22rem)은 `xl`(1280px) 이상에서만 2열 | SHOULD | `ux` G1.8(2앱) |
 | UX-G1.9 | nav 항목의 접근성 이름은 라벨만이다. 스프린트·상태 같은 운영 정보는 `data-*` 또는 시각 보조 텍스트로 둔다 | MUST | `ux` C20, D-13 |

@@ -1,7 +1,7 @@
 # PC/Mobile Web 규약 — 표면 분류·breakpoint·검사 폭·터치·안전영역·overflow
 
 - 정본 지위: 이 문서는 웹 표면의 **반응형 수치와 검사 절차**의 정본이다. 셸·목록·피드백 같은 행동 규칙은 [ux-guide](ux-guide.md), 밀도 토큰 값은 [design-tokens](design-tokens.md) §5.2·§7이 정본이며 여기서는 수치와 검사만 정한다.
-- 확정 task: **T-106**(시각 기준선 템플릿은 T-108). 이 판은 [ux-patterns 조사](../survey/cross/ux-patterns.md) §3과 브리프 D-13·D-21을 규칙 ID `RW-n`으로 옮긴 초안이다. 마지막 갱신: 2026-09-06.
+- 확정 task: **T-106**(시각 기준선 템플릿은 T-108). 이 판은 [ux-patterns 조사](../survey/cross/ux-patterns.md) §3과 브리프 D-13·D-21을 규칙 ID `RW-n`으로 옮긴 초안이다. 마지막 갱신: 2026-11-19(RW-9, ADR-021).
 - 근거 약칭: `ux` = ux-patterns 조사, `dt` = [design-tokens 조사](../survey/cross/design-tokens.md), `inv/<app>` = [인벤토리](../survey/README.md) §3.1.
 
 ## 1. 표면 분류와 기본 자세
@@ -10,7 +10,7 @@
 
 | 표면 | 기본 자세 | 셸 | 적용 앱 | 근거 |
 |---|---|---|---|---|
-| Admin | **PC-first + 최소 모바일 보장**: 1024px 이상 rail-workbench, 그 아래 strip(또는 drawer). 320px부터 문서 전체 가로 스크롤을 만들지 않는다(컨테인). 표·지도·작업면만 자체 overflow | [ux-guide](ux-guide.md) UX-G1 | map·ktc·geo·ktdm·weather·pinvi admin·airport 백업 패널 | `ux` §3.1(5앱 문서 일치) |
+| Admin | **PC-first + 최소 모바일 보장**: 1024px 이상 rail-workbench, 그 아래 좌측 drawer(ADR-021). 320px부터 문서 전체 가로 스크롤을 만들지 않는다(컨테인). 표·지도·작업면만 자체 overflow | [ux-guide](ux-guide.md) UX-G1 | map·ktc·geo·ktdm·weather·pinvi admin·airport 백업 패널 | `ux` §3.1(5앱 문서 일치) |
 | 사용자 웹 | **mobile-first**: 하단 탭바 셸, 44px 타깃, 16px 입력, 안전영역 패딩, `lg` 이상 상단 탭. 판정은 뷰포트 + 포인터 능력(UA 스니핑 금지) | 하단 탭바 4 + 더보기 | pinvi 사용자 웹 | `ux` §3.1 |
 | 사용자 대시보드 | 반응형 단일 페이지: 860px 이하 카드·`<details>` 접기, 320px 가독성 게이트 | 없음 | kta 대시보드 | `ux` §3.1, `inv/airport` §3 |
 | 모바일 앱 | 네이티브 Stack 헤더 + SafeArea, 48px 버튼·입력, NativeWind(Tailwind 3) + `tailwind-preset.cjs` 생성물 | 네이티브 | pinvi mobile | `ux` §3.1; Tailwind 3 예외는 열림 O-8 |
@@ -50,8 +50,8 @@
 | 항목 | 단언 |
 |---|---|
 | 문서 가로 스크롤 없음 | `document.documentElement.scrollWidth <= window.innerWidth` |
-| 셸 상태 | <1024: strip/drawer 렌더, rail 숨김; ≥1024: rail 렌더 |
-| 헤더 밴드 | actions가 wrap되고 h1이 잘리지 않음 |
+| 셸 상태 | <1024: 메뉴 버튼 표시·rail 숨김·drawer는 열 때만; ≥1024: rail 렌더·메뉴 버튼 숨김 |
+| 상단 바 | 한 줄(≤56px), h1·설명은 말줄임과 `title` 속성, actions는 오른쪽 고정 |
 | 표 | `[data-slot="table-container"]`만 `overflow-x: auto` |
 | 터치 타깃 | §4 수치(`getBoundingClientRect`) |
 | 텍스트 | `text-kt-2xs`(12px) 미만 렌더 없음 |
@@ -110,15 +110,14 @@
 
 ## 9. 모바일 셸 전략
 
-**RW-9 (MUST 계약 / SHOULD 선택)** admin의 좁은 화면 셸은 **상단 가로 strip이 기본**, off-canvas drawer는 옵션이며 둘 다 [ux-guide](ux-guide.md) UX-G4.8의 접근성 계약을 만족해야 한다(C4). 하단 탭바는 사용자 웹 전용이다.
+**RW-9 (MUST)** admin의 좁은 화면 셸은 **좌측 off-canvas drawer**이며 [ux-guide](ux-guide.md) UX-G1.2·UX-G4.8의 접근성 계약을 만족해야 한다([ADR-021](../adr/021-admin-shell-left-drawer-and-single-top-bar.md)). 메뉴와 제목이 세로 공간을 차지하지 않도록 상단 가로 strip은 쓰지 않는다. 하단 탭바는 사용자 웹 전용이다.
 
 | 전략 | 규칙 | 참조 구현 | 근거 |
 |---|---|---|---|
-| 상단 strip(기본) | `<nav>` 안 `overflow-x-auto`, 활성 항목 `scrollIntoView({ inline: "center", behavior })`(reduced-motion 시 `auto`), 라벨 표시. 아이콘 전용 항목은 sr-only 라벨 + `title`. 항목 ≤10이면 라벨 표시, 그 이상은 drawer 검토(후보) | map·ktc `AppShell` | `ux` §3.4 |
-| off-canvas drawer(옵션) | 폭 `min(280px, 84vw)`, 상단 56px topbar, backdrop, 닫힘 시 `inert`, focus trap, body scroll lock, hydration 전 `visibility` 처리. 단위 테스트로 포커스 순서 고정 | geo `AppShell.tsx` + `tests/unit/app-shell-drawer.test.tsx` | `ux` §1.1 |
+| 좌측 drawer(admin) | 폭 `min(280px, 84vw)`, 한 줄 상단 바(약 48px) 왼쪽 메뉴 버튼, backdrop, 닫힘 시 미렌더, focus trap, body scroll lock, 이동·lg 전환 시 닫힘, reduced-motion 시 움직임 없음 | `@kor-travel/ui` `AdminShell`(참조 원형 geo `AppShell.tsx`) | ADR-021, `ux` §1.1 |
 | 하단 탭바(사용자 웹) | 4 + 더보기 시트, 앱 밖 목적지는 시트로, 셸 밖 페이지(여행 상세 등)는 chrome 제거 허용, `--app-tabbar-h` 56px | pinvi `AppShell.tsx` | `ux` §3.4 |
 
-셸 골격 코드는 `@kor-travel/ui`가 아니라 레지스트리 채널 템플릿(T-211)으로 배포한다(D-10). nav 정본·접힘·RBAC는 앱 소유([ui-components 조사](../survey/cross/ui-components.md) §4.3).
+admin 셸 골격은 `@kor-travel/ui`의 `AdminShell`로 제공한다(ADR-021, D-10의 셸 부분 대체). nav 항목·권한(RBAC)·로그아웃·브랜드 색은 앱이 주입한다([ui-components 조사](../survey/cross/ui-components.md) §4.3).
 
 ## 10. 표의 모바일 대체
 
@@ -136,7 +135,7 @@
 | kta | 860/980/560/380, JS `innerWidth < 860` | 콘텐츠 breakpoint는 `md`/`lg` | admin 셸이 없으므로 860은 콘텐츠 값으로 잔존 허용, T-432에서 768/1024 재조정 검토 |
 | ktdm | 64rem/48rem | = `lg`/`md` | 일치. 표 영역만 가로 스크롤 유지 |
 | ktc | `useIsMobile` `(max-width: 767px)` | = `md` 미만 | 일치 |
-| geo | `(max-width: 1023px)` drawer | = `lg` 미만 | 일치(drawer 옵션) |
+| geo | `(max-width: 1023px)` drawer | = `lg` 미만 | 일치(drawer). 상단 바·제목은 ADR-021로 이관 |
 | pinvi admin | strip 항목 44px 아이콘 전용, 접힘 5rem | 36px 행, 4rem | C1·C6 예외 등록(T-422) |
 | pinvi 사용자 웹 | 문서 744/1128/1440, 코드 Tailwind 기본 | Tailwind 기본 | 문서 정정은 pinvi 소유 |
 | 안전영역 | ktc bulk 바·pinvi 탭바만 | §6 | 신규 하단 고정 바에 적용 |

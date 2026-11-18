@@ -1,8 +1,8 @@
 # kor-travel-common ADR — Architecture Decision Records
 
-**다음 후보 번호는 ADR-021이다.**
+**다음 후보 번호는 ADR-022이다.**
 
-- 정본 지위: ADR의 단일 색인. 별도 `docs/decisions.md`는 두지 않는다(D-02·D-27, 이중 색인 금지). 확정 task: T-004(★이번 PR). 마지막 갱신: 2026-11-17(ADR-019·ADR-020).
+- 정본 지위: ADR의 단일 색인. 별도 `docs/decisions.md`는 두지 않는다(D-02·D-27, 이중 색인 금지). 확정 task: T-004(★이번 PR). 마지막 갱신: 2026-11-19(ADR-021).
 
 kor-travel-common의 구조적 결정은 파일당 하나의 ADR로 둔다. 파일명은 `NNN-<slug>.md`(3자리·소문자 kebab), H1은 `# ADR-NNN: 제목`, 머리 불릿에 `상태`·`날짜`가 필수이고 `근거 문서`·`Supersedes`는 선택이다. 본문 절은 컨텍스트 → 결정 → 대안 검토 → 결과 → 후속·적용 위치 순서다. 이 색인은 번호·제목·상태를 관리하며 상위 인덱스는 [문서 지도](../README.md)다.
 
@@ -42,3 +42,5 @@ kor-travel-common의 구조적 결정은 파일당 하나의 ADR로 둔다. 파�
 - [ADR-019: 프론트 guard는 정책과 Node/npm 축을 호출자가 고정한 common 커밋에서 읽는다](019-frontend-policy-guard-model.md) — accepted(소유자 2026-11-17)
 
 - [ADR-020: 2026-11 재조사로 Python·UI 공통 범위를 다시 정한다](020-python-ui-scope-after-resurvey.md) — accepted(소유자 2026-11-17)
+
+- [ADR-021: 관리자 셸의 모바일 좌측 drawer와 한 줄 상단 제목 바](021-admin-shell-left-drawer-and-single-top-bar.md) — accepted

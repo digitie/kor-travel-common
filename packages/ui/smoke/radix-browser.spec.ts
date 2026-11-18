@@ -33,5 +33,12 @@ test("Radix 세로탭·상태 CSS·포커스가 격리 설치본에서 동작한
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toBeHidden();
   await expect(trigger).toBeFocused();
+  // UX-G9.1: 키보드 포커스 링은 불투명 outline 2px·offset 2px 하나뿐이다(반투명 box-shadow ring·테두리 색 변화 없음).
+  await expect(trigger).toHaveCSS("outline-style","solid");
+  await expect(trigger).toHaveCSS("outline-width","2px");
+  await expect(trigger).toHaveCSS("outline-offset","2px");
+  await expect(trigger).toHaveCSS("box-shadow","none");
+  await trigger.blur();
+  await expect(trigger).toHaveCSS("outline-style","none");
   expect(errors).toEqual([]);
 });
