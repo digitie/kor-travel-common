@@ -1,3 +1,9 @@
+## 2026-11-18 — PR68 main pack과 불변 catalog 후속
+
+- 실제 source R=706aaa7821588dfca72f660c9161f56be2d0445f의 main push CI 3종 SUCCESS와 canonical artifact14430019630을 확인하고 SHA256/SRI·embedded policy·실제 minimal npm ci/127파일·exports/import를 검증했다. 첫 offline Pretendard metadata 누락 실패는 보존하고 prefer-offline 재시도로 PASS했다.
+- [취득·설치·catalog evidence](evidence/releases/virtual-table-ui-0.2.2-catalog.md)의 실제 bytes로 세 공통 패키지 catalog만 동결한다. 원본 두 리뷰와 manifest·disposition/index도 bytes를 보존해 archive한다. source/versions/정책·다른 asset은 바꾸지 않는다.
+- P merge 및 main pack R/P 동일성 대조는 부모 merge 뒤 후속이며 소비자 편집·이미지 빌드·배포는 미실행이다.
+
 ## 2026-11-18 — 닫힌 task metadata와 CI 계획 검사 복원
 
 - ae2124e의 docs·Ubuntu/Windows tools가 같은 세 계획 metadata 오류에서 중단됐다. 이전에 문서화된 T-416 채택·T-419 대상 없음 종료를 그대로 보존하고 상세 제목을 완료 원장과 맞췄다.
