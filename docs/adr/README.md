@@ -43,4 +43,4 @@ kor-travel-common의 구조적 결정은 파일당 하나의 ADR로 둔다. 파�
 
 - [ADR-020: 2026-11 재조사로 Python·UI 공통 범위를 다시 정한다](020-python-ui-scope-after-resurvey.md) — accepted(소유자 2026-11-17)
 
-- [ADR-021: 관리자 셸의 모바일 좌측 drawer와 한 줄 상단 제목 바](021-admin-shell-left-drawer-and-single-top-bar.md) — accepted
+- [ADR-021: 관리자 셸의 모바일 좌측 drawer와 한 줄 상단 제목 바](021-admin-shell-left-drawer-and-single-top-bar.md) — accepted(소유자 2026-11-19)

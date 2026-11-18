@@ -212,6 +212,37 @@ describe("AdminShell", () => {
     expect(within(rail).getByText("PA")).toBeInTheDocument();
   });
 
+  it("localStorage가 막혀도 접힘 버튼이 동작한다", async () => {
+    const user = userEvent.setup();
+    const get = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => { throw new Error("blocked"); });
+    const set = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("blocked"); });
+    try {
+      const { container } = render(<AdminShell title="홈" collapsedStorageKey="blocked:sidebar" menu={menu()}><p>본문</p></AdminShell>);
+      await user.click(screen.getByRole("button", { name: "메뉴 접기" }));
+      expect(container.querySelector('[data-slot="admin-shell-rail"]')).toHaveAttribute("data-collapsed", "true");
+    } finally {
+      get.mockRestore();
+      set.mockRestore();
+    }
+  });
+
+  it("링크로 닫는 도중 경로가 바뀌어도 포커스는 본문으로 간다", async () => {
+    const user = userEvent.setup();
+    let navigate: (path: string) => void = () => {};
+    function Harness() {
+      const [path, setPath] = useState("/");
+      navigate = setPath;
+      return <AdminShell title="홈" navigationKey={path} menu={<AppMenu groups={groups} pathname={path}
+        linkComponent={props => <a {...props} onClick={event => { event.preventDefault(); navigate(props.href); }} />} />}><p>{path}</p></AdminShell>;
+    }
+    render(<Harness />);
+    await user.click(screen.getByRole("button", { name: "메뉴 열기" }));
+    await user.click(within(screen.getByRole("dialog")).getByRole("link", { name: "작업" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(screen.getByText("/jobs")).toBeInTheDocument();
+    expect(screen.getByRole("main")).toHaveFocus();
+  });
+
   it("collapsible=false면 접힘 버튼이 없다", () => {
     render(<AdminShell title="홈" collapsible={false} menu={menu()} />);
     expect(screen.queryByRole("button", { name: "메뉴 접기" })).not.toBeInTheDocument();

@@ -73,6 +73,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 - `AppMenu`는 셸 안에서 자동으로 세로 목록이 된다. 셸 밖 기존 사용은 그대로다.
 - 지도처럼 화면 높이를 채우는 페이지는 `fillViewport`와 `mainClassName`으로 본문 스크롤을 직접 다룬다.
 - 페이지마다 셸을 감싸는 앱은 `AdminShell`에 `title`·`description`·`actions`를 직접 줘도 된다.
+- 모바일 폭(320px)에서 상단 바 `actions`는 아이콘 버튼 1~2개로 둔다. 많으면 본문 툴바로 옮긴다.
+- 셸 안의 `AppMenu`에 `orientation`을 직접 주지 않는다(주면 셸의 세로·접힘 배치를 이긴다).
+- drawer가 열려 있으면 rail의 메뉴도 DOM에 남으므로 `AppMenu testId`가 두 번 나온다. e2e는 `getByRole("dialog")` 안으로 범위를 좁힌다.
+- drawer 움직임은 `@kor-travel/tokens/radix.css`(tw-animate·`data-open` variant)를 불러온 앱에서만 보인다. 없어도 동작은 같다.
+- 저장된 접힘 상태는 hydration 뒤 적용되므로 첫 화면에서 rail 폭이 한 번 바뀔 수 있다.
 
 ## 예시·검증
 

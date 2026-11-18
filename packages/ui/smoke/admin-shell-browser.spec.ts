@@ -46,6 +46,7 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
       await page.getByRole("dialog", { name: "메뉴" }).getByRole("link", { name: "작업" }).click();
       await expect(page).toHaveURL(/\/admin-shell-contracts\/jobs$/);
       await expect(page.getByRole("dialog")).toBeHidden();
+      await expect(page.getByRole("main")).toBeFocused();
       await expect(heading).toHaveText("검증 - 작업");
       await expect(description).toHaveText("실행 중 3건");
       await expect(page.getByRole("button", { name: "새로고침" })).toBeVisible();

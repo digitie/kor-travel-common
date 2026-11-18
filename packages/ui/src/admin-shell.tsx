@@ -189,19 +189,18 @@ function readCollapsed(key: string | undefined): boolean | null {
 function useRailCollapse(storageKey: string | undefined, defaultCollapsed: boolean) {
   const [local, setLocal] = useState(defaultCollapsed);
   const stored = useSyncExternalStore(subscribeCollapse, () => readCollapsed(storageKey), () => null);
-  const collapsed = storageKey ? stored ?? defaultCollapsed : local;
+  // 저장소를 읽을 수 없으면(차단·예외) 로컬 상태로 동작한다.
+  const collapsed = storageKey ? stored ?? local : local;
   const toggle = () => {
     const next = !collapsed;
-    if (!storageKey) {
-      setLocal(next);
-      return;
-    }
+    setLocal(next);
+    if (!storageKey) return;
     try {
       // 기존 앱이 "1"/"0"으로 저장해 왔다면 같은 형식을 유지한다(PinVi 등).
       const numeric = /^[01]$/.test(window.localStorage.getItem(storageKey) ?? "");
       window.localStorage.setItem(storageKey, numeric ? (next ? "1" : "0") : (next ? "true" : "false"));
     } catch {
-      setLocal(next);
+      // 저장 실패는 로컬 상태로만 반영한다.
     }
     collapseListeners.forEach(listener => listener());
   };
@@ -270,7 +269,7 @@ function AdminShellDrawer({ brand, railFooter, menu, labels, className, onNaviga
       className="fixed inset-0 z-kt-overlay bg-kt-overlay motion-safe:data-open:animate-in motion-safe:data-open:fade-in-0 motion-safe:data-closed:animate-out motion-safe:data-closed:fade-out-0 lg:hidden" />
     <DialogPrimitive.Content data-slot="admin-shell-drawer" aria-describedby={undefined} onClick={closeOnNavigate}
       onCloseAutoFocus={onCloseAutoFocus}
-      className={cn("fixed inset-y-0 left-0 z-kt-modal flex w-[min(280px,84vw)] flex-col border-r border-kt-border bg-kt-surface-card pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] font-kt-sans text-kt-text-primary shadow-[var(--kt-shadow-modal)] outline-none motion-safe:data-open:animate-in motion-safe:data-open:slide-in-from-left motion-safe:data-closed:animate-out motion-safe:data-closed:slide-out-to-left lg:hidden", className)}>
+      className={cn("fixed inset-y-0 left-0 z-kt-modal flex w-[min(280px,84vw)] flex-col border-r border-kt-border bg-kt-surface-card pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] font-kt-sans text-kt-text-primary shadow-[var(--kt-shadow-modal)] focus-visible:outline-0 motion-safe:data-open:animate-in motion-safe:data-open:slide-in-from-left motion-safe:data-closed:animate-out motion-safe:data-closed:slide-out-to-left lg:hidden", className)}>
       <div data-slot="admin-shell-drawer-header" className="flex min-h-12 shrink-0 items-center gap-1 border-b border-kt-border pr-1 pl-3">
         <DialogPrimitive.Title className="sr-only">{labels.menu}</DialogPrimitive.Title>
         <div className="min-w-0 flex-1 truncate text-kt-sm font-semibold">{renderSlot(brand, DRAWER_STATE)}</div>
@@ -296,7 +295,7 @@ function useDrawer(navigationKey: string | undefined) {
   const [drawer, setDrawer] = useState({ open: false, key: navigationKey, returnToMain: false });
   if (drawer.key !== navigationKey) {
     // 이동 직후 같은 렌더에서 닫는다(이전 경로로 돌아와도 다시 열리지 않는다).
-    setDrawer({ open: false, key: navigationKey, returnToMain: drawer.open });
+    setDrawer({ open: false, key: navigationKey, returnToMain: drawer.open || drawer.returnToMain });
   }
   const open = drawer.open && drawer.key === navigationKey;
   const setOpen = (next: boolean) => setDrawer({ open: next, key: navigationKey, returnToMain: false });
@@ -356,7 +355,7 @@ export function AdminShell({
             </button>
           </DialogPrimitive.Trigger>} />
           <main id={mainId} ref={mainRef} tabIndex={-1} data-slot="admin-shell-main"
-            className={cn("min-w-0 flex-1 outline-none", fillViewport && "min-h-0 overflow-hidden", mainClassName)}>
+            className={cn("min-w-0 flex-1 focus-visible:outline-0", fillViewport && "min-h-0 overflow-hidden", mainClassName)}>
             {children}
           </main>
         </div>
