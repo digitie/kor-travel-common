@@ -23,13 +23,20 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
       await expect(description).toHaveCSS("text-overflow", "ellipsis");
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
-      const trigger = page.getByRole("button", { name: "메뉴 열기" });
+      // 접근 가능한 이름은 닫힌 상태에서 역할 셀렉터로 확인한다. 모달 drawer가 열리면 Radix가
+      // 바깥 형제(트리거 포함)에 aria-hidden을 걸어 역할 트리에서 빠지므로, 이후 상태 확인은
+      // DOM 핸들로 같은 요소를 계속 잡는다.
+      await expect(page.getByRole("button", { name: "메뉴 열기" })).toBeVisible();
+      const trigger = page.locator('[data-slot="admin-shell-menu-button"]');
+      await expect(trigger).toHaveAccessibleName("메뉴 열기");
       await expect(trigger).toBeVisible();
       await expect(trigger).toHaveAttribute("aria-expanded", "false");
       await trigger.click();
       const drawer = page.getByRole("dialog", { name: "메뉴" });
       await expect(drawer).toBeVisible();
       await expect(trigger).toHaveAttribute("aria-expanded", "true");
+      // 모달 바깥은 보조기기에서 가려진다(배경 탐색 차단).
+      await expect(page.getByRole("button", { name: "메뉴 열기" })).toHaveCount(0);
       await expect.poll(async () => (await drawer.boundingBox())?.x).toBe(0);
       const drawerBox = (await drawer.boundingBox())!;
       expect(drawerBox.width).toBeLessThanOrEqual(Math.min(280, viewport.width * 0.84) + 1);
