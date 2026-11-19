@@ -325,7 +325,7 @@ class Registry:
         registry = cls(data, path, axes)
         for key, axis in axes.items():
             fields(axis, {"ecosystem", "packages", "floor", "recommended", "max", "image", "check",
-                          "checked", "note", "source", "exact", "application", "requiresPython", "compatible"}, f"axes.{key}", {"ecosystem"})
+                          "checked", "note", "source", "exact", "application", "buildTool", "requiresPython", "compatible"}, f"axes.{key}", {"ecosystem"})
             if axis["ecosystem"] not in {"runtime", "npm", "pypi", "image", "tool", "db"}:
                 raise ValueError(f"{path}: axes.{key}.ecosystem 오류")
             strings(axis, ("image", "check", "note", "source", "requiresPython"), f"axes.{key}")
@@ -339,7 +339,7 @@ class Registry:
                 # 정확 SemVer의 비교와 산출물 bytes는 JS 정책 검사기가 담당한다.
                 pypi_exact = axis["ecosystem"] == "pypi" and isinstance(exact, str) and re.fullmatch(
                     r"(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*)){0,3}(?:\.post\d+)?", exact,
-                ) and (axis.get("checked", True) or axis.get("application") is True)
+                ) and (axis.get("checked", True) or axis.get("application") is True or axis.get("buildTool") is True)
                 if key == "psycopg" and (not isinstance(exact, str) or not re.fullmatch(r"\d+\.\d+\.\d+", exact)):
                     pypi_exact = False
                 if not pypi_exact and (axis["ecosystem"] != "npm" or axis.get("checked") is not False
@@ -348,6 +348,9 @@ class Registry:
                     raise ValueError(f"{path}: axes.{key}.exact 승인 SemVer 계약 오류")
             if "application" in axis and (axis["application"] is not True or axis["ecosystem"] != "pypi" or "exact" not in axis):
                 raise ValueError("application은 정확 PyPI 축만 허용합니다")
+            if "buildTool" in axis and (axis["buildTool"] is not True or axis["ecosystem"] != "pypi"
+                    or "exact" not in axis or axis.get("application")):
+                raise ValueError("buildTool은 application과 분리한 정확 PyPI 축만 허용합니다")
             compatible = axis.get("compatible", [])
             if not isinstance(compatible, list):
                 raise ValueError("application 호환 정책은 목록이어야 합니다")
@@ -2109,6 +2112,7 @@ class Checker:
         self.strict_python_application = strict_python_application
         self.strict_python_inputs = strict_psycopg or strict_python_application
         self.application_constraints: list[str] = []
+        self.application_build_tools = False
         self.application_python: str | None = None
         self.application_installed: dict[str, str] | None = None
         self.installed_intersection_count = 0
@@ -2670,7 +2674,8 @@ class Checker:
         """정본 exact 축을 실제 distribution 이름으로 펼친다. 설치 대상을 만들지 않는다."""
         result = {}
         for key, axis in self.registry.axes.items():
-            if key in APPLICATION_AXES or axis.get("application"):
+            if (key in APPLICATION_AXES or axis.get("application")
+                    or self.application_build_tools and axis.get("buildTool")):
                 for name in axis.get("packages", [key]):
                     result[normalize_name(name)] = axis
         if "psycopg" in result:
@@ -2721,6 +2726,9 @@ class Checker:
         if selected & {"fastapi", "pydantic", "pydantic-settings"}:
             selected.update({"pydantic", "pydantic-core"})
             used.update({"pydantic", "pydantic-core"})
+        if "mcp" in used:
+            selected.add("mcp-types")
+            used.add("mcp-types")
         if self.application_python and requires_python and not application_allows(requires_python, self.application_python):
             self.add(scope.label, "python", "runtime", requires_python, self.application_python,
                      "NOT_RECOMMENDED", "역할 Python이 source requires-python과 다름")
@@ -2736,7 +2744,8 @@ class Checker:
                 problems.append("선언이 정확 선택 버전을 허용하지 않음/registry 선언 아님")
             if any(exact_requirement_version(spec) != expected for spec in pins):
                 problems.append("선택 constraint가 정확 정책과 다름")
-            if name in used and scope.lock_kind in {"uv", "poetry"}:
+            in_app_lock = (not axis.get("buildTool") or name in specs or name in locked or name in referenced)
+            if name in used and scope.lock_kind in {"uv", "poetry"} and in_app_lock:
                 entries = locked.get(name, [])
                 if not entries or any(entry.get("version") != expected for entry in entries):
                     problems.append("직접/전이/dev lock 해석값이 정확 정책과 다름/누락")
@@ -3410,12 +3419,13 @@ def main(argv: list[str] | None = None) -> int:
                         help="선택 Python profile의 root 상대 실소비 constraints; 반복 가능, psycopg 모드는 core/binary 짝 필수")
     parser.add_argument("--python-version", help="requirements/image 역할의 실제 Python 버전; source 최소 지원 metadata를 대체하지 않음")
     parser.add_argument("--installed-versions", type=Path, help="실제 관측 JSON {python, packages}; catalog 교집합만 읽기 전용 비교")
+    parser.add_argument("--python-build-tools", action="store_true", help="실제 사용하는 installer/build 도구 교집합도 명시적으로 대조; 설치 요구 아님")
     parser.add_argument("--self-check", action="store_true", help="레지스트리 형식·정책만 검사하고 종료")
     args = parser.parse_args(argv)
     strict_selected = args.strict_psycopg or args.strict_python_application
     if args.strict_psycopg and args.strict_python_application:
         parser.error("선택 profile 모드는 하나만 사용")
-    if (args.python_version or args.installed_versions) and not args.strict_python_application:
+    if (args.python_version or args.installed_versions or args.python_build_tools) and not args.strict_python_application:
         parser.error("역할 Python/설치 관측은 --strict-python-application과 사용")
     if args.constraints and not strict_selected:
         parser.error("--constraints는 선택 Python profile과 함께 사용")
@@ -3544,6 +3554,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.python_version and not re.fullmatch(r"3\.\d+(?:\.\d+)?", args.python_version):
             raise ValueError("역할 Python 버전 형식 오류")
+        checker.application_build_tools = args.python_build_tools
         checker.application_python = args.python_version
         if args.installed_versions:
             observed = read_json(args.installed_versions)
@@ -3601,6 +3612,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.strict_python_application:
         report["selectedPythonApplication"] = {
             "exactTargets": {name: checker.application_target(axis)[0] for name, axis in checker.application_policy().items()},
+            "buildToolsSelected": args.python_build_tools,
             "installedVersionIntersection": {"checked": checker.application_installed is not None, "count": checker.installed_intersection_count, "python": checker.application_python},
             "commonPython": registry.data["providers"]["packages"]["kor-travel-common"],
             "evidence": ("source/lock/constraints + explicit installed version observations" if checker.application_installed is not None else "source/lock/constraints only"), "runtimeImplementation": "NOT_CHECKED",
