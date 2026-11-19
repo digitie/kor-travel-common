@@ -57,9 +57,12 @@ class OwnedExtensionTests(unittest.TestCase):
         self.assertEqual(self.cli("--python-build-tools", "--constraints", "build.txt",
                                   "--installed-versions", str(observed)).returncode, 1)
         observed.write_text(json.dumps({"python": "3.12.13", "packages": {"httpx": "0.28.1", "pip": "26.3"}}))
-        self.lock({"httpx": "0.28.1", "pip": "26.3"})
+        # installer의 pip를 앱 lock에 추가하지 않고 실제 소비 constraints에 묶는다.
         self.assertEqual(self.cli("--python-build-tools", "--constraints", "build.txt",
                                   "--installed-versions", str(observed)).returncode, 0)
+        self.lock({"httpx": "0.28.1", "pip": "24.0"})
+        self.assertEqual(self.cli("--python-build-tools", "--constraints", "build.txt",
+                                  "--installed-versions", str(observed)).returncode, 1)
 
     def test_dormant_mcp_constraint_does_not_force_mcp_companion_into_lock(self):
         self.lock({"httpx": "0.28.1"})

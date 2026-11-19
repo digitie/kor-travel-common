@@ -307,7 +307,7 @@ python common/tools/check_versions.py consumer --repo kor-travel-concierge \
 
 ### 명시적인 build 도구 분류
 
-`pip`·`setuptools`·`wheel`은 catalog의 `buildTool: true`이며 기본 application 집합에 넣지 않는다. 실제 installer/build 환경을 검사할 때만 기존 모드에 `--python-build-tools`를 더한다. 직접 선언/lock·실제 소비 constraints·명시적 설치 관측의 교집합 검사 방식을 그대로 쓰며 없는 도구를 설치하라고 요구하지 않는다. 이 선택 여부는 JSON `buildToolsSelected`에 남긴다.
+`pip`·`setuptools`·`wheel`은 catalog의 `buildTool: true`이며 기본 application 집합에 넣지 않는다. 실제 installer/build 환경을 검사할 때만 기존 모드에 `--python-build-tools`를 더한다. 직접 선언/lock·실제 소비 constraints·명시적 설치 관측의 교집합 검사 방식을 그대로 쓰며 없는 도구를 설치하라고 요구하지 않는다. 앱 lock 밖의 installer 도구는 실제 소비 constraints와 설치 관측에 묶으며 앱 lock 행을 새로 요구하지 않는다. 이미 앱이 선언/참조/lock한 도구의 기존 lock 대조는 유지한다. 이 선택 여부는 JSON `buildToolsSelected`에 남긴다.
 
 pip constraints는 설치 요청이 아니다. 실제 pip bootstrap 및 PEP 517 build 격리에 쓰는 constraints와 설치된 도구의 관측을 소비자가 연결한다. runtime에 없는 setuptools/wheel을 새로 적재해 정렬 수치를 만들지 않는다. `pip -c`만으로 격리 build dependency가 고정됐다고 주장하지 않는다.
 

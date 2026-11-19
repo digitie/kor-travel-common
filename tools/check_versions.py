@@ -2744,7 +2744,8 @@ class Checker:
                 problems.append("선언이 정확 선택 버전을 허용하지 않음/registry 선언 아님")
             if any(exact_requirement_version(spec) != expected for spec in pins):
                 problems.append("선택 constraint가 정확 정책과 다름")
-            if name in used and scope.lock_kind in {"uv", "poetry"}:
+            in_app_lock = (not axis.get("buildTool") or name in specs or name in locked or name in referenced)
+            if name in used and scope.lock_kind in {"uv", "poetry"} and in_app_lock:
                 entries = locked.get(name, [])
                 if not entries or any(entry.get("version") != expected for entry in entries):
                     problems.append("직접/전이/dev lock 해석값이 정확 정책과 다름/누락")
