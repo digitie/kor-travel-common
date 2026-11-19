@@ -36,6 +36,12 @@ REST/OpenAPI 계약(에러 본문·health 경로·요청 ID·헤더 이름)은 [
 | BE-4 | provider 라이브러리(`python-*-api`)는 `git+https://…@<sha>` 또는 불변 태그로만 핀한다. `@main` 등 이동 참조는 금지한다. SHA 정렬 주체는 각 저장소이며 common `versions.json` `providers` 절은 보고만 한다(O-16). 같은 라이브러리의 두 배포 경로(weather vendored path vs map git+sha)는 T-505 정리 요청 대상 | pinvi etl `python-kasi-api@main`, kma SHA 불일치(`be` §5.1) | pinvi T-484, T-505 |
 | BE-5 | 기존 앱의 하한 전용 선언(`>=` only)은 lock 도입과 함께 `versions.json` floor 이상으로 상향하고, `blocked[]`(예: `mcp>=2`)는 선언 상한으로도 막는다 | ktdm `fastapi ^0.110`(두 minor 세대 차이), concierge `>=`만(`be` §2.1) | ktdm T-471, concierge T-450 |
 
+### 3.1 선택 psycopg 3 driver
+
+psycopg 3를 사용하는 소비자는 [versions.json](../../versions.json)의 `axes.psycopg.exact`로 core/binary를 맞추고 [선택 pin 검사](versions.md#81-선택-psycopg-3-정확-pin-ci-검사)를 CI에서 호출한다. 실제 dependency에 binary extra를 선언하고 lock 또는 별도 constraints의 core/binary도 일치시킨다. constraints는 설치 요청이 아니며, asyncpg·psycopg2 소비자에 psycopg 3를 새로 추가하지 않는다. pool 패키지는 별도 버전 축이므로 core patch와 기계적으로 맞추지 않는다.
+
+소스 guard 통과와 실제 구현 증거를 분리한다. 소비자의 실제 설치/native 환경에서 `importlib.metadata.version("psycopg")`, `importlib.metadata.version("psycopg-binary")`를 정본과 대조하고 `psycopg.pq.__impl__`이 의도한 `binary`인지 기록한다. extra의 플랫폼 조건과 wheel 제공 여부는 설치 결과로 확인하며 이 checker는 패키지를 설치하거나 import하지 않는다. 선택 patch의 공식 변경 근거는 [psycopg release notes](https://www.psycopg.org/psycopg3/docs/news.html)이며 이 문서에 별도 최신 버전 값을 복제하지 않는다.
+
 ## 4. 품질 게이트
 
 C20 quality 산출물은 코드가 아니라 설정 파일이며 `templates/python/`(T-305)에서 배포한다. 앱은 파일을 저장소에 복사하고 머리 주석의 common 버전으로 drift를 추적한다(추정: ruff `extend`는 로컬 경로만 받으므로 패키지 데이터 참조 대신 복사한다 — T-305에서 확정).

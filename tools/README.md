@@ -36,6 +36,8 @@ python3 -B -X utf8 tools/check_versions.py <consumer-repo-root> \
 
 모든 도구는 Python 3.11+ 표준 라이브러리만 사용하며 Windows Python에서도 동작해야 한다([개발 환경](../docs/dev-environment.md) Tier 2).
 
+`check_versions.py <consumer-root> --repo <consumer> --strict-psycopg`는 선택 psycopg exact/binary 선언·lock guard이며 drift는 exit 1이다. 별도 constraints는 `--constraints <root-relative-path>`로 추가한다. 실제 dependency·constraints 역할, 기본 survey 유지, 설치본/runtime 별도 증거는 [선택 psycopg CI 계약](../docs/standards/versions.md#81-선택-psycopg-3-정확-pin-ci-검사)을 따른다.
+
 `check_versions.py --self-check`는 입력 레지스트리만 검사한다. 소비자 실행에서 검사 범위가 없거나 입력 형식이 잘못되면 exit 2이며, 설치 버전을 해석하지 못하면 NO_LOCK이다. 자체 검사 성공은 소비자 버전 정렬 성공이 아니다.
 
 ## Node/npm 도구 선택 검사
