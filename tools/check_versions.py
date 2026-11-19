@@ -31,9 +31,10 @@ import os
 from pathlib import Path
 import re
 import shlex
+import subprocess
 import sys
 import tomllib
-from urllib.parse import unquote, urlsplit, urlunsplit
+from urllib.parse import parse_qs, unquote, urlsplit, urlunsplit
 
 try:
     from manifest_schema import MANIFEST_SCHEMA, validate_manifest_file
@@ -50,6 +51,8 @@ HARD = frozenset({"FLOATING_REF", "BLOCKED", "EXEMPT_EXPIRED"})
 FAILING = HARD | frozenset({"BELOW_FLOOR", "ABOVE_MAX", "NO_LOCK", "NO_ENGINES"})
 SOFT = frozenset({"NOT_RECOMMENDED"})
 MODES = ("report", "warn", "fail")
+APPLICATION_AXES = ("sqlalchemy", "asyncpg", "fastapi", "pydantic", "pydantic-core",
+                    "pydantic-settings", "alembic", "httpx", "uvicorn")
 
 SKIP_DIRS = frozenset({"node_modules", ".venv", "venv", ".git", ".next", "dist", "build", "out",
                        "coverage", ".tools", "vendor", "__pycache__", ".turbo", "target"})
@@ -306,7 +309,11 @@ class Registry:
         if not isinstance(provider_packages, dict):
             raise ValueError(f"{path}: providers.packages는 객체여야 함")
         for name, provider in provider_packages.items():
-            fields(provider, {"repo"}, f"providers.packages.{name}", {"repo"})
+            extra = {"ref", "packageTree"} if name == "kor-travel-common" else set()
+            fields(provider, {"repo"} | extra, f"providers.packages.{name}", {"repo"})
+            if extra & set(provider) and any(not isinstance(provider.get(key), str)
+                    or not re.fullmatch(r"[0-9a-f]{40}", provider[key]) for key in extra):
+                raise ValueError("kor-travel-common ref/packageTree 전체 SHA 정책이 필요합니다")
             strings(provider, ("repo",), f"providers.packages.{name}")
             if not name.strip() or not provider["repo"].startswith("https://"):
                 raise ValueError(f"{path}: provider 이름 또는 저장소 URL 오류")
@@ -2056,12 +2063,16 @@ def scopes_from_manifest(
 # --------------------------------------------------------------------------- 판정
 
 class Checker:
-    def __init__(self, registry: Registry, repo: str, today: date, *, strict_psycopg: bool = False):
+    def __init__(self, registry: Registry, repo: str, today: date, *, strict_psycopg: bool = False,
+                 strict_python_application: bool = False):
         self.registry = registry
         self.repo_id = repo
         self.repo = _workflow_display_value(repo, "(소비자 식별자 비공개)")
         self.today = today
         self.strict_psycopg = strict_psycopg
+        self.strict_python_application = strict_python_application
+        self.strict_python_inputs = strict_psycopg or strict_python_application
+        self.application_constraints: list[str] = []
         self.selected_root: Path | None = None
         self.psycopg_used_groups: dict[Path, str] = {}
         self.psycopg_declared_groups: set[Path] = set()
@@ -2616,6 +2627,165 @@ class Checker:
         self.add(scope.label, "psycopg", "pypi", f"=={expected} [binary]", "",
                  "NOT_RECOMMENDED" if problems else "OK", detail)
 
+    def check_python_application(self, scope: Scope, specs: dict[str, list[str]],
+                                 extras: dict[str, set[str]], urls: dict[str, list[str]],
+                                 constraints: list[str], *, poetry_source: bool = False) -> None:
+        """선택 직접 축과 알려진 Pydantic 짝만 검사하며 설치·전이 그래프는 추정하지 않는다."""
+        locked: dict[str, list[dict]] = {}
+        if scope.lock is not None and scope.lock_kind in {"uv", "poetry"}:
+            data = read_uv_lock(scope.lock) if scope.lock_kind == "uv" else read_poetry_lock(scope.lock)
+            for entry in data["package"]:
+                locked.setdefault(normalize_name(entry["name"]), []).append(entry)
+        constrained: dict[str, list[str]] = {}
+        for line in constraints:
+            parsed = parse_requirement(line, strict=True)
+            if parsed is None:
+                raise _manifest_input_error()
+            name, spec, url = parsed
+            constrained.setdefault(name, []).append(spec if not url else "@URL")
+
+        def allows(spec: str, expected: str) -> bool:
+            if not spec.strip():
+                return True
+            target = parse_version(expected)
+            for prefix in re.findall(r"!=\s*(\d+(?:\.\d+)*)\.\*", spec):
+                if matches_prefix(target, parse_version(prefix)):
+                    return False
+            intervals = _range_interval(spec)
+            if intervals is None:
+                return False
+            for low, low_inc, high, high_inc, exclusions in intervals:
+                if low is not None and (below(target, low) or same_version(target, low) and not low_inc):
+                    continue
+                if high is not None and (below(high, target) or same_version(target, high) and not high_inc):
+                    continue
+                if not any(same_version(target, item) for item in exclusions):
+                    return True
+            return False
+
+        selected = set(specs) & set(APPLICATION_AXES)
+        if selected & {"fastapi", "pydantic", "pydantic-settings"}:
+            selected.update({"pydantic", "pydantic-core"})
+        for name in APPLICATION_AXES:
+            if name not in selected:
+                self.add(scope.label, name, "pypi", "", "", "OK", "NOT_USED: 선택 직접 축 아님")
+                continue
+            expected = self.registry.axes.get(name, {}).get("exact")
+            if not isinstance(expected, str) or not re.fullmatch(r"\d+\.\d+\.\d+", expected):
+                raise ValueError("application 선택 축의 exact 정책이 필요합니다")
+            problems = []
+            declared = specs.get(name, [])
+            if name in urls or any(not allows(spec, expected) for spec in declared):
+                problems.append("선언이 정확 선택 버전을 허용하지 않음/registry 선언 아님")
+            pins = constrained.get(name, [])
+            if any(exact_requirement_version(spec) != expected for spec in pins):
+                problems.append("선택 constraint가 정확 정책과 다름")
+            if scope.lock_kind in {"uv", "poetry"}:
+                entries = locked.get(name, [])
+                if not entries or any(entry.get("version") != expected for entry in entries):
+                    problems.append("선택 lock 해석값이 정확 정책과 다름/누락")
+                for entry in entries:
+                    source = entry.get("source", {})
+                    if ((scope.lock_kind == "uv" and "registry" not in source)
+                            or (scope.lock_kind == "poetry" and source.get("type") in {"git", "url", "file"})):
+                        problems.append("선택 lock이 registry 해석값이 아님")
+            elif not pins and not (declared and all(
+                    exact_requirement_version(spec) == expected
+                    or poetry_source and spec == expected for spec in declared)):
+                problems.append("lock 없는 선택 축의 정확 선언/실소비 constraint가 없음")
+            self.add(scope.label, name, "pypi", f"=={expected}", "",
+                     "NOT_RECOMMENDED" if problems else "OK",
+                     "; ".join(problems) if problems else "선택 source/lock/constraints 일치; 설치본·runtime 미확인")
+
+        # constraint만으로 미사용 driver를 설치 대상으로 만들지 않는다.
+        if set(specs) & {"psycopg", "psycopg-binary"}:
+            self.check_strict_psycopg(scope, specs, extras, urls, constraints)
+        else:
+            self.add(scope.label, "psycopg", "pypi", "", "", "OK", "NOT_USED: 선택 driver 선언 없음")
+        if "daemon-pool" in extras.get("kor-travel-common", set()):
+            self.add(scope.label, "application-profile", "pypi", "", "", "NOT_RECOMMENDED",
+                     "daemon-pool은 별도 external host profile이며 application에서 선택할 수 없음")
+        self.check_application_common(scope, specs, urls, locked)
+
+    def check_application_common(self, scope: Scope, specs: dict[str, list[str]],
+                                 urls: dict[str, list[str]], locked: dict[str, list[dict]]) -> None:
+        """Common Python은 전체 package tree가 같은 immutable Git object만 허용한다."""
+        name = "kor-travel-common"
+        if name not in specs and name not in urls:
+            self.add(scope.label, name, "git", "", "", "OK", "NOT_USED: Common Python 직접 선언 없음")
+            return
+        policy = self.registry.data.get("providers", {}).get("packages", {}).get(name, {})
+        if not all(isinstance(policy.get(key), str) and re.fullmatch(r"[0-9a-f]{40}", policy[key])
+                   for key in ("ref", "packageTree")):
+            raise ValueError("Common Python ref/packageTree 정책이 필요합니다")
+        authority, _ = _parse_url(policy["repo"])
+
+        def read_ref(value: str, *, is_lock: bool = False) -> str | None:
+            if not is_lock and not value.startswith("git+https://"):
+                return None
+            parsed, _ = _parse_url(value.removeprefix("git+"))
+            if (parsed.scheme != "https" or parsed.hostname != authority.hostname
+                    or parsed.username or parsed.password or parsed.port):
+                return None
+            path, separator, path_ref = parsed.path.rpartition("@")
+            repo_path = path if separator else parsed.path
+            if repo_path.removesuffix(".git") != authority.path.removesuffix(".git"):
+                return None
+            query = parse_qs(parsed.query, keep_blank_values=True)
+            if set(query) - {"rev", "subdirectory"} or any(len(items) != 1 for items in query.values()):
+                return None
+            fragment = parse_qs(parsed.fragment, keep_blank_values=True)
+            if not is_lock and (set(fragment) - {"subdirectory"}
+                    or any(len(items) != 1 for items in fragment.values())
+                    or "subdirectory" in query and "subdirectory" in fragment
+                    and query["subdirectory"] != fragment["subdirectory"]):
+                return None
+            subdir = query.get("subdirectory", fragment.get("subdirectory", []))
+            if subdir != ["packages/py/kor-travel-common"]:
+                return None
+            ref = parsed.fragment if is_lock else path_ref if separator else query.get("rev", [""])[0]
+            if not re.fullmatch(r"[0-9a-f]{40}", ref):
+                return None
+            if query.get("rev", [ref]) != [ref]:
+                return None
+            return ref
+
+        declared = [read_ref(value) for value in urls.get(name, [])]
+        valid = bool(declared) and None not in declared and len(set(declared)) == 1
+        ref = declared[0] if valid else None
+        if valid and ref != policy["ref"]:
+            try:
+                result = subprocess.run([
+                    "git", "-c", "core.fsmonitor=false", "-C", str(self.registry.path.parent),
+                    "rev-parse", "--verify", ref + ":packages/py/kor-travel-common"],
+                    capture_output=True, text=True, timeout=10, check=False,
+                    env={**os.environ, "GIT_NO_LAZY_FETCH": "1", "GIT_TERMINAL_PROMPT": "0",
+                         "GIT_OPTIONAL_LOCKS": "0"})
+                valid = result.returncode == 0 and result.stdout.strip() == policy["packageTree"]
+            except (OSError, subprocess.TimeoutExpired):
+                valid = False
+        if scope.lock_kind in {"uv", "poetry"}:
+            entries = locked.get(name, [])
+            if not entries:
+                valid = False
+            for entry in entries:
+                source = entry.get("source", {})
+                if scope.lock_kind == "uv":
+                    actual = read_ref(source.get("git", ""), is_lock=True)
+                else:
+                    url = source.get("url", "")
+                    actual = source.get("resolved_reference")
+                    value = ((url if url.startswith("git+") else "git+" + url)
+                             + "@" + str(actual) + "#subdirectory=" + source.get("subdirectory", ""))
+                    if source.get("type") != "git" or read_ref(value) != actual:
+                        actual = None
+                if actual != ref:
+                    valid = False
+        self.add(scope.label, name, "git", "immutable package tree", "",
+                 "OK" if valid else "NOT_RECOMMENDED",
+                 "선언/lock과 canonical package tree 일치; 설치 bytes 미확인" if valid else
+                 "Common Python source/lock 불일치·이전 tree·Git object 미확인(fetch-depth 0 또는 canonical ref 필요)")
+
     # --- python
     def check_python(self, scope: Scope) -> None:
         label = scope.label
@@ -2681,9 +2851,9 @@ class Checker:
             for group_name in normalized_groups:
                 append_group(group_name)
             for text in specs:
-                parsed = parse_requirement(str(text))
+                parsed = parse_requirement(str(text), strict=self.strict_python_application)
                 if parsed is None:
-                    if self.strict_psycopg:
+                    if self.strict_python_inputs:
                         raise _manifest_input_error()
                     continue
                 name, spec, url = parsed
@@ -2797,10 +2967,10 @@ class Checker:
                 requires_python = nonlocal_requires[0]
         elif manifest is not None and requirements_mode:
             for line in read_requirements(
-                    manifest, root=scope.root or (self.selected_root if self.strict_psycopg else None),
-                    include_constraints=self.strict_psycopg,
-                    constraints=constraint_lines if self.strict_psycopg else None):
-                parsed = parse_requirement(line)
+                    manifest, root=scope.root or (self.selected_root if self.strict_python_inputs else None),
+                    include_constraints=self.strict_python_inputs,
+                    constraints=constraint_lines if self.strict_python_inputs else None):
+                parsed = parse_requirement(line, strict=self.strict_python_application)
                 if parsed is None:
                     raise ValueError("requirements.txt 입력 구조 오류")
                 name, spec, url = parsed
@@ -2816,6 +2986,12 @@ class Checker:
 
         if self.strict_psycopg:
             self.check_strict_psycopg(scope, requirement_specs, declaration_extras, urls, constraint_lines)
+            return
+        if self.strict_python_application:
+            self.check_python_application(scope, requirement_specs, declaration_extras, urls,
+                                          constraint_lines + self.application_constraints,
+                                          poetry_source=(manifest is not None and manifest.name == "pyproject.toml"
+                                                         and "poetry" in data.get("tool", {})))
             return
         if requires_python is None:
             self.add(label, "python", "runtime", "", "", "NO_ENGINES",
@@ -2947,7 +3123,16 @@ class Checker:
                         self.record_axis(label, key, "pypi", "(전이)", version)
 
     def run(self, scopes: list[Scope]) -> None:
-        if self.strict_psycopg:
+        if self.strict_python_application:
+            for name in APPLICATION_AXES:
+                exact = self.registry.axes.get(name, {}).get("exact")
+                if not isinstance(exact, str) or not re.fullmatch(r"\d+\.\d+\.\d+", exact):
+                    raise ValueError("application 선택 축의 exact 정책이 필요합니다")
+            provider = self.registry.data.get("providers", {}).get("packages", {}).get("kor-travel-common", {})
+            if not all(isinstance(provider.get(key), str) and re.fullmatch(r"[0-9a-f]{40}", provider[key])
+                       for key in ("ref", "packageTree")):
+                raise ValueError("Common Python ref/packageTree 정책이 필요합니다")
+        if self.strict_python_inputs:
             python_scopes = [scope for scope in scopes if scope.kind == "python"]
             if not python_scopes:
                 raise ValueError("선택 guard의 Python dependency 입력 scope가 없음")
@@ -3093,14 +3278,20 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--quiet", action="store_true", help="표준 출력에 표를 쓰지 않음(annotation·요약만)")
     parser.add_argument("--strict-psycopg", action="store_true",
                         help="psycopg 3 사용 scope만 exact/binary 선언·lock/constraints 검사; drift는 exit 1, 설치본·runtime은 별도")
+    parser.add_argument("--strict-python-application", action="store_true",
+                        help="선택 application 직접 축의 exact lock/constraints와 Common Python tree 검사")
     parser.add_argument("--constraints", type=Path, action="append", default=[],
-                        help="--strict-psycopg에서 별도로 쓰는 소비자 root 상대 constraints; core/binary 짝 필수, 반복 가능")
+                        help="선택 Python profile의 root 상대 실소비 constraints; 반복 가능, psycopg 모드는 core/binary 짝 필수")
     parser.add_argument("--self-check", action="store_true", help="레지스트리 형식·정책만 검사하고 종료")
     args = parser.parse_args(argv)
-    if args.constraints and not args.strict_psycopg:
-        parser.error("--constraints는 --strict-psycopg와 함께 사용")
-    if args.strict_psycopg and (args.mode or args.self_check or len(args.paths) != 1):
-        parser.error("--strict-psycopg는 소비자 root 하나와 사용하며 --mode/--self-check와 함께 쓰지 않음")
+    strict_selected = args.strict_psycopg or args.strict_python_application
+    if args.strict_psycopg and args.strict_python_application:
+        parser.error("선택 profile 모드는 하나만 사용")
+    if args.constraints and not strict_selected:
+        parser.error("--constraints는 선택 Python profile과 함께 사용")
+    if strict_selected and (args.mode or args.self_check or len(args.paths) != 1):
+        flag = "--strict-python-application" if args.strict_python_application else "--strict-psycopg"
+        parser.error(f"{flag}는 소비자 root 하나와 사용하며 --mode/--self-check와 함께 쓰지 않음")
 
     try:
         if hasattr(sys.stdout, "reconfigure"):
@@ -3217,29 +3408,45 @@ def main(argv: list[str] | None = None) -> int:
                              if consumer_name else "미등록 소비자 기본값")
     today = args.today or date.today()
 
-    checker = Checker(registry, repo, today, strict_psycopg=args.strict_psycopg)
+    checker = Checker(registry, repo, today, strict_psycopg=args.strict_psycopg,
+                      strict_python_application=args.strict_python_application)
     checker.selected_root = first_root
-    if args.strict_psycopg:
-        mode, mode_source = "fail", "--strict-psycopg 선택 pin guard(설치본·runtime 미확인)"
+    if strict_selected:
+        mode, mode_source = "fail", ("--strict-python-application 선택 profile(설치본·runtime 미확인)"
+                                     if args.strict_python_application else
+                                     "--strict-psycopg 선택 pin guard(설치본·runtime 미확인)")
     try:
+        if args.strict_python_application:
+            for constraint in args.constraints:
+                nested: list[str] = []
+                checker.application_constraints.extend(read_requirements(
+                    first_root / constraint, root=first_root, include_constraints=True, constraints=nested))
+                checker.application_constraints.extend(nested)
         checker.run(scopes)
-        for constraint in args.constraints:
-            checker.check_psycopg_constraints(first_root / constraint, first_root)
+        if args.strict_psycopg:
+            for constraint in args.constraints:
+                checker.check_psycopg_constraints(first_root / constraint, first_root)
     except (OSError, ValueError, TypeError, AttributeError, KeyError) as exc:
         print(f"::error title=check_versions::소비자 입력 오류: {exc}")
         return 2
     findings = checker.findings
     markdown = render_markdown(findings, registry, repo, mode, mode_source, today, roots,
-                               strict_psycopg=args.strict_psycopg)
+                               strict_psycopg=strict_selected)
     report = build_report(findings, registry, repo, mode, mode_source, today, roots,
-                          strict_psycopg=args.strict_psycopg)
-    if args.strict_psycopg:
+                          strict_psycopg=strict_selected)
+    if strict_selected:
         report["selectedPsycopg"] = {"exact": registry.axes["psycopg"]["exact"],
                                     "evidence": "source/lock/constraints only", "runtimeImplementation": "NOT_CHECKED"}
 
+    if args.strict_python_application:
+        report["selectedPythonApplication"] = {
+            "exactTargets": {name: registry.axes[name]["exact"] for name in APPLICATION_AXES},
+            "commonPython": registry.data["providers"]["packages"]["kor-travel-common"],
+            "evidence": "source/lock/constraints only", "runtimeImplementation": "NOT_CHECKED",
+            "daemonPool": "별도 external host profile; application SQLAlchemy 예외 아님"}
     if not args.quiet:
         print(markdown)
-    for line in annotations(findings, mode, strict_psycopg=args.strict_psycopg):
+    for line in annotations(findings, mode, strict_psycopg=strict_selected):
         print(line)
     if args.json is not None:
         args.json.parent.mkdir(parents=True, exist_ok=True)
@@ -3251,12 +3458,12 @@ def main(argv: list[str] | None = None) -> int:
     if summary_path and not args.no_step_summary:
         with open(summary_path, "a", encoding="utf-8") as handle:
             handle.write(markdown)
-    code = (int(any(f.verdict != "OK" for f in findings)) if args.strict_psycopg
+    code = (int(any(f.verdict != "OK" for f in findings)) if strict_selected
             else exit_code(mode, findings))
     counts = summarize(findings)
-    failing = (sum(f.verdict != "OK" for f in findings) if args.strict_psycopg
+    failing = (sum(f.verdict != "OK" for f in findings) if strict_selected
                else sum(counts[v] for v in FAILING))
-    meaning = ("선택 pin CI guard; 설치본·runtime 구현 미검증" if args.strict_psycopg
+    meaning = ("선택 pin CI guard; 설치본·runtime 구현 미검증" if strict_selected
                else "읽기 전용 대조; 제품 gate 아님")
     print(f"check_versions: {_workflow_display_value(repo, '(소비자 식별자 비공개)')} mode={mode} findings={len(findings)} "
           f"failing={failing} exit={code} ({meaning})")

@@ -190,7 +190,9 @@
       "ecosystem": "pypi",
       "floor": "0.115",
       "recommended": "0.141",
-      "source": "vm §2.2"
+      "source": "vm §2.2; PyPI JSON https://pypi.org/pypi/fastapi/0.165.0/json 2026-11-19 확인",
+      "exact": "0.165.0",
+      "note": "application 선택 profile의 정확 축; 기존 floor/recommended 판정과 분리."
     },
     "starlette": {
       "ecosystem": "pypi",
@@ -203,39 +205,49 @@
       "ecosystem": "pypi",
       "floor": "0.30",
       "recommended": "0.52",
-      "source": "vm §2.2"
+      "source": "vm §2.2; PyPI JSON https://pypi.org/pypi/uvicorn/0.54.0/json 2026-11-19 확인",
+      "exact": "0.54.0",
+      "note": "application 선택 profile의 정확 축; 기존 floor/recommended 판정과 분리."
     },
     "pydantic": {
       "ecosystem": "pypi",
       "floor": "2.9",
       "recommended": "2.13",
-      "source": "vm §2.2"
+      "source": "vm §2.2; PyPI JSON https://pypi.org/pypi/pydantic/2.14.4/json 2026-11-19 확인",
+      "exact": "2.14.4",
+      "note": "application 선택 profile의 정확 축; 기존 floor/recommended 판정과 분리."
     },
     "pydantic-settings": {
       "ecosystem": "pypi",
       "floor": "2.5",
       "recommended": "2.15",
-      "source": "vm §2.2"
+      "source": "vm §2.2; PyPI JSON https://pypi.org/pypi/pydantic-settings/2.16.3/json 2026-11-19 확인",
+      "exact": "2.16.3",
+      "note": "application 선택 profile의 정확 축; 기존 floor/recommended 판정과 분리."
     },
     "sqlalchemy": {
       "ecosystem": "pypi",
       "floor": "2.0.35",
       "recommended": "2.0.52",
-      "source": "vm §2.3"
+      "source": "vm §2.3; PyPI JSON https://pypi.org/pypi/SQLAlchemy/2.1.9/json 2026-11-19 확인",
+      "exact": "2.1.9",
+      "note": "application 선택 profile의 정확 축; 기존 floor/recommended 판정과 분리."
     },
     "alembic": {
       "ecosystem": "pypi",
       "floor": "1.13",
       "recommended": "1.19",
-      "note": "map `alembic<1.20` 존중.",
-      "source": "vm §2.3"
+      "note": "map `alembic<1.20` 존중. application 선택 profile의 정확 축; 기존 floor/recommended 판정과 분리.",
+      "source": "vm §2.3; PyPI JSON https://pypi.org/pypi/alembic/1.20.1/json 2026-11-19 확인",
+      "exact": "1.20.1"
     },
     "asyncpg": {
       "ecosystem": "pypi",
       "floor": "0.29",
       "recommended": "0.31",
-      "note": "앱 선택(asyncpg 또는 psycopg).",
-      "source": "vm §2.3"
+      "note": "앱 선택(asyncpg 또는 psycopg). application 선택 profile의 정확 축; 기존 floor/recommended 판정과 분리.",
+      "source": "vm §2.3; PyPI JSON https://pypi.org/pypi/asyncpg/0.32.0/json 2026-11-19 확인",
+      "exact": "0.32.0"
     },
     "psycopg": {
       "ecosystem": "pypi",
@@ -249,7 +261,9 @@
       "ecosystem": "pypi",
       "floor": "0.27",
       "recommended": "0.28",
-      "source": "vm §2.4"
+      "source": "vm §2.4; PyPI JSON https://pypi.org/pypi/httpx/0.28.1/json 2026-11-19 확인",
+      "exact": "0.28.1",
+      "note": "application 선택 profile의 정확 축; 기존 floor/recommended 판정과 분리."
     },
     "tenacity": {
       "ecosystem": "pypi",
@@ -634,6 +648,14 @@
       "floor": null,
       "recommended": "0.1.3",
       "source": "Geo 알림용 선택형 공통 Radix Toast namespace; 원본 radix-ui1.8.1/React19.3.1 유지"
+    },
+    "pydantic-core": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "exact": "2.50.5",
+      "note": "application 선택 profile의 정확 축; 기존 floor/recommended 판정과 분리.",
+      "source": "; PyPI JSON https://pypi.org/pypi/pydantic-core/2.50.5/json 2026-11-19 확인"
     }
   },
   "actions": {
@@ -752,6 +774,12 @@
       "aliases": [
         "PinVi"
       ]
+    },
+    "kor-travel-transport": {
+      "enforce": "report",
+      "aliases": [
+        "transport"
+      ]
     }
   },
   "providers": {
@@ -772,6 +800,11 @@
       },
       "python-vworld-api": {
         "repo": "https://github.com/digitie/python-vworld-api"
+      },
+      "kor-travel-common": {
+        "repo": "https://github.com/digitie/kor-travel-common",
+        "ref": "67efe2e546ecef41e54a866bf4862d608ace343d",
+        "packageTree": "87951f9c50bf99dfcba40a8b16a2a476f2e77118"
       }
     },
     "source": "vm §2.7; be §5.1"

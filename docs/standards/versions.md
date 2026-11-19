@@ -281,3 +281,33 @@ python3 -B "$COMMON/tools/check_versions.py" "$CONSUMER" --repo kor-travel-conci
 ### 전이 npm 참조의 범위
 
 전이 패키지의 git/URL 선언은 resolved가 SHA여도 원 선언이 branch이면 FLOATING_REF다. 전이 numeric/wildcard 선언은 lock 설치본으로 대조하고 직접 manifest의 `*`/`latest` 금지와 구분한다. 기본 npm registry의 `/-/<이름>-<설치버전>.tgz` 경로는 registry 설치본으로 분류한다. 그 외 외부 resolved는 §3.8의 고정 참조 규칙을 적용하므로 미지원 사설 registry/mirror는 FLOATING_REF일 수 있다. 실제 파일 다운로드·integrity 검증은 이 읽기 전용 검사기의 성공 주장에 포함하지 않는다.
+
+
+## 선택 Python application profile
+
+`versions.json`의 PyPI 축 `exact`는 opt-in application 검사에만 사용한다. 기존 floor/recommended survey와 `--strict-psycopg`의 계약은 유지한다. 정렬 대상은 SQLAlchemy·asyncpg·FastAPI·Pydantic/core·pydantic-settings·Alembic·httpx·uvicorn의 유한한 목록이며 값은 catalog가 소유한다. Psycopg 3을 선택하면 기존 정확 core/binary guard도 적용한다. 이 모드는 전이 의존성 전체를 정렬하거나 미사용 driver를 설치하도록 요구하지 않는다.
+
+```bash
+python common/tools/check_versions.py consumer --repo kor-travel-geo \
+  --strict-python-application \
+  --constraints kor-travel-geo-dagster/docker/constraints-dagster.txt \
+  --json application-profile.json
+```
+
+- 직접 선언한 선택 축과 FastAPI/Pydantic/settings가 실제로 요구하는 Pydantic/core 짝을 검사한다. core를 새 직접 의존성으로 추가할 필요는 없다.
+- uv/Poetry lock은 선택한 버전과 정확히 같아야 하며 원 선언도 그 버전을 허용해야 한다. 이전 lock, 충돌 범위, registry가 아닌 선택 URL 해석값은 실패한다.
+- lock이 없는 경우는 정확 선언 또는 `--constraints`로 지정한 실제 이미지/installer 소비 constraints가 필요하다. constraints는 반복할 수 있고, 선택 축의 충돌/이전 pin을 합쳐 숨길 수 없다. 기존 `-r`/`-c` parser와 소비자 root 경계 검사를 재사용한다.
+- constraints에 이름이 있다는 이유만으로 미사용 패키지를 선택하지 않는다. `NOT_USED`는 설치 증거가 아니다. Dockerfile/installer가 그 파일을 실제 소비하는지는 소비자 계약 시험과 후속 normal/native 증거로 확인한다.
+- source/lock/constraints 검사일 뿐 설치본·native 구현·실행 중 최신성을 확인하지 않는다. JSON의 `selectedPythonApplication.runtimeImplementation`은 `NOT_CHECKED`이며 어느 모드에서도 source 결과를 runtime PASS로 바꾸지 않는다. 선택 profile은 OK 이외 판정에서 exit 1, 해석 오류는 exit 2이다.
+
+### 범위와 별도 host 프로필
+
+Weather·Transport·Geo·Concierge·Manager backend·Pinvi Python에서 실제 사용하는 축에 적용한다. Manager는 `consumer/backend`, Pinvi는 `consumer/apps/api`와 `consumer/apps/etl`을 각각 application root로 사용할 수 있다. Manager backend의 SQLAlchemy도 검사 대상이며 host 예외로 덮지 않는다. 사용하지 않는 asyncpg/Psycopg/Common Python을 새로 추가하지 않는다.
+
+외부 shared Dagster/Map 소유 daemon-pool 프로필은 별도이다. 그 SQLAlchemy 정확 계약은 [Common Python metadata](../../packages/py/kor-travel-common/pyproject.toml)의 `daemon-pool` extra를 유지한다. application 모드를 그 host dependency root에 적용하거나 이 작업으로 Map source/runtime/CI를 바꾸지 않는다. `dagster` extra는 daemon-pool을 선택하지 않는다. Common package import나 SQLAlchemy entry-point 등록만으로 daemon pool이 활성화되지 않는다.
+
+### Common Python tree
+
+`providers.packages.kor-travel-common`의 `repo`·`ref`·`packageTree`가 정본이다. 직접 사용한 Common Python은 지정 repository/subdirectory와 전체 immutable SHA에 고정하고, lock이 있으면 그 해석 SHA도 선언과 일치해야 한다. canonical ref는 catalog의 검증된 tree에 묶인다. 다른 immutable SHA는 Common catalog checkout의 **로컬 Git object**로 전체 Python package tree가 같음을 증명한 경우 허용한다. 원격 fetch나 설치를 검사기가 실행하지 않는다. shallow checkout에 과거 object가 없으면 fail closed이므로 canonical ref를 쓰거나 Common checkout의 기존 `fetch-depth: 0`을 선택한다.
+
+Common checkout은 consumer의 형제 디렉터리에 둬 자동 root 발견을 오염시키지 않는다. 동일 tree의 Git 문자열 차이만으로 library 코드가 바뀌었다고 주장하지 않는다. Geo의 기존 imported recovery API와 deadline 기본 경로는 소비자 채택 시험으로 별도 보존한다. 기존 UI catalog·npm 축·공개 pack은 이 profile에서 변경하지 않는다.
