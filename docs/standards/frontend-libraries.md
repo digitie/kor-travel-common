@@ -10,6 +10,8 @@ Geo·Map·Weather·Concierge·Docker Manager·Pinvi 웹/관리자·Transport 웹
 
 Radix FocusScope의 초기패널 Shift+Tab과 disabled fieldset 상속 결함은 원본 수정1.3.1+kortravel.fix.2의 단일 배포물로 적용한다. 웹의 직접 file 의존성·root override는 엔진을 같은 bytes로 공급하는 예외이며 앱에서 개별 Radix를 import하는 예외가 아니다. patchedRadixPackages의 각 이름은 공식 scoped 이름·exact 축·artifact 목록과 연결되어야 하고 잘못된 설정은 생성 전에 거부한다. [고정 출처·빌드·라이선스](../../vendor/README.md)를 따른다.
 
+각 소비자의 `common-artifacts.json`·vendor pack·manifest·workspace lock은 같은 고정 catalog의 버전과 SHA512/SRI를 대조한다. `uses`와 `common-ref`를 같은 불변 정책 commit에 고정하고 실제 설치 파일도 canonical pack과 대조한다. 새 정본 채택은 각 앱 PR·이미지·화면 검증으로 기록하며, 다른 앱의 미사용 의존성을 추가해 목록을 강제로 같게 만들지 않는다.
+
 지도는 maplibre-vworld-react GitHub의 정확 커밋에서 core/web/RN을 빌드한다. 이동하는 main 참조와 개발자별 재포장은 배포 참조로 사용하지 않는다. 라이브러리의 재현된 결함은 원 저장소에서 수정·검증한 후 같은 산출물을 소비한다.
 
 ### 선택형 공통 차트·애니메이션
@@ -99,7 +101,7 @@ Weather·Transport가 함께 사용하는 `echarts`·`motion`도 정확 버전 �
 
 <!-- frontend-library-versions:end -->
 
-TypeScript는 OpenAPI 생성기와 typescript-eslint peer 범위 때문에 5.9.3, Node 타입은 Node22 실행환경에 맞춘다. NativeWind RC는 사용자 승인에 따른 것으로 대응 엔진과 함께 고정한다. stable로 표시하지 않는다.
+TypeScript는 OpenAPI 생성기와 typescript-eslint peer 범위 때문에 5.9.3을 유지한다. Node 실행 축은 26.13.1이며 Node 타입은 고정 정책의 22.20.5를 유지한다. 실행 도구와 타입 패키지 버전을 같은 축으로 해석하지 않는다. NativeWind RC는 사용자 승인에 따른 것으로 대응 엔진과 함께 고정한다. stable로 표시하지 않는다.
 
 Pinvi 모바일의 Expo SDK58 패치 버전은 해당 앱의 `apps/mobile/package.json`과 workspace lock이 정본이다. 앱의 `check-mobile-styling.mjs`가 지원하는 Expo 항목의 선언·lock을 대조하고, 나머지 SDK 구성은 명시적인 선언·lock과 CI의 필수 Expo Doctor로 호환성을 검증한다. Expo 계열은 이 문서의 중앙 정확 버전 목록에 포함되지 않으며 웹 앱에 설치를 요구하지 않는다. React Doctor는 별개의 검사이므로 한쪽 성공으로 다른 쪽 실패를 대체하지 않는다. 실기기·EAS·스토어 검증도 이 검사 결과로 대신하지 않는다. SDK 패치만으로 동결된 공통 UI·tokens·VWorld·CSS compiler 산출물을 다시 배포하거나 같은 버전의 bytes를 바꾸지 않는다.
 
@@ -132,6 +134,8 @@ common root와 실제 Next smoke/example의 설치 정의도 같은 tarball과 r
 갱신은 registry와 peer 확인 → 정본 변경 → 공통 구현·테스트 → 단일 pack·원장 생성 → 소비자 동일 bytes 적용·lock 갱신 → 앱 검증 → 같은 불변 커밋 기준의 독립 리뷰2인 → PR CI·머지 → 새 이미지 빌드·배포·동작 확인 순서다. 릴리스된 같은 버전에 다른 bytes를 덮어쓰지 않는다.
 
 ## 현재 수용 상태
+
+선택한 현재 배포 정본은 [AdminShell catalog](../evidence/releases/admin-shell-ui-0.2.3-catalog.md)의 UI0.2.3·tokens0.1.4·선택형 Toast0.1.3이다. 이전 정본의 실제 수용과 새 정본의 source·설치·배포 검증을 [통합 지도](../integration-map.md#5-불변-산출물-채택과-운영-수용2026-11-19)와 [수용 증거](../evidence/releases/2026-11-19-consumer-library-adoption.md)에서 구분한다. 문서의 관측 갱신은 버전 정책·pack bytes를 새로 발행하는 작업이 아니다.
 
 공통 C11 구현과 7개 소비 앱의 주 이관 PR은 독립 리뷰·정확 CI 후 머지했다. 배포 수용은 앱마다 별도로 확인한다. 최종 source commit·산출물 해시·앱별 테스트·리뷰·PR·이미지 digest·배포 결과는 Geo의 단일 통합 보고서에서 기록한다.
 

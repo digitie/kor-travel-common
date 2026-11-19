@@ -1,3 +1,9 @@
+## 2026-11-19 — ui 0.2.3 정본의 소비자 후속과 실제 수용 구분
+
+선택한 소비자 배포 정본은 producer `0e2a3f5aa16323df0d009360802661c9bc496dc6` / catalog `d644632ea9eaf2f6b6baa49305d65fae5bbc0bd4`의 UI0.2.3·tokens0.1.4·사용하는 Geo Toast0.1.3이다. 실제 main artifact14500111373 원본과 SOURCE_SHA·세 pack SRI를 대조했다. 이전 UI0.2.2 수용과 별도로 소비자 PR·설치·native·화면·성능·배포 수용을 기록한다. 아래 이전 시점은 당시 사실이며 새 버전의 완료 근거가 아니다.
+
+다음 작업은 소유 소비자 여섯 앱의 새 정본 채택과 실제 image/runtime 증거를 [수용 기록](evidence/releases/2026-11-19-consumer-library-adoption.md)에 결박하는 것이다. Map은 별도 Claude 소유이며 코드·CI·빌드·배포를 변경하지 않는다. Pinvi 모바일의 실기기/EAS/스토어는 실행하지 않았다. Weather/Transport의 첫 조회 성능과 원천 신선도는 UI 기능 수용과 구분한다. CI 순서 감사·최적화는 마지막 업무로 남아 있다.
+
 ## 2026-11-19 — T-222 병합과 ui 0.2.3 main pack catalog
 
 - PR70 첫 CI의 320·390px drawer smoke 실패는 셀렉터 문제였다. 모달이 열리면 Radix가 바깥에 `aria-hidden`을 걸어 `getByRole`로 트리거를 못 찾는다(정상 접근성 동작). 225ddcd에서 열린 뒤 확인을 `data-slot` 핸들로 바꾸고 바깥 버튼이 역할 트리에서 빠지는 단언을 더했다. 시험 단언은 줄이지 않았다.

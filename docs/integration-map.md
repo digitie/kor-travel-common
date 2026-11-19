@@ -5,6 +5,8 @@
 
 이 문서는 [문서 지도](README.md)에 속하며 "지금 어느 소비자가 common의 무엇을 어느 버전으로 쓰는가"만 답한다. 왜·어떤 순서로 채택하는가는 [소비자](architecture/consumers.md), gate는 [채택 준비 기준](architecture/adoption-readiness.md), 규칙은 [standards](standards/README.md)가 정본이다.
 
+현재 실제수용은 [§5 불변 산출물 채택과 운영 수용](#5-불변-산출물-채택과-운영-수용2026-11-19)에 기록한다. 초기판은 당시 조사 기록이다.
+
 ## 1. 생성 규칙(T-012)
 
 | 입력 | 출력 열 | 비고 |
@@ -61,3 +63,11 @@
 | 2026-11-18 | 전체 소비자 | 공통 Node 축 26.13.1(T-029). 병합 커밋 `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`. 이 커밋으로 호출 SHA와 `common-ref`를 올리는 소비자는 같은 PR에서 `.nvmrc`(·`.node-version`)·정확 `engines.node`·CI Node·모든 Node `FROM`(`node:26.13.1-<배포판>@sha256:…`)을 26.13.1로 옮긴다. npm 12.0.1 그대로. Map은 T-417에서 이 커밋으로 옮긴다 | [T-029](tasks/T-029-node-axis-to-latest-lts.md), [evidence](evidence/t029-node-axis.md) |
 | 2026-11-18 | 전체 소비자 | ADR-019 판 guard 구현. 호출 SHA와 `common-ref`를 T-024 채택 커밋 `e18d1892dcc3915a5e6e57ccad550a852b793780`으로 함께 올린 소비자만 새 동작을 얻고, 옛 판 호출자는 그대로다. 지연은 주간 보고 | [T-024](tasks/T-024-guard-model-implementation.md), [evidence](evidence/t024-guard-model.md) |
 | 2026-11-18 | kor-travel-map | guard 호출 SHA와 `common-ref`를 `55a921b` → `0dec9543c8c8730ce7b05837f2fbe6c31d4ede65`(T-029)로 함께 올림, 도구 규칙 입력(`toolchain-manifests`·`node-dockerfiles`) 채움. map은 새 guard(ADR-019)로 옮겼다 | [T-417](tasks/T-417-map-guard-ref-toolchain.md), map PR #1511(`7dc2af7`) |
+
+## 5. 불변 산출물 채택과 운영 수용(2026-11-19)
+
+실제 source·이미지·검증 결과는 [불변 산출물·실제 수용 기록](evidence/releases/2026-11-19-consumer-library-adoption.md)과 [비민감 증거 JSON](evidence/releases/2026-11-19-consumer-library-adoption.json)에 기록한다. 초기판·이전 정본의 수용과 새 정본 후속을 구분한다. T-012 생성기나 root consumers.pins.json의 고정 smoke fixture를 이번 runtime 관측 때문에 바꾸지 않는다.
+
+선택한 producer는 `0e2a3f5aa16323df0d009360802661c9bc496dc6`, guard/catalog pin은 `d644632ea9eaf2f6b6baa49305d65fae5bbc0bd4`다. UI0.2.3·tokens0.1.4와 실제 사용하는 Geo Toast0.1.3의 동일 pack bytes/SRI를 소비한다. canonical 파일 수는 UI+tokens121, Geo+toast129, 모바일 tokens25다. 각 앱의 새 source·설치·이미지·화면 수용은 후속 기록에 결박하며 미완료를 완료로 합산하지 않는다.
+
+Manager의 PR619는 이 정본을 채택했으며 frontend가 바뀌었다. 따라서 기존617 frontend tree 보존 증거로 최신 Manager 화면을 수용하지 않는다. Geo·Weather·Transport·Pinvi·Concierge도 같은 정본으로 맞춘다. Map은 별도 Claude 소유라 이 작업의 코드·CI·빌드·배포 변경 대상에서 제외한다. CI 순서 감사·최적화는 마지막에 수행한다.

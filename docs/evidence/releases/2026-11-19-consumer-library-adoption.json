@@ -1,0 +1,456 @@
+{
+  "recordDate": "2026-11-19",
+  "updatedUTC": "2026-11-19T07:11:34.913351+00:00",
+  "scope": "owned consumers new0.2.3 source/install/runtime evidence; Map externalowner; native device/EAS/store notrun",
+  "status": "IN_PROGRESS_NOT_RELEASE_ACCEPTED",
+  "selectedRelease": {
+    "status": "VERIFIED_PRODUCER_ARTIFACT_SOURCE_SHA_CATALOG_SRI",
+    "artifact": 14500111373,
+    "producer": "0e2a3f5aa16323df0d009360802661c9bc496dc6",
+    "catalog": "d644632ea9eaf2f6b6baa49305d65fae5bbc0bd4",
+    "ZIP_SHA256": "19881f2c3ed598ed7ec213c559be21ece2be77068bddee6de5bd249b6f8019e1",
+    "packs": {
+      "kor-travel-ui-0.2.3.tgz": {
+        "SHA256": "aa19793165ae37b2214d210692e23235545e1464c4e0059f99d943411fa753d9",
+        "SRI": "sha512-upv+JtiVcF+zg3C/KcZy9UQckx0n3vc0n4ANr3/elWM8PQ4srljxgTQmaBK4IxulEj8pd8gc7mnG3M67oFIQUQ==",
+        "bytes": 80615,
+        "regularFiles": 96,
+        "name": "@kor-travel/ui",
+        "version": "0.2.3"
+      },
+      "kor-travel-tokens-0.1.4.tgz": {
+        "SHA256": "33d08d7b37c60d3e319da19608ce05137f6bf587dc8d42e3ce0dfb4b597a61fc",
+        "SRI": "sha512-k6StI02tH/iRxKimczN0btU+MS9AvDZLlR/6Bn6xQHhZ5Mb79pkyIALd4RkoLT2GP3qlwR89YEgOaBiBxACDpA==",
+        "bytes": 34607,
+        "regularFiles": 25,
+        "name": "@kor-travel/tokens",
+        "version": "0.1.4"
+      },
+      "kor-travel-toast-0.1.3.tgz": {
+        "SHA256": "34b514b270f88fc19c6b411b975d4497f91f3581530f32a39be264874ca09b37",
+        "SRI": "sha512-YziPAKkSfkNs+1aAn02Jf179+4qtAtsJ0QNtSytHpSstzdIhZoAy292c1njRNXMicd9jXfsivyDbhPVLj5aZYA==",
+        "bytes": 19397,
+        "regularFiles": 8,
+        "name": "@kor-travel/toast",
+        "version": "0.1.3"
+      }
+    }
+  },
+  "newConsumerAcceptanceComplete": false,
+  "consumerFollowup": {
+    "geo": {
+      "status": "IN_PROGRESS",
+      "oldRuntimeEvidence": "inheritedAcceptanceSnapshot",
+      "expectedCommonFiles": 129
+    },
+    "weather": {
+      "status": "IN_PROGRESS",
+      "oldRuntimeEvidence": "inheritedAcceptanceSnapshot",
+      "expectedCommonFiles": 121
+    },
+    "transport-public": {
+      "status": "IN_PROGRESS",
+      "oldRuntimeEvidence": "inheritedAcceptanceSnapshot",
+      "expectedCommonFiles": 121
+    },
+    "transport-admin": {
+      "status": "IN_PROGRESS",
+      "oldRuntimeEvidence": "inheritedAcceptanceSnapshot",
+      "expectedCommonFiles": 121
+    },
+    "pinvi-web": {
+      "status": "IN_PROGRESS",
+      "oldRuntimeEvidence": "inheritedAcceptanceSnapshot",
+      "expectedCommonFiles": 121
+    },
+    "pinvi-mobile-tokens": {
+      "status": "IN_PROGRESS",
+      "oldRuntimeEvidence": "inheritedAcceptanceSnapshot",
+      "expectedCommonFiles": 25
+    },
+    "concierge": {
+      "status": "IN_PROGRESS",
+      "oldRuntimeEvidence": "inheritedAcceptanceSnapshot",
+      "expectedCommonFiles": 121
+    },
+    "manager-odroid": {
+      "status": "IN_PROGRESS",
+      "oldRuntimeEvidence": "inheritedAcceptanceSnapshot",
+      "expectedCommonFiles": 121
+    },
+    "manager-n150": {
+      "status": "IN_PROGRESS",
+      "oldRuntimeEvidence": "inheritedAcceptanceSnapshot",
+      "expectedCommonFiles": 121
+    }
+  },
+  "CIOrdering": "NOT_STARTED_LAST",
+  "MapMutation": false,
+  "versionsPolicyOrPackagesChangedByThisDocPR": false,
+  "sameGeoReportPR": "https://github.com/digitie/kor-travel-geo/pull/644",
+  "inheritedAcceptanceSnapshotScope": "Historical UI0.2.2/tokens0.1.3/GeoToast0.1.2 facts preserved from prior unmerged docs preparation, NOT new0.2.3 acceptance",
+  "inheritedAcceptanceSnapshot": {
+    "recordDate": "2026-11-19",
+    "scope": "기존 불변 산출물과 소비자 수용 문서 기록; 새 릴리스 아님",
+    "packSourceR": "706aaa7821588dfca72f660c9161f56be2d0445f",
+    "policyPinC": "5c1b3857e9af060d30ec776157760fb9e9c13ded",
+    "catalogMergeP": "2b0c02a2018c2c8c791bc6d6c7b5a2290579e09e",
+    "catalogStatus": "CANDIDATE_NOT_RELEASED",
+    "catalogCPEqual": true,
+    "packs": {
+      "@kor-travel/ui": {
+        "version": "0.2.2",
+        "filename": "kor-travel-ui-0.2.2.tgz",
+        "integrity": "sha512-/odxLZlFlMj0IB8oPMyjE77kj1MtZO46m/lyHiCTW/gYFq7o6XUSrSPOC7rm7cyEpbjD8dAnCqcz7zmE2GWF+Q==",
+        "sha256": "76ecace688c061b2dd8dc49b5a18b7acf37e7e4c6bbdec71fe863187483c7033",
+        "canonicalRPEqual": true
+      },
+      "@kor-travel/tokens": {
+        "version": "0.1.3",
+        "filename": "kor-travel-tokens-0.1.3.tgz",
+        "integrity": "sha512-m1WsuJw1DHYxAkPsJpAIrFN5P/Udb+Ln/sZHbrmPJpItQDHx+wuf8QEFgSrBsk5yW+NAX5CQnIQZRkPIFwO97A==",
+        "sha256": "e6a0eca29bb1568bc7b858dc15cb1d41ea6c264c0e02be3209db094b08e8f464",
+        "canonicalRPEqual": true
+      },
+      "@kor-travel/toast": {
+        "version": "0.1.2",
+        "filename": "kor-travel-toast-0.1.2.tgz",
+        "integrity": "sha512-pOUwDVZd8Sy2iPrv7uLBdQ5gEHXsA5uRx4IuLgd0KVKoy7WOXCJpCB+NDVplZ8PWWQeQ48Wl0+cr2Y7h+wkI3g==",
+        "sha256": "133e2815053544997197e65a201a65c688bc0ae0a57fe604569bc720831da36f",
+        "canonicalRPEqual": true
+      }
+    },
+    "canonicalMainArtifacts": {
+      "R": 14430019630,
+      "P": 14435485481
+    },
+    "consumers": {
+      "geo": {
+        "source": "96ff8b4c420a405bb68322ed638b9443f6366b94",
+        "functionalAcceptance": "PASS",
+        "commonInstalledFiles": 127,
+        "runtimeImage": "sha256:23ddae724245ebd6b12f119bfe547d52645838fbaa64107fae72346744d8c1de"
+      },
+      "weather": {
+        "source": "aa56ae6bf2e0541724096c2acd6c3c360646d9c5",
+        "functionalAcceptance": "PASS",
+        "commonInstalledFiles": 119,
+        "images": {
+          "api": "sha256:6e5614ef342f485b5a6c4ae5cc40a76dd6b80eb855beaf2e04794bacf97519ab",
+          "code-server": "sha256:22c5db36d501c3df020fbaf5b8c9ec9a67608ebc17fd4da7f4211ec13a983e80",
+          "frontend": "sha256:5ae63c245cfc9c6ff25ce132f96abdd1b4c02984f09ec46a721d64aee4bc4e4b"
+        },
+        "schema": [
+          "0043_alert_success_index"
+        ]
+      },
+      "transport": {
+        "source": "c43bd633f09b029ec0f815fb81c73a4f8d335396",
+        "functionalAcceptance": "PASS",
+        "commonInstalledFiles": {
+          "frontend": 119,
+          "transport-admin-web": 119
+        },
+        "schema": [
+          "0045_places_input_revision"
+        ]
+      },
+      "pinvi": {
+        "source": "227cfe87d7c3dedd4dbcf4a6d7077bbf1ae60285",
+        "functionalAcceptance": "PASS",
+        "commonInstalledFiles": null,
+        "runtimeImage": "sha256:6e48525bd818ba7e9f673a3340127641da6bca9ba7df4b2f183c4d6b164dafe3"
+      },
+      "concierge": {
+        "source": "0c85ad14c13498835b33e72f57b042658a988116",
+        "functionalAcceptance": "PASS",
+        "commonInstalledFiles": 119,
+        "runtimeImage": "sha256:71d12579ef2f5202c52e2984e7272e55d56cb2fc6708c7a112e0ff18eb4b85c4",
+        "pythonImageSourcePreserved": "16c8461f2fea79eec930d0d1a54772ca9eed0ce0"
+      },
+      "manager": {
+        "source": "efda42f8453acd5a13be21f3906442c928eb99c8",
+        "functionalAcceptance": "PASS_BOTH_HOSTS",
+        "commonInstalledFiles": 119,
+        "hosts": {
+          "odroid": {
+            "backendSource": "efda42f8453acd5a13be21f3906442c928eb99c8",
+            "frontendBuildID": "ib003scTWyqeuBoEjb9F1",
+            "normalInstall": "PASS",
+            "postBackendAuthQA": "PASS"
+          },
+          "n150": {
+            "backendSource": "efda42f8453acd5a13be21f3906442c928eb99c8",
+            "frontendBuildID": "7A4y4bg5UUg_DXvSRwVlY",
+            "normalInstall": "PASS",
+            "postBackendAuthQA": "PASS"
+          }
+        },
+        "frontendBuildSource": "1a6b7422f8cda79cedd3138b012ef4595e7549a5",
+        "frontendTree": "5ee619f0b809c87f36fe1352a6c07c8d17aab23d"
+      }
+    },
+    "performance": {
+      "transport": {
+        "placesGoal": "MET",
+        "placesSamplesWallMs": [
+          395.7459586672485,
+          427.06595081835985,
+          251.69779919087887
+        ],
+        "placesMedian200WallMs": 395.7459586672485,
+        "sqlCount": [
+          1,
+          1,
+          1
+        ],
+        "pageBuilds": [
+          0,
+          0,
+          0
+        ],
+        "fingerprintCalculations": [
+          0,
+          0,
+          0
+        ],
+        "rail304": "PASS_TARGETED_SAME_C43_PER_REQUEST_ZERO",
+        "rail304Goal": "MET_300MS",
+        "rail304P95WallMs": 116.07592226937413,
+        "railPositiveControl": {
+          "status": 200,
+          "wallMs": 4416.770672891289,
+          "sqlCount": 19,
+          "pageBuilds": 1,
+          "fingerprintCalculations": 1,
+          "bodyBytes": 875345
+        },
+        "railWarmSamples": {
+          "count": 5,
+          "wallMs": [
+            93.43092422932386,
+            85.54170886054635,
+            80.05598094314337,
+            116.07592226937413,
+            88.54898577556014
+          ],
+          "allHTTP304": true,
+          "allBodyBytes": 0,
+          "allPageBuilds": 0,
+          "allFingerprintCalculations": 0,
+          "sqlCountEach": 5
+        },
+        "TRN04": "INCONCLUSIVE",
+        "historicalC43InitialAttempt": {
+          "clientHTTP200Received": false,
+          "clientTimeoutMs": 15015.340974088758,
+          "serverHTTP": 200,
+          "serverMs": 18728.234,
+          "sqlCount": 39,
+          "sqlMs": 10561.415,
+          "artifactRows": 1466,
+          "artifactBytes": 1490734
+        },
+        "historicalDefcRail304P95Ms": 106.89592221751809
+      },
+      "weather": {
+        "source": "aa56ae6bf2e0541724096c2acd6c3c360646d9c5",
+        "totalMs": 183991.064,
+        "inflightMayRemain": false,
+        "clientTimeouts": [],
+        "profiles": [
+          {
+            "resource": "current",
+            "limit": 200,
+            "firstHTTP": 200,
+            "firstMs": 39484.613,
+            "sourceStatus": "stale",
+            "conditionalHTTP": 304,
+            "conditionalMs": 72.696
+          },
+          {
+            "resource": "forecasts",
+            "limit": 200,
+            "firstHTTP": 200,
+            "firstMs": 8460.028,
+            "sourceStatus": "stale",
+            "conditionalHTTP": 304,
+            "conditionalMs": 2075.241
+          },
+          {
+            "resource": "daily-summaries",
+            "limit": 200,
+            "firstHTTP": 200,
+            "firstMs": 5857.468,
+            "sourceStatus": "stale",
+            "conditionalHTTP": 304,
+            "conditionalMs": 48.063
+          },
+          {
+            "resource": "current",
+            "limit": 2000,
+            "firstHTTP": 200,
+            "firstMs": 27598.156,
+            "sourceStatus": "stale",
+            "conditionalHTTP": 304,
+            "conditionalMs": 285.846
+          },
+          {
+            "resource": "forecasts",
+            "limit": 2000,
+            "firstHTTP": 200,
+            "firstMs": 5172.881,
+            "sourceStatus": "stale",
+            "conditionalHTTP": 304,
+            "conditionalMs": 2161.753
+          },
+          {
+            "resource": "daily-summaries",
+            "limit": 2000,
+            "firstHTTP": 200,
+            "firstMs": 10419.167,
+            "sourceStatus": "stale",
+            "conditionalHTTP": 304,
+            "conditionalMs": 242.898
+          }
+        ],
+        "firstOneSecondGoal": "UNMET",
+        "sourceStatus": "STALE"
+      }
+    },
+    "externalNaturalMap": {
+      "mode": "NATURAL_AFTER_AA56_NOT_A_MAP_DEPLOYMENT",
+      "timeKST": "08:30",
+      "status": "SUCCESS",
+      "durationSeconds": 104,
+      "pages": 23,
+      "locations": 1402,
+      "locationDelta": 226,
+      "http503Observed": false,
+      "sourceStatus": "STALE",
+      "MapMutations": 0,
+      "provenance": "Parent actual run report; raw run ID not supplied"
+    },
+    "rejectedWindowSQL": {
+      "name": "Window SQL prototype",
+      "verdict": "REJECTED_NO_GAIN_OR_REGRESSION",
+      "localTestsPassed": 39,
+      "PRCreated": false,
+      "DockerBuild": false,
+      "deployed": false,
+      "provenance": "Parent outcome report"
+    },
+    "GeoReport": {
+      "number": 644,
+      "url": "https://github.com/digitie/kor-travel-geo/pull/644",
+      "state": "DRAFT_OPEN",
+      "head": "0fe7dc26aa5abe4e99f631759691b9c60b4abb50",
+      "base": "96ff8b4c420a405bb68322ed638b9443f6366b94",
+      "scope": "parent-owned one-MD functional/runtime/performance report",
+      "deploymentChangeClaim": false,
+      "futureCommonDocs": "Reference this same PR; do not create a replacement Geo report PR",
+      "CIrun": 44427834021,
+      "backend": "SUCCESS_AFTER_RETRY",
+      "otherJobsPassed": 5,
+      "causeOwner": "Laplace",
+      "causeStatus": "RESOLVED_PARENT_CONFIRMED",
+      "CIOrderingWork": false,
+      "allJobsSuccess": 6,
+      "backendTestsPassed": 2083,
+      "backendTestsSkipped": 241,
+      "failureCause": "부모 확인 apt mirror 일시 장애"
+    },
+    "mergeStatus": "PENDING_PARENT_FINAL_BINDING",
+    "CIOrdering": "NOT_STARTED_LAST",
+    "newPackages": false,
+    "newWorkflowChanges": false,
+    "toolchain": {
+      "node": "26.13.1",
+      "npm": "12.0.1",
+      "typesNode": "22.20.5",
+      "packageInputsChanged": false
+    },
+    "pendingWeatherCandidate": {
+      "owner": "Anscombe",
+      "scope": "CURRENT cross-limit existing validated snapshot/proof reuse",
+      "baseSource": "aa56ae6bf2e0541724096c2acd6c3c360646d9c5",
+      "sourceHead": "dcbcb00f0a24d656fd44ad928362e9ed7401c8ed",
+      "expiryExtensionAllowed": false,
+      "fullHealthReadsAllowed": false,
+      "artifactReadsAllowed": false,
+      "coldFirstSolved": false,
+      "PR": 262,
+      "normalCI": "ALL_3_SUCCESS_PARENT_CONFIRMED",
+      "sourcePublication": "MERGED",
+      "reviewedHeadPrefix": "9b31",
+      "operations": "HELD_NOT_DEPLOYED_WAIT_ACTUAL_QUIET",
+      "deployedAccepted": false,
+      "acceptedRuntimeSource": "aa56ae6bf2e0541724096c2acd6c3c360646d9c5",
+      "finalRuntimeBinding": "PENDING_KEPLER_SUCCESSFUL_RUNTIME_RECEIPT",
+      "libraryInputsChanged": false,
+      "normalBuildRolesPassed": 3,
+      "nativeRolesPassed": 3,
+      "commonInstalledFiles": 119,
+      "exactModuleProofCount": 6,
+      "exactModuleProof": "PASS",
+      "firstApply": {
+        "result": "QUIET_TIMEOUT_BEFORE_IMAGE_SWAP",
+        "quietTimeoutSeconds": 600,
+        "activeNaturalJobs": [
+          "KMA ultra-short",
+          "OWM"
+        ],
+        "coreCLIInvoked": false,
+        "imagesSwapped": false,
+        "cancellationRequests": 0
+      },
+      "restore": {
+        "parentReportedTime": "02:16:28",
+        "running": 24,
+        "stopped": 3,
+        "instigatorIDs": 27,
+        "sameIDs": true,
+        "complete": true
+      },
+      "acceptedRuntimePreserved": {
+        "allThreeImages": true,
+        "allThreeContainers": true,
+        "schema": "0043_alert_success_index"
+      },
+      "GFree": true,
+      "retryOwner": "Kepler",
+      "retry": "Watch actual quiet; full three-role retry with original built images; no rebuild"
+    },
+    "localValidation": {
+      "unittest": {
+        "testsRun": 405,
+        "passed": 404,
+        "skipped": 1,
+        "skipReason": "Windows8.3 API-only case",
+        "seconds": 73.31
+      },
+      "historicalFailuresPreserved": true,
+      "checksScope": "기존 검사 그대로 실행; 최종 runtime binding은 미수신",
+      "productOrCheckCodeChanges": false
+    }
+  },
+  "latestCompletedWeatherRuntime": {
+    "source": "8a4c9ac882daf84f20f88c2bfb362e97c5f437cb",
+    "commonUI": "0.2.2",
+    "tokens": "0.1.3",
+    "SDK": "618 actualPASS healthy/restored24RUN3STOP",
+    "browser": "PASS",
+    "targetedMs": {
+      "first": 12585.439,
+      "large": 2886.058,
+      "conditional304": 87.621
+    },
+    "sixProfiles": "firstHTTP200all; first6466.465to17569.33ms; coldALL_UNMET; sourceSTALE",
+    "pairedImprovementClaim": false
+  },
+  "latestMergedManagerSDK": {
+    "PR": 620,
+    "merge": "7f07a171e39dc600a7b266da2743bb4327730fcf",
+    "runtimeAcceptance": "PENDING latestroot/UI"
+  }
+}

@@ -48,3 +48,7 @@ P merge와 P main push CI/pack 비교는 현재 NOT_RUN(부모 merge 소유)이�
 [두 원본·manifest·최종 disposition](../../reviews/adversarial/2026-11-18-common-virtual-table-overflow.md)을 archive한다. 두 PASS·P0~P3 각 0이며 원본 bytes를 바꾸지 않는다. closure 자료만으로 같은 리뷰를 재귀 실행하지 않는다.
 
 소비자 편집·빌드·운영 배포·SDK·Map/N150·T-025 설계는 이 PR 범위 밖이다. 이 문서는 artifact catalog 후보의 실제 취득/설치 evidence이며 정식 Release 발행이나 소비자·운영 수용 완료 선언이 아니다.
+
+## 2026-11-19 후속 확정
+
+위 NOT_RUN·미채택 표시는 catalog 후보 작성 당시의 기록이다. 실제 catalog merge P=2b0c02a2018c2c8c791bc6d6c7b5a2290579e09e와 consumer pin C=5c1b3857e9af060d30ec776157760fb9e9c13ded가 확정됐다. P의 실제main artifact14435485481과 R의세pack전체bytes·SHA256/SRI가같고 C는P의ancestor이며 C/P catalog도같다. [소비자·불변산출물 후속](2026-11-19-consumer-library-adoption.md)에 현재수용과제한을기록한다. 원본후보/리뷰/실패기록은보존하며공개Release발행으로표기하지않는다.
