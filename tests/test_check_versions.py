@@ -1645,6 +1645,20 @@ class CheckVersionsTests(unittest.TestCase):
                 result = self.strict_cli()
                 self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
 
+    def test_selected_psycopg_failure_exit_matches_json_markdown_and_annotation(self):
+        self.strict_psycopg_registry()
+        python_fixture(self.repo, requires=">=3.11", deps=["psycopg[binary]==3.3.6"],
+                       locked={"psycopg": "3.3.9", "psycopg-binary": "3.3.9"})
+        report = self.root / "selected-failure.json"
+        markdown = self.root / "selected-failure.md"
+        result = self.strict_cli("--json", str(report), "--markdown", str(markdown))
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(json.loads(report.read_text())["exit_code"], 1)
+        self.assertIn("· exit 1", markdown.read_text())
+        self.assertIn("선택 pin guard는 OK 이외 판정을 실패", markdown.read_text())
+        self.assertIn("::error title=check_versions::NOT_RECOMMENDED", result.stdout)
+        self.assertIn("failing=1 exit=1", result.stdout)
+
     def test_selected_psycopg_does_not_force_asyncpg_or_psycopg2(self):
         self.strict_psycopg_registry()
         python_fixture(self.repo, requires=">=3.11", deps=["asyncpg==0.31.0", "psycopg2-binary==2.9.11"],

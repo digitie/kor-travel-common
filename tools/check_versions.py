@@ -3009,7 +3009,7 @@ def escape_cell(text: str) -> str:
 
 
 def render_markdown(findings: list[Finding], registry: Registry, repo: str, mode: str,
-                    mode_source: str, today: date, roots: list[str]) -> str:
+                    mode_source: str, today: date, roots: list[str], *, strict_psycopg: bool = False) -> str:
     counts = summarize(findings)
     display_roots = [_workflow_display_value(root, "(입력 경로 비공개)") for root in roots]
     display_repo = _workflow_display_value(repo, "(소비자 식별자 비공개)")
@@ -3021,7 +3021,8 @@ def render_markdown(findings: list[Finding], registry: Registry, repo: str, mode
         f"- 레지스트리: `{display_registry_name}` (baseline {registry.data.get('baseline')}, "
         f"updated {registry.data.get('updated')})",
         f"- 대상: {', '.join('`' + r + '`' for r in display_roots) or '-'}",
-        f"- 모드: `{mode}` ({display_mode_source}) · 기준일 {today.isoformat()} · exit {exit_code(mode, findings)}",
+        f"- 모드: `{mode}` ({display_mode_source}) · 기준일 {today.isoformat()} · exit "
+        f"{int(any(f.verdict != 'OK' for f in findings)) if strict_psycopg else exit_code(mode, findings)}",
         "- 판정 요약: " + " · ".join(f"{verdict} {count}" for verdict, count in counts.items() if count),
         "",
         "| 범위 | 축 | 생태계 | 선언 | 설치·하한 | 판정 | 비고 |",
@@ -3035,16 +3036,17 @@ def render_markdown(findings: list[Finding], registry: Registry, repo: str, mode
         lines.append("| - | - | - | - | - | - | 대조할 매니페스트를 찾지 못함 |")
     lines.append("")
     lines.append("판정 어휘·모드·승격 규칙은 `docs/standards/versions.md` §3. "
-                 "NOT_RECOMMENDED는 어느 모드에서도 실패가 아니다.")
+                 + ("선택 pin guard는 OK 이외 판정을 실패로 처리한다." if strict_psycopg
+                    else "NOT_RECOMMENDED는 어느 모드에서도 실패가 아니다."))
     return "\n".join(lines) + "\n"
 
 
-def annotations(findings: list[Finding], mode: str) -> list[str]:
+def annotations(findings: list[Finding], mode: str, *, strict_psycopg: bool = False) -> list[str]:
     lines: list[str] = []
     for finding in findings:
         where = f"{finding.repo}/{finding.scope} {finding.key}"
         message = f"{finding.verdict}: {where} 선언={finding.declared or '-'} 설치={finding.installed or '-'} {finding.detail}"
-        if finding.verdict in HARD:
+        if finding.verdict in HARD or strict_psycopg and finding.verdict != "OK":
             lines.append(f"::error title=check_versions::{message}")
         elif finding.verdict in FAILING and mode in {"warn", "fail"}:
             lines.append(f"::{'error' if mode == 'fail' else 'warning'} title=check_versions::{message}")
@@ -3054,7 +3056,7 @@ def annotations(findings: list[Finding], mode: str) -> list[str]:
 
 
 def build_report(findings: list[Finding], registry: Registry, repo: str, mode: str,
-                 mode_source: str, today: date, roots: list[str]) -> dict:
+                 mode_source: str, today: date, roots: list[str], *, strict_psycopg: bool = False) -> dict:
     return {
         "schema": REPORT_SCHEMA,
         "registry": {"path": _workflow_display_value(registry.path.as_posix(), "(레지스트리 경로 비공개)"),
@@ -3066,7 +3068,8 @@ def build_report(findings: list[Finding], registry: Registry, repo: str, mode: s
         "mode_source": _workflow_display_value(mode_source, "(모드 출처 비공개)"),
         "today": today.isoformat(),
         "summary": summarize(findings),
-        "exit_code": exit_code(mode, findings),
+        "exit_code": (int(any(f.verdict != "OK" for f in findings)) if strict_psycopg
+                      else exit_code(mode, findings)),
         "findings": [asdict(finding) for finding in findings],
     }
 
@@ -3226,15 +3229,17 @@ def main(argv: list[str] | None = None) -> int:
         print(f"::error title=check_versions::소비자 입력 오류: {exc}")
         return 2
     findings = checker.findings
-    markdown = render_markdown(findings, registry, repo, mode, mode_source, today, roots)
-    report = build_report(findings, registry, repo, mode, mode_source, today, roots)
+    markdown = render_markdown(findings, registry, repo, mode, mode_source, today, roots,
+                               strict_psycopg=args.strict_psycopg)
+    report = build_report(findings, registry, repo, mode, mode_source, today, roots,
+                          strict_psycopg=args.strict_psycopg)
     if args.strict_psycopg:
         report["selectedPsycopg"] = {"exact": registry.axes["psycopg"]["exact"],
                                     "evidence": "source/lock/constraints only", "runtimeImplementation": "NOT_CHECKED"}
 
     if not args.quiet:
         print(markdown)
-    for line in annotations(findings, mode):
+    for line in annotations(findings, mode, strict_psycopg=args.strict_psycopg):
         print(line)
     if args.json is not None:
         args.json.parent.mkdir(parents=True, exist_ok=True)
