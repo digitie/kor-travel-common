@@ -6,6 +6,7 @@
 
 | ID | 상태 | 우선순위 | 작업 | 선행 |
 |---|---|---:|---|---|
+| [T-222](tasks/T-222-admin-shell.md) | DONE | P1 | 관리자 셸(모바일 좌측 drawer·한 줄 상단 제목 바)과 ui 0.2.3 (2026-11-19, PR #70) | 없음 |
 | [T-417](tasks/T-417-map-guard-ref-toolchain.md) | DONE | P2 | map: guard 검사 코드 ref 갱신과 정확 Node/npm 도구 규칙 이관 (2026-11-18, map PR #1511) | T-416, T-024, T-029 |
 | [T-419](tasks/T-419-map-ui-tokens-revendor-on-t025.md) | DONE | P2 | map: T-025 릴리스 당일 ui·tokens 재vendor — 대상 없음, T-417 선행 병합으로 종료 (2026-11-18, map PR #1511) | T-417 |
 | [T-416](tasks/T-416-map-exact-node-npm-pin-decision.md) | DONE | P1 | map: 정확 Node/npm 핀 채택 여부 결정 — 채택, Node 26.13.1 (2026-11-17, map PR #1507) | 없음 |
