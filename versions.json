@@ -290,7 +290,11 @@
       "ecosystem": "pypi",
       "floor": "9",
       "recommended": "9.1",
-      "source": "vm §2.4"
+      "source": "https://pypi.org/pypi/tenacity/json (2026-11-20 primary metadata)",
+      "exact": "9.2.1",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "requiresPython": ">=3.10"
     },
     "structlog": {
       "ecosystem": "pypi",
@@ -382,7 +386,11 @@
       "ecosystem": "pypi",
       "floor": "4.8",
       "recommended": "4.15",
-      "source": "vm §2.6"
+      "source": "https://pypi.org/pypi/testcontainers/json (2026-11-20 primary metadata)",
+      "exact": "4.15.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "requiresPython": ">=3.10"
     },
     "postgresql": {
       "ecosystem": "db",
@@ -778,10 +786,10 @@
       "floor": null,
       "recommended": null,
       "checked": false,
-      "exact": "1.44.6",
+      "exact": "1.44.7",
       "application": true,
       "requiresPython": ">=3.10",
-      "source": "; application shared 정본: https://pypi.org/pypi/boto3/1.44.6/json (2026-11-20)",
+      "source": "https://pypi.org/pypi/boto3/json (2026-11-20 final primary cut; matched SDK/core patch)",
       "note": "; 사용 runtime/전이/dev 교집합 exact; 미사용 package 설치를 요구하지 않음."
     },
     "botocore": {
@@ -789,10 +797,10 @@
       "floor": null,
       "recommended": null,
       "checked": false,
-      "exact": "1.44.6",
+      "exact": "1.44.7",
       "application": true,
       "requiresPython": ">=3.10",
-      "source": "; application shared 정본: https://pypi.org/pypi/botocore/1.44.6/json (2026-11-20)",
+      "source": "https://pypi.org/pypi/botocore/json (2026-11-20 final primary cut; matched SDK/core patch)",
       "note": "; 사용 runtime/전이/dev 교집합 exact; 미사용 package 설치를 요구하지 않음."
     },
     "certifi": {
@@ -1029,7 +1037,8 @@
           "repo": "kor-travel-concierge",
           "exact": "1.71.2",
           "requiresPython": ">=3.9",
-          "note": "현재 Google SDK protobuf5와 currentDagster1.13.24의 동시 호환. 미사용 API 이미지에 health package를 설치하지 않음."
+          "note": "현재 Google SDK protobuf5와 currentDagster1.13.24의 동시 호환. 미사용 API 이미지에 health package를 설치하지 않음. 기존3.11/legacy SDK profile 한정; 새3.12 REST-only 역할은 기본 catalog.",
+          "python": "3.11"
         }
       ]
     },
@@ -1290,7 +1299,8 @@
           "repo": "kor-travel-concierge",
           "exact": "5.29.6",
           "requiresPython": ">=3.8",
-          "note": "현재 사용 google-ai-generativelanguage0.6.15의 protobuf<6 상한. Common grpc-health/Dagster 범위와 교집합."
+          "note": "현재 사용 google-ai-generativelanguage0.6.15의 protobuf<6 상한. Common grpc-health/Dagster 범위와 교집합. 기존3.11/legacy SDK profile 한정; 새3.12 REST-only 역할은 기본 catalog.",
+          "python": "3.11"
         }
       ]
     },
@@ -1652,6 +1662,550 @@
       "requiresPython": ">=3.10",
       "source": "; application shared 정본: https://pypi.org/pypi/yarl/1.25.1/json (2026-11-20)",
       "note": "; 사용 runtime/전이/dev 교집합 exact; 미사용 package 설치를 요구하지 않음."
+    },
+    "attrs": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "26.1.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/attrs/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.9"
+    },
+    "httpcore2": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "2.16.2",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/httpcore2/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.11"
+    },
+    "httpx2": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "2.16.2",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/httpx2/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.11"
+    },
+    "jsonschema": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "4.26.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/jsonschema/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "jsonschema-specifications": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "2025.9.1",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/jsonschema-specifications/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.9"
+    },
+    "mcp": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "2.3.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/mcp/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "pyjwt": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "2.15.1",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/pyjwt/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.9"
+    },
+    "referencing": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "0.37.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/referencing/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "rpds-py": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "2026.9.1",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/rpds-py/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.11"
+    },
+    "sse-starlette": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "3.7.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/sse-starlette/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.11"
+    },
+    "truststore": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "0.10.5",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/truststore/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "docker": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "7.2.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/docker/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.8"
+    },
+    "pyasn1": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "0.6.5",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/pyasn1/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.8"
+    },
+    "wheel": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "0.48.0",
+      "buildTool": true,
+      "note": "실제 사용하는 installer/build 환경의 명시적 선택 전용. application 설치 대상이 아님.",
+      "source": "https://pypi.org/pypi/wheel/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.9"
+    },
+    "pip": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "26.3",
+      "buildTool": true,
+      "note": "실제 사용하는 installer/build 환경의 명시적 선택 전용. application 설치 대상이 아님.",
+      "source": "https://pypi.org/pypi/pip/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "setuptools": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "84.2.1",
+      "buildTool": true,
+      "note": "실제 사용하는 installer/build 환경의 명시적 선택 전용. application 설치 대상이 아님.",
+      "source": "https://pypi.org/pypi/setuptools/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "av": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "19.0.2",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/av/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.12"
+    },
+    "apscheduler": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "3.11.3",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/apscheduler/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.8"
+    },
+    "flatbuffers": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "25.12.19",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/flatbuffers/json (2026-11-20 primary metadata)"
+    },
+    "google-generativeai": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "0.8.6",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/google-generativeai/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.9"
+    },
+    "grpcio-status": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "1.85.3",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/grpcio-status/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10",
+      "compatible": [
+        {
+          "repo": "kor-travel-concierge",
+          "python": "3.11",
+          "exact": "1.71.2",
+          "requiresPython": ">=3.9",
+          "note": "기존3.11 legacy Google protobuf5 교집합; 새3.12는 기본 catalog."
+        }
+      ]
+    },
+    "google-api-python-client": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "2.202.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/google-api-python-client/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "numpy": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "2.5.5",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/numpy/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.12"
+    },
+    "geoalchemy2": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "0.21.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/geoalchemy2/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "uritemplate": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "4.2.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/uritemplate/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.9"
+    },
+    "httpx-sse": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "0.4.3",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/httpx-sse/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.9"
+    },
+    "google-ai-generativelanguage": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "0.12.1",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/google-ai-generativelanguage/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10",
+      "compatible": [
+        {
+          "repo": "kor-travel-concierge",
+          "python": "3.11",
+          "exact": "0.6.15",
+          "requiresPython": ">=3.7",
+          "note": "기존3.11 google-generativeai0.8.6 exact 종속. 새3.12 REST-only source는 미사용 SDK를 설치하지 않음."
+        }
+      ]
+    },
+    "youtube-transcript-api": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "1.2.5",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/youtube-transcript-api/json (2026-11-20 primary metadata)",
+      "requiresPython": "<3.16,>=3.8"
+    },
+    "onnxruntime": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "1.32.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/onnxruntime/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.11"
+    },
+    "pyasn1-modules": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "0.4.2",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/pyasn1-modules/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.8"
+    },
+    "huggingface-hub": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "2.4.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/huggingface-hub/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10.0"
+    },
+    "faster-whisper": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "1.2.1",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/faster-whisper/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.9"
+    },
+    "google-auth": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "2.62.2",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/google-auth/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "googleapis-common-protos": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "1.76.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/googleapis-common-protos/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "ffmpeg-python": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "0.2.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/ffmpeg-python/json (2026-11-20 primary metadata)"
+    },
+    "tzlocal": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "5.4.5",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/tzlocal/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "google-api-core": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "2.44.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/google-api-core/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "hf-xet": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "1.8.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/hf-xet/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.8"
+    },
+    "future": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "1.0.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/future/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+    },
+    "ctranslate2": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "4.9.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/ctranslate2/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.9"
+    },
+    "proto-plus": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "1.29.0",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/proto-plus/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "google-auth-httplib2": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "0.4.4",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/google-auth-httplib2/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "tokenizers": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "0.23.3",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/tokenizers/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.10"
+    },
+    "yt-dlp": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "2026.10.26",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/yt-dlp/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.11"
+    },
+    "pyparsing": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "3.3.3",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/pyparsing/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.9"
+    },
+    "defusedxml": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "0.7.1",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/defusedxml/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+    },
+    "httplib2": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "0.32.1",
+      "application": true,
+      "note": "실제 owned 역할에서 공유하는 runtime/전이/dev 이름. 사용 교집합만 정렬하며 설치를 요구하지 않음.",
+      "source": "https://pypi.org/pypi/httplib2/json (2026-11-20 primary metadata)",
+      "requiresPython": ">=3.8"
+    },
+    "mcp-types": {
+      "ecosystem": "pypi",
+      "floor": null,
+      "recommended": null,
+      "checked": false,
+      "exact": "2.3.0",
+      "application": true,
+      "requiresPython": ">=3.10",
+      "note": "MCP requires_dist의 정확 동반 배포. MCP 실제 사용 시 lock/constraints 짝 확인.",
+      "source": "https://pypi.org/pypi/mcp/json (2026-11-20 mcp-types==2.3.0 exact 종속/설치 metadata)"
     }
   },
   "actions": {
