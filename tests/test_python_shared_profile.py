@@ -95,6 +95,30 @@ class SharedProfileTests(unittest.TestCase):
         self.full_lock(requires=">=3.12")
         self.assertEqual(self.cli("--python-version", "3.12").returncode, 0)
 
+    def test_python_excluded_minor_keeps_valid_minimum_and_installed_observation(self):
+        python_fixture(self.repo, requires=">=3.12,!=3.13.*", deps=["httpx==0.28.1"],
+                       locked=None)
+        observed = self.root / "native.json"
+        observed.write_text(json.dumps({"python": "3.12.7", "packages": {"httpx": "0.28.1"}}))
+        for args in [(), ("--python-version", "3.12.7"), ("--installed-versions", str(observed))]:
+            with self.subTest(args=args):
+                result = self.cli(*args)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_python_exclusion_does_not_bypass_source_minimum_or_actual_python(self):
+        cases = [
+            (">=3.12,!=3.13.*", "httpx", "0.28.1", "3.13.7"),
+            (">=3.11,!=3.13.*", "pyproj", "3.8.0", "3.12.7"),
+            ("*", "httpx", "0.28.1", "3.12.7"),
+        ]
+        for requires, name, version, actual in cases:
+            with self.subTest(requires=requires, package=name, actual=actual):
+                python_fixture(self.repo, requires=requires, deps=[name + "==" + version],
+                               locked=None)
+                result = self.cli("--python-version", actual)
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertNotIn("TypeError", result.stdout + result.stderr)
+
     def test_workspace_sdk_lower_minimum_is_not_rewritten_for_app_shared_lock(self):
         self.full_lock()
         sdk = self.repo / "packages/sdk"

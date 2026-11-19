@@ -2755,8 +2755,13 @@ class Checker:
                 if (lock_python and scope.lock is not None and scope.manifest is not None
                         and scope.manifest.parent != scope.lock.parent):
                     context_python = lock_python
-                minimum = lower_bound(context_python) if context_python else None
-                if minimum is not None and not application_allows(package_python, ".".join(map(str, minimum.lower))):
+                # 제외 항은 하한을 낮추지 않는다. 보수적인 하한과 실제 Python 허용 여부는 별도로 확인한다.
+                minimum_spec = ",".join(part for part in (context_python or "").split(",")
+                                        if not re.fullmatch(r"\s*!=\s*\d+(?:\.\d+)*(?:\.\*)?\s*", part))
+                minimum = lower_bound(minimum_spec) if context_python else None
+                if minimum is not None and minimum.lower is None:
+                    problems.append("source Python 최소 지원 하한을 확인할 수 없음")
+                elif minimum is not None and not application_allows(package_python, ".".join(map(str, minimum.lower))):
                     problems.append("source Python 최소 버전이 선택 패키지 Requires-Python과 다름")
                 if self.application_python and not application_allows(package_python, self.application_python):
                     problems.append("실제 역할 Python이 선택 패키지 Requires-Python과 다름")
