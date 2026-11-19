@@ -328,7 +328,10 @@ class Registry:
             if "exact" in axis:
                 exact = axis["exact"]
                 # 정확 SemVer의 비교와 산출물 bytes는 JS 정책 검사기가 담당한다.
-                if (axis["ecosystem"] != "npm" or axis.get("checked") is not False
+                pypi_exact = axis["ecosystem"] == "pypi" and isinstance(exact, str) and re.fullmatch(
+                    r"(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)", exact,
+                ) and axis.get("checked", True)
+                if not pypi_exact and (axis["ecosystem"] != "npm" or axis.get("checked") is not False
                         or axis.get("recommended") is not None or not isinstance(exact, str)
                         or not re.fullmatch(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?", exact)):
                     raise ValueError(f"{path}: axes.{key}.exact 승인 SemVer 계약 오류")
@@ -723,7 +726,9 @@ REQUIREMENTS_VALUE_OPTIONS = frozenset({
 REQUIREMENTS_PARAMETER_OPTIONS = frozenset({"--only-binary", "--no-binary"})
 
 
-def read_requirements(path: Path, *, _stack: tuple[Path, ...] = (), root: Path | None = None) -> list[str]:
+def read_requirements(path: Path, *, _stack: tuple[Path, ...] = (), root: Path | None = None,
+                      include_constraints: bool = False,
+                      constraints: list[str] | None = None) -> list[str]:
     """`-r`/`--requirement`를 재귀 확장하고 유효한 선언 행만 돌려준다."""
     try:
         path = path.resolve()
@@ -760,15 +765,32 @@ def read_requirements(path: Path, *, _stack: tuple[Path, ...] = (), root: Path |
         if not line or line.startswith("#"):
             continue
         include: str | None = None
+        constraint_include = False
         if re.match(r"^-r(?:[ \t]+|$)", line) or (line.startswith("-r") and not line.startswith("--")):
             include = _include_path(line[2:])
         elif line == "--requirement" or line.startswith("--requirement=") or line.startswith("--requirement ") or line.startswith("--requirement\t"):
             value = line[len("--requirement"):]
             include = _include_path(value[1:] if value.startswith("=") else value)
+        elif include_constraints and re.match(r"^-c(?:[ \t]+|[^-])", line):
+            include = _include_path(line[2:])
+            constraint_include = True
+        elif include_constraints and (line == "--constraint" or line.startswith(
+                ("--constraint=", "--constraint ", "--constraint\t"))):
+            value = line[len("--constraint"):]
+            include = _include_path(value[1:] if value.startswith("=") else value)
+            constraint_include = True
         if include is not None:
             if not include:
                 raise ValueError("requirements.txt 입력 구조 오류")
-            result.extend(read_requirements(path.parent / include, _stack=stack, root=root))
+            included = read_requirements(
+                path.parent / include, _stack=stack, root=root,
+                include_constraints=include_constraints,
+                constraints=None if constraint_include else constraints,
+            )
+            if constraint_include and constraints is not None:
+                constraints.extend(included)
+            else:
+                result.extend(included)
             continue
         editable = _editable_requirement(line)
         if editable is not None:
@@ -2034,11 +2056,15 @@ def scopes_from_manifest(
 # --------------------------------------------------------------------------- 판정
 
 class Checker:
-    def __init__(self, registry: Registry, repo: str, today: date):
+    def __init__(self, registry: Registry, repo: str, today: date, *, strict_psycopg: bool = False):
         self.registry = registry
         self.repo_id = repo
         self.repo = _workflow_display_value(repo, "(소비자 식별자 비공개)")
         self.today = today
+        self.strict_psycopg = strict_psycopg
+        self.selected_root: Path | None = None
+        self.psycopg_used_groups: dict[Path, str] = {}
+        self.psycopg_declared_groups: set[Path] = set()
         self.findings: list[Finding] = []
         self.npm_locks: dict[Path, tuple[str, dict]] = {}
         self.npm_direct: set[tuple[Path, str]] = set()
@@ -2502,12 +2528,102 @@ class Checker:
         if key is not None and self.registry.axes[key].get("checked", True):
             self.record_axis(scope, key, "pypi", spec, exact)
 
+    def check_psycopg_constraints(self, path: Path, root: Path) -> None:
+        """Docker/pip가 별도로 전달하는 constraint의 정확 core/binary 짝을 검사한다."""
+        expected = self.registry.axes["psycopg"]["exact"]
+        specs: dict[str, list[str]] = {}
+        for line in read_requirements(path, root=root, include_constraints=True):
+            parsed = parse_requirement(line, strict=True)
+            if parsed is None:
+                raise _manifest_input_error()
+            name, spec, url = parsed
+            if name in {"psycopg", "psycopg-binary"}:
+                specs.setdefault(name, []).append(spec if not url else "")
+        problems = [name for name in ("psycopg", "psycopg-binary")
+                    if not specs.get(name) or any(exact_requirement_version(spec) != expected
+                                                 for spec in specs[name])]
+        if not self.psycopg_declared_groups:
+            problems.append("실제 psycopg dependency 선언이 검사되지 않음")
+        self.add(path.resolve().relative_to(root).as_posix(), "psycopg", "pypi",
+                 f"=={expected} core/binary constraints", "",
+                 "NOT_RECOMMENDED" if problems else "OK",
+                 "정확 constraint 누락/불일치: " + ", ".join(problems) if problems
+                 else "core/binary constraints 일치; lock·설치본·runtime 구현 미확인")
+
+    def check_strict_psycopg(self, scope: Scope, specs: dict[str, list[str]],
+                             extras: dict[str, set[str]], urls: dict[str, list[str]],
+                             constraints: list[str]) -> None:
+        """선택한 driver의 소스/lock만 검사한다. 실행 중 설치본·구현을 추정하지 않는다."""
+        expected = self.registry.axes.get("psycopg", {}).get("exact")
+        if not isinstance(expected, str) or not re.fullmatch(r"\d+\.\d+\.\d+", expected):
+            raise ValueError("psycopg exact 정책이 필요합니다")
+        names = ("psycopg", "psycopg-binary")
+        locked: dict[str, list[dict]] = {}
+        if scope.lock is not None and scope.lock_kind in {"uv", "poetry"}:
+            data = read_uv_lock(scope.lock) if scope.lock_kind == "uv" else read_poetry_lock(scope.lock)
+            for entry in data.get("package", []):
+                name = normalize_name(entry["name"])
+                if name in names:
+                    locked.setdefault(name, []).append(entry)
+        constrained: dict[str, list[str]] = {}
+        for line in constraints:
+            parsed = parse_requirement(line, strict=True)
+            if parsed is None:
+                raise _manifest_input_error()
+            name, spec, url = parsed
+            if name in names:
+                constrained.setdefault(name, []).append(spec if not url else "")
+        if not any(name in specs or name in locked or name in constrained for name in names):
+            self.add(scope.label, "psycopg", "pypi", "", "", "OK",
+                     "NOT_USED: psycopg 3 선언/해당 lock 없음(asyncpg·psycopg2와 구분)")
+            return
+        group = (scope.lock or scope.manifest.parent).resolve()
+        self.psycopg_used_groups[group] = scope.label
+        problems = []
+        def matches(spec):
+            return (exact_requirement_version(spec) == expected
+                    or scope.lock_kind == "poetry" and spec == expected)
+
+        core = specs.get("psycopg", [])
+        if core:
+            self.psycopg_declared_groups.add(group)
+            if any(not matches(spec) for spec in core):
+                problems.append("psycopg 선언의 정확 pin이 정책과 다름")
+            if "binary" not in extras.get("psycopg", set()):
+                problems.append("실제 psycopg[binary] dependency extra가 필요함")
+        for name in names:
+            if name in urls:
+                problems.append(f"{name} URL/git은 정본 registry pin 증거가 아님")
+            if any(not matches(spec) for spec in specs.get(name, [])):
+                problems.append(f"{name} 선언/constraint가 정확 정책과 다름")
+        for name, values in constrained.items():
+            if any(exact_requirement_version(spec) != expected for spec in values):
+                problems.append(f"{name} constraint가 정확 정책과 다름")
+        if scope.lock_kind in {"uv", "poetry"}:
+            for name in names:
+                entries = locked.get(name, [])
+                if not entries or any(entry.get("version") != expected for entry in entries):
+                    problems.append(f"{scope.lock_kind}.lock {name} 해석값이 정책과 다름/누락")
+                for entry in entries:
+                    source = entry.get("source", {})
+                    if ((scope.lock_kind == "uv" and "registry" not in source)
+                            or (scope.lock_kind == "poetry" and source.get("type") in {"git", "url", "file"})):
+                        problems.append(f"{name} lock이 registry 해석값이 아님")
+        detail = ("; ".join(problems) if problems else
+                  (f"선택 pin/binary extra 및 {scope.lock_kind}.lock core/binary 해석값 일치"
+                   if scope.lock_kind in {"uv", "poetry"} else
+                   "정확 binary extra 선언/constraints만 확인; lock·설치본·runtime 구현 미확인"))
+        self.add(scope.label, "psycopg", "pypi", f"=={expected} [binary]", "",
+                 "NOT_RECOMMENDED" if problems else "OK", detail)
+
     # --- python
     def check_python(self, scope: Scope) -> None:
         label = scope.label
         declared: dict[str, str] = {}
         urls: dict[str, list[str]] = {}
         requirement_specs: dict[str, list[str]] = {}
+        declaration_extras: dict[str, set[str]] = {}
+        constraint_lines: list[str] = []
         requires_python: str | None = None
         requirements_mode = scope.lock_kind == "requirements"
         poetry_mode = scope.lock_kind == "poetry"
@@ -2567,9 +2683,17 @@ class Checker:
             for text in specs:
                 parsed = parse_requirement(str(text))
                 if parsed is None:
+                    if self.strict_psycopg:
+                        raise _manifest_input_error()
                     continue
                 name, spec, url = parsed
                 declared.setdefault(name, spec)
+                requirement_specs.setdefault(name, []).append(spec)
+                match = REQ_RE.match(str(text))
+                extras = (match.group(2) or "")[1:-1] if match else ""
+                declaration_extras.setdefault(name, set()).update(
+                    normalize_name(item.strip()) for item in extras.split(",") if item.strip()
+                )
                 if url:
                     urls.setdefault(name, []).append(url)
             uv_sources = data.get("tool", {}).get("uv", {}).get("sources", {})
@@ -2638,6 +2762,12 @@ class Checker:
                             nonlocal_requires[0] = nonlocal_requires[0] or spec
                             continue
                         declared.setdefault(normalized, spec)
+                        requirement_specs.setdefault(normalized, []).append(spec)
+                        if self.strict_psycopg:
+                            extras = config.get("extras", [])
+                            if not isinstance(extras, list) or any(not isinstance(e, str) for e in extras):
+                                raise _manifest_input_error()
+                            declaration_extras.setdefault(normalized, set()).update(map(normalize_name, extras))
                         git_url = config.get("git") if isinstance(config, dict) else None
                         if isinstance(config, dict) and any(field_name in config
                                                            for field_name in ("rev", "tag", "branch")) and git_url is None:
@@ -2666,16 +2796,27 @@ class Checker:
                         add_poetry_dependency(name, value)
                 requires_python = nonlocal_requires[0]
         elif manifest is not None and requirements_mode:
-            for line in read_requirements(manifest, root=scope.root):
+            for line in read_requirements(
+                    manifest, root=scope.root or (self.selected_root if self.strict_psycopg else None),
+                    include_constraints=self.strict_psycopg,
+                    constraints=constraint_lines if self.strict_psycopg else None):
                 parsed = parse_requirement(line)
                 if parsed is None:
                     raise ValueError("requirements.txt 입력 구조 오류")
                 name, spec, url = parsed
                 declared.setdefault(name, spec)
                 requirement_specs.setdefault(name, []).append(spec)
+                match = REQ_RE.match(line)
+                extras = (match.group(2) or "")[1:-1] if match else ""
+                declaration_extras.setdefault(name, set()).update(
+                    normalize_name(item.strip()) for item in extras.split(",") if item.strip()
+                )
                 if url:
                     urls.setdefault(name, []).append(url)
 
+        if self.strict_psycopg:
+            self.check_strict_psycopg(scope, requirement_specs, declaration_extras, urls, constraint_lines)
+            return
         if requires_python is None:
             self.add(label, "python", "runtime", "", "", "NO_ENGINES",
                      "`requires-python` 미선언(D-06: floor 3.11)")
@@ -2806,6 +2947,17 @@ class Checker:
                         self.record_axis(label, key, "pypi", "(전이)", version)
 
     def run(self, scopes: list[Scope]) -> None:
+        if self.strict_psycopg:
+            python_scopes = [scope for scope in scopes if scope.kind == "python"]
+            if not python_scopes:
+                raise ValueError("선택 guard의 Python dependency 입력 scope가 없음")
+            for scope in python_scopes:
+                self.check_python(scope)
+            for group, label in self.psycopg_used_groups.items():
+                if group not in self.psycopg_declared_groups:
+                    self.add(label, "psycopg", "pypi", "", "", "NO_LOCK",
+                             "psycopg lock/constraint 흔적은 있으나 실제 dependency 선언이 검사되지 않음")
+            return
         for scope in scopes:
             if scope.kind == "npm":
                 if scope.manifest is None or not scope.manifest.is_file():
@@ -2936,8 +3088,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--markdown", type=Path, help="Markdown 보고 출력 경로")
     parser.add_argument("--no-step-summary", action="store_true", help="$GITHUB_STEP_SUMMARY에 쓰지 않음")
     parser.add_argument("--quiet", action="store_true", help="표준 출력에 표를 쓰지 않음(annotation·요약만)")
+    parser.add_argument("--strict-psycopg", action="store_true",
+                        help="psycopg 3 사용 scope만 exact/binary 선언·lock/constraints 검사; drift는 exit 1, 설치본·runtime은 별도")
+    parser.add_argument("--constraints", type=Path, action="append", default=[],
+                        help="--strict-psycopg에서 별도로 쓰는 소비자 root 상대 constraints; core/binary 짝 필수, 반복 가능")
     parser.add_argument("--self-check", action="store_true", help="레지스트리 형식·정책만 검사하고 종료")
     args = parser.parse_args(argv)
+    if args.constraints and not args.strict_psycopg:
+        parser.error("--constraints는 --strict-psycopg와 함께 사용")
+    if args.strict_psycopg and (args.mode or args.self_check or len(args.paths) != 1):
+        parser.error("--strict-psycopg는 소비자 root 하나와 사용하며 --mode/--self-check와 함께 쓰지 않음")
 
     try:
         if hasattr(sys.stdout, "reconfigure"):
@@ -3054,15 +3214,23 @@ def main(argv: list[str] | None = None) -> int:
                              if consumer_name else "미등록 소비자 기본값")
     today = args.today or date.today()
 
-    checker = Checker(registry, repo, today)
+    checker = Checker(registry, repo, today, strict_psycopg=args.strict_psycopg)
+    checker.selected_root = first_root
+    if args.strict_psycopg:
+        mode, mode_source = "fail", "--strict-psycopg 선택 pin guard(설치본·runtime 미확인)"
     try:
         checker.run(scopes)
+        for constraint in args.constraints:
+            checker.check_psycopg_constraints(first_root / constraint, first_root)
     except (OSError, ValueError, TypeError, AttributeError, KeyError) as exc:
         print(f"::error title=check_versions::소비자 입력 오류: {exc}")
         return 2
     findings = checker.findings
     markdown = render_markdown(findings, registry, repo, mode, mode_source, today, roots)
     report = build_report(findings, registry, repo, mode, mode_source, today, roots)
+    if args.strict_psycopg:
+        report["selectedPsycopg"] = {"exact": registry.axes["psycopg"]["exact"],
+                                    "evidence": "source/lock/constraints only", "runtimeImplementation": "NOT_CHECKED"}
 
     if not args.quiet:
         print(markdown)
@@ -3078,10 +3246,15 @@ def main(argv: list[str] | None = None) -> int:
     if summary_path and not args.no_step_summary:
         with open(summary_path, "a", encoding="utf-8") as handle:
             handle.write(markdown)
-    code = exit_code(mode, findings)
+    code = (int(any(f.verdict != "OK" for f in findings)) if args.strict_psycopg
+            else exit_code(mode, findings))
     counts = summarize(findings)
+    failing = (sum(f.verdict != "OK" for f in findings) if args.strict_psycopg
+               else sum(counts[v] for v in FAILING))
+    meaning = ("선택 pin CI guard; 설치본·runtime 구현 미검증" if args.strict_psycopg
+               else "읽기 전용 대조; 제품 gate 아님")
     print(f"check_versions: {_workflow_display_value(repo, '(소비자 식별자 비공개)')} mode={mode} findings={len(findings)} "
-          f"failing={sum(counts[v] for v in FAILING)} exit={code} (읽기 전용 대조; 제품 gate 아님)")
+          f"failing={failing} exit={code} ({meaning})")
     return code
 
 

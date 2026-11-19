@@ -232,6 +232,24 @@ python3 -B -X utf8 tools/check_versions.py /path/to/app --repo wx --today 2027-0
 - 한계(사실): Poetry lock은 제한된 package/version·metadata·git source만 읽고 requirements 설치본은 정확 핀 후보와 차단 범위만 보고하며 두 입력 모두 uv lock을 대신하지 않는다. workflow는 §3.8의 제한된 YAML과 `uses`·setup-node 정적 선언만 읽고 실제 실행 버전·액션 major·Docker digest의 이미지 내용을 확인하지 않는다. 지원 밖 YAML·빈 대조 범위·root 밖 symlink는 exit 2, 동적 Node 값은 `NO_ENGINES`, 이동 ref와 기본 구조가 잘못된 Docker/remote target은 `FLOATING_REF`이며 `actions.checked`를 활성화하지 않는다. 실제 실행 버전·Docker 파서는 범위 밖이고 git 고정 판정은 §3.8 휴리스틱이다. 지원 범위는 전체 Poetry resolver·전체 PEP 440 해석기가 아니며 lock과 선언의 만족 여부는 소비자의 `npm ci`·`uv sync --locked` gate가 검증한다. npm 사전 배포 버전·별칭·로컬 링크는 안정 원 패키지와 비교하지 않고 `NO_LOCK`으로 보고한다. npm 설치본은 `major.minor.patch`와 선택적 build metadata만 지원한다. 런타임/정책 숫자 접두와 이미지 `-slim`은 별도 허용한다. 런타임 하한은 단일 숫자와 제한된 비교·compatible·wildcard·교집합·`||` 대안을 지원하며 해석할 수 없는 범위는 안전한 정상 판정으로 축소하지 않는다.
 - CI 연동: common `check-versions(report)` job(T-009)과 재사용 워크플로 `versions-check.yml`(T-010). 소비자는 기존 워크플로에 job을 추가하는 방식으로 호출하며 required check 이름은 입력으로 개방한다([ci-deploy](ci-deploy.md)).
 
+### 8.1 선택 psycopg 3 정확 pin CI 검사
+
+`versions.json`의 `axes.psycopg.exact`는 psycopg 3를 실제 사용하는 소비자가 선택한 patch 정본이다. 기본 survey의 floor/recommended 판정·T-005 `NO_LOCK` 기록은 바꾸지 않는다. 아래 opt-in 명령은 다른 라이브러리·워크플로를 검사하지 않으며, 변경 가능한 Common branch 대신 검토 후 병합한 Common 전체 SHA의 checker와 레지스트리를 함께 사용한다.
+
+```bash
+# 소비자 root 하나를 전달한다. uv workspace의 선언과 공유 lock을 함께 발견한다.
+python3 -B "$COMMON/tools/check_versions.py" "$CONSUMER" --repo kor-travel-weather --strict-psycopg
+# Geo의 별도 Dagster constraints도 같은 선택값으로 검사한다(root 상대 경로).
+python3 -B "$COMMON/tools/check_versions.py" "$CONSUMER" --repo kor-travel-geo --strict-psycopg --constraints path/to/dagster-constraints.txt
+# requirements 기반 소비자도 실제 선언을 검사한다.
+python3 -B "$COMMON/tools/check_versions.py" "$CONSUMER" --repo kor-travel-concierge --strict-psycopg
+```
+
+- 실제 dependency의 `psycopg[binary]`(다른 extra와 병용 가능)와 정확 pin을 요구한다. Poetry 문자열·table 선언을 지원한다. 발견한 uv/Poetry lock은 core와 binary 모두 같은 선택값·registry source여야 한다. 같은 uv lock을 쓰는 workspace 선언은 함께 판단한다.
+- requirements의 `-r`은 실제 선언, `-c` 및 `--constraints`는 해석 제한으로 구분한다. constraint에 `[binary]`를 써도 binary 설치 요청을 대신하지 못한다. 별도 `--constraints` 입력은 core/binary 정확 제한을 모두 요구한다. lock/constraint에 driver 흔적이 있는데 실제 선언이 검사되지 않았으면 실패한다. `--lockfiles`로 입력을 제한할 때도 필요한 실제 선언을 빠뜨리면 안 된다.
+- 정상은 exit 0, drift·floating·누락은 exit 1, 잘못된 입력/검사할 Python scope 없음은 exit 2다. `--mode`로 완화할 수 없다. psycopg2·asyncpg만 쓰는 Python scope는 `NOT_USED`이며 사용하지 않는 driver를 추가하지 않는다.
+- requirements만 있는 정상 결과는 **소스 pin/extra 확인**이다. lock 해석값·설치 성공·실행 중 구현을 증명하지 않는다. 모든 strict 결과의 설치 버전 칸은 비우고 runtime 구현은 `NOT_CHECKED`로 남긴다. 소비자는 별도 실제 설치/native 증거로 core/binary 배포 버전과 `psycopg.pq.__impl__`을 확인한다([backend-stack §3.1](backend-stack.md#31-선택-psycopg-3-driver)).
+
 ## 9. 열린 결정(사용자 확인 필요; 기본값으로 진행)
 
 | # | 결정 | 기본값(이 문서·레지스트리 반영) |

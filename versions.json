@@ -1,7 +1,7 @@
 {
   "schema": "kor-travel-common.version-registry.v1",
   "baseline": "2026-09",
-  "updated": "2026-11-18",
+  "updated": "2026-11-20",
   "next_review": "2026-12",
   "policy": "docs/standards/versions.md",
   "source": "docs/adr/017-shadcn-radix-shared-components.md; 기존 런타임·백엔드 축은 원 source 절을 따른다. Node/npm 빌드 선택은 docs/adr/018-exact-node-npm-build-toolchain.md.",
@@ -241,7 +241,9 @@
       "ecosystem": "pypi",
       "floor": "3.2",
       "recommended": "3.3",
-      "source": "vm §2.3"
+      "source": "기존 vm §2.3; https://www.psycopg.org/psycopg3/docs/news.html#psycopg-3-3-9",
+      "exact": "3.3.9",
+      "note": "선택한 psycopg 3 binary 소비자는 --strict-psycopg로 정확 pin·binary extra·lock/constraints 짝을 검사한다. 기본 floor/recommended survey와 실제 설치·pq.__impl__ 증거는 구분한다."
     },
     "httpx": {
       "ecosystem": "pypi",

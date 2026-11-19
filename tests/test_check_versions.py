@@ -1603,6 +1603,171 @@ class CheckVersionsTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 CV.Registry.load(self.registry_path)
 
+    def strict_psycopg_registry(self):
+        data = json.loads(json.dumps(REGISTRY))
+        data["axes"]["psycopg"] = {
+            "ecosystem": "pypi", "floor": "3.2", "recommended": "3.3", "exact": "3.3.9",
+        }
+        self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+
+    def strict_cli(self, *args):
+        return self.cli(str(self.repo), "--repo", "app-a", "--strict-psycopg", *args)
+
+    def test_selected_psycopg_uv_exact_pair_is_resolution_not_installed(self):
+        self.strict_psycopg_registry()
+        python_fixture(self.repo, requires=">=3.11", deps=["psycopg[binary]==3.3.9"],
+                       locked={"psycopg": "3.3.9", "psycopg-binary": "3.3.9"})
+        before = snapshot(self.repo)
+        report = self.root / "selected.json"
+        result = self.strict_cli("--json", str(report))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        data = json.loads(report.read_text())
+        self.assertEqual(data["selectedPsycopg"]["runtimeImplementation"], "NOT_CHECKED")
+        self.assertTrue(all(not row["installed"] for row in data["findings"]))
+        self.assertEqual(snapshot(self.repo), before)
+
+    def test_selected_psycopg_detects_drift_missing_extra_and_lock_pair(self):
+        self.strict_psycopg_registry()
+        cases = [
+            (["psycopg[binary]>=3.3.9"], {"psycopg": "3.3.9", "psycopg-binary": "3.3.9"}),
+            (["psycopg[binary]==3.3.6"], {"psycopg": "3.3.9", "psycopg-binary": "3.3.9"}),
+            (["psycopg==3.3.9"], {"psycopg": "3.3.9", "psycopg-binary": "3.3.9"}),
+            (["psycopg[binary]==3.3.9"], {"psycopg": "3.3.9"}),
+            (["psycopg[binary]==3.3.9"], {"psycopg": "3.3.9", "psycopg-binary": "3.3.6"}),
+            (["psycopg[binary]==3.3.9"], {"psycopg": "3.3.6", "psycopg-binary": "3.3.9"}),
+            ([], {"psycopg": "3.3.9", "psycopg-binary": "3.3.9"}),
+            (["psycopg[binary]==3.3.9", "psycopg[binary]==3.3.6; python_version < '3.12'"],
+             {"psycopg": "3.3.9", "psycopg-binary": "3.3.9"}),
+        ]
+        for deps, locked in cases:
+            with self.subTest(deps=deps, locked=locked):
+                python_fixture(self.repo, requires=">=3.11", deps=deps, locked=locked)
+                result = self.strict_cli()
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+
+    def test_selected_psycopg_does_not_force_asyncpg_or_psycopg2(self):
+        self.strict_psycopg_registry()
+        python_fixture(self.repo, requires=">=3.11", deps=["asyncpg==0.31.0", "psycopg2-binary==2.9.11"],
+                       locked={"asyncpg": "0.31.0", "psycopg2-binary": "2.9.11"})
+        result = self.strict_cli()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("NOT_USED", result.stdout)
+
+    def test_selected_psycopg_requirements_constraints_detect_binary_drift(self):
+        self.strict_psycopg_registry()
+        (self.repo / "requirements.txt").write_text(
+            "-c constraints.txt\npsycopg[binary]==3.3.9\n", encoding="utf-8")
+        constraint = self.repo / "constraints.txt"
+        for binary, code in (("3.3.9", 0), ("3.3.6", 1)):
+            constraint.write_text(f"psycopg==3.3.9\npsycopg-binary=={binary}\n", encoding="utf-8")
+            result = self.strict_cli("--lockfiles", '["requirements.txt"]')
+            self.assertEqual(result.returncode, code, result.stdout + result.stderr)
+        self.assertIn("runtime", self.strict_cli().stdout)
+
+    def test_selected_psycopg_explicit_constraints_pair_is_not_silently_skipped(self):
+        self.strict_psycopg_registry()
+        python_fixture(self.repo, requires=">=3.11", deps=["psycopg[binary]==3.3.9"], locked=None)
+        directory = self.repo / "dagster"
+        directory.mkdir()
+        path = directory / "constraints.txt"
+        for content, code in (("psycopg==3.3.9\npsycopg-binary==3.3.9\n", 0),
+                              ("psycopg==3.3.9\npsycopg-binary==3.3.6\n", 1),
+                              ("psycopg==3.3.9\n", 1)):
+            with self.subTest(content=content):
+                path.write_text(content, encoding="utf-8")
+                result = self.strict_cli("--constraints", "dagster/constraints.txt")
+                self.assertEqual(result.returncode, code, result.stdout + result.stderr)
+
+    def test_selected_psycopg_explicit_constraints_cannot_escape_root(self):
+        self.strict_psycopg_registry()
+        python_fixture(self.repo, requires=">=3.11", deps=["psycopg[binary]==3.3.9"], locked=None)
+        path = self.root / "outside.txt"
+        path.write_text("psycopg==3.3.9\npsycopg-binary==3.3.9\n", encoding="utf-8")
+        result = self.strict_cli("--constraints", "../outside.txt")
+        self.assertEqual(result.returncode, 2)
+
+    def test_selected_psycopg_requirements_source_only_keeps_default_no_lock(self):
+        self.strict_psycopg_registry()
+        (self.repo / "requirements.txt").write_text("psycopg[binary]==3.3.9\n", encoding="utf-8")
+        result = self.strict_cli()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("lock·설치본·runtime 구현 미확인", result.stdout)
+        default = self.run_checker()
+        self.assertIn("NO_LOCK", self.verdicts(default, "lockfile"))
+        self.assertIn("NO_ENGINES", self.verdicts(default, "python"))
+
+    def test_selected_psycopg_constraint_extra_does_not_install_binary(self):
+        self.strict_psycopg_registry()
+        (self.repo / "requirements.txt").write_text(
+            "-c constraints.txt\npsycopg==3.3.9\n", encoding="utf-8")
+        (self.repo / "constraints.txt").write_text("psycopg[binary]==3.3.9\n", encoding="utf-8")
+        result = self.strict_cli()
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("dependency extra", result.stdout)
+        self.assertIn("선택 pin CI guard", result.stdout)
+        self.assertNotIn("제품 gate 아님", result.stdout)
+
+    def test_selected_psycopg_constraint_only_does_not_replace_actual_declaration(self):
+        self.strict_psycopg_registry()
+        (self.repo / "requirements.txt").write_text("-c constraints.txt\n", encoding="utf-8")
+        (self.repo / "constraints.txt").write_text("psycopg[binary]==3.3.9\n", encoding="utf-8")
+        self.assertEqual(self.strict_cli().returncode, 1)
+
+    def test_selected_psycopg_shared_uv_lock_uses_actual_workspace_declaration(self):
+        self.strict_psycopg_registry()
+        python_fixture(self.repo, requires=">=3.11", deps=["psycopg[binary]==3.3.9"],
+                       locked={"psycopg": "3.3.9", "psycopg-binary": "3.3.9"})
+        member = self.repo / "api"
+        member.mkdir()
+        python_fixture(member, requires=">=3.11", deps=["fastapi>=0.115"], locked=None)
+        result = self.strict_cli()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        # Selecting a lock whose actual declaration is not checked must fail closed.
+        (self.repo / "pyproject.toml").unlink()
+        result = self.strict_cli("--lockfiles", '["uv.lock"]')
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+
+    def test_selected_psycopg_does_not_succeed_on_ignored_python_scope(self):
+        self.strict_psycopg_registry()
+        npm_fixture(self.repo, deps={}, engines={}, installed={})
+        result = self.strict_cli("--lockfiles", '["package-lock.json"]')
+        self.assertEqual(result.returncode, 2)
+
+    def test_selected_psycopg_cannot_be_softened_by_mode(self):
+        self.strict_psycopg_registry()
+        python_fixture(self.repo, requires=">=3.11", deps=["psycopg[binary]>=3.3"], locked=None)
+        result = self.strict_cli("--mode", "report")
+        self.assertEqual(result.returncode, 2)
+
+    def test_selected_psycopg_constraint_cannot_escape_consumer(self):
+        self.strict_psycopg_registry()
+        (self.root / "outside.txt").write_text("psycopg[binary]==3.3.9\n", encoding="utf-8")
+        (self.repo / "requirements.txt").write_text("-c ../outside.txt\n", encoding="utf-8")
+        self.assertEqual(self.strict_cli().returncode, 2)
+
+    def test_selected_psycopg_poetry_exact_binary_pair(self):
+        self.strict_psycopg_registry()
+        (self.repo / "pyproject.toml").write_text(
+            '[tool.poetry.dependencies]\npython = ">=3.11"\n'
+            'psycopg = {version = "3.3.9", extras = ["binary"]}\n'
+            'psycopg-binary = "3.3.9"\nfastapi = "0.141"\n', encoding="utf-8")
+        (self.repo / "poetry.lock").write_text(
+            '[[package]]\nname="psycopg"\nversion="3.3.9"\n'
+            '[[package]]\nname="psycopg-binary"\nversion="3.3.9"\n'
+            '[metadata]\nlock-version="2.0"\npython-versions=">=3.11"\n', encoding="utf-8")
+        result = self.strict_cli()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_selected_psycopg_registry_rejects_nonexact_policy(self):
+        self.strict_psycopg_registry()
+        data = json.loads(self.registry_path.read_text())
+        for exact in ("3.3", ">=3.3.9", "3.3.9rc1", "3.3.9+local"):
+            with self.subTest(exact=exact):
+                data["axes"]["psycopg"]["exact"] = exact
+                self.registry_path.write_text(json.dumps(data), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    CV.Registry.load(self.registry_path)
+
     def test_repo_registry_values_load(self):
         """저장소 루트 versions.json이 스키마·필수 필드를 만족하고 예외 until이 ISO 날짜다."""
         registry = CV.Registry.load(SCRIPT.parents[1] / "versions.json")
