@@ -70,13 +70,14 @@ class ApplicationProfileTests(unittest.TestCase):
                 python_fixture(self.repo, requires=">=3.11", deps=["fastapi>=0.115"], locked=packages)
                 self.assertEqual(self.cli().returncode, 1)
 
-    def test_unused_driver_and_unselected_transitive_are_not_forced(self):
+    def test_old_transitive_gap_is_rejected_without_forcing_unused_driver(self):
         python_fixture(self.repo, requires=">=3.11", deps=["httpx>=0.27"],
                        locked={"httpx": "0.28.1", "sqlalchemy": "2.0.54",
                                "psycopg2-binary": "2.9.13", "asyncpg": "0.31.0"})
         result = self.cli()
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("NOT_USED", result.stdout)
+        self.assertIn("asyncpg", result.stdout)
 
     def test_no_lock_requires_exact_declaration_or_consumed_constraints(self):
         (self.repo / "requirements.txt").write_text("sqlalchemy>=2.0,<3\n")
@@ -225,10 +226,14 @@ class ApplicationProfileTests(unittest.TestCase):
         lock.write_text(lock.read_text(encoding="utf-8").replace('version="2.1.9"', 'version="2.0.54"'))
         self.assertEqual(self.cli().returncode, 1)
 
-    def test_unused_constraint_does_not_select_an_unused_package(self):
+    def test_dormant_constraints_validate_pins_without_requiring_installs(self):
         (self.repo / "requirements.txt").write_text("httpx==0.28.1\n")
         (self.repo / "image.txt").write_text("sqlalchemy==2.0.54\nasyncpg==0.31.0\npsycopg==3.3.6\n")
-        self.assertEqual(self.cli("--constraints", "image.txt").returncode, 0)
+        self.assertEqual(self.cli("--constraints", "image.txt").returncode, 1)
+        (self.repo / "image.txt").write_text("sqlalchemy==2.1.9\nasyncpg==0.32.0\npsycopg==3.3.9\n")
+        installed = self.root / "native.json"
+        installed.write_text(json.dumps({"python": "3.12.1", "packages": {"httpx": "0.28.1"}}))
+        self.assertEqual(self.cli("--constraints", "image.txt", "--installed-versions", str(installed)).returncode, 0)
 
     def test_application_does_not_silently_select_the_external_daemon_extra(self):
         provider = self.data["providers"]["packages"]["kor-travel-common"]

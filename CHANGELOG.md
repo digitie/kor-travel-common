@@ -1,3 +1,13 @@
+## 공유 Python application catalog 확장 — 2026-11-20
+
+### 변경
+
+기존 `--strict-python-application`을 실제 공유 runtime·전이·dev lock 전체의 유한한 catalog로 확장했다. 정확 값·Python 호환 경계·Git SDK source는 `versions.json`이 소유한다. 실제 소비 constraints와 명시적 설치 버전 관측의 교집합을 검사하며 미사용 패키지 설치를 요구하지 않는다. 현재 Dagster/Google SDK 호환 상한과 외부 daemon-pool 프로필을 구분한다.
+
+### 이관
+
+[버전 규칙의 application profile](docs/standards/versions.md#선택-python-application-profile)에 따라 실제 사용하는 shared lock/constraints를 재해석하고, requirements 역할은 실제 Python과 연결한다. 설치 관측은 동작·바이트 증거와 별도다. 기본 floor survey, Common Python package, npm/UI catalog·canonical packs는 바뀌지 않는다.
+
 ## ui 0.2.3·tokens 0.1.4·toast 0.1.3 — 관리자 셸 — 2026-11-19
 
 ### 변경

@@ -201,12 +201,12 @@ Common private tool의 공식 ini·shell-quote 두 parser dependency만 root gra
 | 절 | 필드 | 규칙 |
 |---|---|---|
 | 머리 | `schema`(고정 문자열)·`baseline`(`YYYY-MM`)·`updated`·`next_review`·`policy`·`source` | schema 고정·문자열·YYYY-MM·ISO 날짜 검사, 미지 필드 exit 2 |
-| `axes.<key>` | `ecosystem` ∈ `runtime`/`npm`/`pypi`/`image`/`tool`/`db`(필수), `packages[]`(생략 시 key), `floor`/`recommended`/`max`(문자열 또는 null), `image`, `check`, `checked`(기본 true), `note`, `source` | `runtime` 축은 `engines.node`·`engines.npm`(또는 `packageManager`)·`requires-python`의 **하한**을 대조하고, exact 값이면 recommended까지 대조 |
+| `axes.<key>` | `ecosystem` ∈ `runtime`/`npm`/`pypi`/`image`/`tool`/`db`(필수), `packages[]`(생략 시 key), `floor`/`recommended`/`max`(문자열 또는 null), `image`, `check`, `checked`(기본 true), `note`, `source`, `exact`, `application`, `requiresPython`, `compatible` | `runtime` 축은 `engines.node`·`engines.npm`(또는 `packageManager`)·`requires-python`의 **하한**을 대조하고, exact 값이면 recommended까지 대조 |
 | `actions` | `consumer_policy`·`common{}`·`checked: false` | 현재 미검사. 정적 참조 보고는 T-005c가 소유하며 SHA의 액션 major 실측과 구분한다 |
 | `exceptions[]` | `repo`(consumers 키)·`key`(axes 키)·`installed`(접두)·`reason`·`until`(ISO)·`review` — 6개 모두 필수 | 숫자 접두 일치 시에만 적용; 같은 저장소·축의 중첩 접두는 거부; 다른 설치본이면 무효 |
 | `blocked[]` | `ecosystem`·`name`·`range`·`reason`(필수)·`since`·`source` | `range`는 `>=`·`<`·`==`·`,` 조합 |
 | `consumers.<repo>` | `enforce`(`report`/`warn`/`fail`)·`clean_runs`·`aliases[]`·`note` | 7개 고정. 신규 소비자는 common PR |
-| `providers` | `policy: "report"`·`packages{name:{repo}}`·`note` | 보고 전용. `python-*-api` 패턴은 목록에 없어도 보고 |
+| `providers` | `policy: "report"`·`packages{name:{repo,ref?}}`·`note` | 기본은 보고 전용. application 모드의 canonical SDK는 full SHA 대조. Common Python은 `packageTree`도 검사 |
 
 형식은 dm 런타임 핀 레지스트리(`schema`·`blocked_pinsets`·"값은 파일이, 계약은 코드가 소유")를 라이브러리 축으로 옮긴 것이다(`vm` §7.3). 소비자 매니페스트(`consumer-manifest.v1`, T-011)는 별도 파일이며 이 레지스트리에 소비자 값을 복제하지 않는다.
 
@@ -259,7 +259,7 @@ python3 -B "$COMMON/tools/check_versions.py" "$CONSUMER" --repo kor-travel-conci
 | O-7 | Python 앱 floor 3.12 시점 | common 3.11 호환 유지; 앱 상향은 Phase 4 |
 | O-8 | pinvi mobile | 승인된 NativeWind5 RC·Tailwind4/C11 사용. 과거 Tailwind3 예외 후보는 현행 예외가 아님 |
 | O-10 | Node/npm | [ADR-018](../adr/018-exact-node-npm-build-toolchain.md)로 확정. 권고 exact patch를 private 빌드·테스트 선택으로 강제하며 일반 floor는 별도 유지 |
-| O-16 | 공유 라이브러리·provider SHA | `providers` 보고만; 정리 요청 T-505 |
+| O-16 | 공유 라이브러리·provider SHA | 기본 `providers` 보고 유지; 선택 application 모드는 아래 canonical Git source 검사 |
 | O-18 | Renovate | 미설치 전제, [`templates/dependabot.yml`](../../templates/dependabot.yml) |
 
 ## 10. 근거
@@ -285,20 +285,38 @@ python3 -B "$COMMON/tools/check_versions.py" "$CONSUMER" --repo kor-travel-conci
 
 ## 선택 Python application profile
 
-`versions.json`의 PyPI 축 `exact`는 opt-in application 검사에만 사용한다. 기존 floor/recommended survey와 `--strict-psycopg`의 계약은 유지한다. 정렬 대상은 SQLAlchemy·asyncpg·FastAPI·Pydantic/core·pydantic-settings·Alembic·httpx·uvicorn의 유한한 목록이며 값은 catalog가 소유한다. Psycopg 3을 선택하면 기존 정확 core/binary guard도 적용한다. 이 모드는 전이 의존성 전체를 정렬하거나 미사용 driver를 설치하도록 요구하지 않는다.
+`versions.json`의 PyPI 축 `application: true`·`exact`와 기존 직접 축은 opt-in application 검사에 사용한다. 2026-11-20의 실제 공유 lock 비교에서 직접 축 외 전이·dev 차이와 서로 같지만 오래된 버전이 확인되어, 실제 공유 PyPI 102개 이름과 Git 전용 SDK 3개를 유한한 catalog로 확장했다. 값의 정본은 catalog 하나이며 기존 floor/recommended survey와 `--strict-psycopg` 계약은 유지한다. `checked: false`인 새 application 축은 기본 survey에 강제를 추가하지 않는다.
 
 ```bash
-python common/tools/check_versions.py consumer --repo kor-travel-geo \
-  --strict-python-application \
-  --constraints kor-travel-geo-dagster/docker/constraints-dagster.txt \
-  --json application-profile.json
+# consumer와 Common checkout은 형제 디렉터리
+python common/tools/check_versions.py consumer --repo kor-travel-weather \
+  --strict-python-application --json application-profile.json
+
+# requirements 이미지의 실제 소비 constraints + 별도 실제 설치 관측
+python common/tools/check_versions.py consumer --repo kor-travel-concierge \
+  --strict-python-application --python-version 3.11 \
+  --constraints constraints-application.txt \
+  --installed-versions native-installed-versions.json --json application-native.json
 ```
 
-- 직접 선언한 선택 축과 FastAPI/Pydantic/settings가 실제로 요구하는 Pydantic/core 짝을 검사한다. core를 새 직접 의존성으로 추가할 필요는 없다.
-- uv/Poetry lock은 선택한 버전과 정확히 같아야 하며 원 선언도 그 버전을 허용해야 한다. 이전 lock, 충돌 범위, registry가 아닌 선택 URL 해석값은 실패한다.
-- lock이 없는 경우는 정확 선언 또는 `--constraints`로 지정한 실제 이미지/installer 소비 constraints가 필요하다. constraints는 반복할 수 있고, 선택 축의 충돌/이전 pin을 합쳐 숨길 수 없다. 기존 `-r`/`-c` parser와 소비자 root 경계 검사를 재사용한다.
-- constraints에 이름이 있다는 이유만으로 미사용 패키지를 선택하지 않는다. `NOT_USED`는 설치 증거가 아니다. Dockerfile/installer가 그 파일을 실제 소비하는지는 소비자 계약 시험과 후속 normal/native 증거로 확인한다.
-- source/lock/constraints 검사일 뿐 설치본·native 구현·실행 중 최신성을 확인하지 않는다. JSON의 `selectedPythonApplication.runtimeImplementation`은 `NOT_CHECKED`이며 어느 모드에서도 source 결과를 runtime PASS로 바꾸지 않는다. 선택 profile은 OK 이외 판정에서 exit 1, 해석 오류는 exit 2이다.
+- 직접 선언뿐 아니라 uv/Poetry lock의 runtime·전이·dev 행과 dependency 참조를 전부 대조한다. 실제 사용하는 catalog 이름의 해석값은 정확 정책과 같아야 하고 원 선언도 허용해야 한다. 오래된 lock, 참조한 행의 삭제, registry 대신 URL로 바꾼 해석값은 실패한다. 전이 항목을 새 직접 의존성으로 올릴 필요는 없다.
+- FastAPI/Pydantic/settings를 쓰면 Pydantic/core 짝도 검사한다. Psycopg 3을 직접 선택하면 기존 정확 core/binary guard를 적용한다. 사용하지 않는 driver·dev 도구를 이미지에 추가하지 않는다.
+- lock이 없는 경우는 정확 선언 또는 실제 이미지/installer가 소비하는 `--constraints`가 필요하다. 반복 입력과 기존 `-r`/`-c` parser·root 경계를 재사용한다. constraints의 catalog pin은 잠재 소비 때도 틀리지 않도록 모두 검사하되 그 존재만으로 lock 행이나 설치를 요구하지 않는다. Dockerfile/installer 소비 연결은 소비자 계약 시험, 설치 결과는 normal/native 증거로 따로 확인한다.
+- `--installed-versions`는 실제 읽은 JSON `{"python":"3.12.7","packages":{"anyio":"4.16.0"}}`를 받는다. catalog와 실제 설치 이름의 교집합만 정확 대조하며, 없는 catalog 항목을 설치하라고 요구하지 않는다. 관측 Python·중복 정규화 이름·잘못된 버전·빈 교집합은 입력 오류(exit 2)다. JSON의 `installedVersionIntersection`은 검사 여부·개수·Python을 기록한다. 입력 파일을 지정하지 않으면 설치본 미검증으로 남긴다.
+- 실제 버전 관측은 배포 바이트·동작·Git SDK source 증명이 아니다. `selectedPythonApplication.runtimeImplementation`은 항상 `NOT_CHECKED`다. full Common module/native proof와 실제 consumer smoke를 유지하며, source guard나 JSON 파일 형식만으로 runtime PASS를 만들지 않는다. 선택 profile은 OK 이외 판정에서 exit 1, 입력 해석 오류는 exit 2다.
+
+### 호환 최신과 Python 경계
+
+2026-11-20 [PyPI JSON API](https://docs.pypi.org/api/json/)의 `requires_dist`·`requires_python`을 조회하고 CPython 3.12/3.13·Linux ARM 대상 `uv pip compile --no-build`로 함께 해석했다. metadata 해석은 설치·ABI·실행 검증이 아니다. catalog의 `source`·`note`가 각 값의 근거다. 단일 패키지 latest를 독립 선택하지 않고 다음 실제 상한을 보존한다.
+
+- 현재 Dagster family와 host>=CS 계약을 유지한다. 그 family가 요구하는 coloredlogs·watchdog·grpcio-health-checking 및 protobuf 상한을 함께 따른다. 외부 host family를 이 작업으로 올리지 않는다.
+- Graphene/GraphQLRelay의 graphql-core 상한 때문에 gql의 호환 판을 선택한다. botocore/Graphene의 python-dateutil 상한도 지킨다. 이 호환값은 미조사 최신이라고 표시하지 않는다.
+- 현재 Concierge의 실제 Google SDK가 요구하는 protobuf 상한과 실제 Python 3.11의 pyproj 상한은 catalog `compatible`에 repo별로 좁게 명시한다. 해당 repo/역할 Python이 일치할 때만 적용한다. `--python-version`은 실제 Dockerfile/native Python과 묶고 소스 최소 지원 metadata를 덮어쓰지 않는다.
+- pyproj의 선택판이 Python 3.12 이상을 요구하는 앱은 자체 `requires-python`도 맞춰야 한다. 실제 normal runtime이 이미 3.12/3.13인 앱의 metadata 상향은 runtime 교체와 구분한다. 공유 앱 lock을 쓰는 workspace SDK는 그 앱 lock의 Python 경계로 검사하며, SDK 자체나 Common SDK의 최소 Python을 함께 올리지 않는다.
+
+### Git 전용 SDK
+
+`providers.packages`에서 `ref`가 지정된 Git 전용 SDK는 catalog의 canonical repo·full SHA로 검사한다. source 선언과 uv/Poetry lock의 해석 SHA가 모두 맞아야 하며 PyPI 숫자 버전, 다른 repo, 이전 ref, source/lock 불일치는 실패한다. 기존 requirements의 GitHub archive URL도 full SHA에 묶인 경우 허용한다. Git SDK에 같은 이름의 PyPI 배포가 없다는 이유로 다른 패키지로 바꾸지 않는다. 실제 설치 bytes/readback은 별도 native 경로가 소유한다.
 
 ### 범위와 별도 host 프로필
 
