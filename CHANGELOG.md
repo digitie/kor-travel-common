@@ -1,3 +1,25 @@
+## ui 0.2.3·tokens 0.1.4·toast 0.1.3 — 관리자 셸 — 2026-11-19
+
+### 변경
+
+소유자 요청에 따라 관리자 화면의 모바일 메뉴를 좌측 drawer로 접고 페이지 제목·설명을 한 줄 상단 바에 둔다([ADR-021](docs/adr/021-admin-shell-left-drawer-and-single-top-bar.md), [T-222](docs/tasks/T-222-admin-shell.md)). `@kor-travel/ui`에 `AdminShell`·`AdminTopBar`·`AdminPageTitle`·`formatAdminTitle`(subpath `admin-shell`)을 더하고 `AppMenu`에 `orientation`(`responsive` 기본·`vertical`·`horizontal`)·`compact`를 더했다. 기존 `AppMenu` 기본 마크업·클래스·prop 기본값은 그대로다. 내장 정책 bytes가 바뀌므로 tokens 0.1.4·toast 0.1.3도 patch를 올렸고 두 패키지의 실행 코드·CSS는 바뀌지 않는다.
+
+Button 포커스를 UX-G9.1 레시피로 바꿨다: 키보드 포커스에서 `outline 2px`(`--kt-focus`)·offset 2px 하나만 그리고, 이전의 테두리 색 변화·반투명 3px box-shadow ring·`outline-none`·`transition-all`을 없앴다. 소비자 wrapper가 덧붙이던 outline·ring 클래스와 전역 `button` 규칙이 이것과 겹쳐 테두리가 두꺼워지거나 이중으로 보이던 문제의 공통 쪽 원인이다.
+
+#### Breaking
+
+없음. 공개 prop·기본값·`data-slot`은 그대로이고 포커스 표시 모양만 바뀐다.
+
+### standards
+
+[ux-guide](docs/standards/ux-guide.md) UX-G1.2(모바일 좌측 drawer MUST)·UX-G1.5(한 줄 상단 바 "영역 - 페이지" + 작은 설명, 앱 설명 금지)·UX-G1.6, [responsive-web](docs/standards/responsive-web.md) RW-9, [ui-contract](docs/standards/ui-contract.md) §4.2·§4.6·§4.7·UC-5를 갱신하고 [frontend-stack](docs/standards/frontend-stack.md) FS-7.8(전역 요소 규칙은 layer 밖 금지, 상태 스타일 금지)을 더했다.
+
+### 이관
+
+새 common-ref를 채택하는 소비자는 vendored `@kor-travel/ui` 0.2.3·`@kor-travel/tokens` 0.1.4(toast 사용 시 0.1.3)로 함께 올리고 version·SHA512는 `frontend-artifacts.json`에서 옮긴다(catalog 동결은 이 변경의 main pack 뒤 별도 PR). 관리자 셸 교체는 각 저장소의 이관 PR에서 한다: 자체 rail·strip·헤더 밴드를 `AdminShell`로 바꾸고, 앱 설명 문구를 지우고, section·title을 `area`·`title`로, meta 또는 description을 `description`으로 옮긴다. 레이아웃에 셸을 두는 앱은 페이지에서 `AdminPageTitle`로 설명·동작을 넘긴다. 사용법은 [UI 안내](packages/ui/README.md#관리자-셸)다.
+
+Button을 쓰는 앱은 0.2.3으로 올리면서 FS-7.8에 맞춰 정리한다: (1) 로컬 `button-variants`의 `buttonInteractionClasses`에서 `outline-solid`·`focus-visible:outline-*`·`focus-visible:ring-0`을 지운다(남길 것은 `disabled:opacity-100 disabled:pointer-events-auto` 같은 앱 정책뿐). (2) `globals.css`의 layer 밖 `button:hover`·`button:active`·`button:disabled`·`button:focus-visible`·`button.secondary`·`button.ghost`·`button.danger`·`.button`과 `input`·`select`·`textarea`·`a`의 `:hover`·`:focus-visible` 규칙을 지우거나, 아직 쓰는 레거시 마크업이 있으면 `@layer components` 안의 `.legacy-button` 같은 앱 접두 클래스로 옮긴다. (3) `:focus-visible` 전역 outline은 `@layer base` 안에만 둔다. Button에 `focus-visible:ring-*`·`focus-visible:border-ring`을 덧붙여 쓰던 호출부는 그 효과가 사라진다(링은 outline 하나). Input·Textarea·NativeSelect·Select·Checkbox·Switch 등 다른 공통 컴포넌트의 포커스 레시피는 아직 UX-G9.1로 바꾸지 않았다(후속 task).
+
 ## 공통 Node 축 26.13.1 — 2026-11-18
 
 ### 변경

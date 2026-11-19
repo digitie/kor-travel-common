@@ -1,3 +1,9 @@
+## 2026-11-19 — 관리자 셸(T-222, ADR-021)과 ui 0.2.3
+
+- 소유자 요청: 모든 관리자 화면의 모바일 메뉴를 좌측 drawer로, 페이지 제목·설명을 한 줄 상단 바("영역 - 페이지")로. `AdminShell`·`AdminTopBar`·`AdminPageTitle`·`formatAdminTitle`과 `AppMenu` `orientation`·`compact`를 더했다. 기존 `AppMenu` 기본 마크업은 시험으로 고정했다.
+- 공개 API 추가만 있어 ui 0.2.3 patch. 내장 정책 bytes 변화로 tokens 0.1.4·toast 0.1.3. UX-G1.2·G1.5·G1.6·RW-9·ui-contract를 ADR-021로 갱신했다.
+- 로컬 WSL(Node 26.13.1/npm 12.0.1) `npm test` 전체·lint·check·doctor·check:policy PASS. drawer 이동 닫힘 시험은 변이(렌더 중 닫힘 제거)로 RED를 확인했다. Next build·브라우저 smoke는 로컬 디스크 여유 부족으로 NOT_RUN(로컬), CI가 실행한다.
+
 ## 2026-11-18 — PR68 main pack과 불변 catalog 후속
 
 - 실제 source R=706aaa7821588dfca72f660c9161f56be2d0445f의 main push CI 3종 SUCCESS와 canonical artifact14430019630을 확인하고 SHA256/SRI·embedded policy·실제 minimal npm ci/127파일·exports/import를 검증했다. 첫 offline Pretendard metadata 누락 실패는 보존하고 prefer-offline 재시도로 PASS했다.

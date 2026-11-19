@@ -558,13 +558,13 @@
     "@kor-travel/ui": {
       "ecosystem": "npm",
       "floor": null,
-      "recommended": "0.2.2",
+      "recommended": "0.2.3",
       "source": "ADR-017; 2026-11-11 npm registry/peer 검증"
     },
     "@kor-travel/tokens": {
       "ecosystem": "npm",
       "floor": null,
-      "recommended": "0.1.3",
+      "recommended": "0.1.4",
       "source": "ADR-017; 2026-11-11 npm registry/peer 검증"
     },
     "vworld-map-core": {
@@ -630,7 +630,7 @@
     "@kor-travel/toast": {
       "ecosystem": "npm",
       "floor": null,
-      "recommended": "0.1.2",
+      "recommended": "0.1.3",
       "source": "Geo 알림용 선택형 공통 Radix Toast namespace; 원본 radix-ui1.8.1/React19.3.1 유지"
     }
   },

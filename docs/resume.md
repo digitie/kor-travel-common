@@ -1,3 +1,7 @@
+## 2026-11-19 — 관리자 셸(T-222)
+
+소유자 요청으로 [ADR-021](adr/021-admin-shell-left-drawer-and-single-top-bar.md)과 [T-222](tasks/T-222-admin-shell.md)를 진행 중이다. ui 0.2.3(tokens 0.1.4·toast 0.1.3)에 `AdminShell`을 더했다. 다음 한 작업은 PR CI·독립 2인 리뷰 뒤 병합, main pack을 `frontend-artifacts.json`에 동결하는 catalog PR, 그다음 일곱 소비자의 셸 교체 이관이다.
+
 ## 2026-11-18 — VirtualTable canonical main pack catalog 후보
 
 PR68은 검토 f571767과 같은 tree의 R=706aaa7821588dfca72f660c9161f56be2d0445f로 병합됐고 main CI 3종이 모두 SUCCESS다. [실제 main artifact·npm 설치 evidence](evidence/releases/virtual-table-ui-0.2.2-catalog.md)로 UI0.2.2/tokens0.1.3/toast0.1.2의 catalog entry와 [원본 두 리뷰 종료 archive](reviews/adversarial/2026-11-18-common-virtual-table-overflow.md)를 준비했다. 다음 한 작업은 부모의 catalog PR exact-head CI 확인·merge P 및 P main pack과 R의 동일 bytes 대조다. 소비자 채택·운영 수용은 별도이며 미실행이다.

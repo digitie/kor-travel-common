@@ -131,6 +131,7 @@ lockfile은 의무(`package-lock.json` v3, D-07)이며 `check_versions.py`가 �
 | FS-7.5 `@utility` | `duration-kt-*`·`z-kt-*`는 `theme.css`가 정의. 앱 `@utility`는 앱 접두 | |
 | FS-7.6 preflight | v4 preflight를 켠다. weather처럼 전역 요소 규칙에 의존하는 앱은 `@import "tailwindcss/theme" layer(theme); @import "tailwindcss/utilities" layer(utilities);`로 preflight 없이 시작해 마지막 단계에서 켠다(D-08 ⑥) | `inv/weather` §9.1 |
 | FS-7.7 도메인 CSS | 공통 컴포넌트로 대체되지 않는 앱 CSS(workbench·Dagster·마커)는 `@layer components` 또는 CSS module에 두고 토큰만 참조한다 | `inv/weather` §9.1 |
+| FS-7.8 전역 요소 규칙 | `button`·`button:hover`·`button:active`·`button:focus-visible`·`input`·`select`·`textarea` 같은 요소 선택자와 `.button`·`.secondary`·`.ghost`·`.danger` 같은 범용 클래스 규칙을 layer 밖(unlayered)에 두지 않는다. unlayered 규칙은 모든 Tailwind 유틸리티를 이겨 공통 `Button`의 테두리·배경·포커스 위에 겹친다(테두리·링 이중화, active 2px 이동). 요소 기본값은 `@layer base`에 `font: inherit` 수준만 두고 상태 스타일(hover·active·focus·disabled·border)은 넣지 않는다. 포커스 링은 공통 `Button`이 UX-G9.1대로 그리므로 앱 wrapper에서 `outline-solid`(상시 적용 시 기본 3px outline이 생긴다)·`focus-visible:ring-0`·추가 outline 클래스를 덧붙이지 않는다 | 소유자 보고 2026-11-19(weather·transport 버튼 테두리 이중화) |
 
 ## 5. `kt-` 유틸리티 네임스페이스·`cn`
 

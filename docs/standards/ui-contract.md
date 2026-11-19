@@ -74,7 +74,7 @@
 
 ### 4.2 Button·오류 패널(T-205)
 
-**Button** — D-09 계약. 루트 native `<button data-slot="button">`, 스피너 `data-slot="button-spinner"`.
+**Button** — D-09 계약. 루트 native `<button data-slot="button">`, 스피너 `data-slot="button-spinner"`. 포커스는 0.2.3부터 UX-G9.1 레시피 하나다: `focus-visible:outline-2`·`outline-offset-2`·`outline-kt-focus`, 테두리 색 변화·반투명 box-shadow ring·`outline-none`·`transition-all` 없음(outline은 transition 밖). 앱 전역 CSS 규칙은 [frontend-stack](frontend-stack.md) FS-7.8을 따른다.
 
 | prop | 기본 | 계약 |
 |---|---|---|
@@ -135,13 +135,13 @@
 
 | 컴포넌트 | 루트·슬롯 | prop(기본) | 계약 |
 |---|---|---|---|
-| `AdminPageHeader` | `<header data-slot="admin-shell-header">` | `title`, `description?`, `section?`, `breadcrumbs?[{label, href?}]`, `help?`, `meta?`, `actions?` | 순서 breadcrumb/section → `h1`(+HelpTip) + actions(primary ≤1, secondary ≤2) → meta → description, 아래 hairline(`border-b`). 페이지 `h1`은 여기서만 |
+| `AdminPageHeader` | `<header data-slot="admin-shell-header">` | `title`, `description?`, `section?`, `breadcrumbs?[{label, href?}]`, `help?`, `meta?`, `actions?` | ADR-021로 대체: 페이지 제목·설명·동작은 §4.7 `AdminTopBar` 한 줄 상단 바가 만든다. 이 행은 T-210 계획 기록으로 남긴다 |
 | `AdminSkipLink` | `<a data-slot="skip-link">` | `targetId`(`"main-content"`) | 문구 `본문으로 건너뛰기`. `<main id={targetId} tabIndex={-1}>`는 앱이 렌더 |
 | `AdminRailGrid` | `<div data-slot="admin-rail-grid">` | `rail`(ReactNode) | `xl:grid-cols-[minmax(0,1fr)_var(--kt-rail)]`, 그 아래는 1열 |
 | `FormFieldInput`, `FormSelect`, `FormTextArea` | `data-slot="form-field"` | `label`, `hint?`, `error?`, `required?`, `help?`, `reserveMessage`(`true`) | 라벨 위 · 컨트롤 · 메시지 슬롯 1개 예약(error가 hint 대체), `aria-describedby`는 표시 중 메시지만, required `*` `aria-hidden` + 접근성 이름 보정 |
 | `validateForm` (`form-validation`) | 헤드리스 | `rules[]` | `{errors, firstErrorField}`; 규칙 순서 = 포커스 순서 |
 
-앱별 셸 골격(nav·접힘·로그아웃·RBAC 구성)과 `ConfirmDialog` 엔진 선택은 앱 소유다. 공용 `LoginForm`·로그인 오류/상태 슬롯의 마크업 계약은 T-214에서 패키지로 제공하며, endpoint·IdP·redirect·세션 왕복은 앱이 주입한다([ADR-015](../adr/015-common-shared-systems-scope.md), T-214·T-312). 셸·기준선 템플릿 채널은 T-211에서 별도로 다룬다.
+셸 골격은 §4.7 `AdminShell`이 제공하고(ADR-021), nav 항목·로그아웃·RBAC 구성과 `ConfirmDialog` 엔진 선택은 앱 소유다. 공용 `LoginForm`·로그인 오류/상태 슬롯의 마크업 계약은 T-214에서 패키지로 제공하며, endpoint·IdP·redirect·세션 왕복은 앱이 주입한다([ADR-015](../adr/015-common-shared-systems-scope.md), T-214·T-312). 셸·기준선 템플릿 채널은 T-211에서 별도로 다룬다.
 
 ### 4.7 로그인·탐색 메뉴(T-215 개발 후보)
 
@@ -152,14 +152,18 @@
 | `LoginForm` / `login-form` | `onSubmit({credentials:{username,password},nextPath})` 필수. `nextPath` 기본 `/`, `pending` 기본 false, `error`·`onClearError`·`defaultUsername`·`usernameLabel`(아이디)·`brand`(kor travel)·`description`·`footer`·`testId` 선택. username 앞뒤 공백만 제거하며 password는 변형하지 않는다. form은 `aria-busy`, 입력은 required/자동완성/명시 label, 대기 시 readOnly. SSR·초기 hydration에서는 입력과 CTA가 native disabled이며 client effect 준비 뒤 활성화한다. 준비 후 대기 CTA는 native disabled 없이 `aria-disabled`+`aria-busy`로 포커스를 유지하고 동일 틱 중복 제출을 차단한다. 완료·실패 뒤 password DOM 값을 지운다. 위젯은 네트워크·저장소를 사용하지 않는다. |
 | `LoginError` / `login-error` | `error`·`id` 선택. 항상 존재하는 `p[role=alert][aria-atomic=true]`, 빈 오류도 슬롯 유지. |
 | `LoginStatus` / `login-status` | `status` 필수: checking / authenticated / unauthenticated. `userLabel` 선택. `p[role=status]`에 `data-state`를 표시한다. 인증 판정은 소비자 책임. |
-| `AppMenu` / `app-menu` | `groups[{id,label?,items}]` 필수. 항목은 `{id,label,href,exact?}` 또는 `{id,label,onSelect}`, 공통 `icon?`·`hint?`·`disabled?`. `pathname` 기본 `/`, `activeItemId` 미지정이면 경계가 맞는 최장 경로 하나, null이면 비활성. `label` 기본 `주 메뉴`, `testId`, `linkComponent` 선택. native nav/ul/a/button, 활성 링크 `aria-current=page`+tint+2px mark, 버튼 type=button. disabled 링크는 href 없는 `span[role=link][aria-disabled=true]`, 버튼은 native disabled. `hint`·icon은 접근성 이름에서 제외. 라벨만 접근성 이름이다. |
+| `AppMenu` / `app-menu` | `groups[{id,label?,items}]` 필수. 항목은 `{id,label,href,exact?}` 또는 `{id,label,onSelect}`, 공통 `icon?`·`hint?`·`disabled?`. `pathname` 기본 `/`, `activeItemId` 미지정이면 경계가 맞는 최장 경로 하나, null이면 비활성. `label` 기본 `주 메뉴`, `testId`, `linkComponent` 선택. `orientation`(기본 `responsive` = lg 미만 가로·이상 세로, `vertical`, `horizontal`)과 `compact`(기본 false, `vertical`에서만 라벨을 sr-only로 두고 `title`과 아이콘(없으면 첫 글자)만 표시)는 0.2.3에 더했으며, 명시하지 않으면 `AdminShell`의 rail·drawer가 `AppMenuLayoutContext`로 정한다. 명시했을 때만 `nav[data-orientation]`이, 접힘일 때만 `[data-compact]`가 붙는다. native nav/ul/a/button, 활성 링크 `aria-current=page`+tint+2px mark, 버튼 type=button. disabled 링크는 href 없는 `span[role=link][aria-disabled=true]`, 버튼은 native disabled. `hint`·icon은 접근성 이름에서 제외. 라벨만 접근성 이름이다. |
 | `sanitizeLocalPath` / `navigation` | 루트 기준 로컬 경로만 허용하고 외부·역슬래시·제어문자·경계 문자 인코딩·중첩 인코딩을 `/`로 치환한다. 안전한 pathname/query/hash는 URL 정규화 후 유지. 소비자가 성공 이동에 반환된 경로를 사용한다. |
 | `getActiveMenuItemId` / `navigation` | query/hash 없는 로컬 href만 자동 판정한다. 루트는 정확 일치, exact=true 항목은 하위 경로에 활성화하지 않는다. 동률은 첫 항목. hash/query 상태는 앱이 `activeItemId`로 주입. |
+| `AdminShell` / `admin-shell` | `menu`(ReactNode, 보통 `AppMenu`) 필수. `area?`·`title?`·`description?`·`descriptionTitle?`·`actions?`는 상단 바 기본값. `brand?`·`railFooter?`는 ReactNode 또는 `({collapsed,inDrawer})=>ReactNode`. 접힌 rail에서는 함수형 `brand`만 그린다. `navigationKey?`(바뀌면 drawer 닫힘·본문 포커스), `collapsible`(true), `collapsedStorageKey?`(값 `"true"`/`"false"`; 기존 값이 `"1"`/`"0"`이면 그 형식을 읽고 유지), `defaultCollapsed`(false), `fillViewport`(false), `mainId`(`main-content`), `labels?`(메뉴 열기·메뉴 닫기·메뉴·본문으로 건너뛰기·메뉴 접기·메뉴 펼치기), `className`·`railClassName`·`drawerClassName`·`mainClassName`·`testId`. lg 이상 rail 16rem/접힘 4rem, 미만은 메뉴 버튼(Radix Dialog Trigger: `aria-expanded`·`aria-controls`·`aria-haspopup=dialog`)과 좌측 drawer(`role=dialog`, 이름 `labels.menu`). drawer 안 링크·동작 클릭(수정 키·새 창 제외)과 lg 전환에서 닫는다. `<main id tabIndex=-1>`과 skip link를 렌더한다. |
+| `AdminTopBar` / `admin-shell` | `area?`·`title?`·`description?`·`descriptionTitle?`·`actions?`·`leading?`·`className`·`testId`. `header[data-slot=admin-shell-header]` 한 줄(min-h 48px, sticky, safe-area 상단). `h1`은 `formatAdminTitle(area,title)`와 같은 `title` 속성, 설명은 `p` 한 줄 말줄임에 문자열(또는 `descriptionTitle`)을 `title` 속성으로 둔다. 페이지 `h1`은 여기서만 만든다. |
+| `AdminPageTitle` / `admin-shell` | `AdminTitleContent`와 같은 prop. `AdminShell` 안에서는 아무것도 그리지 않고 상단 바의 지정 필드만 덮어쓰며 unmount 시 셸 값으로 돌아간다. 셸 밖에서는 `AdminTopBar`를 그린다. 서버 첫 렌더의 제목은 셸 prop이 담당한다. |
+| `formatAdminTitle` / `admin-shell` | `(area, page)` → `"영역 - 페이지"`. 한쪽이 비거나 둘이 같으면 남은 하나. document.title에도 쓴다. |
 | `getLoginErrorMessage` / `login-messages` | 503=설정 확인, 429=시도 제한, 403=허용되지 않은 요청, 기타=자격 증명 확인의 한국어 기본 사전. 서버 원문 오류를 자동 출력하지 않는다. |
 
-슬롯은 `login-form`, `login-brand`, `login-username`, `login-password`, `login-error`, `login-submit`, `login-footer`, `login-status`, `app-menu`, `app-menu-group`, `app-menu-group-label`, `app-menu-item`, `app-menu-link`, `app-menu-action`이다. 로그인은 페이지 h1 아래 h2 `로그인`을 만든다. CTA는 `로그인` / `로그인 중…`, 상태는 `로그인 상태 확인 중…` / `로그인됨`(사용자 이름이 있으면 `{userLabel}님, 로그인됨`) / `로그인이 필요합니다.`다. 콜백 예외는 `로그인하지 못했습니다. 잠시 후 다시 시도해 주세요.`로 표시한다.
+슬롯은 `login-form`, `login-brand`, `login-username`, `login-password`, `login-error`, `login-submit`, `login-footer`, `login-status`, `app-menu`, `app-menu-group`, `app-menu-group-label`, `app-menu-item`, `app-menu-link`, `app-menu-action`, `app-menu-initial`과 셸의 `admin-shell`, `admin-shell-skip-link`, `admin-shell-rail`, `admin-shell-brand`, `admin-shell-collapse`, `admin-shell-nav`, `admin-shell-rail-footer`, `admin-shell-body`, `admin-shell-header`, `admin-shell-heading`, `admin-shell-title`, `admin-shell-area`, `admin-shell-description`, `admin-shell-actions`, `admin-shell-menu-button`, `admin-shell-main`, `admin-shell-drawer`, `admin-shell-drawer-overlay`, `admin-shell-drawer-header`, `admin-shell-drawer-close`, `admin-shell-drawer-nav`, `admin-shell-drawer-footer`이다. 로그인은 페이지 h1 아래 h2 `로그인`을 만든다. CTA는 `로그인` / `로그인 중…`, 상태는 `로그인 상태 확인 중…` / `로그인됨`(사용자 이름이 있으면 `{userLabel}님, 로그인됨`) / `로그인이 필요합니다.`다. 콜백 예외는 `로그인하지 못했습니다. 잠시 후 다시 시도해 주세요.`로 표시한다.
 
-메뉴 ID는 그룹 내 및 항목 전체에서 유일해야 한다. 그룹/항목/권한/경로/로그아웃 정책은 소비자 소유다. 반응형 메뉴는 lg 미만에서 가로 strip, lg 이상에서 세로 rail이며 전체 셸·drawer를 대체하지 않는다. 최신 Next App Router에서는 client adapter가 Link와 콜백을 주입하고 서버는 `navigation` subpath만 직접 import할 수 있다. 스타일·통합 사용법은 [패키지 안내](../../packages/ui/README.md)를 따른다.
+메뉴 ID는 그룹 내 및 항목 전체에서 유일해야 한다. 그룹/항목/권한/경로/로그아웃 정책은 소비자 소유다. `AppMenu`의 기본 반응형 배치는 lg 미만에서 가로 strip, lg 이상에서 세로 rail이다. 관리자 화면은 [ADR-021](../adr/021-admin-shell-left-drawer-and-single-top-bar.md)에 따라 `AdminShell` 안에서 rail·drawer의 세로 목록으로 쓴다. 최신 Next App Router에서는 client adapter가 Link와 콜백을 주입하고 서버는 `navigation` subpath만 직접 import할 수 있다. 스타일·통합 사용법은 [패키지 안내](../../packages/ui/README.md)를 따른다.
 
 ### 4.8 Dagster 운영 표시(T-216 개발 후보)
 
@@ -205,7 +209,7 @@ run의 `maxRuntimeSeconds`가 유한한 양수이면 정체 의심 상한에 사
 
 | 위치 | heading | 제어 |
 |---|---|---|
-| 페이지 제목 | `h1` — `AdminPageHeader`만 만든다 | — |
+| 페이지 제목 | `h1` — `AdminTopBar`(`AdminShell` 상단 바)만 만든다(ADR-021) | — |
 | 섹션 | `SectionCard` `h{headingLevel}`(기본 `2`) | `headingLevel` |
 | 카드 | `CardTitle` `role="heading" aria-level`(기본 2) | `headingLevel`(후보) |
 | 다이얼로그 | `DialogTitle`/`AlertDialogTitle` = `h2` | — |
