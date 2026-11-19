@@ -1,3 +1,8 @@
+## 2026-11-19 — T-222 병합과 ui 0.2.3 main pack catalog
+
+- PR70 첫 CI의 320·390px drawer smoke 실패는 셀렉터 문제였다. 모달이 열리면 Radix가 바깥에 `aria-hidden`을 걸어 `getByRole`로 트리거를 못 찾는다(정상 접근성 동작). 225ddcd에서 열린 뒤 확인을 `data-slot` 핸들로 바꾸고 바깥 버튼이 역할 트리에서 빠지는 단언을 더했다. 시험 단언은 줄이지 않았다.
+- PR CI 9 job SUCCESS로 병합 R=0e2a3f5aa16323df0d009360802661c9bc496dc6. main push CI 3종 SUCCESS, artifact 14500111373의 ui 0.2.3·tokens 0.1.4·toast 0.1.3을 [catalog](evidence/releases/admin-shell-ui-0.2.3-catalog.md)에 동결했다. T-222 DONE. 소비자 이관은 각 저장소 PR이 소유한다.
+
 ## 2026-11-19 — 관리자 셸(T-222, ADR-021)과 ui 0.2.3
 
 - 소유자 요청: 모든 관리자 화면의 모바일 메뉴를 좌측 drawer로, 페이지 제목·설명을 한 줄 상단 바("영역 - 페이지")로. `AdminShell`·`AdminTopBar`·`AdminPageTitle`·`formatAdminTitle`과 `AppMenu` `orientation`·`compact`를 더했다. 기존 `AppMenu` 기본 마크업은 시험으로 고정했다.

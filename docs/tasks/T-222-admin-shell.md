@@ -1,6 +1,6 @@
-# T-222 관리자 셸(모바일 좌측 drawer·한 줄 상단 제목 바)과 ui 0.2.3
+# T-222 관리자 셸(모바일 좌측 drawer·한 줄 상단 제목 바)과 ui 0.2.3 (2026-11-19, PR #70)
 
-- 상태: IN_PROGRESS
+- 상태: DONE
 - 우선순위: P1
 - Gate: UI 단위·타입·lint·doctor, 정규 pack·Next webpack/Turbopack smoke·브라우저 smoke, 독립 2인 리뷰·CI
 - 선행: 없음
@@ -44,7 +44,7 @@ docs/adr/021-*, docs/standards/{ux-guide,responsive-web,ui-contract,frontend-lib
 - [x] 상단 바: "영역 - 페이지" `h1`, 설명 말줄임·`title`, 동작 슬롯. `AdminPageTitle`의 덮어쓰기와 복원.
 - [x] Button 포커스가 UX-G9.1 outline 하나다(반투명 ring·outline-none·transition-all 없음, 시험·브라우저 smoke 단언). 소비자 전역 규칙 정리는 FS-7.8.
 - [x] rail 접힘·저장·복원, compact 메뉴의 접근성 이름은 라벨.
-- [ ] 정규 pack을 설치한 Next webpack·Turbopack build와 320·390·1280px 브라우저 smoke가 CI에서 통과한다.
+- [x] 정규 pack을 설치한 Next webpack·Turbopack build와 320·390·1280px 브라우저 smoke가 CI에서 통과한다.
 - [x] 독립 2인 리뷰 finding이 닫힌다(아래 Evidence).
 
 ## 검증 명령
@@ -59,6 +59,8 @@ npm test
 
 - 로컬(WSL, Node 26.13.1/npm 12.0.1): `npm test` 전체 PASS(UI vitest 121·node 시험 235·tokens 90·toast 9·toolchain 3), lint·check·doctor(0 issue)·check:policy PASS.
 - 브라우저 smoke·Next build: 로컬 디스크 여유 부족으로 NOT_RUN(로컬), CI `packages` job이 실행한다.
+- 첫 CI(b04333c)에서 320·390px drawer smoke 2건이 `getByRole("button", { name: "메뉴 열기" })` not found로 실패했다. 모달 drawer가 열리면 Radix가 바깥 형제에 `aria-hidden`을 거는 정상 동작이라 트리거가 역할 트리에서 빠진 것이며 drawer 결함이 아니다. 225ddcd에서 닫힌 상태의 접근 가능한 이름은 역할 셀렉터로, 열린 뒤 `aria-expanded`·Escape 포커스 복귀는 `data-slot` 핸들로 확인하고, 열린 동안 바깥 버튼이 역할 트리에서 빠지는 것을 새로 단언했다. PR CI 9 job SUCCESS(Playwright 72 PASS)로 병합, merge R=0e2a3f5aa16323df0d009360802661c9bc496dc6, main push CI 3종 SUCCESS.
+- main pack catalog: [admin-shell-ui-0.2.3-catalog](../evidence/releases/admin-shell-ui-0.2.3-catalog.md).
 
 - 독립 2인 리뷰(34bd8f3 기준, React·접근성 / CSS·릴리스·문서): 둘 다 P0·P1 0, PASS. 반영: drawer 링크 닫힘 애니메이션 중 경로가 바뀌면 본문 포커스를 잃던 P2와 저장소 차단 시 접힘 버튼 무반응 P2를 고치고 회귀 시험 2개·smoke 본문 포커스 단언을 더했다. 소비자 이관 안내에 입력 요소 전역 규칙을 더하고, 셸 컨테이너의 `outline-none`을 `focus-visible:outline-0`으로 바꾸고, README에 모바일 actions·testId 중복·animation 전제를 적었다. 다른 공통 컴포넌트(Input·Select·Checkbox·Switch 등)의 UX-G9.1 정렬은 후속으로 남긴다(리뷰 P2, 범위 밖).
 
