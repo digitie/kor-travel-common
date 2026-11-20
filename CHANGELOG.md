@@ -1,3 +1,23 @@
+## 추가 owned 역할의 공유 Python 이름 — 2026-11-20
+
+### 변경
+
+원래 네 lock의 105개 공유 이름 밖에서 실제 역할/소스 조사로 발견한 49개를 기존 application catalog에 더했다. MCP의 정확 동반 배포를 실제 사용 때만 대조한다. pip/setuptools/wheel은 `buildTool` 분류와 명시적인 `--python-build-tools`로 분리하고 미사용 도구를 설치 대상으로 만들지 않는다. 기존 floor survey·Common Python tree·UI/npm packs는 유지한다.
+
+### 이관
+
+[application 규칙](docs/standards/versions.md#선택-python-application-profile)의 실제 소비 constraints·Python 경계·설치 관측을 따른다. NumPy/AV/pyproj 선택에 맞는 owned 앱 Python metadata와 실제 normal/native를 확인한다. MCP 2 및 미사용 legacy Google 선언 정리는 소비자 API 시험과 함께 이관한다. source/metadata 해석을 전체 운영 동작으로 표시하지 않는다.
+
+## 공유 Python application catalog 확장 — 2026-11-20
+
+### 변경
+
+기존 `--strict-python-application`을 실제 공유 runtime·전이·dev lock 전체의 유한한 catalog로 확장했다. 정확 값·Python 호환 경계·Git SDK source는 `versions.json`이 소유한다. 실제 소비 constraints와 명시적 설치 버전 관측의 교집합을 검사하며 미사용 패키지 설치를 요구하지 않는다. 현재 Dagster/Google SDK 호환 상한과 외부 daemon-pool 프로필을 구분한다.
+
+### 이관
+
+[버전 규칙의 application profile](docs/standards/versions.md#선택-python-application-profile)에 따라 실제 사용하는 shared lock/constraints를 재해석하고, requirements 역할은 실제 Python과 연결한다. 설치 관측은 동작·바이트 증거와 별도다. 기본 floor survey, Common Python package, npm/UI catalog·canonical packs는 바뀌지 않는다.
+
 ## ui 0.2.3·tokens 0.1.4·toast 0.1.3 — 관리자 셸 — 2026-11-19
 
 ### 변경

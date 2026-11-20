@@ -1,0 +1,198 @@
+{
+  "attrs": {
+    "exact": "26.1.0",
+    "class": "application"
+  },
+  "httpcore2": {
+    "exact": "2.16.2",
+    "class": "application"
+  },
+  "httpx2": {
+    "exact": "2.16.2",
+    "class": "application"
+  },
+  "jsonschema": {
+    "exact": "4.26.0",
+    "class": "application"
+  },
+  "jsonschema-specifications": {
+    "exact": "2025.9.1",
+    "class": "application"
+  },
+  "mcp": {
+    "exact": "2.3.0",
+    "class": "application"
+  },
+  "pyjwt": {
+    "exact": "2.15.1",
+    "class": "application"
+  },
+  "referencing": {
+    "exact": "0.37.0",
+    "class": "application"
+  },
+  "rpds-py": {
+    "exact": "2026.9.1",
+    "class": "application"
+  },
+  "sse-starlette": {
+    "exact": "3.7.0",
+    "class": "application"
+  },
+  "truststore": {
+    "exact": "0.10.5",
+    "class": "application"
+  },
+  "docker": {
+    "exact": "7.2.0",
+    "class": "application"
+  },
+  "pyasn1": {
+    "exact": "0.6.5",
+    "class": "application"
+  },
+  "tenacity": {
+    "exact": "9.2.1",
+    "class": "application"
+  },
+  "testcontainers": {
+    "exact": "4.15.0",
+    "class": "application"
+  },
+  "wheel": {
+    "exact": "0.48.0",
+    "class": "build-tool"
+  },
+  "pip": {
+    "exact": "26.3",
+    "class": "build-tool"
+  },
+  "setuptools": {
+    "exact": "84.2.1",
+    "class": "build-tool"
+  },
+  "av": {
+    "exact": "19.0.2",
+    "class": "application"
+  },
+  "apscheduler": {
+    "exact": "3.11.3",
+    "class": "application"
+  },
+  "flatbuffers": {
+    "exact": "25.12.19",
+    "class": "application"
+  },
+  "google-generativeai": {
+    "exact": "0.8.6",
+    "class": "application"
+  },
+  "grpcio-status": {
+    "exact": "1.85.3",
+    "class": "application"
+  },
+  "google-api-python-client": {
+    "exact": "2.202.0",
+    "class": "application"
+  },
+  "numpy": {
+    "exact": "2.5.5",
+    "class": "application"
+  },
+  "geoalchemy2": {
+    "exact": "0.21.0",
+    "class": "application"
+  },
+  "uritemplate": {
+    "exact": "4.2.0",
+    "class": "application"
+  },
+  "httpx-sse": {
+    "exact": "0.4.3",
+    "class": "application"
+  },
+  "google-ai-generativelanguage": {
+    "exact": "0.12.1",
+    "class": "application"
+  },
+  "youtube-transcript-api": {
+    "exact": "1.2.5",
+    "class": "application"
+  },
+  "onnxruntime": {
+    "exact": "1.32.0",
+    "class": "application"
+  },
+  "pyasn1-modules": {
+    "exact": "0.4.2",
+    "class": "application"
+  },
+  "huggingface-hub": {
+    "exact": "2.4.0",
+    "class": "application"
+  },
+  "faster-whisper": {
+    "exact": "1.2.1",
+    "class": "application"
+  },
+  "google-auth": {
+    "exact": "2.62.2",
+    "class": "application"
+  },
+  "googleapis-common-protos": {
+    "exact": "1.76.0",
+    "class": "application"
+  },
+  "ffmpeg-python": {
+    "exact": "0.2.0",
+    "class": "application"
+  },
+  "tzlocal": {
+    "exact": "5.4.5",
+    "class": "application"
+  },
+  "google-api-core": {
+    "exact": "2.44.0",
+    "class": "application"
+  },
+  "hf-xet": {
+    "exact": "1.8.0",
+    "class": "application"
+  },
+  "future": {
+    "exact": "1.0.0",
+    "class": "application"
+  },
+  "ctranslate2": {
+    "exact": "4.9.0",
+    "class": "application"
+  },
+  "proto-plus": {
+    "exact": "1.29.0",
+    "class": "application"
+  },
+  "google-auth-httplib2": {
+    "exact": "0.4.4",
+    "class": "application"
+  },
+  "tokenizers": {
+    "exact": "0.23.3",
+    "class": "application"
+  },
+  "yt-dlp": {
+    "exact": "2026.10.26",
+    "class": "application"
+  },
+  "pyparsing": {
+    "exact": "3.3.3",
+    "class": "application"
+  },
+  "defusedxml": {
+    "exact": "0.7.1",
+    "class": "application"
+  },
+  "httplib2": {
+    "exact": "0.32.1",
+    "class": "application"
+  }
+}

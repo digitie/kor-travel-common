@@ -63,10 +63,10 @@ TAG_RE = re.compile(r"^(?:[A-Za-z0-9._-]+-)?v?\d+(?:\.\d+){1,3}(?:[-+.][0-9A-Za-
 # 태그 정규식과 분리한다. 실제 action major를 원격에서 확인하지는 않는다.
 WORKFLOW_TAG_RE = re.compile(r"^(?:[A-Za-z0-9._-]+-)?v?\d+(?:\.\d+){0,3}(?:[-+.][0-9A-Za-z.-]+)?$")
 FLOATING_NAMES = frozenset({"main", "master", "develop", "dev", "head", "latest", "trunk"})
-VERSION_RE = re.compile(r"v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?(?:-slim|\+[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?")
+VERSION_RE = re.compile(r"v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?(?:\.post(\d+))?(?:-slim|\+[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?")
 NPM_VERSION_RE = re.compile(r"(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?")
 REQ_RE = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)\s*(\[[^\]]*\])?\s*(.*)$")
-EXACT_REQUIREMENT_RE = re.compile(r"^==\s*(v?\d+(?:\.\d+){0,3})\s*$")
+EXACT_REQUIREMENT_RE = re.compile(r"^==\s*(v?\d+(?:\.\d+){0,3}(?:\.post\d+)?)\s*$")
 
 
 # --------------------------------------------------------------------------- 버전 비교
@@ -78,7 +78,9 @@ def parse_version(text: str | None) -> tuple[int, ...] | None:
     match = VERSION_RE.fullmatch(text.strip())
     if match is None:
         return None
-    return tuple(int(group) for group in match.groups() if group is not None)
+    base = tuple(int(group) for group in match.groups()[:4] if group is not None)
+    post = match.group(5)
+    return base + (0,) * (4 - len(base)) + (1, int(post)) if post is not None else base
 
 
 def normalize_name(name: str) -> str:
@@ -309,7 +311,7 @@ class Registry:
         if not isinstance(provider_packages, dict):
             raise ValueError(f"{path}: providers.packages는 객체여야 함")
         for name, provider in provider_packages.items():
-            extra = {"ref", "packageTree"} if name == "kor-travel-common" else set()
+            extra = {"ref", "packageTree"} if name == "kor-travel-common" else {"ref"}
             fields(provider, {"repo"} | extra, f"providers.packages.{name}", {"repo"})
             if extra & set(provider) and any(not isinstance(provider.get(key), str)
                     or not re.fullmatch(r"[0-9a-f]{40}", provider[key]) for key in extra):
@@ -323,10 +325,10 @@ class Registry:
         registry = cls(data, path, axes)
         for key, axis in axes.items():
             fields(axis, {"ecosystem", "packages", "floor", "recommended", "max", "image", "check",
-                          "checked", "note", "source", "exact"}, f"axes.{key}", {"ecosystem"})
+                          "checked", "note", "source", "exact", "application", "buildTool", "requiresPython", "compatible"}, f"axes.{key}", {"ecosystem"})
             if axis["ecosystem"] not in {"runtime", "npm", "pypi", "image", "tool", "db"}:
                 raise ValueError(f"{path}: axes.{key}.ecosystem 오류")
-            strings(axis, ("image", "check", "note", "source"), f"axes.{key}")
+            strings(axis, ("image", "check", "note", "source", "requiresPython"), f"axes.{key}")
             for field_name in ("floor", "recommended", "max"):
                 value = axis.get(field_name)
                 if value is not None and (parse_version(value) is None
@@ -336,12 +338,28 @@ class Registry:
                 exact = axis["exact"]
                 # 정확 SemVer의 비교와 산출물 bytes는 JS 정책 검사기가 담당한다.
                 pypi_exact = axis["ecosystem"] == "pypi" and isinstance(exact, str) and re.fullmatch(
-                    r"(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)", exact,
-                ) and axis.get("checked", True)
+                    r"(?:0|[1-9]\d*)(?:\.(?:0|[1-9]\d*)){0,3}(?:\.post\d+)?", exact,
+                ) and (axis.get("checked", True) or axis.get("application") is True or axis.get("buildTool") is True)
+                if key == "psycopg" and (not isinstance(exact, str) or not re.fullmatch(r"\d+\.\d+\.\d+", exact)):
+                    pypi_exact = False
                 if not pypi_exact and (axis["ecosystem"] != "npm" or axis.get("checked") is not False
                         or axis.get("recommended") is not None or not isinstance(exact, str)
                         or not re.fullmatch(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?", exact)):
                     raise ValueError(f"{path}: axes.{key}.exact 승인 SemVer 계약 오류")
+            if "application" in axis and (axis["application"] is not True or axis["ecosystem"] != "pypi" or "exact" not in axis):
+                raise ValueError("application은 정확 PyPI 축만 허용합니다")
+            if "buildTool" in axis and (axis["buildTool"] is not True or axis["ecosystem"] != "pypi"
+                    or "exact" not in axis or axis.get("application")):
+                raise ValueError("buildTool은 application과 분리한 정확 PyPI 축만 허용합니다")
+            compatible = axis.get("compatible", [])
+            if not isinstance(compatible, list):
+                raise ValueError("application 호환 정책은 목록이어야 합니다")
+            for entry in compatible:
+                fields(entry, {"repo", "python", "exact", "requiresPython", "note"}, "application 호환 정책", {"repo", "exact", "note"})
+                strings(entry, entry, "application 호환 정책")
+                if (entry["repo"] not in data.get("consumers", {}) or parse_version(entry["exact"]) is None
+                        or "python" in entry and not re.fullmatch(r"3\.\d+", entry["python"])):
+                    raise ValueError("application 호환 repo/Python/정확 버전이 잘못되었습니다")
             floor, recommended, maximum = (parse_version(axis.get(n)) for n in ("floor", "recommended", "max"))
             if ((floor is not None and recommended is not None and below(recommended, floor))
                     or (maximum is not None and any(v is not None and at_or_above(v, maximum)
@@ -2062,6 +2080,27 @@ def scopes_from_manifest(
 
 # --------------------------------------------------------------------------- 판정
 
+def application_allows(spec: str, expected: str) -> bool:
+    if not spec.strip():
+        return True
+    target = parse_version(expected)
+    for prefix in re.findall(r"!=\s*(\d+(?:\.\d+)*)\.\*", spec):
+        if matches_prefix(target, parse_version(prefix)):
+            return False
+    spec = ",".join(part for part in spec.split(",") if not re.fullmatch(r"\s*!=\s*\d+(?:\.\d+)*\.\*\s*", part))
+    intervals = _range_interval(spec)
+    if intervals is None:
+        return False
+    for low, low_inc, high, high_inc, exclusions in intervals:
+        if low is not None and (below(target, low) or same_version(target, low) and not low_inc):
+            continue
+        if high is not None and (below(high, target) or same_version(target, high) and not high_inc):
+            continue
+        if not any(same_version(target, item) for item in exclusions):
+            return True
+    return False
+
+
 class Checker:
     def __init__(self, registry: Registry, repo: str, today: date, *, strict_psycopg: bool = False,
                  strict_python_application: bool = False):
@@ -2073,6 +2112,10 @@ class Checker:
         self.strict_python_application = strict_python_application
         self.strict_python_inputs = strict_psycopg or strict_python_application
         self.application_constraints: list[str] = []
+        self.application_build_tools = False
+        self.application_python: str | None = None
+        self.application_installed: dict[str, str] | None = None
+        self.installed_intersection_count = 0
         self.selected_root: Path | None = None
         self.psycopg_used_groups: dict[Path, str] = {}
         self.psycopg_declared_groups: set[Path] = set()
@@ -2627,15 +2670,49 @@ class Checker:
         self.add(scope.label, "psycopg", "pypi", f"=={expected} [binary]", "",
                  "NOT_RECOMMENDED" if problems else "OK", detail)
 
+    def application_policy(self) -> dict[str, dict]:
+        """정본 exact 축을 실제 distribution 이름으로 펼친다. 설치 대상을 만들지 않는다."""
+        result = {}
+        for key, axis in self.registry.axes.items():
+            if (key in APPLICATION_AXES or axis.get("application")
+                    or self.application_build_tools and axis.get("buildTool")):
+                for name in axis.get("packages", [key]):
+                    result[normalize_name(name)] = axis
+        if "psycopg" in result:
+            result["psycopg-binary"] = result["psycopg"]
+        return result
+
+    def application_target(self, axis: dict) -> tuple[str, str]:
+        exact, python = axis["exact"], axis.get("requiresPython", "")
+        matches = [entry for entry in axis.get("compatible", [])
+                   if entry["repo"] == self.repo_id and ("python" not in entry
+                       or self.application_python and entry["python"] == ".".join(self.application_python.split(".")[:2]))]
+        if len(matches) > 1:
+            raise ValueError("application 호환 정책이 모호합니다")
+        if matches:
+            exact, python = matches[0]["exact"], matches[0].get("requiresPython", python)
+        return exact, python
+
     def check_python_application(self, scope: Scope, specs: dict[str, list[str]],
                                  extras: dict[str, set[str]], urls: dict[str, list[str]],
-                                 constraints: list[str], *, poetry_source: bool = False) -> None:
-        """선택 직접 축과 알려진 Pydantic 짝만 검사하며 설치·전이 그래프는 추정하지 않는다."""
+                                 constraints: list[str], *, poetry_source: bool = False,
+                                 requires_python: str | None = None) -> None:
+        """직접·전이·dev lock 및 실제 소비 constraints의 shared 교집합을 검사한다."""
         locked: dict[str, list[dict]] = {}
+        lock_python = None
         if scope.lock is not None and scope.lock_kind in {"uv", "poetry"}:
             data = read_uv_lock(scope.lock) if scope.lock_kind == "uv" else read_poetry_lock(scope.lock)
+            lock_python = data.get("requires-python") or data.get("metadata", {}).get("python-versions")
             for entry in data["package"]:
                 locked.setdefault(normalize_name(entry["name"]), []).append(entry)
+        referenced = set()
+        for entries in locked.values():
+            for entry in entries:
+                dependencies = entry.get("dependencies", [])
+                if isinstance(dependencies, dict):
+                    referenced.update(map(normalize_name, dependencies))
+                elif isinstance(dependencies, list):
+                    referenced.update(normalize_name(d["name"]) for d in dependencies if isinstance(d, dict) and isinstance(d.get("name"), str))
         constrained: dict[str, list[str]] = {}
         for line in constraints:
             parsed = parse_requirement(line, strict=True)
@@ -2643,61 +2720,65 @@ class Checker:
                 raise _manifest_input_error()
             name, spec, url = parsed
             constrained.setdefault(name, []).append(spec if not url else "@URL")
-
-        def allows(spec: str, expected: str) -> bool:
-            if not spec.strip():
-                return True
-            target = parse_version(expected)
-            for prefix in re.findall(r"!=\s*(\d+(?:\.\d+)*)\.\*", spec):
-                if matches_prefix(target, parse_version(prefix)):
-                    return False
-            intervals = _range_interval(spec)
-            if intervals is None:
-                return False
-            for low, low_inc, high, high_inc, exclusions in intervals:
-                if low is not None and (below(target, low) or same_version(target, low) and not low_inc):
-                    continue
-                if high is not None and (below(high, target) or same_version(target, high) and not high_inc):
-                    continue
-                if not any(same_version(target, item) for item in exclusions):
-                    return True
-            return False
-
-        selected = set(specs) & set(APPLICATION_AXES)
+        policy = self.application_policy()
+        used = set(specs) | set(locked) | referenced | set(self.application_installed or {})
+        selected = (used | set(constrained)) & policy.keys()
         if selected & {"fastapi", "pydantic", "pydantic-settings"}:
             selected.update({"pydantic", "pydantic-core"})
-        for name in APPLICATION_AXES:
+            used.update({"pydantic", "pydantic-core"})
+        if "mcp" in used:
+            selected.add("mcp-types")
+            used.add("mcp-types")
+        if self.application_python and requires_python and not application_allows(requires_python, self.application_python):
+            self.add(scope.label, "python", "runtime", requires_python, self.application_python,
+                     "NOT_RECOMMENDED", "역할 Python이 source requires-python과 다름")
+        for name, axis in policy.items():
             if name not in selected:
-                self.add(scope.label, name, "pypi", "", "", "OK", "NOT_USED: 선택 직접 축 아님")
+                if name in APPLICATION_AXES:
+                    self.add(scope.label, name, "pypi", "", "", "OK", "NOT_USED: 선택 축 아님")
                 continue
-            expected = self.registry.axes.get(name, {}).get("exact")
-            if not isinstance(expected, str) or not re.fullmatch(r"\d+\.\d+\.\d+", expected):
-                raise ValueError("application 선택 축의 exact 정책이 필요합니다")
+            expected, package_python = self.application_target(axis)
             problems = []
-            declared = specs.get(name, [])
-            if name in urls or any(not allows(spec, expected) for spec in declared):
+            declared, pins = specs.get(name, []), constrained.get(name, [])
+            if name in urls or any(not application_allows(spec, expected) for spec in declared):
                 problems.append("선언이 정확 선택 버전을 허용하지 않음/registry 선언 아님")
-            pins = constrained.get(name, [])
             if any(exact_requirement_version(spec) != expected for spec in pins):
                 problems.append("선택 constraint가 정확 정책과 다름")
-            if scope.lock_kind in {"uv", "poetry"}:
+            in_app_lock = (not axis.get("buildTool") or name in specs or name in locked or name in referenced)
+            if name in used and scope.lock_kind in {"uv", "poetry"} and in_app_lock:
                 entries = locked.get(name, [])
                 if not entries or any(entry.get("version") != expected for entry in entries):
-                    problems.append("선택 lock 해석값이 정확 정책과 다름/누락")
+                    problems.append("직접/전이/dev lock 해석값이 정확 정책과 다름/누락")
                 for entry in entries:
                     source = entry.get("source", {})
                     if ((scope.lock_kind == "uv" and "registry" not in source)
                             or (scope.lock_kind == "poetry" and source.get("type") in {"git", "url", "file"})):
                         problems.append("선택 lock이 registry 해석값이 아님")
-            elif not pins and not (declared and all(
+            elif name in used and not pins and not (declared and all(
                     exact_requirement_version(spec) == expected
                     or poetry_source and spec == expected for spec in declared)):
                 problems.append("lock 없는 선택 축의 정확 선언/실소비 constraint가 없음")
+            if name in used and package_python:
+                # workspace SDK가 공유하는 앱 lock의 transitive 집합으로 SDK 최소 Python을 올리지 않는다.
+                context_python = requires_python
+                if (lock_python and scope.lock is not None and scope.manifest is not None
+                        and scope.manifest.parent != scope.lock.parent):
+                    context_python = lock_python
+                # 제외 항은 하한을 낮추지 않는다. 보수적인 하한과 실제 Python 허용 여부는 별도로 확인한다.
+                minimum_spec = ",".join(part for part in (context_python or "").split(",")
+                                        if not re.fullmatch(r"\s*!=\s*\d+(?:\.\d+)*(?:\.\*)?\s*", part))
+                minimum = lower_bound(minimum_spec) if context_python else None
+                if minimum is not None and minimum.lower is None:
+                    problems.append("source Python 최소 지원 하한을 확인할 수 없음")
+                elif minimum is not None and not application_allows(package_python, ".".join(map(str, minimum.lower))):
+                    problems.append("source Python 최소 버전이 선택 패키지 Requires-Python과 다름")
+                if self.application_python and not application_allows(package_python, self.application_python):
+                    problems.append("실제 역할 Python이 선택 패키지 Requires-Python과 다름")
+                if name == "pyproj" and minimum is None and not self.application_python:
+                    problems.append("pyproj의 실제 역할 Python 또는 source requires-python이 필요함")
             self.add(scope.label, name, "pypi", f"=={expected}", "",
-                     "NOT_RECOMMENDED" if problems else "OK",
-                     "; ".join(problems) if problems else "선택 source/lock/constraints 일치; 설치본·runtime 미확인")
-
-        # constraint만으로 미사용 driver를 설치 대상으로 만들지 않는다.
+                     "NOT_RECOMMENDED" if problems else "OK", "; ".join(problems) if problems else
+                     "실제 source/lock/소비 constraint 교집합 일치; 설치 bytes·native 구현 미확인")
         if set(specs) & {"psycopg", "psycopg-binary"}:
             self.check_strict_psycopg(scope, specs, extras, urls, constraints)
         else:
@@ -2706,6 +2787,59 @@ class Checker:
             self.add(scope.label, "application-profile", "pypi", "", "", "NOT_RECOMMENDED",
                      "daemon-pool은 별도 external host profile이며 application에서 선택할 수 없음")
         self.check_application_common(scope, specs, urls, locked)
+        self.check_application_providers(scope, specs, urls, locked)
+
+    def check_installed_application(self) -> None:
+        """명시한 실제 설치 관측과 정본의 교집합만 검사한다. 미사용 package를 요구하지 않는다."""
+        if self.application_installed is None:
+            return
+        policy = self.application_policy()
+        for name, actual in self.application_installed.items():
+            if name not in policy:
+                continue
+            expected, python = self.application_target(policy[name])
+            valid = actual == expected and (not python or application_allows(python, self.application_python))
+            self.add("installed", name, "pypi", "==" + expected, actual,
+                     "OK" if valid else "NOT_RECOMMENDED", "실제 설치 버전 관측 교집합; bytes/native 구현은 별도")
+            self.installed_intersection_count += 1
+
+        if not self.installed_intersection_count:
+            raise ValueError("설치 관측에 실제 shared 교집합이 없음")
+
+    def check_application_providers(self, scope, specs, urls, locked) -> None:
+        """Git-only SDK는 PyPI 버전으로 바꾸지 않고 canonical immutable source를 검증한다."""
+        for name, policy in self.registry.data.get("providers", {}).get("packages", {}).items():
+            if name == "kor-travel-common" or "ref" not in policy or name not in set(specs) | set(locked):
+                continue
+            authority, _ = _parse_url(policy["repo"])
+            def read_ref(value):
+                parsed, _ = _parse_url(value.removeprefix("git+"))
+                if (parsed.scheme != "https" or parsed.hostname != authority.hostname
+                        or parsed.username or parsed.password or parsed.port):
+                    return None
+                archive = re.fullmatch(re.escape(authority.path.removesuffix(".git")) + r"/archive/([0-9a-f]{40})\.(?:zip|tar\.gz)", parsed.path)
+                if archive:
+                    return archive[1] if not parsed.query and not parsed.fragment else None
+                path, separator, ref = parsed.path.rpartition("@")
+                repo = path if separator else parsed.path
+                query = parse_qs(parsed.query, keep_blank_values=True)
+                if (repo.removesuffix(".git") != authority.path.removesuffix(".git")
+                        or set(query) - {"rev"} or any(len(v) != 1 for v in query.values())):
+                    return None
+                values = [value for value in [ref if separator else "", query.get("rev", [""])[0], parsed.fragment] if value]
+                return values[0] if values and len(set(values)) == 1 and re.fullmatch(r"[0-9a-f]{40}", values[0]) else None
+            refs = [read_ref(value) for value in urls.get(name, [])]
+            valid = bool(refs) and all(ref == policy["ref"] for ref in refs)
+            entries = locked.get(name, [])
+            if scope.lock_kind in {"uv", "poetry"}:
+                valid = valid or name not in specs and bool(entries)
+                for row in entries:
+                    source = row.get("source", {})
+                    value = source.get("git", "") if scope.lock_kind == "uv" else source.get("url", "") + "@" + source.get("resolved_reference", "")
+                    valid = valid and read_ref(value) == policy["ref"]
+                valid = valid and bool(entries)
+            self.add(scope.label, name, "git", policy["ref"], "", "OK" if valid else "NOT_RECOMMENDED",
+                     "canonical immutable SDK source/lock 확인; 설치 bytes 별도" if valid else "Git SDK의 canonical 저장소/ref 또는 source/lock 불일치")
 
     def check_application_common(self, scope: Scope, specs: dict[str, list[str]],
                                  urls: dict[str, list[str]], locked: dict[str, list[dict]]) -> None:
@@ -2991,7 +3125,8 @@ class Checker:
             self.check_python_application(scope, requirement_specs, declaration_extras, urls,
                                           constraint_lines + self.application_constraints,
                                           poetry_source=(manifest is not None and manifest.name == "pyproject.toml"
-                                                         and "poetry" in data.get("tool", {})))
+                                                         and "poetry" in data.get("tool", {})),
+                                          requires_python=requires_python)
             return
         if requires_python is None:
             self.add(label, "python", "runtime", "", "", "NO_ENGINES",
@@ -3124,9 +3259,9 @@ class Checker:
 
     def run(self, scopes: list[Scope]) -> None:
         if self.strict_python_application:
-            for name in APPLICATION_AXES:
-                exact = self.registry.axes.get(name, {}).get("exact")
-                if not isinstance(exact, str) or not re.fullmatch(r"\d+\.\d+\.\d+", exact):
+            for axis in self.application_policy().values():
+                exact = axis.get("exact")
+                if not isinstance(exact, str) or parse_version(exact) is None:
                     raise ValueError("application 선택 축의 exact 정책이 필요합니다")
             provider = self.registry.data.get("providers", {}).get("packages", {}).get("kor-travel-common", {})
             if not all(isinstance(provider.get(key), str) and re.fullmatch(r"[0-9a-f]{40}", provider[key])
@@ -3279,14 +3414,19 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--strict-psycopg", action="store_true",
                         help="psycopg 3 사용 scope만 exact/binary 선언·lock/constraints 검사; drift는 exit 1, 설치본·runtime은 별도")
     parser.add_argument("--strict-python-application", action="store_true",
-                        help="선택 application 직접 축의 exact lock/constraints와 Common Python tree 검사")
+                        help="사용 중 shared runtime/전이/dev exact lock/소비 constraints와 canonical Git source 검사")
     parser.add_argument("--constraints", type=Path, action="append", default=[],
                         help="선택 Python profile의 root 상대 실소비 constraints; 반복 가능, psycopg 모드는 core/binary 짝 필수")
+    parser.add_argument("--python-version", help="requirements/image 역할의 실제 Python 버전; source 최소 지원 metadata를 대체하지 않음")
+    parser.add_argument("--installed-versions", type=Path, help="실제 관측 JSON {python, packages}; catalog 교집합만 읽기 전용 비교")
+    parser.add_argument("--python-build-tools", action="store_true", help="실제 사용하는 installer/build 도구 교집합도 명시적으로 대조; 설치 요구 아님")
     parser.add_argument("--self-check", action="store_true", help="레지스트리 형식·정책만 검사하고 종료")
     args = parser.parse_args(argv)
     strict_selected = args.strict_psycopg or args.strict_python_application
     if args.strict_psycopg and args.strict_python_application:
         parser.error("선택 profile 모드는 하나만 사용")
+    if (args.python_version or args.installed_versions or args.python_build_tools) and not args.strict_python_application:
+        parser.error("역할 Python/설치 관측은 --strict-python-application과 사용")
     if args.constraints and not strict_selected:
         parser.error("--constraints는 선택 Python profile과 함께 사용")
     if strict_selected and (args.mode or args.self_check or len(args.paths) != 1):
@@ -3411,8 +3551,37 @@ def main(argv: list[str] | None = None) -> int:
     checker = Checker(registry, repo, today, strict_psycopg=args.strict_psycopg,
                       strict_python_application=args.strict_python_application)
     checker.selected_root = first_root
+    try:
+        if args.python_version and not re.fullmatch(r"3\.\d+(?:\.\d+)?", args.python_version):
+            raise ValueError("역할 Python 버전 형식 오류")
+        checker.application_build_tools = args.python_build_tools
+        checker.application_python = args.python_version
+        if args.installed_versions:
+            observed = read_json(args.installed_versions)
+            python, packages = observed.get("python"), observed.get("packages")
+            if (not isinstance(python, str) or not re.fullmatch(r"3\.\d+(?:\.\d+)?", python)
+                    or not isinstance(packages, dict) or not packages):
+                raise ValueError("설치 관측 metadata 형식 오류")
+            if args.python_version and parse_version(python)[:len(parse_version(args.python_version))] != parse_version(args.python_version):
+                raise ValueError("역할 Python과 실제 설치 관측 Python이 다름")
+            normalized = {}
+            for name, version in packages.items():
+                if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", name) or not isinstance(version, str):
+                    raise ValueError("설치 관측 metadata 형식 오류")
+                key = normalize_name(name)
+                if key in normalized:
+                    raise ValueError("설치 distribution identity가 중복됨")
+                if key in checker.application_policy() and installed_version("pypi", version) is None:
+                    raise ValueError("설치 버전 metadata 형식 오류")
+                normalized[key] = version
+            checker.application_python, checker.application_installed = python, normalized
+    except (OSError, ValueError, TypeError, AttributeError):
+        print("::error title=check_versions::역할 Python/설치 관측 metadata 형식 오류")
+        return 2
     if strict_selected:
-        mode, mode_source = "fail", ("--strict-python-application 선택 profile(설치본·runtime 미확인)"
+        mode, mode_source = "fail", (("--strict-python-application 선택 profile(관측된 설치버전 대조; 실행동작/바이트 별도)"
+                                     if checker.application_installed is not None else
+                                     "--strict-python-application 선택 profile(설치본 미검증; 실행동작/바이트 별도)")
                                      if args.strict_python_application else
                                      "--strict-psycopg 선택 pin guard(설치본·runtime 미확인)")
     try:
@@ -3423,6 +3592,8 @@ def main(argv: list[str] | None = None) -> int:
                     first_root / constraint, root=first_root, include_constraints=True, constraints=nested))
                 checker.application_constraints.extend(nested)
         checker.run(scopes)
+        if args.strict_python_application:
+            checker.check_installed_application()
         if args.strict_psycopg:
             for constraint in args.constraints:
                 checker.check_psycopg_constraints(first_root / constraint, first_root)
@@ -3440,9 +3611,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.strict_python_application:
         report["selectedPythonApplication"] = {
-            "exactTargets": {name: registry.axes[name]["exact"] for name in APPLICATION_AXES},
+            "exactTargets": {name: checker.application_target(axis)[0] for name, axis in checker.application_policy().items()},
+            "buildToolsSelected": args.python_build_tools,
+            "installedVersionIntersection": {"checked": checker.application_installed is not None, "count": checker.installed_intersection_count, "python": checker.application_python},
             "commonPython": registry.data["providers"]["packages"]["kor-travel-common"],
-            "evidence": "source/lock/constraints only", "runtimeImplementation": "NOT_CHECKED",
+            "evidence": ("source/lock/constraints + explicit installed version observations" if checker.application_installed is not None else "source/lock/constraints only"), "runtimeImplementation": "NOT_CHECKED",
             "daemonPool": "별도 external host profile; application SQLAlchemy 예외 아님"}
     if not args.quiet:
         print(markdown)
@@ -3463,7 +3636,9 @@ def main(argv: list[str] | None = None) -> int:
     counts = summarize(findings)
     failing = (sum(f.verdict != "OK" for f in findings) if strict_selected
                else sum(counts[v] for v in FAILING))
-    meaning = ("선택 pin CI guard; 설치본·runtime 구현 미검증" if strict_selected
+    meaning = ("선택 pin CI guard; 관측된 설치버전 대조; 실행동작/바이트 별도"
+               if args.strict_python_application and checker.application_installed is not None else
+               "선택 pin CI guard; 설치본 미검증; 실행동작/바이트 별도" if strict_selected
                else "읽기 전용 대조; 제품 gate 아님")
     print(f"check_versions: {_workflow_display_value(repo, '(소비자 식별자 비공개)')} mode={mode} findings={len(findings)} "
           f"failing={failing} exit={code} ({meaning})")
