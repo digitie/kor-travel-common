@@ -76,6 +76,8 @@
 
 **Button** — D-09 계약. 루트 native `<button data-slot="button">`, 스피너 `data-slot="button-spinner"`. 포커스는 0.2.3부터 UX-G9.1 레시피 하나다: `focus-visible:outline-2`·`outline-offset-2`·`outline-kt-focus`, 테두리 색 변화·반투명 box-shadow ring·`outline-none`·`transition-all` 없음(outline은 transition 밖). 앱 전역 CSS 규칙은 [frontend-stack](frontend-stack.md) FS-7.8을 따른다.
 
+**TabsTrigger**도 0.2.4부터 Button과 같은 포커스 레시피다: `focus-visible:outline-2`·`outline-offset-2`·`outline-kt-focus` 하나만 그리고, 이전의 3px 반투명 ring·`outline-1 outline-ring`(두 번째 outline)·`border-ring` 테두리 색 변화·`transition-all`은 없다. 테두리는 상태와 무관하게 1px(`border`)이고 클릭·active 이동은 없다.
+
 | prop | 기본 | 계약 |
 |---|---|---|
 | `type` | `"button"` | 엔진과 무관하게 **명시** 기본. 폼 제출은 `type="submit"` 명시 |

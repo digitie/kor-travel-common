@@ -1,3 +1,17 @@
+## ui 0.2.4·tokens 0.1.5·toast 0.1.4 — TabsTrigger 포커스 — 2026-11-21
+
+### 변경
+
+`TabsTrigger`의 키보드 포커스를 0.2.3 Button과 같은 UX-G9.1 레시피(FS-7.8)로 바꿨다: `outline 2px`(`--kt-focus`)·offset 2px 하나만 그린다. 이전의 3px 반투명 box-shadow ring(`focus-visible:ring-[3px] ring-ring/50`)·두 번째 1px outline(`focus-visible:outline-1 outline-ring`)·테두리 색 변화(`focus-visible:border-ring`)가 겹쳐 그려지던 것과 outline까지 전환하던 `transition-all`을 없앴다(전환은 색·배경·테두리 색·그림자만). 테두리 두께는 상태와 무관하게 1px이고 클릭·active 이동은 없다. 시험 `tabs-focus.test.tsx`가 두 variant(`default`·`line`)에서 이를 고정한다. 내장 정책 bytes가 바뀌므로 tokens 0.1.5·toast 0.1.4도 patch를 올렸고 두 패키지의 실행 코드·CSS는 바뀌지 않는다.
+
+#### Breaking
+
+없음. 공개 prop·기본값·`data-slot`은 그대로이고 포커스 표시 모양만 바뀐다.
+
+### 이관
+
+새 common-ref를 채택하는 소비자는 vendored `@kor-travel/ui` 0.2.4·`@kor-travel/tokens` 0.1.5(toast 사용 시 0.1.4)로 함께 올리고 version·SHA512는 `frontend-artifacts.json`에서 옮긴다(catalog 동결은 이 변경의 main pack 뒤 별도 PR). 로컬 tabs wrapper에서 공통 `TabsTrigger`의 ring·outline을 덮어쓰던 클래스(`focus-visible:ring-0`·추가 `focus-visible:outline-*` 등)는 지운다.
+
 ## 추가 owned 역할의 공유 Python 이름 — 2026-11-20
 
 ### 변경
