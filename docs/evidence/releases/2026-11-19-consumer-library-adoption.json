@@ -484,7 +484,7 @@
       "repository": "digitie/kor-travel-weather",
       "pull": 280,
       "run": 44840934957,
-      "result": "Python 정책 뒤 Python 검사를 실행한다. 웹은 Common guard, 정적 검사·단위 테스트·빌드, Playwright 순서다. headless shell로 fixture 34건과 타일 5건을 유지한다."
+      "result": "Python 정책과 Python 테스트는 병렬로 실행된다. 웹은 Common guard, 정적 검사·단위 테스트·빌드, Playwright 순서다. headless shell로 fixture 34건과 타일 5건을 유지한다."
     },
     "Concierge": {
       "repository": "digitie/kor-travel-concierge",
