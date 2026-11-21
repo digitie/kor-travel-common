@@ -1,0 +1,520 @@
+{
+  "recordDate": "2026-11-19",
+  "updatedUTC": "2026-11-21T00:10:53.795598+00:00",
+  "scope": "검증한 공통0.2.3/tokens0.1.4 소비·실행 근거.도메인 라이브러리는 실제 사용 교집합으로 관리.",
+  "status": "VERIFIED_RELEASE_EVIDENCE_WITH_OPEN_RUNTIME_LIMITS",
+  "programComplete": false,
+  "newConsumerAcceptanceComplete": false,
+  "selectedRelease": {
+    "status": "VERIFIED_PRODUCER_ARTIFACT_SOURCE_SHA_CATALOG_SRI",
+    "artifact": 14500111373,
+    "producer": "0e2a3f5aa16323df0d009360802661c9bc496dc6",
+    "catalog": "d644632ea9eaf2f6b6baa49305d65fae5bbc0bd4",
+    "ZIP_SHA256": "19881f2c3ed598ed7ec213c559be21ece2be77068bddee6de5bd249b6f8019e1",
+    "packs": {
+      "kor-travel-ui-0.2.3.tgz": {
+        "SHA256": "aa19793165ae37b2214d210692e23235545e1464c4e0059f99d943411fa753d9",
+        "SRI": "sha512-upv+JtiVcF+zg3C/KcZy9UQckx0n3vc0n4ANr3/elWM8PQ4srljxgTQmaBK4IxulEj8pd8gc7mnG3M67oFIQUQ==",
+        "bytes": 80615,
+        "regularFiles": 96,
+        "name": "@kor-travel/ui",
+        "version": "0.2.3"
+      },
+      "kor-travel-tokens-0.1.4.tgz": {
+        "SHA256": "33d08d7b37c60d3e319da19608ce05137f6bf587dc8d42e3ce0dfb4b597a61fc",
+        "SRI": "sha512-k6StI02tH/iRxKimczN0btU+MS9AvDZLlR/6Bn6xQHhZ5Mb79pkyIALd4RkoLT2GP3qlwR89YEgOaBiBxACDpA==",
+        "bytes": 34607,
+        "regularFiles": 25,
+        "name": "@kor-travel/tokens",
+        "version": "0.1.4"
+      },
+      "kor-travel-toast-0.1.3.tgz": {
+        "SHA256": "34b514b270f88fc19c6b411b975d4497f91f3581530f32a39be264874ca09b37",
+        "SRI": "sha512-YziPAKkSfkNs+1aAn02Jf179+4qtAtsJ0QNtSytHpSstzdIhZoAy292c1njRNXMicd9jXfsivyDbhPVLj5aZYA==",
+        "bytes": 19397,
+        "regularFiles": 8,
+        "name": "@kor-travel/toast",
+        "version": "0.1.3"
+      }
+    }
+  },
+  "applicationLibraryPolicy": {
+    "source": "f7017c63a332b58365ff3ce1976de9e2cc452a2e",
+    "applicationNames": 149,
+    "buildToolNames": 3,
+    "frontendExactNames": 68,
+    "frontendPackCatalogCommit": "d644632ea9eaf2f6b6baa49305d65fae5bbc0bd4",
+    "frontendCodeProducerCommit": "0e2a3f5aa16323df0d009360802661c9bc496dc6",
+    "pythonCodeProducerCommit": "67efe2e546ecef41e54a866bf4862d608ace343d",
+    "fullPolicyComparisonInGeoSingleMD": true
+  },
+  "consumerFollowup": {
+    "geo": {
+      "observedSource": "8260e3577ac1b8845a75396eeedd9024b5e401f8",
+      "commonRegularFiles": 129,
+      "observation": "관리 UI의 실행 의존성 레이어 개선을 적용했다. 500c8479 관리 UI의 ARM과 PC·모바일 제목·표·인증, 환경값 일치를 확인했다.",
+      "evidenceKeys": [
+        "geoCurrent",
+        "geoCurrentUI3589972",
+        "geoRuntimeLayerCache652"
+      ],
+      "actualRoleSourceBindings": {
+        "apiAndCS": "8260e3577ac1b8845a75396eeedd9024b5e401f8",
+        "UIProducer": "500c84797b0010643384d317ce5a4acdb5bcd6f7",
+        "UIImage": "sha256:62109ca7f6cd9b909d6b251249a610048289fb11e24170f33f6a391ed24c0b9b"
+      }
+    },
+    "weather": {
+      "observedSource": "2b269b03d4ac63d02e577be35a7186e53f3bf0de",
+      "commonRegularFiles": 121,
+      "observation": "ARM 3개 이미지·SDK627 적용. 기존 24 RUN·3 STOP 복원. 모바일 390px 로그인·지도·로그아웃 확인. 첫 단기예보 진단 HTTP 200·5.790초·stale.",
+      "evidenceKeys": [
+        "weatherCurrentApply",
+        "weatherCurrentBrowser",
+        "weatherFirstRequest",
+        "weatherNatural503",
+        "weatherCurrentFreshness",
+        "weatherPublisher279Apply",
+        "weatherPublisher279Mobile",
+        "weatherPublisher279FirstHTTP",
+        "weatherPublisher279NaturalTicks",
+        "weatherPublisher279NaturalConsumer"
+      ],
+      "images": {
+        "api": "sha256:58ab2fcc7a8a0e2c75a0dee7fee7800b43fd2bfbe7f6cf0a08d51fe7d363b613",
+        "code-server": "sha256:2275bfe91ef01e30080ac9166c31eca4d5262cbd215ccb905b48f6da872ba7f6",
+        "frontend": "sha256:f748b52df886edb49f2b897d85b572eeb295621b6406adbfbd7af9ba65e579e2"
+      },
+      "firstStoredShortDiagnostic": {
+        "wallMs": 5790.402,
+        "status": 200,
+        "sourceStatus": "stale",
+        "endUTC": "2026-11-20T22:48:59.974407+00:00",
+        "cache": "generated"
+      }
+    },
+    "transport-public": {
+      "observedSource": "810373320c183ef53eef46a7abb481437bdfb6d3",
+      "commonRegularFiles": 121,
+      "observation": "SDK627 코어 적용 및 기존 일정 20개 복원. 공개 주차 390px·1280px 수용. 철도 첫 200·7,766ms, 조건부 304·305ms. 1초 목표 미달.",
+      "evidenceKeys": [
+        "transportCore",
+        "transportCurrentRailPerf",
+        "transportStartup234Apply",
+        "transportStartup234FirstRail",
+        "transportStartup234PublicBrowser"
+      ],
+      "images": {
+        "backend": "sha256:79d6e17cd5ca02a0e68bbd9ec3e485bc805d81db0c0aa04e2836e0bc072805cb",
+        "dagster-code-server": "sha256:79d6e17cd5ca02a0e68bbd9ec3e485bc805d81db0c0aa04e2836e0bc072805cb",
+        "migrate": "sha256:79d6e17cd5ca02a0e68bbd9ec3e485bc805d81db0c0aa04e2836e0bc072805cb",
+        "frontend": "sha256:b1e173d5296581b849d29b4cc9749a07e218bac95b1aebe0025f13c5c43db88b"
+      },
+      "firstRailDiagnostic": {
+        "status": 200,
+        "wallMs": 7765.589396003634,
+        "conditionalStatus": 304,
+        "conditionalWallMs": 304.6126561239362,
+        "inputFingerprintSQLRecalculated": false,
+        "newBodyGenerated": true,
+        "within1Second": false
+      }
+    },
+    "transport-admin": {
+      "observedSource": "736b731faa54fcaca93662f0d41336a317b6ed21",
+      "commonRegularFiles": 121,
+      "observation": "실제 db139445 UI,375/1280 PC세로메뉴·모바일메뉴·일반 로그인/로그아웃401;복사8h쿠키 서버회수는 기존 미지원",
+      "evidenceKeys": [
+        "transportUIAndFuel",
+        "transportAdminBrowser",
+        "transportAdminScope"
+      ],
+      "actualRoleSourceBindings": {
+        "UIProducer": "736b731faa54fcaca93662f0d41336a317b6ed21",
+        "backendProducer": "b75099880645252cc18999cc633b1fa4bb3d4f34"
+      }
+    },
+    "transport-fuel": {
+      "observedSource": "2ed65d8d8ec3cb12f6b5d10c59a3fc43e7e974fd",
+      "commonRegularFiles": 121,
+      "observation": "Fuel 웹 단독 ARM·native 적용. 게이트웨이·Admin·코어·환경 유지. 공개 390px·1280px 전체 지도와 문구 없는 44×44px 위치 아이콘, 위치 조회 성공.",
+      "evidenceKeys": [
+        "transportUIAndFuel",
+        "fuelBrowser",
+        "fuelActualLowZoom",
+        "fuelParentVisual",
+        "transportFuelLocation235Apply",
+        "transportFuelLocation235Browser"
+      ],
+      "actualRoleSourceBindings": {
+        "UIAndGatewayProducer": "736b731faa54fcaca93662f0d41336a317b6ed21",
+        "backendProducer": "b75099880645252cc18999cc633b1fa4bb3d4f34"
+      },
+      "currentRoleBindings": {
+        "fuelWebSource": "2ed65d8d8ec3cb12f6b5d10c59a3fc43e7e974fd",
+        "fuelWebImage": "sha256:1ab89f96c43ca3f728384729d3121378f4d2272b7381e3937505654c46544baa",
+        "gatewaySource": "736b731faa54fcaca93662f0d41336a317b6ed21",
+        "gatewayImage": "sha256:c6686e894d0936fceb006db047cf811701293f490bf3d4dd0000d688dc1d0cf6",
+        "coreSource": "810373320c183ef53eef46a7abb481437bdfb6d3"
+      }
+    },
+    "pinvi-web": {
+      "observedSource": "716781d0465799066449ff58dc45db9617339ac3",
+      "commonRegularFiles": 121,
+      "observation": "현재2e62713a/ec02765b/073cfedb 설치65/78·공통PY19파일·UI121일치;공개CURRENT정산·현재1280/4타일/인증 수용.과거5폭은 이전tuple",
+      "evidenceKeys": [
+        "pinviCurrentInstalledBytes",
+        "pinviAdopt",
+        "pinviCurrentBrowser",
+        "pinviOldBrowserHistorical"
+      ]
+    },
+    "pinvi-mobile-tokens": {
+      "observedSource": "716781d0465799066449ff58dc45db9617339ac3",
+      "commonRegularFiles": 25,
+      "observation": "소스/설치 정책에서NativeWind5 RC·Tailwind4·tokens 일치.실기기/EAS/스토어 미실행",
+      "evidenceKeys": [],
+      "scope": "SOURCE_INSTALL_POLICY_CI_ONLY_NOT_NATIVE_RUNTIME_ACCEPTANCE"
+    },
+    "concierge": {
+      "observedSource": "9e2668142cd371bae6beb8251ae277187702e44f",
+      "commonRegularFiles": 121,
+      "observation": "API/MCP·CS 정상/native·SDK626·3개sensor복원·실제 화면/타일/인증 수용;재사용UI 출처 별도 기록",
+      "evidenceKeys": [
+        "conciergeCurrent"
+      ],
+      "actualRoleSourceBindings": {
+        "apiMCPAndCS": "9e2668142cd371bae6beb8251ae277187702e44f",
+        "UIProducer": "039c445a0a3616c306d2ce530f21bc31f606ff04",
+        "UIImage": "sha256:b4d533cc552d5be8fce9f53db196ac7a4e54952b98d8c37375662accc5013815"
+      }
+    },
+    "manager-odroid": {
+      "observedSource": "db78d1a869c6abd8b5218bb91a2b9bb98be5223b",
+      "commonRegularFiles": 121,
+      "observation": "실제627 설치77모듈·28분포/pipcheck·인증 수용.동일bytes wheel30330·UI7f07 출처 유지",
+      "evidenceKeys": [
+        "managerOdroid"
+      ],
+      "actualRoleSourceBindings": {
+        "managerRecordedSource": "db78d1a869c6abd8b5218bb91a2b9bb98be5223b",
+        "pythonWheelProducer": "30330a2cf0e991419792648d237217371c06cdf5",
+        "UIProducer": "7f07a171e39dc600a7b266da2743bb4327730fcf"
+      }
+    },
+    "manager-n150": {
+      "observedSource": "db78d1a869c6abd8b5218bb91a2b9bb98be5223b",
+      "commonRegularFiles": 121,
+      "observation": "실제627 설치77모듈·28분포/pipcheck·인증 수용.동일bytes wheel30330·UI7f07 출처 유지",
+      "evidenceKeys": [
+        "managerN150"
+      ],
+      "actualRoleSourceBindings": {
+        "managerRecordedSource": "db78d1a869c6abd8b5218bb91a2b9bb98be5223b",
+        "pythonWheelProducer": "30330a2cf0e991419792648d237217371c06cdf5",
+        "UIProducer": "7f07a171e39dc600a7b266da2743bb4327730fcf"
+      }
+    }
+  },
+  "CIOrdering": "AUDITED_AFTER_RUNTIME_ACCEPTANCE",
+  "MapMutation": false,
+  "MapOwnership": "Claude담당/이번source,CI,build,deploy,runtime변경 없음",
+  "versionsPolicyOrPackagesChangedByThisDocPR": false,
+  "sameGeoReportPR": "https://github.com/digitie/kor-travel-geo/pull/644",
+  "knownLimits": {
+    "externalFuelRouting": "별도 공개 HTTPS 검증에서 지도와 API 상태가 200을 반환했다. 모바일 390px에서 제목과 메뉴가 없고 줌 10에 집계 없이 주유소 300건이 표시됐다.",
+    "Weather": "이전 저장 단기예보 진단은 HTTP 200·16.469초, 새 첫 진단은 HTTP 200·5.790초였다. 부하와 시각이 다른 사례이고 현재 원천은 stale 상태다. 503 재발률과 6시간 신선도는 추가 운영 확인이 필요하다. 08:30 KST 정기 소비와 일치한 Weather SHORT 요청 47건은 모두 200이었다. 이 수치는 해당 접근 로그 관측 구간으로 한정한다.",
+    "transportSession": "일반 로그아웃 뒤 쿠키 없는 보호 경로401.기존8h서명쿠키 복사본은 만료까지 유효;추가 서버회수 기능을 요구/구현한 것으로 표시하지 않음",
+    "mobile": "NativeWind5.0.0-rc.1/react-native-css3.1.0-rc.1의 RC 표기 유지;실기기/EAS/스토어 수용 아님",
+    "nativeABI": "실제 GDAL Geo3.10.3/Transport3.13.3.인터프리터 Pinvi3.12.14/Transport3.12.16.149 application exact는 OS/인터프리터 바이너리 전체 일치 증거가 아님",
+    "PinviRebuild": "다른 작업의 같은716 새tuple에 설치bytes·현재1280·공개adopt를 새로 연결.옛5폭/전체native/producer 영수증을 새image에 전용하지 않음",
+    "TransportFirstRail": "운영 첫 진단에서 입력 지문은 재사용됐고, 응답 본문 최초 생성으로 7,766ms가 소요됐다. 두 번째 조건부 304는 305ms였다. 첫 응답 1초 목표 미달."
+  },
+  "draftOnlyNotPublished": false,
+  "evidenceReceipts": {
+    "geoCurrent": {
+      "receiptFile": "final-acceptance.json",
+      "SHA256": "1f2cb4cc758d5114069494854d22c18bb973a151d1dadb7268ccfe790378a4ac",
+      "bytes": 5620,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "conciergeCurrent": {
+      "receiptFile": "final-acceptance.json",
+      "SHA256": "a93db3819fe595fb45b1dafabb0d21e1be448a0a67ccbe0a00235ffd6251d417",
+      "bytes": 26571,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "weatherCurrentApply": {
+      "receiptFile": "apply-state-final.json",
+      "SHA256": "80b7e4225b26518c85483cc52775739328d08f6a605f2f7b07066f6a55e395d7",
+      "bytes": 6204,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "weatherCurrentBrowser": {
+      "receiptFile": "qa-browser-result.json",
+      "SHA256": "c3d0118bbfc63b91337d4419d97b796e2fff8196a2191ee1bfdcfb3576f71632",
+      "bytes": 2689,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "weatherFirstRequest": {
+      "receiptFile": "first-summary.json",
+      "SHA256": "dcf05f0d0401961b9baeec68341b1d4de241f31cfa264465c362a802cedf44a0",
+      "bytes": 4605,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "weatherNatural503": {
+      "receiptFile": "current503-incident.json",
+      "SHA256": "e5cdc541107e3644b98b866216f720e00db1b40307f87280b9bdc9c1240c1bcf",
+      "bytes": 1138,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "weatherRejectedCandidate": {
+      "receiptFile": "parent-candidate-decision.json",
+      "SHA256": "6119bec0453bfa058d196f9f8188e349b9c661b09d0bb98a594b4fdd49c85867",
+      "bytes": 622,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "weatherNextObservation": {
+      "receiptFile": "preflight-receipt.json",
+      "SHA256": "53aae13af82370f2f99704e428938efc144974b80edea0f6a8438eeaf3995b0c",
+      "bytes": 1018,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "pinviCurrentInstalledBytes": {
+      "receiptFile": "current-vs-history-proof.json",
+      "SHA256": "e0ce5139a360ff203574e3a5a2da714caa684843f8fe84dd0b8547e1a66f8f70",
+      "bytes": 6548,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "pinviAuthorityClarification": {
+      "receiptFile": "metadata-authority-clarification.json",
+      "SHA256": "80d7f9374d74c6614d4c0a9ea4c92c34294b1d52f4a546a793a52b45116f2dd1",
+      "bytes": 4923,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "pinviOldBrowserHistorical": {
+      "receiptFile": "accepted-final.json",
+      "SHA256": "a980249f19d153f9b00cc283a54e8941e092d748fb61dbe708cc05ecfd21dfe3",
+      "bytes": 2773,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "managerN150": {
+      "receiptFile": "n150-final-acceptance.json",
+      "SHA256": "91a0c5e18a119f5537f9a3dae59e1a65d64485137cace1a277e5b0eb25aa8a47",
+      "bytes": 2495,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "managerOdroid": {
+      "receiptFile": "odroid-final-acceptance.json",
+      "SHA256": "bded2d06b0392d7b170c21b2d3607bd1840ed495f6824e24ef59aee21ec34655",
+      "bytes": 2753,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "transportCore": {
+      "receiptFile": "official-sdk-terminal-acceptance.json",
+      "SHA256": "69dd38b6ea8747b97e4abb8dd595e92433a19c494307300556dd7e5e88439d5a",
+      "bytes": 1860,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "transportUIAndFuel": {
+      "receiptFile": "selected-runtime-acceptance.json",
+      "SHA256": "f4eff26b68083c7800ef8f2f10b6e5cd28877b4c958203427a1251eb893f05e1",
+      "bytes": 1747,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "fuelBrowser": {
+      "receiptFile": "final-live-upstream-acceptance.json",
+      "SHA256": "2cd75c4455b2d447e8751a4c0077d7b933ae6493bcd10b3d3f1554c7c8300617",
+      "bytes": 11225,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "fuelParentVisual": {
+      "receiptFile": "parent-final-visual-observation.json",
+      "SHA256": "7717fe47cbdf2612cbb301687e1b1fddb378e43f08c8cc43ea902a83f71f6974",
+      "bytes": 1004,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "fuelActualLowZoom": {
+      "receiptFile": "result.json",
+      "SHA256": "0549299516c0958661a21d182918ec47bfe881326c81762e9a275549bf4b1d41",
+      "bytes": 2168,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "transportAdminBrowser": {
+      "receiptFile": "final-disposition.json",
+      "SHA256": "5e31f721f316e104026628246e700358528cf31107553ac587018b8ce9b79fcb",
+      "bytes": 5612,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "transportAdminScope": {
+      "receiptFile": "parent-admin-scope-disposition.json",
+      "SHA256": "abe55b0b365a07a09a962cf4d55a18db312b8bf50007d4329c6516ee02885778",
+      "bytes": 895,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "ingressBlocked": {
+      "receiptFile": "ingress-access-current.json",
+      "SHA256": "3e52183f8cf2e12a72405c43d89ff2f4895a5970a65a9afd77a58e4659e7f08f",
+      "bytes": 2585,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "pinviAdopt": {
+      "receiptFile": "public-adopt-final.json",
+      "SHA256": "3aebc127c15fffe2fa13a0917efb9d5d46bd59feca573c396bed9577df92be60",
+      "bytes": 7353,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "pinviCurrentBrowser": {
+      "receiptFile": "current-one1280-final.json",
+      "SHA256": "7d1af031b7c7550f7d5177955cdedbc718a6422471493cfb6c13fa40829c623b",
+      "bytes": 3834,
+      "scope": "비공개 운영 검증 원본의 무결성 식별자.실제 관찰 범위는 해당 소비자 행을 따름."
+    },
+    "weatherNatural0530": {
+      "receiptFile": "natural-completion.json",
+      "SHA256": "5a9d8ed4bd1fbe532e53231efa529b0509e4f3decaa48a771bd2d0fc62c9f618"
+    },
+    "weatherOnceWaits": {
+      "receiptFile": "summary.json",
+      "SHA256": "fb6e436e7a20028a5c86699701886637f24e212df4504d5d2ab539ea5a5688cf"
+    },
+    "weatherOnceHTTP": {
+      "receiptFile": "status.json",
+      "SHA256": "43a968d57ceb8c6a971f016dad5e0fcc9756a61cc8b8d2efdf7db730eafeb8c1"
+    },
+    "geoCurrentUI3589972": {
+      "receiptFile": "geo-ui-3589972-20261121-acceptance.json",
+      "SHA256": "189efc2b712bbc27c0903ea2d90852cb9ccaf723cb0acf4125f48f8df33b262e",
+      "bytes": 1373,
+      "scope": "Geo 관리 UI 단일 배포 검증"
+    },
+    "transportCurrentRailPerf": {
+      "receiptFile": "parent-production-measurement-handoff.json",
+      "SHA256": "337bd45d75e5bef88af7299d257aca70f33a7786ee59434020d7beb4a9223865",
+      "bytes": 570,
+      "scope": "현재 운영 이미지 측정 근거"
+    },
+    "weatherCurrentFreshness": {
+      "receiptFile": "capacity-proof.json",
+      "SHA256": "e8cb71a60eb816e0d8df2756d3d20229e24e7dec87cab23c9560936774cfbdcf",
+      "bytes": 1054,
+      "scope": "현재 운영 이미지 측정 근거"
+    },
+    "geoRuntimeLayerCache652": {
+      "receiptFile": "geo-ui-cache-500c8479-20261121-acceptance.json",
+      "SHA256": "5333dde87fed032982a31ab6d1579f83ae1fbc3f89415581c142c89cea6670db",
+      "bytes": 2787,
+      "scope": "관리 UI 캐시 개선 ARM과 실제 배포"
+    },
+    "weatherPublisher279Apply": {
+      "receiptFile": "odroid-weather279-final-acceptance.json",
+      "SHA256": "eb7cb64ad0640cc9059bce5ae33dfd6f6e50202d307f65a0dcacd9aa35f3df5d",
+      "bytes": 1013,
+      "scope": "SDK627 적용, 이미지, 기존 작업 상태 복원 및 첫 저장 단기예보"
+    },
+    "weatherPublisher279Mobile": {
+      "receiptFile": "weather279-post-deploy-mobile-390.json",
+      "SHA256": "3037a43aacba6aa2a696bb35f2307f73f79fe3a1d54f0302ea5d84b463b496e7",
+      "bytes": 308,
+      "scope": "실제 브라우저 390px 지도, 로그인, 로그아웃과 이후 HTTP 401"
+    },
+    "weatherPublisher279FirstHTTP": {
+      "receiptFile": "odroid-quiet-first-actual-279.json",
+      "SHA256": "2aa166d49b93254afda28fdfd9b1a1951205f64ccbbe1a0416fa9a9ba2ad4785",
+      "bytes": 1020,
+      "scope": "비조건부 첫 저장 단기예보 진단 및 서버 타이밍"
+    },
+    "weatherPublisher279NaturalTicks": {
+      "receiptFile": "weather279-natural-publisher-sample-once.json",
+      "SHA256": "699542c9d2a1360e43c48979dfd59c02fbe25ffc04d61ed31f3ee4bb474941ea",
+      "bytes": 1082,
+      "scope": "배포 후 정기 발행 센서 두 건의 단계별 소요 및 발행량"
+    },
+    "transportStartup234Apply": {
+      "receiptFile": "deployment-and-performance-acceptance.json",
+      "SHA256": "5520774378d7a1d5a77b36ec83bddb6ac0b80bf11c2861d049ff7d9ea469247e",
+      "bytes": 2228,
+      "scope": "정규 ARM과 native, SDK627 적용, 기존 일정 복원 및 운영 이미지"
+    },
+    "transportStartup234FirstRail": {
+      "receiptFile": "post-apply-rail.json",
+      "SHA256": "8b88a7c796384caa1e947802c6edfb241e43d553d34a6f94eddec0af660a7a21",
+      "bytes": 3476,
+      "scope": "배포 후 첫 철도 200, 조건부 304, 입력 지문 및 응답 생성 계측"
+    },
+    "transportStartup234PublicBrowser": {
+      "receiptFile": "public-parking-browser-390-1280.json",
+      "SHA256": "40ca45d9cb434bb0997d2852755a3e9994eca2b8b2bf08b2ab6ae9809ef7e03a",
+      "bytes": 141,
+      "scope": "실제 공개 주차 모바일·PC 화면 확인"
+    },
+    "weatherPublisher279NaturalConsumer": {
+      "receiptFile": "observation.json",
+      "SHA256": "536ec4fdb7c85e60c65d648f806450d9c099f6bae041cbd760bdf9697f97e7ed",
+      "bytes": 20942,
+      "scope": "Weather 08:30 KST SHORT 정기 소비와 일치한 기존 접근 로그 47건 HTTP 200 및 관측 구간 503 0건"
+    },
+    "transportFuelLocation235Apply": {
+      "receiptFile": "actual-fuel-web-apply.json",
+      "SHA256": "ca3ff6875e0844be20ae444849eac0513fb76807726f17067313f5c571451bc7",
+      "bytes": 1334,
+      "scope": "Fuel 웹 단독 적용과 다른 역할·DB·환경 보존"
+    },
+    "transportFuelLocation235Browser": {
+      "receiptFile": "parent-public-fuel-browser-390-1280.json",
+      "SHA256": "1e49614cf5cbb2d3391eadf23de088d154471c7f945251ccf05a6962f9c8cb9e",
+      "bytes": 658,
+      "scope": "실제 공개 Fuel 브라우저 두 폭, 위치 조회와 전체 지도"
+    }
+  },
+  "ciJobOrderEvidence": {
+    "Geo": {
+      "repository": "digitie/kor-travel-geo",
+      "pull": 653,
+      "run": 44840179735,
+      "result": "Common 웹 guard와 OpenAPI는 독립 실행한다. Python 정책이 끝난 뒤 백엔드·PostGIS·Dagster를 병렬로 시작한다. PR CI에서 정책 완료 후 세 작업이 2–3초 뒤 시작했다."
+    },
+    "Transport": {
+      "repository": "digitie/kor-travel-transport",
+      "pull": 236,
+      "run": 44840343022,
+      "result": "Common 웹 guard 뒤 공개·관리 웹이 병렬 실행한다. 공개 웹 런타임 계약 19건을 npm 설치 전에 실행한다. 이전 CI에서 뒤따르는 설치·검사에 약 86초가 걸렸다."
+    },
+    "Weather": {
+      "repository": "digitie/kor-travel-weather",
+      "pull": 280,
+      "run": 44840934957,
+      "result": "Python 정책 뒤 Python 검사를 실행한다. 웹은 Common guard, 정적 검사·단위 테스트·빌드, Playwright 순서다. headless shell로 fixture 34건과 타일 5건을 유지한다."
+    },
+    "Concierge": {
+      "repository": "digitie/kor-travel-concierge",
+      "pull": 281,
+      "run": 44841095023,
+      "result": "웹 정적 검사·단위 테스트·빌드 뒤 브라우저 회귀 17건을 실행한다. 기본 Chromium headless 프로젝트에 필요한 shell만 내려받는다."
+    },
+    "Pinvi": {
+      "repository": "digitie/pinvi",
+      "pull": 793,
+      "run": 44840388515,
+      "result": "웹 선행 검사는 lockfile·Common·Doctor·lint·typecheck 뒤 웹 빌드·이미지·E2E에 연결된다. 모바일은 lockfile 직후 스타일 계약을 검사한다. 기존 실패 두 건에서는 앞선 npm 설치에 28–36초를 사용했다."
+    },
+    "Common": {
+      "repository": "digitie/kor-travel-common",
+      "pull": 77,
+      "run": 44840180300,
+      "result": "비밀 값·버전 정책이 문서·도구·패키지의 선행 조건이다. 문서 job은 소스 SHA 직후 공백을 검사하고 Python·Node 설치를 시작한다."
+    },
+    "Manager": {
+      "repository": "digitie/kor-travel-docker-manager",
+      "pull": null,
+      "run": 44646286987,
+      "result": "별도 Common 웹·Python 정책과 제품 검사를 병렬 실행한다. 웹은 빌드 통과 후 Chromium을 설치한다. 백엔드 21분 8초 중 pytest가 20분 45초였다. 현재 순서를 유지했다."
+    },
+    "Map": {
+      "repository": "digitie/kor-travel-map",
+      "pull": null,
+      "run": 44833958026,
+      "result": "Claude 담당 실행을 읽기 전용으로 비교했다. PostGIS 통합은 단위 행렬 성공 뒤 시작하며 lint·이미지·프런트엔드·fixture는 독립 실행한다."
+    }
+  }
+}
