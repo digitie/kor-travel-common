@@ -1,3 +1,7 @@
+## 2026-11-21 — PR79 병합과 ui 0.2.4 main pack catalog
+
+- PR CI 9 job SUCCESS로 병합 R=9691080c73d582f581c0c40fd5c300a70c34d326. main push CI 3종 SUCCESS, artifact 14698374408의 ui 0.2.4·tokens 0.1.5·toast 0.1.4를 [catalog](evidence/releases/tabs-focus-ui-0.2.4-catalog.md)에 동결했다. 소비자 이관은 각 저장소 PR이 소유한다.
+
 ## 2026-11-21 — TabsTrigger 포커스 FS-7.8 정합(ui 0.2.4)
 
 - 0.2.3의 `TabsTrigger`가 포커스에서 3px 반투명 ring·1px outline·`border-ring` 테두리 변화를 함께 그려 Button에 채택한 FS-7.8(outline 2px·offset 2px 하나)을 어겼다. Map은 로컬 tabs wrapper에서 덮어쓰고 있었다. 공통 `TabsTrigger`를 Button 레시피로 맞추고 `transition-all`을 색·배경·테두리 색·그림자 전환으로 좁혔다.
