@@ -1,39 +1,65 @@
-# 공통 라이브러리 정본과 실제 소비자 수용 — 2026-11-19
+# 공통 라이브러리 소비·실제 실행 현황
 
-필수 사용과 버전 규범은 [라이브러리 규약](../../standards/frontend-libraries.md)과 자동 생성 정책이 소유한다. 이 문서는 선택한 불변 pack과 소비자 source·설치·이미지·실제 기능 검증을 연결한다. [증거 JSON](2026-11-19-consumer-library-adoption.json)의 이전 수용과 후속 상태를 구분하며 자격증명·원본 사용자 데이터는 싣지 않는다.
+2026-11-19 공통 리소스 릴리스의 소비 현황이다. 각 표면에 실제로 적용한 이미지와 검증 범위를 기록한다.
 
-## 선택한 배포 정본
+## 정본과 필요한 라이브러리
 
-[AdminShell main pack catalog](admin-shell-ui-0.2.3-catalog.md)의 producer는 `0e2a3f5aa16323df0d009360802661c9bc496dc6`, guard/catalog pin은 `d644632ea9eaf2f6b6baa49305d65fae5bbc0bd4`다. 실제 producer artifact14500111373 ZIP SHA256은 `19881f2c3ed598ed7ec213c559be21ece2be77068bddee6de5bd249b6f8019e1`이다. SOURCE_SHA와 세 pack의 SHA512/SRI를 catalog와 대조했으며 재포장하지 않았다.
+공통 구현은 shadcn/ui Radix, TanStack Table·Virtual의 VirtualTable, React Hook Form·Zod, Zustand, Pretendard다. 동일 이름을 사용하는 표면은 exact 버전과 동일 pack bytes를 소비한다. 도메인 의존성·권한·API·인증 저장소는 앱이 소유한다. 모바일은 NativeWind5 RC와 Tailwind4 및 공통 tokens를 적용한다.
 
-| 패키지 | 버전 | SHA256 | 정규 파일 수 |
-| --- | --- | --- | --- |
-| @kor-travel/ui | 0.2.3 | aa19793165ae37b2214d210692e23235545e1464c4e0059f99d943411fa753d9 | 96 |
-| @kor-travel/tokens | 0.1.4 | 33d08d7b37c60d3e319da19608ce05137f6bf587dc8d42e3ce0dfb4b597a61fc | 25 |
-| @kor-travel/toast | 0.1.3 | 34b514b270f88fc19c6b411b975d4497f91f3581530f32a39be264874ca09b37 | 8 |
+필수·선택 프로필과 자동 생성 전체 버전 표는 [라이브러리 규약](../../standards/frontend-libraries.md), [정본 정책](../../../versions.json), [생성 프론트엔드 정책](../../../frontend-dependencies.json)을 따른다. 정책 application149개와 build tool3개는 실제 사용하는 Python 이름에 적용한다. 상세 장단점·105개 비교·149개 정확 버전·68개 프론트엔드 축은 [Geo의 단일 보고서 PR644](https://github.com/digitie/kor-travel-geo/pull/644)에 모은다.
 
-웹에서 UI+tokens는121개, Toast도 사용하는 Geo는129개 정규 파일을 대조한다. 모바일은 tokens25개만 소비하고 DOM UI를 강제하지 않는다. 미사용 Toast·지도·도메인 의존성을 추가하지 않는다. 같은 이름을 사용하는 앱의 버전·pack bytes·lock SRI는 일치시킨다.
+## 변경 방지와 산출물
 
-## 이전 정본과 실제 실행 근거
+불변 UI0.2.3/tokens0.1.4/선택형Toast0.1.3의 producer는 `0e2a3f5aa16323df0d009360802661c9bc496dc6`, frontend catalog는 `d644632ea9eaf2f6b6baa49305d65fae5bbc0bd4`다. application 정책 출처는 `f7017c63a332b58365ff3ce1976de9e2cc452a2e`이며 기존 pack을 재포장하지 않는다. ZIP artifact14500111373/SHA256은 `19881f2c3ed598ed7ec213c559be21ece2be77068bddee6de5bd249b6f8019e1`다.
 
-UI0.2.2·tokens0.1.3·Geo Toast0.1.2의 [이전 catalog](virtual-table-ui-0.2.2-catalog.md)와 실행 증거는 보존한다. 그것은 UI0.2.3의 설치·배포 검증을 대신하지 않는다. 표의 기존 source와 새 소비자 source·이미지는 각각 결박한다.
+| pack | SHA256 | 파일 |
+| --- | --- | ---: |
+| kor-travel-ui-0.2.3.tgz | `aa19793165ae37b2214d210692e23235545e1464c4e0059f99d943411fa753d9` | 96 |
+| kor-travel-tokens-0.1.4.tgz | `33d08d7b37c60d3e319da19608ce05137f6bf587dc8d42e3ce0dfb4b597a61fc` | 25 |
+| kor-travel-toast-0.1.3.tgz | `34b514b270f88fc19c6b411b975d4497f91f3581530f32a39be264874ca09b37` | 8 |
 
-| 앱 | 기존 실제 기능 수용 | 새 정본 후속 |
-| --- | --- | --- |
-| Geo | source96ff, native127·5폭·지도·로그인/로그아웃 검증 | 이관 PR·새 native129·실제 화면/배포 확인 중 |
-| Weather | source8a4(PR266), native119·schema43·원24RUN/3STOP·화면/지도 수용 | PR267·COPY PR268과 새 UI/tokens 정본 채택을 결박 |
-| Transport | source5a28(PR219), SDK618·스케줄20개 복원·native119·5폭·지도/로그아웃 검증 | 새 UI/tokens 이관과 후속 이미지/성능 검증을 별도 결박 |
-| Pinvi | source227, web native119·지도/사용자·로그아웃 검증, 모바일 NativeWind5 RC·Tailwind4 source/CI | 웹 UI/tokens와 모바일 tokens 이관·검증 확인 중; 실기기/EAS/스토어 미실행 |
-| Concierge | UI source0c85 native119·5폭·지도·로그아웃 검증, Python source16c846 유지 | 새 UI/tokens 이관과 UI 이미지 검증 확인 중; 무관한 Python 재빌드 없음 |
-| Manager | 양쪽 설치 rootEFDA와 frontend617 tree의 UI0.2.2 기능 수용 | 외부 PR619의 source9643은 UI0.2.3을 사용하므로 새 frontend build/native/실제 화면 검증 필요; PR620 SDK 중복 관측 개선은7f07a171e39dc600a7b266da2743bb4327730fcf로 머지, 새 실제 배포 검증은 별도 |
+웹은 UI96+tokens25=121파일,Geo는Toast8을 더한129파일,모바일 직접 tokens는25파일이다. exact·manifest·lock SRI·canonical pack·실제 설치 파일과 실제-used Python 교집합을 기존 검사기로 대조한다. reusable guard의 uses/common-ref는 같은 불변 ref를 쓴다. source·pack producer·정책·normal 이미지·native·실제 화면을 각각 기록한다.
 
-## 성능·신선도와 한계
+## 현재 소비·실행 근거
 
-- Transport PR219의 실제 rail 첫 관측200은3,237ms(app CPU2,055ms·SQL1,442ms/39문), 다음200은390ms,304 다섯 건의p95는90ms였다.304는 각각0byte·page build0·full fingerprint0이다. 첫1초 목표는 미달이며 강제로 cold 상태를 만들지 않았다. 과거 서버18.728초·client15초 timeout과 서로 다른 환경이므로 단순 전후 개선율로 제시하지 않는다.
-- Weather PR266 targeted current는 첫20012.59초·다음 큰 페이지2.89초·동일 key30488ms였다. 별도 무프로파일 여섯 프로필의 첫 응답은 모두200이나6.47~17.57초였고 cold 목표와 source 신선도는 미달이다. PR263의27.9초 측정과 같은 입력·환경의 교대 비교가 아니므로 단순 개선율로 제시하지 않는다. 별도 current limit2000 세 건은 승인 세대·계획 존재·활성 시도 metadata 조회 중 SQL57014로503을 반환했다. 단일 누락 index나 host 부하의 인과관계까지 증명한 것은 아니다.
-- Map 자연05:30Z 단기예보 적재는42개 요청 모두200·1,452위치·442 delta rows로05:33:52Z SUCCESS였다. 원천 수집 시각은11/18 12:15Z이고 source_status는stale다. 이 성공과 별도 current503을 합쳐 정상/신선으로 표시하지 않는다.
-- Weather PR264~267과 Transport PR218~219의 로컬 CPU 개선율은 해당 정규화·직렬화·동시 작업 fixture 범위다. 실제 전체 수집·첫 조회 개선율은 새로운 runtime 측정으로 확인한다. 효과 없는 bulk fetch·multiVALUES·압축 수준·namespace 중복 계산 후보는 제품에 넣지 않았다. COPY PR268은 실제 PostgreSQL16건과 저장 단계5교대 쌍을 통과했으나 전체 수집·첫 조회의 운영 개선율은 미검증이다.
+| 표면 | source 관찰 | 공통 파일 | 실제 검증과 범위 |
+| --- | --- | ---: | --- |
+| Geo | API·코드 서버 `8260e3577ac1`, UI `500c84797b00` | 129 | 배포 후 ARM 실행, PC 1280px·모바일 390px 제목·테이블·인증 확인. UI 환경값과 API·코드 서버·DB 실행 상태 동일. |
+| weather | `2b269b03d4ac` | 121 | ARM 3개 이미지·SDK627 적용. 27개 기존 상태 복원, 모바일 390px 수용. 첫 단기예보 진단 200·5.790초·`stale` |
+| transport-public | `810373320c18` | 121 | SDK627 코어 적용·기존 일정 20개 복원. 공개 주차 390px·1280px 수용. 철도 첫 진단 200·7,766ms 및 조건부 304·305ms |
+| transport-admin | UI `736b731faa54`;core `810373320c18` | 121 | 실제 db139445 UI,375/1280 PC세로메뉴·모바일메뉴·일반 로그인/로그아웃401;복사8h쿠키 서버회수는 기존 미지원 |
+| transport-fuel | UI `2ed65d8d8ec3`·gateway `736b731faa54`·core `810373320c18` | 121 | Fuel 웹 단독 ARM·native 교체. 고정 12308·12307 및 API 게이트웨이 유지. 공개 HTTPS 390px·1280px에서 전체 화면·44×44px 위치 아이콘·위치 권한 허용 후 조회 확인 |
+| pinvi-web | `716781d04657` | 121 | 현재2e62713a/ec02765b/073cfedb 설치65/78·공통PY19파일·UI121일치;공개CURRENT정산·현재1280/4타일/인증 수용.과거5폭은 이전tuple |
+| pinvi-mobile-tokens | `716781d04657` | 25 | 소스/설치 정책에서NativeWind5 RC·Tailwind4·tokens 일치.실기기/EAS/스토어 미실행 |
+| concierge | API/MCP/CS `9e2668142cd3`; UI `039c445a0a36` | 121 | API/MCP·CS 정상/native·SDK626·3개sensor복원·실제 화면/타일/인증 수용;재사용UI 출처 별도 기록 |
+| manager-odroid | 기록 `db78d1a869c6`;wheel `30330a2cf0e9`;UI `7f07a171e39d` | 121 | 실제627 설치77모듈·28분포/pipcheck·인증 수용.동일bytes wheel30330·UI7f07 출처 유지 |
+| manager-n150 | 기록 `db78d1a869c6`;wheel `30330a2cf0e9`;UI `7f07a171e39d` | 121 | 실제627 설치77모듈·28분포/pipcheck·인증 수용.동일bytes wheel30330·UI7f07 출처 유지 |
 
-## 최종 출판 조건
+Map은 기존 담당 분담을 유지한다. 기존5폭 수용과 새 이미지1280 smoke를 같은 범위로 합치지 않는다. Manager의 UI7f07과 동일 code bytes의30330 wheel, Transport의 backendb750와UI736도 실제 출처를 따로 보존한다.
 
-새 정본의 소비자별 source/lock·실제121/129/25개 파일·이미지 source·로그인/로그아웃·반응형/지도 검증과 성능 한계를 결박한 뒤 이 기록을 확정한다. 같은 [Geo 단일 보고서 draft PR644](https://github.com/digitie/kor-travel-geo/pull/644)를 갱신하며 다른 Geo 보고서 PR을 만들지 않는다. CI 순서 감사·최적화는 마지막에 수행한다. 현재 기록은 후속 진행 상태이며 새 버전 전체 배포 완료를 뜻하지 않는다.
+## 미완료와 해석 범위
+
+- Transport 운영 `b7509988`의 철도 요청 첫 200은 3,067ms였다. 304 세 건은 141·263·176ms였고 커서와 전체 1,466행 수를 검증했다.
+- Weather에서 현재 승인한 1,078격자 중 349격자의 최근 6시간 갱신을 확인했다. 6시간 목표에 필요한 조건은 운영 키 승인 한도와 공유 사용량 확인이다.
+
+- Transport는 API 기동 후 같은 워커에서 철도 입력 지문을 한 번 읽는다. 동일 1,466행의 준비된 본문을 사용하는 로컬 HTTP 200 비교에서 중앙값이 154ms에서 103ms로 줄었다. 별도 반복 비교는 196ms에서 129ms였다. 입력 리비전 변경 시 다시 계산하고 API readiness는 기다리지 않는다. 운영 `8103733`에서는 첫 200이 7,766ms, 조건부 304가 305ms였다. 입력 지문 SQL을 재실행하지 않았으며 새 응답 본문 생성이 실행됐다. 첫 응답 1초 목표는 미달했다. [Transport PR #234](https://github.com/digitie/kor-travel-transport/pull/234)
+- 동일 1,466행 본문을 새 릴리스로 먼저 발행한 로컬 PostgreSQL 검증에서 첫 200은 311ms에서 42ms로 줄었다. 운영 첫 요청까지 보장하려면 이전 API와 수집 중지 뒤, 새 API 시작 전에 실행할 배포 지점이 필요하다.
+- 별도 공개 HTTPS 검증에서 지도와 API 상태가 200을 반환했다. 모바일 390px에서 제목과 메뉴가 없고 줌 10에 집계 없이 주유소 300건이 표시됐다.
+- **Weather** 이전 `b5039fa8`에서 정기 Map 적재 중 503이 발생한 뒤 200으로 회복했다. 별도 저장 단기예보 진단은 HTTP 200, 16.469초였다. 새 `2b269b03`의 첫 진단은 HTTP 200, 5.790초였다. 두 표본의 부하와 시각은 다르고 새 표본의 원천은 `stale`이다. 적용 후 발행 센서 실행은 대기 조회 7.4초와 7.7초에 각각 27건과 36건을 발행했다. 11월 21일 08:30 KST 정기 소비와 일치한 Weather SHORT 접근 로그 47건은 모두 200이었다. 해당 관측 구간 SHORT 503은 0건이었다. 503 재발률과 6시간 신선도는 추가 운영 확인이 필요하다. [Weather PR #279](https://github.com/digitie/kor-travel-weather/pull/279)
+- **transportSession**: 일반 로그아웃 뒤 쿠키 없는 보호 경로401.기존8h서명쿠키 복사본은 만료까지 유효;추가 서버회수 기능을 요구/구현한 것으로 표시하지 않음
+- **mobile**: NativeWind5.0.0-rc.1/react-native-css3.1.0-rc.1의 RC 표기 유지;실기기/EAS/스토어 수용 아님
+- **nativeABI**: 실제 GDAL Geo3.10.3/Transport3.13.3.인터프리터 Pinvi3.12.14/Transport3.12.16.149 application exact는 OS/인터프리터 바이너리 전체 일치 증거가 아님
+- **PinviRebuild**: 다른 작업의 같은716 새tuple에 설치bytes·현재1280·공개adopt를 새로 연결.옛5폭/전체native/producer 영수증을 새image에 전용하지 않음
+
+## CI 검사 순서
+
+- **Geo** Common 웹 guard와 OpenAPI는 독립 실행한다. Python 정책이 끝난 뒤 백엔드·PostGIS·Dagster를 병렬로 시작한다. PR CI에서 정책 완료 후 세 작업이 2–3초 뒤 시작했다. [PR #653](https://github.com/digitie/kor-travel-geo/pull/653) · [검증 실행](https://github.com/digitie/kor-travel-geo/actions/runs/44840179735)
+- **Transport** Common 웹 guard 뒤 공개·관리 웹이 병렬 실행한다. 공개 웹 런타임 계약 19건을 npm 설치 전에 실행한다. 이전 CI에서 뒤따르는 설치·검사에 약 86초가 걸렸다. [PR #236](https://github.com/digitie/kor-travel-transport/pull/236) · [검증 실행](https://github.com/digitie/kor-travel-transport/actions/runs/44840343022)
+- **Weather** Python 정책 뒤 Python 검사를 실행한다. 웹은 Common guard, 정적 검사·단위 테스트·빌드, Playwright 순서다. headless shell로 fixture 34건과 타일 5건을 유지한다. [PR #280](https://github.com/digitie/kor-travel-weather/pull/280) · [검증 실행](https://github.com/digitie/kor-travel-weather/actions/runs/44840934957)
+- **Concierge** 웹 정적 검사·단위 테스트·빌드 뒤 브라우저 회귀 17건을 실행한다. 기본 Chromium headless 프로젝트에 필요한 shell만 내려받는다. [PR #281](https://github.com/digitie/kor-travel-concierge/pull/281) · [검증 실행](https://github.com/digitie/kor-travel-concierge/actions/runs/44841095023)
+- **Pinvi** 웹 선행 검사는 lockfile·Common·Doctor·lint·typecheck 뒤 웹 빌드·이미지·E2E에 연결된다. 모바일은 lockfile 직후 스타일 계약을 검사한다. 기존 실패 두 건에서는 앞선 npm 설치에 28–36초를 사용했다. [PR #793](https://github.com/digitie/pinvi/pull/793) · [검증 실행](https://github.com/digitie/pinvi/actions/runs/44840388515)
+- **Common** 비밀 값·버전 정책이 문서·도구·패키지의 선행 조건이다. 문서 job은 소스 SHA 직후 공백을 검사하고 Python·Node 설치를 시작한다. [PR #77](https://github.com/digitie/kor-travel-common/pull/77) · [검증 실행](https://github.com/digitie/kor-travel-common/actions/runs/44840180300)
+- **Manager** 별도 Common 웹·Python 정책과 제품 검사를 병렬 실행한다. 웹은 빌드 통과 후 Chromium을 설치한다. 백엔드 21분 8초 중 pytest가 20분 45초였다. 현재 순서를 유지했다. [검증 실행](https://github.com/digitie/kor-travel-docker-manager/actions/runs/44646286987)
+- **Map** Claude 담당 실행을 읽기 전용으로 비교했다. PostGIS 통합은 단위 행렬 성공 뒤 시작하며 lint·이미지·프런트엔드·fixture는 독립 실행한다. [검증 실행](https://github.com/digitie/kor-travel-map/actions/runs/44833958026)
+
+68개 프론트엔드 exact의 정본은 위 라이브러리 규약과 생성 정책에 둔다. 이 근거 문서는 별도의 버전 규범을 만들지 않는다.
