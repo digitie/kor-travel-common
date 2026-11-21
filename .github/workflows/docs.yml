@@ -27,14 +27,23 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: '3.11'
       - name: 검사 source SHA 확인
         shell: bash
         run: |
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
           printf '검사 source: `%s`\n' "$SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - name: 변경 공백 검사
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ -n "$BASE_SHA" && "$BASE_SHA" != 0000000000000000000000000000000000000000 ]]; then
+            git diff --check "$BASE_SHA" HEAD
+          else
+            git show --format= --check HEAD
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
       - name: MDX 검사 Node.js 설치
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -50,15 +59,6 @@ jobs:
           python -B -X utf8 tools/validate_document_links.py
           python -B -X utf8 tools/validate_plan.py
           python -B -X utf8 -m unittest discover -s tests -p 'test_*.py'
-      - name: 변경 공백 검사
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: |
-          if [[ -n "$BASE_SHA" && "$BASE_SHA" != 0000000000000000000000000000000000000000 ]]; then
-            git diff --check "$BASE_SHA" HEAD
-          else
-            git show --format= --check HEAD
-          fi
       - name: 운영 정보 전체 트리 검사
         run: python -B -X utf8 tools/check_prod_redaction.py --all
 
