@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2023 shadcn; 2026 Youn-sok Choi (digitie)
 // Origin: shadcn-ui/ui@dd41d19e2f80ff6891951f7ced74c2c9a650b065 apps/v4/registry/bases/radix/ui/accordion.tsx (MIT)
 // Derived-From: shadcn/ui Radix Nova
-// Modified: 2026-11-11 — 공통 패키지 경로·아이콘·표현 계약 연결
+// Modified: 2026-11-11 — 공통 패키지 경로·아이콘·표현 계약 연결; 2026-11-23 — focus를 UX-G9.1 outline 2px·offset 2px 하나로(ring·border 변화·outline-none 제거)
 "use client";
 
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
@@ -52,7 +52,7 @@ function AccordionTrigger({
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          "group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent py-2.5 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground",
+          "group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent py-2.5 text-left text-sm font-medium transition-[color,background-color,border-color] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kt-focus disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground",
           className
         )}
         {...props}

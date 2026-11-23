@@ -78,6 +78,8 @@
 
 **TabsTrigger**도 0.2.4부터 Button과 같은 포커스 레시피다: `focus-visible:outline-2`·`outline-offset-2`·`outline-kt-focus` 하나만 그리고, 이전의 3px 반투명 ring·`outline-1 outline-ring`(두 번째 outline)·`border-ring` 테두리 색 변화·`transition-all`은 없다. 테두리는 상태와 무관하게 1px(`border`)이고 클릭·active 이동은 없다.
 
+**입력·선택 컨트롤**(`Input`·`Textarea`·`NativeSelect`·`SelectTrigger`·`Checkbox`·`Switch`·`AccordionTrigger`·`ScrollArea` viewport·링크 `Badge`)도 0.2.5부터 같은 레시피 하나다: `focus-visible:outline-2`·`outline-offset-2`·`outline-kt-focus`, `outline-none`·반투명 ring·`border-ring` 테두리 색 변화 없음. 선택 카드 `FieldLabel`은 포커스 표시를 따로 그리지 않고 내부 컨트롤의 outline만 보인다. `Checkbox`·`Switch`는 md 미만에서 `after` 터치 영역이 44px 이상이다(보이는 크기 불변).
+
 | prop | 기본 | 계약 |
 |---|---|---|
 | `type` | `"button"` | 엔진과 무관하게 **명시** 기본. 폼 제출은 `type="submit"` 명시 |

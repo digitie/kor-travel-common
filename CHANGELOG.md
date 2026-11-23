@@ -1,3 +1,19 @@
+## ui 0.2.5·tokens 0.1.6·toast 0.1.5 — 입력·선택 컨트롤 포커스 — 2026-11-23
+
+### 변경
+
+`Input`·`Textarea`·`NativeSelect`·`SelectTrigger`·`Checkbox`·`Switch`·`AccordionTrigger`·`ScrollArea` viewport·`Badge`(링크로 쓸 때)의 키보드 포커스를 Button·TabsTrigger와 같은 UX-G9.1 레시피(FS-7.8)로 맞췄다: `outline 2px`(`--kt-focus`)·offset 2px 하나만 그린다. 이전의 `outline-none`과 3px 반투명 box-shadow ring(`focus-visible:ring-3 ring-ring/50`)·테두리 색 변화(`focus-visible:border-ring`)를 없앴다. 선택 카드 `FieldLabel`이 내부 컨트롤 포커스 때 그리던 두 번째 ring·테두리와, 이를 숨기려고 `Checkbox`·`Switch`에 있던 `group-has-[:focus-visible]/field-label:*` 보정도 지웠다. `Switch`·`AccordionTrigger`·`Badge`의 `transition-all`은 색·배경·테두리 색 전환으로 좁혔다. `aria-invalid` 표시는 그대로다.
+
+`Checkbox`·`Switch`의 `after` 터치 영역을 md(48rem) 미만에서 44px 이상으로 넓혔다(체크박스 16px + 2×14px). 보이는 크기와 데스크톱 밀도는 바뀌지 않는다. 시험 `field-focus.test.tsx`가 이를 고정한다. 내장 정책 bytes가 바뀌므로 tokens 0.1.6·toast 0.1.5도 patch를 올렸고 두 패키지의 실행 코드·CSS는 바뀌지 않는다.
+
+#### Breaking
+
+없음. 공개 prop·기본값·`data-slot`은 그대로이고 포커스 표시 모양과 모바일 터치 영역만 바뀐다.
+
+### 이관
+
+새 common-ref를 채택하는 소비자는 vendored `@kor-travel/ui` 0.2.5·`@kor-travel/tokens` 0.1.6(toast 사용 시 0.1.5)로 함께 올리고 version·SHA512는 `frontend-artifacts.json`에서 옮긴다(catalog 동결은 이 변경의 main pack 뒤 별도 PR). 앱에서 입력·선택 포커스를 덮어쓰던 클래스(`focus-visible:ring-0`·`outline-none`·추가 `focus-visible:outline-*`)나 전역 `input:focus` 규칙은 지운다.
+
 ## ui 0.2.4·tokens 0.1.5·toast 0.1.4 — TabsTrigger 포커스 — 2026-11-21
 
 ### 변경

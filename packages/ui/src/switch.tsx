@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2023 shadcn; 2026 Youn-sok Choi (digitie)
 // Origin: shadcn-ui/ui@dd41d19e2f80ff6891951f7ced74c2c9a650b065 apps/v4/registry/bases/radix/ui/switch.tsx (MIT)
 // Derived-From: shadcn/ui Radix Nova
-// Modified: 2026-11-11 — 공통 패키지 경로·아이콘·표현 계약 연결
+// Modified: 2026-11-11 — 공통 패키지 경로·아이콘·표현 계약 연결; 2026-11-23 — focus를 UX-G9.1 outline 2px·offset 2px 하나로(ring·border 변화·outline-none 제거), md 미만 after 터치 영역 44px
 "use client";
 
 import * as React from "react"
@@ -21,7 +21,7 @@ function Switch({
       data-slot="switch"
       data-size={size}
       className={cn(
-        "peer group/switch relative inline-flex shrink-0 items-center rounded-full border border-transparent transition-all outline-none group-has-[:focus-visible]/field-label:border-transparent group-has-[:focus-visible]/field-label:ring-0 after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=default]:h-[18.4px] data-[size=default]:w-[32px] data-[size=sm]:h-[14px] data-[size=sm]:w-[24px] dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:bg-primary data-unchecked:bg-input dark:data-unchecked:bg-input/80 data-disabled:cursor-not-allowed data-disabled:opacity-50",
+        "peer group/switch relative inline-flex shrink-0 items-center rounded-full border border-transparent transition-[color,background-color,border-color] after:absolute after:-inset-x-3 after:-inset-y-2 max-md:after:-inset-y-3.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kt-focus aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=default]:h-[18.4px] data-[size=default]:w-[32px] data-[size=sm]:h-[14px] data-[size=sm]:w-[24px] dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:bg-primary data-unchecked:bg-input dark:data-unchecked:bg-input/80 data-disabled:cursor-not-allowed data-disabled:opacity-50",
         className
       )}
       {...props}

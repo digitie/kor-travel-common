@@ -1,3 +1,7 @@
+## 2026-11-23 — 입력·선택 컨트롤 포커스 정합(ui 0.2.5)
+
+입력·선택·체크·스위치 등 포커스를 Button과 같은 FS-7.8 레시피로 맞추고 체크박스·스위치 모바일 터치 영역을 44px로 넓힌 ui 0.2.5·tokens 0.1.6·toast 0.1.5 제품 PR을 진행한다. 다음 한 작업은 이 PR 병합 뒤 main pack을 `frontend-artifacts.json`에 동결하는 catalog PR, 그다음 소비자(먼저 concierge)가 그 main commit을 `common-ref`로 올리는 이관 PR이다.
+
 ## 2026-11-21 — TabsTrigger 포커스 정합(ui 0.2.4) 완료
 
 PR79로 병합됐다(R=9691080c73d582f581c0c40fd5c300a70c34d326). ui 0.2.4·tokens 0.1.5·toast 0.1.4 main pack을 [catalog](evidence/releases/tabs-focus-ui-0.2.4-catalog.md)로 `frontend-artifacts.json`에 동결한다. 다음 한 작업은 소비자가 이 catalog main commit을 `common-ref`로 올리며 vendored tgz를 바꾸고 로컬 tabs focus 덮어쓰기(예: Map admin tabs wrapper)를 지우는 이관 PR이다.
