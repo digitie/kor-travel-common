@@ -14,7 +14,11 @@ from dagster import (
     reconstructable,
 )
 
+import kortravelcommon.dagster as recovery
 from kortravelcommon.dagster import RecoveryPolicy, infrastructure_retry_sensor
+
+# 방금 기록된 실패 event를 바로 판정한다(운영 기본 settle 대기는 끈다).
+recovery.FAILURE_SETTLE_SECONDS = 0
 
 
 @op

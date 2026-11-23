@@ -33,6 +33,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.engine import Connection, Engine, make_url
 
+from kortravelcommon.backoff import backoff_seconds
+
 
 class ReverseAddressError(RuntimeError):
     """비밀·원문 응답을 싣지 않는 유한한 실패 코드."""
@@ -337,7 +339,13 @@ class ReverseAddressStore:
                 "next_refresh_at": (old["next_refresh_at"] if same else None)
                 if error
                 else six_months_after(now),
-                "next_retry_at": now + timedelta(seconds=min(86400, 60 * 2 ** min(failures, 10)))
+                # 같은 장애로 함께 실패한 행이 같은 시각에 다시 몰리지 않게 간격의 1/4을 흩뜨린다.
+                "next_retry_at": now
+                + timedelta(
+                    seconds=backoff_seconds(
+                        failures + 1, base_seconds=60, cap_seconds=86400, jitter=0.25
+                    )
+                )
                 if error
                 else None,
             }

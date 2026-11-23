@@ -89,8 +89,9 @@ def test_seventeen_jobs_share_one_failure_page(monkeypatch):
         monkeypatch.setattr(instance, "get_runs", observed)
         result = shared.evaluate_tick(build_sensor_context(instance=instance))
         assert not result.run_requests
+        # 실패 event 최대 100건의 run을 run_ids 한 번으로 고른다.
         assert len(pages) == 1
-        assert pages[0]["limit"] == 100
+        assert pages[0]["limit"] == 17 and len(pages[0]["filters"].run_ids) == 17
         assert pages[0]["filters"].job_name is None
         assert pages[0]["filters"].tags == {PROJECT_TAG: "test"}
 
@@ -102,16 +103,17 @@ def test_selected_job_config_policy_and_single_handoff_are_preserved():
         earlier = failure(instance, mapping["sample_0"][0])
         later = failure(instance, mapping["sample_1"][0])
         result = shared.evaluate_tick(build_sensor_context(instance=instance))
+        # 실패 event는 오래된 순서로 판정한다.
         assert len(result.run_requests) == 1
         request = result.run_requests[0]
-        assert request.job_name == "sample_1"
-        assert request.run_config == later.run_config
-        assert request.tags["dagster/max_runtime"] == "301"
+        assert request.job_name == "sample_0"
+        assert request.run_config == earlier.run_config
+        assert request.tags["dagster/max_runtime"] == "300"
         assert request.tags["dagster/max_retries"] == "0"
-        assert request.tags[INFRA_RETRY_PARENT_TAG] == later.run_id
-        assert request.run_key == f"test/infra/{later.run_id}/1"
-        assert instance.get_run_by_id(later.run_id).tags[INFRA_RETRY_PENDING_TAG] == "true"
-        assert INFRA_RETRY_PENDING_TAG not in instance.get_run_by_id(earlier.run_id).tags
+        assert request.tags[INFRA_RETRY_PARENT_TAG] == earlier.run_id
+        assert request.run_key == f"test/infra/{earlier.run_id}/1"
+        assert instance.get_run_by_id(earlier.run_id).tags[INFRA_RETRY_PENDING_TAG] == "true"
+        assert INFRA_RETRY_PENDING_TAG not in instance.get_run_by_id(later.run_id).tags
 
 
 @pytest.mark.parametrize(
@@ -186,23 +188,27 @@ def test_shared_budget_preserves_progress_without_scanning_each_job(monkeypatch)
     shared = definition(mapping)
     with DagsterInstance.local_temp() as instance:
         failure(instance, mapping["sample_0"][0], RunFailureReason.UNKNOWN)
-        latest = failure(instance, mapping["sample_1"][0], RunFailureReason.UNKNOWN)
+        failure(instance, mapping["sample_1"][0], RunFailureReason.UNKNOWN)
         clock = [0.0]
         monkeypatch.setattr(recovery, "monotonic", lambda: clock[0])
-        original = instance.get_records_for_run
-        reads = []
+        original = instance.get_runs
+        scans = []
 
         def slow(**kwargs):
-            reads.append(kwargs["run_id"])
-            result = original(**kwargs)
-            clock[0] = 6.0
-            return result
+            if kwargs["filters"].run_ids:
+                scans.append(kwargs["filters"].run_ids)
+                clock[0] = 6.0
+            return original(**kwargs)
 
-        monkeypatch.setattr(instance, "get_records_for_run", slow)
+        monkeypatch.setattr(instance, "get_runs", slow)
         result = shared.evaluate_tick(build_sensor_context(instance=instance))
+        events = instance.fetch_run_status_changes(
+            DagsterEventType.RUN_FAILURE, limit=2, ascending=True
+        ).records
         assert not result.run_requests
-        assert reads == [latest.run_id]
-        assert result.cursor == latest.run_id
+        # job 수와 무관하게 한 번 고르고, 예산이 지나면 첫 판정 event까지만 저장한다.
+        assert len(scans) == 1
+        assert result.cursor == f"failures:{events[0].storage_id}"
 
 
 def test_mapping_is_copied_and_invalid_entries_are_rejected():
@@ -245,9 +251,9 @@ def test_next_tick_routes_the_other_job_with_shared_cursor():
             build_sensor_context(instance=instance, cursor=first.cursor)
         )
         assert len(first.run_requests) == len(second.run_requests) == 1
-        assert first.run_requests[0].job_name == "sample_1"
-        assert second.run_requests[0].job_name == "sample_0"
-        assert second.run_requests[0].tags[INFRA_RETRY_PARENT_TAG] == earlier.run_id
+        assert first.run_requests[0].job_name == "sample_0"
+        assert first.run_requests[0].tags[INFRA_RETRY_PARENT_TAG] == earlier.run_id
+        assert second.run_requests[0].job_name == "sample_1"
 
 
 def test_other_job_active_does_not_block_selected_job():

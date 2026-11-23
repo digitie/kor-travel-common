@@ -218,14 +218,75 @@ project/location을 함께 검증하고, 실행 중인 같은 job은 합친다. 
 마무리한다. 발급된 child를 확인하면 표식을 false로 닫고, child에는 표식을 상속하지 않는다.
 실행 계획의 일부 step 또는 resolved op subset도 전체 job으로 확대하지 않는다.
 
-일반 polling sensor가 실패 실행 100건씩 확인하고 한 tick에 한 실행만 재예약한다. batch 끝에서
-새 실패부터 다시 확인하며, metadata 장애·10초 timeout에는 cursor를 전진시키지 않는다.
-느리지만 정상인 조회에서는 5초 작업 예산 뒤 마지막 완료 행을 저장해 다음 tick에서 이어간다.
-run failure callback 예외도 이벤트를 소비하는 Dagster 동작을 피하기 위한 경계다. 전체 조회는
-10초/동시 4개 상한이며 metadata 장애는 sensor tick 실패로 전달한다. native retry 활성화 시
-미완료 인계만 처리하고 새 실패는 native에 위임한다. 오래된 실패가 많으면 한 순회만큼 복구가 지연될 수 있다.
+일반 polling sensor가 instance의 RUN_FAILURE event를 오래된 순서로 최대 100건 읽고, 그 run 중
+project(·job) 것만 `run_ids` 한 번으로 고른다. cursor(`failures:<storage_id>`)는 판정을 마친
+마지막 event이며 다음 tick은 그 뒤부터 읽는다. 이미 판정한 run은 다시 훑지 않는다(2026-11-24 전에는
+실패 run을 최신순 100건씩 끝까지 다시 순회해 10초 deadline으로 tick이 실패했다). 한 tick에 한 실행만
+재예약하고, 5초 작업 예산이 지나면 마지막으로 판정한 event까지 저장하고 나머지는 다음 tick에 맡긴다.
+첫 event는 예산과 무관하게 판정해 매 tick 전진한다. metadata 장애·10초 timeout에는 cursor를
+전진시키지 않는다. run failure callback 예외도 이벤트를 소비하는 Dagster 동작을 피하기 위한 경계다.
+전체 조회는 10초/동시 4개 상한이며 metadata 장애는 sensor tick 실패로 전달한다. native retry
+활성화 시 미완료 인계만 처리하고 새 실패는 native에 위임한다. `FAILURE_LOOKBACK_SECONDS`(1시간)보다
+오래된 실패 event는 보지 않고, `FAILURE_SETTLE_SECONDS`(120초)보다 젊은 event는 다음 tick에 읽는다
+(event 저장 뒤 run 상태 갱신, storage id commit 순서 역전, launch timeout 뒤 늦게 시작한 worker를
+기다린다). id 순서로 읽다가 젊은 event를 만나면 그 앞에서 멈추므로 id와 생성 시각 순서가 어긋난
+event도 건너뛰지 않는다(event 시각은 그 event를 낸 프로세스의 시계다. run worker가 다른 호스트에서
+돌며 시계가 크게 어긋나면 이 전제가 약해진다). cursor가 없거나 옛 형식(run_id·`head`·3필드 `steps:`)이면
+이 창 안의 실패부터 시작한다. 창 안에 실패가 없으면 창보다 오래된 최신 event까지 전진한다. 같은 job 실행이 남아 있어 합친
+실패는 다시 읽지 않는다(그 실행이 일을 맡는다). 재예약한 parent의 `infra_retry_pending=true`는
+그 뒤 다시 읽지 않으므로 표식으로 남는다(native 억제 태그는 이미 닫혀 있다). 판정 하나가 매번
+10초를 넘기면 그 event가 창 밖으로 나갈 때까지(최대 1시간) tick이 실패한다.
 native retry 설정 전환은 기존 daemon/code-server를 drain한 뒤 수행하여 서로 다른 설정의
-daemon을 동시에 두지 않는다. fresh sensor의 최초 순회는 기존 scope의 미재시도 실패도 대상이다.
+daemon을 동시에 두지 않는다.
+
+사유(JobFailureData) 없이 밖에서 실패 처리된 run(Dagster의 dequeue·launch 실패, run monitoring의
+worker 소실, 최대 실행시간 초과 종료가 모두 이렇게 기록된다)은 event 이력 구조로 분류해
+`kortravelcommon/failure_class` tag에 남기고 warning 로그를 쓴다. RUN_CANCELING이 있으면
+`canceled`, STEP_FAILURE가 있으면 `step_failure`(둘 다 보고만), 둘 다 없고 RUN_START가 없으면
+`launch_failure`(재예약)다. RUN_START가 있으면 실패 event 뒤에 실행 event(STEP_START 등)가 있거나
+실패 기록 바로 앞 engine event가 step 없는 오류(launch_run·submit_run 실패 경로, 예: launch RPC
+timeout)일 때 `worker_alive`(worker가 살아 있을 수 있어 보고만), 아니면 `worker_lost`(재예약)다. 재예약은 기존
+판정·횟수 상한을 그대로 따른다. 정의 load 실패 같은 결정적 launch 오류도 `launch_failure`라 재시도
+상한만큼 반복될 수 있다. 분류·차단기 tag는 child에 넘기지 않는다.
+
+### 연속 실패 차단기
+
+재시도로 고칠 수 없는 결정적 오류가 짧은 주기 schedule에서 매번 run을 만들면
+`failure_breaker`를 `should_execute`로 넣는다.
+
+```python
+from kortravelcommon.dagster import coalescing_schedule, failure_breaker
+
+alerts_schedule = coalescing_schedule(
+    project="weather", location_name="kortravelweather_dagster.definitions",
+    job=alert_events_job, cron_schedule="*/5 * * * *",
+    should_execute=failure_breaker(
+        project="weather", location_name="kortravelweather_dagster.definitions",
+        job=alert_events_job, threshold=3,
+        base_cooldown_seconds=900, max_cooldown_seconds=6 * 3600,
+    ),
+)
+```
+
+- 같은 지문(실패 사유|첫 실패 step|원 예외 형식)으로 threshold회 연속 실패하면 열린다. 마지막
+  실패 뒤 base초 동안 tick을 건너뛰고, 그 뒤 시험 실행 1회를 허용한다. 시험이 같은 지문으로
+  실패하면 대기가 두 배(max에서 멈춤)가 된다. 성공하거나 지문이 바뀌면 닫힌다.
+- worker·launch 장애(`START_TIMEOUT` 등, 사유 없는 `launch_failure`·`worker_lost`)·취소·backfill
+  run은 세지도 끊지도 않는다. 최대 실행시간 초과 종료는 센다.
+- 상태는 run 이력에서 매 tick 다시 계산한다. 원인을 고쳐 배포해도 남은 대기 동안은 열려 있다.
+  기다리지 않으려면 수동 실행 한 번을 성공시킨다.
+- 경보: 열림을 처음 본 실패 run에 `kortravelcommon/breaker=open`, `breaker_fingerprint`,
+  `breaker_streak`(대기 계산 창까지만 센 수) tag가 붙고 warning 로그가 남는다. 운영 경보는
+  이 tag로 run을 찾는다. 선택 `on_open(context, streak)`은 그 tag를 쓰기 직전 한 번 불리며
+  실패하면 다음 tick에 다시 불린다(최소 1회 전달). 콜백은 schedule 평가 시간 안에 끝나야 한다.
+- 오류 코드별로 가르려면 오류마다 예외 형식을 나누거나 `fingerprint=(instance, run_id) -> str | None`을
+  준다. 원문 message는 지문에 넣지 않는다. 직접 구현하려면 `failure_streak`·`breaker_retry_at`을 쓴다.
+- 5분 job 권장값은 threshold 3, base 900초, max 21600초다. tick마다 최근 run 이력(최대 500건)과
+  지문 계산 run(최대 2×창, run당 event 조회 2~5건)을 읽는다. `dagster/failure_reason`·
+  `kortravelcommon/failure_class` tag로 이미 판정된 worker·launch 장애는 조회 없이 건너뛴다.
+- 한계: 매번 launch 단계에서 실패하는 결정적 오류(정의 load 실패 등)는 worker·launch 장애로 보아
+  세지 않으므로 차단기가 막지 못한다. 이런 반복은 재시도 sensor의 `failure_class` tag로 찾는다.
+  UI 재실행은 Dagster가 parent tag를 복사하므로 경보는 `on_open`(또는 tag와 run 생성 순서)을 정본으로 한다.
 
 sensor 확인과 다른 수동/예약 발화는 원자적이지 않다. shared coordinator의 job limit과 소비자
 DB lease를 함께 적용한다. DB lease는 중복 provider 호출을 막지만 queued run의 메모리 제한을
@@ -835,8 +896,12 @@ daemon의 해석된 URL을 보내지 않는다. literal/custom storage와 local 
 ### 풀 상한·timeout·정리
 
 plugin은 `postgresql+psycopg2`의 명시적 NullPool 생성에만 적용한다.
-활성화 뒤 최초 run/event/schedule 세 primary engine에 각각 pool_size2/max_overflow2,
-pool_timeout1초/pool_recycle3600초를 쓴다. primary pooled 연결 상한12, 유휴 보관 상한6이다.
+활성화 뒤 최초 run/event/schedule 세 primary engine에 각각 pool_size4/max_overflow4,
+pool_timeout1초/pool_recycle3600초를 쓴다. primary pooled 연결 상한24, 유휴 보관 상한12다.
+(2026-11-24 이전 2+2는 schedule·sensor worker 각 4개와 겹쳐 pool 부족 경고와 tick 실패를 냈다.
+daemon 수만큼 곱해 공유 PG의 `max_connections` 여유를 확인한다. `DaemonQueuePool.connect`는 수명
+잠금 안에서 대기하므로 대기자가 직렬화되어 N번째 대기자는 N×timeout을 기다린다. 그래서 대기는
+1초로 둔다. 늘리려면 잠금 밖 대기 변경이 먼저다.)
 이는 pooled primary 세 engine의 합계이며 프로세스 전체·PG 전체 접속이나 worker 수의 상한은 아니다.
 공식 DefaultRunLauncher의 gRPC start_run은 같은 프로세스에서 InstanceRef를 해석해 임시
 Instance를 만든다. 네 번째 이후 engine은 원 NullPool·원 연결 수명 그대로 두며 primary

@@ -1,3 +1,12 @@
+## 2026-11-24 — 재시도 sensor 순회·사유 없는 실패 분류·연속 실패 차단기(py 0.1.0.dev1)
+
+- 감사(2026-11-23 수집 실패) §2.5 #6: 재시도 sensor가 FAILURE run을 최신순 100건씩 끝까지 다시 순회해, 실패 run이 쌓인 odroid에서 자기 10초 deadline으로 tick 338건이 실패했다. RUN_FAILURE event를 storage id high-water로 오래된 순서부터 읽고 판정한 곳까지만 전진하게 바꿨다(6시간 창, 다른 project는 `run_ids` 한 번으로 거름).
+- §2.5 #8: `report_run_failed(run)`(데이터 없음)로 기록된 47건을 건너뛰던 것을 event 구조(RUN_CANCELING·STEP_FAILURE·RUN_START)로 분류해 launch 실패·worker 소실은 재예약, 취소·step 실패는 tag로 보고한다. 원문 message는 보지 않는다.
+- §2.5 #9: `coalescing_schedule`에 선택 QUEUED 나이 상한. common에는 `max_runtime` 기본값이 없어(소비자가 RecoveryPolicy에 준다) 주기 비례 조정은 소비자 몫으로 CHANGELOG 이관에 적었다.
+- §4 #2용 재사용 부품 `failure_breaker`(run 이력에서 같은 지문 연속 실패를 다시 계산, 저장 상태 없음)와 core-only `backoff`(jitter·Retry-After). common에는 다건 호출 재시도 헬퍼가 없다(`http.bounded_request`는 재시도하지 않는 계약). 기존 backoff는 주소 갱신 `next_retry_at` 하나뿐이라 jitter를 넣었다.
+- §4 #8 common 몫: daemon primary pool 2+2 → 4+4. 대기 10초는 적대 리뷰에서 `DaemonQueuePool.connect`가 수명 잠금 안에서 대기해 대기자가 직렬화(N×timeout)됨을 실측해 1초로 두었다(잠금 밖 대기는 후속).
+- 적대 리뷰 2인 반영: settle 120초(상태 갱신·id commit 역전·늦은 worker), 실패 뒤 실행 event·launch 경로 오류면 `worker_alive`로 보고만(중복 실행 방지), 옛 3필드 checkpoint가 cursor None으로 sensor를 멈추던 것 수정, 창 1시간, 빈 결과 전진. 차단기는 worker·launch 장애·취소·backfill을 세지 않고 RetryPolicy 래퍼를 풀며 page를 넘겨 센다. 분류·차단기 tag는 child에 상속하지 않는다. 재검토(2인 APPROVE_WITH_NITS) 뒤: settle을 SQL 필터 대신 순회 중 젊은 event에서 멈추는 방식으로(id·시각 역전 누락 방지), worker_alive engine 판별을 실패 기록 직전의 step 없는 오류로 좁힘, 차단기 지문 계산 수 상한(2×창)과 tag 선판정.
+
 ## 2026-11-24 — python-krex-api canonical ref 6646be5
 
 - transport가 0405 부분 파싱 실패의 유효 행을 쓰려고 python-krex-api #20(`KrexPartialParseError`, `KrexParseError` 하위·기본 계약 불변)을

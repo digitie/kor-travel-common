@@ -758,7 +758,7 @@ wheels = [
 
 [[package]]
 name = "kor-travel-common"
-version = "0.1.0.dev0"
+version = "0.1.0.dev1"
 source = { editable = "." }
 
 [package.optional-dependencies]

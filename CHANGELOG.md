@@ -1,3 +1,29 @@
+## py 0.1.0.dev1 — Dagster 실패 재시도 sensor 순회·사유 없는 실패 분류·연속 실패 차단기·jitter backoff — 2026-11-24
+
+2026-11-23 수집 실패 감사(Map 저장소 `docs/reports/2026-11-23-collection-failure-audit.md` §4 #14·#8, §2.5 #6·#8·#9, §1.3 P2)의 common 몫이다.
+
+### 변경
+
+- `infrastructure_retry_sensor`·`infrastructure_retry_sensor_for_jobs`: 실패 run을 최신순 100건씩 끝까지 다시 순회하던 방식을 RUN_FAILURE event high-water 순회로 바꿨다. cursor `failures:<storage_id>`는 판정을 마친 마지막 event이고 다음 tick은 그 뒤부터 읽는다. 공용 plane의 다른 project 실패는 `run_ids` 한 번으로 걸러진다. 5초 협력 예산이 지나면 판정한 곳까지 저장하고 나머지는 다음 tick에 맡긴다. `FAILURE_LOOKBACK_SECONDS`(1시간)보다 오래된 실패는 보지 않고, `FAILURE_SETTLE_SECONDS`(120초)보다 젊은 실패는 다음 tick에 읽는다. 옛 cursor(run_id·`head`·3필드 `steps:`)와 cursor 없음은 이 창부터 시작하고 5·6필드 `steps:` checkpoint는 그대로 이어 받는다. 순서는 오래된 실패부터다(이전: 최신부터).
+- 같은 sensor가 사유(JobFailureData) 없이 밖에서 실패 처리된 run을 `classify_unreported_failure`로 분류해 `kortravelcommon/failure_class` tag와 warning 로그를 남긴다. `launch_failure`(RUN_START 없음)·`worker_lost`(시작 뒤 소실)는 기존 판정·횟수 상한으로 재예약하고, `canceled`(최대 실행시간 초과 포함)·`step_failure`·`worker_alive`(실패 기록 뒤 실행 event가 있거나 RUN_START 뒤 launch 경로 오류로 실패 처리 — 중복 실행 위험)는 보고만 한다. 이전에는 모두 건너뛰었다. 분류·차단기 tag는 재시도 child에 넘기지 않는다.
+- `coalescing_schedule(queued_stale_after_seconds=...)`(선택): 그보다 오래 QUEUED인 run마다 warning을 남기고, 남은 실행이 그 run 하나뿐이면 이번 tick을 허용한다(대기열은 최대 1건만 는다). 생략하면 기존과 같다.
+- 새 `failure_breaker(...)`: 같은 실패 지문(사유|첫 실패 step|원 예외 형식, RetryPolicy 래퍼는 푼다)으로 threshold회 연속 실패하면 schedule tick을 건너뛰는 `should_execute`. 대기는 base에서 시작해 시험 실행이 실패할 때마다 두 배(max에서 멈춤), 대기가 지나면 시험 1회를 허용하고 그 run이 끝날 때까지 기다린다. 열림을 처음 본 실패 run에 `kortravelcommon/breaker=open`·지문·연속 횟수 tag를 남기고 선택 `on_open(context, streak)`을 한 번 부른다. worker·launch 장애·취소·backfill run은 세지 않는다. 상태는 run 이력에서 매번 다시 계산한다. 직접 구현용으로 `failure_streak`·`failure_fingerprint`·`breaker_retry_at`·`FailureStreak`도 공개한다.
+- 새 core-only `kortravelcommon.backoff`: `backoff_seconds(attempt, base_seconds, cap_seconds, jitter=0.5)`(지수 증가·상한·비율 jitter)와 `retry_after_seconds(value)`(HTTP `Retry-After` 초·HTTP-date 해석, 잘못되면 None).
+- 주소 갱신(`reverse_address`) 실패 행의 `next_retry_at`에 간격 1/4 jitter를 넣었다(같은 장애로 함께 실패한 행이 같은 시각에 몰리지 않게). 상한은 24시간이다(이전 계산의 최대는 약 17시간).
+- daemon-pool: primary engine pool을 2+2에서 4+4로 늘렸다(primary 연결 상한 12→24). 대기는 1초 그대로다(수명 잠금 안 대기가 직렬화되어 늘리면 대기자 수만큼 곱해진다).
+
+#### Breaking
+
+공개 함수 시그니처 제거·변경은 없다(인자 추가만). 재시도 sensor의 cursor 형식·순회 순서·대상 창이 바뀌고, 재예약한 parent의 `infra_retry_pending=true`는 다시 읽지 않아 그대로 남는다. daemon 프로세스의 최대 연결 수가 늘어난다.
+
+### 이관
+
+- 소비자는 새 40자리 common SHA로 재핀한다. 재시도 sensor는 코드 변경 없이 새 순회·분류를 쓴다. 배포 직후 첫 tick은 최근 1시간 실패부터 다시 판정하므로 그 창의 사유 없는 launch 실패가 재예약될 수 있다(재시도 상한·기존 child 확인은 그대로). 재시도는 실패 뒤 최소 120초 뒤에 나간다.
+- 결정적 오류가 반복되는 schedule은 `should_execute=failure_breaker(project=..., location_name=..., job=job, threshold=3, base_cooldown_seconds=900, max_cooldown_seconds=21600)`을 `coalescing_schedule` 또는 `ScheduleDefinition`에 넣는다. 오류 코드별로 가르려면 오류마다 예외 형식을 나누거나 `fingerprint=`를 준다.
+- 오래 QUEUED인 run이 짧은 주기 예약을 막을 수 있는 job은 `queued_stale_after_seconds`를 주기의 몇 배로 준다. STARTED 상한은 job의 `dagster/max_runtime`(RecoveryPolicy)이 맡으므로 주기에 비례하게 낮춘다(5분 job에 14,400초는 과하다).
+- daemon-pool 채택 plane은 공유 PG `max_connections`에 daemon당 primary 24 연결 여유가 있는지 확인한다.
+- 운영 경보는 `kortravelcommon/breaker=open`·`kortravelcommon/failure_class` tag로 run을 찾을 수 있다.
+
 ## ui 0.2.6·tokens 0.1.7·toast 0.1.6 — 선택 칸 터치 영역·아코디언 포커스·Dialog 긴 제목 — 2026-11-23
 
 ### 변경

@@ -51,7 +51,7 @@ def test_plugin_preserves_options_and_lazy_three_engine_lifecycle(registered):
         for item in engines:
             assert isinstance(item.pool, QueuePool)
             assert item.pool._pre_ping is True
-            assert item.pool.size() == 2 and item.pool._max_overflow == 2
+            assert item.pool.size() == 4 and item.pool._max_overflow == 4
             assert item.pool.timeout() == 1 and item.pool._recycle == 3600
             assert item.url == make_url(URL)
             assert item.get_execution_options() == {}
