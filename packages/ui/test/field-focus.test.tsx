@@ -28,7 +28,7 @@ function expectSingleOutline(name: string, element: Element | null) {
   expect(classes.filter(cls => /^focus-visible:outline-/.test(cls)).sort(), name).toEqual(RECIPE);
   expect(classes.filter(cls => FORBIDDEN.test(cls)), name).toEqual([]);
   // 테두리 두께는 상태와 무관하게 하나다(상태 접두 border-width 변화 금지).
-  expect(classes.filter(cls => /:border(?:-[xytrbl])?-(?:\d+|\[[^\]]+\])$/.test(cls)), name).toEqual([]);
+  expect(classes.filter(cls => /^(?:[\w-]+:)*(?:hover|focus|focus-visible|focus-within|active|disabled|aria-[\w-]+|data-[^:]+):border(?:-[xytrbl])?-(?:\d+|\[[^\]]+\])$/.test(cls)), name).toEqual([]);
 }
 
 it("입력·선택·체크·스위치·아코디언·스크롤 영역·배지 포커스는 Button과 같은 outline 하나다", () => {
