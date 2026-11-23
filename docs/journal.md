@@ -1,3 +1,7 @@
+## 2026-11-23 — PR81 병합과 ui 0.2.5 main pack catalog
+
+- PR CI 9 job SUCCESS·적대 리뷰 2인 P0/P1 없음으로 병합 R=fe141143cc8ba75e8fd0b6134e1c9e518e294fa2. main push CI 3종 SUCCESS, artifact 14782962353의 ui 0.2.5·tokens 0.1.6·toast 0.1.5를 [catalog](evidence/releases/field-focus-ui-0.2.5-catalog.md)에 동결했다. 소비자 이관은 각 저장소 PR이 소유한다.
+
 ## 2026-11-23 — 입력·선택 컨트롤 포커스 FS-7.8 정합(ui 0.2.5)
 
 - concierge 390/320 격리 점검에서 input·select·textarea가 `outline-none`+3px 반투명 ring+테두리 색 변화로, 버튼·링크(2px outline·offset 2)와 다른 포커스를 그렸다. 원인은 공통 `Input`·`Textarea`·`NativeSelect`·`SelectTrigger`(와 `Checkbox`·`Switch`·`AccordionTrigger`·`ScrollArea`·`Badge`·선택 카드 `FieldLabel`)가 shadcn 원본 ring 레시피를 그대로 두고 있던 것이다. 0.2.3 Button·0.2.4 TabsTrigger와 같은 outline 하나로 맞췄다.
