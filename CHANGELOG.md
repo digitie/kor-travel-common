@@ -1,3 +1,23 @@
+## ui 0.2.6·tokens 0.1.7·toast 0.1.6 — 선택 칸 터치 영역·아코디언 포커스·Dialog 긴 제목 — 2026-11-23
+
+### 변경
+
+`VirtualTable` 선택 칸(`td`/`th`)은 md(48rem) 미만에서 `h-11`·`w-11`·`min-w-11`·`p-0`이고 체크박스가 가운데에 놓인다. 체크박스의 md 미만 `after`(padding box 14px + 2×15px = 44px)가 칸과 정확히 겹쳐 터치 영역이 44×44px이면서 이웃 행·옆 칸(행 작업 버튼 등)으로 새지 않는다(0.2.5는 44px `after`가 37~41px 안팎 행 밖으로 1~3px, 24~36px 칸 밖으로 수 px 새었다). 칸은 positioned로 만들지 않아 클릭 가능한 행의 inset 포커스 outline·선택 배경이 첫 칸에서 끊기지 않는다. 가상 표는 넓어진 8px을 같은 조건에서 표 최소 폭에 더해 마지막 칸이 행 밖으로 밀리지 않는다. 데스크톱 행 높이·열 폭·터치 영역·보이는 체크박스 16px은 그대로다.
+
+`AccordionContent`는 `overflow-hidden` 대신 `overflow: clip` + `overflow-clip-margin: 4px`로 자른다. 안쪽 컨트롤의 포커스 outline(2px+offset 2px)이 잘리지 않고, 넓은 자식·애니메이션 중 높이는 여전히 잘려 바깥 스크롤 범위에 더해지지 않는다. `overflow-clip-margin`이 없는 WebKit에서는 이전과 같이 잘린다(퇴행 없음).
+
+`DialogContent`가 닫기 버튼을 그릴 때(`showCloseButton` 기본, `unstyled` 아님) 그 안의 `DialogTitle`이 오른쪽 `pr-7`(28px)을 비우고, `DialogTitle`은 `wrap-anywhere`로 공백 없는 긴 토큰도 줄바꿈한다. 긴 제목이 320/390px에서 닫기 버튼과 겹치지 않는다. 여백은 제목 자신의 클래스라 소비자 `className`의 `pr-*`가 이긴다.
+
+시험: `touch-focus-dialog.test.tsx`(클래스 계약), `smoke/touch-focus-browser.spec.ts`(320/390/1440 hit-test·픽셀 outline·제목 글자 사각형 기하, 잘림 대조군 포함). 내장 정책 bytes가 바뀌므로 tokens 0.1.7·toast 0.1.6도 patch를 올렸고 두 패키지의 실행 코드·CSS는 바뀌지 않는다.
+
+#### Breaking
+
+없음. 공개 prop·기본값·`data-slot`은 그대로다. md 미만 선택 칸 높이·폭이 44px이 된다.
+
+### 이관
+
+새 common-ref를 채택하는 소비자는 vendored `@kor-travel/ui` 0.2.6·`@kor-travel/tokens` 0.1.7(toast 사용 시 0.1.6)로 함께 올리고 version·SHA512는 `frontend-artifacts.json`에서 옮긴다(catalog 동결은 이 변경의 main pack 뒤 별도 PR). 앱이 선택 열 체크박스 터치 영역·행 높이를 덮어쓰던 규칙, `AccordionContent`의 `overflow-visible`·내부 padding 보정, Dialog 제목의 `pr-*`·닫기 버튼 위치 보정이 있으면 지운다.
+
 ## ui 0.2.5·tokens 0.1.6·toast 0.1.5 — 입력·선택 컨트롤 포커스 — 2026-11-23
 
 ### 변경

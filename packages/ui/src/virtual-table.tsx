@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
 // Derived-From: digitie/kor-travel-map@32668d003ea6a259468e03970bd167359c19ecdb packages/kor-travel-map-admin/frontend/src/components/ui/data-table.tsx
-// Modified: 2026-11-11 TanStack 9 API와 공통 소비자 계약
+// Modified: 2026-11-11 TanStack 9 API와 공통 소비자 계약; 2026-11-23 md 미만 선택 칸 44×44px(체크박스 터치 영역이 이웃 행·칸과 겹치지 않게)
 "use client";
 
 // 공용 headless VirtualTable — @tanstack/react-table v9 기능 등록 기반. admin/ops UI의 모든
@@ -392,6 +392,18 @@ function pageSelectionState<T extends RowData>(
 
 /** 선택 열. 행 체크박스 이름은 `rowSelectionLabel`이 있으면 행마다 다르게(`홍길동 선택`),
  *  없으면 기존 계약대로 `행 선택`으로 남는다(호출부 호환). */
+/** md 미만에서 선택 칸을 체크박스 터치 영역과 같은 44×44px로 키우고 padding을 없애 체크박스를
+ *  가운데 둔다. 체크박스의 md 미만 `after`(padding box 14px + 2×15px = 44px)가 칸과 정확히 겹쳐
+ *  이웃 행·옆 칸(행 작업 버튼 등)으로 새지 않는다. 칸을 positioned로 만들지 않는다 — 클릭 가능한
+ *  행의 inset outline·선택 배경이 첫 칸에서 끊기지 않게. 데스크톱 행 높이·열 폭은 그대로다. */
+const SELECTION_CELL_CLASS =
+  "max-md:h-11 max-md:w-11 max-md:min-w-11 max-md:p-0";
+const SELECTION_CHECKBOX_CLASS = "max-md:mx-auto";
+/** 가상 표는 열 폭 합(`getTotalSize`)을 표 최소 폭으로 쓴다. md 미만 선택 칸이 `size: 36` →
+ *  44px로 넓어지는 8px을 같은 조건(max-md)에서 최소 폭에 더해 행·머리 행이 마지막 칸을 덮게 한다.
+ *  선택 열 `size`를 바꾸면 이 값도 바꾼다. */
+const SELECTION_EXTRA_WIDTH_CLASS = "max-md:[--kt-vt-select-extra:8px]";
+
 function selectionColumn<TData extends RowData>(
   rowSelectionLabel?: (row: TData) => string,
 ): ColumnDef<TData, unknown> {
@@ -399,8 +411,10 @@ function selectionColumn<TData extends RowData>(
     id: "__select__",
     enableSorting: false,
     size: 36,
+    meta: { className: SELECTION_CELL_CLASS } satisfies DataTableColumnMeta,
     header: ({ table }) => (
       <Checkbox
+        className={SELECTION_CHECKBOX_CLASS}
         aria-label="전체 선택"
         checked={pageSelectionState(table)}
         onCheckedChange={(checked) => {
@@ -411,6 +425,7 @@ function selectionColumn<TData extends RowData>(
     ),
     cell: ({ row }) => (
       <Checkbox
+        className={SELECTION_CHECKBOX_CLASS}
         aria-label={
           rowSelectionLabel
             ? `${rowSelectionLabel(row.original)} 선택`
@@ -816,6 +831,9 @@ function TableSurface<T extends RowData>({
   const groups = hideHeader ? [] : table.getHeaderGroups();
   const role = structuralRole(virtualized);
   const totalWidth = table.getTotalSize();
+  const hasSelection = table
+    .getVisibleLeafColumns()
+    .some((column) => column.id === "__select__");
   return (
     <Table
       containerRef={scrollRef}
@@ -832,8 +850,20 @@ function TableSurface<T extends RowData>({
       role={role("table")}
       aria-rowcount={virtualized ? entries.length + groups.length : undefined}
       aria-colcount={virtualized ? colCount : undefined}
-      className={cn("tabular-nums", virtualized && "grid")}
-      style={virtualized ? { minWidth: totalWidth } : undefined}
+      className={cn(
+        "tabular-nums",
+        virtualized && "grid",
+        virtualized && hasSelection && SELECTION_EXTRA_WIDTH_CLASS,
+      )}
+      style={
+        virtualized
+          ? {
+              minWidth: hasSelection
+                ? `calc(${totalWidth}px + var(--kt-vt-select-extra, 0px))`
+                : totalWidth,
+            }
+          : undefined
+      }
     >
       {caption ? <TableCaption>{caption}</TableCaption> : null}
       {!hideHeader ? (
