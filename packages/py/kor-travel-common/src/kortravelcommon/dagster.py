@@ -38,6 +38,7 @@ import math
 import threading
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from time import monotonic
 from time import time as wall_clock
 from types import SimpleNamespace
@@ -49,12 +50,14 @@ from dagster import (
     DefaultSensorStatus,
     RunRequest,
     RunsFilter,
+    RunStatusChangeRecordsFilter,
     ScheduleDefinition,
     SensorResult,
     SkipReason,
     sensor,
 )
 
+from kortravelcommon.backoff import backoff_seconds
 from kortravelcommon.deadline import call_with_deadline
 from kortravelcommon.pg_errors import pg_error_info
 from kortravelcommon.stall import StallClock, due_alert, mark_alerted, observe_failure
@@ -64,9 +67,109 @@ JOB_TAG = "kortravelcommon/job"
 INFRA_RETRY_ATTEMPT_TAG = "kortravelcommon/infra_retry_attempt"
 INFRA_RETRY_PARENT_TAG = "kortravelcommon/infra_retry_parent"
 INFRA_RETRY_PENDING_TAG = "kortravelcommon/infra_retry_pending"
-_RETRY_SCAN_HEAD = "head"
+# 사유(JobFailureData) 없이 밖에서 실패 처리된 run의 판별 결과. 재시도 sensor가 남긴다.
+FAILURE_CLASS_TAG = "kortravelcommon/failure_class"
+# 실행 시작(RUN_START) 전에 dequeue·launch가 실패했다. step이 돌지 않았으므로 재시도한다.
+FAILURE_CLASS_LAUNCH = "launch_failure"
+# 시작한 뒤 worker가 사라져 run monitoring 등이 실패 처리했다. 취소·step 실패 기록은 없다.
+FAILURE_CLASS_WORKER_LOST = "worker_lost"
+# 취소(최대 실행시간 초과 포함) 뒤 실패 처리됐다. 같은 상한에 다시 걸리므로 보고만 한다.
+FAILURE_CLASS_CANCELED = "canceled"
+# step 실패 기록이 있다. provider·도메인 오류일 수 있으므로 보고만 한다.
+FAILURE_CLASS_STEP_FAILURE = "step_failure"
+# worker가 살아 있을 수 있다: 실패 기록 뒤에도 실행 event가 이어지거나, RUN_START 뒤에
+# launch 경로 오류(launch RPC timeout 등)로 실패 처리됐다. 재시도하면 중복 실행이므로 보고만 한다.
+FAILURE_CLASS_WORKER_ALIVE = "worker_alive"
+_RETRYABLE_FAILURE_CLASSES = frozenset({FAILURE_CLASS_LAUNCH, FAILURE_CLASS_WORKER_LOST})
+# 차단기가 결정적 오류로 세지 않는 분류.
+_NOT_DETERMINISTIC_CLASSES = _RETRYABLE_FAILURE_CLASSES | {FAILURE_CLASS_WORKER_ALIVE}
+# 실행 중인 worker가 남기는 event. 실패 기록 뒤에 보이면 worker가 살아 있다.
+_WORKER_ACTIVITY_EVENTS = frozenset(
+    {
+        DagsterEventType.RUN_START,
+        DagsterEventType.STEP_WORKER_STARTED,
+        DagsterEventType.STEP_START,
+        DagsterEventType.STEP_OUTPUT,
+        DagsterEventType.STEP_SUCCESS,
+        DagsterEventType.ASSET_MATERIALIZATION,
+        DagsterEventType.RUN_SUCCESS,
+    }
+)
+# 재시도 sensor가 보는 실패 창. 이보다 오래된 실패는 다음 정기 실행이 맡는다.
+FAILURE_LOOKBACK_SECONDS = 3600
+# 이보다 젊은 실패 event는 다음 tick에 읽는다. event 저장 뒤 run 상태 갱신·storage id
+# commit 순서 역전·launch timeout 뒤 늦게 시작한 worker의 event를 기다린다.
+FAILURE_SETTLE_SECONDS = 120
+_FAILURE_SCAN_LIMIT = 100
+_FAILURE_CURSOR_PREFIX = "failures:"
 _STEP_CURSOR_PREFIX = "steps:"
 _STALL_CURSOR_PREFIX = "stall:"
+
+
+def _encode_failure_cursor(storage_id: int) -> str:
+    return f"{_FAILURE_CURSOR_PREFIX}{storage_id}"
+
+
+def _decode_failure_cursor(cursor: str | None) -> int | None:
+    """판정을 마친 마지막 RUN_FAILURE event ID. 옛 형식(run_id·head)·손상은 None이다."""
+    if not cursor or not cursor.startswith(_FAILURE_CURSOR_PREFIX):
+        return None
+    raw = cursor[len(_FAILURE_CURSOR_PREFIX) :]
+    if not (raw.isascii() and raw.isdecimal() and len(raw) <= 18):
+        return None
+    return int(raw)
+
+
+def classify_unreported_failure(
+    instance: Any, run_id: str, failure_storage_id: int | None = None
+) -> str:
+    """사유 없이 실패 처리된 run을 event 이력의 구조로 분류한다(원문 message는 보지 않는다).
+
+    Dagster는 dequeue·launch 실패, run worker 소실, 최대 실행시간 초과 종료를 모두
+    `report_run_failed(run)`(JobFailureData 없음)로 기록한다. 취소·step 실패 기록이 있으면
+    보고 대상, 없으면 RUN_START 유무로 launch 실패와 worker 소실을 가른다. RUN_START가
+    있어도 실패 event(`failure_storage_id`) 뒤에 실행 event가 있거나, launch 경로 오류
+    (오류가 담긴 ENGINE_EVENT)가 남아 있으면 worker가 살아 있을 수 있어 보고만 한다.
+    launch 단계의 결정적 오류(정의 load 실패 등)도 `launch_failure`이며 재시도 상한만큼
+    반복될 수 있다.
+    """
+    blocking = instance.get_records_for_run(
+        run_id=run_id,
+        of_type={DagsterEventType.RUN_CANCELING, DagsterEventType.STEP_FAILURE},
+        limit=1,
+        ascending=False,
+    ).records
+    if blocking:
+        event = blocking[0].event_log_entry.dagster_event
+        if event is not None and event.event_type == DagsterEventType.STEP_FAILURE:
+            return FAILURE_CLASS_STEP_FAILURE
+        return FAILURE_CLASS_CANCELED
+    started = instance.get_records_for_run(
+        run_id=run_id, of_type=DagsterEventType.RUN_START, limit=1
+    ).records
+    if not started:
+        return FAILURE_CLASS_LAUNCH
+    if failure_storage_id is not None:
+        latest_activity = instance.get_records_for_run(
+            run_id=run_id, of_type=set(_WORKER_ACTIVITY_EVENTS), limit=1, ascending=False
+        ).records
+        if latest_activity and latest_activity[0].storage_id > failure_storage_id:
+            return FAILURE_CLASS_WORKER_ALIVE
+    engine_events = instance.get_records_for_run(
+        run_id=run_id, of_type=DagsterEventType.ENGINE_EVENT, limit=20, ascending=False
+    ).records
+    for record in engine_events:
+        if failure_storage_id is not None and record.storage_id > failure_storage_id:
+            continue
+        event = record.event_log_entry.dagster_event
+        # launch_run/submit_run 실패 경로는 실패 기록 바로 앞에 step 없는 오류 engine event를
+        # 남긴다(launch RPC timeout 등 — worker가 살아 있을 수 있다). 실패 기록 직전의
+        # engine event 하나만 본다. step의 compute log 오류 같은 더 앞선 기록은 보지 않는다.
+        data = getattr(event, "event_specific_data", None)
+        if getattr(data, "error", None) is not None and not getattr(event, "step_key", None):
+            return FAILURE_CLASS_WORKER_ALIVE
+        break
+    return FAILURE_CLASS_WORKER_LOST
 
 
 @dataclass(frozen=True)
@@ -163,11 +266,7 @@ def has_active_run(instance: Any, *, job_name: str, project: str, location_name:
     while True:
         batch = instance.get_runs(filters=filters, limit=100, cursor=cursor)
         for run in batch:
-            origin = run.remote_job_origin
-            if origin is not None:
-                if origin.repository_origin.code_location_origin.location_name == location_name:
-                    return True
-            elif run.tags.get(PROJECT_TAG) == project:
+            if _owned(run, project=project, location_name=location_name):
                 return True
         if len(batch) < 100:
             return False
@@ -180,23 +279,410 @@ def coalescing_schedule(
     location_name: str,
     job: Any,
     should_execute: Callable[[Any], bool] | None = None,
+    queued_stale_after_seconds: float | None = None,
     **kwargs: Any,
 ):
     """진행/대기 중인 동일 job이 있으면 새 tick을 합친다. 수동 실행은 별도다.
 
     경쟁하는 수동 실행은 instance의 JOB_TAG별 limit=1로 막아야 한다.
     DB 장애는 예외로 전달하여 tick을 실패시킨다. 확인 실패를 빈 큐로 간주하지 않는다.
+
+    `queued_stale_after_seconds`를 주면 그보다 오래 QUEUED인 run마다 warning을 남긴다.
+    남은 실행이 그 오래된 QUEUED run 하나뿐이면 이번 tick을 허용한다(막힌 대기 run 하나가
+    예약을 영원히 막지 않게 한다). 생략하면 기존과 같다. STARTED run의 상한은 job의
+    `dagster/max_runtime`이 맡으므로 주기에 비례하게 잡는다(5분 job에 몇 시간은 과하다).
     """
 
-    def eligible(context):
-        active = has_active_run(
+    if queued_stale_after_seconds is not None:
+        _require_positive(queued_stale_after_seconds, "queued_stale_after_seconds")
+
+    def blocked(context) -> bool:
+        if queued_stale_after_seconds is None:
+            return has_active_run(
+                context.instance, job_name=job.name, project=project, location_name=location_name
+            )
+        active = _active_run_records(
             context.instance, job_name=job.name, project=project, location_name=location_name
         )
-        if active:
+        now = wall_clock()
+        if any(_epoch(record.create_timestamp) > now + 60 for record in active):
+            # 저장소 시각이 UTC가 아니면(서버 TimeZone) 나이가 음수가 되어 상한이 꺼진다.
+            context.log.warning("run 생성 시각이 현재보다 미래입니다. 저장소 시간대를 확인합니다.")
+        stale = [
+            record
+            for record in active
+            if record.dagster_run.status == DagsterRunStatus.QUEUED
+            and now - _epoch(record.create_timestamp) >= queued_stale_after_seconds
+        ]
+        for record in stale:
+            context.log.warning(
+                "QUEUED run이 %d초째 dequeue되지 않았습니다: %s %s",
+                now - _epoch(record.create_timestamp),
+                job.name,
+                record.dagster_run.run_id,
+            )
+        if len(active) == 1 and stale:
+            # 막힌 대기 run 하나 뒤에 한 번만 더 넣는다. 새 run도 막히면 다음 tick은 그 새
+            # run(아직 젊다)이나 대기 run 둘을 보고 다시 합치므로 대기열이 계속 불지 않는다.
+            context.log.warning(
+                "오래 대기한 QUEUED run만 남아 이번 예약을 허용합니다: %s", job.name
+            )
+            return False
+        return bool(active)
+
+    def eligible(context):
+        if blocked(context):
             context.log.info("동일 job 실행이 남아 있어 이번 예약을 합칩니다: %s", job.name)
-        return not active and (should_execute(context) if should_execute is not None else True)
+            return False
+        return should_execute(context) if should_execute is not None else True
 
     return ScheduleDefinition(job=job, should_execute=eligible, **kwargs)
+
+
+def _require_positive(value: object, name: str) -> float:
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not math.isfinite(value)
+        or value <= 0
+    ):
+        raise ValueError(f"{name}는 유한한 양수여야 합니다.")
+    return float(value)
+
+
+def _epoch(value: Any) -> float:
+    """RunRecord 시각(datetime·epoch)을 epoch 초로. 시간대 없는 datetime은 UTC로 본다."""
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=UTC)
+        return value.timestamp()
+    return float(value)
+
+
+def _owned(run: Any, *, project: str, location_name: str) -> bool:
+    origin = run.remote_job_origin
+    if origin is not None:
+        return origin.repository_origin.code_location_origin.location_name == location_name
+    return run.tags.get(PROJECT_TAG) == project
+
+
+def _active_run_records(instance: Any, *, job_name: str, project: str, location_name: str):
+    cursor = None
+    owned = []
+    filters = RunsFilter(job_name=job_name, statuses=ACTIVE_STATUSES)
+    while True:
+        batch = instance.get_run_records(filters=filters, limit=100, cursor=cursor)
+        owned.extend(
+            record
+            for record in batch
+            if _owned(record.dagster_run, project=project, location_name=location_name)
+        )
+        if len(batch) < 100:
+            return owned
+        cursor = batch[-1].dagster_run.run_id
+
+
+# 차단기가 연 실패 run에 남기는 경보용 tag. 운영 경보는 이 tag로 run을 찾는다.
+BREAKER_TAG = "kortravelcommon/breaker"
+BREAKER_FINGERPRINT_TAG = "kortravelcommon/breaker_fingerprint"
+BREAKER_STREAK_TAG = "kortravelcommon/breaker_streak"
+_FINGERPRINT_CHARS = 200
+_PARENT_ONLY_TAGS = frozenset(
+    {FAILURE_CLASS_TAG, BREAKER_TAG, BREAKER_FINGERPRINT_TAG, BREAKER_STREAK_TAG}
+)
+
+
+@dataclass(frozen=True)
+class FailureStreak:
+    """가장 최근에 끝난 run부터 같은 실패 지문이 연속한 구간."""
+
+    fingerprint: str
+    count: int
+    last_run_id: str
+    last_failed_at: float
+    # 가장 최근 실패보다 새 run이 아직 끝나지 않았다(시험 실행이 진행 중).
+    in_flight: bool = False
+
+
+# 사용자 예외를 cause로 감싸는 Dagster 오류. 지문에는 감싼 원 예외 형식을 쓴다.
+_WRAPPER_ERRORS = frozenset(
+    {
+        "DagsterExecutionStepExecutionError",
+        "RetryRequestedFromPolicy",
+        "RetryRequested",
+        "DagsterMaxRetriesExceededError",
+    }
+)
+# 재시도로 고칠 수 있는 worker·launch 장애. 차단기는 이 실패를 세지도 끊지도 않는다.
+_TRANSIENT_RUN_REASONS = frozenset(
+    {"START_TIMEOUT", "UNEXPECTED_TERMINATION", "RUN_WORKER_RESTART"}
+)
+
+
+def _error_name(error: Any) -> str:
+    for _ in range(8):
+        if error is None:
+            return ""
+        if error.cls_name in _WRAPPER_ERRORS and error.cause is not None:
+            error = error.cause
+            continue
+        break
+    return error.cls_name or ""
+
+
+def failure_fingerprint(instance: Any, run_id: str) -> str | None:
+    """실패 사유·첫 실패 step·예외 형식으로 만든 지문. 원문 message는 넣지 않는다.
+
+    worker·launch 장애(`START_TIMEOUT` 등, 사유 없는 `launch_failure`·`worker_lost`·
+    `worker_alive`)는 결정적 오류가 아니므로 None을 돌려준다. 최대 실행시간 초과로
+    취소된 실패는 센다.
+    """
+    run_failure = instance.get_records_for_run(
+        run_id=run_id, of_type=DagsterEventType.RUN_FAILURE, limit=1, ascending=False
+    ).records
+    run_data = (
+        run_failure[0].event_log_entry.dagster_event.event_specific_data if run_failure else None
+    )
+    reason = getattr(getattr(run_data, "failure_reason", None), "value", None)
+    if reason in _TRANSIENT_RUN_REASONS:
+        return None
+    if run_data is None:
+        failure_class = classify_unreported_failure(
+            instance, run_id, run_failure[0].storage_id if run_failure else None
+        )
+        if failure_class in _NOT_DETERMINISTIC_CLASSES:
+            return None
+        if failure_class == FAILURE_CLASS_CANCELED:
+            return "CANCELED||"
+    reason = reason or "NONE"
+    step_failure = instance.get_records_for_run(
+        run_id=run_id, of_type=DagsterEventType.STEP_FAILURE, limit=1, ascending=True
+    ).records
+    if step_failure:
+        event = step_failure[0].event_log_entry.dagster_event
+        step_key = event.step_key or ""
+        error = getattr(event.event_specific_data, "error", None)
+    else:
+        step_key = ""
+        error = getattr(run_data, "error", None)
+    return f"{reason}|{step_key}|{_error_name(error)}"[:_FINGERPRINT_CHARS]
+
+
+def failure_streak(
+    instance: Any,
+    *,
+    job_name: str,
+    project: str,
+    location_name: str,
+    limit: int = 32,
+    fingerprint: Callable[[Any, str], str | None] = failure_fingerprint,
+) -> FailureStreak | None:
+    """최근 run을 생성 역순으로 읽어 같은 지문의 연속 실패를 센다. 성공을 만나면 멈춘다.
+
+    취소된 run, backfill run, 다른 project/location run, 지문이 None인 실패(worker·launch
+    장애)는 건너뛴다(연속을 끊지도 세지도 않는다). 수동·재시도 run도 같은 job이면 센다.
+    `count`는 최대 `limit`까지만 센다. 세어 볼 실패가 없거나 가장 최근 판정 run이 성공이면
+    None이다. 읽는 run은 page 5개(최대 500건), 지문 계산은 `2×limit`건까지다.
+    """
+    if type(limit) is not int or not 1 <= limit <= 100:
+        raise ValueError("limit는 1~100 정수여야 합니다.")
+    filters = RunsFilter(
+        job_name=job_name,
+        statuses=[
+            DagsterRunStatus.SUCCESS,
+            DagsterRunStatus.FAILURE,
+            DagsterRunStatus.CANCELED,
+            *ACTIVE_STATUSES,
+        ],
+    )
+    in_flight = False
+    first = None
+    count = 0
+    computed = 0
+    cursor = None
+    done = False
+    for _ in range(5):
+        records = instance.get_run_records(filters=filters, limit=100, cursor=cursor)
+        for record in records:
+            run = record.dagster_run
+            if (
+                not _owned(run, project=project, location_name=location_name)
+                or "dagster/backfill" in run.tags
+            ):
+                continue
+            if run.status in ACTIVE_STATUSES:
+                in_flight = in_flight or first is None
+                continue
+            if run.status == DagsterRunStatus.CANCELED:
+                continue
+            if run.status != DagsterRunStatus.FAILURE:
+                done = True
+                break
+            # 이미 판정된 tag로 worker·launch 장애를 event 조회 없이 건너뛴다.
+            if (
+                run.tags.get("dagster/failure_reason") in _TRANSIENT_RUN_REASONS
+                or run.tags.get(FAILURE_CLASS_TAG) in _NOT_DETERMINISTIC_CLASSES
+            ):
+                continue
+            computed += 1
+            if computed > 2 * limit:
+                # 세지 않는 실패가 길게 이어지면 지문 계산을 멈춘다(tick 비용 상한).
+                done = True
+                break
+            current = fingerprint(instance, run.run_id)
+            if current is None:
+                continue
+            if first is None:
+                first = (current, record)
+            elif current != first[0]:
+                done = True
+                break
+            count += 1
+            if count >= limit:
+                done = True
+                break
+        if done or len(records) < 100:
+            break
+        cursor = records[-1].dagster_run.run_id
+    if first is None:
+        return None
+    current, record = first
+    return FailureStreak(
+        fingerprint=current,
+        count=count,
+        last_run_id=record.dagster_run.run_id,
+        last_failed_at=(
+            record.end_time if record.end_time is not None else _epoch(record.update_timestamp)
+        ),
+        in_flight=in_flight,
+    )
+
+
+def breaker_retry_at(
+    streak: FailureStreak,
+    *,
+    threshold: int,
+    base_cooldown_seconds: float,
+    max_cooldown_seconds: float,
+) -> float | None:
+    """차단기가 열렸으면 다음 시험 실행을 허용할 epoch 초, 닫혀 있으면 None.
+
+    threshold번째 연속 실패에서 열리고 대기는 base에서 시작해 시험이 실패할 때마다 두 배
+    (max에서 멈춤)다. 소비자가 자체 저장소로 차단기를 구현할 때도 이 계산을 쓸 수 있다.
+    """
+    if streak.count < threshold:
+        return None
+    cooldown = backoff_seconds(
+        streak.count - threshold + 1,
+        base_seconds=base_cooldown_seconds,
+        cap_seconds=max_cooldown_seconds,
+        jitter=0,
+    )
+    return streak.last_failed_at + cooldown
+
+
+def failure_breaker(
+    *,
+    project: str,
+    location_name: str,
+    job: Any,
+    threshold: int = 3,
+    base_cooldown_seconds: float = 900,
+    max_cooldown_seconds: float = 6 * 3600,
+    fingerprint: Callable[[Any, str], str | None] = failure_fingerprint,
+    on_open: Callable[[Any, FailureStreak], None] | None = None,
+) -> Callable[[Any], bool]:
+    """같은 지문으로 threshold회 연속 실패하면 schedule tick을 건너뛰는 `should_execute`.
+
+    재시도로 고칠 수 없는 결정적 오류가 매 주기 run을 만드는 것을 막는다. 상태는 따로
+    저장하지 않고 매 tick run 이력에서 다시 계산한다(재기동·배포에 안전하다).
+
+    - 열림: 마지막 실패 뒤 대기(`breaker_retry_at`) 동안 tick을 건너뛴다. 대기가 지나면
+      시험 실행 한 번을 허용하고(반개방), 그 run이 끝날 때까지 다음 tick은 건너뛴다.
+      시험이 같은 지문으로 실패하면 대기가 두 배가 되고, 성공하거나 지문이 바뀌면 닫힌다.
+    - 경보: 열림을 처음 본 실패 run에 `BREAKER_TAG=open`, 지문, 연속 횟수 tag를 남기고
+      warning 로그를 쓴다. `on_open(context, streak)`는 그 tag를 새로 쓰기 직전에 한 번
+      부른다. 콜백이 실패하면 tag를 쓰지 않아 다음 tick에 다시 부른다(최소 1회 전달이며
+      tag 쓰기가 실패하면 중복될 수 있다). 콜백은 짧게 끝나야 한다(schedule 평가 시간 안).
+      연속 횟수 tag는 대기 계산에 필요한 창(threshold+대기 두 배 횟수)까지만 센다.
+    - 지문 기본값은 실패 사유|첫 실패 step|예외 형식(RetryPolicy·step 오류 래퍼는 원 예외로
+      푼다)이다. worker·launch 장애(`failure_fingerprint`가 None)는 세지도 끊지도 않는다.
+      오류 코드로 가르려면 오류마다 예외 형식을 나누거나 `fingerprint(instance, run_id)`를
+      준다(원문 message는 넣지 않는다). backfill run은 보지 않는다.
+    - 운영: 원인을 고쳐 배포해도 남은 대기 동안은 열려 있다. 수동 실행 한 번이 성공하면 닫힌다.
+
+    `coalescing_schedule(should_execute=...)` 또는 `ScheduleDefinition(should_execute=...)`에
+    넣는다. 이력 조회가 실패하면 예외로 tick을 실패시킨다(확인 실패를 정상으로 보지 않는다).
+    """
+    if type(threshold) is not int or not 1 <= threshold <= 50:
+        raise ValueError("threshold는 1~50 정수여야 합니다.")
+    base = _require_positive(base_cooldown_seconds, "base_cooldown_seconds")
+    cap = _require_positive(max_cooldown_seconds, "max_cooldown_seconds")
+    if base > cap:
+        raise ValueError("base_cooldown_seconds는 max_cooldown_seconds 이하여야 합니다.")
+    # 대기가 max에 닿는 데 필요한 만큼만 이력을 읽는다.
+    scan_limit = min(100, threshold + math.ceil(math.log2(cap / base)) + 1)
+
+    def should_execute(context) -> bool:
+        streak = failure_streak(
+            context.instance,
+            job_name=job.name,
+            project=project,
+            location_name=location_name,
+            limit=scan_limit,
+            fingerprint=fingerprint,
+        )
+        if streak is None:
+            return True
+        retry_at = breaker_retry_at(
+            streak,
+            threshold=threshold,
+            base_cooldown_seconds=base,
+            max_cooldown_seconds=cap,
+        )
+        if retry_at is None:
+            return True
+        _record_open(context, streak, on_open)
+        if streak.in_flight:
+            context.log.info("차단기 시험 실행이 아직 끝나지 않았습니다: %s", job.name)
+            return False
+        now = wall_clock()
+        if now >= retry_at:
+            context.log.warning(
+                "차단기 반개방: 같은 실패 %d회 뒤 시험 실행 1회를 허용합니다: %s %s",
+                streak.count,
+                job.name,
+                streak.fingerprint,
+            )
+            return True
+        context.log.warning(
+            "차단기 열림: 같은 실패 %d회, %d초 뒤 시험 실행: %s %s",
+            streak.count,
+            retry_at - now,
+            job.name,
+            streak.fingerprint,
+        )
+        return False
+
+    return should_execute
+
+
+def _record_open(context: Any, streak: FailureStreak, on_open) -> None:
+    tags = {
+        BREAKER_TAG: "open",
+        BREAKER_FINGERPRINT_TAG: streak.fingerprint,
+        BREAKER_STREAK_TAG: str(streak.count),
+    }
+    run = context.instance.get_run_by_id(streak.last_run_id)
+    if run is None or all(run.tags.get(key) == value for key, value in tags.items()):
+        return
+    if on_open is not None:
+        try:
+            on_open(context, streak)
+        except Exception:
+            context.log.exception("차단기 경보 콜백이 실패하여 다음 tick에 다시 부릅니다.")
+            return
+    context.instance.add_run_tags(streak.last_run_id, tags)
 
 
 def _failure_signature(exc: BaseException) -> str:
@@ -421,7 +907,27 @@ def _infrastructure_retry_sensor(
             and getattr(getattr(failure_data, "error", None), "cls_name", None)
             == "DagsterSubprocessError"
         )
-        if (
+        unreported = (
+            checkpoint is None
+            and failure_data is None
+            and context.failure_event.event_type_value == DagsterEventType.RUN_FAILURE.value
+        )
+        if unreported:
+            failure_class = classify_unreported_failure(
+                instance, run.run_id, context.failure_storage_id
+            )
+            if run.tags.get(FAILURE_CLASS_TAG) != failure_class:
+                # 분류 tag는 보고용이다. 예산이 부족하면 tick을 실패시키지 않고 생략한다.
+                if monotonic() - context.started < 8:
+                    instance.add_run_tags(run.run_id, {FAILURE_CLASS_TAG: failure_class})
+            log = getattr(context, "log", None)
+            if log is not None:
+                log.warning(
+                    "사유 없이 실패 처리된 run을 분류했습니다: %s %s", run.run_id, failure_class
+                )
+            if failure_class not in _RETRYABLE_FAILURE_CLASSES:
+                return SkipReason(f"사유 없는 실패({failure_class})는 보고만 합니다.")
+        elif (
             getattr(reason, "value", None)
             not in {
                 "UNEXPECTED_TERMINATION",
@@ -545,7 +1051,12 @@ def _infrastructure_retry_sensor(
                 )
             raise TimeoutError("재시도 인계에 필요한 시간 예산이 부족합니다.")
         # 이전 run의 native 상태 태그는 전달하지 않는다. job 정의의 실행 설정만 다시 적용한다.
-        tags = {key: value for key, value in run.tags.items() if not key.startswith("dagster/")}
+        # parent의 실패 판정(분류·차단기 경보) tag도 child에 넘기지 않는다.
+        tags = {
+            key: value
+            for key, value in run.tags.items()
+            if not key.startswith("dagster/") and key not in _PARENT_ONLY_TAGS
+        }
         tags.update(job.tags)
         tags.update(policy.tags(project=project, job_name=job.name))
         tags.pop(INFRA_RETRY_PENDING_TAG, None)
@@ -575,96 +1086,160 @@ def _infrastructure_retry_sensor(
             tags=tags,
         )
 
-    def evaluate_failures(context):
-        started = monotonic()
-        instance = context.instance
+    def runs_by_id(instance, run_ids):
         filter_tags = {PROJECT_TAG: project}
         if instance.run_retries_enabled:
             filter_tags[INFRA_RETRY_PENDING_TAG] = "true"
-        checkpoint = _decode_step_checkpoint(context.cursor)
-        cursor = None if context.cursor == _RETRY_SCAN_HEAD else context.cursor or None
-        if checkpoint is not None:
-            resumed = instance.get_run_by_id(checkpoint.run_id)
-            runs = [resumed] if resumed is not None else []
-        else:
-            if cursor is not None and instance.get_run_by_id(cursor) is None:
-                cursor = None
-            runs = instance.get_runs(
-                filters=RunsFilter(
-                    job_name=next(iter(jobs)) if single_job else None,
-                    statuses=[DagsterRunStatus.FAILURE],
-                    tags=filter_tags,
-                ),
-                limit=100,
-                cursor=cursor,
+        unique = list(dict.fromkeys(run_ids))
+        if not unique:
+            return {}
+        runs = instance.get_runs(
+            filters=RunsFilter(
+                run_ids=unique,
+                job_name=next(iter(jobs)) if single_job else None,
+                statuses=[DagsterRunStatus.FAILURE],
+                tags=filter_tags,
+            ),
+            limit=len(unique),
+        )
+        return {run.run_id: run for run in runs}
+
+    def evaluate_checkpoint(context, started, checkpoint):
+        """한 run의 step 이력 검증을 이어 한다. 끝나면 그 실패 event 다음부터 훑는다."""
+        instance = context.instance
+        resumed = runs_by_id(instance, [checkpoint.run_id]).get(checkpoint.run_id)
+        # 옛 3필드 checkpoint의 실패 event ID는 0이다. 0부터 읽어도 창(timestamp) 안만 본다.
+        # None을 돌려주면 Dagster가 옛 cursor를 그대로 두어 sensor가 멈춘다.
+        after = _encode_failure_cursor(checkpoint.failure_storage_id)
+        if resumed is None or resumed.job_name not in jobs:
+            return SensorResult(cursor=after)
+        records = instance.get_records_for_run(
+            run_id=resumed.run_id,
+            # 완료 checkpoint 뒤에 추가된 step 실패도 확인한다. terminal 이벤트 ID만
+            # 같다고 step 이력이 불변이라고 가정하지 않는다.
+            of_type=(
+                {DagsterEventType.RUN_FAILURE, DagsterEventType.STEP_FAILURE}
+                if checkpoint.complete
+                else DagsterEventType.RUN_FAILURE
+            ),
+            limit=1,
+            ascending=False,
+        ).records
+        if not records:
+            return SensorResult(cursor=after)
+        if checkpoint.complete and records[0].storage_id != max(
+            checkpoint.failure_storage_id, checkpoint.step_storage_id
+        ):
+            # 새 실패 기록은 완료 증거를 무효화한다. 다음 tick에서 RUN_FAILURE를
+            # 확인하고 cursor 이후 이력을 읽어 provider 거부와 복구 진행을 함께 지킨다.
+            return SensorResult(
+                cursor=_StepCheckpoint(
+                    checkpoint.run_id,
+                    checkpoint.cursor,
+                    checkpoint.crashed_steps,
+                    False,
+                    checkpoint.failure_storage_id,
+                    checkpoint.step_storage_id,
+                ).encode()
             )
-        requests = []
-        for index, run in enumerate(runs):
-            # 느리지만 정상인 metadata에서도 완료한 행을 checkpoint한다. 전체 페이지가
-            # 10초를 넘는다는 이유로 같은 100행을 영구 반복하지 않는다.
-            if index and monotonic() - started >= 5:
-                return SensorResult(cursor=runs[index - 1].run_id)
-            if run.job_name not in jobs:
-                continue
-            records = instance.get_records_for_run(
-                run_id=run.run_id,
-                # 완료 checkpoint 뒤에 추가된 step 실패도 확인한다. terminal 이벤트 ID만
-                # 같다고 step 이력이 불변이라고 가정하지 않는다.
-                of_type=(
-                    {DagsterEventType.RUN_FAILURE, DagsterEventType.STEP_FAILURE}
-                    if checkpoint is not None and checkpoint.complete
-                    else DagsterEventType.RUN_FAILURE
+        result = retry_failed_run(
+            SimpleNamespace(
+                instance=instance,
+                dagster_run=resumed,
+                failure_event=records[0].event_log_entry.dagster_event,
+                started=started,
+                step_checkpoint=checkpoint,
+                failure_storage_id=(
+                    checkpoint.failure_storage_id if checkpoint.complete else records[0].storage_id
+                ),
+                log=context.log,
+            )
+        )
+        if isinstance(result, _StepCheckpoint):
+            return SensorResult(cursor=result.encode())
+        if isinstance(result, RunRequest):
+            return SensorResult(run_requests=[result], cursor=after)
+        return SensorResult(cursor=after)
+
+    def evaluate_failures(context):
+        started = monotonic()
+        instance = context.instance
+        checkpoint = _decode_step_checkpoint(context.cursor)
+        if checkpoint is not None:
+            return evaluate_checkpoint(context, started, checkpoint)
+        # 이미 판정한 실패 event 다음부터 오래된 순서로 읽는다. 옛 run_id/head cursor나
+        # cursor가 없으면 최근 창 안의 실패부터 시작한다(창 밖의 오래된 실패는 재시도하지 않는다).
+        after = _decode_failure_cursor(context.cursor)
+        now = wall_clock()
+        # 창보다 오래 밀린 실패(예: sensor를 오래 멈춘 뒤)는 건너뛴다. 늦은 재실행은 다음
+        # 정기 실행과 겹칠 뿐이다.
+        settled_before = now - FAILURE_SETTLE_SECONDS
+        window_start = now - FAILURE_LOOKBACK_SECONDS
+        events = instance.fetch_run_status_changes(
+            RunStatusChangeRecordsFilter(
+                DagsterEventType.RUN_FAILURE,
+                after_storage_id=after,
+                after_timestamp=window_start,
+            ),
+            limit=_FAILURE_SCAN_LIMIT,
+            ascending=True,
+        ).records
+        if not events:
+            # 창 안에 실패가 없다. 창보다 오래된 최신 event까지 전진해 창 밖 행을 매 tick
+            # 다시 훑지 않는다.
+            latest = instance.fetch_run_status_changes(
+                RunStatusChangeRecordsFilter(
+                    DagsterEventType.RUN_FAILURE, before_timestamp=window_start
                 ),
                 limit=1,
                 ascending=False,
             ).records
-            if not records:
-                continue
+            after = max(after or 0, latest[0].storage_id if latest else 0)
+            return SensorResult(cursor=_encode_failure_cursor(after))
+        # 공용 plane의 실패 event는 모든 project의 것이다. project·job run만 한 번에 고른다.
+        owned = runs_by_id(instance, [event.run_id for event in events])
+        # 같은 run의 실패 event가 batch에 여럿이면 마지막 것만 판정한다.
+        latest = {event.run_id: event.storage_id for event in events}
+        handled = after
+        evaluated = False
+        for event in events:
+            # id 순서로 읽다가 아직 자리 잡지 않은(젊은) event를 만나면 멈춘다. 그 앞까지만
+            # 전진하므로 id와 생성 시각 순서가 어긋난 event도 다음 tick에 다시 읽는다.
+            if event.timestamp >= settled_before:
+                break
+            run = owned.get(event.run_id)
+            dagster_event = event.event_log_entry.dagster_event
             if (
-                checkpoint is not None
-                and checkpoint.complete
-                and records[0].storage_id
-                != max(checkpoint.failure_storage_id, checkpoint.step_storage_id)
+                run is None
+                or run.job_name not in jobs
+                or dagster_event is None
+                or latest[event.run_id] != event.storage_id
             ):
-                # 새 실패 기록은 완료 증거를 무효화한다. 다음 tick에서 RUN_FAILURE를
-                # 확인하고 cursor 이후 이력을 읽어 provider 거부와 복구 진행을 함께 지킨다.
-                return SensorResult(
-                    cursor=_StepCheckpoint(
-                        checkpoint.run_id,
-                        checkpoint.cursor,
-                        checkpoint.crashed_steps,
-                        False,
-                        checkpoint.failure_storage_id,
-                        checkpoint.step_storage_id,
-                    ).encode()
-                )
-            event = records[0].event_log_entry.dagster_event
+                handled = event.storage_id
+                continue
+            # 판정한 event까지만 전진한다. 다음 tick은 그 뒤부터 이어 읽고 같은 run을 다시
+            # 훑지 않는다. 첫 판정은 예산과 무관하게 하여 매 tick 반드시 전진한다.
+            if evaluated and monotonic() - started >= 5:
+                break
+            evaluated = True
             result = retry_failed_run(
                 SimpleNamespace(
                     instance=instance,
                     dagster_run=run,
-                    failure_event=event,
+                    failure_event=dagster_event,
                     started=started,
-                    step_checkpoint=checkpoint,
-                    failure_storage_id=(
-                        checkpoint.failure_storage_id
-                        if checkpoint is not None and checkpoint.complete
-                        else records[0].storage_id
-                    ),
+                    step_checkpoint=None,
+                    failure_storage_id=event.storage_id,
+                    log=context.log,
                 )
             )
             if isinstance(result, _StepCheckpoint):
                 return SensorResult(cursor=result.encode())
+            handled = event.storage_id
             if isinstance(result, RunRequest):
-                requests.append(result)
                 # 같은 job은 한 tick에 하나만 발급한다. 다음 tick에 active 여부를 재확인한다.
-                return SensorResult(run_requests=requests, cursor=run.run_id)
-        # 유한한 batch를 모두 확인한 뒤에만 cursor를 전진한다. 끝에서는 새 실패부터 재확인한다.
-        return SensorResult(
-            cursor=runs[-1].run_id
-            if runs and (checkpoint is not None or len(runs) == 100)
-            else _RETRY_SCAN_HEAD
-        )
+                return SensorResult(run_requests=[result], cursor=_encode_failure_cursor(handled))
+        return SensorResult(cursor=_encode_failure_cursor(handled or 0))
 
     @sensor(
         name=name,

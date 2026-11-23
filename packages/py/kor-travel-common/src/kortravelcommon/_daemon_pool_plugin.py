@@ -15,8 +15,13 @@ from sqlalchemy.engine import CreateEnginePlugin, Engine
 from sqlalchemy.pool import NullPool, QueuePool
 
 PLUGIN_NAME = "kortravel_daemon_pool"
-POOL_SIZE = 2
-MAX_OVERFLOW = 2
+# daemon은 schedule·sensor worker(각 4)와 queue·monitoring·backfill thread가 세 storage를
+# 함께 쓴다. 2+2에서는 기동 뒤 몇 시간 동안 pool 부족 경고와 tick 실패가 났다
+# (2026-11-23 수집 실패 감사). primary 상한은 3×(4+4)=24 연결이다.
+# 대기는 1초로 둔다. DaemonQueuePool.connect는 수명 잠금 안에서 대기하므로 대기자가
+# 직렬화되어 N번째 대기자는 N×timeout을 기다린다. 늘리려면 잠금 밖 대기가 먼저다.
+POOL_SIZE = 4
+MAX_OVERFLOW = 4
 POOL_TIMEOUT = 1
 POOL_RECYCLE = 3600
 

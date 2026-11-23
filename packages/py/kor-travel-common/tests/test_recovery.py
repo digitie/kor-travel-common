@@ -342,7 +342,8 @@ def test_retry_cursor_cycles_to_new_failures_after_the_last_page():
         end_tick = retry.evaluate_tick(
             build_sensor_context(instance=instance, cursor=first_tick.cursor)
         )
-        assert end_tick.cursor == "head"
+        # 판정한 실패 event 뒤에 새 실패가 없으면 cursor는 그대로다(처음부터 다시 훑지 않는다).
+        assert end_tick.cursor == first_tick.cursor and not end_tick.run_requests
         second = failure_context(instance)
         new_tick = retry.evaluate_tick(
             build_sensor_context(instance=instance, cursor=end_tick.cursor)
@@ -495,14 +496,18 @@ def test_slow_healthy_metadata_checkpoints_completed_rows_before_outer_deadline(
     import kortravelcommon.dagster as dagster_module
 
     with DagsterInstance.local_temp() as instance:
-        target = failure_context(instance)
+        # 실패 event는 오래된 순서로 판정한다. 첫 판정 뒤 예산이 지나면 그 event까지 저장한다.
         failure_context(instance, RunFailureReason.STEP_FAILURE)
-        newest = failure_context(instance, RunFailureReason.STEP_FAILURE)
+        failure_context(instance, RunFailureReason.STEP_FAILURE)
+        target = failure_context(instance)
+        oldest = instance.fetch_run_status_changes(
+            DagsterEventType.RUN_FAILURE, limit=1, ascending=True
+        ).records[0]
         clock = iter([0, 6])
         monkeypatch.setattr(dagster_module, "monotonic", lambda: next(clock))
         first = retry_definition().evaluate_tick(build_sensor_context(instance=instance))
         assert not first.run_requests
-        assert first.cursor == newest.dagster_run.run_id
+        assert first.cursor == f"failures:{oldest.storage_id}"
         monkeypatch.setattr(dagster_module, "monotonic", lambda: 0)
         resumed = retry_definition().evaluate_tick(
             build_sensor_context(instance=instance, cursor=first.cursor)

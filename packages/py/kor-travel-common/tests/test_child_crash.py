@@ -266,7 +266,15 @@ def test_late_valid_child_step_resumes_with_finite_slow_metadata(monkeypatch, af
             writes.append(tags)
             return original_add(run_id, tags)
 
+        original_scan = instance.fetch_run_status_changes
+
+        def slow_scan(*args, **kw):
+            # 실패 event 순회도 느린 metadata 조회다(이전의 RUN_FAILURE 이력 조회 자리).
+            time.sleep(3.1)
+            return original_scan(*args, **kw)
+
         monkeypatch.setattr(instance, "get_records_for_run", events)
+        monkeypatch.setattr(instance, "fetch_run_status_changes", slow_scan)
         monkeypatch.setattr(instance, "add_run_tags", add_tags)
         definition = retry_definition()
         cursor = None
