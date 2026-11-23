@@ -390,8 +390,6 @@ function pageSelectionState<T extends RowData>(
   return selected === eligible.length ? true : "indeterminate";
 }
 
-/** 선택 열. 행 체크박스 이름은 `rowSelectionLabel`이 있으면 행마다 다르게(`홍길동 선택`),
- *  없으면 기존 계약대로 `행 선택`으로 남는다(호출부 호환). */
 /** md 미만에서 선택 칸을 체크박스 터치 영역과 같은 44×44px로 키우고 padding을 없애 체크박스를
  *  가운데 둔다. 체크박스의 md 미만 `after`(padding box 14px + 2×15px = 44px)가 칸과 정확히 겹쳐
  *  이웃 행·옆 칸(행 작업 버튼 등)으로 새지 않는다. 칸을 positioned로 만들지 않는다 — 클릭 가능한
@@ -404,6 +402,8 @@ const SELECTION_CHECKBOX_CLASS = "max-md:mx-auto";
  *  선택 열 `size`를 바꾸면 이 값도 바꾼다. */
 const SELECTION_EXTRA_WIDTH_CLASS = "max-md:[--kt-vt-select-extra:8px]";
 
+/** 선택 열. 행 체크박스 이름은 `rowSelectionLabel`이 있으면 행마다 다르게(`홍길동 선택`),
+ *  없으면 기존 계약대로 `행 선택`으로 남는다(호출부 호환). */
 function selectionColumn<TData extends RowData>(
   rowSelectionLabel?: (row: TData) => string,
 ): ColumnDef<TData, unknown> {
@@ -831,9 +831,7 @@ function TableSurface<T extends RowData>({
   const groups = hideHeader ? [] : table.getHeaderGroups();
   const role = structuralRole(virtualized);
   const totalWidth = table.getTotalSize();
-  const hasSelection = table
-    .getVisibleLeafColumns()
-    .some((column) => column.id === "__select__");
+  const surface = surfaceTableLayout(table, virtualized, totalWidth);
   return (
     <Table
       containerRef={scrollRef}
@@ -850,20 +848,8 @@ function TableSurface<T extends RowData>({
       role={role("table")}
       aria-rowcount={virtualized ? entries.length + groups.length : undefined}
       aria-colcount={virtualized ? colCount : undefined}
-      className={cn(
-        "tabular-nums",
-        virtualized && "grid",
-        virtualized && hasSelection && SELECTION_EXTRA_WIDTH_CLASS,
-      )}
-      style={
-        virtualized
-          ? {
-              minWidth: hasSelection
-                ? `calc(${totalWidth}px + var(--kt-vt-select-extra, 0px))`
-                : totalWidth,
-            }
-          : undefined
-      }
+      className={surface.className}
+      style={surface.style}
     >
       {caption ? <TableCaption>{caption}</TableCaption> : null}
       {!hideHeader ? (
@@ -1192,6 +1178,25 @@ function DataCells<T extends RowData>({
       })}
     </>
   );
+}
+
+/** 표 요소의 배치 클래스·최소 폭. 가상 표는 열 폭 합을 최소 폭으로 쓰고, 선택 열이 있으면
+ *  md 미만에서 넓어진 선택 칸만큼(`--kt-vt-select-extra`) 더한다. */
+function surfaceTableLayout<T extends RowData>(
+  table: TanstackTable<T>,
+  virtualized: boolean,
+  totalWidth: number,
+): { className: string; style: React.CSSProperties | undefined } {
+  if (!virtualized) return { className: "tabular-nums", style: undefined };
+  const hasSelection = table
+    .getVisibleLeafColumns()
+    .some((column) => column.id === "__select__");
+  if (!hasSelection)
+    return { className: "tabular-nums grid", style: { minWidth: totalWidth } };
+  return {
+    className: cn("tabular-nums grid", SELECTION_EXTRA_WIDTH_CLASS),
+    style: { minWidth: `calc(${totalWidth}px + var(--kt-vt-select-extra, 0px))` },
+  };
 }
 
 function useHeaderHeight(virtualized: boolean) {
