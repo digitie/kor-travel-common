@@ -1,3 +1,7 @@
+## 2026-11-24 — kor-travel-common Python canonical ref ec5e168(py 0.1.0.dev1)
+
+- #86 병합(ec5e168, tag `py-v0.1.0.dev1`)에 맞춰 `providers.packages.kor-travel-common`의 ref·packageTree를 67efe2e/87951f9 → ec5e168/18d82c4로 옮긴다. 소비자는 Python 핀과 정책 checkout ref를 함께 올린다(이 registry를 담은 common commit). 정책 ref를 올리면 python-krex-api canonical ref 6646be5(#85)도 함께 맞춘다.
+
 ## 2026-11-24 — 재시도 sensor 순회·사유 없는 실패 분류·연속 실패 차단기(py 0.1.0.dev1)
 
 - 감사(2026-11-23 수집 실패) §2.5 #6: 재시도 sensor가 FAILURE run을 최신순 100건씩 끝까지 다시 순회해, 실패 run이 쌓인 odroid에서 자기 10초 deadline으로 tick 338건이 실패했다. RUN_FAILURE event를 storage id high-water로 오래된 순서부터 읽고 판정한 곳까지만 전진하게 바꿨다(6시간 창, 다른 project는 `run_ids` 한 번으로 거름).
