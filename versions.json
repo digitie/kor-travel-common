@@ -2360,7 +2360,7 @@
       },
       "python-krex-api": {
         "repo": "https://github.com/digitie/python-krex-api",
-        "ref": "894ea64faed3a9a0ba9ba11b2a59dc5a0b5e5634"
+        "ref": "6646be516bcb5f2f206044186066baae2f5b63c6"
       }
     },
     "source": "vm §2.7; be §5.1"

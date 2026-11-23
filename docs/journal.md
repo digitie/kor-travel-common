@@ -1,3 +1,9 @@
+## 2026-11-24 — python-krex-api canonical ref 6646be5
+
+- transport가 0405 부분 파싱 실패의 유효 행을 쓰려고 python-krex-api #20(`KrexPartialParseError`, `KrexParseError` 하위·기본 계약 불변)을
+  핀한다. `providers.packages.python-krex-api.ref`를 894ea64 → 6646be5로 옮긴다. weather는 894ea64를 핀하고 있어 다음 common 정책 ref
+  갱신 때 같은 SHA로 맞춘다(동작 변화 없음 — 예외 하위 클래스만 추가).
+
 ## 2026-11-23 — PR83 병합과 ui 0.2.6 main pack catalog
 
 - PR CI 9 job SUCCESS·n150 RED/GREEN·적대 리뷰 반영으로 병합 R=05d7f91a4151a69d72b8bf1dc0007291c6ab2a61. main push CI 3종 SUCCESS, artifact 14803131043의 ui 0.2.6·tokens 0.1.7·toast 0.1.6을 [catalog](evidence/releases/touch-focus-ui-0.2.6-catalog.md)에 동결했다. 소비자 이관은 R4 작업 뒤 각 저장소 PR이 소유한다.
