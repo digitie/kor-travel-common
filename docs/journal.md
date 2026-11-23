@@ -1,3 +1,9 @@
+## 2026-11-23 — 선택 칸 터치 영역·아코디언 포커스·Dialog 긴 제목(ui 0.2.6)
+
+- 0.2.5 뒤 prod 점검: concierge와 Map admin 390px에서 VirtualTable 행 체크박스의 44px `after`가 이웃 행으로 1~3px 넘쳤다(Map admin: 중심 왼쪽 21px hit-test가 다른 요소). 원인은 37~41px 행·24~36px 칸보다 큰 터치 영역이었다. md 미만 선택 칸을 44×44·padding 0으로 키워 체크박스 `after`와 칸을 일치시켰다(칸은 positioned로 만들지 않음 — 첫 안은 행 outline을 끊을 수 있어 적대 리뷰 뒤 바꿈).
+- `AccordionContent`의 `overflow-hidden`이 열린 뒤에도 안쪽 포커스 outline을 잘랐다 → `overflow: clip` + clip-margin 4px(첫 안 clip-path는 레이아웃 넘침을 바깥 스크롤에 더해 리뷰 뒤 바꿈). Dialog 닫기 버튼이 긴 제목과 겹쳤다 → 버튼이 있을 때만 `DialogTitle` 자신이 `pr-7`(context, 소비자 `pr-*` 우선), `wrap-anywhere`.
+- 시험: jsdom 클래스 계약 + smoke 320/390/1440 브라우저 기하·픽셀(잘림 대조군). ui 0.2.6·tokens 0.1.7·toast 0.1.6. catalog 동결은 main pack 뒤 별도 PR, 소비자 이관은 R4 작업 뒤 각 저장소 PR.
+
 ## 2026-11-23 — PR81 병합과 ui 0.2.5 main pack catalog
 
 - PR CI 9 job SUCCESS·적대 리뷰 2인 P0/P1 없음으로 병합 R=fe141143cc8ba75e8fd0b6134e1c9e518e294fa2. main push CI 3종 SUCCESS, artifact 14782962353의 ui 0.2.5·tokens 0.1.6·toast 0.1.5를 [catalog](evidence/releases/field-focus-ui-0.2.5-catalog.md)에 동결했다. 소비자 이관은 각 저장소 PR이 소유한다.

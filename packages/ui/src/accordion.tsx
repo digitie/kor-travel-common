@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2023 shadcn; 2026 Youn-sok Choi (digitie)
 // Origin: shadcn-ui/ui@dd41d19e2f80ff6891951f7ced74c2c9a650b065 apps/v4/registry/bases/radix/ui/accordion.tsx (MIT)
 // Derived-From: shadcn/ui Radix Nova
-// Modified: 2026-11-11 — 공통 패키지 경로·아이콘·표현 계약 연결; 2026-11-23 — focus를 UX-G9.1 outline 2px·offset 2px 하나로(ring·border 변화·outline-none 제거)
+// Modified: 2026-11-11 — 공통 패키지 경로·아이콘·표현 계약 연결; 2026-11-23 — focus를 UX-G9.1 outline 2px·offset 2px 하나로(ring·border 변화·outline-none 제거); 2026-11-23 — 내용 영역을 overflow:clip + clip-margin 4px로 잘라 안쪽 컨트롤 포커스 outline이 보이게
 "use client";
 
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
@@ -81,6 +81,10 @@ function AccordionTrigger({
   )
 }
 
+// overflow:hidden은 열린 뒤에도 안쪽 컨트롤의 포커스 outline(2px+offset 2px)을 위·양옆에서 잘랐다.
+// overflow:clip + overflow-clip-margin 4px은 그 outline 폭만큼만 잘림 경계를 넓힌다. 넓은 자식이나
+// 높이 애니메이션 중의 안쪽 높이는 여전히 잘려 바깥 스크롤 폭·높이에 더해지지 않는다(clip-path와 다름).
+// overflow-clip-margin이 없는 엔진(WebKit)에서는 이전 overflow:hidden과 같게 잘린다.
 function AccordionContent({
   className,
   children,
@@ -89,7 +93,7 @@ function AccordionContent({
   return (
     <AccordionPrimitive.Content
       data-slot="accordion-content"
-      className="overflow-hidden text-sm data-open:animate-accordion-down data-closed:animate-accordion-up"
+      className="overflow-clip text-sm [overflow-clip-margin:4px] data-open:animate-accordion-down data-closed:animate-accordion-up"
       {...props}
     >
       <div

@@ -1,3 +1,7 @@
+## 2026-11-23 — 선택 칸 터치 영역·아코디언 포커스·Dialog 긴 제목(ui 0.2.6)
+
+VirtualTable 선택 칸 터치 영역(이웃 행 겹침 제거, md 미만 44px)·AccordionContent 포커스 outline 잘림·Dialog 긴 제목/닫기 버튼 겹침을 고친 ui 0.2.6·tokens 0.1.7·toast 0.1.6 제품 PR을 진행한다. 다음 한 작업은 이 PR 병합 뒤 main pack을 `frontend-artifacts.json`에 동결하는 catalog PR이다. 소비자 이관은 R4 작업 뒤 각 저장소 PR이 소유한다.
+
 ## 2026-11-23 — 입력·선택 컨트롤 포커스 정합(ui 0.2.5) 완료
 
 PR81로 병합됐다(R=fe141143cc8ba75e8fd0b6134e1c9e518e294fa2). ui 0.2.5·tokens 0.1.6·toast 0.1.5 main pack을 [catalog](evidence/releases/field-focus-ui-0.2.5-catalog.md)로 `frontend-artifacts.json`에 동결한다. 다음 한 작업은 소비자가 이 catalog main commit을 `common-ref`로 올리며 vendored tgz를 바꾸는 이관 PR이다(첫 소비자 concierge).

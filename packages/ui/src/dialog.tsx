@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2023 shadcn; 2026 Youn-sok Choi (digitie)
 // Origin: shadcn-ui/ui@dd41d19e2f80ff6891951f7ced74c2c9a650b065 apps/v4/registry/bases/radix/ui/dialog.tsx (MIT)
 // Derived-From: shadcn/ui Radix Nova
-// Modified: 2026-11-11 — 공통 경로·아이콘 연결; 2026-11-12 — viewport 스크롤·반응형 폭·overlay 전달·표현 opt-in
+// Modified: 2026-11-11 — 공통 경로·아이콘 연결; 2026-11-12 — viewport 스크롤·반응형 폭·overlay 전달·표현 opt-in; 2026-11-23 — 닫기 버튼 자리만큼 제목 오른쪽 여백·긴 제목 줄바꿈
 "use client";
 
 import { XIcon } from "lucide-react";
@@ -25,6 +25,10 @@ const dialogSizeClasses = {
   "2xl": "max-w-7xl",
   full: "max-w-none",
 } as const
+
+// 닫기 버튼(top-2 right-2, 28px)이 차지하는 오른쪽 36px에서 본문 여백 16px을 뺀 20px + 간격 8px을
+// 제목이 비워 둔다. DialogContent가 버튼을 그릴 때만 켜지고, 제목 자신의 클래스라 소비자 `pr-*`가 이긴다.
+const DialogCloseSpaceContext = React.createContext(false)
 
 function Dialog({
   ...props
@@ -93,7 +97,9 @@ function DialogContent({
         )}
         {...props}
       >
-        {children}
+        <DialogCloseSpaceContext.Provider value={!unstyled && showCloseButton}>
+          {children}
+        </DialogCloseSpaceContext.Provider>
         {showCloseButton && (
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
             <Button
@@ -159,11 +165,13 @@ function DialogTitle({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Title>) {
+  const reserveCloseSpace = React.useContext(DialogCloseSpaceContext)
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
       className={cn(
-        "cn-font-heading text-base leading-none font-medium",
+        "cn-font-heading text-base leading-none font-medium wrap-anywhere",
+        reserveCloseSpace && "pr-7",
         className
       )}
       {...props}
