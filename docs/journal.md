@@ -1,3 +1,7 @@
+## 2026-11-23 — PR83 병합과 ui 0.2.6 main pack catalog
+
+- PR CI 9 job SUCCESS·n150 RED/GREEN·적대 리뷰 반영으로 병합 R=05d7f91a4151a69d72b8bf1dc0007291c6ab2a61. main push CI 3종 SUCCESS, artifact 14803131043의 ui 0.2.6·tokens 0.1.7·toast 0.1.6을 [catalog](evidence/releases/touch-focus-ui-0.2.6-catalog.md)에 동결했다. 소비자 이관은 R4 작업 뒤 각 저장소 PR이 소유한다.
+
 ## 2026-11-23 — 선택 칸 터치 영역·아코디언 포커스·Dialog 긴 제목(ui 0.2.6)
 
 - 0.2.5 뒤 prod 점검: concierge와 Map admin 390px에서 VirtualTable 행 체크박스의 44px `after`가 이웃 행으로 1~3px 넘쳤다(Map admin: 중심 왼쪽 21px hit-test가 다른 요소). 원인은 37~41px 행·24~36px 칸보다 큰 터치 영역이었다. md 미만 선택 칸을 44×44·padding 0으로 키워 체크박스 `after`와 칸을 일치시켰다(칸은 positioned로 만들지 않음 — 첫 안은 행 outline을 끊을 수 있어 적대 리뷰 뒤 바꿈).
