@@ -1,3 +1,9 @@
+## 2026-11-24 — Dialog·AlertDialog 넓은 본문 가로 넘침(ui 0.2.7)
+
+- 0.2.6 소비자 채택 중 발견: concierge 반복 작업 상세 모달이 390/320에서 본문 표 때문에 머리글·본문째 가로로 넘쳤다(390: 칸 419px > 안쪽 326px, 모달 scrollWidth 451 > 358; PinVi POI 생성 Dialog도 390에서 본문 넘침). 원인은 `DialogContent`(`AlertDialogContent`도 같음)의 grid가 칸을 지정하지 않아 암시적 `auto` 칸이 자식 min-content만큼 커지는 것이다. 칸 하나를 `grid-cols-[minmax(0,1fr)]`로 명시했다(소비자 `grid-cols-*` 우선, `unstyled` 제외). 넓은 표는 `Table` 컨테이너가 가로 스크롤한다.
+- 앱 본문 안의 자기 grid(암시적 auto 칸)·폭 없는 입력 넘침은 common 몫이 아니라 각 앱 PR로 고친다. PinVi POI 생성 Dialog가 그 경우라(본문 grid 칸 313px > 본문 안쪽 294px) PinVi PR로 따로 고치고, concierge는 이 변경의 dist만으로 390/320 모달 넘침이 사라짐을 확인했다(표가 자체 스크롤).
+- 시험: jsdom 클래스 계약 + smoke 320/390/1440(`dialog-overflow-browser.spec.ts`). 옛 클래스로 되돌리면 단위 1건·smoke 6건 FAIL(RED), 새 코드로 radix smoke 전체 94 passed/2 skipped. 적대 리뷰 2인 P0/P1 없음, P2(수치·서술·시험 공백)를 같은 PR에서 반영. ui 0.2.7·tokens 0.1.8·toast 0.1.7. catalog 동결은 main pack 뒤 별도 PR, 소비자 이관은 R4 작업 뒤 각 저장소 PR.
+
 ## 2026-11-24 — kor-travel-common Python canonical ref ec5e168(py 0.1.0.dev1)
 
 - #86 병합(ec5e168, tag `py-v0.1.0.dev1`)에 맞춰 `providers.packages.kor-travel-common`의 ref·packageTree를 67efe2e/87951f9 → ec5e168/18d82c4로 옮긴다. 소비자는 Python 핀과 정책 checkout ref를 함께 올린다(이 registry를 담은 common commit). 정책 ref를 올리면 python-krex-api canonical ref 6646be5(#85)도 함께 맞춘다.

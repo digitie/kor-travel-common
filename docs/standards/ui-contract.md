@@ -82,6 +82,8 @@
 
 `VirtualTable` 선택 칸은 0.2.6부터 md 미만에서 44×44px·padding 0(`h-11`·`w-11`·`min-w-11`·`p-0`)이고 체크박스가 가운데에 놓여, 체크박스의 44px `after` 터치 영역이 칸과 일치한다(이웃 행·옆 칸과 겹침 없음). 칸은 positioned가 아니다. 데스크톱 행 높이·열 폭은 그대로다. `AccordionContent`는 `overflow: clip` + `overflow-clip-margin: 4px`로 잘라 안쪽 포커스 outline이 보인다. `DialogContent`가 닫기 버튼을 그리면 그 안의 `DialogTitle`이 오른쪽 `pr-7`을 비우고(소비자 `pr-*` 우선) `wrap-anywhere`로 줄바꿈한다.
 
+`DialogContent`·`AlertDialogContent`는 0.2.7부터 grid 칸 하나를 `minmax(0,1fr)`로 명시한다(같은 variant의 소비자 `grid-cols-*`가 대체, `unstyled` 제외). 자식은 모달 안쪽 폭에 맞고, 넓은 표는 `Table` 컨테이너가 자체 가로 스크롤을 맡는다. 앱 본문 안의 자기 grid·폭 없는 입력 넘침은 앱 몫이다. 내용 크기 폭(`w-fit`·`w-auto`) 모달은 지원하지 않는다.
+
 | prop | 기본 | 계약 |
 |---|---|---|
 | `type` | `"button"` | 엔진과 무관하게 **명시** 기본. 폼 제출은 `type="submit"` 명시 |

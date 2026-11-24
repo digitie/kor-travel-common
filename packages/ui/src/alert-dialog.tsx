@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2023 shadcn; 2026 Youn-sok Choi (digitie)
 // Origin: shadcn-ui/ui@dd41d19e2f80ff6891951f7ced74c2c9a650b065 apps/v4/registry/bases/radix/ui/alert-dialog.tsx (MIT)
 // Derived-From: shadcn/ui Radix Nova
-// Modified: 2026-11-11 — 공통 경로·아이콘 연결; 2026-11-12 — viewport 스크롤·overlay 전달·표현 opt-in
+// Modified: 2026-11-11 — 공통 경로·아이콘 연결; 2026-11-12 — viewport 스크롤·overlay 전달·표현 opt-in; 2026-11-24 — grid 칸을 minmax(0,1fr)로 묶어 넓은 자식이 모달을 넓히지 않게
 "use client";
 
 import * as React from "react"
@@ -50,6 +50,7 @@ function AlertDialogOverlay({
   )
 }
 
+// DialogContent와 같은 이유로 grid 칸을 minmax(0,1fr)로 묶는다(넓은 자식이 모달 폭을 넘지 않게).
 function AlertDialogContent({
   className,
   overlayProps,
@@ -68,7 +69,7 @@ function AlertDialogContent({
         data-slot="alert-dialog-content"
         data-size={size}
         className={cn(
-          !unstyled && "group/alert-dialog-content fixed top-1/2 left-1/2 z-50 grid max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none data-[size=default]:max-w-xs data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          !unstyled && "group/alert-dialog-content fixed top-1/2 left-1/2 z-50 grid grid-cols-[minmax(0,1fr)] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none data-[size=default]:max-w-xs data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className
         )}
         {...props}

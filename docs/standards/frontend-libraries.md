@@ -30,9 +30,9 @@ Weather·Transport가 함께 사용하는 `echarts`·`motion`도 정확 버전 �
 |---|---|
 | @axe-core/playwright | 4.14.0 |
 | @hookform/resolvers | 7.0.5 |
-| @kor-travel/toast | 0.1.6 |
-| @kor-travel/tokens | 0.1.7 |
-| @kor-travel/ui | 0.2.6 |
+| @kor-travel/toast | 0.1.7 |
+| @kor-travel/tokens | 0.1.8 |
+| @kor-travel/ui | 0.2.7 |
 | @next/eslint-plugin-next | 16.4.6 |
 | @playwright/test | 1.65.0 |
 | @radix-ui/react-focus-scope | 1.3.1+kortravel.fix.2 |
