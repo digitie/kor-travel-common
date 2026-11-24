@@ -1,3 +1,23 @@
+## ui 0.2.7·tokens 0.1.8·toast 0.1.7 — Dialog·AlertDialog 넓은 본문 가로 넘침 — 2026-11-24
+
+### 변경
+
+`DialogContent`·`AlertDialogContent`의 grid가 `grid-cols-[minmax(0,1fr)]` 칸 하나를 명시한다. 0.2.6까지는 칸이 암시적 `auto`라, 스크롤 컨테이너가 아닌 래퍼 안에 든 넓은 자식(표 등)의 min-content만큼 칸이 커졌고 좁은 화면에서 머리글·본문 전체가 모달 안에서 가로로 넘쳤다(concierge 반복 작업 상세 390px: 칸 419px > 안쪽 326px, 모달 `scrollWidth` 451 > 358). 이제 자식은 모달 안쪽 폭에 맞고, 넓은 표는 `Table` 컨테이너(`overflow-x-auto`)가 자체 가로 스크롤을 맡는다(표 컨테이너가 모달의 직계 자식이면 0.2.6에서도 넘치지 않았다). 모달 자신의 `overflow-y-auto`(가로도 auto)는 그대로라 앱 본문이 스스로 넘치면 모달 안 스크롤로 남는다. 접두 없는 소비자 `grid-cols-*`가 기본 칸을 대신한다(`md:grid-cols-*`만 주면 md 미만은 기본 칸). `unstyled`에는 붙지 않는다.
+
+앱 본문 안의 자기 grid(암시적 auto 칸)·폭 없는 입력·가로 flex 줄이 넘치는 경우는 이 변경으로 고쳐지지 않는다. 그 grid에 `grid-cols-1`(또는 `minmax(0,1fr)`)이나 입력에 `min-w-0`·`w-full`을 두는 것은 앱 몫이다.
+
+보이는 차이: 스크롤 컨테이너가 아닌 넓은 자식(고정 폭 요소·`<pre>` 등)은 칸 전체를 넓히는 대신 자기 상자 밖으로 넘치고, 모달 가로 스크롤로 받는다. 이때 `DialogFooter`의 바닥 띠 배경·테두리 상자는 스크롤된 구간까지 넓어지지 않는다. 래퍼 안의 `truncate`는 이제 실제로 말줄임된다. 내용 크기 폭(`w-fit`·`w-auto`) 모달은 min-content가 패딩뿐이라 지원하지 않는다(현재 소비자 사용처 없음).
+
+시험: `dialog.test.tsx`(칸 클래스·소비자 override·unstyled), `smoke/dialog-overflow-browser.spec.ts`(320/390/1440. Dialog는 min-width:0 없는 세로 flex 래퍼 안의 600px 가상 표와 줄바꿈 없는 일반 표(약 1000px), AlertDialog는 블록 래퍼 안의 일반 표. 모달 `scrollWidth ≤ clientWidth`, grid 칸 하나 ≤ 안쪽 폭, 제목·자식·표 컨테이너가 안쪽 폭 안, md 미만에서 표 컨테이너가 실제로 가로 스크롤, 1440 lg 모달에서 600px 가상 표는 스크롤 없이 들어감). 옛 클래스로 되돌리면 단위 시험 1건과 smoke 6건(두 모달×세 폭)이 FAIL한다. 내장 정책 bytes가 바뀌므로 tokens 0.1.8·toast 0.1.7도 patch를 올렸고 두 패키지의 실행 코드·CSS는 바뀌지 않는다.
+
+#### Breaking
+
+없음. 공개 prop·기본값·`data-slot`은 그대로다. 이전에 자식 min-content만큼 넓어지던 모달 본문이 모달 안쪽 폭에 맞춰지고, 그 자식 안의 표가 가로로 스크롤된다.
+
+### 이관
+
+새 common-ref를 채택하는 소비자는 vendored `@kor-travel/ui` 0.2.7·`@kor-travel/tokens` 0.1.8(toast 사용 시 0.1.7)로 함께 올리고 version·SHA512는 `frontend-artifacts.json`에서 옮긴다(catalog 동결은 이 변경의 main pack 뒤 별도 PR). Dialog 본문 래퍼에 넘침을 막으려고 둔 `min-w-0`·`overflow-x-hidden`·고정 `max-w` 보정은 그대로 둬도 무해하다. 모달 안 표 폭을 재던 e2e는 모달 대신 표 컨테이너의 가로 스크롤을 단언하도록 바꿀 수 있다.
+
 ## py 0.1.0.dev1 — Dagster 실패 재시도 sensor 순회·사유 없는 실패 분류·연속 실패 차단기·jitter backoff — 2026-11-24
 
 2026-11-23 수집 실패 감사(Map 저장소 `docs/reports/2026-11-23-collection-failure-audit.md` §4 #14·#8, §2.5 #6·#8·#9, §1.3 P2)의 common 몫이다.

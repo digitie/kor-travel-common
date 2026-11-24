@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2023 shadcn; 2026 Youn-sok Choi (digitie)
 // Origin: shadcn-ui/ui@dd41d19e2f80ff6891951f7ced74c2c9a650b065 apps/v4/registry/bases/radix/ui/dialog.tsx (MIT)
 // Derived-From: shadcn/ui Radix Nova
-// Modified: 2026-11-11 — 공통 경로·아이콘 연결; 2026-11-12 — viewport 스크롤·반응형 폭·overlay 전달·표현 opt-in; 2026-11-23 — 닫기 버튼 자리만큼 제목 오른쪽 여백·긴 제목 줄바꿈
+// Modified: 2026-11-11 — 공통 경로·아이콘 연결; 2026-11-12 — viewport 스크롤·반응형 폭·overlay 전달·표현 opt-in; 2026-11-23 — 닫기 버튼 자리만큼 제목 오른쪽 여백·긴 제목 줄바꿈; 2026-11-24 — grid 칸을 minmax(0,1fr)로 묶어 넓은 자식이 모달을 넓히지 않게
 "use client";
 
 import { XIcon } from "lucide-react";
@@ -71,6 +71,9 @@ function DialogOverlay({
   )
 }
 
+// grid 칸을 minmax(0,1fr)로 묶는다. 암시적 auto 칸은 자식의 min-content(넓은 표·고정 폭 입력)만큼
+// 커져 좁은 화면에서 모달 폭을 넘는다. 묶으면 자식은 모달 폭에 맞고, 넓은 표는 Table 컨테이너
+// (overflow-x-auto)가 자체 가로 스크롤을 맡는다. 같은 variant의 소비자 grid-cols-*가 대체한다.
 function DialogContent({
   className,
   overlayProps,
@@ -91,7 +94,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          !unstyled && "fixed top-1/2 left-1/2 z-50 grid max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          !unstyled && "fixed top-1/2 left-1/2 z-50 grid grid-cols-[minmax(0,1fr)] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           !unstyled && dialogSizeClasses[size],
           className
         )}
