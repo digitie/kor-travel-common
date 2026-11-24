@@ -1,3 +1,7 @@
+## 2026-11-24 — kor-travel-common Python canonical ref f1faf56(py 0.1.0.dev2)
+
+- #90 병합(f1faf56, tag `py-v0.1.0.dev2`, release 자산 wheel·sdist·SHA256SUMS, 같은 source 두 번 빌드 digest 일치)에 맞춰 `providers.packages.kor-travel-common`의 ref·packageTree를 ec5e168/18d82c4 → f1faf56/b715d42로 옮긴다. 소비자는 Python 핀과 정책 checkout ref를 함께 올린다.
+
 ## 2026-11-24 — daemon 연결 풀 잠금 밖 대기·env 설정·webserver pre-ping(py 0.1.0.dev2)
 
 - 감사(2026-11-23 수집 실패) §1.4: n150 daemon에서 기동 4.8시간 동안 pool 부족 경고 574건, sensor/scheduler 반복 실패. #86에서 2+2→4+4로 늘렸지만 대기 10초는 `DaemonQueuePool.connect`가 수명 잠금 안에서 대기해 대기자가 직렬화(N×timeout)되어 1초로 묶어 두었다.
