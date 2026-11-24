@@ -908,7 +908,7 @@ daemon 수만큼 곱해 공유 PG의 접속 여유를 확인한다. 같은 DB ro
 |---|---|---|
 | `KOR_TRAVEL_DAGSTER_DAEMON_POOL_SIZE` | 4 | 1~10 |
 | `KOR_TRAVEL_DAGSTER_DAEMON_POOL_MAX_OVERFLOW` | 4 | 0~10 |
-| `KOR_TRAVEL_DAGSTER_DAEMON_POOL_TIMEOUT_SECONDS` | 10 | 1~30 |
+| `KOR_TRAVEL_DAGSTER_DAEMON_POOL_TIMEOUT_SECONDS` | 10 | 1~20 |
 
 크기와 overflow의 합은 10 이하여야 한다.
 
@@ -916,8 +916,10 @@ daemon 수만큼 곱해 공유 PG의 접속 여유를 확인한다. 같은 DB ro
 설정 오류(종료 코드 2)로 거절한다. wrapper는 기동 때 stderr에 적용 수치 한 줄
 (`daemon 연결 풀: primary engine 3개 각 pool_size=… max_overflow=… pool_timeout=…s`)을 남긴다. DSN은
 남기지 않는다. 최대 primary 상한은 3×10=30이다. 올리기 전에 role 접속 한도에서 webserver·run worker
-몫을 뺀 여유를 확인한다. 대기 상한 30초는 SDK 재시도까지 더한 최악(아래)이 daemon heartbeat 허용
-300초 안에 들게 하려는 것이다.
+몫을 뺀 여유를 확인한다(Manager 공용 plane은 `docker-compose.yml` db-init의 role `CONNECTION LIMIT 45`).
+대기 상한 20초는 heartbeat 한 번(storage 조회·기록 두 호출)의 최악 2×(6×20+11.4)≈262초가 heartbeat
+허용 안에 들게 하려는 것이다. 이 300초는 Manager compose의 `DAGSTER_DAEMON_HEARTBEAT_TOLERANCE=300`
+기준이다(Dagster 기본은 1800초). 허용을 더 줄이는 배포는 대기도 그에 맞춰 줄인다.
 
 대기는 잠금 밖에서 한다. `DaemonQueuePool.connect`의 수명 잠금은 scope·퇴역 검사와 진행 중
 대여 수(`_inflight`) 증감만 감싸고, 실제 대기·연결 생성·pre-ping은 원 QueuePool이 잠금 없이 한다.
@@ -941,7 +943,7 @@ SQL count와 별도로 측정한다. 실행 중 연결 단절/transaction 재시
 QueuePool checkout TimeoutError도 SDK 기존 retry/backoff 대상이다(dagster-postgres
 `retry_pg_connection_fn`: 최대6회 시도, 시도 사이 `((2**n)-1)×0.2±0.2`초로 합 약 11.4초).
 따라서 포화가 계속되면 한 storage 호출의 전체 대기는 최악 약 6×timeout+11.4초다(기본 10초면 약 72초,
-상한 30초면 약 191초. 연결 생성·pre-ping 시간은 별도).
+상한 20초면 약 131초. 연결 생성·pre-ping 시간은 별도).
 포화가 짧으면 첫 대기 안에서 반환된 연결을 받으므로 재시도 경고(`Retrying failed database connection`)가 줄어든다.
 중첩 checkout·pool 포화·heartbeat/tick 지연을 별도로 검증해야 한다.
 

@@ -996,11 +996,11 @@ def test_retire_and_new_checkout_cannot_interleave():
 
 def test_default_settings_and_custom_activation_apply_to_primary_engines(registered):
     assert (pool.POOL_SIZE, pool.MAX_OVERFLOW, pool.POOL_TIMEOUT) == (4, 4, 10)
-    with pool.activation(pool_size=6, max_overflow=2, pool_timeout=30):
+    with pool.activation(pool_size=6, max_overflow=2, pool_timeout=20):
         engines = [engine() for _ in range(3)]
         for item in engines:
             assert item.pool.size() == 6 and item.pool._max_overflow == 2
-            assert item.pool.timeout() == 30 and item.pool._pre_ping is True
+            assert item.pool.timeout() == 20 and item.pool._pre_ping is True
         assert type(engine().pool) is NullPool
     with pool.activation():
         item = engine()
@@ -1010,7 +1010,7 @@ def test_default_settings_and_custom_activation_apply_to_primary_engines(registe
 @pytest.mark.parametrize("kwargs", [
     {"pool_size": 0}, {"pool_size": 11}, {"max_overflow": -1}, {"max_overflow": 11},
     {"pool_size": 6, "max_overflow": 5}, {"pool_size": 10, "max_overflow": 1},
-    {"pool_timeout": 0}, {"pool_timeout": 31}, {"pool_size": True}, {"pool_timeout": 1.5},
+    {"pool_timeout": 0}, {"pool_timeout": 21}, {"pool_size": True}, {"pool_timeout": 1.5},
     {"pool_size": "4"},
 ])
 def test_invalid_activation_settings_reject_before_opening_scope(kwargs):
@@ -1023,12 +1023,12 @@ def test_invalid_activation_settings_reject_before_opening_scope(kwargs):
     ({}, {"pool_size": 4, "max_overflow": 4, "pool_timeout": 10}),
     ({"KOR_TRAVEL_DAGSTER_DAEMON_POOL_SIZE": "8",
       "KOR_TRAVEL_DAGSTER_DAEMON_POOL_MAX_OVERFLOW": "0",
-      "KOR_TRAVEL_DAGSTER_DAEMON_POOL_TIMEOUT_SECONDS": "30"},
-     {"pool_size": 8, "max_overflow": 0, "pool_timeout": 30}),
-    ({"KOR_TRAVEL_DAGSTER_DAEMON_POOL_TIMEOUT_SECONDS": "30",
+      "KOR_TRAVEL_DAGSTER_DAEMON_POOL_TIMEOUT_SECONDS": "15"},
+     {"pool_size": 8, "max_overflow": 0, "pool_timeout": 15}),
+    ({"KOR_TRAVEL_DAGSTER_DAEMON_POOL_TIMEOUT_SECONDS": "20",
       "KOR_TRAVEL_DAGSTER_DAEMON_POOL_SIZE": "10",
       "KOR_TRAVEL_DAGSTER_DAEMON_POOL_MAX_OVERFLOW": "0"},
-     {"pool_size": 10, "max_overflow": 0, "pool_timeout": 30}),
+     {"pool_size": 10, "max_overflow": 0, "pool_timeout": 20}),
 ])
 def test_pool_settings_from_environment(monkeypatch, env, expected):
     for name in (cli.POOL_SIZE_ENV, cli.POOL_MAX_OVERFLOW_ENV, cli.POOL_TIMEOUT_ENV):
@@ -1048,7 +1048,7 @@ def test_pool_settings_from_environment(monkeypatch, env, expected):
     ("KOR_TRAVEL_DAGSTER_DAEMON_POOL_SIZE", "7"),
     ("KOR_TRAVEL_DAGSTER_DAEMON_POOL_MAX_OVERFLOW", "-1"),
     ("KOR_TRAVEL_DAGSTER_DAEMON_POOL_TIMEOUT_SECONDS", "10.0"),
-    ("KOR_TRAVEL_DAGSTER_DAEMON_POOL_TIMEOUT_SECONDS", "31"),
+    ("KOR_TRAVEL_DAGSTER_DAEMON_POOL_TIMEOUT_SECONDS", "21"),
     ("KOR_TRAVEL_DAGSTER_DAEMON_POOL_TIMEOUT_SECONDS", "1000"),
 ])
 def test_invalid_pool_environment_is_a_value_free_configuration_error(monkeypatch, name, value):

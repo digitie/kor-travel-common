@@ -26,12 +26,14 @@ POOL_TIMEOUT = 10
 POOL_RECYCLE = 3600
 # 설정 허용 범위(양 끝 포함). 공유 PG role은 webserver·run worker·임시 instance와 접속 한도를
 # 나눠 쓰므로 engine당 pool_size+max_overflow를 10 이하로 묶는다(primary 최대 3×10=30).
-# 대기 상한 30초: SDK 재시도(최대 6회, 사이 대기 합 약 11.4초)까지 더한 최악 약 191초가
-# Manager 배포의 daemon heartbeat 허용(DAGSTER_DAEMON_HEARTBEAT_TOLERANCE=300초) 안에 들게 한다.
+# 대기 상한 20초: storage 호출 1회의 최악은 SDK 재시도(최대 6회, 사이 대기 합 약 11.4초)를 더해
+# 6×timeout+11.4초다. heartbeat 한 번은 storage 호출 두 번(조회·기록)이라 지속 포화 때 최악
+# 2×131≈262초가 Manager 배포의 heartbeat 허용(DAGSTER_DAEMON_HEARTBEAT_TOLERANCE=300초,
+# Dagster 기본은 1800초) 안에 들게 한다.
 POOL_SIZE_RANGE = (1, 10)
 MAX_OVERFLOW_RANGE = (0, 10)
 POOL_TOTAL_MAX = 10
-POOL_TIMEOUT_RANGE = (1, 30)
+POOL_TIMEOUT_RANGE = (1, 20)
 
 _owner_pid: int | None = None
 _scope: object | None = None
