@@ -20,6 +20,8 @@ _NAMESPACE = UUID("ae499c92-88dd-5c9d-9629-8187b5d94b98")
 _REQUEST_TAG = "kortravel/idempotent-request-sha256"
 _BOUND_STORAGE_CONNECTION: ContextVar = ContextVar("native_run_storage_connection", default=None)
 _ADAPTER_INSTALL_LOCK = Lock()
+# "1"이면 이 프로세스의 shared storage URL에 pre-ping plugin을 더한다. 미설정·"0"은 원 동작.
+PRE_PING_ENV = "KOR_TRAVEL_DAGSTER_WEBSERVER_POOL_PRE_PING"
 
 
 def _check_versions() -> None:
@@ -366,18 +368,56 @@ def create_schema():
     )
 
 
+@contextmanager
+def _storage_pre_ping():
+    """opt-in이면 자기 프로세스 env의 shared URL에만 pre-ping plugin을 더하고 종료 때 복원한다.
+
+    daemon wrapper와 같은 shared storage YAML 계약(``postgres_url: {env: ...}``·autocreate
+    false)일 때만 켠다. 다른 컨테이너·YAML·자격증명은 바꾸지 않는다.
+    """
+    raw = os.environ.get(PRE_PING_ENV)
+    if raw is None or raw == "0":
+        yield
+        return
+    from kortravelcommon._webserver_pool_plugin import PLUGIN_NAME
+    from kortravelcommon.daemon_pool import (
+        SHARED_URL_ENV,
+        DaemonPoolConfigurationError,
+        _validate_storage_config,
+        _with_plugin,
+    )
+
+    if raw != "1":
+        raise DaemonPoolConfigurationError("webserver pre-ping 설정을 확인할 수 없습니다.")
+    _validate_storage_config()
+    shared = os.environ.get(SHARED_URL_ENV)
+    patched = _with_plugin(shared, PLUGIN_NAME)
+    os.environ[SHARED_URL_ENV] = patched
+    try:
+        yield
+    finally:
+        os.environ[SHARED_URL_ENV] = shared
+
+
 def main() -> None:
     """별도 프로세스 없이 기존 native CLI 인자를 그대로 처리한다."""
     _check_versions()
     from dagster_webserver import app, cli
     from dagster_webserver.webserver import DagsterWebserver
 
+    from kortravelcommon.daemon_pool import DaemonPoolConfigurationError
+
     class IdempotentWebserver(DagsterWebserver):
         def build_graphql_schema(self):
             return create_schema()
 
     app.DagsterWebserver = IdempotentWebserver
-    cli.main()
+    try:
+        with _storage_pre_ping():
+            cli.main()
+    except DaemonPoolConfigurationError:
+        print("webserver storage 연결 설정을 확인할 수 없습니다.", file=sys.stderr)
+        raise SystemExit(2) from None
 
 
 if __name__ == "__main__":

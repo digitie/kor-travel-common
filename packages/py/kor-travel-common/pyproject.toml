@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kor-travel-common"
-version = "0.1.0.dev1"
+version = "0.1.0.dev2"
 description = "kor-travel 공용 실행 복구 프리미티브"
 requires-python = ">=3.11"
 license = "GPL-3.0-or-later"
@@ -52,3 +52,4 @@ select = ["E", "F", "I", "UP", "B"]
 
 [project.entry-points."sqlalchemy.plugins"]
 kortravel_daemon_pool = "kortravelcommon._daemon_pool_plugin:DaemonPoolPlugin"
+kortravel_webserver_pre_ping = "kortravelcommon._webserver_pool_plugin:WebserverPrePingPlugin"
