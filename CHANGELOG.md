@@ -1,3 +1,24 @@
+## py 0.1.0.dev2 — daemon 연결 풀 잠금 밖 대기·크기·대기 env 설정·webserver storage pre-ping — 2026-11-24
+
+2026-11-23 수집 실패 감사(Map 저장소 `docs/reports/2026-11-23-collection-failure-audit.md` §1.4: n150 daemon 기동 4.8시간 동안 pool 부족 경고 574건·sensor/scheduler 반복 실패, webserver pre-ping 없음)의 common 몫이다.
+
+### 변경
+
+- daemon-pool: `DaemonQueuePool.connect`가 수명 잠금 밖에서 대기한다. 잠금은 scope·퇴역 검사와 진행 중 대여 수(`_inflight`) 증감만 감싸고 대기·연결 생성·pre-ping은 원 QueuePool이 한다. 이전에는 잠금 안에서 대기해 동시 대기자가 한 명씩 timeout을 다 썼다(대기자 8명·timeout 1초에서 마지막이 약 8초). 이제 각자 timeout만큼만 기다린다. 연결 상한은 원 QueuePool overflow 계수가 지키고, dispose/recreate는 진행 중 대여도 대여 중으로 보고 거절한다(이전에는 잠금을 기다린 뒤 판단했다).
+- daemon-pool 기본 대기 1초 → 10초. 크기·대기를 env로 바꿀 수 있다: `KOR_TRAVEL_DAGSTER_DAEMON_POOL_SIZE`(기본 4, 1~10)·`KOR_TRAVEL_DAGSTER_DAEMON_POOL_MAX_OVERFLOW`(기본 4, 0~10, 크기와 합 10 이하)·`KOR_TRAVEL_DAGSTER_DAEMON_POOL_TIMEOUT_SECONDS`(기본 10, 1~20). ASCII 정수만 받고 빈 값·범위 밖은 원 CLI 호출 전에 종료 코드 2로 거절한다. 기동 때 stderr에 적용 수치 한 줄을 남긴다(DSN 없음). `activation(pool_size=, max_overflow=, pool_timeout=)` 키워드 인자와 `validate_settings`를 추가했다.
+- 새 opt-in webserver storage pre-ping: `kor-travel-dagster-webserver`에 `KOR_TRAVEL_DAGSTER_WEBSERVER_POOL_PRE_PING=1`이면 자기 프로세스의 shared URL에 SQLAlchemy plugin `kortravel_webserver_pre_ping`(새 entry point)을 더한다. dagster-postgres `optimize_for_webserver`의 재생성 engine(명시 `pool_size`, `poolclass` 없음)에만 `pool_pre_ping=True`를 더하고 크기·recycle·statement_timeout은 그대로다. daemon과 같은 shared storage YAML·psycopg2 DSN일 때만 켜고 아니면 종료 코드 2다. 켜지면 stderr에 한 줄을 남기고, `--help`·`--version`은 그대로 원 CLI에 맡기며 숨김 `--instance-ref`는 거절한다. grpc_server workspace만 지원한다.
+
+#### Breaking
+
+공개 함수 제거·시그니처 변경은 없다(키워드 인자 추가만). daemon-pool 기본 pool_timeout이 1초에서 10초로 늘어 포화 시 storage 호출이 실패 대신 더 오래 기다린다(SDK 재시도 포함 최악 약 72초). 진행 중 대여가 있을 때 dispose/recreate가 대기 없이 거절된다.
+
+### 이관
+
+- 앱 소비자(code-server 이미지)는 새 40자리 common SHA로 재핀한다. 코드 변경은 필요 없다.
+- 공용 Dagster 호스트 이미지는 Manager가 common wheel을 vendor한다. daemon·webserver에 적용하려면 Manager가 vendor wheel·파일 해시 기록·adoption 시험·이미지 tag를 갱신하고 이미지를 다시 만들어야 한다(Manager 시험이 wheel 파일명·버전·파일 목록을 고정 대조한다). Manager가 dev0에 머물러 있으면 dev1(2+2→4+4)과 dev2를 함께 받는다. code-server 이미지 재핀만으로는 daemon 동작이 바뀌지 않는다.
+- daemon당 primary 상한은 3×(size+overflow)다(기본 24). 같은 DB role을 webserver·run worker가 함께 쓰므로 role `CONNECTION LIMIT`(Manager 공용 plane 45) 안에 드는지 확인한다. 대기 상한 20초는 Manager의 heartbeat 허용 300초 기준이다.
+- webserver pre-ping은 Manager가 webserver 컨테이너에 `KOR_TRAVEL_DAGSTER_WEBSERVER_POOL_PRE_PING=1`을 줄 때만 켜진다.
+
 ## ui 0.2.7·tokens 0.1.8·toast 0.1.7 — Dialog·AlertDialog 넓은 본문 가로 넘침 — 2026-11-24
 
 ### 변경

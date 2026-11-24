@@ -6,12 +6,17 @@ from __future__ import annotations
 
 import importlib.metadata
 import os
+import re
 import sys
 from contextlib import contextmanager
 
 SHARED_URL_ENV = "KOR_TRAVEL_DAGSTER_SHARED_PG_URL"
 DAEMON_URL_ENV = "KOR_TRAVEL_DAGSTER_DAEMON_POSTGRES_URL"
 WORKSPACE_RELOAD_ENV = "KOR_TRAVEL_DAGSTER_WORKSPACE_RELOAD_SECONDS"
+# 미설정이면 plugin 기본값(4·4·10초). 빈 값·부호·소수·범위 밖은 거절한다.
+POOL_SIZE_ENV = "KOR_TRAVEL_DAGSTER_DAEMON_POOL_SIZE"
+POOL_MAX_OVERFLOW_ENV = "KOR_TRAVEL_DAGSTER_DAEMON_POOL_MAX_OVERFLOW"
+POOL_TIMEOUT_ENV = "KOR_TRAVEL_DAGSTER_DAEMON_POOL_TIMEOUT_SECONDS"
 EXPECTED_VERSIONS = {
     "dagster": "1.13.24",
     "dagster-postgres": "0.29.24",
@@ -37,20 +42,59 @@ def _original_cli():
     return entries[0].load()
 
 
-def _pooled_url(shared: str | None, dedicated: str | None) -> str:
+def _with_plugin(value: str | None, plugin: str) -> str:
+    """psycopg2 DSN에 SQLAlchemy plugin 이름 하나만 더한다. 값은 메시지에 싣지 않는다."""
     from sqlalchemy.engine import make_url
 
+    if not value:
+        raise DaemonPoolConfigurationError("shared DSN이 없습니다.")
+    try:
+        url = make_url(value)
+    except Exception:
+        raise DaemonPoolConfigurationError("DSN 형식이 잘못되었습니다.") from None
+    if url.drivername != "postgresql+psycopg2" or {"plugin", "plugins"} & set(url.query):
+        raise DaemonPoolConfigurationError("지원하지 않는 DSN 또는 기존 plugin입니다.")
+    return url.update_query_dict({"plugin": plugin}).render_as_string(hide_password=False)
+
+
+def _pooled_url(shared: str | None, dedicated: str | None) -> str:
     from kortravelcommon._daemon_pool_plugin import PLUGIN_NAME
 
     if not shared or dedicated != shared:
         raise DaemonPoolConfigurationError("전용 DSN과 원 shared DSN이 같아야 합니다.")
+    return _with_plugin(dedicated, PLUGIN_NAME)
+
+
+def _pool_settings() -> dict[str, int]:
+    """env의 크기·대기를 정수로 읽는다. 미설정은 plugin 기본값, 그 밖의 오류는 거절한다."""
+    from kortravelcommon._daemon_pool_plugin import (
+        MAX_OVERFLOW,
+        POOL_SIZE,
+        POOL_TIMEOUT,
+        validate_settings,
+    )
+
+    values = {}
+    for key, name, default in (
+        ("pool_size", POOL_SIZE_ENV, POOL_SIZE),
+        ("max_overflow", POOL_MAX_OVERFLOW_ENV, MAX_OVERFLOW),
+        ("pool_timeout", POOL_TIMEOUT_ENV, POOL_TIMEOUT),
+    ):
+        raw = os.environ.get(name)
+        if raw is None:
+            values[key] = default
+            continue
+        # ASCII 숫자만(전각 숫자·공백·부호 거절). 앞자리 0은 정수 그대로 해석한다.
+        if not re.fullmatch(r"[0-9]{1,3}", raw):
+            raise DaemonPoolConfigurationError("daemon 연결 풀 크기·대기 설정이 잘못되었습니다.")
+        values[key] = int(raw)
     try:
-        url = make_url(dedicated)
-    except Exception:
-        raise DaemonPoolConfigurationError("DSN 형식이 잘못되었습니다.") from None
-    if url.drivername != "postgresql+psycopg2" or "plugin" in url.query:
-        raise DaemonPoolConfigurationError("지원하지 않는 DSN 또는 기존 plugin입니다.")
-    return url.update_query_dict({"plugin": PLUGIN_NAME}).render_as_string(hide_password=False)
+        validate_settings(**values)
+    except ValueError:
+        raise DaemonPoolConfigurationError(
+            "daemon 연결 풀 크기·대기 설정이 허용 범위 밖입니다."
+        ) from None
+    return values
 
 
 def _validate_storage_config() -> None:
@@ -124,11 +168,18 @@ def run() -> None:
 
     from kortravelcommon._daemon_pool_plugin import activation
 
+    settings = _pool_settings()
     _validate_storage_config()
     shared = os.environ.get(SHARED_URL_ENV)
     pooled = _pooled_url(shared, os.environ.get(DAEMON_URL_ENV))
+    # 값(DSN)이 아닌 적용 수치만 남겨 배포 뒤 실제 설정을 로그로 확인할 수 있게 한다.
+    print(
+        "daemon 연결 풀: primary engine 3개 각 pool_size={pool_size} "
+        "max_overflow={max_overflow} pool_timeout={pool_timeout}s".format(**settings),
+        file=sys.stderr,
+    )
     try:
-        with activation(), _workspace_refresh_profile():
+        with activation(**settings), _workspace_refresh_profile():
             os.environ[SHARED_URL_ENV] = pooled
             original()
     finally:
