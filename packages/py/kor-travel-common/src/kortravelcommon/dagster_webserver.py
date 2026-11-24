@@ -376,7 +376,9 @@ def _storage_pre_ping():
     false)일 때만 켠다. 다른 컨테이너·YAML·자격증명은 바꾸지 않는다.
     """
     raw = os.environ.get(PRE_PING_ENV)
-    if raw is None or raw == "0":
+    args = sys.argv[1:]
+    # help/version은 storage를 열지 않으므로 원 CLI에 그대로 맡긴다(daemon wrapper와 같다).
+    if raw is None or raw == "0" or any(arg in ("--help", "--version") for arg in args):
         yield
         return
     from kortravelcommon._webserver_pool_plugin import PLUGIN_NAME
@@ -389,9 +391,16 @@ def _storage_pre_ping():
 
     if raw != "1":
         raise DaemonPoolConfigurationError("webserver pre-ping 설정을 확인할 수 없습니다.")
+    # 숨김 --instance-ref는 YAML 검증을 우회하므로 opt-in에서는 거절한다.
+    if any(arg == "--instance-ref" or arg.startswith("--instance-ref=") for arg in args):
+        raise DaemonPoolConfigurationError("별도 instance ref는 지원하지 않습니다.")
     _validate_storage_config()
     shared = os.environ.get(SHARED_URL_ENV)
     patched = _with_plugin(shared, PLUGIN_NAME)
+    print(
+        "webserver storage pre-ping: 켜짐(optimize_for_webserver engine에 pool_pre_ping)",
+        file=sys.stderr,
+    )
     os.environ[SHARED_URL_ENV] = patched
     try:
         yield

@@ -899,20 +899,25 @@ plugin은 `postgresql+psycopg2`의 명시적 NullPool 생성에만 적용한다.
 활성화 뒤 최초 run/event/schedule 세 primary engine에 각각 기본 pool_size4/max_overflow4,
 pool_timeout10초/pool_recycle3600초를 쓴다. 기본 primary pooled 연결 상한24, 유휴 보관 상한12다.
 (2026-11-24 이전 2+2는 schedule·sensor worker 각 4개와 겹쳐 pool 부족 경고와 tick 실패를 냈다.
-daemon 수만큼 곱해 공유 PG의 `max_connections` 여유를 확인한다.)
+daemon 수만큼 곱해 공유 PG의 접속 여유를 확인한다. 같은 DB role을 webserver(기본 3×(1+20))·run worker·
+임시 instance가 함께 쓰므로 `max_connections`보다 그 role의 `CONNECTION LIMIT`이 먼저 걸린다.)
 
 크기·대기는 daemon 컨테이너 env로 바꿀 수 있다. 미설정이면 위 기본값이다.
 
 | env | 기본 | 허용 |
 |---|---|---|
-| `KOR_TRAVEL_DAGSTER_DAEMON_POOL_SIZE` | 4 | 1~16 |
-| `KOR_TRAVEL_DAGSTER_DAEMON_POOL_MAX_OVERFLOW` | 4 | 0~16 |
-| `KOR_TRAVEL_DAGSTER_DAEMON_POOL_TIMEOUT_SECONDS` | 10 | 1~60 |
+| `KOR_TRAVEL_DAGSTER_DAEMON_POOL_SIZE` | 4 | 1~10 |
+| `KOR_TRAVEL_DAGSTER_DAEMON_POOL_MAX_OVERFLOW` | 4 | 0~10 |
+| `KOR_TRAVEL_DAGSTER_DAEMON_POOL_TIMEOUT_SECONDS` | 10 | 1~30 |
+
+크기와 overflow의 합은 10 이하여야 한다.
 
 값은 ASCII 10진 정수만 받는다. 빈 값·공백·부호·소수·범위 밖은 원 CLI를 부르기 전에 값 없는
 설정 오류(종료 코드 2)로 거절한다. wrapper는 기동 때 stderr에 적용 수치 한 줄
 (`daemon 연결 풀: primary engine 3개 각 pool_size=… max_overflow=… pool_timeout=…s`)을 남긴다. DSN은
-남기지 않는다. 최대 primary 상한은 3×(16+16)=96이다. 올리기 전에 공유 PG 여유를 확인한다.
+남기지 않는다. 최대 primary 상한은 3×10=30이다. 올리기 전에 role 접속 한도에서 webserver·run worker
+몫을 뺀 여유를 확인한다. 대기 상한 30초는 SDK 재시도까지 더한 최악(아래)이 daemon heartbeat 허용
+300초 안에 들게 하려는 것이다.
 
 대기는 잠금 밖에서 한다. `DaemonQueuePool.connect`의 수명 잠금은 scope·퇴역 검사와 진행 중
 대여 수(`_inflight`) 증감만 감싸고, 실제 대기·연결 생성·pre-ping은 원 QueuePool이 잠금 없이 한다.
@@ -934,8 +939,9 @@ idle 연결이 끊긴 뒤 첫 tick이 실패하는 신규 회귀를 막기 위�
 pool_pre_ping=True로 checkout 시 검증·재연결한다. 내부 ping SQL 비용은 기존 workload
 SQL count와 별도로 측정한다. 실행 중 연결 단절/transaction 재시도 범위는 바꾸지 않는다.
 QueuePool checkout TimeoutError도 SDK 기존 retry/backoff 대상이다(dagster-postgres
-`retry_pg_connection_fn`: 최대6회 시도, 0.2초에서 시작하는 지수 backoff).
-따라서 포화가 계속되면 한 storage 호출의 전체 대기는 최악 약 6×timeout+backoff다(기본 10초면 약 66초).
+`retry_pg_connection_fn`: 최대6회 시도, 시도 사이 `((2**n)-1)×0.2±0.2`초로 합 약 11.4초).
+따라서 포화가 계속되면 한 storage 호출의 전체 대기는 최악 약 6×timeout+11.4초다(기본 10초면 약 72초,
+상한 30초면 약 191초. 연결 생성·pre-ping 시간은 별도).
 포화가 짧으면 첫 대기 안에서 반환된 연결을 받으므로 재시도 경고(`Retrying failed database connection`)가 줄어든다.
 중첩 checkout·pool 포화·heartbeat/tick 지연을 별도로 검증해야 한다.
 
@@ -998,7 +1004,9 @@ engine을 `pool_size=1`·`max_overflow`(CLI `--db-pool-max-overflow`, 기본 20)
 만들지만 pre-ping 키가 없다. 그래서 PG 재시작·idle 절단 뒤 첫 요청이 끊긴 연결을 받아 실패한다.
 `kor-travel-dagster-webserver`에 `KOR_TRAVEL_DAGSTER_WEBSERVER_POOL_PRE_PING=1`을 주면 자기
 프로세스의 shared URL(`KOR_TRAVEL_DAGSTER_SHARED_PG_URL`)에만 SQLAlchemy plugin
-`kortravel_webserver_pre_ping`을 더하고 종료 때 원 값으로 복원한다. 위 daemon과 같은 storage
+`kortravel_webserver_pre_ping`을 더하고 종료 때 원 값으로 복원한다. 켜지면 stderr에
+`webserver storage pre-ping: 켜짐` 한 줄을 남긴다(DSN 없음). `--help`·`--version`은 opt-in을 보지 않고
+원 CLI에 맡기며, 숨김 `--instance-ref`는 YAML 검증을 우회하므로 opt-in에서 거절한다. 위 daemon과 같은 storage
 YAML 형태(`postgres_url: {env: …}`·`should_autocreate_tables: false`)와 psycopg2 DSN일 때만 켜고,
 아니면 값 없는 설정 오류(종료 코드 2)다. 미설정·`0`은 원 동작이다.
 
@@ -1006,7 +1014,9 @@ plugin은 명시 `pool_size`가 있고 `poolclass`가 없는 engine 생성, 즉 
 `pool_pre_ping=True`를 더한다. 초기 NullPool engine·연결 확인용 일회 engine·이미 pre-ping 값을 준
 호출은 그대로다. 크기·overflow·recycle·statement_timeout은 바꾸지 않는다. 비용은 유휴 연결을
 다시 꺼낼 때마다 가벼운 ping 왕복 하나다(새로 만든 연결은 ping하지 않는다). native 제출 잠금 engine(`_submission_engine`)은 원 pool을 recreate하므로
-pre-ping을 계승한다.
+pre-ping을 계승한다. python_module/python_file workspace에서 webserver가 띄우는 local code-server
+자식은 plugin이 붙은 env를 물려받으므로 이 계약 밖이다(common wheel이 없는 interpreter면 실패한다).
+grpc_server workspace만 지원한다.
 
 ## 19. 회수 sensor의 tick 예산과 정체 경보
 

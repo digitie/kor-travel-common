@@ -26,6 +26,12 @@ def _forbidden():
     raise AssertionError("실제 DB 연결 금지")
 
 
+@pytest.fixture(autouse=True)
+def plain_argv(monkeypatch):
+    # pytest 자신의 argv(--help 등)가 opt-in 판단에 섞이지 않게 한다.
+    monkeypatch.setattr(sys, "argv", ["owned"])
+
+
 @pytest.fixture
 def registered():
     plugins.register(webpool.PLUGIN_NAME, webpool.__name__, "WebserverPrePingPlugin")
@@ -189,3 +195,39 @@ def test_wheel_metadata_registers_both_plugins():
     assert entry["kortravel_daemon_pool"] == (
         "kortravelcommon._daemon_pool_plugin:DaemonPoolPlugin"
     )
+
+
+@pytest.mark.parametrize("argv", [["owned", "--help"], ["owned", "--version"]])
+def test_help_and_version_skip_opt_in_even_when_misconfigured(tmp_path, monkeypatch, argv):
+    adapter = pytest.importorskip("kortravelcommon.dagster_webserver")
+    monkeypatch.setattr(sys, "argv", argv)
+    monkeypatch.setenv(adapter.PRE_PING_ENV, "true")
+    monkeypatch.setenv(cli.SHARED_URL_ENV, URL)
+    with adapter._storage_pre_ping():
+        assert os.environ[cli.SHARED_URL_ENV] == URL
+
+
+@pytest.mark.parametrize("argv", [
+    ["owned", "--instance-ref", "synthetic"], ["owned", "--instance-ref=synthetic"],
+])
+def test_opt_in_rejects_hidden_instance_ref(tmp_path, monkeypatch, argv):
+    adapter = pytest.importorskip("kortravelcommon.dagster_webserver")
+    _config(tmp_path, monkeypatch)
+    monkeypatch.setattr(sys, "argv", argv)
+    monkeypatch.setenv(adapter.PRE_PING_ENV, "1")
+    monkeypatch.setenv(cli.SHARED_URL_ENV, URL)
+    with pytest.raises(cli.DaemonPoolConfigurationError):
+        with adapter._storage_pre_ping():
+            pytest.fail("거절해야 함")
+    assert os.environ[cli.SHARED_URL_ENV] == URL
+
+
+def test_opt_in_logs_activation_without_values(tmp_path, monkeypatch, capsys):
+    adapter = pytest.importorskip("kortravelcommon.dagster_webserver")
+    _config(tmp_path, monkeypatch)
+    monkeypatch.setenv(adapter.PRE_PING_ENV, "1")
+    monkeypatch.setenv(cli.SHARED_URL_ENV, URL)
+    with adapter._storage_pre_ping():
+        pass
+    err = capsys.readouterr().err
+    assert "pre-ping: 켜짐" in err and "fixture" not in err and "127.0.0.1" not in err

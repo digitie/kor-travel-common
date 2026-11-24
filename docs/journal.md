@@ -2,7 +2,7 @@
 
 - 감사(2026-11-23 수집 실패) §1.4: n150 daemon에서 기동 4.8시간 동안 pool 부족 경고 574건, sensor/scheduler 반복 실패. #86에서 2+2→4+4로 늘렸지만 대기 10초는 `DaemonQueuePool.connect`가 수명 잠금 안에서 대기해 대기자가 직렬화(N×timeout)되어 1초로 묶어 두었다.
 - 잠금을 scope·퇴역 검사와 `_inflight` 증감으로 좁히고 대기·생성·pre-ping은 잠금 밖 원 QueuePool에 맡겼다. dispose/recreate는 `_inflight`도 대여 중으로 본다. 대여가 `checkedout()`에 잡힌 뒤 `_inflight`를 줄여 공백이 없다. 시험: 대기자 8명·timeout 1초가 합계 3초 안에 모두 timeout(이전 약 8초), 반환 하나가 대기자 하나만 깨움, 16 thread×40회에서 상한 2+2 초과 0·누수 0, 생성 실패·timeout 뒤 `_inflight`·overflow 원복, 원 QueuePool 안에 있는 대여 중 dispose/recreate 즉시 거절, 퇴역과 대여 경합 50회 중 정확히 한쪽만 성공.
-- 기본 대기 10초, 크기·대기 env(1~16·0~16·1~60, ASCII 정수만). 기동 stderr에 적용 수치 한 줄.
+- 기본 대기 10초, 크기·대기 env(1~10·0~10·합 10 이하·1~30, ASCII 정수만). 기동 stderr에 적용 수치 한 줄. 상한은 리뷰 B 지적으로 좁혔다: 같은 DB role을 webserver·run worker가 함께 써 role 접속 한도가 먼저 걸리고, 대기 30초×SDK 재시도 6회(+11.4초)가 heartbeat 허용 300초 안에 들어야 한다.
 - webserver pre-ping: dagster-postgres 0.29.24 `optimize_for_webserver`가 `pool_pre_ping` 키 없이 engine을 다시 만든다. SQLAlchemy `CreateEnginePlugin`으로 그 호출(명시 `pool_size`, `poolclass` 없음)에만 pre-ping을 더하는 opt-in(`KOR_TRAVEL_DAGSTER_WEBSERVER_POOL_PRE_PING=1`)을 넣었다. 설치된 SDK의 세 storage `optimize_for_webserver`를 DB 없이 불러 pre-ping이 켜짐을 시험한다.
 - Manager는 common wheel을 `docker/dagster-host/vendor/`에 vendor하므로 호스트 이미지 재빌드와 vendor 갱신이 있어야 운영에 적용된다(소비자 재핀만으로는 daemon 동작 불변).
 

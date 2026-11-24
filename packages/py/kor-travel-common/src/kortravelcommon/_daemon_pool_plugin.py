@@ -24,10 +24,14 @@ POOL_SIZE = 4
 MAX_OVERFLOW = 4
 POOL_TIMEOUT = 10
 POOL_RECYCLE = 3600
-# 설정 허용 범위(양 끝 포함). 상한은 공유 PG 접속 예산을 지키려는 것이다(최대 3×(16+16)=96).
-POOL_SIZE_RANGE = (1, 16)
-MAX_OVERFLOW_RANGE = (0, 16)
-POOL_TIMEOUT_RANGE = (1, 60)
+# 설정 허용 범위(양 끝 포함). 공유 PG role은 webserver·run worker·임시 instance와 접속 한도를
+# 나눠 쓰므로 engine당 pool_size+max_overflow를 10 이하로 묶는다(primary 최대 3×10=30).
+# 대기 상한 30초: SDK 재시도(최대 6회, 사이 대기 합 약 11.4초)까지 더한 최악 약 191초가
+# Manager 배포의 daemon heartbeat 허용(DAGSTER_DAEMON_HEARTBEAT_TOLERANCE=300초) 안에 들게 한다.
+POOL_SIZE_RANGE = (1, 10)
+MAX_OVERFLOW_RANGE = (0, 10)
+POOL_TOTAL_MAX = 10
+POOL_TIMEOUT_RANGE = (1, 30)
 
 _owner_pid: int | None = None
 _scope: object | None = None
@@ -55,6 +59,8 @@ def validate_settings(
     ):
         if type(value) is not int or not low <= value <= high:
             raise ValueError("daemon pool 크기·대기 설정이 허용 범위 밖입니다.")
+    if pool_size + max_overflow > POOL_TOTAL_MAX:
+        raise ValueError("daemon pool 크기·대기 설정이 허용 범위 밖입니다.")
     return pool_size, max_overflow, pool_timeout
 
 
@@ -88,20 +94,25 @@ class DaemonQueuePool(QueuePool):
 
     def connect(self):
         self._check_creator()
-        with self._lifecycle_lock:
-            if (
-                _owner_pid != os.getpid()
-                or self._pool_scope is None
-                or self._pool_scope is not _scope
-                or self._retired
-            ):
-                raise PoolScopeError("다른 수명 또는 퇴역한 daemon pool입니다.")
-            self._inflight += 1
+        counted = False
         try:
+            with self._lifecycle_lock:
+                if (
+                    _owner_pid != os.getpid()
+                    or self._pool_scope is None
+                    or self._pool_scope is not _scope
+                    or self._retired
+                ):
+                    raise PoolScopeError("다른 수명 또는 퇴역한 daemon pool입니다.")
+                self._inflight += 1
+                counted = True
+            # 대기 중 활성 수명이 끝날 수 있으므로 대기 뒤 _on_checkout이 scope를 다시 본다.
             return super().connect()
         finally:
-            with self._lifecycle_lock:
-                self._inflight -= 1
+            # 잠금 해제와 try 사이의 비동기 예외에도 증가분만 정확히 되돌린다.
+            if counted:
+                with self._lifecycle_lock:
+                    self._inflight -= 1
 
     def _busy(self):
         return bool(self._inflight or self.checkedout())
@@ -131,6 +142,11 @@ def _on_connect(connection, record):
 def _on_checkout(connection, record, proxy):
     if _owner_pid != os.getpid():
         raise PoolScopeError("daemon pool 활성 범위가 아닙니다.")
+    # 잠금 밖에서 기다리는 동안 수명이 바뀌었으면(이전 activation의 pool) 빌려주지 않는다.
+    # 예외가 나면 SQLAlchemy가 record를 무효화하고 반환하므로 대여 계수는 남지 않는다.
+    source = getattr(proxy, "_pool", None)
+    if isinstance(source, DaemonQueuePool) and source._pool_scope is not _scope:
+        raise PoolScopeError("다른 수명의 daemon pool입니다.")
     if record.info.get("kortravel_pid") != os.getpid():
         # SQLAlchemy 공식 multiprocessing recipe: 부모의 socket을 재사용하지 않는다.
         record.dbapi_connection = proxy.dbapi_connection = None
