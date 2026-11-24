@@ -1,6 +1,6 @@
-## 2026-11-24 — Dialog·AlertDialog 넓은 본문 가로 넘침(ui 0.2.7)
+## 2026-11-24 — Dialog·AlertDialog 넓은 본문 가로 넘침(ui 0.2.7) 완료
 
-`DialogContent`·`AlertDialogContent` grid 칸을 `minmax(0,1fr)`로 묶어 넓은 표가 좁은 화면에서 모달을 넘치지 않게 한 ui 0.2.7·tokens 0.1.8·toast 0.1.7 제품 PR을 진행한다. 다음 한 작업은 이 PR 병합 뒤 main pack을 `frontend-artifacts.json`에 동결하는 catalog PR이다. 소비자 이관은 R4 작업 뒤 각 저장소 PR이 소유한다.
+PR88로 병합됐다(R=f159ef3ca2883fae6dd33f0d0d46dc2bf98032e1). ui 0.2.7·tokens 0.1.8·toast 0.1.7 main pack을 [catalog](evidence/releases/dialog-overflow-ui-0.2.7-catalog.md)로 `frontend-artifacts.json`에 동결한다. 다음 한 작업은 R4 작업 뒤 소비자(concierge·PinVi Admin·Map admin 등)가 이 catalog main commit을 `common-ref`로 올리며 vendored tgz를 바꾸는 이관 PR이다(0.2.6 이관과 함께 해도 된다).
 
 ## 2026-11-23 — 선택 칸 터치 영역·아코디언 포커스·Dialog 긴 제목(ui 0.2.6) 완료
 
