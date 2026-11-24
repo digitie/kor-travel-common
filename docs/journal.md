@@ -1,3 +1,7 @@
+## 2026-11-24 — PR88 병합과 ui 0.2.7 main pack catalog
+
+- PR CI 9 job SUCCESS·로컬 Docker RED/GREEN·적대 리뷰 2인 반영으로 병합 R=f159ef3ca2883fae6dd33f0d0d46dc2bf98032e1. main push CI 3종 SUCCESS, artifact 14894046767의 ui 0.2.7·tokens 0.1.8·toast 0.1.7을 [catalog](evidence/releases/dialog-overflow-ui-0.2.7-catalog.md)에 동결했다. 소비자 이관은 R4 작업 뒤 각 저장소 PR이 소유한다(concierge는 ui 채택만으로 작업 상세 모달 넘침 해소, PinVi는 본문 수정 PR이 별도).
+
 ## 2026-11-24 — Dialog·AlertDialog 넓은 본문 가로 넘침(ui 0.2.7)
 
 - 0.2.6 소비자 채택 중 발견: concierge 반복 작업 상세 모달이 390/320에서 본문 표 때문에 머리글·본문째 가로로 넘쳤다(390: 칸 419px > 안쪽 326px, 모달 scrollWidth 451 > 358; PinVi POI 생성 Dialog도 390에서 본문 넘침). 원인은 `DialogContent`(`AlertDialogContent`도 같음)의 grid가 칸을 지정하지 않아 암시적 `auto` 칸이 자식 min-content만큼 커지는 것이다. 칸 하나를 `grid-cols-[minmax(0,1fr)]`로 명시했다(소비자 `grid-cols-*` 우선, `unstyled` 제외). 넓은 표는 `Table` 컨테이너가 가로 스크롤한다.
