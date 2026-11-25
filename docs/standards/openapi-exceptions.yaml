@@ -269,39 +269,47 @@ exceptions:
     owner: kor-travel-docker-manager
 
   # ---------------------------------------------------------------- airport
-  # 2026-11-25 재검증: kor-travel-transport(옛 이름 airport) origin/main 786fff85 기준. 근거 경로는 그 저장소 상대 경로.
+  # 2026-11-25 재검증: kor-travel-transport(옛 이름 airport) origin/main 786fff85 기준. 근거 경로는 그 저장소 상대 경로,
+  # PR 날짜는 merge 시각의 KST 날짜.
   - app: airport
     rule: N1
     surface: "*"
-    reason: "422 응답 선언은 #30(2026-09-20)부터 와이어와 같은 `ProblemDetails`(problem+json) 참조로 정합됐다(`docs/openapi.json` 422 53곳 전부). 남은 것은 어느 응답도 참조하지 않는 FastAPI 자동 `HTTPValidationError`·`ValidationError` 컴포넌트가 `components.schemas`에 남아 typegen에 노출되는 것. T-482에서 제거."
+    reason: "422 응답 선언은 #30(2026-09-20)부터 와이어와 같은 `ProblemDetails`(problem+json) 참조로 정합됐다(`docs/openapi.json` 422 53곳 전부). 남은 불일치: (1) 라우트가 실제로 내는 상태 일부가 스펙 `responses`에 없다 — 예: 일반철도 `/v1/transport/rail/general/*` 429·502·503(`general_rail_routes.py`), 도로 소통 `/v1/transport/highways/road-traffic` 429·502·504(`highway_map_routes.py`), 교통 통계 `/v1/transport/statistics` 429·504, 관리자 토큰 미들웨어 404의 일부 `/v1/transport/admin/*`(목록은 망라가 아님). `default` 응답 선언 없음. (2) 어느 응답도 참조하지 않는 FastAPI 자동 `HTTPValidationError`·`ValidationError` 컴포넌트가 `components.schemas`에 남아 typegen에 노출된다. T-482."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-airport
   - app: airport
     rule: M3
     surface: "*"
-    reason: "`code`는 #277(2026-11-24)부터 `/v1/service/exports/*` 503에만 있다(`backend/app/core/problems.py` `ProblemCode` 11종: EXPORT_SOURCE_NOT_CURRENT·EXPORT_NO_HISTORY·EXPORT_INCIDENTS_NOT_CURRENT·EXPORT_EMPTY_SET·EXPORT_BUSY·EXPORT_PREPARE_TIMEOUT·EXPORT_QUERY_TIMEOUT·EXPORT_DISABLED·EXPORT_SOURCE_INCONSISTENT·EXPORT_TOO_LARGE·TRANSIENT_DB, `Retry-After` 동반; transport ADR-005 사실 갱신 2026-11-24). 그 밖의 4xx/5xx는 `{type:'about:blank', title, status, detail, instance}`에 `code`가 없다 — 장소 지도 입장 제한 429/504(#273·#289)도 `Retry-After`만 있고 `code`는 없다. `request_id`는 모든 표면에 없고, 422는 `errors[]` 대신 pydantic 원본 목록을 `detail`에 싣는다. 모두 additive라 기존 `detail` 소비자 무영향. T-482."
+    reason: "`code`(UPPER_SNAKE)는 #277(2026-11-24)부터 `/v1/service/exports/*` 503에만 있고 항상 `Retry-After`를 동반한다(`backend/app/core/problems.py` `ProblemCode` 11종: EXPORT_SOURCE_NOT_CURRENT·EXPORT_NO_HISTORY·EXPORT_INCIDENTS_NOT_CURRENT·EXPORT_EMPTY_SET·EXPORT_BUSY·EXPORT_PREPARE_TIMEOUT·EXPORT_QUERY_TIMEOUT·EXPORT_DISABLED·EXPORT_SOURCE_INCONSISTENT·EXPORT_TOO_LARGE·TRANSIENT_DB; export gateway 동시 상한 503도 EXPORT_BUSY; transport ADR-005 사실 갱신 2026-11-24). 앱 핸들러(HTTPException·검증·500)가 내는 그 밖의 4xx/5xx는 `{type:'about:blank', title, status, detail, instance}`이고 `code`가 없다(가격 이력 무이력 503은 `meta` 추가). 장소 지도 입장 제한 429/504(#273·#289)를 비롯해 `Retry-After`를 싣는 다른 429/504(일반철도·도로 소통·버스·여객선 등)도 `code`가 없다. 웹 BFF `/api/backend/*` 프록시가 만든 502/503/504는 소문자 `code`(`backend_timeout`·`backend_busy`·`backend_unavailable`, `frontend/src/lib/full-history-proxy.ts`)라 UPPER_SNAKE 밖이다. 핸들러가 `fastapi.HTTPException`에만 등록돼 라우트 미일치 404/405·MCP 게이트 404·TrustedHost 400은 problem+json이 아니다. `request_id`는 모든 표면에 없고, 422는 `errors[]` 대신 pydantic 원본 목록을 `detail`에 싣는다. 기존 `detail` 소비자 무영향인 additive로 T-482에서 정렬하되, 기존 export `code` 11종의 값·뜻은 바꾸지 않는다."
+    sunset: null
+    review: "2026-12-31"
+    owner: kor-travel-airport
+  - app: airport
+    rule: N4
+    surface: "*"
+    reason: "`RequestValidationError` 핸들러가 `jsonable_encoder(exc.errors())`를 그대로 `detail`에 실어 pydantic `input`(·있으면 `ctx`·`url`)이 응답에 나간다(`backend/app/main.py`). T-482에서 M3.3 `errors[]{field,message}`로 정규화."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-airport
   - app: airport
     rule: M4
     surface: "*"
-    reason: "요청 ID 미구현 — `X-Request-ID` 미들웨어·본문 `request_id` 모두 없음(`backend/app` 검색 0건). 계층 1 규칙이므로 기한부. T-482에서 additive 추가."
+    reason: "요청 ID 미구현 — `X-Request-ID` 미들웨어·본문 `request_id` 모두 없음(`backend/app` 검색 0건; admin BFF는 수신 `x-request-id`를 검증·발급 없이 전달만 함). 계층 1 규칙이므로 기한부. T-482에서 additive 추가."
     sunset: "2026-12-31"
     review: "2026-12-31"
     owner: kor-travel-airport
   - app: airport
     rule: M1
     surface: "*"
-    reason: "`scripts/export_openapi.py --check`가 #63(2026-10-02)부터 CI backend job 필수 단계이고 직렬화도 M1과 같다(`sort_keys`·`indent=2`·`ensure_ascii=False`·끝 개행). 남은 차이는 저장 위치가 앱 루트 `openapi.json`이 아니라 `docs/openapi.json`인 것 — kor-travel-map이 이 경로를 vendoring하는 계약 정본으로 쓴다(transport ADR-013). common CLI 전환은 T-482."
+    reason: "`scripts/export_openapi.py --check`가 #63(2026-10-03)부터 CI backend job 필수 단계이고 직렬화도 M1과 같다(`sort_keys`·`indent=2`·`ensure_ascii=False`·끝 개행). 남은 차이는 저장 위치가 앱 루트 `openapi.json`이 아니라 `docs/openapi.json`인 것 — transport ADR-013 결정 6이 이 경로를 계약 정본으로 정했다(Map은 pin·vendoring하지 않고 응답을 런타임 검증). common CLI 전환은 T-482."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-airport
   - app: airport
     rule: N8
     surface: "/health"
-    reason: "`/health`가 여전히 DB 세션 의존성으로 `exists(ParkingSnapshot)`를 질의하고(`seeded`) `release_sha`·`reference_payload_fingerprint`를 싣는다. `/readyz`·`/livez`는 없다. T-482에서 `/readyz`로 분리하고 `/health`는 무의존 liveness로."
+    reason: "`/health`(`backend/app/main.py` `health()`)가 여전히 DB 세션 의존성으로 `exists(ParkingSnapshot)`를 질의하고(`seeded`) `release_sha`·`reference_payload_fingerprint`를 싣는다. `/readyz`·`/livez`는 없다. T-482에서 `/readyz`로 분리하고 `/health`는 무의존 liveness로."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-airport

@@ -14,6 +14,7 @@ airport 백엔드(`backend/`, `main.py` 단일 파일 1,150행)가 py v0.1.0 1�
 - [design-brief](../plan/design-brief.md) D-14(M3 `code`·`request_id`·`errors[]` 신규 MUST/기존 SHOULD + additive; M1 `--check`; M5 health 3경로; 422 기본; airport 스펙 422 불일치는 예외 레지스트리 초기 등록)·D-15(1차 모듈, C20 ruff 신규 도입)·D-16(Python 1차 3곳)·D-06(uv lockfile 의무, Docker `--locked`)·D-24.
 - ADR-009·ADR-011 — [ADR 색인](../adr/README.md). 정본: [openapi](../standards/openapi.md), `docs/standards/openapi-exceptions.yaml`, [backend-stack](../standards/backend-stack.md).
 - 사실: RFC7807 핸들러 2종(HTTPException + RequestValidationError, ADR-005), `/v1` prefix + `/health` 비버저닝, `docs/openapi.json` 21 paths·37 schemas(README §6.2-4 정정), tags 없음·operationId 자동, drift 검사 부재, CI `uv sync --extra dev --locked` vs Docker `pip install -e`, ruff/mypy 전무, alembic head 상수 검증 + `alembic check`, `/health.release_sha` 배포 대조 — [inv/kta §4.1·§8-10~16·§9](../survey/inventory/kor-travel-airport.md), [oa §2.5·§2.11·§4](../survey/cross/openapi.md), [be §2.1·§2.17·§2.18](../survey/cross/backend.md), [ci §2.2 kta](../survey/cross/ci-deploy.md).
+- 사실 갱신 2026-11-25(transport `origin/main` 786fff85): 위 사실 행은 조사 기준 스냅샷이다. 지금은 `--check` CI drift gate(#63)와 422 → `ProblemDetails` 스펙 정합(#30)이 이미 있고, 스펙은 72 operations·422 53곳이다. `/v1/service/exports/*` 503은 `code` 11종 + `Retry-After`(#277)를 내며 Map이 이 값에 의존하므로 이 task의 `code` 추가는 `code`가 없는 응답에만 기본값을 더하고 기존 11종의 값·뜻을 바꾸지 않는다. 남은 차이의 정본은 `openapi-exceptions.yaml` airport 항목이다.
 - PR 순서: [judge-migration-feasibility §3.1 airport #4](../plan/design-panel/judge-migration-feasibility.md).
 
 ## 구현 범위
