@@ -11,7 +11,7 @@
 # - 초기 등록: 브리프 D-14(2026-09-06). 실행 검증은 하지 않았고 조사 파일 기준 사실만 등록했다.
 
 schema: kor-travel-common.openapi-exceptions.v1
-updated: "2026-11-25"
+updated: "2026-11-26"
 apps: [airport, concierge, ktdm, geo, map, weather, pinvi]
 
 exceptions:
@@ -295,9 +295,9 @@ exceptions:
   - app: airport
     rule: M4
     surface: "*"
-    reason: "요청 ID 미구현 — `X-Request-ID` 미들웨어·본문 `request_id` 모두 없음(`backend/app` 검색 0건; admin BFF는 수신 `x-request-id`를 검증·발급 없이 전달만 함). 계층 1 규칙이므로 기한부. T-482에서 additive 추가."
-    sunset: "2026-12-31"
-    review: "2026-12-31"
+    reason: "요청 ID 미구현 — `X-Request-ID` 미들웨어·본문 `request_id` 모두 없음(`backend/app` 검색 0건; admin BFF는 수신 `x-request-id`를 검증·발급 없이 전달만 함). 계층 1 규칙이므로 기한부. T-482에서 additive 추가. 소유자 결정(2026-11-26)으로 sunset을 2026-12-31에서 2027-06-30으로 연장 — T-482가 BLOCKED라 기한 안 구현이 불가능하다."
+    sunset: "2027-06-30"
+    review: "2027-03-31"
     owner: kor-travel-airport
   - app: airport
     rule: M1
