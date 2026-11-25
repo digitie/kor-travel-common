@@ -281,14 +281,14 @@ exceptions:
   - app: airport
     rule: M3
     surface: "*"
-    reason: "`code`(UPPER_SNAKE)는 #277(2026-11-24)부터 `/v1/service/exports/*` 503에만 있고 항상 `Retry-After`를 동반한다(`backend/app/core/problems.py` `ProblemCode` 11종: EXPORT_SOURCE_NOT_CURRENT·EXPORT_NO_HISTORY·EXPORT_INCIDENTS_NOT_CURRENT·EXPORT_EMPTY_SET·EXPORT_BUSY·EXPORT_PREPARE_TIMEOUT·EXPORT_QUERY_TIMEOUT·EXPORT_DISABLED·EXPORT_SOURCE_INCONSISTENT·EXPORT_TOO_LARGE·TRANSIENT_DB; export gateway 동시 상한 503도 EXPORT_BUSY; transport ADR-005 사실 갱신 2026-11-24). 앱 핸들러(HTTPException·검증·500)가 내는 그 밖의 4xx/5xx는 `{type:'about:blank', title, status, detail, instance}`이고 `code`가 없다(가격 이력 무이력 503은 `meta` 추가). 장소 지도 입장 제한 429/504(#273·#289)를 비롯해 `Retry-After`를 싣는 다른 429/504(일반철도·도로 소통·버스·여객선 등)도 `code`가 없다. 웹 BFF `/api/backend/*` 프록시가 만든 502/503/504는 소문자 `code`(`backend_timeout`·`backend_busy`·`backend_unavailable`, `frontend/src/lib/full-history-proxy.ts`)라 UPPER_SNAKE 밖이다. 핸들러가 `fastapi.HTTPException`에만 등록돼 라우트 미일치 404/405·MCP 게이트 404·TrustedHost 400은 problem+json이 아니다. `request_id`는 모든 표면에 없고, 422는 `errors[]` 대신 pydantic 원본 목록을 `detail`에 싣는다. 기존 `detail` 소비자 무영향인 additive로 T-482에서 정렬하되, 기존 export `code` 11종의 값·뜻은 바꾸지 않는다."
+    reason: "`code`(UPPER_SNAKE)는 #277(2026-11-24)부터 `/v1/service/exports/*` 503에만 있고 항상 `Retry-After`를 동반한다(`backend/app/core/problems.py` `ProblemCode` 11종: EXPORT_SOURCE_NOT_CURRENT·EXPORT_NO_HISTORY·EXPORT_INCIDENTS_NOT_CURRENT·EXPORT_EMPTY_SET·EXPORT_BUSY·EXPORT_PREPARE_TIMEOUT·EXPORT_QUERY_TIMEOUT·EXPORT_DISABLED·EXPORT_SOURCE_INCONSISTENT·EXPORT_TOO_LARGE·TRANSIENT_DB; export gateway 동시 상한 503도 EXPORT_BUSY; transport ADR-005 사실 갱신 2026-11-24). 앱 핸들러(HTTPException·검증·500)가 내는 그 밖의 4xx/5xx는 `{type:'about:blank', title, status, detail, instance}`이고 `code`가 없다(가격 이력 무이력 503은 `meta` 추가). 장소 지도 입장 제한 429/504(#273·#289)와 일반철도·도로 소통·버스·여객선 429처럼 `Retry-After`를 싣는 응답도 `code`가 없다. 웹 BFF `/api/backend/*` 프록시가 만든 502/503/504는 소문자 `code`(`backend_timeout`·`backend_busy`·`backend_unavailable`, `frontend/src/lib/full-history-proxy.ts`)라 UPPER_SNAKE 밖이다. 핸들러가 `fastapi.HTTPException`에만 등록돼 라우트 미일치 404/405·MCP 게이트 404·TrustedHost 400은 problem+json이 아니다. `request_id`는 모든 표면에 없고, 422는 `errors[]` 대신 pydantic 원본 목록을 `detail`에 싣는다. 기존 `detail` 소비자 무영향인 additive로 T-482에서 정렬하되, 기존 export `code` 11종의 값·뜻은 바꾸지 않는다."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-airport
   - app: airport
     rule: N4
     surface: "*"
-    reason: "`RequestValidationError` 핸들러가 `jsonable_encoder(exc.errors())`를 그대로 `detail`에 실어 pydantic `input`(·있으면 `ctx`·`url`)이 응답에 나간다(`backend/app/main.py`). T-482에서 M3.3 `errors[]{field,message}`로 정규화."
+    reason: "`RequestValidationError` 핸들러가 `jsonable_encoder(exc.errors())`를 그대로 `detail`에 실어 pydantic `input`(제약 위반이면 `ctx`도)이 응답에 나간다(`backend/app/main.py`). T-482에서 M3.3 `errors[]{field,message}`로 정규화."
     sunset: null
     review: "2026-12-31"
     owner: kor-travel-airport
