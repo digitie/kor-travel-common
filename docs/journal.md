@@ -33,6 +33,12 @@
 - §4 #8 common 몫: daemon primary pool 2+2 → 4+4. 대기 10초는 적대 리뷰에서 `DaemonQueuePool.connect`가 수명 잠금 안에서 대기해 대기자가 직렬화(N×timeout)됨을 실측해 1초로 두었다(잠금 밖 대기는 후속).
 - 적대 리뷰 2인 반영: settle 120초(상태 갱신·id commit 역전·늦은 worker), 실패 뒤 실행 event·launch 경로 오류면 `worker_alive`로 보고만(중복 실행 방지), 옛 3필드 checkpoint가 cursor None으로 sensor를 멈추던 것 수정, 창 1시간, 빈 결과 전진. 차단기는 worker·launch 장애·취소·backfill을 세지 않고 RetryPolicy 래퍼를 풀며 page를 넘겨 센다. 분류·차단기 tag는 child에 상속하지 않는다. 재검토(2인 APPROVE_WITH_NITS) 뒤: settle을 SQL 필터 대신 순회 중 젊은 event에서 멈추는 방식으로(id·시각 역전 누락 방지), worker_alive engine 판별을 실패 기록 직전의 step 없는 오류로 좁힘, 차단기 지문 계산 수 상한(2×창)과 tag 선판정.
 
+## 2026-11-27 — python-krex-api canonical ref 989dfeb
+
+- transport가 휴게소 먹거리(Map ADR-127)를 수집하려고 python-krex-api #21(0502 `restBestfoodList` 경로 정정, 0615·0124 추가,
+  404였던 `food_price`/`FoodPrice` 제거)을 핀한다(transport #304). `providers.packages.python-krex-api.ref`를 6646be5 → 989dfeb로
+  옮긴다. 기존 메서드의 파서는 바뀌지 않았다. weather(894ea64)는 다음 정책 ref 갱신 때 맞춘다(`food_price` 미사용).
+
 ## 2026-11-24 — python-krex-api canonical ref 6646be5
 
 - transport가 0405 부분 파싱 실패의 유효 행을 쓰려고 python-krex-api #20(`KrexPartialParseError`, `KrexParseError` 하위·기본 계약 불변)을
