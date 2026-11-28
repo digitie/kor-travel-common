@@ -6,7 +6,13 @@ from uuid import UUID
 
 import pytest
 
-from kortravelcommon.dagster_ops import RunAction, RunControlError, execute_run_action, run_actions
+from kortravelcommon.dagster_ops import (
+    RunAction,
+    RunControlError,
+    execute_run_action,
+    parse_daemon_statuses,
+    run_actions,
+)
 
 PARENT = UUID("1d012606-4215-4f42-8a97-ef106603899f")
 CHILD = UUID("2d012606-4215-4f42-8a97-ef106603899f")
@@ -32,6 +38,50 @@ def _run(**overrides):
             }
         }
     }
+
+
+def test_daemon_statuses_use_typed_health_and_only_error_classes():
+    assert parse_daemon_statuses(None) == []
+    assert parse_daemon_statuses({"daemonHealth": {"allDaemonStatuses": {}}}) == []
+    statuses = [
+        {
+            "daemonType": "SCHEDULER",
+            "required": True,
+            "healthy": False,
+            "lastHeartbeatTime": 42,
+            "lastHeartbeatErrors": [
+                {"className": "SchedulerError", "message": "internal details"},
+                {"className": None},
+            ],
+        },
+        {"daemonType": "SENSOR", "required": "true", "healthy": 1, "lastHeartbeatTime": True},
+        {"daemonType": "MONITOR", "lastHeartbeatTime": float("inf")},
+        {},
+    ]
+    parsed = parse_daemon_statuses({"daemonHealth": {"allDaemonStatuses": statuses}})
+    assert parsed == [
+        {
+            "daemon_type": "SCHEDULER",
+            "required": True,
+            "healthy": False,
+            "last_heartbeat_time": 42,
+            "error_classes": ["SchedulerError"],
+        },
+        {
+            "daemon_type": "SENSOR",
+            "required": False,
+            "healthy": None,
+            "last_heartbeat_time": None,
+            "error_classes": [],
+        },
+        {
+            "daemon_type": "MONITOR",
+            "required": False,
+            "healthy": None,
+            "last_heartbeat_time": None,
+            "error_classes": [],
+        },
+    ]
 
 
 def test_force_cancel_uses_native_policy():

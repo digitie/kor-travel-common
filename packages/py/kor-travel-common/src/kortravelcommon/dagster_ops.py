@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Iterable
 from enum import StrEnum
-from typing import Any
+from typing import Any, TypedDict
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 GraphQL = Callable[[str, dict[str, object]], Awaitable[dict[str, Any]]]
@@ -114,6 +114,52 @@ class RunControlError(RuntimeError):
 
 def _record(value: object) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
+
+
+class DaemonStatus(TypedDict):
+    daemon_type: str
+    required: bool
+    healthy: bool | None
+    last_heartbeat_time: float | None
+    error_classes: list[str]
+
+
+def parse_daemon_statuses(instance: object) -> list[DaemonStatus]:
+    """앱의 공용 운영 화면에 데몬 상태와 오류 유형만 전달한다."""
+    statuses = _record(_record(instance).get("daemonHealth")).get("allDaemonStatuses")
+    if not isinstance(statuses, list):
+        return []
+    result: list[DaemonStatus] = []
+    for status in statuses:
+        daemon = _record(status)
+        name = daemon.get("daemonType")
+        if not isinstance(name, str) or not name:
+            continue
+        healthy = daemon.get("healthy")
+        heartbeat = daemon.get("lastHeartbeatTime")
+        errors = daemon.get("lastHeartbeatErrors")
+        error_classes = []
+        if isinstance(errors, list):
+            for error in errors:
+                error_class = _record(error).get("className")
+                if isinstance(error_class, str) and error_class:
+                    error_classes.append(error_class)
+        result.append(
+            DaemonStatus(
+                daemon_type=name,
+                required=daemon.get("required") is True,
+                healthy=healthy if isinstance(healthy, bool) else None,
+                last_heartbeat_time=(
+                    float(heartbeat)
+                    if isinstance(heartbeat, int | float)
+                    and not isinstance(heartbeat, bool)
+                    and abs(heartbeat) <= 8.64e12
+                    else None
+                ),
+                error_classes=error_classes,
+            )
+        )
+    return result
 
 
 def _result(payload: dict[str, Any], field: str) -> dict[str, Any]:
