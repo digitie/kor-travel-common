@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+
 """Dagster 운영 UI의 상태 조회 및 실행 단위 제어 계약."""
 
 from __future__ import annotations
