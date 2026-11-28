@@ -22,6 +22,13 @@ test("배포 정책 사본은 루트 frontend-dependencies.json 정본과 바이
     readFileSync(rootFile("frontend-dependencies.json"), "utf8"));
 });
 
+test("Toast 배포물에 제3자 고지 파일을 포함한다", () => {
+  const manifest = json(new URL("../package.json", import.meta.url));
+  const filename = "THIRD_PARTY_NOTICES.md";
+  assert.ok(manifest.files.includes(filename));
+  assert.match(readFileSync(new URL("../" + filename, import.meta.url), "utf8"), /Radix UI.*MIT/);
+});
+
 test("공통 패키지 metadata 버전은 versions.json 정확 축과 같다", () => {
   const axes = json(rootFile("versions.json")).axes;
   for (const [dir, name] of [["toast", "@kor-travel/toast"], ["ui", "@kor-travel/ui"], ["tokens", "@kor-travel/tokens"]]) {

@@ -9,6 +9,7 @@
     "index.d.ts",
     "LICENSE",
     "NOTICE",
+    "THIRD_PARTY_NOTICES.md",
     "README.md",
     "check-dependencies.mjs",
     "dependency-policy.json"
