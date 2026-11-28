@@ -37,28 +37,39 @@ function DagsterConfirmation({ label, description, dangerous, disabled, onConfir
   );
 }
 
-export function DagsterRunControls({ actions, pending, onAction }: {
+const runActions = [
+  {
+    key: "force-cancel",
+    label: "실행 강제 종료",
+    description: "Dagster에 즉시 취소를 요청합니다. 실행 상태가 먼저 바뀔 수 있으므로 작업 프로세스 상태를 확인하세요."
+  },
+  {
+    key: "reexecute",
+    label: "처음부터 재실행",
+    description: "이 실행의 설정으로 새로운 전체 실행을 시작합니다. 원본마다 한 번만 접수합니다."
+  }
+] as const satisfies ReadonlyArray<{ key: DagsterControlAction; label: string; description: string }>;
+
+export function DagsterRunControls({ runId, label, actions, pending, onAction }: {
+  runId: string;
+  label: string;
   actions: readonly DagsterControlAction[];
   pending?: boolean;
   onAction: (action: DagsterControlAction) => void;
 }) {
-  if (!actions.length) return null;
+  const enabledActions = runActions.filter(({ key }) => actions.includes(key));
+  if (!enabledActions.length) return null;
   return (
-    <div className="flex flex-wrap gap-2" aria-label="Dagster 실행 제어">
-      {actions.map(action => {
-        const force = action === "force-cancel";
-        return (
-          <DagsterConfirmation key={action}
-            label={force ? "실행 강제 종료" : "처음부터 재실행"}
-            description={force
-              ? "Dagster에 즉시 취소를 요청합니다. 실행 상태가 먼저 바뀔 수 있으므로 작업 프로세스 상태를 확인하세요."
-              : "이 실행의 설정으로 새로운 전체 실행을 시작합니다. 원본마다 한 번만 접수합니다."}
-            dangerous={force}
-            disabled={pending}
-            onConfirm={() => onAction(action)}
-          />
-        );
-      })}
+    <div key={runId} className="flex flex-wrap gap-2" role="group" aria-label="Dagster 실행 제어">
+      {enabledActions.map(({ key, label: actionLabel, description }) => (
+        <DagsterConfirmation key={key}
+          label={actionLabel}
+          description={`대상 ${label} (${runId}). ${description}`}
+          dangerous={key === "force-cancel"}
+          disabled={pending}
+          onConfirm={() => onAction(key)}
+        />
+      ))}
     </div>
   );
 }
@@ -70,7 +81,8 @@ const serviceActions = [
   { key: "force-stop", label: "서비스 강제 종료" }
 ] as const satisfies ReadonlyArray<{ key: DagsterServiceAction; label: string }>;
 
-export function DagsterServiceControls({ actions, label, affectedServices = [], pending, onAction, onLogs }: {
+export function DagsterServiceControls({ serviceId, actions, label, affectedServices = [], pending, onAction, onLogs }: {
+  serviceId: string;
   actions: readonly DagsterServiceAction[];
   label: string;
   affectedServices?: readonly string[];
@@ -81,7 +93,7 @@ export function DagsterServiceControls({ actions, label, affectedServices = [], 
   if (!actions.length && !onLogs) return null;
   const scope = affectedServices.length ? ` 영향받는 대상은 ${affectedServices.join(", ")}입니다.` : "";
   return (
-    <div className="flex flex-wrap gap-2" aria-label="Dagster 서비스 제어">
+    <div key={serviceId} className="flex flex-wrap gap-2" role="group" aria-label="Dagster 서비스 제어">
       {onLogs ? <Button size="sm" variant="outline" onClick={onLogs}>서비스 로그</Button> : null}
       {serviceActions.filter(({ key }) => actions.includes(key)).map(({ key, label: actionLabel }) => (
         <DagsterConfirmation key={key}
@@ -149,7 +161,7 @@ export function DagsterLogControls({ errorsOnly, onFilter, onFirstPage, onNextPa
   onNextPage?: () => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2" aria-label="Dagster 로그 보기">
+    <div className="flex flex-wrap gap-2" role="group" aria-label="Dagster 로그 보기">
       <Button size="sm" variant="outline" aria-pressed={errorsOnly} onClick={() => onFilter(!errorsOnly)}>
         오류 로그만 보기
       </Button>

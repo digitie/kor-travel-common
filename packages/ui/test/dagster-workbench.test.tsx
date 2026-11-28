@@ -8,16 +8,28 @@ import { DagsterLogControls, DagsterRunControls, DagsterServiceControls, Dagster
 describe("Dagster 공용 조작", () => {
   it("사용자가 확인해야 강제 종료를 요청한다", () => {
     const action = vi.fn();
-    render(<DagsterRunControls actions={["force-cancel"]} onAction={action} />);
+    render(<DagsterRunControls runId="run-one" label="수집 작업" actions={["force-cancel"]} onAction={action} />);
     fireEvent.click(screen.getByRole("button", { name: "실행 강제 종료" }));
     expect(action).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("alertdialog").querySelector('button[data-slot="alert-dialog-action"]')!);
     expect(action).toHaveBeenCalledWith("force-cancel");
   });
 
+  it("대상이 바뀌면 확인창을 닫고 알 수 없는 작업은 표시하지 않는다", () => {
+    const action = vi.fn();
+    const { rerender } = render(<DagsterRunControls runId="run-one" label="수집 작업"
+      actions={["reexecute", "unknown" as "reexecute"]} onAction={action} />);
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "처음부터 재실행" }));
+    expect(screen.getByRole("alertdialog").textContent).toContain("run-one");
+    rerender(<DagsterRunControls runId="run-two" label="다른 작업" actions={["reexecute"]} onAction={action} />);
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    expect(action).not.toHaveBeenCalled();
+  });
+
   it("서비스 제어는 설정된 작업만 표시하고 영향 범위를 알린다", () => {
     const action = vi.fn();
-    render(<DagsterServiceControls label="공유 데몬" actions={["dagster-restart"]}
+    render(<DagsterServiceControls serviceId="shared-daemon" label="공유 데몬" actions={["dagster-restart"]}
       affectedServices={["Geo", "Map"]} onAction={action} />);
     expect(screen.queryByRole("button", { name: "서비스 강제 종료" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "서비스 재시작" }));
