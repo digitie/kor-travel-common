@@ -1,3 +1,7 @@
+## 2026-11-28 — 수집 파이프라인 Common 산출물 정본 고정
+
+운영 UI·tokens·toast 패키지의 main CI 산출물과 Python Common 0.1.0.dev3를 고정했다. [산출물 검증 기록](evidence/releases/collection-pipeline-ui-0.2.8-catalog.md)
+
 ## 2026-11-28 — Dagster 운영 실행 제어 계약
 
 관리자가 공용 인스턴스의 자기 저장소 실행을 즉시 취소하거나 실패한 전체 실행을 재실행할 때 쓰는 Python 계약을 추가했다. 실행 위치와 저장소를 확인하고, 원본에 고정한 제출 키로 중복을 막는다.

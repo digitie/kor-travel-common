@@ -2355,8 +2355,8 @@
       },
       "kor-travel-common": {
         "repo": "https://github.com/digitie/kor-travel-common",
-        "ref": "f1faf56365854cefcc9e1f02f51c5b9c7e6a13ae",
-        "packageTree": "b715d42b62173c34b567dedd2c2d99820dbf381b"
+        "ref": "aefdc8695aecc09fd73c97c083b00e6379681c07",
+        "packageTree": "10aec3730cf1ac19af132424ab7da4d548d09dff"
       },
       "python-krex-api": {
         "repo": "https://github.com/digitie/python-krex-api",
