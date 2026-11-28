@@ -110,3 +110,12 @@ loopback GET의2xx 헤더를 확인한다. 전체4초·헤더16KiB 상한이며 
 grpc-health extra만으로 liveness를 쓸 수 있고 readiness에는 지원 Dagster distribution의
 생성 protobuf 파일이 추가로 필요하다. Dagster 본체·DB·복구 동작은 import/실행하지 않는다.
 [적용 가이드 §14](../../../docs/runbooks/dagster-adoption.md#14-생존정의-준비-조회와-복구-동작-분리)를 따른다.
+
+## Dagster 실행 제어
+
+`kortravelcommon.dagster_ops`는 공용 인스턴스의 데몬 상태 조회와 실행 제어에 사용할 계약을 제공한다.
+호출하는 앱이 관리자 권한과 GraphQL 연결을 관리하며, 변경 직전에 저장소와 위치가 일치하는지
+검증한다. 즉시 취소는 Dagster 상태의 즉시 전환을 요청하며 작업 프로세스 종료를 증명하지 않는다. 실패한 전체 실행은 원본 설정으로 처음부터 다시 시작할 수 있다.
+원본 실행에 고정한 요청 ID로 `launchIdempotentRun`을 호출해 중복 실행을 막는다.
+Dagster 네이티브 재실행의 부모·자식 연결 대신 원본 실행 태그를 남긴다. 앱이 별도 상태를 소유한 실행의 재시도는 앱에서 처리한다.
+앱 상태를 식별하는 태그는 Dagster GraphQL에서 보이는 태그여야 한다.
