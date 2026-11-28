@@ -1,3 +1,7 @@
+## 2026-11-28 — Dagster 운영 실행 제어 계약
+
+관리자가 공용 인스턴스의 자기 저장소 실행을 즉시 취소하거나 실패한 전체 실행을 재실행할 때 쓰는 Python 계약을 추가했다. 실행 위치와 저장소를 확인하고, 원본에 고정한 제출 키로 중복을 막는다.
+
 ## 2026-11-24 — Dialog·AlertDialog 넓은 본문 가로 넘침(ui 0.2.7) 완료
 
 PR88로 병합됐다(R=f159ef3ca2883fae6dd33f0d0d46dc2bf98032e1). ui 0.2.7·tokens 0.1.8·toast 0.1.7 main pack을 [catalog](evidence/releases/dialog-overflow-ui-0.2.7-catalog.md)로 `frontend-artifacts.json`에 동결한다. 다음 한 작업은 R4 작업 뒤 소비자(concierge·PinVi Admin·Map admin 등)가 이 catalog main commit을 `common-ref`로 올리며 vendored tgz를 바꾸는 이관 PR이다(0.2.6 이관과 함께 해도 된다).

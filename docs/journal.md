@@ -1,3 +1,7 @@
+## 2026-11-28 — Dagster 운영 실행 제어 계약
+
+관리자가 공용 인스턴스의 자기 저장소 실행을 즉시 취소하거나 실패한 전체 실행을 재실행할 때 쓰는 Python 계약을 추가했다. 실행 위치와 저장소를 확인하고, 원본에 고정한 제출 키로 중복을 막는다.
+
 ## 2026-11-24 — kor-travel-common Python canonical ref f1faf56(py 0.1.0.dev2)
 
 - #90 병합(f1faf56, tag `py-v0.1.0.dev2`, release 자산 wheel·sdist·SHA256SUMS, 같은 source 두 번 빌드 digest 일치)에 맞춰 `providers.packages.kor-travel-common`의 ref·packageTree를 ec5e168/18d82c4 → f1faf56/b715d42로 옮긴다. 소비자는 Python 핀과 정책 checkout ref를 함께 올린다.
