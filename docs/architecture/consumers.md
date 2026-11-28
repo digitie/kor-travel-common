@@ -14,6 +14,21 @@
 
 이 문서는 [아키텍처 개요](README.md) §1의 소비자를 저장소 단위로 펼친다. gate 판정은 [채택 준비 기준](adoption-readiness.md), 이관 절차는 [consumer adoption runbook](../runbooks/consumer-adoption.md), 앱별 task는 [tasks](../tasks.md) T-4xx가 정본이다. 아래 사실은 조사 기준 커밋에 고정된 관찰이며 저장소가 바뀌어도 본문을 고치지 않고 분기 감사(T-506)에서 기준 커밋을 갱신한 절로만 확장한다.
 
+## 수집 파이프라인 공용 기능
+
+Map 관리자 메뉴의 수집 파이프라인을 기준으로 메뉴 이름과 순서를
+@kor-travel/ui/collection-pipeline에서 제공한다. Geo, Map, Weather,
+Transport, Concierge, PinVi는 제공할 기능의 경로만 연결한다. 데이터셋,
+오프라인 업로드, POI 캐시, 캐시 전파, 릴리스에 필요한 데이터와 갱신 정책은
+해당 앱이 공급한다.
+
+@kor-travel/ui/dagster-workbench에는 실행 및 서비스 제어 확인창,
+데몬 하트비트, 로그 필터와 페이지 이동이 있다. 앱은 서버가 허용한 작업과
+로그 및 페이지 상태를 전달한다. Docker Manager는 서비스 대상과 영향을 받는
+앱을 확인하고, 서비스 로그와 컨테이너 제어를 담당한다. Python Common의
+Dagster 실행 제어에는 앱별 코드 위치와 저장소를 전달한다. 각 앱 서버가
+사용자 권한과 적용 범위를 검증한다.
+
 ## 1. 소비자 목록과 현재 상태(조사 기준 커밋, 사실)
 
 | 약칭 | 저장소 | 기준 커밋 | 라이선스 | Admin 표면 | 프론트(설치 기준) | 백엔드 | 근거 |

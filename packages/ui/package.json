@@ -1,6 +1,6 @@
 {
   "name": "@kor-travel/ui",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "kor-travel 공용 Radix UI·가상 테이블·폼·관리자 셸과 지도 작업면",
   "license": "GPL-3.0-or-later",
   "author": "Youn-sok Choi (digitie)",
@@ -195,7 +195,15 @@
       "types": "./dist/badge-variants.d.ts",
       "import": "./dist/badge-variants.js"
     },
-    "./check-dependencies.mjs": "./check-dependencies.mjs"
+    "./check-dependencies.mjs": "./check-dependencies.mjs",
+    "./collection-pipeline": {
+      "types": "./dist/collection-pipeline.d.ts",
+      "import": "./dist/collection-pipeline.js"
+    },
+    "./dagster-workbench": {
+      "types": "./dist/dagster-workbench.d.ts",
+      "import": "./dist/dagster-workbench.js"
+    }
   },
   "dependencies": {
     "radix-ui": "1.8.1",
@@ -211,7 +219,7 @@
     "zustand": "5.1.0"
   },
   "peerDependencies": {
-    "@kor-travel/tokens": "0.1.8",
+    "@kor-travel/tokens": "0.1.9",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },

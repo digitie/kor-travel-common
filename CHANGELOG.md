@@ -1,3 +1,8 @@
+## UI 0.2.8 · tokens 0.1.9 · toast 0.1.8 — 수집 파이프라인 공용 운영 UI
+
+- Map의 수집 파이프라인 메뉴 계약과 앱별 경로 매핑을 추가했다.
+- Dagster 실행 및 서비스 제어 확인창, 데몬 상태, 로그 필터와 페이지 이동을 공용화했다.
+
 ## py 0.1.0.dev2 — daemon 연결 풀 잠금 밖 대기·크기·대기 env 설정·webserver storage pre-ping — 2026-11-24
 
 2026-11-23 수집 실패 감사(Map 저장소 `docs/reports/2026-11-23-collection-failure-audit.md` §1.4: n150 daemon 기동 4.8시간 동안 pool 부족 경고 574건·sensor/scheduler 반복 실패, webserver pre-ping 없음)의 common 몫이다.
