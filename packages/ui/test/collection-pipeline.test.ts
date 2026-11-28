@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Youn-sok Choi (digitie)
+
 import { describe, expect, it } from "vitest";
 import { collectionPipelineItems, isPipelineErrorEvent } from "../src/collection-pipeline";
 
