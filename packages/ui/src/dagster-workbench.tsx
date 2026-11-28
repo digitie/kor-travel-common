@@ -57,7 +57,8 @@ export function DagsterRunControls({ runId, label, actions, pending, onAction }:
   pending?: boolean;
   onAction: (action: DagsterControlAction) => void;
 }) {
-  const enabledActions = runActions.filter(({ key }) => actions.includes(key));
+  const requestedActions = new Set(actions);
+  const enabledActions = runActions.filter(({ key }) => requestedActions.has(key));
   if (!enabledActions.length) return null;
   return (
     <div key={runId} className="flex flex-wrap gap-2" role="group" aria-label="Dagster 실행 제어">
@@ -91,11 +92,12 @@ export function DagsterServiceControls({ serviceId, actions, label, affectedServ
   onLogs?: () => void;
 }) {
   if (!actions.length && !onLogs) return null;
+  const requestedActions = new Set(actions);
   const scope = affectedServices.length ? ` 영향받는 대상은 ${affectedServices.join(", ")}입니다.` : "";
   return (
     <div key={serviceId} className="flex flex-wrap gap-2" role="group" aria-label="Dagster 서비스 제어">
       {onLogs ? <Button size="sm" variant="outline" onClick={onLogs}>서비스 로그</Button> : null}
-      {serviceActions.filter(({ key }) => actions.includes(key)).map(({ key, label: actionLabel }) => (
+      {serviceActions.filter(({ key }) => requestedActions.has(key)).map(({ key, label: actionLabel }) => (
         <DagsterConfirmation key={key}
           label={actionLabel}
           description={`${label}의 ${actionLabel}를 요청합니다. 실행 중인 작업이 중단될 수 있습니다.${scope}`}
